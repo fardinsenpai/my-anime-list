@@ -39,20 +39,108 @@
     .card.hidden{display:none}
     footer{text-align:center;margin-top:70px;color:#333;font-size:.78rem}
 
-    .counter-container {
+   .counter-container {
   display: flex;
   justify-content: center;
-  gap: 50px;
-  margin: 30px 0;
+  gap: 20px; /* gap ছোট করলাম */
+  margin: 20px 0;
 }
+
 .counter-box {
   text-align: center;
+  padding: 15px; /* padding কমানো হলো */
+  border-radius: 12px;
+
+  background: linear-gradient(135deg, #fbc2eb 0%, #a6c1ee 100%);
+  box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all 0.8s ease-out;
+  
 }
+
+.counter-box.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.counter {
+  font-size: 28px; /* সংখ্যা ছোট করা হলো */
+  font-weight: bold;
+  color: #ff4d4d;
+}
+
+.counter-box p {
+  font-size: 14px; /* টেক্সট ছোট করা হলো */
+  font-weight: 600;
+  color: black;
+  margin-top: 8px;
+}
+
+
+.counter {
+  font-size: 40px;
+  font-weight: bold;
+  color: #ff4d4d; /* তোমার আগের রঙ */
+}
+
+
+
+.counter-container {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  margin: 30px 0;
+  /* এখানে কোনো background থাকবে না */
+}
+
+.counter-box {
+  text-align: center;
+  padding: 30px;
+  border-radius: 15px;
+
+  /* শুধু প্রতিটা box-এর জন্য background */
+  background: linear-gradient(135deg, #fbc2eb 0%, #a6c1ee 100%);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+
+  /* Animation setup */
+  opacity: 0;
+  transform: translateY(40px);
+  transition: all 1s ease-out;
+}
+
+.counter-box.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 .counter {
   font-size: 40px;
   font-weight: bold;
   color: #ff4d4d;
 }
+
+
+.counter-box.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.counter {
+  font-size: 40px;
+  font-weight: bold;
+  color: #ff4d4d;
+}
+  .counter-box p {
+  font-size: 18px;
+  font-weight: 600;
+  color: black;
+  margin-top: 10px;
+}
+
+
+
 
 /* স্টিকি সার্চ বক্সের স্টাইল */
 .sticky-search {
@@ -88,20 +176,23 @@
     <input type="text" id="searchBox" placeholder="🔍 Search anime..." oninput="filterCards()"/>
   </div>
 
-  <!-- Counter Section -->
-<div class="counter-container">
+  <div class="counter-container">
   <div class="counter-box">
-    <h2 id="animeCount" class="counter">0</h2>
+    <h2 id="animeCount" class="counter">0+</h2>
     <p>Total Anime</p>
   </div>
   <div class="counter-box">
-    <h2 id="seasonCount" class="counter">0</h2>
+    <h2 id="seasonCount" class="counter">0+</h2>
     <p>Total Seasons</p>
   </div>
   <div class="counter-box">
-    <h2 id="episodeCount" class="counter">0</h2>
+    <h2 id="episodeCount" class="counter">0+</h2>
     <p>Total Episodes</p>
   </div>
+</div>
+
+
+
 
 </div>
   <div class="grid" id="grid">
@@ -521,8 +612,8 @@ function filterAnime(value) {
 function counterUp(id, target, duration) {
   let count = 0;
   const element = document.getElementById(id);
-  const steps = duration / 20; // প্রতি 20ms এ আপডেট হবে
-  const increment = target / steps; // target অনুযায়ী increment হিসাব
+  const steps = duration / 20;
+  const increment = target / steps;
 
   const interval = setInterval(() => {
     count += increment;
@@ -530,17 +621,27 @@ function counterUp(id, target, duration) {
       count = target;
       clearInterval(interval);
     }
-    element.innerText = Math.floor(count) + "+"; // শেষে + দেখাবে
+    element.innerText = Math.floor(count) + "+";
   }, 20);
 }
 
-// সবগুলো কাউন্টার একই সময়ে (৭ সেকেন্ডে) শেষ হবে
 window.onload = () => {
-  const duration = 7000; // ৭ সেকেন্ড
+  const duration = 7000; // ৭ সেকেন্ডে সব শেষ হবে
+  const boxes = document.querySelectorAll(".counter-box");
+
+  // Fade + Slide animation trigger
+  boxes.forEach((box, index) => {
+    setTimeout(() => {
+      box.classList.add("show");
+    }, index * 200); // staggered entry (optional)
+  });
+
+  // Counter start
   counterUp("animeCount", 235, duration);
   counterUp("seasonCount", 346, duration);
   counterUp("episodeCount", 6142, duration);
 };
+
 
 
 
