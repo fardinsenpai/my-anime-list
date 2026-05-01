@@ -38,8 +38,32 @@
     .season{font-size:.64rem;color:#555;margin-top:5px;line-height:1.3}
     .card.hidden{display:none}
     footer{text-align:center;margin-top:70px;color:#333;font-size:.78rem}
+
+/* স্টিকি সার্চ বক্সের স্টাইল */
+.sticky-search {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+    display: none; /* শুরুতে এটি লুকানো থাকবে */
+}
+
+.sticky-search input {
+    padding: 10px 15px;
+    border-radius: 20px;
+    border: 2px solid #ff4757; /* আপনার থিমের সাথে মিল রেখে কালার দিতে পারেন */
+    background: #1e1e2f;
+    color: white;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+}
+
   </style>
 </head>
+
+<div class="sticky-search" id="stickySearch">
+    <input type="text" placeholder="Search anime..." onkeyup="filterAnime(this.value)">
+</div>
+
 <body>
   <div class="header">
     <h1>🎌 Let's See What Anime I Have Watched:-</h1>
@@ -323,6 +347,34 @@
         c.classList.toggle('hidden',!c.querySelector('.title').textContent.toLowerCase().includes(q));
       });
     }
+
+window.onscroll = function() {
+    var mainSearch = document.getElementById('searchBox'); // আপনার মেইন সার্চ বক্সের ক্লাস নাম
+    var stickySearch = document.getElementById('stickySearch');
+    
+    // মেইন সার্চ বক্স যখন স্ক্রিন থেকে চলে যাবে তখন স্টিকি বক্স আসবে
+    if (window.pageYOffset > mainSearch.offsetTop + mainSearch.offsetHeight) {
+        stickySearch.style.display = "block";
+    } else {
+        stickySearch.style.display = "none";
+    }
+};
+
+// সার্চ ফাংশন (যাতে দুই বক্সেই কাজ করে)
+function filterAnime(value) {
+    let searchTerm = value.toLowerCase();
+    let cards = document.querySelectorAll('.card');
+    
+    cards.forEach(card => {
+        let title = card.querySelector('.title').innerText.toLowerCase();
+        if (title.includes(searchTerm)) {
+            card.style.display = "block";
+        } else {
+            card.style.display = "none";
+        }
+    });
+}
+
   </script>
 </body>
 </html>
