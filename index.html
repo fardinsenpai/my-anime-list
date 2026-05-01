@@ -39,6 +39,21 @@
     .card.hidden{display:none}
     footer{text-align:center;margin-top:70px;color:#333;font-size:.78rem}
 
+    .counter-container {
+  display: flex;
+  justify-content: center;
+  gap: 50px;
+  margin: 30px 0;
+}
+.counter-box {
+  text-align: center;
+}
+.counter {
+  font-size: 40px;
+  font-weight: bold;
+  color: #ff4d4d;
+}
+
 /* স্টিকি সার্চ বক্সের স্টাইল */
 .sticky-search {
     position: fixed;
@@ -67,11 +82,28 @@
 <body>
   <div class="header">
     <h1>🎌 Let's See What Anime I Have Watched:-</h1>
-    <div class="stats">Total: <span>235 Anime</span> &nbsp;|&nbsp; Source {FB}: <span>@fardin.senpai</span></div>
+    
   </div>
   <div class="search-wrap">
     <input type="text" id="searchBox" placeholder="🔍 Search anime..." oninput="filterCards()"/>
   </div>
+
+  <!-- Counter Section -->
+<div class="counter-container">
+  <div class="counter-box">
+    <h2 id="animeCount" class="counter">0</h2>
+    <p>Total Anime</p>
+  </div>
+  <div class="counter-box">
+    <h2 id="seasonCount" class="counter">0</h2>
+    <p>Total Seasons</p>
+  </div>
+  <div class="counter-box">
+    <h2 id="episodeCount" class="counter">0</h2>
+    <p>Total Episodes</p>
+  </div>
+
+</div>
   <div class="grid" id="grid">
 <div class="card"><div class="poster-wrap"><img src="https://media.kitsu.app/anime/poster_images/11469/large.jpg" alt="My Hero Academia" loading="lazy"/><span class="badge">#1</span></div><div class="info"><div class="number">NO. 1</div><div class="title">My Hero Academia</div><div class="season">Season-1,2,3,4,5,6,7,8 & Manga Finished</div></div></div>
 <div class="card"><div class="poster-wrap"><img src="https://m.media-amazon.com/images/M/MV5BZTNjOWI0ZTAtOGY1OS00ZGU0LWEyOWYtMjhkYjdlYmVjMDk2XkEyXkFqcGc@._V1_.jpg" alt="Naruto" loading="lazy"/><span class="badge">#2</span></div><div class="info"><div class="number">NO. 2</div><div class="title">Naruto</div><div class="season">OG 220 Episodes</div></div></div>
@@ -485,6 +517,33 @@ function filterAnime(value) {
         }
     });
 }
+
+function counterUp(id, target, duration) {
+  let count = 0;
+  const element = document.getElementById(id);
+  const steps = duration / 20; // প্রতি 20ms এ আপডেট হবে
+  const increment = target / steps; // target অনুযায়ী increment হিসাব
+
+  const interval = setInterval(() => {
+    count += increment;
+    if (count >= target) {
+      count = target;
+      clearInterval(interval);
+    }
+    element.innerText = Math.floor(count) + "+"; // শেষে + দেখাবে
+  }, 20);
+}
+
+// সবগুলো কাউন্টার একই সময়ে (৭ সেকেন্ডে) শেষ হবে
+window.onload = () => {
+  const duration = 7000; // ৭ সেকেন্ড
+  counterUp("animeCount", 235, duration);
+  counterUp("seasonCount", 346, duration);
+  counterUp("episodeCount", 6142, duration);
+};
+
+
+
 
   </script>
 </body>
