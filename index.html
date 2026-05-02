@@ -63,7 +63,11 @@
     .card.hidden{display:none}
     footer{text-align:center;margin-top:70px;color:#333;font-size:.78rem}
 
-    
+    /* সব কার্ডের সিজন টেক্সটের রঙ পরিবর্তনের জন্য */
+.season {
+    color: #FFC0CB; /* এখানে আপনার পছন্দমতো কালার কোড দিন (যেমন: গোলাপী) */
+    font-weight: bold; /* চাইলে লেখাটি একটু মোটাও করতে পারেন */
+}
 
     /* Default PC layout */
 .grid {
@@ -77,6 +81,22 @@
   .grid {
     grid-template-columns: repeat(2, 1fr); /* Mobile এ 2 কার্ড একসাথে */
   }
+}
+.counter-box {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: all 1s ease-out;
+}
+
+.counter-box.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.counter {
+  font-size: 40px;
+  font-weight: bold;
+  color: #FFD700; /* Golden Yellow */
 }
 
 
