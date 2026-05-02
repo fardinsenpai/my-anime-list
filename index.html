@@ -6,31 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Let's See What Anime I Have Watched</title>
   <style>
-
-.site-header {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 15px;
-      margin: 20px 0;
-    }
-
-    .logo {
-      width: 60px;
-      height: 60px;
-      object-fit: contain; /* Logo ঠিকভাবে fit হবে */
-    }
-
-    .site-title {
-  font-size: 28px;
-  font-weight: bold;
-  background: linear-gradient(90deg, #ff4d4d, #a6c1ee);
-  background-clip: text;              /* Standard property */
-  -webkit-background-clip: text;      /* Chrome/Safari support */
-  -webkit-text-fill-color: transparent;
-}
-
-    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap');
     *{box-sizing:border-box;margin:0;padding:0}
     body{background:#080810;color:#fff;font-family:'Poppins',sans-serif;padding:50px 20px 60px}
     .header{text-align:center;margin-bottom:45px}
@@ -69,6 +45,7 @@
     color: #FFC0CB; /* এখানে আপনার পছন্দমতো কালার কোড দিন (যেমন: গোলাপী) */
     font-weight: bold; /* চাইলে লেখাটি একটু মোটাও করতে পারেন */
 }
+
 
     /* Default PC layout */
 .grid {
@@ -110,13 +87,54 @@
 
 /* প্রতিটা box */
 .counter-box {
+  position: relative;
+  display: inline-block;
+  padding: 40px;
   text-align: center;
-  padding: 20px;
-  border-radius: 12px;
-  background: linear-gradient(135deg, #fbc2eb 0%, #a6c1ee 100%);
-  box-shadow: 0 3px 8px rgba(0,0,0,0.2);
-  flex: 1;
+  font-weight: bold;
+  color: #fff;
+  overflow: hidden;
 }
+
+.counter-box::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 180px;
+  height: 180px;
+  transform: translate(-50%, -50%);
+  background: linear-gradient(135deg, #fbc2eb 0%, #a6c1ee 100%);
+  z-index: -1;
+
+  /* Octagon shape */
+  clip-path: polygon(
+    30% 0%, 70% 0%, 
+    100% 30%, 100% 70%, 
+    70% 100%, 30% 100%, 
+    0% 70%, 0% 30%
+  );
+
+  /* Slow rotation */
+  animation: rotateOctagon 50s linear infinite,
+           gradientShift 15s ease infinite;
+
+}
+
+@keyframes rotateOctagon {
+  from {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+@keyframes gradientShift {
+  0% { background: linear-gradient(135deg, #fbc2eb, #a6c1ee); }
+  50% { background: linear-gradient(135deg, #a6c1ee, #fbc2eb); }
+  100% { background: linear-gradient(135deg, #fbc2eb, #a6c1ee); }
+}
+
 
 .counter {
   font-size: 28px;
