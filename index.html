@@ -262,6 +262,56 @@
   }
 }
 
+.filter-container {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+}
+
+/* কন্টেইনার স্টাইল */
+.filter-container {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin: 30px 0;
+    flex-wrap: wrap;
+}
+
+/* বেসিক বাটন স্টাইল */
+.filter-btn {
+    background: rgba(26, 26, 46, 0.8); /* হালকা স্বচ্ছ ব্যাকগ্রাউন্ড */
+    color: #ffffff;
+    border: 1px solid #2a2a4a;
+    padding: 10px 25px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    backdrop-filter: blur(5px); /* গ্লাস ইফেক্ট */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* হোভার করলে গ্লোয়িং ইফেক্ট */
+.filter-btn:hover {
+    background: linear-gradient(135deg, #fbc2eb 0%, #a6c1ee 100%);
+    color: #1a1a2e;
+    border-color: transparent;
+    transform: translateY(-5px); /* হালকা উপরে উঠবে */
+    box-shadow: 0 10px 20px rgba(251, 194, 235, 0.4);
+}
+
+/* একটি বাটন যখন এক্টিভ বা সিলেক্ট করা থাকবে */
+.filter-btn.active {
+    background: #ff6b6b;
+    color: white;
+    border-color: #ff6b6b;
+    box-shadow: 0 0 20px rgba(255, 107, 107, 0.5);
+}
 
   </style>
 </head>
@@ -292,6 +342,13 @@
     <h2 id="episodeCount" class="counter">0+</h2>
     <p>Total Episodes</p>
   </div>
+</div>
+
+<div class="filter-container">
+    <button class="filter-btn" onclick="autoFilter('all')">All</button>
+    <button class="filter-btn" onclick="autoFilter('Series')">Series</button>
+    <button class="filter-btn" onclick="autoFilter('Ongoing')">Ongoing</button>
+    <button class="filter-btn" onclick="autoFilter('Movie')">Movie</button>
 </div>
 
 <div id="petals-container"></div>
@@ -773,6 +830,42 @@ window.onload = () => {
   counterUp("seasonCount", 346, duration);
   counterUp("episodeCount", 6142, duration);
 };
+
+
+function autoFilter(category) {
+    const cards = document.querySelectorAll('.card');
+    
+    cards.forEach(card => {
+        // কার্ডের ভেতরের সিজন/স্ট্যাটাস টেক্সটটি নেওয়া হচ্ছে
+        const statusText = card.querySelector('.season').innerText;
+
+        if (category === 'all') {
+            card.style.display = "block";
+        } 
+        else if (category === 'Series') {
+            // যদি লেখায় 'Season' বা 'Episodes' থাকে তবে সেটি Series
+            if (statusText.includes('Season') || statusText.includes('Episodes')) {
+                card.style.display = "block";
+            } else {
+                card.style.display = "none";
+            }
+        } 
+        else if (category === 'Ongoing') {
+            if (statusText.includes('Ongoing')) {
+                card.style.display = "block";
+            } else {
+                card.style.display = "none";
+            }
+        } 
+        else if (category === 'Movie') {
+            if (statusText.includes('Movie')) {
+                card.style.display = "block";
+            } else {
+                card.style.display = "none";
+            }
+        }
+    });
+}
 
 
   </script>
