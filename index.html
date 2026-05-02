@@ -5,6 +5,30 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Let's See What Anime I Have Watched</title>
   <style>
+
+.site-header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 15px;
+      margin: 20px 0;
+    }
+
+    .logo {
+      width: 60px;
+      height: 60px;
+      object-fit: contain; /* Logo ঠিকভাবে fit হবে */
+    }
+
+    .site-title {
+  font-size: 28px;
+  font-weight: bold;
+  background: linear-gradient(90deg, #ff4d4d, #a6c1ee);
+  background-clip: text;              /* Standard property */
+  -webkit-background-clip: text;      /* Chrome/Safari support */
+  -webkit-text-fill-color: transparent;
+}
+
     @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap');
     *{box-sizing:border-box;margin:0;padding:0}
     body{background:#080810;color:#fff;font-family:'Poppins',sans-serif;padding:50px 20px 60px}
@@ -38,6 +62,23 @@
     .season{font-size:.64rem;color:#555;margin-top:5px;line-height:1.3}
     .card.hidden{display:none}
     footer{text-align:center;margin-top:70px;color:#333;font-size:.78rem}
+
+    
+
+    /* Default PC layout */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr); /* PC তে 4 কার্ড একসাথে */
+  gap: 20px;
+}
+
+/* 📱 Mobile layout */
+@media (max-width: 767px) {
+  .grid {
+    grid-template-columns: repeat(2, 1fr); /* Mobile এ 2 কার্ড একসাথে */
+  }
+}
+
 
    .counter-container {
   display: flex;
@@ -177,6 +218,7 @@
     <p>Total Episodes</p>
   </div>
 </div>
+
 
 
   <div class="grid" id="grid">
