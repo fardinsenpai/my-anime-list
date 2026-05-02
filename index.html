@@ -227,6 +227,42 @@
     box-shadow: 0 4px 15px rgba(0,0,0,0.3);
 }
 
+.petal {
+  position: fixed;
+  top: -50px;
+  width: 20px;
+  height: 20px;
+  background: pink;
+  border-radius: 50% 50% 50% 0;
+  opacity: 0.8;
+  pointer-events: none;
+  animation: fall linear infinite;
+}
+
+@keyframes fall {
+  0% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100vh) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+
+@keyframes fall {
+  0% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100vh) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+
   </style>
 </head>
 
@@ -258,7 +294,7 @@
   </div>
 </div>
 
-
+<div id="petals-container"></div>
 
   <div class="grid" id="grid">
 <div class="card"><div class="poster-wrap"><img src="https://media.kitsu.app/anime/poster_images/11469/large.jpg" alt="My Hero Academia" loading="lazy"/><span class="badge">#1</span></div><div class="info"><div class="number">NO. 1</div><div class="title">My Hero Academia</div><div class="season">Season-1,2,3,4,5,6,7,8 & Manga Finished</div></div></div>
@@ -640,6 +676,37 @@
 </footer>
 
   <script>
+
+function createPetal() {
+  const petal = document.createElement("div");
+  petal.classList.add("petal");
+
+  // random horizontal start position
+  petal.style.left = Math.random() * window.innerWidth + "px";
+
+  // random size
+  const size = 10 + Math.random() * 20;
+  petal.style.width = size + "px";
+  petal.style.height = size + "px";
+
+  // random animation duration
+  const duration = 5 + Math.random() * 10;
+  petal.style.animationDuration = duration + "s";
+
+  // random delay
+  petal.style.animationDelay = Math.random() * 5 + "s";
+
+  document.getElementById("petals-container").appendChild(petal);
+
+  // remove after animation ends
+  setTimeout(() => {
+    petal.remove();
+  }, duration * 1000);
+}
+
+// keep generating petals
+setInterval(createPetal, 500); // every 0.5s new petal
+
     function filterCards(){
       const q=document.getElementById('searchBox').value.toLowerCase();
       document.querySelectorAll('.card').forEach(c=>{
@@ -706,9 +773,6 @@ window.onload = () => {
   counterUp("seasonCount", 346, duration);
   counterUp("episodeCount", 6142, duration);
 };
-
-
-
 
 
   </script>
