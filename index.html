@@ -313,31 +313,6 @@
     box-shadow: 0 0 20px rgba(255, 107, 107, 0.5);
 }
 
-.thunder {
-  position: fixed;
-  top: -100px;
-  width: 4px;
-  height: 40px;
-  background: linear-gradient(to bottom, #fff, #ff0);
-  opacity: 0.9;
-  pointer-events: none;
-  animation: thunderFall linear infinite;
-}
-
-@keyframes thunderFall {
-  0% {
-    transform: translateY(0) scaleX(1);
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.5;
-    transform: translateY(50vh) scaleX(0.8);
-  }
-  100% {
-    transform: translateY(100vh) scaleX(1.2);
-    opacity: 0;
-  }
-}
 
   </style>
 </head>
@@ -893,32 +868,6 @@ function autoFilter(category) {
     });
 }
 
-
-function createThunder() {
-  const thunder = document.createElement("div");
-  thunder.classList.add("thunder");
-
-  // random horizontal start
-  thunder.style.left = Math.random() * window.innerWidth + "px";
-
-  // random width/height
-  const height = 30 + Math.random() * 50;
-  thunder.style.height = height + "px";
-
-  // random duration
-  const duration = 1 + Math.random() * 2; // fast fall
-  thunder.style.animationDuration = duration + "s";
-
-  document.body.appendChild(thunder);
-
-  // remove after animation
-  setTimeout(() => {
-    thunder.remove();
-  }, duration * 1000);
-}
-
-// keep generating thunder drops
-setInterval(createThunder, 2000); // every 2s new thunder
 
   </script>
 </body>
