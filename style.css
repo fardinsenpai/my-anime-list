@@ -410,26 +410,13 @@
     box-shadow: 0 0 20px rgba(255, 107, 107, 0.6); /* আগের গ্লো ইফেক্ট */
 }
 
+.card {
+  opacity: 0;
+  transform: scale(0.9);
+  transition: all 0.6s ease-out;
+}
 
-
-
-
-/* এটি মোবাইল ফোনের জন্য বিশেষ হ্যাক */
-@media screen and (max-width: 767px) {
-    ::-webkit-scrollbar {
-        width: 15px !important; /* মোবাইলে একটু চিকন রাখাই ভালো */
-        display: block !important;
-    }
-
-    ::-webkit-scrollbar-thumb {
-        background: linear-gradient(#ff6b6b, #4d96ff) !important;
-        border-radius: 10px !important;
-        /* মোবাইলে স্ক্রলবার সব সময় দৃশ্যমান রাখতে এটি সাহায্য করে */
-        border: 1px solid rgba(255, 255, 255, 0.1) !important;
-    }
-
-    /* বডি-তে এই লাইনটি অবশ্যই যোগ করবেন */
-    body {
-        -webkit-overflow-scrolling: touch !important;
-    }
+.card.show {
+  opacity: 1;
+  transform: scale(1);
 }
