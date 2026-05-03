@@ -607,3 +607,18 @@ form {
     width: 90%;       /* Mobile এ full width */
   }
 }
+.fb-link {
+  display: inline-block;
+  padding: 10px 20px;
+  background: rgba(255,255,255,0.15);
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
+  color: #fff;
+  text-decoration: none;
+  font-weight: bold;
+  transition: 0.3s;
+}
+.fb-link:hover {
+  background: linear-gradient(45deg, #ff7eb9, #7afcff);
+  transform: translateY(-3px);
+}
