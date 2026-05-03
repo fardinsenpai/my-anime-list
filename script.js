@@ -163,5 +163,9 @@ document.addEventListener('mousemove', (e) => {
     glow.style.top = e.pageY + 'px';
 });
 
+/* === FARDIN'S OTAKU LIST - PREMIUM SAKURA CHAT JS === */
 
-
+function toggleSakuraChat() {
+  const chatBox = document.getElementById("sakuraChatBox");
+  chatBox.classList.toggle("active");
+}
