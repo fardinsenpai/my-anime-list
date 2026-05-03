@@ -1,4 +1,21 @@
-function filterCards(){
+
+const cards = document.querySelectorAll(".card");
+
+function showCardsOnScroll() {
+  const triggerBottom = window.innerHeight * 0.85;
+
+  cards.forEach(card => {
+    const cardTop = card.getBoundingClientRect().top;
+    if(cardTop < triggerBottom) {
+      card.classList.add("show");
+    }
+  });
+}
+
+window.addEventListener("scroll", showCardsOnScroll);
+window.addEventListener("load", showCardsOnScroll);
+
+    function filterCards(){
       const q=document.getElementById('searchBox').value.toLowerCase();
       document.querySelectorAll('.card').forEach(c=>{
         c.classList.toggle('hidden',!c.querySelector('.title').textContent.toLowerCase().includes(q));
@@ -145,3 +162,6 @@ document.addEventListener('mousemove', (e) => {
     glow.style.left = e.pageX + 'px';
     glow.style.top = e.pageY + 'px';
 });
+
+
+
