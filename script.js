@@ -1,6 +1,4 @@
-
-
-    function filterCards(){
+function filterCards(){
       const q=document.getElementById('searchBox').value.toLowerCase();
       document.querySelectorAll('.card').forEach(c=>{
         c.classList.toggle('hidden',!c.querySelector('.title').textContent.toLowerCase().includes(q));
@@ -147,5 +145,3 @@ document.addEventListener('mousemove', (e) => {
     glow.style.left = e.pageX + 'px';
     glow.style.top = e.pageY + 'px';
 });
-
-
