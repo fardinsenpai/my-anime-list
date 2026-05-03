@@ -108,8 +108,7 @@
   );
 
   /* Slow rotation */
-  animation: rotateOctagon 50s linear infinite,
-           gradientShift 15s ease infinite;
+  animation: rotateOctagon 50s linear infinite;
 
 }
 
@@ -219,39 +218,43 @@
     box-shadow: 0 4px 15px rgba(0,0,0,0.3);
 }
 
-.petal {
-  position: fixed;
-  top: -50px;
-  width: 20px;
-  height: 20px;
-  background: pink;
-  border-radius: 50% 50% 50% 0;
-  opacity: 0.8;
-  pointer-events: none;
-  animation: fall linear infinite;
+/* style.css */
+
+/* পাপড়ির বেসিক স্টাইল */
+.sakura {
+    position: fixed;
+    top: -10vh; /* স্ক্রিনের সামান্য ওপর থেকে শুরু হবে */
+    background: #ffb7c5; /* চেরি ব্লসমের হালকা গোলাপী রঙ */
+    border-radius: 100% 0% 100% 0% / 100% 0% 100% 0%; /* বাস্তবসম্মত পাপড়ির আকার */
+    opacity: 0.8;
+    z-index: -1;
+    pointer-events: none; /* যাতে ক্লিক বা স্ক্রলে বাধা না দেয় */
+    
+    /* ঘোরার এবং দুলার জন্য */
+    transform-origin: center;
+    
+    /* একাধিক অ্যানিমেশন একসাথে */
+    animation: fall linear infinite, sway ease-in-out infinite alternate;
 }
 
+/* নিচে পড়ার অ্যানিমেশন (সব পাপড়ির জন্য একই গতি) */
 @keyframes fall {
-  0% {
-    transform: translateY(0) rotate(0deg);
-    opacity: 1;
-  }
-  100% {
-    transform: translateY(100vh) rotate(360deg);
-    opacity: 0;
-  }
+    0% {
+        top: -10vh;
+    }
+    100% {
+        top: 110vh; /* স্ক্রিনের একদম নিচে চলে যাবে */
+    }
 }
 
-
-@keyframes fall {
-  0% {
-    transform: translateY(0) rotate(0deg);
-    opacity: 1;
-  }
-  100% {
-    transform: translateY(100vh) rotate(360deg);
-    opacity: 0;
-  }
+/* দুলার এবং ঘোরার অ্যানিমেশন (ইউনিক লুকের জন্য) */
+@keyframes sway {
+    0% {
+        transform: translateX(0px) rotate(0deg);
+    }
+    100% {
+        transform: translateX(50px) rotate(180deg); /* হালকা বাতাস এবং ঘূর্ণন */
+    }
 }
 
 .filter-container {
@@ -304,3 +307,115 @@
     border-color: #ff6b6b;
     box-shadow: 0 0 20px rgba(255, 107, 107, 0.5);
 }
+
+/* style.css */
+.poster-wrap::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.3) 100%);
+    transform: skewX(-25deg);
+    transition: 0.7s;
+}
+
+.card:hover .poster-wrap::after {
+    left: 150%;
+}
+
+/* style.css */
+::-webkit-scrollbar {
+    width: 10px;
+}
+::-webkit-scrollbar-track {
+    background: #080810; 
+}
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(#ff6b6b, #4d96ff);
+    border-radius: 10px;
+}
+/* style.css */
+
+.header h1 {
+    font-size: clamp(1.8rem, 5vw, 3rem); /* রেসপন্সিভ ফন্ট সাইজ */
+    font-weight: 800;
+    line-height: 1.25;
+    margin-bottom: 20px;
+    
+    /* আপনার বর্তমান মাল্টিকালার গ্রিডিয়েন্ট */
+    background: linear-gradient(135deg, #ff6b6b 0%, #ffd93d 30%, #6bcb77 65%, #4d96ff 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    
+    /* --- নতুন Glowing Fade-In অ্যানিমেশন এখানে শুরু --- */
+    opacity: 0; /* শুরুতে লুকানো থাকবে */
+    animation: glowFadeIn 2s ease-out forwards;
+    position: relative;
+    display: inline-block; /* মোবাইলে সেন্টারিং ঠিক রাখার জন্য */
+}
+
+/* অ্যানিমেশন ডিফিনিশন */
+@keyframes glowFadeIn {
+    0% {
+        opacity: 0;
+        transform: translateY(20px); /* হালকা নিচ থেকে উপরে উঠবে */
+        filter: blur(5px); /* শুরুতে ঝাপসা থাকবে */
+        text-shadow: 0 0 0px rgba(255, 107, 107, 0);
+    }
+    50% {
+        opacity: 0.5;
+        /* মাঝপথে একটি হালকা নিয়ন গ্লো */
+        text-shadow: 0 0 10px rgba(251, 194, 235, 0.7), 0 0 20px rgba(166, 193, 238, 0.5);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0); /* সঠিক জায়গায় আসবে */
+        filter: blur(0); /* একদম পরিষ্কার হয়ে যাবে */
+        /* শেষে খুব সূক্ষ্ম একটি স্থায়ী গ্লো */
+        text-shadow: 0 0 5px rgba(251, 194, 235, 0.4);
+    }
+}
+
+.cursor-glow {
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, rgba(251, 194, 235, 0.2) 0%, rgba(0, 0, 0, 0) 70%);
+    position: fixed;
+    pointer-events: none;
+    border-radius: 50%;
+    z-index: -1; /* যাতে লেখা বা কার্ডের পেছনে থাকে */
+    transform: translate(-50%, -50%);
+    transition: 0.1s ease-out;
+}
+
+.card-content {
+    background: rgba(255, 255, 255, 0.05); /* হালকা সাদা স্বচ্ছতা */
+    backdrop-filter: blur(10px); /* পেছনে ঝাপসা করার ম্যাজিক */
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 15px;
+    border-radius: 0 0 15px 15px;
+}
+/* style.css */
+
+/* ভাসমান অ্যানিমেশন ডিফিনিশন */
+@keyframes floatingCards {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); } /* হালকা ১০px উপরে উঠবে */
+    100% { transform: translateY(0px); }
+}
+
+/* আপনার সব অ্যানিমে কার্ডের ওপর ফ্লোটিং ইফেক্ট */
+.grid .card {
+    /* আগের transform: translateY(-10px) বা scale ইফেক্টগুলো মুছে দিন */
+    animation: floatingCards 4s ease-in-out infinite; /* সব কার্ড সবসময় হালকা ভাসতে থাকবে */
+}
+
+/* হোভার করলে হালকা দুলবে বা থামবে (ঐচ্ছিক) */
+.grid .card:hover {
+    animation-play-state: paused; /* মাউস নিলে ভাসমান ইফেক্ট থেমে যাবে */
+    box-shadow: 0 0 20px rgba(255, 107, 107, 0.6); /* আগের গ্লো ইফেক্ট */
+}
+
