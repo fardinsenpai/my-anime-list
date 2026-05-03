@@ -13,6 +13,7 @@
 </div>
 
 <body>
+ 
   <div class="header">
     <h1> Let's See What Anime I Have Watched:-</h1>
     
@@ -44,6 +45,8 @@
 </div>
 
 <div id="petals-container"></div>
+
+
 
   <div class="grid" id="grid">
 <div class="card"><div class="poster-wrap"><img src="https://media.kitsu.app/anime/poster_images/11469/large.jpg" alt="My Hero Academia" loading="lazy"/><span class="badge">#1</span></div><div class="info"><div class="number">NO. 1</div><div class="title">My Hero Academia</div><div class="season">Season-1,2,3,4,5,6,7,8 & Manga Finished</div></div></div>
@@ -80,7 +83,7 @@
 <div class="card"><div class="poster-wrap"><img src="https://media.kitsu.app/anime/poster_images/43014/large.jpg" alt="The Daily Life of the Immortal King" loading="lazy"/><span class="badge">#32</span></div><div class="info"><div class="number">NO. 32</div><div class="title">The Daily Life of the Immortal King</div><div class="season">Season-1,2,3,4,5</div></div></div>
 <div class="card"><div class="poster-wrap"><img src="https://media.kitsu.app/anime/poster_images/10734/large.jpg" alt="Prison School" loading="lazy"/><span class="badge">#33</span></div><div class="info"><div class="number">NO. 33</div><div class="title">Prison School</div><div class="season">Season-1</div></div></div>
 <div class="card"><div class="poster-wrap"><img src="https://media.kitsu.app/anime/46370/poster_image/large-338a164d72dacaa07fc4b6ea58fa1efc.jpeg" alt="I Got a Cheat Skill in Another World and Became Unrivaled in the Real World, Too" loading="lazy"/><span class="badge">#34</span></div><div class="info"><div class="number">NO. 34</div><div class="title">I Got a Cheat Skill in Another World and Became Unrivaled in the Real World, Too</div><div class="season">Season-1</div></div></div>
-<div class="card"><div class="poster-wrap"><img src="https://media.kitsu.app/anime/43028/poster_image/large-e464f2b70c6e0696153474df519f1b9a.jpeg" alt="Rent A Girlfriend" loading="lazy"/><span class="badge">#35</span></div><div class="info"><div class="number">NO. 35</div><div class="title">Rent A Girlfriend</div><div class="season">Season-1,2,3,4 & Manga Ongoing</div></div></div>
+<div class="card"><div class="poster-wrap"><img src="https://media.kitsu.app/anime/43028/poster_image/large-e464f2b70c6e0696153474df519f1b9a.jpeg" alt="Rent A Girlfriend" loading="lazy"/><span class="badge">#35</span></div><div class="info"><div clas"number">NO. 35</div><div class="title">Rent A Girlfriend</div><div class="season">Season-1,2,3,4 & Manga Ongoing</div></div></div>
 <div class="card"><div class="poster-wrap"><img src="https://media.kitsu.app/anime/poster_images/41099/large.jpg" alt="Radiant" loading="lazy"/><span class="badge">#36</span></div><div class="info"><div class="number">NO. 36</div><div class="title">Radiant</div><div class="season">Season-1,2</div></div></div>
 <div class="card"><div class="poster-wrap"><img src="https://media.kitsu.app/anime/486/poster_image/large-d7ec3ada948851369b7eb6726235cc0d.jpeg" alt="Pokemon" loading="lazy"/><span class="badge">#37</span></div><div class="info"><div class="number">NO. 37</div><div class="title">Pokemon</div><div class="season">∞</div></div></div>
 <div class="card"><div class="poster-wrap"><img src="https://media.kitsu.app/anime/poster_images/11614/large.jpg" alt="Your Name" loading="lazy"/><span class="badge">#38</span></div><div class="info"><div class="number">NO. 38</div><div class="title">Your Name</div><div class="season">Movie</div></div></div>
@@ -402,14 +405,8 @@
         <div class="title">Yuri!!! on Ice</div>
         <div class="season">Season-1</div>
     </div>
-</div>
+ </div>
  
-
-
-
-
-
-
 
 
 
@@ -423,6 +420,28 @@
   End of Fardin's Anime Watch List
 </h1> </p>
 </footer>
+
+
+  <!-- Floating Chat Icon -->
+  <div class="chat-icon" onclick="toggleSakuraChat()">
+    💬
+    <span class="pulse"></span>
+  </div>
+
+  <!-- Hidden Chat Box -->
+  <div class="chat-box" id="sakuraChatBox">
+    <form action="https://formspree.io/f/xkoyoqog" method="POST">
+      <h2> Drop An Anime Suggestion</h2>
+      <input type="text" name="Adviser Name" placeholder="Your Name" required>
+      
+      <textarea name="Suggested Anime" placeholder="Suggest an Anime..." required></textarea>
+      
+       <textarea name="Reason To Watch " placeholder="Why I should Watch It?(not required)"></textarea>
+      
+      <button type="submit">Drop</button>
+    </form>
+  </div>
+
 
 <script src="script.js"></script>
   
