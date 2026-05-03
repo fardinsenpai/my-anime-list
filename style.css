@@ -587,3 +587,23 @@
     right: 5%;
   }
 }
+/* Form Container */
+form {
+  max-width: 400px;   /* PC তে খুব বড় না হয় */
+  margin: 0 auto;     /* সবসময় center এ থাকবে */
+  text-align: center;
+}
+
+/* Footer Text */
+.footer-text {
+  color: #7afcff;     /* একটু softer neon blue */
+  font-size: 1.2rem;
+  text-align: center;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  form {
+    width: 90%;       /* Mobile এ full width */
+  }
+}
