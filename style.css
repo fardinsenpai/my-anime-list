@@ -622,3 +622,12 @@ form {
   background: linear-gradient(45deg, #ff7eb9, #7afcff);
   transform: translateY(-3px);
 }
+a {
+  text-decoration: none;   /* underline remove */
+  color: #7afcff;          /* তোমার neon blue */
+  font-weight: bold;
+}
+
+a:hover {
+  color: #ff7eb9;          /* hover এ pink glow */
+}
