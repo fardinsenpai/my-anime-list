@@ -1,33 +1,4 @@
 
-function createPetal() {
-  const petal = document.createElement("div");
-  petal.classList.add("petal");
-
-  // random horizontal start position
-  petal.style.left = Math.random() * window.innerWidth + "px";
-
-  // random size
-  const size = 10 + Math.random() * 20;
-  petal.style.width = size + "px";
-  petal.style.height = size + "px";
-
-  // random animation duration
-  const duration = 5 + Math.random() * 10;
-  petal.style.animationDuration = duration + "s";
-
-  // random delay
-  petal.style.animationDelay = Math.random() * 5 + "s";
-
-  document.getElementById("petals-container").appendChild(petal);
-
-  // remove after animation ends
-  setTimeout(() => {
-    petal.remove();
-  }, duration * 1000);
-}
-
-// keep generating petals
-setInterval(createPetal, 500); // every 0.5s new petal
 
     function filterCards(){
       const q=document.getElementById('searchBox').value.toLowerCase();
@@ -131,5 +102,50 @@ function autoFilter(category) {
         }
     });
 }
+// script.js
+
+function createSakura() {
+    const sakura = document.createElement("div");
+    sakura.classList.add("sakura");
+    
+    // --- ইউনিক প্রপার্টি জেনারেট করা ---
+
+    // ১. পজিশন (র‍্যান্ডম)
+    sakura.style.left = Math.random() * 100 + "vw";
+    
+    // ২. আকার (র‍্যান্ডম - ৫px থেকে ১৫px)
+    const size = Math.random() * 10 + 5 + "px";
+    sakura.style.width = size;
+    sakura.style.height = size;
+    
+    // ৩. পড়ার সময়কাল (র‍্যান্ডম গতি - ৫s থেকে ১৫s)
+    const fallDuration = Math.random() * 10 + 5;
+    sakura.style.animationDuration = fallDuration + "s, 4s"; // fall এবং sway এর সময়কাল
+    
+    // ৪. হালকা অস্বচ্ছতা (Opacity - র‍্যান্ডম ০.৫ থেকে ১.০)
+    sakura.style.opacity = Math.random() * 0.5 + 0.5;
+
+    // ৫. দুলার জন্য র‍্যান্ডম বিলম্ব
+    sakura.style.animationDelay = Math.random() * 5 + "s";
+
+    document.body.appendChild(sakura);
+
+    // পাপড়ি স্ক্রিনের বাইরে চলে গেলে মুছে ফেলা
+    setTimeout(() => {
+        sakura.remove();
+    }, fallDuration * 1000);
+}
+
+// প্রতি ২০০ মিলিসেকেন্ডে একটি নতুন পাপড়ি তৈরি হবে
+setInterval(createSakura, 200);
+
+const glow = document.createElement('div');
+glow.className = 'cursor-glow';
+document.body.appendChild(glow);
+
+document.addEventListener('mousemove', (e) => {
+    glow.style.left = e.pageX + 'px';
+    glow.style.top = e.pageY + 'px';
+});
 
 
