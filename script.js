@@ -1,3 +1,78 @@
+(function () {
+  const GENRES = {
+    "All":           { icon: "✦", nums: null },
+    "Action":        { icon: "⚔", nums: new Set([1,2,3,4,5,6,7,8,10,11,13,14,15,16,17,19,22,23,24,26,27,28,29,30,32,34,36,37,40,42,43,46,48,49,50,52,55,61,62,63,64,65,66,67,68,69,70,73,74,75,76,78,80,81,85,86,89,90,92,93,94,97,98,99,100,102,104,105,106,107,114,115,116,118,125,126,127,129,130,135,136,137,139,140,141,146,149,152,158,162,165,169,170,173,174,175,179,180,181,184,187,188,190,194,195,198,199,201,202,203,205,212,214,218,220,221,225,226,227,228,231,232,234]) },
+    "Adventure":     { icon: "🗺", nums: new Set([1,2,3,4,5,6,7,10,13,17,18,25,29,36,37,39,46,62,64,66,76,79,81,93,100,104,105,118,120,126,128,134,135,136,137,143,149,154,155,156,160,161,163,165,167,171,179,181,182,183,188,189,191,206,207,208,209,214,216,224,231,233]) },
+    "Comedy":        { icon: "😂", nums: new Set([4,5,7,14,15,19,23,32,33,40,43,56,62,63,65,67,69,70,74,84,85,90,101,105,108,115,117,123,131,133,134,138,139,140,144,148,150,151,154,155,157,162,169,171,175,176,185,186,195,196,197,198,199,201,213,215,219,220,221,222,229]) },
+    "Sports":        { icon: "🏆", nums: new Set([8,9,16,21,30,44,94,96,98,110,125,129,132,200,202,235]) },
+    "Isekai":        { icon: "🌀", nums: new Set([18,34,52,63,68,69,82,89,90,93,99,102,105,114,115,117,120,127,128,131,133,134,135,137,139,142,143,149,154,155,160,161,163,165,167,169,170,171,173,174,175,181,184,185,187,189,194,198,199,201,207,208,209,212,214,216,218,222,226,228,232,233]) },
+    "Dark / Horror": { icon: "💀", nums: new Set([10,11,12,22,24,27,28,29,40,42,47,48,49,50,52,53,65,66,67,68,73,75,76,95,99,100,114,116,130,141,152,158,159,170,172,180,182,184,190,203,205,214,217,225,228,231]) },
+    "Romcom":        { icon: "💕", nums: new Set([20,35,38,41,45,51,57,58,59,60,71,72,77,80,82,83,84,85,87,91,103,106,108,109,112,113,122,132,138,142,153,159,162,166,168,177,185,193,197,207,210,211,219,223]) },
+    "Slice of Life": { icon: "🌸", nums: new Set([12,19,20,27,31,35,38,39,43,47,51,54,57,58,59,72,77,79,83,88,95,103,109,111,112,113,119,121,122,123,124,133,138,144,145,147,148,150,151,153,156,157,160,161,164,166,168,172,176,177,178,186,189,191,192,193,196,204,206,208,210,213,215,219,222,223,224,230,235]) },
+    "Sci-Fi":        { icon: "🚀", nums: new Set([25,26,61,65,71,73,75,78,106,135,141,164,183,213,217,234]) },
+    "Historical":    { icon: "📜", nums: new Set([13,24,42,49,77,86,88,92,146,158,168,227]) },
+  };
+
+  const TOTAL = document.querySelectorAll('.card').length;
+
+  function countForGenre(name) {
+    const set = GENRES[name].nums;
+    if (!set) return TOTAL;
+    let c = 0;
+    document.querySelectorAll('.card').forEach(card => {
+      const n = parseInt((card.querySelector('.number') || {}).textContent?.match(/\d+/)?.[0], 10);
+      if (!isNaN(n) && set.has(n)) c++;
+    });
+    return c;
+  }
+
+  function getNum(card) {
+    const el = card.querySelector('.number');
+    if (!el) return null;
+    const m = el.textContent.match(/\d+/);
+    return m ? parseInt(m[0], 10) : null;
+  }
+
+  function buildPills() {
+    const wrap = document.getElementById('pillsWrap');
+    if (!wrap) return;
+    Object.entries(GENRES).forEach(([name, g]) => {
+      const btn = document.createElement('button');
+      btn.className = 'pill' + (name === 'All' ? ' active' : '');
+      btn.dataset.genre = name;
+      const cnt = countForGenre(name);
+      btn.innerHTML = `<span style="font-size:14px">${g.icon}</span>${name}<span class="pill-count">${cnt}</span>`;
+      btn.addEventListener('click', () => applyFilter(name));
+      wrap.appendChild(btn);
+    });
+  }
+
+  function applyFilter(name) {
+    const set = GENRES[name].nums;
+    const cards = document.querySelectorAll('.card');
+    let vis = 0;
+    cards.forEach(card => {
+      const n = getNum(card);
+      const show = n !== null && (!set || set.has(n));
+      card.classList.toggle('hidden', !show);
+      if (show) vis++;
+    });
+    document.querySelectorAll('.pill').forEach(p =>
+      p.classList.toggle('active', p.dataset.genre === name));
+    const status = document.getElementById('filterStatus');
+    if (status) status.innerHTML = `Showing <strong>${vis}</strong> of <strong>${TOTAL}</strong> anime`;
+    const clr = document.getElementById('clearBtn');
+    if (clr) clr.classList.toggle('hidden', name === 'All');
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    buildPills();
+    const clr = document.getElementById('clearBtn');
+    if (clr) clr.addEventListener('click', () => applyFilter('All'));
+  });
+})();
+
+
 
 const cards = document.querySelectorAll(".card");
 
