@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Orbitron:wght@600&family=Rajdhani:wght@600&display=swap');
+
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap');
     *{box-sizing:border-box;margin:0;padding:0}
     body{background:#080810;color:#fff;font-family:'Poppins',sans-serif;padding:50px 20px 60px}
@@ -31,6 +33,315 @@
     .season{font-size:.64rem;color:#555;margin-top:5px;line-height:1.3}
     .card.hidden{display:none}
     footer{text-align:center;margin-top:70px;color:#333;font-size:.78rem}
+    
+
+    /* ══════════════════════════════════════
+   SEARCH BOX ANIMATION
+══════════════════════════════════════ */
+
+/* Fade in from top */
+.search-wrap {
+  animation: searchFadeDown 0.8s ease-out forwards;
+  opacity: 0;
+}
+
+@keyframes searchFadeDown {
+  0% {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Glowing border pulse when focused */
+.search-wrap input {
+  transition: all 0.4s ease;
+  box-shadow: 0 0 0px rgba(255, 107, 157, 0);
+}
+
+.search-wrap input:focus {
+  border-color: #ff6b9d;
+  box-shadow: 0 0 15px rgba(255, 107, 157, 0.4),
+              0 0 30px rgba(255, 107, 157, 0.2);
+  transform: scale(1.02);
+}
+
+/* Shimmer effect on search box */
+.search-wrap input::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(
+    to right,
+    rgba(255,255,255,0) 0%,
+    rgba(255,255,255,0.1) 100%
+  );
+  animation: searchShimmer 3s infinite;
+}
+
+@keyframes searchShimmer {
+  0% { left: -100%; }
+  100% { left: 200%; }
+}
+
+
+/* ══════════════════════════════════════
+   GENRE / FILTER PILLS ANIMATION
+══════════════════════════════════════ */
+
+/* Filter section fade in from bottom */
+.filter-section {
+  opacity: 0;
+  animation: filterFadeUp 0.9s ease-out 0.3s forwards;
+}
+
+@keyframes filterFadeUp {
+  0% {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Filter heading slide in */
+.filter-heading {
+  opacity: 0;
+  animation: slideInLeft 0.7s ease-out 0.5s forwards;
+}
+
+@keyframes slideInLeft {
+  0% {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Each pill pops in one by one */
+.pill {
+  opacity: 0;
+  transform: scale(0.8) translateY(10px);
+  animation: pillPopIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+/* Each pill gets a delay - handled by JS below */
+.pill:nth-child(1)  { animation-delay: 0.1s; }
+.pill:nth-child(2)  { animation-delay: 0.15s; }
+.pill:nth-child(3)  { animation-delay: 0.2s; }
+.pill:nth-child(4)  { animation-delay: 0.25s; }
+.pill:nth-child(5)  { animation-delay: 0.3s; }
+.pill:nth-child(6)  { animation-delay: 0.35s; }
+.pill:nth-child(7)  { animation-delay: 0.4s; }
+.pill:nth-child(8)  { animation-delay: 0.45s; }
+.pill:nth-child(9)  { animation-delay: 0.5s; }
+.pill:nth-child(10) { animation-delay: 0.55s; }
+.pill:nth-child(11) { animation-delay: 0.6s; }
+.pill:nth-child(12) { animation-delay: 0.65s; }
+
+@keyframes pillPopIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.8) translateY(10px);
+  }
+  70% {
+    transform: scale(1.08) translateY(-2px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+
+@keyframes pillBounce {
+  0%   { transform: translateY(0); }
+  40%  { transform: translateY(-6px); }
+  100% { transform: translateY(-1px); }
+}
+
+/* ✅ ADD THIS - no vanish on click */
+.pill.active {
+  border-color: #ff6b9d;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 107, 157, 0.22),
+    rgba(255, 154, 108, 0.12)
+  );
+  color: #fff;
+  opacity: 1 !important;
+  /* Only animate box-shadow, nothing else */
+  animation: pillGlowPulse 2s infinite;
+  animation-fill-mode: none;
+}
+
+@keyframes pillGlowPulse {
+  0%, 100% {
+    box-shadow: 0 0 8px rgba(255, 107, 157, 0.3);
+    opacity: 1;
+    transform: translateY(0);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(255, 107, 157, 0.7),
+                0 0 35px rgba(255, 107, 157, 0.3);
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+    /* ── Flip Card Fix ── */
+.card {
+  perspective: 1000px;
+  cursor: pointer;
+  background: transparent !important;
+  height: 380px; /* fixed height দাও */
+}
+
+.card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%; /* 100% of card height */
+  transition: transform 0.7s ease;
+  transform-style: preserve-3d;
+}
+
+.card.flipped .card-inner {
+  transform: rotateY(180deg);
+}
+
+.card-front,
+.card-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.card-front {
+  background: #1a1a2e;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Back must be rotated 180 from start */
+.card-back {
+  transform: rotateY(180deg);
+  background: linear-gradient(135deg, #1a0a1a, #2d1b2d, #1a0a2e, #0d0a1a);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  text-align: center;
+}
+
+.back-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.back-title {
+  font-family: 'Cinzel Decorative', cursive;
+  font-size: 13px;
+  font-weight: 700;
+  color: #ffd700;
+  text-shadow: 0 0 15px rgba(255, 215, 0, 0.6),
+               0 0 30px rgba(255, 107, 157, 0.3);
+  line-height: 1.4;
+  letter-spacing: 1px;
+}
+
+.back-season {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: #ffb7c5;
+  letter-spacing: 1.5px;
+  text-shadow: 0 0 10px rgba(255, 183, 197, 0.4);
+}
+
+.back-episodes {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  color: #a78bfa;
+  letter-spacing: 2px;
+  padding: 5px 12px;
+  border: 1px solid rgba(167, 139, 250, 0.3);
+  border-radius: 20px;
+  background: rgba(167, 139, 250, 0.08);
+  text-shadow: 0 0 10px rgba(167, 139, 250, 0.5);
+}
+
+/* ── REMOVE tap hint / hide it ── */
+.back-tap-hint {
+  display: none !important;
+}
+
+/* Image fills the poster area */
+
+/* Smooth transition for counter and filter */
+.counter-container {
+  transition: all 0.4s ease;
+}
+
+.filter-section {
+  transition: all 0.4s ease;
+}
+
+.card-front .poster-wrap {
+  position: relative;
+  width: 100%;
+  flex: 1;
+  overflow: hidden;
+  min-height: 0;
+}
+
+.card-front .poster-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Info bar at bottom of front */
+.card-front .info {
+  padding: 10px 12px;
+  background: linear-gradient(135deg,#1a1a2e,#16213e);
+  border-top: 2px solid rgba(255,105,180,0.3);
+  flex-shrink: 0;
+}
+
+.card-front .number {
+  font-size: 11px;
+  font-weight: 700;
+  color: #a78bfa;
+  letter-spacing: 2px;
+  margin-bottom: 3px;
+}
+
+.card-front .title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
     
    
     /* সব কার্ডের সিজন টেক্সটের রঙ পরিবর্তনের জন্য */
@@ -741,5 +1052,4 @@ a:hover {
 .card.hidden { display: none; }
 .card { transition: transform 0.2s ease, box-shadow 0.2s ease; }
 .card:hover { transform: translateY(-4px); box-shadow: 0 8px 20px rgba(255,107,157,0.15); }
-
 
