@@ -1,3 +1,6 @@
+// ── Flip Card Toggle ──
+
+
 (function () {
   const GENRES = {
     "All":           { icon: "✦", nums: null },
@@ -243,4 +246,100 @@ document.addEventListener('mousemove', (e) => {
 function toggleSakuraChat() {
   const chatBox = document.getElementById("sakuraChatBox");
   chatBox.classList.toggle("active");
+}
+
+
+// Auto flip back when clicking another card
+document.querySelectorAll('.card').forEach(card => {
+  card.addEventListener('click', function () {
+    
+    // Flip back ALL other cards first
+    document.querySelectorAll('.card.flipped').forEach(flippedCard => {
+      if (flippedCard !== this) {
+        flippedCard.classList.remove('flipped');
+      }
+    });
+
+    // Then toggle current card
+    this.classList.toggle('flipped');
+  });
+});
+
+// Dynamic animation delay for pills
+// Add this inside your pill generation code
+// Find where you create pills and add this after:
+
+document.querySelectorAll('.pill').forEach((pill, index) => {
+  pill.style.animationDelay = `${0.1 + index * 0.05}s`;
+});
+
+// Hide counter and genre when searching
+const searchBox = document.getElementById('searchBox');
+const counterContainer = document.querySelector('.counter-container');
+const filterSection = document.querySelector('.filter-section');
+
+searchBox.addEventListener('input', function () {
+  const value = this.value.trim();
+
+  if (value.length > 0) {
+    // Hide counter and genre when typing
+    counterContainer.style.opacity = '0';
+    counterContainer.style.transform = 'translateY(-20px)';
+    counterContainer.style.pointerEvents = 'none';
+    counterContainer.style.height = '0';
+    counterContainer.style.overflow = 'hidden';
+    counterContainer.style.marginBottom = '0';
+    counterContainer.style.transition = 'all 0.4s ease';
+
+    filterSection.style.opacity = '0';
+    filterSection.style.transform = 'translateY(-20px)';
+    filterSection.style.pointerEvents = 'none';
+    filterSection.style.height = '0';
+    filterSection.style.overflow = 'hidden';
+    filterSection.style.marginBottom = '0';
+    filterSection.style.transition = 'all 0.4s ease';
+
+  } else {
+    // Show counter and genre when search is empty
+    counterContainer.style.opacity = '1';
+    counterContainer.style.transform = 'translateY(0)';
+    counterContainer.style.pointerEvents = 'auto';
+    counterContainer.style.height = '';
+    counterContainer.style.overflow = '';
+    counterContainer.style.marginBottom = '';
+    counterContainer.style.transition = 'all 0.4s ease';
+
+    filterSection.style.opacity = '1';
+    filterSection.style.transform = 'translateY(0)';
+    filterSection.style.pointerEvents = 'auto';
+    filterSection.style.height = '';
+    filterSection.style.overflow = '';
+    filterSection.style.marginBottom = '';
+    filterSection.style.transition = 'all 0.4s ease';
+  }
+});
+
+function searchAnime() {
+    let input = document.getElementById('search-input').value.toLowerCase();
+    let cards = document.querySelectorAll('.card');
+    let noResults = document.getElementById('no-results');
+    let visibleCount = 0;
+
+    cards.forEach(card => {
+        let title = card.querySelector('.title').innerText.toLowerCase();
+        
+        if (title.includes(input)) {
+            card.style.display = "block"; // কার্ড দেখাবে
+            visibleCount++;
+        } else {
+            card.style.display = "none";  // কার্ড লুকাবে
+        }
+    });
+
+    // যদি কোনো কার্ড দৃশ্যমান না থাকে (visibleCount == 0)
+    if (visibleCount === 0) {
+        noResults.style.display = "block"; // মেসেজ দেখাবে
+    } else {
+        noResults.style.display = "none";  // মেসেজ লুকাবে
+    }
 }
