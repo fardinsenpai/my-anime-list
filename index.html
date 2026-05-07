@@ -6,8 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Let's See What Anime I Have Watched</title>
   <link rel="stylesheet" href="style.css">
-
-
+ 
 </head>
 
 <div class="sticky-search" id="stickySearch">
@@ -38,6 +37,17 @@
     </div>
   </div>
 
+  <body>
+  <!-- ⚡ Lightning Canvas ⚡ -->
+  <canvas id="lightningCanvas"></canvas>
+  
+  <!-- বাকি আপনার কন্টেন্ট -->
+  <div class="sticky-search" id="stickySearch">
+    ...
+  </div>
+  <!-- ... -->
+</body>
+
   <div class="filter-section">
     <div class="filter-heading">Filter by genre</div>
     <div class="pills-wrap" id="pillsWrap"></div>
@@ -47,7 +57,7 @@
 
   <div class="grid" id="grid">
 
-    <div class="card"><div class="card-inner"><div class="card-front"><div class="poster-wrap"><img src="https://media.kitsu.app/anime/poster_images/11469/large.jpg" alt="My Hero Academia" loading="lazy"/><span class="badge">#1</span></div><div class="info"><div class="number">NO. 1</div><div class="title">My Hero Academia</div></div></div><div class="card-back"><div class="back-content"><div class="back-title">My Hero Academia</div><div class="back-season">🌸 Season-1,2,3,4,5,6,7,8 & Manga Finished</div><div class="back-episodes">📺 Total Episodes: 190</div><div class="back-tap-hint">click to flip back</div></div></div></div></div>
+<div class="card"><div class="card-inner"><div class="card-front"><div class="poster-wrap"><img src="https://media.kitsu.app/anime/poster_images/11469/large.jpg" alt="My Hero Academia" loading="lazy"/><span class="badge">#1</span></div><div class="info"><div class="number">NO. 1</div><div class="title">My Hero Academia</div></div></div><div class="card-back"><div class="back-content"><div class="back-title">My Hero Academia</div><div class="back-season">🌸 Season-1,2,3,4,5,6,7,8 & Manga Finished</div><div class="back-episodes">📺 Total Episodes: 190</div><div class="back-tap-hint">click to flip back</div></div></div></div></div>
 
 <div class="card"><div class="card-inner"><div class="card-front"><div class="poster-wrap"><img src="https://m.media-amazon.com/images/M/MV5BZTNjOWI0ZTAtOGY1OS00ZGU0LWEyOWYtMjhkYjdlYmVjMDk2XkEyXkFqcGc@._V1_.jpg" alt="Naruto" loading="lazy"/><span class="badge">#2</span></div><div class="info"><div class="number">NO. 2</div><div class="title">Naruto</div></div></div><div class="card-back"><div class="back-content"><div class="back-title">Naruto</div><div class="back-season">🌸 Season-1,2,3,4,5,6,7,8,9</div><div class="back-episodes">📺 Total Episodes: 220</div><div class="back-tap-hint">click to flip back</div></div></div></div></div>
 
@@ -258,7 +268,7 @@
 
 <div class="card"><div class="card-inner"><div class="card-front"><div class="poster-wrap"><img src="https://media.kitsu.app/anime/7158/poster_image/large-9e79f5c290ae821d2141473e6fdb6532.jpeg" alt="JoJo's Bizarre Adventure" loading="lazy"/><span class="badge">#104</span></div><div class="info"><div class="number">NO. 104</div><div class="title">JoJo's Bizarre Adventure</div></div></div><div class="card-back"><div class="back-content"><div class="back-title">JoJo's Bizarre Adventure</div><div class="back-season">🌸 Part-1,2</div><div class="back-episodes">📺 Total Episodes: 26</div><div class="back-tap-hint">click to flip back</div></div></div></div></div>
 
-<div class="card"><div class="card-inner"><div class="card-front"><div class="poster-wrap"><img src="https://media.kitsu.app/anime/poster_images/41024/large.jpg" alt="That Time I Got Reincarnated as a Slime" loading="lazy"/><span class="badge">#105</span></div><div class="info"><div class="number">NO. 105</div><div class="title">That Time I Got Reincarnated as a Slime</div></div></div><div class="card-back"><div class="back-content"><div class="back-title">That Time I Got Reincarnated as a Slime</div><div class="back-season">🌸 Season-1,2,3</div><div class="back-episodes">📺 Total Episodes: 60</div><div class="back-tap-hint">click to flip back</div></div></div></div></div>
+<div class="card"><div class="card-inner"><div class="card-front"><div class="poster-wrap"><img src="https://media.kitsu.app/anime/poster_images/41024/large.jpg" alt="TENSURA" loading="lazy"/><span class="badge">#105</span></div><div class="info"><div class="number">NO. 105</div><div class="title">TENSURA</div></div></div><div class="card-back"><div class="back-content"><div class="back-title">TENSURA</div><div class="back-season">🌸 Season-1,2,3</div><div class="back-episodes">📺 Total Episodes: 60</div><div class="back-tap-hint">click to flip back</div></div></div></div></div>
 
 <div class="card"><div class="card-inner"><div class="card-front"><div class="poster-wrap"><img src="https://media.kitsu.app/anime/poster_images/13600/large.jpg" alt="Darling In The FranXX" loading="lazy"/><span class="badge">#106</span></div><div class="info"><div class="number">NO. 106</div><div class="title">Darling In The FranXX</div></div></div><div class="card-back"><div class="back-content"><div class="back-title">Darling In The FranXX</div><div class="back-season">🌸 Season-1</div><div class="back-episodes">📺 Total Episodes: 24</div><div class="back-tap-hint">click to flip back</div></div></div></div></div>
 
@@ -519,7 +529,37 @@
 <div class="card"><div class="card-inner"><div class="card-front"><div class="poster-wrap"><img src="https://m.media-amazon.com/images/M/MV5BODEzNTFjOTgtZGJmNi00MmQ4LTlhY2QtNWUwNTJiY2ViNzI5XkEyXkFqcGc@._V1_.jpg" alt="Ultraviolet Code 044" loading="lazy"/><span class="badge">#234</span></div><div class="info"><div class="number">NO. 234</div><div class="title">Ultraviolet Code 044</div></div></div><div class="card-back"><div class="back-content"><div class="back-title">Ultraviolet Code 044</div><div class="back-season">🌸 Season-1</div><div class="back-episodes">📺 Total Episodes: 12</div><div class="back-tap-hint">click to flip back</div></div></div></div></div>
 
 <div class="card"><div class="card-inner"><div class="card-front"><div class="poster-wrap"><img src="https://m.media-amazon.com/images/M/MV5BMjhkMmY4YjktNTNmYy00NGVjLWI5ZTEtOTQzZDg1NzFlMjM3XkEyXkFqcGc@._V1_.jpg" alt="Yuri on Ice" loading="lazy"/><span class="badge">#235</span></div><div class="info"><div class="number">NO. 235</div><div class="title">Yuri!!! on Ice</div></div></div><div class="card-back"><div class="back-content"><div class="back-title">Yuri!!! on Ice</div><div class="back-season">🌸 Season-1</div><div class="back-episodes">📺 Total Episodes: 12</div><div class="back-tap-hint">click to flip back</div></div></div></div></div>
+
+ <div class="card"><div class="card-inner"><div class="card-front"><div class="poster-wrap"><img src="https://myanimelist.net/images/anime/1310/148243l.jpg" alt="I Left My A-Rank Party to Help My Former Students Reach the Dungeon Depths!" loading="lazy"/><span class="badge">#236</span></div><div class="info"><div class="number">NO. 236</div><div class="title">I Left My A-Rank Party to Help My Former Students Reach the Dungeon Depths!</div></div></div><div class="card-back"><div class="back-content"><div class="back-title">I Left My A-Rank Party to Help My Former Students Reach the Dungeon Depths!</div><div class="back-season">🌸 Season-1</div><div class="back-episodes">📺 Total Episodes: 24</div><div class="back-tap-hint">click to flip back</div></div></div></div></div>
+
+ <!-- New Card Templete
+
+ <div class="card">
+  <div class="card-inner">
+    <div class="card-front">
+      <div class="poster-wrap">
+        <img src="POSTER_IMAGE_URL" alt="ANIME_NAME" loading="lazy"/>
+        <span class="badge">#236</span>
+      </div>
+      <div class="info">
+        <div class="number">NO. 236</div>
+        <div class="title">ANIME_TITLE_HERE</div>
+      </div>
+    </div>
+    <div class="card-back">
+      <div class="back-content">
+        <div class="back-title">ANIME_TITLE_HERE</div>
+        <div class="back-season">🌸 SEASON_INFO_HERE</div>
+        <div class="back-episodes">📺 Total Episodes: NUMBER_HERE</div>
+        <div class="back-tap-hint">click to flip back</div>
+      </div>
+    </div>
   </div>
+</div>
+
+-->
+
+</div>
 
   <footer>
     <p>❤️‍🩹
