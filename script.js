@@ -1,5 +1,19 @@
-// ── Flip Card Toggle ──
+window.onload = () => {
+  const duration = 8500; // ৭ সেকেন্ডে সব শেষ হবে
+  const boxes = document.querySelectorAll(".counter-box");
 
+  // Fade + Slide animation trigger
+  boxes.forEach((box, index) => {
+    setTimeout(() => {
+      box.classList.add("show");
+    }, index * 200); // staggered entry (optional)
+  });
+
+  // Counter start
+  counterUp("animeCount", 236, duration);
+  counterUp("seasonCount", 347, duration);
+  counterUp("episodeCount", 6166, duration);
+};
 
 (function () {
   const GENRES = {
@@ -8,13 +22,15 @@
     "Adventure":     { icon: "🗺", nums: new Set([1,2,3,4,5,6,7,10,13,17,18,25,29,36,37,39,46,62,64,66,76,79,81,93,100,104,105,118,120,126,128,134,135,136,137,143,149,154,155,156,160,161,163,165,167,171,179,181,182,183,188,189,191,206,207,208,209,214,216,224,231,233]) },
     "Comedy":        { icon: "😂", nums: new Set([4,5,7,14,15,19,23,32,33,40,43,56,62,63,65,67,69,70,74,84,85,90,101,105,108,115,117,123,131,133,134,138,139,140,144,148,150,151,154,155,157,162,169,171,175,176,185,186,195,196,197,198,199,201,213,215,219,220,221,222,229]) },
     "Sports":        { icon: "🏆", nums: new Set([8,9,16,21,30,44,94,96,98,110,125,129,132,200,202,235]) },
-    "Isekai":        { icon: "🌀", nums: new Set([18,34,52,63,68,69,82,89,90,93,99,102,105,114,115,117,120,127,128,131,133,134,135,137,139,142,143,149,154,155,160,161,163,165,167,169,170,171,173,174,175,181,184,185,187,189,194,198,199,201,207,208,209,212,214,216,218,222,226,228,232,233]) },
+    "Isekai":        { icon: "🌀", nums: new Set([18,34,52,63,68,69,82,89,90,93,99,102,105,114,115,117,120,127,128,131,133,134,135,137,139,142,143,149,154,155,160,161,163,165,167,169,170,171,173,174,175,181,184,185,187,189,194,198,199,201,207,208,209,212,214,216,218,222,226,228,232,233,236]) },
     "Dark / Horror": { icon: "💀", nums: new Set([10,11,12,22,24,27,28,29,40,42,47,48,49,50,52,53,65,66,67,68,73,75,76,95,99,100,114,116,130,141,152,158,159,170,172,180,182,184,190,203,205,214,217,225,228,231]) },
     "Romcom":        { icon: "💕", nums: new Set([20,35,38,41,45,51,57,58,59,60,71,72,77,80,82,83,84,85,87,91,103,106,108,109,112,113,122,132,138,142,153,159,162,166,168,177,185,193,197,207,210,211,219,223]) },
     "Slice of Life": { icon: "🌸", nums: new Set([12,19,20,27,31,35,38,39,43,47,51,54,57,58,59,72,77,79,83,88,95,103,109,111,112,113,119,121,122,123,124,133,138,144,145,147,148,150,151,153,156,157,160,161,164,166,168,172,176,177,178,186,189,191,192,193,196,204,206,208,210,213,215,219,222,223,224,230,235]) },
     "Sci-Fi":        { icon: "🚀", nums: new Set([25,26,61,65,71,73,75,78,106,135,141,164,183,213,217,234]) },
     "Historical":    { icon: "📜", nums: new Set([13,24,42,49,77,86,88,92,146,158,168,227]) },
   };
+
+  
 
   const TOTAL = document.querySelectorAll('.card').length;
 
@@ -142,25 +158,6 @@ function counterUp(id, target, duration) {
     element.innerText = Math.floor(count) + "+";
   }, 20);
 }
-
-window.onload = () => {
-  const duration = 8500; // ৭ সেকেন্ডে সব শেষ হবে
-  const boxes = document.querySelectorAll(".counter-box");
-
-  // Fade + Slide animation trigger
-  boxes.forEach((box, index) => {
-    setTimeout(() => {
-      box.classList.add("show");
-    }, index * 200); // staggered entry (optional)
-  });
-
-  // Counter start
-  counterUp("animeCount", 235, duration);
-  counterUp("seasonCount", 346, duration);
-  counterUp("episodeCount", 6142, duration);
-};
-
-
 function autoFilter(category) {
     const cards = document.querySelectorAll('.card');
     
@@ -342,4 +339,139 @@ function searchAnime() {
     } else {
         noResults.style.display = "none";  // মেসেজ লুকাবে
     }
+}
+
+cards.forEach((card, i) => {
+  setTimeout(() => {
+    card.classList.add("show");
+  }, i * 80);
+});
+
+/* ⚡⚡⚡ LIGHTNING - BLUE & LONGER DURATION ⚡⚡⚡ */
+
+class LightningBolt {
+  constructor(canvas) {
+    this.canvas = canvas;
+    this.ctx = canvas.getContext('2d');
+    this.width = canvas.width;
+    this.height = canvas.height;
+    this.reset();
+  }
+
+  reset() {
+    this.x = Math.random() * this.width;
+    this.y = 0;
+    this.segments = [];
+    this.createSegments();
+  }
+
+  createSegments() {
+    this.segments = [];
+    let x = this.x;
+    let y = this.y;
+    
+    for (let i = 0; i < 20; i++) {
+      x += (Math.random() - 0.5) * 40;
+      y += Math.random() * (this.height / 20);
+      this.segments.push({ x, y });
+    }
+  }
+
+  draw() {
+    // ⚡ নীল Lightning (উজ্জ্বল)
+    this.ctx.strokeStyle = `rgba(100, 150, 255, 0.95)`; // নীল রঙ
+    this.ctx.lineWidth = 4 + Math.random() * 3;
+    this.ctx.lineCap = 'round';
+    this.ctx.lineJoin = 'round';
+
+    this.ctx.beginPath();
+    this.ctx.moveTo(this.x, this.y);
+
+    for (let segment of this.segments) {
+      this.ctx.lineTo(segment.x, segment.y);
+    }
+
+    this.ctx.stroke();
+
+    // ছোট শাখা তৈরি করা
+    for (let segment of this.segments) {
+      if (Math.random() > 0.7) {
+        this.drawBranch(segment.x, segment.y);
+      }
+    }
+  }
+
+  drawBranch(startX, startY) {
+    this.ctx.strokeStyle = `rgba(100, 150, 255, 0.7)`; // নীল শাখা
+    this.ctx.lineWidth = 2;
+    
+    this.ctx.beginPath();
+    this.ctx.moveTo(startX, startY);
+
+    let x = startX;
+    let y = startY;
+
+    for (let i = 0; i < 5; i++) {
+      x += (Math.random() - 0.5) * 30;
+      y += Math.random() * 30;
+      this.ctx.lineTo(x, y);
+    }
+
+    this.ctx.stroke();
+  }
+}
+
+// Canvas সেটআপ
+const canvas = document.getElementById('lightningCanvas');
+if (canvas) {
+  const ctx = canvas.getContext('2d');
+  
+  function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+
+  resizeCanvas();
+  window.addEventListener('resize', resizeCanvas);
+
+  let lightningBolt = null;
+  let lightningTimeout = null;
+
+  function createLightning() {
+    lightningBolt = new LightningBolt(canvas);
+    
+    // ⏱️ ৫০০ms পর্যন্ত দৃশ্যমান থাকবে (আগে ২০০ms ছিল)
+    setTimeout(() => {
+      lightningBolt = null;
+    }, 400);
+
+    // পরবর্তী lightning (১-৪ স���কেন্ড পর পর আসবে - আগে ২-৮ সেকেন্ড ছিল)
+    lightningTimeout = setTimeout(createLightning, 2000 + Math.random() * 5000);
+  }
+
+  function animate() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    if (lightningBolt) {
+      lightningBolt.draw();
+    }
+
+    requestAnimationFrame(animate);
+  }
+
+  animate();
+  createLightning();
+
+  window.toggleLightning = function() {
+    if (lightningTimeout) {
+      clearTimeout(lightningTimeout);
+      lightningTimeout = null;
+      lightningBolt = null;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      console.log('⚡ Lightning বন্ধ হয়েছে');
+    } else {
+      createLightning();
+      console.log('⚡ Lightning শুরু হয়েছে');
+    }
+  };
 }
