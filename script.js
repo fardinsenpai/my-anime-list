@@ -1,1127 +1,477 @@
-@import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Orbitron:wght@600&family=Rajdhani:wght@600&display=swap');
+window.onload = () => {
+  const duration = 8500; // ৭ সেকেন্ডে সব শেষ হবে
+  const boxes = document.querySelectorAll(".counter-box");
 
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap');
-    *{box-sizing:border-box;margin:0;padding:0}
-    body{background:#080810;color:#fff;font-family:'Poppins',sans-serif;padding:50px 20px 60px}
-    .header{text-align:center;margin-bottom:45px}
-    .header h1{font-size:clamp(1.5rem,4vw,2.6rem);font-weight:800;line-height:1.25;margin-bottom:14px;
-      background:linear-gradient(135deg,#ff6b6b 0%,#ffd93d 30%,#6bcb77 65%,#4d96ff 100%);
-      -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-    .stats{display:inline-flex;gap:20px;flex-wrap:wrap;justify-content:center;
-      background:#1a1a2e;border:1px solid #2a2a4a;border-radius:50px;
-      padding:10px 26px;font-size:.82rem;color:#999}
-    .stats span{color:#ff6b6b;font-weight:700}
-    .search-wrap{display:flex;justify-content:center;margin-bottom:40px}
-    .search-wrap input{width:100%;max-width:480px;padding:12px 22px;border-radius:50px;
-      border:1px solid #2a2a4a;background:#13132a;color:#fff;font-size:.88rem;
-      font-family:'Poppins',sans-serif;outline:none;transition:border .3s}
-    .search-wrap input:focus{border-color:#ff6b6b}
-    .search-wrap input::placeholder{color:#44445a}
-    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(165px,1fr));gap:22px;max-width:1600px;margin:0 auto}
-    .card{background:#12122a;border-radius:14px;overflow:hidden;border:1px solid #1e1e3a;
-      transition:transform .3s,box-shadow .3s,border-color .3s}
-    .card:hover{transform:translateY(-8px) scale(1.02);box-shadow:0 20px 45px rgba(255,107,107,.25);border-color:#ff6b6b}
-    .poster-wrap{position:relative;width:100%;padding-top:145%;overflow:hidden;background:#0d0d1e}
-    .poster-wrap img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .4s}
-    .card:hover .poster-wrap img{transform:scale(1.08)}
-    .no-img{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:2.5rem;color:#222}
-    .badge{position:absolute;top:9px;left:9px;z-index:2;background:rgba(255,107,107,.92);color:#fff;
-      font-size:.65rem;font-weight:700;padding:3px 9px;border-radius:20px}
-    .info{padding:11px 10px 13px}
-    .number{font-size:.65rem;color:#ff6b6b;font-weight:700;letter-spacing:1px;margin-bottom:3px}
-    .title{font-size:.8rem;font-weight:600;color:#eee;line-height:1.35}
-    .season{font-size:.64rem;color:#555;margin-top:5px;line-height:1.3}
-    .card.hidden{display:none}
-    footer{text-align:center;margin-top:70px;color:#333;font-size:.78rem}
+  // Fade + Slide animation trigger
+  boxes.forEach((box, index) => {
+    setTimeout(() => {
+      box.classList.add("show");
+    }, index * 200); // staggered entry (optional)
+  });
+
+  // Counter start
+  counterUp("animeCount", 236, duration);
+  counterUp("seasonCount", 347, duration);
+  counterUp("episodeCount", 6166, duration);
+};
+
+(function () {
+  const GENRES = {
+    "All":           { icon: "✦", nums: null },
+    "Action":        { icon: "⚔", nums: new Set([1,2,3,4,5,6,7,8,10,11,13,14,15,16,17,19,22,23,24,26,27,28,29,30,32,34,36,37,40,42,43,46,48,49,50,52,55,61,62,63,64,65,66,67,68,69,70,73,74,75,76,78,80,81,85,86,89,90,92,93,94,97,98,99,100,102,104,105,106,107,114,115,116,118,125,126,127,129,130,135,136,137,139,140,141,146,149,152,158,162,165,169,170,173,174,175,179,180,181,184,187,188,190,194,195,198,199,201,202,203,205,212,214,218,220,221,225,226,227,228,231,232,234]) },
+    "Adventure":     { icon: "🗺", nums: new Set([1,2,3,4,5,6,7,10,13,17,18,25,29,36,37,39,46,62,64,66,76,79,81,93,100,104,105,118,120,126,128,134,135,136,137,143,149,154,155,156,160,161,163,165,167,171,179,181,182,183,188,189,191,206,207,208,209,214,216,224,231,233]) },
+    "Comedy":        { icon: "😂", nums: new Set([4,5,7,14,15,19,23,32,33,40,43,56,62,63,65,67,69,70,74,84,85,90,101,105,108,115,117,123,131,133,134,138,139,140,144,148,150,151,154,155,157,162,169,171,175,176,185,186,195,196,197,198,199,201,213,215,219,220,221,222,229]) },
+    "Sports":        { icon: "🏆", nums: new Set([8,9,16,21,30,44,94,96,98,110,125,129,132,200,202,235]) },
+    "Isekai":        { icon: "🌀", nums: new Set([18,34,52,63,68,69,82,89,90,93,99,102,105,114,115,117,120,127,128,131,133,134,135,137,139,142,143,149,154,155,160,161,163,165,167,169,170,171,173,174,175,181,184,185,187,189,194,198,199,201,207,208,209,212,214,216,218,222,226,228,232,233,236]) },
+    "Dark / Horror": { icon: "💀", nums: new Set([10,11,12,22,24,27,28,29,40,42,47,48,49,50,52,53,65,66,67,68,73,75,76,95,99,100,114,116,130,141,152,158,159,170,172,180,182,184,190,203,205,214,217,225,228,231]) },
+    "Romcom":        { icon: "💕", nums: new Set([20,35,38,41,45,51,57,58,59,60,71,72,77,80,82,83,84,85,87,91,103,106,108,109,112,113,122,132,138,142,153,159,162,166,168,177,185,193,197,207,210,211,219,223]) },
+    "Slice of Life": { icon: "🌸", nums: new Set([12,19,20,27,31,35,38,39,43,47,51,54,57,58,59,72,77,79,83,88,95,103,109,111,112,113,119,121,122,123,124,133,138,144,145,147,148,150,151,153,156,157,160,161,164,166,168,172,176,177,178,186,189,191,192,193,196,204,206,208,210,213,215,219,222,223,224,230,235]) },
+    "Sci-Fi":        { icon: "🚀", nums: new Set([25,26,61,65,71,73,75,78,106,135,141,164,183,213,217,234]) },
+    "Historical":    { icon: "📜", nums: new Set([13,24,42,49,77,86,88,92,146,158,168,227]) },
+  };
+
+  
+
+  const TOTAL = document.querySelectorAll('.card').length;
+
+  function countForGenre(name) {
+    const set = GENRES[name].nums;
+    if (!set) return TOTAL;
+    let c = 0;
+    document.querySelectorAll('.card').forEach(card => {
+      const n = parseInt((card.querySelector('.number') || {}).textContent?.match(/\d+/)?.[0], 10);
+      if (!isNaN(n) && set.has(n)) c++;
+    });
+    return c;
+  }
+
+  function getNum(card) {
+    const el = card.querySelector('.number');
+    if (!el) return null;
+    const m = el.textContent.match(/\d+/);
+    return m ? parseInt(m[0], 10) : null;
+  }
+
+  function buildPills() {
+    const wrap = document.getElementById('pillsWrap');
+    if (!wrap) return;
+    Object.entries(GENRES).forEach(([name, g]) => {
+      const btn = document.createElement('button');
+      btn.className = 'pill' + (name === 'All' ? ' active' : '');
+      btn.dataset.genre = name;
+      const cnt = countForGenre(name);
+      btn.innerHTML = `<span style="font-size:14px">${g.icon}</span>${name}<span class="pill-count">${cnt}</span>`;
+      btn.addEventListener('click', () => applyFilter(name));
+      wrap.appendChild(btn);
+    });
+  }
+
+  function applyFilter(name) {
+    const set = GENRES[name].nums;
+    const cards = document.querySelectorAll('.card');
+    let vis = 0;
+    cards.forEach(card => {
+      const n = getNum(card);
+      const show = n !== null && (!set || set.has(n));
+      card.classList.toggle('hidden', !show);
+      if (show) vis++;
+    });
+    document.querySelectorAll('.pill').forEach(p =>
+      p.classList.toggle('active', p.dataset.genre === name));
+    const status = document.getElementById('filterStatus');
+    if (status) status.innerHTML = `Showing <strong>${vis}</strong> of <strong>${TOTAL}</strong> anime`;
+    const clr = document.getElementById('clearBtn');
+    if (clr) clr.classList.toggle('hidden', name === 'All');
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    buildPills();
+    const clr = document.getElementById('clearBtn');
+    if (clr) clr.addEventListener('click', () => applyFilter('All'));
+  });
+})();
+
+
+
+const cards = document.querySelectorAll(".card");
+
+function showCardsOnScroll() {
+  const triggerBottom = window.innerHeight * 0.85;
+
+  cards.forEach(card => {
+    const cardTop = card.getBoundingClientRect().top;
+    if(cardTop < triggerBottom) {
+      card.classList.add("show");
+    }
+  });
+}
+
+window.addEventListener("scroll", showCardsOnScroll);
+window.addEventListener("load", showCardsOnScroll);
+
+    function filterCards(){
+      const q=document.getElementById('searchBox').value.toLowerCase();
+      document.querySelectorAll('.card').forEach(c=>{
+        c.classList.toggle('hidden',!c.querySelector('.title').textContent.toLowerCase().includes(q));
+      });
+    }
+
+window.onscroll = function() {
+    var mainSearch = document.getElementById('searchBox'); // আপনার মেইন সার্চ বক্সের ক্লাস নাম
+    var stickySearch = document.getElementById('stickySearch');
     
+    // মেইন সার্চ বক্স যখন স্ক্রিন থেকে চলে যাবে তখন স্টিকি বক্স আসবে
+    if (window.pageYOffset > mainSearch.offsetTop + mainSearch.offsetHeight) {
+        stickySearch.style.display = "block";
+    } else {
+        stickySearch.style.display = "none";
+    }
+};
 
-    /* ══════════════════════════════════════
-   SEARCH BOX ANIMATION
-══════════════════════════════════════ */
-
-/* Fade in from top */
-.search-wrap {
-  animation: searchFadeDown 0.8s ease-out forwards;
-  opacity: 0;
-}
-
-@keyframes searchFadeDown {
-  0% {
-    opacity: 0;
-    transform: translateY(-30px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* Glowing border pulse when focused */
-.search-wrap input {
-  transition: all 0.4s ease;
-  box-shadow: 0 0 0px rgba(255, 107, 157, 0);
-}
-
-.search-wrap input:focus {
-  border-color: #ff6b9d;
-  box-shadow: 0 0 15px rgba(255, 107, 157, 0.4),
-              0 0 30px rgba(255, 107, 157, 0.2);
-  transform: scale(1.02);
-}
-
-/* Shimmer effect on search box */
-.search-wrap input::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 50%;
-  height: 100%;
-  background: linear-gradient(
-    to right,
-    rgba(255,255,255,0) 0%,
-    rgba(255,255,255,0.1) 100%
-  );
-  animation: searchShimmer 3s infinite;
-}
-
-@keyframes searchShimmer {
-  0% { left: -100%; }
-  100% { left: 200%; }
-}
-
-
-/* ══════════════════════════════════════
-   GENRE / FILTER PILLS ANIMATION
-══════════════════════════════════════ */
-
-/* Filter section fade in from bottom */
-.filter-section {
-  opacity: 0;
-  animation: filterFadeUp 0.9s ease-out 0.3s forwards;
-}
-
-@keyframes filterFadeUp {
-  0% {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* Filter heading slide in */
-.filter-heading {
-  opacity: 0;
-  animation: slideInLeft 0.7s ease-out 0.5s forwards;
-}
-
-@keyframes slideInLeft {
-  0% {
-    opacity: 0;
-    transform: translateX(-20px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-/* Each pill pops in one by one */
-.pill {
-  opacity: 0;
-  transform: scale(0.8) translateY(10px);
-  animation: pillPopIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-}
-
-/* Each pill gets a delay - handled by JS below */
-.pill:nth-child(1)  { animation-delay: 0.1s; }
-.pill:nth-child(2)  { animation-delay: 0.15s; }
-.pill:nth-child(3)  { animation-delay: 0.2s; }
-.pill:nth-child(4)  { animation-delay: 0.25s; }
-.pill:nth-child(5)  { animation-delay: 0.3s; }
-.pill:nth-child(6)  { animation-delay: 0.35s; }
-.pill:nth-child(7)  { animation-delay: 0.4s; }
-.pill:nth-child(8)  { animation-delay: 0.45s; }
-.pill:nth-child(9)  { animation-delay: 0.5s; }
-.pill:nth-child(10) { animation-delay: 0.55s; }
-.pill:nth-child(11) { animation-delay: 0.6s; }
-.pill:nth-child(12) { animation-delay: 0.65s; }
-
-@keyframes pillPopIn {
-  0% {
-    opacity: 0;
-    transform: scale(0.8) translateY(10px);
-  }
-  70% {
-    transform: scale(1.08) translateY(-2px);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
-}
-
-
-@keyframes pillBounce {
-  0%   { transform: translateY(0); }
-  40%  { transform: translateY(-6px); }
-  100% { transform: translateY(-1px); }
-}
-
-/* ✅ ADD THIS - no vanish on click */
-.pill.active {
-  border-color: #ff6b9d;
-  background: linear-gradient(
-    135deg,
-    rgba(255, 107, 157, 0.22),
-    rgba(255, 154, 108, 0.12)
-  );
-  color: #fff;
-  opacity: 1 !important;
-  /* Only animate box-shadow, nothing else */
-  animation: pillGlowPulse 2s infinite;
-  animation-fill-mode: none;
-}
-
-@keyframes pillGlowPulse {
-  0%, 100% {
-    box-shadow: 0 0 8px rgba(255, 107, 157, 0.3);
-    opacity: 1;
-    transform: translateY(0);
-  }
-  50% {
-    box-shadow: 0 0 20px rgba(255, 107, 157, 0.7),
-                0 0 35px rgba(255, 107, 157, 0.3);
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-    /* ── Flip Card Fix ── */
-.card {
-  perspective: 1000px;
-  cursor: pointer;
-  background: transparent !important;
-  height: 380px; /* fixed height দাও */
-}
-
-.card-inner {
-  position: relative;
-  width: 100%;
-  height: 100%; /* 100% of card height */
-  transition: transform 0.7s ease;
-  transform-style: preserve-3d;
-}
-
-.card.flipped .card-inner {
-  transform: rotateY(180deg);
-}
-
-.card-front,
-.card-back {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-  border-radius: 16px;
-  overflow: hidden;
-}
-
-.card-front {
-  background: #1a1a2e;
-  display: flex;
-  flex-direction: column;
-}
-
-/* Back must be rotated 180 from start */
-.card-back {
-  transform: rotateY(180deg);
-  background: linear-gradient(135deg, #1a0a1a, #2d1b2d, #1a0a2e, #0d0a1a);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
-  text-align: center;
-}
-
-.back-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-}
-
-.back-title {
-  font-family: 'Cinzel Decorative', cursive;
-  font-size: 13px;
-  font-weight: 700;
-  color: #ffd700;
-  text-shadow: 0 0 15px rgba(255, 215, 0, 0.6),
-               0 0 30px rgba(255, 107, 157, 0.3);
-  line-height: 1.4;
-  letter-spacing: 1px;
-}
-
-.back-season {
-  font-family: 'Rajdhani', sans-serif;
-  font-size: 13px;
-  font-weight: 600;
-  color: #ffb7c5;
-  letter-spacing: 1.5px;
-  text-shadow: 0 0 10px rgba(255, 183, 197, 0.4);
-}
-
-.back-episodes {
-  font-family: 'Orbitron', sans-serif;
-  font-size: 11px;
-  font-weight: 600;
-  color: #a78bfa;
-  letter-spacing: 2px;
-  padding: 5px 12px;
-  border: 1px solid rgba(167, 139, 250, 0.3);
-  border-radius: 20px;
-  background: rgba(167, 139, 250, 0.08);
-  text-shadow: 0 0 10px rgba(167, 139, 250, 0.5);
-}
-
-/* ── REMOVE tap hint / hide it ── */
-.back-tap-hint {
-  display: none !important;
-}
-
-/* Image fills the poster area */
-
-/* Smooth transition for counter and filter */
-.counter-container {
-  transition: all 0.4s ease;
-}
-
-.filter-section {
-  transition: all 0.4s ease;
-}
-
-.card-front .poster-wrap {
-  position: relative;
-  width: 100%;
-  flex: 1;
-  overflow: hidden;
-  min-height: 0;
-}     
-
-.card-front .poster-wrap img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-
-/* Info bar at bottom of front */
-.card-front .info {
-  padding: 10px 12px;
-  background: linear-gradient(135deg,#1a1a2e,#16213e);
-  border-top: 2px solid rgba(255,105,180,0.3);
-  flex-shrink: 0;
-}
-
-.card-front .number {
-  font-size: 11px;
-  font-weight: 700;
-  color: #a78bfa;
-  letter-spacing: 2px;
-  margin-bottom: 3px;
-}
-
-.card-front .title {
-  font-size: 13px;
-  font-weight: 700;
-  color: #fff;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
+// সার্চ ফাংশন (যাতে দুই বক্সেই কাজ করে)
+function filterAnime(value) {
+    let searchTerm = value.toLowerCase();
+    let cards = document.querySelectorAll('.card');
     
-   
-    /* সব কার্ডের সিজন টেক্সটের রঙ পরিবর্তনের জন্য */
-.season {
-    color: #FFC0CB; /* এখানে আপনার পছন্দমতো কালার কোড দিন (যেমন: গোলাপী) */
-    font-weight: bold; /* চাইলে লেখাটি একটু মোটাও করতে পারেন */
+    cards.forEach(card => {
+        let title = card.querySelector('.title').innerText.toLowerCase();
+        if (title.includes(searchTerm)) {
+            card.style.display = "block";
+        } else {
+            card.style.display = "none";
+        }
+    });
 }
 
+function counterUp(id, target, duration) {
+  let count = 0;
+  const element = document.getElementById(id);
+  const steps = duration / 20;
+  const increment = target / steps;
 
-    /* Default PC layout */
-.grid {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr); /* PC তে 4 কার্ড একসাথে */
-  gap: 20px;
+  const interval = setInterval(() => {
+    count += increment;
+    if (count >= target) {
+      count = target;
+      clearInterval(interval);
+    }
+    element.innerText = Math.floor(count) + "+";
+  }, 20);
 }
-
-/* 📱 Mobile layout */
-@media (max-width: 767px) {
-  .grid {
-    grid-template-columns: repeat(2, 1fr); /* Mobile এ 2 কার্ড একসাথে */
-  }
-}
-.counter-box {
-  opacity: 0;
-  transform: translateY(40px);
-  transition: all 1s ease-out;
-}
-
-.counter-box.show {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.counter {
-  font-size: 40px;
-  font-weight: bold;
-  color: #FFD700; /* Golden Yellow */
-}
-
-
-   .counter-container {
-  display: flex;
-  justify-content: center;
-  gap: 20px;
-  margin: 20px 0;
-}
-
-/* প্রতিটা box */
-.counter-box {
-  position: relative;
-  display: inline-block;
-  padding: 40px;
-  text-align: center;
-  font-weight: bold;
-  color: #fff;
-  overflow: hidden;
-}
-
-.counter-box::before {
-  content: "";
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 180px;
-  height: 180px;
-  transform: translate(-50%, -50%);
-  background: linear-gradient(135deg, #fbc2eb 0%, #a6c1ee 100%);
-  z-index: -1;
-
-  /* Octagon shape */
-  clip-path: polygon(
-    30% 0%, 70% 0%, 
-    100% 30%, 100% 70%, 
-    70% 100%, 30% 100%, 
-    0% 70%, 0% 30%
-  );
-
-  /* Slow rotation */
-  animation: rotateOctagon 50s linear infinite;
-
-}
-
-@keyframes rotateOctagon {
-  from {
-    transform: translate(-50%, -50%) rotate(0deg);
-  }
-  to {
-    transform: translate(-50%, -50%) rotate(360deg);
-  }
-}
-@keyframes gradientShift {
-  0% { background: linear-gradient(135deg, #fbc2eb, #a6c1ee); }
-  50% { background: linear-gradient(135deg, #a6c1ee, #fbc2eb); }
-  100% { background: linear-gradient(135deg, #fbc2eb, #a6c1ee); }
-}
-
-
-.counter {
-  font-size: 28px;
-  font-weight: bold;
-  color: #ff4d4d;
-}
-
-.counter-box p {
-  font-size: 14px;
-  font-weight: 600;
-  color: black;
-  margin-top: 8px;
-}
-
-/* 🖥️ PC Layout (default) */
-@media (min-width: 768px) {
-  .counter-container {
-    flex-direction: row; /* PC তে side by side */
-  }
-  .counter-box {
-    max-width: 200px;
-  }
-}
-
-/* 📱 Mobile Layout */
-@media (max-width: 767px) {
-  .counter-container {
-    flex-direction: column; /* Mobile এ একটার নিচে একটা */
-    align-items: center;
-  }
-  .counter-box {
-    width: 80%; /* Mobile এ ছোট হবে */
-    margin-bottom: 15px;
-  }
-  .counter {
-    font-size: 22px; /* Mobile এ সংখ্যা ছোট */
-  }
-  .counter-box p {
-    font-size: 12px; /* Mobile এ টেক্সট ছোট */
-  }
-}
-
-.counter-box.show {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.counter {
-  font-size: 40px;
-  font-weight: bold;
-  color: #ff4d4d;
-}
-
-
-.counter-box.show {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.counter {
-  font-size: 40px;
-  font-weight: bold;
-  color: #ff4d4d;
-}
-  .counter-box p {
-  font-size: 18px;
-  font-weight: 600;
-  color: black;
-  margin-top: 10px;
-}
-
-
-
-
-/* স্টিকি সার্চ বক্সের স্টাইল */
-.sticky-search {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    z-index: 1000;
-    display: none; /* শুরুতে এটি লুকানো থাকবে */
-}
-
-.sticky-search input {
-    padding: 10px 15px;
-    border-radius: 20px;
-    border: 2px solid #ff4757; /* আপনার থিমের সাথে মিল রেখে কালার দিতে পারেন */
-    background: #1e1e2f;
-    color: white;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-}
-
-/* style.css */
-
-/* পাপড়ির বেসিক স্টাইল */
-.sakura {
-    position: fixed;
-    top: -10vh; /* স্ক্রিনের সামান্য ওপর থেকে শুরু হবে */
-    background: #ffb7c5; /* চেরি ব্লসমের হালকা গোলাপী রঙ */
-    border-radius: 100% 0% 100% 0% / 100% 0% 100% 0%; /* বাস্তবসম্মত পাপড়ির আকার */
-    opacity: 0.8;
-    z-index: -1;
-    pointer-events: none; /* যাতে ক্লিক বা স্ক্রলে বাধা না দেয় */
+function autoFilter(category) {
+    const cards = document.querySelectorAll('.card');
     
-    /* ঘোরার এবং দুলার জন্য */
-    transform-origin: center;
+    cards.forEach(card => {
+        // কার্ডের ভেতরের সিজন/স্ট্যাটাস টেক্সটটি নেওয়া হচ্ছে
+        const statusText = card.querySelector('.season').innerText;
+
+        if (category === 'all') {
+            card.style.display = "block";
+        } 
+        else if (category === 'Series') {
+            // যদি লেখায় 'Season' বা 'Episodes' থাকে তবে সেটি Series
+            if (statusText.includes('Season') || statusText.includes('Episodes')) {
+                card.style.display = "block";
+            } else {
+                card.style.display = "none";
+            }
+        } 
+        else if (category === 'Ongoing') {
+            if (statusText.includes('Ongoing')) {
+                card.style.display = "block";
+            } else {
+                card.style.display = "none";
+            }
+        } 
+        else if (category === 'Movie') {
+            if (statusText.includes('Movie')) {
+                card.style.display = "block";
+            } else {
+                card.style.display = "none";
+            }
+        }
+    });
+}
+// script.js
+
+function createSakura() {
+    const sakura = document.createElement("div");
+    sakura.classList.add("sakura");
     
-    /* একাধিক অ্যানিমেশন একসাথে */
-    animation: fall linear infinite, sway ease-in-out infinite alternate;
-}
+    // --- ইউনিক প্রপার্টি জেনারেট করা ---
 
-/* নিচে পড়ার অ্যানিমেশন (সব পাপড়ির জন্য একই গতি) */
-@keyframes fall {
-    0% {
-        top: -10vh;
-    }
-    100% {
-        top: 110vh; /* স্ক্রিনের একদম নিচে চলে যাবে */
-    }
-}
-
-/* দুলার এবং ঘোরার অ্যানিমেশন (ইউনিক লুকের জন্য) */
-@keyframes sway {
-    0% {
-        transform: translateX(0px) rotate(0deg);
-    }
-    100% {
-        transform: translateX(50px) rotate(180deg); /* হালকা বাতাস এবং ঘূর্ণন */
-    }
-}
-
-.filter-container {
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-    margin-bottom: 30px;
-    flex-wrap: wrap;
-}
-
-/* কন্টেইনার স্টাইল */
-.filter-container {
-    display: flex;
-    justify-content: center;
-    gap: 15px;
-    margin: 30px 0;
-    flex-wrap: wrap;
-}
-
-/* বেসিক বাটন স্টাইল */
-.filter-btn {
-    background: rgba(26, 26, 46, 0.8); /* হালকা স্বচ্ছ ব্যাকগ্রাউন্ড */
-    color: #ffffff;
-    border: 1px solid #2a2a4a;
-    padding: 10px 25px;
-    font-size: 0.9rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    border-radius: 12px;
-    cursor: pointer;
-    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    backdrop-filter: blur(5px); /* গ্লাস ইফেক্ট */
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-}
-
-/* হোভার করলে গ্লোয়িং ইফেক্ট */
-.filter-btn:hover {
-    background: linear-gradient(135deg, #fbc2eb 0%, #a6c1ee 100%);
-    color: #1a1a2e;
-    border-color: transparent;
-    transform: translateY(-5px); /* হালকা উপরে উঠবে */
-    box-shadow: 0 10px 20px rgba(251, 194, 235, 0.4);
-}
-
-/* একটি বাটন যখন এক্টিভ বা সিলেক্ট করা থাকবে */
-.filter-btn.active {
-    background: #ff6b6b;
-    color: white;
-    border-color: #ff6b6b;
-    box-shadow: 0 0 20px rgba(255, 107, 107, 0.5);
-}
-
-/* style.css */
-.poster-wrap::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 50%;
-    height: 100%;
-    background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.3) 100%);
-    transform: skewX(-25deg);
-    transition: 0.7s;
-}
-
-.card:hover .poster-wrap::after {
-    left: 150%;
-}
-
-
-/* style.css */
-
-.header h1 {
-    font-size: clamp(1.8rem, 5vw, 3rem); /* রেসপন্সিভ ফন্ট সাইজ */
-    font-weight: 800;
-    line-height: 1.25;
-    margin-bottom: 20px;
+    // ১. পজিশন (র‍্যান্ডম)
+    sakura.style.left = Math.random() * 100 + "vw";
     
-    /* আপনার বর্তমান মাল্টিকালার গ্রিডিয়েন্ট */
-    background: linear-gradient(135deg, #ff6b6b 0%, #ffd93d 30%, #6bcb77 65%, #4d96ff 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    // ২. আকার (র‍্যান্ডম - ৫px থেকে ১৫px)
+    const size = Math.random() * 10 + 5 + "px";
+    sakura.style.width = size;
+    sakura.style.height = size;
     
-    /* --- নতুন Glowing Fade-In অ্যানিমেশন এখানে শুরু --- */
-    opacity: 0; /* শুরুতে লুকানো থাকবে */
-    animation: glowFadeIn 2s ease-out forwards;
-    position: relative;
-    display: inline-block; /* মোবাইলে সেন্টারিং ঠিক রাখার জন্য */
+    // ৩. পড়ার সময়কাল (র‍্যান্ডম গতি - ৫s থেকে ১৫s)
+    const fallDuration = Math.random() * 10 + 5;
+    sakura.style.animationDuration = fallDuration + "s, 4s"; // fall এবং sway এর সময়কাল
+    
+    // ৪. হালকা অস্বচ্ছতা (Opacity - র‍্যান্ডম ০.৫ থেকে ১.০)
+    sakura.style.opacity = Math.random() * 0.5 + 0.5;
+
+    // ৫. দুলার জন্য র‍্যান্ডম বিলম্ব
+    sakura.style.animationDelay = Math.random() * 5 + "s";
+
+    document.body.appendChild(sakura);
+
+    // পাপড়ি স্ক্রিনের বাইরে চলে গেলে মুছে ফেলা
+    setTimeout(() => {
+        sakura.remove();
+    }, fallDuration * 1000);
 }
 
-/* অ্যানিমেশন ডিফিনিশন */
-@keyframes glowFadeIn {
-    0% {
-        opacity: 0;
-        transform: translateY(20px); /* হালকা নিচ থেকে উপরে উঠবে */
-        filter: blur(5px); /* শুরুতে ঝাপসা থাকবে */
-        text-shadow: 0 0 0px rgba(255, 107, 107, 0);
+// প্রতি ২০০ মিলিসেকেন্ডে একটি নতুন পাপড়ি তৈরি হবে
+setInterval(createSakura, 200);
+
+const glow = document.createElement('div');
+glow.className = 'cursor-glow';
+document.body.appendChild(glow);
+
+document.addEventListener('mousemove', (e) => {
+    glow.style.left = e.pageX + 'px';
+    glow.style.top = e.pageY + 'px';
+});
+
+/* === FARDIN'S OTAKU LIST - PREMIUM SAKURA CHAT JS === */
+
+function toggleSakuraChat() {
+  const chatBox = document.getElementById("sakuraChatBox");
+  chatBox.classList.toggle("active");
+}
+
+
+// Auto flip back when clicking another card
+document.querySelectorAll('.card').forEach(card => {
+  card.addEventListener('click', function () {
+    
+    // Flip back ALL other cards first
+    document.querySelectorAll('.card.flipped').forEach(flippedCard => {
+      if (flippedCard !== this) {
+        flippedCard.classList.remove('flipped');
+      }
+    });
+
+    // Then toggle current card
+    this.classList.toggle('flipped');
+  });
+});
+
+// Dynamic animation delay for pills
+// Add this inside your pill generation code
+// Find where you create pills and add this after:
+
+document.querySelectorAll('.pill').forEach((pill, index) => {
+  pill.style.animationDelay = `${0.1 + index * 0.05}s`;
+});
+
+// Hide counter and genre when searching
+const searchBox = document.getElementById('searchBox');
+const counterContainer = document.querySelector('.counter-container');
+const filterSection = document.querySelector('.filter-section');
+
+searchBox.addEventListener('input', function () {
+  const value = this.value.trim();
+
+  if (value.length > 0) {
+    // Hide counter and genre when typing
+    counterContainer.style.opacity = '0';
+    counterContainer.style.transform = 'translateY(-20px)';
+    counterContainer.style.pointerEvents = 'none';
+    counterContainer.style.height = '0';
+    counterContainer.style.overflow = 'hidden';
+    counterContainer.style.marginBottom = '0';
+    counterContainer.style.transition = 'all 0.4s ease';
+
+    filterSection.style.opacity = '0';
+    filterSection.style.transform = 'translateY(-20px)';
+    filterSection.style.pointerEvents = 'none';
+    filterSection.style.height = '0';
+    filterSection.style.overflow = 'hidden';
+    filterSection.style.marginBottom = '0';
+    filterSection.style.transition = 'all 0.4s ease';
+
+  } else {
+    // Show counter and genre when search is empty
+    counterContainer.style.opacity = '1';
+    counterContainer.style.transform = 'translateY(0)';
+    counterContainer.style.pointerEvents = 'auto';
+    counterContainer.style.height = '';
+    counterContainer.style.overflow = '';
+    counterContainer.style.marginBottom = '';
+    counterContainer.style.transition = 'all 0.4s ease';
+
+    filterSection.style.opacity = '1';
+    filterSection.style.transform = 'translateY(0)';
+    filterSection.style.pointerEvents = 'auto';
+    filterSection.style.height = '';
+    filterSection.style.overflow = '';
+    filterSection.style.marginBottom = '';
+    filterSection.style.transition = 'all 0.4s ease';
+  }
+});
+
+function searchAnime() {
+    let input = document.getElementById('search-input').value.toLowerCase();
+    let cards = document.querySelectorAll('.card');
+    let noResults = document.getElementById('no-results');
+    let visibleCount = 0;
+
+    cards.forEach(card => {
+        let title = card.querySelector('.title').innerText.toLowerCase();
+        
+        if (title.includes(input)) {
+            card.style.display = "block"; // কার্ড দেখাবে
+            visibleCount++;
+        } else {
+            card.style.display = "none";  // কার্ড লুকাবে
+        }
+    });
+
+    // যদি কোনো কার্ড দৃশ্যমান না থাকে (visibleCount == 0)
+    if (visibleCount === 0) {
+        noResults.style.display = "block"; // মেসেজ দেখাবে
+    } else {
+        noResults.style.display = "none";  // মেসেজ লুকাবে
     }
-    50% {
-        opacity: 0.5;
-        /* মাঝপথে একটি হালকা নিয়ন গ্লো */
-        text-shadow: 0 0 10px rgba(251, 194, 235, 0.7), 0 0 20px rgba(166, 193, 238, 0.5);
+}
+
+cards.forEach((card, i) => {
+  setTimeout(() => {
+    card.classList.add("show");
+  }, i * 80);
+});
+
+/* ⚡⚡⚡ LIGHTNING - BLUE & LONGER DURATION ⚡⚡⚡ */
+
+class LightningBolt {
+  constructor(canvas) {
+    this.canvas = canvas;
+    this.ctx = canvas.getContext('2d');
+    this.width = canvas.width;
+    this.height = canvas.height;
+    this.reset();
+  }
+
+  reset() {
+    this.x = Math.random() * this.width;
+    this.y = 0;
+    this.segments = [];
+    this.createSegments();
+  }
+
+  createSegments() {
+    this.segments = [];
+    let x = this.x;
+    let y = this.y;
+    
+    for (let i = 0; i < 20; i++) {
+      x += (Math.random() - 0.5) * 40;
+      y += Math.random() * (this.height / 20);
+      this.segments.push({ x, y });
     }
-    100% {
-        opacity: 1;
-        transform: translateY(0); /* সঠিক জায়গায় আসবে */
-        filter: blur(0); /* একদম পরিষ্কার হয়ে যাবে */
-        /* শেষে খুব সূক্ষ্ম একটি স্থায়ী গ্লো */
-        text-shadow: 0 0 5px rgba(251, 194, 235, 0.4);
+  }
+
+  draw() {
+    // ⚡ নীল Lightning (উজ্জ্বল)
+    this.ctx.strokeStyle = `rgba(100, 150, 255, 0.95)`; // নীল রঙ
+    this.ctx.lineWidth = 4 + Math.random() * 3;
+    this.ctx.lineCap = 'round';
+    this.ctx.lineJoin = 'round';
+
+    this.ctx.beginPath();
+    this.ctx.moveTo(this.x, this.y);
+
+    for (let segment of this.segments) {
+      this.ctx.lineTo(segment.x, segment.y);
     }
-}
 
-.cursor-glow {
-    width: 200px;
-    height: 200px;
-    background: radial-gradient(circle, rgba(251, 194, 235, 0.2) 0%, rgba(0, 0, 0, 0) 70%);
-    position: fixed;
-    pointer-events: none;
-    border-radius: 50%;
-    z-index: -1; /* যাতে লেখা বা কার্ডের পেছনে থাকে */
-    transform: translate(-50%, -50%);
-    transition: 0.1s ease-out;
-}
+    this.ctx.stroke();
 
-.card-content {
-    background: rgba(255, 255, 255, 0.05); /* হালকা সাদা স্বচ্ছতা */
-    backdrop-filter: blur(10px); /* পেছনে ঝাপসা করার ম্যাজিক */
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-    padding: 15px;
-    border-radius: 0 0 15px 15px;
-}
-/* style.css */
-
-/* ভাসমান অ্যানিমেশন ডিফিনিশন */
-@keyframes floatingCards {
-    0% { transform: translateY(0px); }
-    50% { transform: translateY(-10px); } /* হালকা ১০px উপরে উঠবে */
-    100% { transform: translateY(0px); }
-}
-
-/* আপনার সব অ্যানিমে কার্ডের ওপর ফ্লোটিং ইফেক্ট */
-.grid .card {
-    /* আগের transform: translateY(-10px) বা scale ইফেক্টগুলো মুছে দিন */
-    animation: floatingCards 4s ease-in-out infinite; /* সব কার্ড সবসময় হালকা ভাসতে থাকবে */
-}
-
-/* হোভার করলে হালকা দুলবে বা থামবে (ঐচ্ছিক) */
-.grid .card:hover {
-    animation-play-state: paused; /* মাউস নিলে ভাসমান ইফেক্ট থেমে যাবে */
-    box-shadow: 0 0 20px rgba(255, 107, 107, 0.6); /* আগের গ্লো ইফেক্ট */
-}
-
-.card {
-  /* Animation ইতিমধ্যে নিচে CSS-এ আছে */
-  @keyframes cardWaveIn {
-  0% {
-    opacity: 0;
-    transform: translateY(40px) rotateZ(-5deg);
-    filter: blur(5px);
+    // ছোট শাখা তৈরি করা
+    for (let segment of this.segments) {
+      if (Math.random() > 0.7) {
+        this.drawBranch(segment.x, segment.y);
+      }
+    }
   }
-  70% {
-    transform: translateY(-8px) rotateZ(1deg);
-    filter: blur(0);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0) rotateZ(0);
-    filter: blur(0);
+
+  drawBranch(startX, startY) {
+    this.ctx.strokeStyle = `rgba(100, 150, 255, 0.7)`; // নীল শাখা
+    this.ctx.lineWidth = 2;
+    
+    this.ctx.beginPath();
+    this.ctx.moveTo(startX, startY);
+
+    let x = startX;
+    let y = startY;
+
+    for (let i = 0; i < 5; i++) {
+      x += (Math.random() - 0.5) * 30;
+      y += Math.random() * 30;
+      this.ctx.lineTo(x, y);
+    }
+
+    this.ctx.stroke();
   }
 }
 
-.card {
-  animation: cardWaveIn 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-  opacity: 0;
-}
-
-/* প্রতিটি row এর জন্য ভিন্ন ডিলে */
-.card:nth-child(5n+1) { animation-delay: 0.1s; }
-.card:nth-child(5n+2) { animation-delay: 0.15s; }
-.card:nth-child(5n+3) { animation-delay: 0.2s; }
-.card:nth-child(5n+4) { animation-delay: 0.25s; }
-.card:nth-child(5n+5) { animation-delay: 0.3s; }
-}
-
-/* ⚡ LIGHTNING CANVAS STYLING ⚡ */
-#lightningCanvas {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: -1; /* সবসময় নিচে থাকবে */
-  pointer-events: none;
-  display: block;
-  background: transparent !important; /* স্বচ্ছ রাখুন */
-  mix-blend-mode: screen; /* Thunder উজ্জ্বল হবে */
-}
-
-
-/* =========================================================================
-   === FARDIN'S OTAKU LIST - PREMIUM GLASS SAKURA CHAT BOX ===
-   ========================================================================= */
-
-/* --- ১. ইউনিক ফ্লোটিং বাটন (অ্যানিমেশন এবং লাইভ এফেক্ট সহ) --- */
-#otaku-chat-icon {
-    position: fixed;
-    bottom: 30px;
-    right: 30px;
-    width: 70px;
-    height: 70px;
-    /* গ্রেডিয়েন্ট এবং ট্রান্সপারেন্সি */
-    background: linear-gradient(135deg, rgba(255, 107, 107, 0.8), rgba(77, 150, 255, 0.8));
-    border-radius: 24px; /* গোল না করে আধুনিক কোণ */
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
-    z-index: 2000; /* নিশ্চিত করুন যেন এটি সব কার্ডের ওপরে থাকে */
-    transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    border: 2px solid rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(5px);
-}
-
-/* বাটন অ্যানিমেশন */
-#otaku-chat-icon:hover {
-    transform: translateY(-10px) rotate(5deg);
-    background: linear-gradient(135deg, #ff6b6b, #4d96ff);
-    box-shadow: 0 20px 45px rgba(255, 107, 107, 0.5);
-}
-
-#otaku-chat-icon .chat-bubble {
-    font-size: 32px;
-    line-height: 1;
-}
-
-#otaku-chat-icon .live-status {
-    font-size: 10px;
-    font-weight: 900;
-    color: white;
-    background: #ff6b6b;
-    padding: 2px 6px;
-    border-radius: 10px;
-    margin-top: 4px;
-    letter-spacing: 1px;
-    animation: pulseStatus 1.5s infinite;
-}
-
-@keyframes pulseStatus {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.6; }
-}
-
-/* ফ্লোটিং গ্লো রিং এফেক্ট */
-#otaku-chat-icon .glow-ring {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    border-radius: 24px;
-    background: transparent;
-    border: 2px solid #ff6b6b;
-    animation: ringPulse 2s infinite;
-    z-index: -1;
-}
-
-@keyframes ringPulse {
-    0% { transform: scale(1); opacity: 0.8; }
-    100% { transform: scale(1.4); opacity: 0; }
-}
-
-/* Floating Chat Icon */
-.chat-icon {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  background: linear-gradient(45deg, #ff7eb9, #7afcff);
-  color: #fff;
-  font-size: 24px;
-  padding: 15px;
-  border-radius: 50%;
-  cursor: pointer;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-  z-index: 1000;
-}
-
-/* Pulsing Notification */
-.pulse {
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 12px;
-  height: 12px;
-  background: #ff4da6;
-  border-radius: 50%;
-  animation: pulse 1.5s infinite;
-}
-@keyframes pulse {
-  0% { transform: scale(0.8); opacity: 0.7; }
-  50% { transform: scale(1.2); opacity: 1; }
-  100% { transform: scale(0.8); opacity: 0.7; }
-}
-
-/* Chat Box */
-.chat-box {
-  position: fixed;
-  bottom: 80px;
-  right: 20px;
-  width: 300px;
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(12px);
-  border-radius: 15px;
-  padding: 20px;
-  box-shadow: 0 8px 25px rgba(0,0,0,0.4);
-  opacity: 0;
-  transform: translateY(50px);
-  pointer-events: none;
-  transition: all 0.5s ease;
-  z-index: 999;
-}
-
-/* Active State */
-.chat-box.active {
-  opacity: 1;
-  transform: translateY(0);
-  pointer-events: auto;
-}
-
-/* Form Elements */
-.chat-box h2 {
-  margin: 0 0 10px;
-  color: #fff;
-  font-size: 18px;
-  text-align: center;
-}
-.chat-box input, .chat-box textarea {
-  width: 100%;
-  margin: 8px 0;
-  padding: 10px;
-  border: none;
-  border-radius: 8px;
-  outline: none;
-}
-.chat-box button {
-  width: 100%;
-  padding: 10px;
-  background: linear-gradient(45deg, #ff7eb9, #7afcff);
-  border: none;
-  border-radius: 8px;
-  color: #fff;
-  font-weight: bold;
-  cursor: pointer;
-  transition: 0.3s;
-}
-.chat-box button:hover {
-  opacity: 0.9;
-}
-
-/* Responsive */
-@media (max-width: 480px) {
-  .chat-box {
-    width: 90%;
-    right: 5%;
+// Canvas সেটআপ
+const canvas = document.getElementById('lightningCanvas');
+if (canvas) {
+  const ctx = canvas.getContext('2d');
+  
+  function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
   }
-}
-/* Form Container */
-form {
-  max-width: 400px;   /* PC তে খুব বড় না হয় */
-  margin: 0 auto;     /* সবসময় center এ থাকবে */
-  text-align: center;
-}
 
-/* Footer Text */
-.footer-text {
-  color: #7afcff;     /* একটু softer neon blue */
-  font-size: 1.2rem;
-  text-align: center;
-}
+  resizeCanvas();
+  window.addEventListener('resize', resizeCanvas);
 
-/* Responsive */
-@media (max-width: 768px) {
-  form {
-    width: 90%;       /* Mobile এ full width */
+  let lightningBolt = null;
+  let lightningTimeout = null;
+
+  function createLightning() {
+    lightningBolt = new LightningBolt(canvas);
+    
+    // ⏱️ ৫০০ms পর্যন্ত দৃশ্যমান থাকবে (আগে ২০০ms ছিল)
+    setTimeout(() => {
+      lightningBolt = null;
+    }, 400);
+
+    // পরবর্তী lightning (১-৪ স���কেন্ড পর পর আসবে - আগে ২-৮ সেকেন্ড ছিল)
+    lightningTimeout = setTimeout(createLightning, 2000 + Math.random() * 5000);
   }
-}
-.fb-link {
-  display: inline-block;
-  padding: 10px 20px;
-  background: rgba(255,255,255,0.15);
-  backdrop-filter: blur(10px);
-  border-radius: 12px;
-  color: #fff;
-  text-decoration: none;
-  font-weight: bold;
-  transition: 0.3s;
-}
-.fb-link:hover {
-  background: linear-gradient(45deg, #ff7eb9, #7afcff);
-  transform: translateY(-3px);
-}
-a {
-  text-decoration: none;   /* underline remove */
-  color: #7afcff;          /* তোমার neon blue */
-  font-weight: bold;
-}
 
-a:hover {
-  color: #ff7eb9;          /* hover এ pink glow */
-}
+  function animate() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+    if (lightningBolt) {
+      lightningBolt.draw();
+    }
 
-
-
-
-/* ── Filter heading ─────────────────────────── */
-.filter-heading {
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: #ff6b9d;
-  margin-bottom: 14px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-.filter-heading::after {
-  content: '';
-  flex: 1;
-  height: 1px;
-  background: linear-gradient(90deg, rgba(255,107,157,0.3), transparent);
-}
-
-/* ── Pill buttons ───────────────────────────── */
-.pills-wrap {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 20px;
-}
-
-.pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 7px 15px;
-  border-radius: 999px;
-  border: 1px solid rgba(255, 107, 157, 0.22);
-  background: rgba(255, 255, 255, 0.04);
-  color: rgba(255, 255, 255, 0.5);
-  font-size: 13px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.18s ease;
-  user-select: none;
-}
-.pill:hover {
-  border-color: rgba(255, 107, 157, 0.55);
-  color: rgba(255, 255, 255, 0.85);
-  background: rgba(255, 107, 157, 0.08);
-  transform: translateY(-1px);
-}
-.pill.active {
-  border-color: #ff6b9d;
-  background: linear-gradient(135deg, rgba(255,107,157,0.22), rgba(255,154,108,0.12));
-  color: #fff;
-  box-shadow: 0 0 12px rgba(255, 107, 157, 0.2);
-}
-
-/* Count badge inside pill */
-.pill-count {
-  font-size: 10.5px;
-  font-weight: 700;
-  background: rgba(255, 107, 157, 0.15);
-  color: #ff9aaa;
-  padding: 1px 7px;
-  border-radius: 999px;
-  min-width: 22px;
-  text-align: center;
-}
-.pill.active .pill-count {
-  background: rgba(255, 107, 157, 0.35);
-  color: #fff;
-}
-
-/* ── Status bar ─────────────────────────────── */
-.filter-status-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 16px;
-}
-.filter-status-text {
-  font-size: 12px;
-  color: rgba(255, 255, 255, 0.3);
-}
-.filter-status-text strong { color: #ff9aaa; }
-
-.filter-clear {
-  font-size: 11px;
-  color: rgba(255, 107, 157, 0.6);
-  cursor: pointer;
-  padding: 4px 12px;
-  border-radius: 999px;
-  border: 1px solid rgba(255, 107, 157, 0.2);
-  background: transparent;
-  transition: all 0.15s;
-}
-.filter-clear:hover {
-  color: #ff6b9d;
-  border-color: rgba(255, 107, 157, 0.5);
-  background: rgba(255, 107, 157, 0.07);
-}
-.filter-clear.hidden { display: none; }
-
-/* ── Card hidden state ──────────────────────── */
-.card.hidden { display: none; }
-.card { transition: transform 0.2s ease, box-shadow 0.2s ease; }
-.card:hover { transform: translateY(-4px); box-shadow: 0 8px 20px rgba(255,107,157,0.15); }
-
-/* ✨ CARD ENTRY ANIMATION ✨ */
-
-@keyframes cardStaggerPop {
-  0% {
-    opacity: 0;
-    transform: translateY(50px) scale(0.85);
-    filter: blur(4px);
+    requestAnimationFrame(animate);
   }
-  70% {
-    transform: translateY(-6px) scale(1.08);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-    filter: blur(0);
-  }
+
+  animate();
+  createLightning();
+
+  window.toggleLightning = function() {
+    if (lightningTimeout) {
+      clearTimeout(lightningTimeout);
+      lightningTimeout = null;
+      lightningBolt = null;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      console.log('⚡ Lightning বন্ধ হয়েছে');
+    } else {
+      createLightning();
+      console.log('⚡ Lightning শুরু হয়েছে');
+    }
+  };
 }
-
-/* সব কার্ডে অ্যানিমেশন লাগান */
-.card {
-  animation: cardStaggerPop 0.65s cubic-bezier(0.175, 0.885, 0.32, 1.275) both !important;
-}
-
-/* Grid stagger - 5 কলামের জন্য */
-.card:nth-child(5n+1) { animation-delay: 0.08s; }
-.card:nth-child(5n+2) { animation-delay: 0.12s; }
-.card:nth-child(5n+3) { animation-delay: 0.16s; }
-.card:nth-child(5n+4) { animation-delay: 0.2s; }
-.card:nth-child(5n+5) { animation-delay: 0.24s; }
-
-/* Mobile এর জন্য (2 কলাম) */
-@media (max-width: 767px) {
-  .card:nth-child(2n+1) { animation-delay: 0.08s; }
-  .card:nth-child(2n+2) { animation-delay: 0.16s; }
-}
-
