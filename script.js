@@ -475,3 +475,100 @@ if (canvas) {
     }
   };
 }
+
+// ── Groq AI Chatbot with Anime Knowledge ──
+const GROK_API_KEY = "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";
+const GROK_API_URL = "https://api.groq.com/openai/v1/chat/completions";
+
+// ── Build anime list from the page automatically ──
+function buildAnimeList() {
+  const cards = document.querySelectorAll('.card-back');
+  const list = [];
+  cards.forEach((card, i) => {
+    const title = card.querySelector('.back-title')?.textContent?.trim() || '';
+    const season = card.querySelector('.back-season')?.textContent?.trim().replace('🌸 ', '') || '';
+    const episodes = card.querySelector('.back-episodes')?.textContent?.trim().replace('📺 ', '').replace('🎬 ', '') || '';
+    if (title) list.push(`${i + 1}. ${title} | ${season} | ${episodes}`);
+  });
+  return list.join('\n');
+}
+
+const SYSTEM_PROMPT = `You are Fardin's personal anime assistant. When greeting users, just say "Hello! I'm Fardin's personal anime assistant." — never mention the website name in your responses. You are fun, friendly and knowledgeable about anime.
+
+You can:
+- Answer questions about any anime in Fardin's list (episodes, seasons, genre etc.)
+- Pick a RANDOM anime from his list when asked (use Math.random logic mentally)
+- Recommend anime from his list based on mood or genre
+- Tell total count, compare anime etc.
+
+When picking a random anime, actually pick one randomly — don't always pick the same one.
+Keep answers short and fun. Use emojis occasionally.
+
+Here is Fardin's complete watched anime list:
+${buildAnimeList()}`;
+
+const chatHistory = [
+  { role: "system", content: SYSTEM_PROMPT }
+];
+
+function toggleChat() {
+  const box = document.getElementById("chatBox");
+  box.classList.toggle("open");
+  if (box.classList.contains("open")) {
+    document.getElementById("chatInput").focus();
+  }
+}
+
+async function sendMessage() {
+  const input = document.getElementById("chatInput");
+  const userText = input.value.trim();
+  if (!userText) return;
+
+  input.value = "";
+  addMessage(userText, "user");
+  chatHistory.push({ role: "user", content: userText });
+
+  const typingEl = addMessage("✨ Thinking...", "typing");
+
+  try {
+    const response = await fetch(GROK_API_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${GROK_API_KEY}`
+      },
+      body: JSON.stringify({
+        model: "llama-3.3-70b-versatile",
+        messages: chatHistory,
+        max_tokens: 500,
+        stream: false
+      })
+    });
+
+    const data = await response.json();
+    typingEl.remove();
+
+    const reply = data?.choices?.[0]?.message?.content;
+    if (reply) {
+      chatHistory.push({ role: "assistant", content: reply });
+      addMessage(reply, "bot");
+    } else {
+      addMessage("Sorry, no response. Try again!", "bot");
+    }
+
+  } catch (err) {
+    typingEl.remove();
+    addMessage("⚠️ Network error!", "bot");
+    console.error(err);
+  }
+}
+
+function addMessage(text, type) {
+  const messages = document.getElementById("chatMessages");
+  const div = document.createElement("div");
+  div.classList.add("msg", type);
+  div.textContent = text;
+  messages.appendChild(div);
+  messages.scrollTop = messages.scrollHeight;
+  return div;
+}
