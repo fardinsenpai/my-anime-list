@@ -1517,3 +1517,71 @@ a:hover {
   0%, 100% { opacity: 1; transform: scale(1); }
   50%       { opacity: 0.2; transform: scale(0.6); }
 }
+
+/* ══════════════════════════════
+   📱 MOBILE RESPONSIVE
+══════════════════════════════ */
+@media (max-width: 480px) {
+
+  /* AI Chat Box — full width on mobile */
+  .chat-box {
+    width: calc(100vw - 24px) !important;
+    right: 12px !important;
+    left: 12px !important;
+    bottom: 90px !important;
+    max-height: 65vh !important;
+    border-radius: 16px !important;
+  }
+
+  /* AI Bubble — bottom right */
+  .chat-bubble {
+    bottom: 16px !important;
+    right: 16px !important;
+    width: 58px !important;
+    height: 58px !important;
+    font-size: 24px !important;
+  }
+
+  /* Suggestion Bubble — above AI bubble (উপরে) */
+  .chat-icon {
+    bottom: 88px !important;
+    right: 16px !important;
+    z-index: 99997 !important;
+  }
+
+  /* Suggestion Box — full width */
+  #sakuraChatBox {
+    width: calc(100vw - 24px) !important;
+    right: 12px !important;
+    left: 12px !important;
+    bottom: 160px !important;
+  }
+
+  /* Header font size */
+  .chat-header {
+    font-size: 11px !important;
+    padding: 12px 14px !important;
+  }
+
+  /* Messages font */
+  .msg {
+    font-size: 14px !important;
+    max-width: 90% !important;
+  }
+
+  /* Input area */
+  .chat-input-area {
+    padding: 10px !important;
+    gap: 6px !important;
+  }
+
+  .chat-input-area input {
+    font-size: 14px !important;
+    padding: 9px 12px !important;
+  }
+
+  .chat-input-area button {
+    padding: 9px 14px !important;
+    font-size: 10px !important;
+  }
+}
