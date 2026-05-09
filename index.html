@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Let's See What Anime I Have Watched</title>
   <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
  
 </head>
 
@@ -585,6 +586,32 @@
       <button type="submit">Drop</button>
     </form>
   </div>
+
+  <!-- AI Chatbot Widget -->
+<div class="chat-bubble" id="chatBubble" onclick="toggleChat()">
+  💬
+</div>
+
+<!-- AI Chatbot Widget -->
+<div class="chat-bubble" id="chatBubble" onclick="toggleChat()">
+  🤖
+  <span class="ai-dot"></span>
+</div>
+
+<div class="chat-box" id="chatBox">
+  <div class="chat-header">
+    <span>🤖 AI As Your Assistant</span>
+    <button onclick="toggleChat()">✕</button>
+  </div>
+  <div class="chat-messages" id="chatMessages">
+    <div class="msg bot">😊 Hello! Welcome to Fardin's Anime List! I'm Fardin's personal anime assistant. Ask me anything — episodes, seasons, random picks, or genre recommendations! ✨</div>
+  </div>
+  <div class="chat-input-area">
+    <input type="text" id="chatInput" placeholder="Type a message..." onkeydown="if(event.key==='Enter') sendMessage()" />
+    <button onclick="sendMessage()">Send</button>
+  </div>
+</div>
+
 
   <script src="script.js"></script>
 </body>
