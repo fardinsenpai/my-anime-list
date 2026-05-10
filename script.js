@@ -476,99 +476,312 @@ if (canvas) {
   };
 }
 
-// ── Groq AI Chatbot with Anime Knowledge ──
-const GROK_API_KEY = "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";
-const GROK_API_URL = "https://api.groq.com/openai/v1/chat/completions";
+// ── Back to Top Button ──
+(function () {
+  const btn = document.createElement('button');
+  btn.id = 'backToTop';
+  btn.innerHTML = '&#8679;'; // ⇧ arrow
+  btn.title = 'Back to top';
+  document.body.appendChild(btn);
 
-// ── Build anime list from the page automatically ──
-function buildAnimeList() {
-  const cards = document.querySelectorAll('.card-back');
-  const list = [];
-  cards.forEach((card, i) => {
-    const title = card.querySelector('.back-title')?.textContent?.trim() || '';
-    const season = card.querySelector('.back-season')?.textContent?.trim().replace('🌸 ', '') || '';
-    const episodes = card.querySelector('.back-episodes')?.textContent?.trim().replace('📺 ', '').replace('🎬 ', '') || '';
-    if (title) list.push(`${i + 1}. ${title} | ${season} | ${episodes}`);
+  window.addEventListener('scroll', () => {
+if (window.scrollY > document.body.scrollHeight / 3) {
+  
+  btn.classList.add('visible');
+    } else {
+      btn.classList.remove('visible');
+    }
   });
-  return list.join('\n');
+
+  btn.addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+})();
+
+
+// ===== SMART RELOAD WARNING =====
+let aiUsed = false;
+
+// Track যখন ইউজার আসলেই AI কে মেসেজ পাঠায়
+const originalSendMessage = sendMessage;
+sendMessage = async function() {
+  aiUsed = true; // AI ইউজ হইছে
+  return originalSendMessage.apply(this, arguments);
 }
 
-const SYSTEM_PROMPT = `You are Fardin's personal anime assistant. When greeting users, just say "Hello! I'm Fardin's personal anime assistant." — never mention the website name in your responses. You are fun, friendly and knowledgeable about anime.
+// পেজ রিলোড/ক্লোজ করার আগে চেক করো
+window.addEventListener('beforeunload', function (e) {
+  // শুধু তখনই warning যখন: 
+  // 1. AI ইউজ হইছে AND 
+  // 2. চ্যাটে কমপক্ষে 1টা user + 1টা bot মেসেজ আছে
+  if (aiUsed && chatHistory.length > 2) {
+    e.preventDefault();
+    const message = 'Your AI chat history will be lost if you leave this page.';
+    e.returnValue = message;
+    return message;
+  }
+});
 
-You can:
-- Answer questions about any anime in Fardin's list (episodes, seasons, genre etc.)
-- Pick a RANDOM anime from his list when asked (use Math.random logic mentally)
-- Recommend anime from his list based on mood or genre
-- Tell total count, compare anime etc.
+// চ্যাট বক্স বন্ধ করলে flag রিসেট হবে না
+// কারণ ইউজার আবার খুলতে পারে। রিলোড দিলেই শুধু memory যাবে
 
-When picking a random anime, actually pick one randomly — don't always pick the same one.
-Keep answers short and fun. Use emojis occasionally.
 
-Here is Fardin's complete watched anime list:
-${buildAnimeList()}`;
+// ===== CEREBRAS API CONFIG =====
+const CEREBRAS_API_KEY = 'csk-r84k3e2j2mwc4cm55d8c4chex3hteydpxn5kexj6ymr9de3d'; // এখানে তোমার key বসাও
+const apiUrl = 'https://api.cerebras.ai/v1/chat/completions';
+const proxyUrl = 'https://corsproxy.io/?';
 
-const chatHistory = [
-  { role: "system", content: SYSTEM_PROMPT }
+// ===== STATS & ANIME LIST =====
+function getStats() {
+  const cards = document.querySelectorAll('.card-back');
+  const totalAnime = cards.length;
+  let totalSeasons = 0;
+  let totalEpisodes = 0;
+
+  cards.forEach((card) => {
+    const seasonText = card.querySelector('.back-season')?.textContent || '';
+    const episodeText = card.querySelector('.back-episodes')?.textContent || '';
+
+    const seasonMatch = seasonText.match(/\d+/g);
+    if (seasonMatch) {
+      const nums = seasonMatch.map(Number);
+      totalSeasons += nums.length === 1? nums[0] : nums[1] - nums[0] + 1;
+    }
+
+    const episodeNum = parseInt(episodeText.replace(/\D/g, ''));
+    if (episodeNum) totalEpisodes += episodeNum;
+  });
+
+  return {
+    animeCount: totalAnime,
+    seasonCount: totalSeasons,
+    episodeCount: totalEpisodes
+  };
+}
+
+// ===== LEVEL 3: Ultra Compressed JSON List =====
+function getAnimeListJSON() {
+  const cards = document.querySelectorAll('.card-back');
+  const animeObj = {};
+
+  cards.forEach((card) => {
+    const title = card.querySelector('.back-title')?.textContent?.trim();
+    const episodes = card.querySelector('.back-episodes')?.textContent?.trim().replace(/\D/g, '');
+
+    if (title && episodes) {
+      animeObj[title] = parseInt(episodes) || 0;
+    }
+  });
+
+  return JSON.stringify(animeObj);
+}
+
+// ===== SYSTEM PROMPT - Light Version (No List) =====
+function getSystemPrompt() {
+  const stats = getStats();
+
+  return `You are Fardin's personal anime assistant on "Let's See What Anime I Have Watched" website. You are fun, friendly and knowledgeable.
+
+Website Stats:
+- Total Anime: ${stats.animeCount}
+- Total Seasons: ${stats.seasonCount}
+- Total Episodes: ${stats.episodeCount}
+
+Rules:
+1. Reply in the same language the user uses. If user writes Bangla, reply in Bangla. If English, reply in English.
+2. Only answer about anime Fardin has watched. Don't make up names.
+3. If user asks for random/suggest/pick anime, I'll give you one from his list in [DATA] context.
+4. Keep answers short, fun, and engaging.
+5. Use ⚡ emoji occasionally.
+6. Greet user with As-salamu alaykum and well wishes when appropriate, like first message or when user greets.
+7. If user asks for details about the website owner and Fardin, say: The ID link is under the website all cards.
+8. Tell more good things about Fardin and his anime taste. Make it fun. Fardin loves diverse genres - action, comedy, romance, thriller. He appreciates good storytelling and character development.
+9. You can use your general anime knowledge to make answers better. If I give you [DATA] context, use ONLY that for specific anime info. Don't mention you have external info.
+
+Don't make up anime. Stick to his list only.`;
+}
+
+// ===== CHAT ELEMENTS =====
+const chatBubble = document.getElementById('chatBubble');
+const chatBox = document.getElementById('chatBox');
+const chatMessages = document.getElementById('chatMessages');
+const chatInput = document.getElementById('chatInput');
+
+let chatHistory = [
+  { role: "system", content: getSystemPrompt() }
 ];
 
+// ===== TOGGLE CHAT =====
 function toggleChat() {
-  const box = document.getElementById("chatBox");
-  box.classList.toggle("open");
-  if (box.classList.contains("open")) {
-    document.getElementById("chatInput").focus();
+  chatBox.classList.toggle('open');
+  if (chatBox.classList.contains('open')) {
+    chatInput.focus();
   }
 }
 
+// ===== SEND MESSAGE =====
 async function sendMessage() {
-  const input = document.getElementById("chatInput");
-  const userText = input.value.trim();
-  if (!userText) return;
+  const message = chatInput.value.trim();
+  if (!message) return;
 
-  input.value = "";
-  addMessage(userText, "user");
-  chatHistory.push({ role: "user", content: userText });
+  // Add user message to UI
+  addMessage(message, 'user');
+  chatInput.value = '';
 
-  const typingEl = addMessage("✨ Thinking...", "typing");
+  // Add to history
+  chatHistory.push({ role: 'user', content: message });
+
+  // Trim history: keep system + last 8 messages
+  if (chatHistory.length > 9) {
+    chatHistory = [chatHistory[0],...chatHistory.slice(-8)];
+  }
+
+  // Show typing indicator
+  const typingDiv = addMessage('Typing...', 'bot typing');
 
   try {
-    const response = await fetch(GROK_API_URL, {
-      method: "POST",
+    // Check if user wants random anime
+    const needsRandom = /random|pick|suggest|recommend.*anime|কোনটা দেখব/i.test(message);
+
+    let messagesToSend = [...chatHistory];
+
+    // If random needed, inject the list + instruction
+    if (needsRandom) {
+      const animeObj = JSON.parse(getAnimeListJSON());
+      const titles = Object.keys(animeObj);
+      const randomTitle = titles[Math.floor(Math.random() * titles.length)];
+      const epCount = animeObj[randomTitle];
+
+      // Replace last user message with enhanced version
+      messagesToSend[messagesToSend.length - 1] = {
+        role: 'user',
+        content: `User asked: "${message}". I randomly picked from Fardin's list: "${randomTitle}" which has ${epCount} episodes. Now reply in a fun way about this anime, mention the episode count, and ask if they want details.`
+      };
+    }
+
+    const response = await fetch(proxyUrl + encodeURIComponent(apiUrl), {
+      method: 'POST',
       headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${GROK_API_KEY}`
+        'Authorization': `Bearer ${CEREBRAS_API_KEY}`,
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        model: "llama-3.3-70b-versatile",
-        messages: chatHistory,
-        max_tokens: 500,
+        model: 'llama3.1-8b',
+        messages: messagesToSend,
+        temperature: 0.8,
+        max_tokens: 200, // ছোট রিপ্লাই = token বাঁচবে
         stream: false
       })
     });
 
     const data = await response.json();
-    typingEl.remove();
 
-    const reply = data?.choices?.[0]?.message?.content;
-    if (reply) {
-      chatHistory.push({ role: "assistant", content: reply });
-      addMessage(reply, "bot");
+    // Remove typing indicator
+    typingDiv.remove();
+
+    if (data.choices && data.choices[0]) {
+      const botReply = data.choices[0].message.content;
+      addMessage(botReply, 'bot');
+      chatHistory.push({ role: 'assistant', content: botReply });
     } else {
-      addMessage("Sorry, no response. Try again!", "bot");
+      throw new Error('No response from API');
     }
 
-  } catch (err) {
-    typingEl.remove();
-    addMessage("⚠️ Network error!", "bot");
-    console.error(err);
+  } catch (error) {
+    typingDiv.remove();
+    addMessage('Sorry, something went wrong ⚡ Try again!', 'bot');
+    console.error('Cerebras Error:', error);
   }
 }
 
+// ===== ADD MESSAGE TO UI =====
 function addMessage(text, type) {
-  const messages = document.getElementById("chatMessages");
-  const div = document.createElement("div");
-  div.classList.add("msg", type);
-  div.textContent = text;
-  messages.appendChild(div);
-  messages.scrollTop = messages.scrollHeight;
-  return div;
+  const msgDiv = document.createElement('div');
+  msgDiv.className = `msg ${type}`;
+  msgDiv.textContent = text;
+  chatMessages.appendChild(msgDiv);
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+  return msgDiv;
 }
+
+// ===== ENTER KEY SUPPORT =====
+chatInput.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    sendMessage();
+  }
+});
+
+// ===== CLOSE CHAT ON OUTSIDE CLICK =====
+document.addEventListener('click', (e) => {
+  if (!chatBox.contains(e.target) &&!chatBubble.contains(e.target)) {
+    chatBox.classList.remove('open');
+  }
+});
+
+// ===== AI CONTEXT HELPER - শুধু দরকারের সময় লিস্ট পাঠাবে =====
+const originalFetch = window.fetch;
+
+window.fetch = function(...args) {
+  const [url, options] = args;
+
+  // শুধু Cerebras API call হলে intercept করো
+  if (url.includes('cerebras.ai') && options?.body) {
+    try {
+      const body = JSON.parse(options.body);
+      const userMsg = body.messages[body.messages.length - 1]?.content || '';
+
+      let extraInfo = '';
+
+      // 1. যদি নাম্বার দিয়ে anime চায়: "78 number anime"
+      const numMatch = userMsg.match(/#?(\d+)\s*(number|no\.?|th|st|nd|rd)?/i);
+      if (numMatch) {
+        const num = parseInt(numMatch[1]);
+        const cards = document.querySelectorAll('.anime-card,.card');
+
+        for (let card of cards) {
+          const numEl = card.querySelector('[class*="number"], [class*="no"]');
+          const titleEl = card.querySelector('h3, [class*="title"]');
+
+          if (numEl && titleEl) {
+            const cardNum = parseInt(numEl.textContent.replace(/\D/g, ''));
+            if (cardNum === num) {
+              extraInfo = `\n[DATA]: Anime #${num} is "${titleEl.textContent.trim()}". Use this exact info.`;
+              break;
+            }
+          }
+        }
+
+        if (!extraInfo) {
+          extraInfo = `\n[DATA]: Fardin hasn't watched anime #${num} yet.`;
+        }
+      }
+
+      // 2. যদি random/suggest চায়
+      if (/random|suggest|pick|recommend/i.test(userMsg)) {
+        const cards = document.querySelectorAll('.anime-card,.card');
+        const randomCard = cards[Math.floor(Math.random() * cards.length)];
+
+        const numEl = randomCard.querySelector('[class*="number"], [class*="no"]');
+        const titleEl = randomCard.querySelector('h3, [class*="title"]');
+
+        if (numEl && titleEl) {
+          const num = numEl.textContent.replace(/\D/g, '');
+          const title = titleEl.textContent.trim();
+          extraInfo = `\n[DATA]: Suggest this anime: #${num} "${title}". Talk about it.`;
+        }
+      }
+
+      // System prompt এ extra info যোগ করো
+      if (extraInfo && body.messages[0]?.role === 'system') {
+        body.messages[0].content += extraInfo;
+        options.body = JSON.stringify(body);
+      }
+
+    } catch (e) {
+      console.log('AI context error:', e);
+    }
+  }
+
+  return originalFetch.apply(this, args);
+};
