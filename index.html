@@ -10,14 +10,14 @@
  
 </head>
 
+
 <div class="sticky-search" id="stickySearch">
     <input type="text" placeholder="Search anime..." onkeyup="filterAnime(this.value)">
 </div>
 
 <body>
   <div class="header">
-    <h1>Let's See What Anime I Have Watched:-</h1>
-  </div>
+<h1 onclick="window.location.reload()" style="cursor:pointer;" title="Click to refresh">Let's See What Anime I Have Watched:-</h1>  </div>
 
   <div class="search-wrap">
     <input type="text" id="searchBox" placeholder="🔍 Search anime..." oninput="filterCards()"/>
@@ -586,11 +586,6 @@
       <button type="submit">Drop</button>
     </form>
   </div>
-
-  <!-- AI Chatbot Widget -->
-<div class="chat-bubble" id="chatBubble" onclick="toggleChat()">
-  💬
-</div>
 
 <!-- AI Chatbot Widget -->
 <div class="chat-bubble" id="chatBubble" onclick="toggleChat()">
