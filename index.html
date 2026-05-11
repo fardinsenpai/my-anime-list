@@ -4,18 +4,70 @@
   <meta charset="UTF-8"/>
   <link rel="icon" type="image/png" href="logo.png">
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Let's See What Anime I Have Watched</title>
+  <title>Fardin's Anime Hub</title>
   <link rel="stylesheet" href="style.css">
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
  
 </head>
 
-
-<div class="sticky-search" id="stickySearch">
-    <input type="text" placeholder="Search anime..." onkeyup="filterAnime(this.value)">
-</div>
-
 <body>
+
+  <!-- ===== TOP NAVIGATION BAR ===== -->
+<header class="topbar">
+  <button class="menu-btn" id="menuBtn" aria-label="Menu">
+    <span></span>
+    <span></span>
+    <span></span>
+  </button>
+  
+  <div class="topbar-logo" onclick="window.scrollTo({top:0,behavior:'smooth'})">
+    <img src="logo.png" alt="Logo">
+    <span>FARDIN'S ANIME HUB</span>
+  </div>
+  
+  <button class="search-btn" id="topSearchBtn" aria-label="Search">
+    <svg viewBox="0 0 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+  </button>
+</header>
+
+<!-- === UPDATED SIDEMENU === -->
+<div class="sidemenu" id="sideMenu">
+  <div class="side-header">
+    <img src="logo.png" alt="">
+    <span>Fardin's Anime</span>
+  </div>
+  
+  <nav class="side-nav">
+<div class="side-divider">⭐ Top 5 Picks</div>
+<div class="side-dropdown" id="topFiveDropdown">
+  <button class="dropdown-btn" id="dropBtn">🎭 By Genre <i class="arrow">▼</i></button>
+  <div class="dropdown-container">
+    <a href="javascript:void(0)" onclick="filterTopFive('Action')">⚔ Action</a>
+    <a href="javascript:void(0)" onclick="filterTopFive('Adventure')">🗺 Adventure</a>
+    <a href="javascript:void(0)" onclick="filterTopFive('Isekai')">🌀 Isekai</a>
+    <a href="javascript:void(0)" onclick="filterTopFive('Comedy')">😂 Comedy</a>
+    <a href="javascript:void(0)" onclick="filterTopFive('Sports')">🏆 Sports</a>
+    <a href="javascript:void(0)" onclick="filterTopFive('Romcom')">💕 Romcom</a>
+    <a href="javascript:void(0)" onclick="filterTopFive('Sci-Fi')">🚀 Sci-Fi</a>
+    <a href="javascript:void(0)" onclick="filterTopFive('Historical')">📜 History</a>
+    <a href="javascript:void(0)" onclick="filterTopFive('Dark / Horror')">💀 Dark</a>
+    <a href="javascript:void(0)" onclick="filterTopFive('Slice of Life')">🌸 SOL</a>
+    <a href="javascript:void(0)" onclick="filterTopFive('Psychological')">🧠 Psychological</a>
+    <a href="javascript:void(0)" onclick="filterTopFive('Movie')">🎬 Movie</a>
+  </div>
+</div>  
+
+<a href="javascript:void(0)" onclick="openSuggestion()">
+  <i>💬</i> Drop Suggestion
+</a>  
+  
+  <a href="https://facebook.com/fardin.senpai" target="_blank"><i>💙</i> Facebook</a>
+  </nav>
+</div>
+<div class="menu-overlay" id="menuOverlay"></div>
+
+
+
   <div class="header">
 <h1 onclick="window.location.reload()" style="cursor:pointer;" title="Click to refresh">Let's See What Anime I Have Watched:-</h1>  </div>
 
@@ -38,7 +90,7 @@
     </div>
   </div>
 
-  <body>
+  
   <!-- ⚡ Lightning Canvas ⚡ -->
   <canvas id="lightningCanvas"></canvas>
   
@@ -47,8 +99,6 @@
     ...
   </div>
   <!-- ... -->
-</body>
-
   <div class="filter-section">
     <div class="filter-heading">Filter by genre</div>
     <div class="pills-wrap" id="pillsWrap"></div>
@@ -562,30 +612,63 @@
 
 </div>
 
-  <footer>
-    <p>❤️‍🩹
-      <h1 style="font-family:'Poppins',sans-serif;color:#1E90FF;font-size:23px;text-shadow:2px 2px 4px rgba(0,0,0,0.2);text-align:center;">
-        End of Fardin's Anime Watch List
-      </h1>
-    </p>
-  </footer>
+  <footer class="anime-footer">
 
-  <a href="https://www.facebook.com/fardin.senpai" target="_blank" class="fb-link">🌸 My Facebook</a>
+  <div class="footer-glow"></div>
 
-  <div class="chat-icon" onclick="toggleSakuraChat()">
-    💬
-    <span class="pulse"></span>
+  <h2>✨ End of Fardin's Anime Journey ✨</h2>
+
+  <p>
+    Thanks for exploring my anime universe 🌌
+  </p>
+
+  <div class="footer-line"></div>
+
+  <span>
+    Made with ❤️ by Fardin Ahmed Tasfin
+  </span>
+
+</footer>
+
+ <div class="suggestion-panel" id="suggestionPanel">
+
+  <div class="suggestion-header">
+    <span>💬 Drop Suggestion</span>
+    <button onclick="closeSuggestion()">✕</button>
   </div>
 
-  <div class="chat-box" id="sakuraChatBox">
-    <form action="https://formspree.io/f/xkoyoqog" method="POST">
-      <h2>Drop An Anime Suggestion</h2>
-      <input type="text" name="Adviser Name" placeholder="Your Name" required>
-      <textarea name="Suggested Anime" placeholder="Suggest an Anime..." required></textarea>
-      <textarea name="Reason To Watch" placeholder="Why I should Watch It?(not required)"></textarea>
-      <button type="submit">Drop</button>
-    </form>
-  </div>
+  <form
+    action="https://formspree.io/f/xkoyoqog"
+    method="POST"
+    class="suggestion-form"
+  >
+
+    <input
+      type="text"
+      name="username"
+      placeholder="👤 Your Name"
+      required
+    >
+
+    <input
+      type="text"
+      name="anime"
+      placeholder="🎌 Anime Name"
+      required
+    >
+
+    <textarea
+      name="reason"
+      placeholder="✨ Why should I watch it? (Optional)"
+    ></textarea>
+
+    <button type="submit" class="send-btn">
+      🚀 Send Suggestion
+    </button>
+
+  </form>
+
+</div>
 
 <!-- AI Chatbot Widget -->
 <div class="chat-bubble" id="chatBubble" onclick="toggleChat()">
