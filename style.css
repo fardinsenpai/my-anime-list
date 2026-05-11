@@ -33,7 +33,287 @@
     .card.hidden{display:none}
     footer{text-align:center;margin-top:70px;color:#333;font-size:.78rem}
     
+   /* ══════════════════════════════════════
+   TOP NAVIGATION BAR - SLIM VERSION
+══════════════════════════════════════ */
+.topbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 48px;
+  background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #1e1b4b 100%);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid rgba(245,197,24,0.18);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12px;
+  z-index: 10000;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.4);
+}
 
+.menu-btn {
+  width: 36px;
+  height: 36px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+  padding: 6px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+.menu-btn:hover { background: rgba(245,197,24,0.1); }
+.menu-btn span {
+  display: block;
+  width: 20px;
+  height: 2.5px;
+  background: #f5c518;
+  border-radius: 2px;
+  transition: all 0.2s ease;
+  box-shadow: 0 0 6px rgba(245,197,24,0.4);
+}
+
+.topbar-logo {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+.topbar-logo img {
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 5px rgba(245,197,24,0.5));
+}
+.topbar-logo span {
+  font-family: 'Orbitron', monospace;
+  font-weight: 800;
+  font-size: 0.85rem;
+  background: linear-gradient(135deg, #f5c518 0%, #ff6b35 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: 0.5px;
+}
+
+.search-btn {
+  width: 40px; /* সাইজ কিছুটা বাড়ানো হয়েছে */
+  height: 40px;
+  background: transparent;
+  border: none;
+  color: #f5c518 !important; /* টেক্সট/আইকন কালার */
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  padding: 0;
+}
+
+.search-btn:hover {
+  background: rgba(245, 197, 24, 0.15);
+  transform: scale(1.1);
+}
+
+.search-btn svg {
+  width: 22px !important; /* আইকনটি বড় করা হয়েছে */
+  height: 22px !important;
+  stroke: #f5c518 !important; /* বর্ডার কালার */
+  fill: none; /* যাতে ভেতরটা খালি থাকে */
+  filter: drop-shadow(0 0 8px rgba(245, 197, 24, 0.7)); /* উজ্জ্বল গ্লো ইফেক্ট */
+  display: block;
+}
+
+
+/* === NEW SIDEMENU - 2026 UPDATE === */
+.sidemenu {
+  position: fixed !important;
+  top: 0 !important;
+  left: -280px !important;
+  width: 270px !important;
+  height: 100vh !important;
+  background: rgba(15, 15, 30, 0.95) !important;
+  backdrop-filter: blur(12px) !important;
+  z-index: 100000 !important;
+  transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  box-shadow: 4px 0 20px rgba(0,0,0,0.5) !important;
+  border-right: 1px solid rgba(255,204,0,0.2) !important;
+}
+.sidemenu.open { left: 0 !important; }
+
+.side-header {
+  height: 52px !important;
+  background: linear-gradient(90deg, #3a2f7e, #2d2a70) !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  padding: 0 18px !important;
+  border-bottom: 2px solid #ffcc00 !important;
+}
+.side-header img {
+  width: 28px !important;
+  height: 28px !important;
+  filter: drop-shadow(0 0 8px #ffcc00) !important;
+  animation: pikaGlow 2s infinite alternate !important;
+}
+.side-header span {
+  color: #ffcc00 !important;
+  font-family: 'Orbitron', sans-serif !important;
+  font-weight: 700 !important;
+  font-size: 16px !important;
+  text-shadow: 0 0 10px rgba(255,204,0,0.6) !important;
+}
+
+.side-nav {
+  padding: 12px 0 !important;
+}
+.side-nav a {
+  display: flex !important;
+  align-items: center !important;
+  gap: 14px !important;
+  padding: 14px 22px !important;
+  color: #d0d0e0 !important;
+  text-decoration: none !important;
+  font-size: 15px !important;
+  font-weight: 500 !important;
+  transition: all 0.2s !important;
+  border-left: 3px solid transparent !important;
+}
+.side-nav a i {
+  font-size: 18px !important;
+  width: 24px !important;
+  text-align: center !important;
+}
+.side-nav a:hover {
+  background: rgba(255,204,0,0.1) !important;
+  color: #ffcc00 !important;
+  border-left-color: #ffcc00 !important;
+  transform: translateX(4px) !important;
+}
+
+@keyframes pikaGlow {
+  0% { filter: drop-shadow(0 0 5px #ffcc00); }
+  100% { filter: drop-shadow(0 0 12px #ffcc00); }
+}
+
+/* Overlay update */
+.menu-overlay {
+  position: fixed !important;
+  inset: 0 !important;
+  background: rgba(0,0,0,0.6) !important;
+  backdrop-filter: blur(2px) !important;
+  z-index: 99998 !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  transition: 0.3s !important;
+}
+.menu-overlay.open { opacity: 1 !important; visibility: visible !important; }
+
+
+.side-divider {
+  padding: 18px 22px 8px;
+  font-size: 11px;
+  text-transform: uppercase;
+  color: #ffcc00;
+  letter-spacing: 2px;
+  font-weight: 800;
+  font-family: 'Orbitron', sans-serif;
+  opacity: 0.8;
+}
+
+.dropdown-btn {
+  width: 100%;
+  padding: 14px 22px;
+  background: none;
+  border: none;
+  color: #d0d0e0;
+  font-size: 15px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: 0.3s;
+}
+
+.dropdown-btn:hover { color: #ffcc00; }
+
+.dropdown-container {
+  display: none;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.side-dropdown.active .dropdown-container {
+  display: block;
+}
+
+.dropdown-container a {
+  padding: 10px 40px !important;
+  font-size: 13px !important;
+}
+
+.arrow {
+  transition: transform 0.3s;
+  font-style: normal;
+}
+
+.side-dropdown.active .arrow {
+  transform: rotate(180deg);
+}
+
+.sidemenu {
+  /* ... তোমার আগের কোড ... */
+  overflow-y: auto !important; /* সাইডবার লম্বা হলে এর ভেতরেই স্ক্রল হবে */
+  max-height: 100vh !important; /* স্ক্রিনের উচ্চতার বেশি হবে না */
+}
+
+/* স্ক্রলবারটিকে সুন্দর করার জন্য (ঐচ্ছিক) */
+.sidemenu::-webkit-scrollbar {
+  width: 5px;
+}
+.sidemenu::-webkit-scrollbar-thumb {
+  background: rgba(255, 204, 0, 0.3);
+  border-radius: 10px;
+}
+
+/* === 1. ব্যাকগ্রাউন্ড কালার লুপ === */
+.topbar {
+  background: linear-gradient(90deg, #2d2a70, #3b2e7a, #2d2a70);
+  background-size: 200% 100%;
+  animation: barShift 6s linear infinite;
+}
+@keyframes barShift {
+  0% { background-position: 0% 0%; }
+  100% { background-position: 200% 0%; }
+}
+
+/* === 2. PIKACHU বাউন্স লুপ === */
+.topbar-logo img {
+  animation: pikaBounce 1.8s ease-in-out infinite;
+  filter: drop-shadow(0 0 6px #ffcc00);
+}
+@keyframes pikaBounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+
+/* === 4. হ্যামবার্গার + সার্চ পালস === */
+.menu-btn span, #topSearchBtn {
+  animation: iconPulse 2s infinite;
+}
+@keyframes iconPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
     /* ══════════════════════════════════════
    SEARCH BOX ANIMATION
 ══════════════════════════════════════ */
@@ -784,168 +1064,189 @@
 }
 
 
-/* =========================================================================
-   === FARDIN'S OTAKU LIST - PREMIUM GLASS SAKURA CHAT BOX ===
-   ========================================================================= */
+/* =========================================
+   ANIME SUGGESTION SIDE PANEL
+========================================= */
 
-/* --- ১. ইউনিক ফ্লোটিং বাটন (অ্যানিমেশন এবং লাইভ এফেক্ট সহ) --- */
-#otaku-chat-icon {
-    position: fixed;
-    bottom: 30px;
-    right: 30px;
-    width: 70px;
-    height: 70px;
-    /* গ্রেডিয়েন্ট এবং ট্রান্সপারেন্সি */
-    background: linear-gradient(135deg, rgba(255, 107, 107, 0.8), rgba(77, 150, 255, 0.8));
-    border-radius: 24px; /* গোল না করে আধুনিক কোণ */
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
-    z-index: 2000; /* নিশ্চিত করুন যেন এটি সব কার্ডের ওপরে থাকে */
-    transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    border: 2px solid rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(5px);
+.suggestion-panel{
+  position:fixed;
+  top:0;
+  left:-340px;
+  width:320px;
+  height:100vh;
+  background:rgba(15,15,30,0.96);
+  backdrop-filter:blur(14px);
+  border-right:1px solid rgba(255,204,0,0.18);
+  z-index:100001;
+  transition:left 0.35s cubic-bezier(0.4,0,0.2,1);
+  display:flex;
+  flex-direction:column;
+  padding:18px;
+  overflow:hidden;
+  box-shadow:4px 0 25px rgba(0,0,0,0.45);
 }
 
-/* বাটন অ্যানিমেশন */
-#otaku-chat-icon:hover {
-    transform: translateY(-10px) rotate(5deg);
-    background: linear-gradient(135deg, #ff6b6b, #4d96ff);
-    box-shadow: 0 20px 45px rgba(255, 107, 107, 0.5);
+/* OPEN STATE */
+.suggestion-panel.open{
+  left:0;
 }
 
-#otaku-chat-icon .chat-bubble {
-    font-size: 32px;
-    line-height: 1;
+/* =========================================
+   HEADER
+========================================= */
+
+.suggestion-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:20px;
+  padding-bottom:14px;
+  border-bottom:1px solid rgba(255,255,255,0.08);
 }
 
-#otaku-chat-icon .live-status {
-    font-size: 10px;
-    font-weight: 900;
-    color: white;
-    background: #ff6b6b;
-    padding: 2px 6px;
-    border-radius: 10px;
-    margin-top: 4px;
-    letter-spacing: 1px;
-    animation: pulseStatus 1.5s infinite;
+.suggestion-header span{
+  font-family:'Orbitron',sans-serif;
+  font-size:15px;
+  font-weight:700;
+  color:#ffcc00;
+  text-shadow:0 0 10px rgba(255,204,0,0.4);
+  letter-spacing:0.5px;
 }
 
-@keyframes pulseStatus {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.6; }
+.suggestion-header button{
+  width:34px;
+  height:34px;
+  border:none;
+  border-radius:10px;
+  background:rgba(255,255,255,0.05);
+  color:#ffcc00;
+  font-size:18px;
+  cursor:pointer;
+  transition:0.25s ease;
 }
 
-/* ফ্লোটিং গ্লো রিং এফেক্ট */
-#otaku-chat-icon .glow-ring {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    border-radius: 24px;
-    background: transparent;
-    border: 2px solid #ff6b6b;
-    animation: ringPulse 2s infinite;
-    z-index: -1;
+.suggestion-header button:hover{
+  background:rgba(255,204,0,0.12);
+  transform:rotate(90deg);
 }
 
-@keyframes ringPulse {
-    0% { transform: scale(1); opacity: 0.8; }
-    100% { transform: scale(1.4); opacity: 0; }
+/* =========================================
+   FORM
+========================================= */
+
+.suggestion-form{
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+  flex:1;
 }
 
-/* Floating Chat Icon */
-.chat-icon {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  background: linear-gradient(45deg, #ff7eb9, #7afcff);
-  color: #fff;
-  font-size: 24px;
-  padding: 15px;
-  border-radius: 50%;
-  cursor: pointer;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-  z-index: 1000;
+/* =========================================
+   INPUTS
+========================================= */
+
+.suggestion-form input,
+.suggestion-form textarea{
+  width:100%;
+  border:none;
+  outline:none;
+  background:#13132a;
+  color:white;
+  border-radius:14px;
+  padding:14px 15px;
+  font-size:14px;
+  font-family:'Poppins',sans-serif;
+  border:1px solid rgba(255,255,255,0.08);
+  transition:all 0.3s ease;
 }
 
-@keyframes pulse {
-  0% { transform: scale(0.8); opacity: 0.7; }
-  50% { transform: scale(1.2); opacity: 1; }
-  100% { transform: scale(0.8); opacity: 0.7; }
+/* PLACEHOLDER */
+.suggestion-form input::placeholder,
+.suggestion-form textarea::placeholder{
+  color:#777;
 }
 
-/* Chat Box */
-.chat-box {
-  position: fixed;
-  bottom: 80px;
-  right: 20px;
-  width: 300px;
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(12px);
-  border-radius: 15px;
-  padding: 20px;
-  box-shadow: 0 8px 25px rgba(0,0,0,0.4);
-  opacity: 0;
-  transform: translateY(50px);
-  pointer-events: none;
-  transition: all 0.5s ease;
-  z-index: 999;
+/* FOCUS EFFECT */
+.suggestion-form input:focus,
+.suggestion-form textarea:focus{
+  border-color:#ffcc00;
+  box-shadow:
+    0 0 15px rgba(255,204,0,0.2),
+    0 0 30px rgba(255,204,0,0.08);
+  transform:translateY(-1px);
 }
 
-/* Active State */
-.chat-box.active {
-  opacity: 1;
-  transform: translateY(0);
-  pointer-events: auto;
+/* =========================================
+   TEXTAREA
+========================================= */
+
+.suggestion-form textarea{
+  flex:1;
+  resize:none;
+  min-height:180px;
+  line-height:1.5;
 }
 
-/* Form Elements */
-.chat-box h2 {
-  margin: 0 0 10px;
-  color: #fff;
-  font-size: 18px;
-  text-align: center;
-}
-.chat-box input, .chat-box textarea {
-  width: 100%;
-  margin: 8px 0;
-  padding: 10px;
-  border: none;
-  border-radius: 8px;
-  outline: none;
-}
-.chat-box button {
-  width: 100%;
-  padding: 10px;
-  background: linear-gradient(45deg, #ff7eb9, #7afcff);
-  border: none;
-  border-radius: 8px;
-  color: #fff;
-  font-weight: bold;
-  cursor: pointer;
-  transition: 0.3s;
-}
-.chat-box button:hover {
-  opacity: 0.9;
+/* =========================================
+   SEND BUTTON
+========================================= */
+
+.send-btn{
+  border:none;
+  outline:none;
+  padding:14px;
+  border-radius:14px;
+  cursor:pointer;
+  font-size:15px;
+  font-weight:700;
+  font-family:'Poppins',sans-serif;
+  background:linear-gradient(135deg,#ffcc00 0%,#ff6b35 100%);
+  color:#111;
+  transition:all 0.3s ease;
+  box-shadow:0 8px 20px rgba(255,107,53,0.25);
 }
 
-/* Responsive */
-@media (max-width: 480px) {
-  .chat-box {
-    width: 90%;
-    right: 5%;
+/* HOVER */
+.send-btn:hover{
+  transform:translateY(-3px) scale(1.02);
+  box-shadow:0 14px 28px rgba(255,107,53,0.35);
+}
+
+/* CLICK */
+.send-btn:active{
+  transform:scale(0.98);
+}
+
+/* =========================================
+   SCROLLBAR
+========================================= */
+
+.suggestion-panel::-webkit-scrollbar{
+  width:5px;
+}
+
+.suggestion-panel::-webkit-scrollbar-thumb{
+  background:rgba(255,204,0,0.25);
+  border-radius:10px;
+}
+
+/* =========================================
+   MOBILE RESPONSIVE
+========================================= */
+
+@media (max-width:480px){
+
+  .suggestion-panel{
+    width:100%;
+    left:-100%;
+    border-right:none;
   }
-}
-/* Form Container */
-form {
-  max-width: 400px;   /* PC তে খুব বড় না হয় */
-  margin: 0 auto;     /* সবসময় center এ থাকবে */
-  text-align: center;
-}
 
+  .suggestion-panel.open{
+    left:0;
+  }
+
+}
 /* Footer Text */
 .footer-text {
   color: #7afcff;     /* একটু softer neon blue */
@@ -959,33 +1260,6 @@ form {
     width: 90%;       /* Mobile এ full width */
   }
 }
-.fb-link {
-  display: inline-block;
-  padding: 10px 20px;
-  background: rgba(255,255,255,0.15);
-  backdrop-filter: blur(10px);
-  border-radius: 12px;
-  color: #fff;
-  text-decoration: none;
-  font-weight: bold;
-  transition: 0.3s;
-}
-.fb-link:hover {
-  background: linear-gradient(45deg, #ff7eb9, #7afcff);
-  transform: translateY(-3px);
-}
-a {
-  text-decoration: none;   /* underline remove */
-  color: #7afcff;          /* তোমার neon blue */
-  font-weight: bold;
-}
-
-a:hover {
-  color: #ff7eb9;          /* hover এ pink glow */
-}
-
-
-
 
 
 /* ── Filter heading ─────────────────────────── */
@@ -1639,4 +1913,118 @@ a:hover {
     padding: 9px 14px !important;
     font-size: 10px !important;
   }
+}
+
+/* =========================================
+   PREMIUM ANIME FOOTER
+========================================= */
+
+.anime-footer{
+  position:relative;
+  margin-top:90px;
+  padding:50px 20px;
+  text-align:center;
+  overflow:hidden;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(20,20,35,0.2),
+      rgba(20,20,35,0.9)
+    );
+
+  border-top:1px solid rgba(255,255,255,0.08);
+}
+
+/* Glow background */
+.footer-glow{
+  position:absolute;
+  width:300px;
+  height:300px;
+  background:radial-gradient(
+    circle,
+    rgba(30,144,255,0.18),
+    transparent 70%
+  );
+
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  filter:blur(40px);
+  z-index:0;
+}
+
+/* Main title */
+.anime-footer h2{
+  position:relative;
+  z-index:2;
+
+  font-family:'Orbitron',sans-serif;
+  font-size:clamp(1.4rem,4vw,2.2rem);
+  font-weight:800;
+
+  background:linear-gradient(
+    135deg,
+    #00c6ff 0%,
+    #0072ff 50%,
+    #8f5cff 100%
+  );
+
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  background-clip:text;
+
+  letter-spacing:1px;
+  margin-bottom:14px;
+
+  text-shadow:
+    0 0 15px rgba(0,114,255,0.25);
+}
+
+/* Subtitle */
+.anime-footer p{
+  position:relative;
+  z-index:2;
+
+  color:#b8b8d0;
+  font-size:15px;
+  margin-bottom:22px;
+  font-family:'Poppins',sans-serif;
+}
+
+/* Decorative line */
+.footer-line{
+  width:120px;
+  height:3px;
+  margin:0 auto 22px;
+
+  border-radius:999px;
+
+  background:linear-gradient(
+    90deg,
+    transparent,
+    #00c6ff,
+    #8f5cff,
+    transparent
+  );
+
+  box-shadow:
+    0 0 12px rgba(0,198,255,0.5);
+}
+
+/* Bottom text */
+.anime-footer span{
+  position:relative;
+  z-index:2;
+
+  color:#7d7d95;
+  font-size:13px;
+  letter-spacing:0.5px;
+  font-family:'Poppins',sans-serif;
+}
+
+/* Small hover effect */
+.anime-footer:hover .footer-line{
+  transform:scaleX(1.15);
+  transition:0.4s ease;
 }
