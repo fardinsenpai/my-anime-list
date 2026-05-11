@@ -15,6 +15,183 @@ window.onload = () => {
   counterUp("episodeCount", 6166, duration);
 };
 
+// === TOPBAR MENU & SEARCH ===
+const menuBtn = document.getElementById('menuBtn');
+const sideMenu = document.getElementById('sideMenu');
+const menuOverlay = document.getElementById('menuOverlay');
+const topSearchBtn = document.getElementById('topSearchBtn');
+
+function openMenu() {
+  if(sideMenu) sideMenu.classList.add('open');
+  if(menuOverlay) menuOverlay.classList.add('open');
+}
+function closeMenu() {
+  if(sideMenu) sideMenu.classList.remove('open');
+  if(menuOverlay) menuOverlay.classList.remove('open');
+}
+
+if(menuBtn) {
+  menuBtn.onclick = () => {
+    sideMenu && sideMenu.classList.contains('open') ? closeMenu() : openMenu();
+  };
+}
+
+if(topSearchBtn) {
+  topSearchBtn.onclick = (e) => {
+    e.preventDefault();
+    const box = document.getElementById('searchBox');
+    if(box) {
+      const topOffset = 80;
+      const elementPosition = box.getBoundingClientRect().top + window.pageYOffset;
+      const offsetPosition = elementPosition - topOffset;
+      
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth'
+      });
+      
+      setTimeout(()=>box.focus(), 500);
+    }
+  };
+}
+
+if(menuOverlay) menuOverlay.onclick = closeMenu;
+
+// === ১. ডাটা ও অর্ডার (আগের মতোই রাখা হয়েছে) ===
+const TOP_5_DATA = {
+  "Action": [3, 6, 1, 5, 10],
+  "Adventure": [4, 7, 17, 24, 55],
+  "Isekai": [105, 99, 76, 135, 181],
+  "Comedy": [221, 119, 191, 123, 219],
+  "Sports": [21, 9, 202, 186, 8],
+  "Romcom": [109, 219, 41, 103, 56],
+  "Sci-Fi": [26, 76, 164, 73, 220],
+  "Historical": [13, 92, 49, 24, 86],
+  "Dark / Horror": [29, 205, 12, 53, 217],
+  "Slice of Life": [223, 20, 113, 47, 156],
+  "Psychological": [12, 31, 95, 47, 68],
+  "Movie": [38, 39, 81, 122, 48]
+};
+
+// === ২. মেইন ফিল্টার ফাংশন (টাইটেল আপডেট ও সাইজ কন্ট্রোল) ===
+function filterTopFive(genre) {
+  const targetIds = TOP_5_DATA[genre]; 
+  const grid = document.getElementById('grid');
+  const cards = Array.from(document.querySelectorAll('.card'));
+  
+  const mainTitle = document.querySelector('.header h1');
+  const counterSection = document.querySelector('.counter-container');
+  const searchSection = document.querySelector('.search-wrap');
+  const genreSection = document.querySelector('.filter-section');
+
+  // টাইটেল পরিবর্তন এবং সাইজ ছোট করা
+  if (mainTitle) {
+    mainTitle.textContent = `Top 5 Picks From ${genre}`;
+    mainTitle.style.fontSize = "clamp(1.4rem, 4vw, 2.2rem)"; 
+  }
+
+  // সেকশন হাইড করা
+  if (counterSection) counterSection.style.display = 'none';
+  if (searchSection) searchSection.style.display = 'none';
+  if (genreSection) genreSection.style.display = 'none';
+
+  cards.forEach(card => {
+    card.classList.add('hidden');
+    card.style.display = "none";
+  });
+
+  // অর্ডার মেইনটেইন এবং ব্যাজ আপডেট
+  targetIds.forEach((id, index) => {
+    const matchingCard = cards.find(card => {
+      const numEl = card.querySelector('.number');
+      return numEl && parseInt(numEl.textContent.replace(/\D/g, '')) === id;
+    });
+
+    if (matchingCard) {
+      matchingCard.classList.remove('hidden');
+      matchingCard.style.display = "block";
+      
+      const badge = matchingCard.querySelector('.badge');
+      if (badge) badge.textContent = `Top-${index + 1}`;
+      
+      grid.appendChild(matchingCard);
+    }
+  });
+
+  if (typeof closeMenu === 'function') closeMenu();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// === ৩. ড্রপডাউন লজিক এবং রিসেট বাটন ===
+document.addEventListener('DOMContentLoaded', () => {
+  const dropBtn = document.getElementById('dropBtn');
+  const sideDropdown = document.querySelector('.side-dropdown');
+  
+  // ড্রপডাউন ওপেন/ক্লোজ (এখানে parentElement ব্যবহার করা হয়েছে)
+  if (dropBtn && sideDropdown) {
+    dropBtn.onclick = function(e) {
+      e.preventDefault();
+      sideDropdown.classList.toggle('active');
+    };
+  }
+
+  // Home রিসেট লজিক
+  const homeBtn = document.querySelector('.side-nav a[href="#"]');
+  if(homeBtn) {
+    homeBtn.onclick = (e) => {
+      e.preventDefault();
+      
+      const mainTitle = document.querySelector('.header h1');
+      if (mainTitle) {
+        mainTitle.textContent = "Let's See What Anime I Have Watched:-";
+        mainTitle.style.fontSize = ""; 
+      }
+
+      const counterSection = document.querySelector('.counter-container');
+      const searchSection = document.querySelector('.search-wrap');
+      const genreSection = document.querySelector('.filter-section');
+      
+      if(counterSection) counterSection.style.display = 'flex';
+      if(searchSection) searchSection.style.display = 'flex';
+      if(genreSection) genreSection.style.display = 'block';
+
+      const grid = document.getElementById('grid');
+      const allCards = Array.from(document.querySelectorAll('.card'));
+      allCards.sort((a, b) => {
+        const numA = parseInt(a.querySelector('.number').textContent.replace(/\D/g, ''));
+        const numB = parseInt(b.querySelector('.number').textContent.replace(/\D/g, ''));
+        return numA - numB;
+      }).forEach(card => {
+        card.classList.remove('hidden');
+        card.style.display = "block";
+        
+        const badge = card.querySelector('.badge');
+        const originalNum = card.querySelector('.number').textContent.replace(/\D/g, '');
+        if (badge) badge.textContent = `#${originalNum}`;
+        
+        grid.appendChild(card);
+      });
+      
+      if (typeof closeMenu === 'function') closeMenu();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+  }
+});
+
+// ===============================
+// SUGGESTION PANEL
+// ===============================
+
+const suggestionPanel = document.getElementById("suggestionPanel");
+
+function openSuggestion() {
+  suggestionPanel.classList.add("open");
+}
+
+function closeSuggestion() {
+  suggestionPanel.classList.remove("open");
+}
+
 (function () {
   const GENRES = {
     "All":           { icon: "✦", nums: null },
@@ -22,15 +199,17 @@ window.onload = () => {
     "Adventure":     { icon: "🗺", nums: new Set([1,2,3,4,5,6,7,10,13,17,18,25,29,36,37,39,46,62,64,66,76,79,81,93,100,104,105,118,120,126,128,134,135,136,137,143,149,154,155,156,160,161,163,165,167,171,179,181,182,183,188,189,191,206,207,208,209,214,216,224,231,233]) },
     "Comedy":        { icon: "😂", nums: new Set([4,5,7,14,15,19,23,32,33,40,43,56,62,63,65,67,69,70,74,84,85,90,101,105,108,115,117,123,131,133,134,138,139,140,144,148,150,151,154,155,157,162,169,171,175,176,185,186,195,196,197,198,199,201,213,215,219,220,221,222,229]) },
     "Sports":        { icon: "🏆", nums: new Set([8,9,16,21,30,44,94,96,98,110,125,129,132,200,202,235]) },
+    "Movie":         { icon: "🎬", nums: new Set([38, 39, 42, 44, 46, 48, 79, 81, 122, 129]) },
     "Isekai":        { icon: "🌀", nums: new Set([18,34,52,63,68,69,82,89,90,93,99,102,105,114,115,117,120,127,128,131,133,134,135,137,139,142,143,149,154,155,160,161,163,165,167,169,170,171,173,174,175,181,184,185,187,189,194,198,199,201,207,208,209,212,214,216,218,222,226,228,232,233,236]) },
     "Dark / Horror": { icon: "💀", nums: new Set([10,11,12,22,24,27,28,29,40,42,47,48,49,50,52,53,65,66,67,68,73,75,76,95,99,100,114,116,130,141,152,158,159,170,172,180,182,184,190,203,205,214,217,225,228,231]) },
     "Romcom":        { icon: "💕", nums: new Set([20,35,38,41,45,51,57,58,59,60,71,72,77,80,82,83,84,85,87,91,103,106,108,109,112,113,122,132,138,142,153,159,162,166,168,177,185,193,197,207,210,211,219,223]) },
     "Slice of Life": { icon: "🌸", nums: new Set([12,19,20,27,31,35,38,39,43,47,51,54,57,58,59,72,77,79,83,88,95,103,109,111,112,113,119,121,122,123,124,133,138,144,145,147,148,150,151,153,156,157,160,161,164,166,168,172,176,177,178,186,189,191,192,193,196,204,206,208,210,213,215,219,222,223,224,230,235]) },
     "Sci-Fi":        { icon: "🚀", nums: new Set([25,26,61,65,71,73,75,78,106,135,141,164,183,213,217,234]) },
     "Historical":    { icon: "📜", nums: new Set([13,24,42,49,77,86,88,92,146,158,168,227]) },
+    "Psychological": { icon: "🧠", nums: new Set([12, 29, 31, 47, 53, 68, 73, 95, 152, 205]) },
+
   };
 
-  
 
   const TOTAL = document.querySelectorAll('.card').length;
 
@@ -594,7 +773,7 @@ Rules:
 4. Keep answers short, fun, and engaging.
 5. Use ⚡ emoji occasionally.
 6. Greet user with As-salamu alaykum and well wishes when appropriate, like first message or when user greets.
-7. If user asks for details about the website owner and Fardin, say: The ID link is under the website all cards.
+7. If user asks for details about the website owner and Fardin, say: It will be found on The side Menu Bar.Also Suggestion Box And Top 5 anime by Genre will be found there
 8. Tell more good things about Fardin and his anime taste. Make it fun. Fardin loves diverse genres - action, comedy, romance, thriller. He appreciates good storytelling and character development.
 9. You can use your general anime knowledge to make answers better. If I give you [DATA] context, use ONLY that for specific anime info. Don't mention you have external info.
 
