@@ -1180,10 +1180,18 @@
    TEXTAREA
 ========================================= */
 
-.suggestion-form textarea{
-  resize:none;
-  min-height:120px;
-  max-height:220px;
+@media (max-width:480px){
+
+  .suggestion-form textarea{
+    min-height:90px !important;
+    max-height:120px !important;
+  }
+
+  .suggestion-panel{
+    padding-top:70px;
+    padding-bottom:20px;
+  }
+
 }
 /* =========================================
    SEND BUTTON
