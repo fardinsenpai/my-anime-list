@@ -1180,36 +1180,36 @@
    TEXTAREA
 ========================================= */
 
-@media (max-width:480px){
+@media (max-width: 480px) {
+    /* পুরো প্যানেলকে ভিউপোর্টের সাথে মানিয়ে নেওয়া */
+    .suggestion-panel {
+        display: flex;
+        flex-direction: column;
+        max-height: 100vh;
+        overflow-y: auto;
+    }
 
-  .suggestion-form textarea{
-    min-height:90px !important;
-    max-height:120px !important;
-  }
+    /* ফর্মকে একটি ফ্লেক্স কন্টেইনার করা যাতে এলিমেন্টগুলো জায়গা ভাগ করে নিতে পারে */
+    .suggestion-form {
+        display: flex;
+        flex-direction: column;
+        gap: 10px; /* ইনপুটগুলোর মাঝের দূরত্ব */
+    }
 
-  .suggestion-panel{
-    padding-top:70px;
-    padding-bottom:20px;
-  }
+    /* টেক্সট এরিয়া যাতে খুব বেশি বড় না হয় */
+    .suggestion-form textarea {
+        min-height: 80px; /* একদম ছোট হবে না */
+        max-height: 150px; /* অতিরিক্ত বড় হয়ে বাটনকে নিচে ঠেলে দেবে না */
+        height: auto;
+        resize: vertical; /* ব্যবহারকারী চাইলে সামান্য বড় করতে পারবে */
+    }
 
-}
-/* =========================================
-   SEND BUTTON
-========================================= */
-
-.send-btn{
-  border:none;
-  outline:none;
-  padding:14px;
-  border-radius:14px;
-  cursor:pointer;
-  font-size:15px;
-  font-weight:700;
-  font-family:'Poppins',sans-serif;
-  background:linear-gradient(135deg,#ffcc00 0%,#ff6b35 100%);
-  color:#111;
-  transition:all 0.3s ease;
-  box-shadow:0 8px 20px rgba(255,107,53,0.25);
+    /* সেন্ড বাটন যাতে সবসময় সামনে থাকে */
+    .send-btn {
+        margin-top: auto; /* ফ্লেক্সের কারণে এটি নিচে স্থির থাকবে */
+        padding: 12px;
+        flex-shrink: 0; /* বাটনটি যাতে চেপে না যায় */
+    }
 }
 
 /* HOVER */
