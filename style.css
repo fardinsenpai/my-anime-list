@@ -638,7 +638,27 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
-    
+
+@keyframes floatingCard {
+  0% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-8px);
+  }
+
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+.card {
+  animation: floatingCard 4s ease-in-out infinite;
+}
+
+
+
    
     /* সব কার্ডের সিজন টেক্সটের রঙ পরিবর্তনের জন্য */
 .season {
@@ -937,44 +957,85 @@
 /* style.css */
 
 .header h1 {
-    font-size: clamp(1.8rem, 5vw, 3rem); /* রেসপন্সিভ ফন্ট সাইজ */
-    font-weight: 800;
-    line-height: 1.25;
-    margin-bottom: 20px;
-    
-    /* আপনার বর্তমান মাল্টিকালার গ্রিডিয়েন্ট */
-    background: linear-gradient(135deg, #ff6b6b 0%, #ffd93d 30%, #6bcb77 65%, #4d96ff 100%);
+    font-size: clamp(1.5rem, 4vw, 2.8rem);
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 900;
+    text-align: center;
+    line-height: 1.15;
+    letter-spacing: 2px;
+    margin-bottom: 25px;
+
+    background: linear-gradient(
+        90deg,
+        #ff6b6b,
+        #ffd93d,
+        #6bffb8,
+        #4d96ff,
+        #c77dff,
+        #ff6b6b
+    );
+
+    background-size: 400% auto;
+
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    
-    /* --- নতুন Glowing Fade-In অ্যানিমেশন এখানে শুরু --- */
-    opacity: 0; /* শুরুতে লুকানো থাকবে */
-    animation: glowFadeIn 2s ease-out forwards;
+
+    animation:
+        titleGradient 8s linear infinite,
+        titleFloat 4s ease-in-out infinite;
+
+    text-shadow:
+        0 0 10px rgba(255,255,255,0.15),
+        0 0 25px rgba(255,107,107,0.25),
+        0 0 40px rgba(77,150,255,0.2);
+
     position: relative;
-    display: inline-block; /* মোবাইলে সেন্টারিং ঠিক রাখার জন্য */
 }
 
-/* অ্যানিমেশন ডিফিনিশন */
-@keyframes glowFadeIn {
+/* Gradient moving */
+@keyframes titleGradient {
     0% {
-        opacity: 0;
-        transform: translateY(20px); /* হালকা নিচ থেকে উপরে উঠবে */
-        filter: blur(5px); /* শুরুতে ঝাপসা থাকবে */
-        text-shadow: 0 0 0px rgba(255, 107, 107, 0);
-    }
-    50% {
-        opacity: 0.5;
-        /* মাঝপথে একটি হালকা নিয়ন গ্লো */
-        text-shadow: 0 0 10px rgba(251, 194, 235, 0.7), 0 0 20px rgba(166, 193, 238, 0.5);
+        background-position: 0% center;
     }
     100% {
-        opacity: 1;
-        transform: translateY(0); /* সঠিক জায়গায় আসবে */
-        filter: blur(0); /* একদম পরিষ্কার হয়ে যাবে */
-        /* শেষে খুব সূক্ষ্ম একটি স্থায়ী গ্লো */
-        text-shadow: 0 0 5px rgba(251, 194, 235, 0.4);
+        background-position: 400% center;
     }
+}
+
+/* Floating effect */
+@keyframes titleFloat {
+    0%,100% {
+        transform: translateY(0px);
+    }
+
+    50% {
+        transform: translateY(-6px);
+    }
+}
+
+.header h1::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: -10px;
+    transform: translateX(-50%);
+
+    width: 60%;
+    height: 4px;
+
+    border-radius: 999px;
+
+    background: linear-gradient(
+        90deg,
+        transparent,
+        #ff6b6b,
+        #ffd93d,
+        #4d96ff,
+        transparent
+    );
+
+    box-shadow: 0 0 20px rgba(255,255,255,0.4);
 }
 
 .cursor-glow {
@@ -996,57 +1057,13 @@
     padding: 15px;
     border-radius: 0 0 15px 15px;
 }
-/* style.css */
 
-/* ভাসমান অ্যানিমেশন ডিফিনিশন */
-@keyframes floatingCards {
-    0% { transform: translateY(0px); }
-    50% { transform: translateY(-10px); } /* হালকা ১০px উপরে উঠবে */
-    100% { transform: translateY(0px); }
-}
 
-/* আপনার সব অ্যানিমে কার্ডের ওপর ফ্লোটিং ইফেক্ট */
-.grid .card {
-    /* আগের transform: translateY(-10px) বা scale ইফেক্টগুলো মুছে দিন */
-    animation: floatingCards 4s ease-in-out infinite; /* সব কার্ড সবসময় হালকা ভাসতে থাকবে */
-}
-
-/* হোভার করলে হালকা দুলবে বা থামবে (ঐচ্ছিক) */
-.grid .card:hover {
-    animation-play-state: paused; /* মাউস নিলে ভাসমান ইফেক্ট থেমে যাবে */
-    box-shadow: 0 0 20px rgba(255, 107, 107, 0.6); /* আগের গ্লো ইফেক্ট */
-}
-
-.card {
-  /* Animation ইতিমধ্যে নিচে CSS-এ আছে */
-  @keyframes cardWaveIn {
-  0% {
-    opacity: 0;
-    transform: translateY(40px) rotateZ(-5deg);
-    filter: blur(5px);
-  }
-  70% {
-    transform: translateY(-8px) rotateZ(1deg);
-    filter: blur(0);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0) rotateZ(0);
-    filter: blur(0);
-  }
-}
-
-.card {
-  animation: cardWaveIn 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-  opacity: 0;
-}
-
-/* প্রতিটি row এর জন্য ভিন্ন ডিলে */
-.card:nth-child(5n+1) { animation-delay: 0.1s; }
-.card:nth-child(5n+2) { animation-delay: 0.15s; }
-.card:nth-child(5n+3) { animation-delay: 0.2s; }
-.card:nth-child(5n+4) { animation-delay: 0.25s; }
-.card:nth-child(5n+5) { animation-delay: 0.3s; }
+/* ৩. মাউস নিলে স্থির থাকবে */
+.card:hover {
+  animation-play-state: paused !important;
+  box-shadow: 0 10px 30px rgba(255, 107, 107, 0.4);
+  transform: scale(1.02); /* হোভারে হালকা বড় হবে */
 }
 
 /* ⚡ LIGHTNING CANVAS STYLING ⚡ */
@@ -1324,28 +1341,6 @@
 .card { transition: transform 0.2s ease, box-shadow 0.2s ease; }
 .card:hover { transform: translateY(-4px); box-shadow: 0 8px 20px rgba(255,107,157,0.15); }
 
-/* ✨ CARD ENTRY ANIMATION ✨ */
-
-@keyframes cardStaggerPop {
-  0% {
-    opacity: 0;
-    transform: translateY(50px) scale(0.85);
-    filter: blur(4px);
-  }
-  70% {
-    transform: translateY(-6px) scale(1.08);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-    filter: blur(0);
-  }
-}
-
-/* সব কার্ডে অ্যানিমেশন লাগান */
-.card {
-  animation: cardStaggerPop 0.65s cubic-bezier(0.175, 0.885, 0.32, 1.275) both !important;
-}
 
 /* Grid stagger - 5 কলামের জন্য */
 .card:nth-child(5n+1) { animation-delay: 0.08s; }
