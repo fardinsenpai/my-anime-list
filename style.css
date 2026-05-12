@@ -1237,29 +1237,45 @@
 }
 
 /* =========================================
-   MOBILE RESPONSIVE
+   MOBILE RESPONSIVE FIX (REPLACED)
 ========================================= */
+@media (max-width: 480px) {
+    .suggestion-panel {
+        display: flex !important;
+        flex-direction: column !important;
+        height: 100dvh !important; /* স্ক্রিনের উচ্চতা অনুযায়ী লক করা */
+        max-height: 100dvh !important;
+        left: -340px; /* ডিফল্ট পজিশন */
+        overflow: hidden !important; /* প্যানেলের বাইরের স্ক্রল বন্ধ */
+    }
 
-@media (max-width:480px){
+    .suggestion-panel.open {
+        left: 0 !important;
+    }
 
-  .suggestion-panel{
-    display:flex;
-    flex-direction:column;
-    overflow-y:auto;
-  }
+    .suggestion-form {
+        display: flex !important;
+        flex-direction: column !important;
+        flex: 1 !important; /* ফর্মটিকে পুরো খালি জায়গা নিতে বাধ্য করা */
+        overflow-y: auto !important; /* শুধুমাত্র ফর্মের ভেতর স্ক্রল হবে */
+        padding-bottom: 10px;
+        gap: 12px;
+    }
 
-  .suggestion-form{
-    display:flex;
-    flex-direction:column;
-    gap:12px;
-  }
+    .suggestion-form textarea {
+        min-height: 100px !important;
+        max-height: 180px !important;
+        flex-shrink: 0; /* টেক্সট এরিয়া যাতে বাটনের ওপর চেপে না যায় */
+    }
 
-  .send-btn{
-    margin-top:auto;
-    position:sticky;
-    bottom:0;
-  }
-
+    .send-btn {
+        margin-top: auto !important; /* বাটনকে সবসময় নিচে ঠেলে রাখবে */
+        position: sticky !important;
+        bottom: 0 !important;
+        width: 100% !important;
+        flex-shrink: 0 !important; /* বাটন ছোট হবে না */
+        z-index: 10;
+    }
 }
 
 /* Responsive */
