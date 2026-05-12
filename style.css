@@ -1177,16 +1177,33 @@
 }
 
 /* HOVER */
-.send-btn:hover{
-  transform:translateY(-3px) scale(1.02);
-  box-shadow:0 14px 28px rgba(255,107,53,0.35);
+/* PC View Button Styling */
+.send-btn {
+  margin-top: 20px;
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #ff6b35 0%, #f5c518 100%);
+  color: #000;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 14px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 6px 15px rgba(255, 107, 53, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 
-/* CLICK */
-.send-btn:active{
-  transform:scale(0.98);
+.send-btn:hover {
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 10px 25px rgba(255, 107, 53, 0.4);
 }
-
 /* =========================================
    SCROLLBAR
 ========================================= */
@@ -1900,31 +1917,54 @@
   transition:0.4s ease;
 }
 
+/* ══════════════════════════════════════
+   MOBILE SIDEBAR FINAL REPAIR
+══════════════════════════════════════ */
 @media (max-width: 480px) {
-    /* পুরো প্যানেলকে ভিউপোর্টে লক করা */
+    /* পুরো প্যানেলকে ভিউপোর্টের উচ্চতায় লক করা */
     .suggestion-panel {
         display: flex !important;
         flex-direction: column !important;
-        height: 100dvh !important;
+        height: 100dvh !important; /* ব্রাউজার বার থাকলেও বাটন নিচে নামবে না */
         max-height: 100dvh !important;
         overflow: hidden !important; 
         padding: 15px !important;
-        left: -100%; /* ডিফল্ট পজিশন */
     }
 
-    .suggestion-panel.open {
-        left: 0 !important;
-    }
-
-    /* ফর্মকে পুরো ফাঁকা জায়গা নিতে বাধ্য করা */
+    /* ফর্ম কন্টেইনার স্ক্রল করার অনুমতি দেওয়া */
     .suggestion-form {
         display: flex !important;
         flex-direction: column !important;
         flex: 1 !important; 
-        overflow-y: auto !important; /* এটি নিশ্চিত করবে যে শুধু ফর্ম স্ক্রল হবে */
+        overflow-y: auto !important; /* শুধুমাত্র ফর্মের ভেতর স্ক্রল হবে */
         gap: 12px !important;
         padding-bottom: 20px !important;
     }
+
+    /* টেক্সট এরিয়া যাতে বাটনকে নিচে পুশ না করে */
+    .suggestion-form textarea {
+        min-height: 100px !important;
+        max-height: 160px !important;
+        flex-shrink: 0 !important;
+    }
+
+    /* প্রিমিয়াম ডিজাইনের বাটন */
+    .send-btn {
+        margin-top: auto !important; 
+        position: relative !important;
+        width: 100% !important;
+        min-height: 52px !important;
+        background: linear-gradient(135deg, #ff6b35, #f5c518) !important; /* গ্লোসি অরেঞ্জ কালার */
+        color: #000 !important;
+        font-family: 'Orbitron', sans-serif !important; /* পিসির মতো ফন্ট */
+        font-size: 13px !important;
+        font-weight: 800 !important;
+        border-radius: 12px !important;
+        flex-shrink: 0 !important;
+        box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3) !important;
+        z-index: 100 !important;
+    }
+}
 
     /* টেক্সট এরিয়া যাতে বাটনকে নিচে না ঠেলে */
     .suggestion-form textarea {
@@ -1944,4 +1984,3 @@
         flex-shrink: 0 !important;
         z-index: 100 !important;
     }
-}
