@@ -1073,7 +1073,7 @@
   top:0;
   left:-340px;
   width:320px;
-  height:100vh;
+  height:100dvh;
   background:rgba(15,15,30,0.96);
   backdrop-filter:blur(14px);
   border-right:1px solid rgba(255,204,0,0.18);
@@ -1176,42 +1176,6 @@
   transform:translateY(-1px);
 }
 
-/* =========================================
-   TEXTAREA
-========================================= */
-
-@media (max-width: 480px) {
-    /* পুরো প্যানেলকে ভিউপোর্টের সাথে মানিয়ে নেওয়া */
-    .suggestion-panel {
-        display: flex;
-        flex-direction: column;
-        max-height: 100vh;
-        overflow-y: auto;
-    }
-
-    /* ফর্মকে একটি ফ্লেক্স কন্টেইনার করা যাতে এলিমেন্টগুলো জায়গা ভাগ করে নিতে পারে */
-    .suggestion-form {
-        display: flex;
-        flex-direction: column;
-        gap: 10px; /* ইনপুটগুলোর মাঝের দূরত্ব */
-    }
-
-    /* টেক্সট এরিয়া যাতে খুব বেশি বড় না হয় */
-    .suggestion-form textarea {
-        min-height: 80px; /* একদম ছোট হবে না */
-        max-height: 150px; /* অতিরিক্ত বড় হয়ে বাটনকে নিচে ঠেলে দেবে না */
-        height: auto;
-        resize: vertical; /* ব্যবহারকারী চাইলে সামান্য বড় করতে পারবে */
-    }
-
-    /* সেন্ড বাটন যাতে সবসময় সামনে থাকে */
-    .send-btn {
-        margin-top: auto; /* ফ্লেক্সের কারণে এটি নিচে স্থির থাকবে */
-        padding: 12px;
-        flex-shrink: 0; /* বাটনটি যাতে চেপে না যায় */
-    }
-}
-
 /* HOVER */
 .send-btn:hover{
   transform:translateY(-3px) scale(1.02);
@@ -1234,55 +1198,6 @@
 .suggestion-panel::-webkit-scrollbar-thumb{
   background:rgba(255,204,0,0.25);
   border-radius:10px;
-}
-
-/* =========================================
-   MOBILE RESPONSIVE FIX (REPLACED)
-========================================= */
-@media (max-width: 480px) {
-    .suggestion-panel {
-        display: flex !important;
-        flex-direction: column !important;
-        height: 100dvh !important; /* স্ক্রিনের উচ্চতা অনুযায়ী লক করা */
-        max-height: 100dvh !important;
-        left: -340px; /* ডিফল্ট পজিশন */
-        overflow: hidden !important; /* প্যানেলের বাইরের স্ক্রল বন্ধ */
-    }
-
-    .suggestion-panel.open {
-        left: 0 !important;
-    }
-
-    .suggestion-form {
-        display: flex !important;
-        flex-direction: column !important;
-        flex: 1 !important; /* ফর্মটিকে পুরো খালি জায়গা নিতে বাধ্য করা */
-        overflow-y: auto !important; /* শুধুমাত্র ফর্মের ভেতর স্ক্রল হবে */
-        padding-bottom: 10px;
-        gap: 12px;
-    }
-
-    .suggestion-form textarea {
-        min-height: 100px !important;
-        max-height: 180px !important;
-        flex-shrink: 0; /* টেক্সট এরিয়া যাতে বাটনের ওপর চেপে না যায় */
-    }
-
-    .send-btn {
-        margin-top: auto !important; /* বাটনকে সবসময় নিচে ঠেলে রাখবে */
-        position: sticky !important;
-        bottom: 0 !important;
-        width: 100% !important;
-        flex-shrink: 0 !important; /* বাটন ছোট হবে না */
-        z-index: 10;
-    }
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-  form {
-    width: 90%;       /* Mobile এ full width */
-  }
 }
 
 
@@ -1871,74 +1786,6 @@
   50%       { opacity: 0.2; transform: scale(0.6); }
 }
 
-/* ══════════════════════════════
-   📱 MOBILE RESPONSIVE
-══════════════════════════════ */
-@media (max-width: 480px) {
-
-  /* AI Chat Box — full width on mobile */
-  .chat-box {
-    width: calc(100vw - 24px) !important;
-    right: 12px !important;
-    left: 12px !important;
-    bottom: 90px !important;
-    max-height: 65vh !important;
-    border-radius: 16px !important;
-  }
-
-  /* AI Bubble — bottom right */
-  .chat-bubble {
-    bottom: 16px !important;
-    right: 16px !important;
-    width: 58px !important;
-    height: 58px !important;
-    font-size: 24px !important;
-  }
-
-  /* Suggestion Bubble — above AI bubble (উপরে) */
-  .chat-icon {
-    bottom: 88px !important;
-    right: 16px !important;
-    z-index: 99997 !important;
-  }
-
-  /* Suggestion Box — full width */
-  #sakuraChatBox {
-    width: calc(100vw - 24px) !important;
-    right: 12px !important;
-    left: 12px !important;
-    bottom: 160px !important;
-  }
-
-  /* Header font size */
-  .chat-header {
-    font-size: 11px !important;
-    padding: 12px 14px !important;
-  }
-
-  /* Messages font */
-  .msg {
-    font-size: 14px !important;
-    max-width: 90% !important;
-  }
-
-  /* Input area */
-  .chat-input-area {
-    padding: 10px !important;
-    gap: 6px !important;
-  }
-
-  .chat-input-area input {
-    font-size: 14px !important;
-    padding: 9px 12px !important;
-  }
-
-  .chat-input-area button {
-    padding: 9px 14px !important;
-    font-size: 10px !important;
-  }
-}
-
 /* =========================================
    PREMIUM ANIME FOOTER
 ========================================= */
@@ -2051,4 +1898,50 @@
 .anime-footer:hover .footer-line{
   transform:scaleX(1.15);
   transition:0.4s ease;
+}
+
+@media (max-width: 480px) {
+    /* পুরো প্যানেলকে ভিউপোর্টে লক করা */
+    .suggestion-panel {
+        display: flex !important;
+        flex-direction: column !important;
+        height: 100dvh !important;
+        max-height: 100dvh !important;
+        overflow: hidden !important; 
+        padding: 15px !important;
+        left: -100%; /* ডিফল্ট পজিশন */
+    }
+
+    .suggestion-panel.open {
+        left: 0 !important;
+    }
+
+    /* ফর্মকে পুরো ফাঁকা জায়গা নিতে বাধ্য করা */
+    .suggestion-form {
+        display: flex !important;
+        flex-direction: column !important;
+        flex: 1 !important; 
+        overflow-y: auto !important; /* এটি নিশ্চিত করবে যে শুধু ফর্ম স্ক্রল হবে */
+        gap: 12px !important;
+        padding-bottom: 20px !important;
+    }
+
+    /* টেক্সট এরিয়া যাতে বাটনকে নিচে না ঠেলে */
+    .suggestion-form textarea {
+        min-height: 100px !important;
+        max-height: 180px !important;
+        flex-shrink: 0 !important;
+    }
+
+    /* বাটন ফিক্স (রঙ ও পজিশন) */
+    .send-btn {
+        margin-top: auto !important; 
+        position: relative !important;
+        width: 100% !important;
+        min-height: 50px !important;
+        background: linear-gradient(135deg, #ff6b35, #f5c518) !important;
+        color: #000 !important;
+        flex-shrink: 0 !important;
+        z-index: 100 !important;
+    }
 }
