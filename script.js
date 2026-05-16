@@ -875,8 +875,7 @@ async function sendMessage() {
         content: `User asked: "${message}". I randomly picked from Fardin's list: "${randomTitle}" which has ${epCount} episodes. Now reply in a fun way about this anime, mention the episode count, and ask if they want details.`
       };
     }
-
-    // ⚡ Netlify Function এন্ডপয়েন্টে রিকোয়েস্ট পাঠানো হচ্ছে (কোনো API Key ও Proxy ছাড়াই)
+// ⚡ পুরানো proxyUrl কেটে দিয়ে সরাসরি Netlify Function-এ রিকোয়েস্ট পাঠাও
     const response = await fetch('/.netlify/functions/chat', {
       method: 'POST',
       headers: {
