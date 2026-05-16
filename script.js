@@ -62,7 +62,7 @@ const TOP_5_DATA = {
   "Action": [3, 6, 1, 5, 10],
   "Adventure": [4, 7, 17, 24, 55],
   "Isekai": [105, 99, 76, 135, 181],
-  "Comedy": [221, 119, 191, 123, 219],
+  "Comedy": [221, 19, 191, 123, 219],
   "Sports": [21, 9, 202, 186, 8],
   "Romcom": [109, 219, 41, 103, 56],
   "Sci-Fi": [26, 76, 164, 73, 220],
@@ -176,6 +176,12 @@ document.addEventListener('DOMContentLoaded', () => {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     };
   }
+});
+
+window.addEventListener('load', function() {
+  const duelScript = document.createElement('script');
+  duelScript.src = 'duel-system.js';
+  document.body.appendChild(duelScript);
 });
 
 // ===============================
@@ -705,10 +711,9 @@ window.addEventListener('beforeunload', function (e) {
 // কারণ ইউজার আবার খুলতে পারে। রিলোড দিলেই শুধু memory যাবে
 
 
-// ===== CEREBRAS API CONFIG =====
-const CEREBRAS_API_KEY = 'csk-r84k3e2j2mwc4cm55d8c4chex3hteydpxn5kexj6ymr9de3d'; // এখানে তোমার key বসাও
-const apiUrl = 'https://api.cerebras.ai/v1/chat/completions';
-const proxyUrl = 'https://corsproxy.io/?';
+// ===== LOCALSTORAGE CONFIG =====
+const CHAT_STORAGE_KEY = 'fardin_ai_chat_ui_history';
+const MAX_STORED_MSG = 50;
 
 // ===== STATS & ANIME LIST =====
 function getStats() {
@@ -724,7 +729,7 @@ function getStats() {
     const seasonMatch = seasonText.match(/\d+/g);
     if (seasonMatch) {
       const nums = seasonMatch.map(Number);
-      totalSeasons += nums.length === 1? nums[0] : nums[1] - nums[0] + 1;
+      totalSeasons += nums.length === 1 ? nums[0] : nums[1] - nums[0] + 1;
     }
 
     const episodeNum = parseInt(episodeText.replace(/\D/g, ''));
@@ -759,7 +764,7 @@ function getAnimeListJSON() {
 function getSystemPrompt() {
   const stats = getStats();
 
-  return `You are Fardin's personal anime assistant on "Let's See What Anime I Have Watched" website. You are fun, friendly and knowledgeable.
+  return `You are Fardin's personal anime assistant on "Fardin's Anime Hub" website. You are fun, friendly and knowledgeable.
 
 Website Stats:
 - Total Anime: ${stats.animeCount}
@@ -790,6 +795,39 @@ let chatHistory = [
   { role: "system", content: getSystemPrompt() }
 ];
 
+// ===== LOCALSTORAGE FUNCTIONS =====
+function saveChatToStorage() {
+  const toSave = chatHistory.filter(msg => msg.role !== 'system');
+  const trimmed = toSave.slice(-MAX_STORED_MSG);
+  localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(trimmed));
+}
+
+function restoreChatFromStorage() {
+  const saved = localStorage.getItem(CHAT_STORAGE_KEY);
+  if (!saved) return;
+
+  try {
+    const savedMessages = JSON.parse(saved);
+    savedMessages.forEach(msg => {
+      if (msg.role === 'user') {
+        addMessage(msg.content, 'user', false); 
+        chatHistory.push(msg);
+      } else if (msg.role === 'assistant') {
+        addMessage(msg.content, 'bot', false);
+        chatHistory.push(msg);
+      }
+    });
+  } catch (e) {
+    console.error('Chat restore failed:', e);
+    localStorage.removeItem(CHAT_STORAGE_KEY);
+  }
+}
+
+// Call restore on page load
+document.addEventListener('DOMContentLoaded', () => {
+  restoreChatFromStorage();
+});
+
 // ===== TOGGLE CHAT =====
 function toggleChat() {
   chatBox.classList.toggle('open');
@@ -810,9 +848,9 @@ async function sendMessage() {
   // Add to history
   chatHistory.push({ role: 'user', content: message });
 
-  // Trim history: keep system + last 8 messages
+  // Trim history: keep system + last 8 messages for API
   if (chatHistory.length > 9) {
-    chatHistory = [chatHistory[0],...chatHistory.slice(-8)];
+    chatHistory = [chatHistory[0], ...chatHistory.slice(-8)];
   }
 
   // Show typing indicator
@@ -838,18 +876,17 @@ async function sendMessage() {
       };
     }
 
-    const response = await fetch(proxyUrl + encodeURIComponent(apiUrl), {
+    // ⚡ Netlify Function এন্ডপয়েন্টে রিকোয়েস্ট পাঠানো হচ্ছে (কোনো API Key ও Proxy ছাড়াই)
+    const response = await fetch('/.netlify/functions/chat', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${CEREBRAS_API_KEY}`,
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
         model: 'llama3.1-8b',
         messages: messagesToSend,
         temperature: 0.8,
-        max_tokens: 200, // ছোট রিপ্লাই = token বাঁচবে
-        stream: false
+        max_tokens: 200
       })
     });
 
@@ -874,93 +911,36 @@ async function sendMessage() {
 }
 
 // ===== ADD MESSAGE TO UI =====
-function addMessage(text, type) {
+function addMessage(text, type, shouldSave = true) {
   const msgDiv = document.createElement('div');
   msgDiv.className = `msg ${type}`;
   msgDiv.textContent = text;
+  msgDiv.dataset.role = type === 'user' ? 'user' : 'assistant';
   chatMessages.appendChild(msgDiv);
   chatMessages.scrollTop = chatMessages.scrollHeight;
+
+  // Save to localStorage after adding
+  if (shouldSave && (type === 'user' || type === 'bot')) {
+    saveChatToStorage();
+  }
+
   return msgDiv;
 }
 
-// ===== ENTER KEY SUPPORT =====
-chatInput.addEventListener('keydown', (e) => {
-  if (e.key === 'Enter') {
-    e.preventDefault();
-    sendMessage();
-  }
-});
+// ===== CLEAR CHAT HISTORY =====
+function clearChatHistory() {
+  localStorage.removeItem(CHAT_STORAGE_KEY);
+  chatMessages.innerHTML = '';
+  chatHistory = [
+    { role: "system", content: getSystemPrompt() }
+  ];
+}
 
-// ===== CLOSE CHAT ON OUTSIDE CLICK =====
-document.addEventListener('click', (e) => {
-  if (!chatBox.contains(e.target) &&!chatBubble.contains(e.target)) {
-    chatBox.classList.remove('open');
-  }
-});
-
-// ===== AI CONTEXT HELPER - শুধু দরকারের সময় লিস্ট পাঠাবে =====
-const originalFetch = window.fetch;
-
-window.fetch = function(...args) {
-  const [url, options] = args;
-
-  // শুধু Cerebras API call হলে intercept করো
-  if (url.includes('cerebras.ai') && options?.body) {
-    try {
-      const body = JSON.parse(options.body);
-      const userMsg = body.messages[body.messages.length - 1]?.content || '';
-
-      let extraInfo = '';
-
-      // 1. যদি নাম্বার দিয়ে anime চায়: "78 number anime"
-      const numMatch = userMsg.match(/#?(\d+)\s*(number|no\.?|th|st|nd|rd)?/i);
-      if (numMatch) {
-        const num = parseInt(numMatch[1]);
-        const cards = document.querySelectorAll('.anime-card,.card');
-
-        for (let card of cards) {
-          const numEl = card.querySelector('[class*="number"], [class*="no"]');
-          const titleEl = card.querySelector('h3, [class*="title"]');
-
-          if (numEl && titleEl) {
-            const cardNum = parseInt(numEl.textContent.replace(/\D/g, ''));
-            if (cardNum === num) {
-              extraInfo = `\n[DATA]: Anime #${num} is "${titleEl.textContent.trim()}". Use this exact info.`;
-              break;
-            }
-          }
-        }
-
-        if (!extraInfo) {
-          extraInfo = `\n[DATA]: Fardin hasn't watched anime #${num} yet.`;
-        }
-      }
-
-      // 2. যদি random/suggest চায়
-      if (/random|suggest|pick|recommend/i.test(userMsg)) {
-        const cards = document.querySelectorAll('.anime-card,.card');
-        const randomCard = cards[Math.floor(Math.random() * cards.length)];
-
-        const numEl = randomCard.querySelector('[class*="number"], [class*="no"]');
-        const titleEl = randomCard.querySelector('h3, [class*="title"]');
-
-        if (numEl && titleEl) {
-          const num = numEl.textContent.replace(/\D/g, '');
-          const title = titleEl.textContent.trim();
-          extraInfo = `\n[DATA]: Suggest this anime: #${num} "${title}". Talk about it.`;
-        }
-      }
-
-      // System prompt এ extra info যোগ করো
-      if (extraInfo && body.messages[0]?.role === 'system') {
-        body.messages[0].content += extraInfo;
-        options.body = JSON.stringify(body);
-      }
-
-    } catch (e) {
-      console.log('AI context error:', e);
-    }
-  }
-
-  return originalFetch.apply(this, args);
-};
+// ===== CLEAR CHAT HISTORY - NEW =====
+function clearChatHistory() {
+  localStorage.removeItem(CHAT_STORAGE_KEY);
+  chatMessages.innerHTML = '';
+  chatHistory = [
+    { role: "system", content: getSystemPrompt() }
+  ];
+}
