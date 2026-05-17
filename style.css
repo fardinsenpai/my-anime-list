@@ -105,12 +105,14 @@
   letter-spacing: 0.5px;
 }
 
+
+
 .search-btn {
-  width: 40px; /* সাইজ কিছুটা বাড়ানো হয়েছে */
+  width: 40px;
   height: 40px;
   background: transparent;
   border: none;
-  color: #f5c518 !important; /* টেক্সট/আইকন কালার */
+  color: #f5c518 !important; 
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -1979,3 +1981,4 @@
         flex-shrink: 0 !important;
         z-index: 100 !important;
     }
+
