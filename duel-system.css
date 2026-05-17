@@ -1,0 +1,1815 @@
+/* ============================================================
+   ⚔️  ANIME DUEL SYSTEM - duel-system.css
+   ------------------------------------------------------------
+   Cyberpunk/Otaku থিমে — তোমার existing style-এর সাথে 
+   perfectly blend করে।
+   ============================================================ */
+
+/* ============================================================
+   🔧 SECTION 1: CSS CUSTOM PROPERTIES
+   — Duel System-এর নিজস্ব color variables
+   ============================================================ */
+
+:root {
+  /* Duel Color Palette */
+  --duel-primary:      #00d4ff;   /* Electric Blue */
+  --duel-secondary:    #ffcc00;   /* Golden Yellow */
+  --duel-danger:       #ff4757;   /* Red */
+  --duel-success:      #00ff88;   /* Green */
+  --duel-p1-color:     #00d4ff;   /* Player 1 — Blue */
+  --duel-p2-color:     #ff6b6b;   /* Player 2 — Red */
+  --duel-bg:           rgba(0, 5, 20, 0.97);
+  --duel-panel-bg:     rgba(5, 15, 35, 0.95);
+  --duel-border:       rgba(0, 212, 255, 0.3);
+  --duel-glow-blue:    0 0 20px rgba(0, 212, 255, 0.6);
+  --duel-glow-gold:    0 0 15px rgba(255, 204, 0, 0.8);
+  --duel-glow-red:     0 0 20px rgba(255, 71, 87, 0.6);
+
+  /* Timing */
+  --duel-transition:   cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --duel-spring:       cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+
+/* ============================================================
+   🔧 SECTION 2: GLOBAL DUEL MODE BODY STATE
+   ============================================================ */
+
+/* Duel Mode active থাকলে body-তে এই class থাকবে */
+body.duel-mode-active {
+  --card-cursor: crosshair;
+}
+
+/* Duel Mode active থাকলে cards-এর flip prevent করা */
+body.duel-mode-active .card {
+  cursor: crosshair !important;
+  pointer-events: all !important;
+}
+
+/* Normal card flip animation Duel Mode-এ disable করা */
+body.duel-mode-active .card:hover .card-inner,
+body.duel-mode-active .card.flipped .card-inner {
+  transform: none !important;
+}
+
+/* Card hover effect Duel Mode-এ */
+body.duel-mode-active .card:hover {
+  transform: translateY(-4px) scale(1.02);
+  transition: transform 0.2s var(--duel-transition);
+}
+
+
+/* ============================================================
+   🔧 SECTION 3: SELECTED CARD STYLING
+   — .selected-for-duel class
+   ============================================================ */
+
+.card.selected-for-duel {
+  position: relative;
+  outline: none !important;
+
+  /* Glowing border effect */
+  box-shadow:
+    0 0 0 3px var(--duel-primary),
+    0 0 15px rgba(0, 212, 255, 0.5),
+    0 0 35px rgba(0, 212, 255, 0.2),
+    inset 0 0 20px rgba(0, 212, 255, 0.05);
+
+  border-radius: inherit;
+  animation: card-selected-pulse 1.5s ease-in-out infinite;
+  transform: translateY(-6px) scale(1.04) !important;
+  transition: all 0.3s var(--duel-spring) !important;
+  z-index: 10;
+}
+
+/* Player 2 selected card — লাল glow */
+.card.selected-for-duel[data-duel-player="P2"] {
+  box-shadow:
+    0 0 0 3px var(--duel-p2-color),
+    0 0 15px rgba(255, 107, 107, 0.5),
+    0 0 35px rgba(255, 107, 107, 0.2),
+    inset 0 0 20px rgba(255, 107, 107, 0.05);
+
+  animation: card-selected-pulse-red 1.5s ease-in-out infinite;
+}
+
+/* Selected card pulse animation — নীল */
+@keyframes card-selected-pulse {
+  0%, 100% {
+    box-shadow:
+      0 0 0 3px var(--duel-primary),
+      0 0 15px rgba(0, 212, 255, 0.5),
+      0 0 35px rgba(0, 212, 255, 0.2);
+  }
+  50% {
+    box-shadow:
+      0 0 0 3px var(--duel-primary),
+      0 0 25px rgba(0, 212, 255, 0.8),
+      0 0 50px rgba(0, 212, 255, 0.4);
+  }
+}
+
+/* Selected card pulse — লাল */
+@keyframes card-selected-pulse-red {
+  0%, 100% {
+    box-shadow:
+      0 0 0 3px var(--duel-p2-color),
+      0 0 15px rgba(255, 107, 107, 0.5),
+      0 0 35px rgba(255, 107, 107, 0.2);
+  }
+  50% {
+    box-shadow:
+      0 0 0 3px var(--duel-p2-color),
+      0 0 25px rgba(255, 107, 107, 0.8),
+      0 0 50px rgba(255, 107, 107, 0.4);
+  }
+}
+
+/* Card-এ Selection Badge */
+.duel-selection-badge {
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  z-index: 20;
+  animation: badge-bounce-in 0.4s var(--duel-spring);
+  white-space: nowrap;
+}
+
+.duel-selection-badge--p1 {
+  background: linear-gradient(135deg, #003d5c, #0080a8);
+  color: var(--duel-primary);
+  border: 1px solid var(--duel-primary);
+  box-shadow: 0 0 10px rgba(0, 212, 255, 0.4);
+}
+
+.duel-selection-badge--p2 {
+  background: linear-gradient(135deg, #5c0000, #a80000);
+  color: var(--duel-p2-color);
+  border: 1px solid var(--duel-p2-color);
+  box-shadow: 0 0 10px rgba(255, 107, 107, 0.4);
+}
+
+@keyframes badge-bounce-in {
+  0%   { transform: translateX(-50%) scale(0) translateY(10px); opacity: 0; }
+  70%  { transform: translateX(-50%) scale(1.15) translateY(-3px); opacity: 1; }
+  100% { transform: translateX(-50%) scale(1) translateY(0); }
+}
+
+
+/* ============================================================
+   🔧 SECTION 4: SIDEBAR DUEL LINK
+   ============================================================ */
+
+#duel-nav-item {
+  margin-top: auto; /* নিচের দিকে push করা */
+  border-top: 1px solid rgba(0, 212, 255, 0.15);
+  padding-top: 8px;
+  animation: nav-item-slide-in 0.5s var(--duel-spring);
+}
+
+@keyframes nav-item-slide-in {
+  from { transform: translateX(-20px); opacity: 0; }
+  to   { transform: translateX(0); opacity: 1; }
+}
+
+.duel-nav-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  text-decoration: none;
+  color: rgba(255, 255, 255, 0.7);
+  border-radius: 10px;
+  transition: all 0.3s var(--duel-transition);
+  position: relative;
+  overflow: hidden;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+/* Hover shimmer effect */
+.duel-nav-link::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(0, 212, 255, 0.1),
+    rgba(0, 212, 255, 0.05)
+  );
+  opacity: 0;
+  transition: opacity 0.3s;
+  border-radius: inherit;
+}
+
+.duel-nav-link:hover::before,
+.duel-nav-link.duel-link--active::before {
+  opacity: 1;
+}
+
+.duel-nav-link:hover {
+  color: var(--duel-primary);
+  transform: translateX(4px);
+  box-shadow: var(--duel-glow-blue);
+}
+
+/* Active state — Duel Mode ON */
+.duel-nav-link.duel-link--active {
+  color: var(--duel-primary);
+  border: 1px solid rgba(0, 212, 255, 0.4);
+  background: rgba(0, 212, 255, 0.08);
+  box-shadow: var(--duel-glow-blue);
+  animation: nav-link-active-glow 2s ease-in-out infinite;
+}
+
+@keyframes nav-link-active-glow {
+  0%, 100% { box-shadow: 0 0 10px rgba(0, 212, 255, 0.3); }
+  50%       { box-shadow: 0 0 20px rgba(0, 212, 255, 0.6); }
+}
+
+.duel-nav-icon {
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+.duel-nav-text {
+  flex: 1;
+  font-size: 0.9rem;
+}
+
+/* ON/OFF Status Badge */
+.duel-status-badge {
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 1px;
+  padding: 2px 7px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.3s;
+}
+
+.duel-status-badge.badge--active {
+  background: rgba(0, 212, 255, 0.2);
+  color: var(--duel-primary);
+  border-color: var(--duel-primary);
+  box-shadow: 0 0 8px rgba(0, 212, 255, 0.4);
+  animation: badge-pulse 1s ease-in-out infinite;
+}
+
+@keyframes badge-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.6; }
+}
+
+
+/* ============================================================
+   🔧 SECTION 5: FLOATING DUEL MODE INDICATOR
+   ============================================================ */
+
+.duel-mode-indicator {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(100px);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 24px;
+  background: var(--duel-panel-bg);
+  border: 1px solid var(--duel-primary);
+  border-radius: 50px;
+  color: var(--duel-primary);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  z-index: 1000;
+  opacity: 0;
+  transition:
+    transform 0.5s var(--duel-spring),
+    opacity 0.3s;
+  box-shadow: var(--duel-glow-blue), inset 0 0 20px rgba(0, 212, 255, 0.05);
+  backdrop-filter: blur(20px);
+  white-space: nowrap;
+}
+
+.duel-mode-indicator.indicator--visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.indicator__pulse {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--duel-primary);
+  animation: indicator-pulse 1s ease-in-out infinite;
+  box-shadow: 0 0 8px var(--duel-primary);
+}
+
+@keyframes indicator-pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50%       { transform: scale(1.5); opacity: 0.5; }
+}
+
+.indicator__icon { font-size: 1rem; }
+
+.indicator__text {
+  text-transform: uppercase;
+  font-size: 11px;
+}
+
+.indicator__sub {
+  font-size: 11px;
+  opacity: 0.7;
+  border-left: 1px solid rgba(0, 212, 255, 0.3);
+  padding-left: 10px;
+}
+
+
+/* ============================================================
+   🔧 SECTION 6: TOAST NOTIFICATION
+   ============================================================ */
+
+.duel-toast {
+  position: fixed;
+  top: 60px;
+  right: 24px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  min-width: 280px;
+  max-width: 380px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: var(--duel-panel-bg);
+  border-left: 4px solid var(--duel-primary);
+  color: #fff;
+  z-index: 9999;
+  opacity: 0;
+  transform: translateX(120%);
+  transition:
+    transform 0.4s var(--duel-spring),
+    opacity 0.3s;
+  backdrop-filter: blur(20px);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.5),
+    0 0 20px rgba(0, 212, 255, 0.1);
+}
+
+.duel-toast.toast--visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.duel-toast.toast--hiding {
+  opacity: 0;
+  transform: translateX(120%);
+}
+
+/* Toast Types */
+.duel-toast--info    { border-left-color: var(--duel-primary); }
+.duel-toast--success { border-left-color: var(--duel-success); }
+.duel-toast--warning { border-left-color: var(--duel-secondary); }
+.duel-toast--error   { border-left-color: var(--duel-danger); }
+
+.toast-icon {
+  font-size: 1.2rem;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.toast-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.toast-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 0.3px;
+}
+
+.toast-message {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.6);
+  line-height: 1.4;
+}
+
+.toast-close {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.4);
+  cursor: pointer;
+  font-size: 14px;
+  padding: 0;
+  line-height: 1;
+  transition: color 0.2s;
+  flex-shrink: 0;
+}
+
+.toast-close:hover { color: #fff; }
+
+
+/* ============================================================
+   🔧 SECTION 7: DUEL OVERLAY — MAIN PANEL
+   ============================================================ */
+
+.duel-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: var(--duel-bg);
+  opacity: 0;
+  transition: opacity 0.5s var(--duel-transition);
+
+  /* তোমার lightningCanvas-এর মতো backdrop */
+  background-image:
+    radial-gradient(ellipse at 20% 50%, rgba(0, 80, 160, 0.15) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 50%, rgba(160, 0, 0, 0.15) 0%, transparent 50%);
+}
+
+.duel-overlay--visible {
+  opacity: 1;
+}
+
+.duel-overlay--hiding {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Main Arena Panel */
+.duel-arena {
+  position: relative;
+  margin-top: 70px;
+  width: 100%;
+  max-width: 900px;
+  max-height: 90vh;
+  overflow-y: auto;
+  background: var(--duel-panel-bg);
+  border: 1px solid var(--duel-border);
+  border-radius: 20px;
+  padding: 30px 24px;
+  transform: scale(0.9) translateY(30px);
+  transition:
+    transform 0.5s var(--duel-spring),
+    opacity 0.4s;
+  box-shadow:
+    0 0 60px rgba(0, 212, 255, 0.15),
+    0 0 120px rgba(0, 212, 255, 0.05),
+    0 30px 80px rgba(0, 0, 0, 0.8);
+
+  /* Custom scrollbar */
+  scrollbar-width: thin;
+  scrollbar-color: var(--duel-primary) transparent;
+}
+
+.duel-overlay--visible .duel-arena {
+  transform: scale(1) translateY(0);
+}
+
+.duel-arena::-webkit-scrollbar { width: 4px; }
+.duel-arena::-webkit-scrollbar-track { background: transparent; }
+.duel-arena::-webkit-scrollbar-thumb {
+  background: var(--duel-primary);
+  border-radius: 4px;
+}
+
+/* Background animated grid lines */
+.duel-arena::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(0, 212, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 212, 255, 0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+  border-radius: 20px;
+  pointer-events: none;
+}
+
+/* Background Effect Container */
+.duel-bg-effect {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  border-radius: 20px;
+}
+
+
+/* ============================================================
+   🔧 SECTION 8: LIGHTNING BACKGROUND EFFECTS
+   ============================================================ */
+
+.duel-lightning-left,
+.duel-lightning-right {
+  position: absolute;
+  top: 0;
+  width: 40%;
+  height: 100%;
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+.duel-lightning-left {
+  left: 0;
+  background: radial-gradient(
+    ellipse at left center,
+    rgba(0, 212, 255, 0.2) 0%,
+    transparent 70%
+  );
+  animation: lightning-pulse-left 3s ease-in-out infinite;
+}
+
+.duel-lightning-right {
+  right: 0;
+  background: radial-gradient(
+    ellipse at right center,
+    rgba(255, 107, 107, 0.2) 0%,
+    transparent 70%
+  );
+  animation: lightning-pulse-right 3s ease-in-out infinite;
+}
+
+@keyframes lightning-pulse-left {
+  0%, 100% { opacity: 0.2; }
+  50%       { opacity: 0.5; }
+}
+
+@keyframes lightning-pulse-right {
+  0%, 100% { opacity: 0.2; }
+  50%       { opacity: 0.5; }
+}
+
+/* Floating Particles */
+.duel-particle {
+  position: absolute;
+  bottom: -10px;
+  border-radius: 50%;
+  background: var(--duel-primary);
+  opacity: 0;
+  animation: particle-float linear infinite;
+}
+
+@keyframes particle-float {
+  0%   { bottom: -10px; opacity: 0; }
+  10%  { opacity: 0.8; }
+  90%  { opacity: 0.4; }
+  100% { bottom: 110%; opacity: 0; }
+}
+
+/* Screen Flash */
+.duel-screen-flash {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 212, 255, 0.3);
+  border-radius: 20px;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 100;
+}
+
+.duel-screen-flash.flash--active {
+  animation: screen-flash 0.4s ease-out;
+}
+
+@keyframes screen-flash {
+  0%   { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+
+/* ============================================================
+   🔧 SECTION 9: CLOSE BUTTON
+   ============================================================ */
+
+.duel-close-btn {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  transition: all 0.2s;
+}
+
+.duel-close-btn:hover {
+  border-color: var(--duel-danger);
+  color: var(--duel-danger);
+  background: rgba(255, 71, 87, 0.1);
+  box-shadow: 0 0 15px rgba(255, 71, 87, 0.3);
+  transform: rotate(90deg) scale(1.1);
+}
+
+
+/* ============================================================
+   🔧 SECTION 10: ARENA HEADER
+   ============================================================ */
+
+.duel-header {
+  text-align: center;
+  margin-bottom: 28px;
+}
+
+.duel-header__title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 6px;
+}
+
+.duel-header__icon {
+  font-size: 1.5rem;
+  animation: icon-float 2s ease-in-out infinite alternate;
+}
+
+.duel-header__icon:last-child {
+  animation-direction: alternate-reverse;
+}
+
+@keyframes icon-float {
+  from { transform: translateY(0) rotate(-5deg); }
+  to   { transform: translateY(-6px) rotate(5deg); }
+}
+
+.duel-header__text {
+  font-size: clamp(1.2rem, 4vw, 1.8rem);
+  font-weight: 900;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  background: linear-gradient(135deg, var(--duel-primary), var(--duel-secondary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0;
+}
+
+.duel-header__subtitle {
+  font-size: 11px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.4);
+  margin: 0;
+}
+
+
+/* ============================================================
+   🔧 SECTION 11: FIGHTER CARDS
+   ============================================================ */
+
+/* Duel Fighters - Balanced Layout */
+.duel-fighters {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  justify-content: center;
+  gap: 40px;
+  margin: 30px 0;
+  min-height: 280px; /* এই লাইনটা গুরুত্বপূর্ণ */
+}
+
+/* দুই পাশের কার্ড সমানভাবে দেখানো */
+.duel-fighter {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 200px;
+  opacity: 1 !important; /* যেন কখনো হাইড না হয় */
+}
+
+/* VS এর চারপাশে স্পেস */
+.duel-vs-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 100px;
+}
+
+/* যদি কোনো পাশ খালি থাকে তাহলে এই স্টাইল */
+.duel-fighter:empty {
+  visibility: hidden;
+}
+.duel-fighter--p1 {
+  background: linear-gradient(160deg, rgba(0, 80, 160, 0.3), transparent);
+  border: 1px solid rgba(0, 212, 255, 0.2);
+  animation-delay: 0.2s;
+}
+
+.duel-fighter--p2 {
+  background: linear-gradient(200deg, rgba(160, 0, 0, 0.3), transparent);
+  border: 1px solid rgba(255, 107, 107, 0.2);
+  animation-delay: 0.4s;
+}
+
+@keyframes fighter-appear {
+  from { opacity: 0; transform: scale(0.85) translateY(20px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* Player Label */
+.duel-fighter__label {
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 4px 12px;
+  border-radius: 20px;
+}
+
+.duel-fighter--p1 .duel-fighter__label {
+  color: var(--duel-p1-color);
+  background: rgba(0, 212, 255, 0.1);
+  border: 1px solid rgba(0, 212, 255, 0.3);
+}
+
+.duel-fighter--p2 .duel-fighter__label {
+  color: var(--duel-p2-color);
+  background: rgba(255, 107, 107, 0.1);
+  border: 1px solid rgba(255, 107, 107, 0.3);
+}
+
+/* Poster Image */
+.duel-fighter__poster {
+  width: 90px;
+  height: 120px;
+  border-radius: 10px;
+  overflow: hidden;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.duel-fighter__poster img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s;
+}
+
+.duel-fighter--p1 .duel-fighter__poster {
+  border: 2px solid rgba(0, 212, 255, 0.4);
+  box-shadow: 0 0 15px rgba(0, 212, 255, 0.2);
+}
+
+.duel-fighter--p2 .duel-fighter__poster {
+  border: 2px solid rgba(255, 107, 107, 0.4);
+  box-shadow: 0 0 15px rgba(255, 107, 107, 0.2);
+}
+
+.duel-fighter__poster-fallback {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3rem;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* Anime Name */
+.duel-fighter__name {
+  font-size: 13px;
+  font-weight: 700;
+  text-align: center;
+  color: #fff;
+  margin: 0;
+  line-height: 1.3;
+  text-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
+  max-width: 140px;
+}
+
+.duel-fighter--p2 .duel-fighter__name {
+  text-shadow: 0 0 10px rgba(255, 107, 107, 0.3);
+}
+
+.duel-fighter__genre {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.4);
+  text-align: center;
+  letter-spacing: 0.5px;
+}
+
+/* Power Preview */
+.duel-fighter__power-preview {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 8px 14px;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  min-width: 100px;
+}
+
+.duel-fighter__power-preview span {
+  font-size: 9px;
+  letter-spacing: 1px;
+  color: rgba(255, 255, 255, 0.4);
+  text-transform: uppercase;
+}
+
+.duel-fighter__power-preview strong {
+  font-size: 1.2rem;
+  font-weight: 900;
+}
+
+.duel-fighter--p1 .duel-fighter__power-preview strong {
+  color: var(--duel-p1-color);
+  text-shadow: var(--duel-glow-blue);
+}
+
+.duel-fighter--p2 .duel-fighter__power-preview strong {
+  color: var(--duel-p2-color);
+  text-shadow: var(--duel-glow-red);
+}
+
+/* Clash Animations */
+.fighter--clash-in-left {
+  animation: clash-slide-left 0.6s var(--duel-spring) forwards !important;
+}
+
+.fighter--clash-in-right {
+  animation: clash-slide-right 0.6s var(--duel-spring) forwards !important;
+}
+
+@keyframes clash-slide-left {
+  0%   { transform: scale(1) translateX(0); }
+  60%  { transform: scale(1.08) translateX(20px); }
+  100% { transform: scale(1) translateX(0); }
+}
+
+@keyframes clash-slide-right {
+  0%   { transform: scale(1) translateX(0); }
+  60%  { transform: scale(1.08) translateX(-20px); }
+  100% { transform: scale(1) translateX(0); }
+}
+
+.fighter--clash-impact {
+  animation: clash-impact 0.3s ease-out !important;
+}
+
+@keyframes clash-impact {
+  0%, 100% { transform: scale(1); }
+  50%       { transform: scale(0.95) rotate(-1deg); filter: brightness(1.5); }
+}
+
+/* Victory / Defeat states */
+/* ============================================================
+   🔧 FIGHTER STATES — Victory & Defeat
+   ============================================================ */
+
+/* Victory state — Winner */
+.fighter--victory {
+  animation: fighter-victory 0.8s var(--duel-spring) !important;
+  border-color: var(--duel-secondary) !important;
+  box-shadow: 
+    0 0 30px rgba(255, 204, 0, 0.4),
+    inset 0 0 20px rgba(255, 204, 0, 0.1) !important;
+  transform: scale(1.05) !important;
+  z-index: 10;
+  position: relative;
+}
+
+/* ⭐ Victory crown floating effect */
+.fighter--victory::before {
+  content: '👑';
+  position: absolute;
+  top: -25px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 1.5rem;
+  animation: crown-float 1.5s ease-in-out infinite;
+  z-index: 20;
+}
+
+@keyframes crown-float {
+  0%, 100% { transform: translateX(-50%) translateY(0); }
+  50%      { transform: translateX(-50%) translateY(-5px); }
+}
+
+/* 🔻 Defeat state — Loser (VS এর পাশে থাকবে কিন্তু dimmed) */
+.fighter--defeat {
+  opacity: 0.55;                          /* ⬅️ Visible রাখো */
+  filter: grayscale(70%) brightness(0.7); /* Faded look */
+  transform: scale(0.92) !important;
+  transition: all 0.8s var(--duel-transition) !important;
+  position: relative;
+  /* ⬇️ display:none বা hide করবে না */
+}
+
+/* 💔 Defeat overlay effect */
+.fighter--defeat::after {
+  content: 'DEFEATED';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(-15deg);
+  font-size: 0.9rem;
+  font-weight: 900;
+  letter-spacing: 3px;
+  color: var(--duel-danger);
+  background: rgba(0, 0, 0, 0.75);
+  padding: 4px 16px;
+  border: 2px solid var(--duel-danger);
+  border-radius: 6px;
+  text-shadow: 0 0 10px var(--duel-danger);
+  box-shadow: 0 0 20px rgba(255, 71, 87, 0.5);
+  pointer-events: none;
+  z-index: 15;
+  animation: defeat-stamp 0.6s var(--duel-spring) 0.3s both;
+}
+
+@keyframes defeat-stamp {
+  0%   { transform: translate(-50%, -50%) rotate(-15deg) scale(2); opacity: 0; }
+  100% { transform: translate(-50%, -50%) rotate(-15deg) scale(1); opacity: 1; }
+}
+
+/* 💀 Defeat poster effect */
+.fighter--defeat .duel-fighter__poster {
+  border-color: rgba(255, 71, 87, 0.3) !important;
+  box-shadow: 0 0 10px rgba(255, 71, 87, 0.2) !important;
+}
+
+/* Defeat name color */
+.fighter--defeat .duel-fighter__name {
+  color: rgba(255, 255, 255, 0.5);
+  text-decoration: line-through;
+  text-decoration-color: rgba(255, 71, 87, 0.5);
+}
+
+/* ============================================================
+   🔧 SECTION 12: VS CENTER
+   ============================================================ */
+
+.duel-vs-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+  z-index: 5;
+}
+
+.duel-vs__ring {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.5);
+  border: 2px solid var(--duel-border);
+  position: relative;
+  transition: all 0.4s;
+}
+
+/* Rotating ring effect */
+.duel-vs__ring::before {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  border-top-color: var(--duel-primary);
+  border-right-color: var(--duel-secondary);
+  animation: vs-ring-spin 2s linear infinite;
+}
+
+@keyframes vs-ring-spin {
+  to { transform: rotate(360deg); }
+}
+
+.duel-vs__text {
+  font-size: 1.4rem;
+  font-weight: 900;
+  letter-spacing: 2px;
+  background: linear-gradient(135deg, var(--duel-primary), var(--duel-secondary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* VS Pulse animation */
+.vs--pulse .duel-vs__ring {
+  animation: vs-pulse 0.5s ease-in-out;
+}
+
+@keyframes vs-pulse {
+  0%   { transform: scale(1); }
+  50%  { transform: scale(1.4); border-color: var(--duel-primary); }
+  100% { transform: scale(1); }
+}
+
+.vs--impact .duel-vs__ring {
+  border-color: var(--duel-secondary);
+  box-shadow: var(--duel-glow-gold), 0 0 40px rgba(255, 204, 0, 0.4);
+}
+
+/* Spark Effects */
+.duel-vs__spark {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.spark {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--duel-primary);
+  opacity: 0;
+}
+
+.spark--1 { top: 0;   left: 50%; transform: translateX(-50%); }
+.spark--2 { bottom: 0; left: 50%; transform: translateX(-50%); }
+.spark--3 { left: 0;   top: 50%;  transform: translateY(-50%); }
+.spark--4 { right: 0;  top: 50%;  transform: translateY(-50%); }
+
+.spark--active .spark {
+  animation: spark-fly 0.6s ease-out forwards;
+}
+
+.spark--active .spark--1 { animation-delay: 0s; }
+.spark--active .spark--2 { animation-delay: 0.1s; }
+.spark--active .spark--3 { animation-delay: 0.05s; }
+.spark--active .spark--4 { animation-delay: 0.15s; }
+
+@keyframes spark-fly {
+  0%   { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+  100% {
+    transform:
+      translate(
+        calc(-50% + var(--spark-dx, 30px)),
+        calc(-50% + var(--spark-dy, -30px))
+      )
+      scale(0);
+    opacity: 0;
+  }
+}
+
+.duel-vs__subtitle {
+  font-size: 8px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.3);
+  white-space: nowrap;
+}
+
+
+/* ============================================================
+   🔧 SECTION 13: STATS COMPARISON SECTION
+   ============================================================ */
+
+.duel-stats-section {
+  opacity: 0;
+  transform: translateY(20px);
+  transition:
+    opacity 0.6s var(--duel-transition),
+    transform 0.6s var(--duel-spring);
+  border-top: 1px solid var(--duel-border);
+  padding-top: 24px;
+  margin-bottom: 20px;
+  pointer-events: none;
+}
+
+.duel-stats-section.stats--visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: all;
+}
+
+.duel-stats__heading {
+  text-align: center;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.5);
+  margin: 0 0 20px;
+}
+
+/* Stat Row */
+.duel-stat-row {
+  display: grid;
+  grid-template-columns: 1fr 120px 1fr;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+/* Label center */
+.duel-stat__label {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 700;
+}
+
+.duel-stat__label small {
+  font-size: 9px;
+  color: rgba(255, 255, 255, 0.3);
+}
+
+/* Bar Wrapper */
+.duel-stat__bar-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.duel-stat__bar-wrap--left {
+  flex-direction: row-reverse; /* P1 bar বামে থেকে ডানে যাবে */
+}
+
+.duel-stat__bar-wrap--right {
+  flex-direction: row; /* P2 bar ডানে থেকে বামে যাবে */
+}
+
+/* Progress Bar */
+.duel-stat__bar {
+  flex: 1;
+  height: 10px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+  position: relative;
+}
+
+.duel-stat__fill {
+  height: 100%;
+  border-radius: 10px;
+  width: 0%;
+  position: relative;
+}
+
+/* P1 Bar Color */
+.duel-stat__bar--p1 .duel-stat__fill {
+  background: linear-gradient(90deg, rgba(0, 212, 255, 0.4), var(--duel-p1-color));
+  box-shadow: 0 0 8px rgba(0, 212, 255, 0.5);
+  float: right; /* বামে থেকে শুরু */
+}
+
+/* P2 Bar Color */
+.duel-stat__bar--p2 .duel-stat__fill {
+  background: linear-gradient(90deg, var(--duel-p2-color), rgba(255, 107, 107, 0.4));
+  box-shadow: 0 0 8px rgba(255, 107, 107, 0.5);
+}
+
+/* Winner bar highlight */
+.duel-stat__bar.bar--winner .duel-stat__fill {
+  box-shadow: 0 0 15px currentColor;
+}
+
+.duel-stat__bar--p1.bar--winner .duel-stat__fill {
+  background: linear-gradient(90deg, rgba(0, 212, 255, 0.6), var(--duel-primary));
+  box-shadow: 0 0 15px rgba(0, 212, 255, 0.8);
+}
+
+.duel-stat__bar--p2.bar--winner .duel-stat__fill {
+  background: linear-gradient(90deg, var(--duel-p2-color), rgba(255, 107, 107, 0.6));
+  box-shadow: 0 0 15px rgba(255, 107, 107, 0.8);
+}
+
+/* Stat Value Text */
+.duel-stat__value {
+  font-size: 14px;
+  font-weight: 900;
+  min-width: 32px;
+  text-align: center;
+}
+
+.duel-stat__bar-wrap--left .duel-stat__value {
+  color: var(--duel-p1-color);
+}
+
+.duel-stat__bar-wrap--right .duel-stat__value {
+  color: var(--duel-p2-color);
+}
+
+/* Total Power Score */
+.duel-power-total {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 16px;
+  align-items: center;
+  margin-top: 20px;
+  padding: 16px;
+  border-radius: 14px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  opacity: 0;
+  transform: scale(0.95);
+  transition:
+    opacity 0.5s var(--duel-transition),
+    transform 0.5s var(--duel-spring);
+}
+
+.duel-power-total.power-total--visible {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.duel-power-total__label {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.4);
+  text-align: center;
+  white-space: nowrap;
+}
+
+.duel-power-total__p1,
+.duel-power-total__p2 {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 10px;
+  border-radius: 10px;
+  transition: all 0.4s;
+}
+
+.duel-power-total__p1 { border: 1px solid rgba(0, 212, 255, 0.2); }
+.duel-power-total__p2 { border: 1px solid rgba(255, 107, 107, 0.2); }
+
+.power-label {
+  font-size: 9px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.power-value {
+  font-size: 1.6rem;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.duel-power-total__p1 .power-value { color: var(--duel-p1-color); }
+.duel-power-total__p2 .power-value { color: var(--duel-p2-color); }
+
+/* Winner total highlight */
+.duel-power-total__p1.power--winner,
+.duel-power-total__p2.power--winner {
+  border-color: var(--duel-secondary);
+  background: rgba(255, 204, 0, 0.08);
+  box-shadow: 0 0 20px rgba(255, 204, 0, 0.2);
+  animation: power-winner-glow 1s ease-in-out infinite alternate;
+}
+
+.duel-power-total__p1.power--winner .power-value {
+  color: var(--duel-secondary);
+  text-shadow: var(--duel-glow-gold);
+}
+
+.duel-power-total__p2.power--winner .power-value {
+  color: var(--duel-secondary);
+  text-shadow: var(--duel-glow-gold);
+}
+
+@keyframes power-winner-glow {
+  from { box-shadow: 0 0 15px rgba(255, 204, 0, 0.2); }
+  to   { box-shadow: 0 0 30px rgba(255, 204, 0, 0.4); }
+}
+
+
+/* ============================================================
+   🔧 SECTION 14: WINNER ANNOUNCEMENT
+   ============================================================ */
+
+.duel-winner-section {
+  opacity: 0;
+  transform: translateY(30px) scale(0.95);
+  transition:
+    opacity 0.7s var(--duel-transition),
+    transform 0.7s var(--duel-spring);
+  text-align: center;
+  border-top: 1px solid var(--duel-border);
+  padding-top: 24px;
+  margin-bottom: 20px;
+}
+
+.duel-winner-section.winner--visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+/* Winner Announcement Box */
+.winner-announcement {
+  padding: 20px;
+  border-radius: 16px;
+  position: relative;
+  overflow: hidden;
+}
+
+.winner-announcement--victory {
+  background: linear-gradient(
+    160deg,
+    rgba(255, 204, 0, 0.08),
+    rgba(0, 0, 0, 0.3)
+  );
+  border: 1px solid rgba(255, 204, 0, 0.3);
+  box-shadow: 0 0 40px rgba(255, 204, 0, 0.1);
+}
+
+.winner-announcement--draw {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.winner__trophy,
+.winner__crown {
+  font-size: 3rem;
+  display: block;
+  margin-bottom: 8px;
+  animation: crown-bounce 0.8s var(--duel-spring);
+}
+
+@keyframes crown-bounce {
+  0%   { transform: scale(0) rotate(-20deg); opacity: 0; }
+  70%  { transform: scale(1.2) rotate(5deg); }
+  100% { transform: scale(1) rotate(0); opacity: 1; }
+}
+
+.winner__badge {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 6px 20px;
+  border-radius: 20px;
+  margin-bottom: 12px;
+  animation: badge-pop 0.5s var(--duel-spring) 0.3s both;
+}
+
+@keyframes badge-pop {
+  from { transform: scale(0.5); opacity: 0; }
+  to   { transform: scale(1); opacity: 1; }
+}
+
+.winner__badge--p1 {
+  background: rgba(0, 212, 255, 0.15);
+  color: var(--duel-p1-color);
+  border: 1px solid var(--duel-p1-color);
+  box-shadow: 0 0 15px rgba(0, 212, 255, 0.3);
+}
+
+.winner__badge--p2 {
+  background: rgba(255, 107, 107, 0.15);
+  color: var(--duel-p2-color);
+  border: 1px solid var(--duel-p2-color);
+  box-shadow: 0 0 15px rgba(255, 107, 107, 0.3);
+}
+
+/* Winner Title — THE MAIN EVENT! */
+.winner__title--victory {
+  font-size: clamp(1.4rem, 5vw, 2.2rem);
+  font-weight: 900;
+  letter-spacing: 2px;
+  margin: 0 0 8px;
+
+  /* তোমার requested glowing text shadow */
+  text-shadow:
+    0 0 15px #ffcc00,
+    0 0 30px rgba(255, 204, 0, 0.6),
+    0 0 60px rgba(255, 204, 0, 0.3);
+
+  background: linear-gradient(135deg, #ffcc00, #fff5a0, #ffcc00);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation:
+    winner-title-appear 0.8s var(--duel-spring) 0.5s both,
+    winner-title-shimmer 3s ease-in-out 1.3s infinite;
+}
+
+@keyframes winner-title-appear {
+  from { transform: scale(0.7) translateY(20px); opacity: 0; }
+  to   { transform: scale(1) translateY(0); opacity: 1; }
+}
+
+@keyframes winner-title-shimmer {
+  0%, 100% { filter: brightness(1); }
+  50%       { filter: brightness(1.3); }
+}
+
+.winner__title--draw {
+  font-size: clamp(1.2rem, 4vw, 1.8rem);
+  font-weight: 900;
+  color: rgba(255, 255, 255, 0.7);
+  letter-spacing: 3px;
+  margin: 0 0 8px;
+}
+
+.winner__subtitle {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.5);
+  margin: 0 0 16px;
+  letter-spacing: 1px;
+}
+
+/* Score Comparison */
+.winner__score-comparison {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.winner__score {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 16px;
+  border-radius: 10px;
+  min-width: 90px;
+}
+
+.winner__score--winner {
+  background: rgba(255, 204, 0, 0.1);
+  border: 1px solid rgba(255, 204, 0, 0.4);
+}
+
+.winner__score--loser {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  opacity: 0.6;
+}
+
+.winner__score--margin {
+  background: rgba(0, 255, 136, 0.08);
+  border: 1px solid rgba(0, 255, 136, 0.2);
+}
+
+.score-label {
+  font-size: 9px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.score-value {
+  font-size: 1.3rem;
+  font-weight: 900;
+}
+
+.winner__score--winner .score-value {
+  color: var(--duel-secondary);
+  text-shadow: 0 0 10px rgba(255, 204, 0, 0.5);
+}
+
+.winner__score--margin .score-value {
+  color: var(--duel-success);
+}
+
+/* Fighter Highlight Image */
+.winner__fighter-highlight {
+  display: inline-block;
+  position: relative;
+  margin-top: 8px;
+}
+
+.winner__fighter-highlight img {
+  width: 80px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 2px solid var(--duel-secondary);
+  box-shadow: 0 0 20px rgba(255, 204, 0, 0.4);
+  animation: winner-img-float 2s ease-in-out infinite;
+}
+
+@keyframes winner-img-float {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-8px); }
+}
+
+.winner__glow-ring {
+  position: absolute;
+  inset: -8px;
+  border-radius: 14px;
+  border: 2px solid rgba(255, 204, 0, 0.4);
+  animation: glow-ring-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes glow-ring-pulse {
+  0%, 100% { transform: scale(1); opacity: 0.6; }
+  50%       { transform: scale(1.05); opacity: 1; }
+}
+
+/* Draw Score Display */
+.winner__score-display {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 12px;
+  font-size: 1.2rem;
+  font-weight: 900;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.winner__no-img {
+  font-size: 4rem;
+  display: block;
+  animation: winner-img-float 2s ease-in-out infinite;
+}
+
+
+/* ============================================================
+   🔧 SECTION 15: ACTION BUTTONS
+   ============================================================ */
+
+.duel-actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  opacity: 0;
+  transform: translateY(10px);
+  transition:
+    opacity 0.5s var(--duel-transition),
+    transform 0.5s var(--duel-spring);
+  pointer-events: none;
+}
+
+.duel-actions.actions--visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: all;
+}
+
+.duel-btn {
+  padding: 12px 28px;
+  border-radius: 30px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  cursor: pointer;
+  border: none;
+  transition: all 0.3s var(--duel-transition);
+  text-transform: uppercase;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Button shimmer effect */
+.duel-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.1),
+    transparent
+  );
+  transition: left 0.4s;
+}
+
+.duel-btn:hover::before { left: 100%; }
+
+/* Reset Button */
+.duel-btn--reset {
+  background: linear-gradient(135deg, #003d5c, #0080a8);
+  color: var(--duel-primary);
+  border: 1px solid var(--duel-primary);
+  box-shadow: 0 0 15px rgba(0, 212, 255, 0.2);
+}
+
+.duel-btn--reset:hover {
+  background: linear-gradient(135deg, #0080a8, #00d4ff);
+  color: #000;
+  box-shadow: 0 0 25px rgba(0, 212, 255, 0.5);
+  transform: translateY(-2px) scale(1.03);
+}
+
+/* Exit Button */
+.duel-btn--exit {
+  background: linear-gradient(135deg, rgba(255, 71, 87, 0.1), rgba(255, 71, 87, 0.05));
+  color: rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.duel-btn--exit:hover {
+  background: rgba(255, 71, 87, 0.2);
+  color: var(--duel-danger);
+  border-color: var(--duel-danger);
+  box-shadow: 0 0 20px rgba(255, 71, 87, 0.3);
+  transform: translateY(-2px);
+}
+
+
+/* ============================================================
+   🔧 SECTION 16: CONFETTI
+   ============================================================ */
+
+.duel-confetti {
+  position: fixed;
+  top: -10px;
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  pointer-events: none;
+  z-index: 9001;
+  animation: confetti-fall 2s ease-in forwards;
+}
+
+@keyframes confetti-fall {
+  0%   { top: -10px; opacity: 1; transform: rotate(0deg) translateX(0); }
+  100% {
+    top: 100vh;
+    opacity: 0;
+    transform: rotate(720deg) translateX(calc(sin(var(--i, 0) * 1rad) * 100px));
+  }
+}
+
+
+/* ============================================================
+   🔧 SECTION 17: RESPONSIVE DESIGN
+   ============================================================ */
+
+@media (max-width: 680px) {
+  .duel-arena {
+    padding: 20px 14px;
+    max-height: 95vh;
+    border-radius: 14px;
+  }
+
+  .duel-fighters {
+    grid-template-columns: 1fr auto 1fr;
+    gap: 10px;
+  }
+
+  .duel-fighter {
+    padding: 14px 8px;
+  }
+
+  .duel-fighter__poster {
+    width: 65px;
+    height: 85px;
+  }
+
+  .duel-fighter__name {
+    font-size: 11px;
+    max-width: 100px;
+  }
+
+  .duel-vs__ring {
+    width: 50px;
+    height: 50px;
+  }
+
+  .duel-vs__text {
+    font-size: 1rem;
+  }
+
+  .duel-stat-row {
+    grid-template-columns: 1fr 90px 1fr;
+    gap: 8px;
+  }
+
+  .duel-stat__label {
+    font-size: 10px;
+  }
+
+  .winner__score-comparison {
+    gap: 8px;
+  }
+
+  .winner__score {
+    min-width: 70px;
+    padding: 8px 10px;
+  }
+
+  .duel-toast {
+    right: 12px;
+    left: 12px;
+    max-width: none;
+    min-width: auto;
+  }
+
+  .duel-header__text {
+    letter-spacing: 1px;
+  }
+
+  .duel-mode-indicator {
+    padding: 10px 16px;
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 400px) {
+  .duel-fighters {
+    grid-template-columns: 1fr 40px 1fr;
+    gap: 6px;
+  }
+
+  .duel-vs__ring {
+    width: 38px;
+    height: 38px;
+  }
+
+  .duel-vs__text { font-size: 0.75rem; }
+
+  .winner__score-comparison {
+    flex-direction: column;
+    align-items: center;
+  }
+}
+
+
+/* ============================================================
+   🔧 SECTION 18: ACCESSIBILITY & REDUCED MOTION
+   ============================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  /* সব animations কমিয়ে দেওয়া */
+  .duel-overlay,
+  .duel-arena,
+  .duel-fighter,
+  .duel-stats-section,
+  .duel-winner-section,
+  .duel-actions,
+  .duel-power-total,
+  .card.selected-for-duel,
+  .duel-mode-indicator,
+  .duel-toast,
+  .winner__title--victory {
+    animation: none !important;
+    transition-duration: 0.1s !important;
+  }
+
+  .duel-overlay--visible .duel-arena {
+    transform: none !important;
+  }
+
+  .winner__fighter-highlight img {
+    animation: none !important;
+  }
+}
+
+/* Focus visible for keyboard navigation */
+.duel-btn:focus-visible,
+.duel-close-btn:focus-visible,
+.duel-nav-link:focus-visible {
+  outline: 2px solid var(--duel-primary);
+  outline-offset: 3px;
+}
+
+
+/* ============================================================
+   🔧 SECTION 19: PRINT STYLES
+   ============================================================ */
+
+@media print {
+  .duel-overlay,
+  .duel-toast,
+  .duel-mode-indicator,
+  #duel-nav-item {
+    display: none !important;
+  }
+}
