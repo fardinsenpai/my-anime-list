@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Fardin's Anime Hub</title>
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="duel-system.css">
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
  
 </head>
@@ -26,7 +27,7 @@
   </div>
   
   <button class="search-btn" id="topSearchBtn" aria-label="Search">
-    <svg viewBox="0 0 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
   </button>
 </header>
 
@@ -56,6 +57,14 @@
     <a href="javascript:void(0)" onclick="filterTopFive('Movie')">🎬 Movie</a>
   </div>
 </div>  
+
+<li id="duel-nav-item">
+  <a href="#" id="duel-nav-link" class="duel-nav-link">
+    <span class="duel-nav-icon">⚔️</span>
+    <span class="duel-nav-text">Anime Duel</span>
+    <span class="duel-status-badge" id="duel-status-badge">OFF</span>
+  </a>
+</li>
 
 <a href="javascript:void(0)" onclick="openSuggestion()">
   <i>💬</i> Drop Suggestion
@@ -682,15 +691,17 @@
     <button onclick="toggleChat()">✕</button>
   </div>
   <div class="chat-messages" id="chatMessages">
-    <div class="msg bot">😊 Hello! Welcome to Fardin's Anime List! I'm Fardin's personal anime assistant. Ask me anything — episodes, seasons, random picks, or genre recommendations! ✨</div>
+    <div class="msg bot">😊 Hello! Welcome to Fardin's Anime Hub! I'm Fardin's personal anime assistant. Ask me anything — episodes, seasons, random picks, or genre recommendations! ✨</div>
   </div>
   <div class="chat-input-area">
     <input type="text" id="chatInput" placeholder="Type a message..." onkeydown="if(event.key==='Enter') sendMessage()" />
     <button onclick="sendMessage()">Send</button>
+    <button onclick="clearChatHistory()" class="clear-btn">🗑️</button>
   </div>
 </div>
 
 
+  <script src="duel-system.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
