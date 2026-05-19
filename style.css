@@ -1980,5 +1980,47 @@
         color: #000 !important;
         flex-shrink: 0 !important;
         z-index: 100 !important;
-    }
+      }
+
+/* ===== PREMIUM TYPING ANIMATION ===== */
+
+.typing-animation {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+  padding: 4px 2px;
+}
+
+.typing-animation span {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #7aa2ff;
+  animation: bounce 1.2s infinite ease-in-out;
+}
+
+.typing-animation span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.typing-animation span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes bounce {
+  0%, 80%, 100% {
+    transform: scale(0.7);
+    opacity: 0.5;
+  }
+  40% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+}
+
+/* Smooth message bubble animation */
+
+.msg {
+  will-change: transform, opacity;
+}
 
