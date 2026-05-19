@@ -416,7 +416,7 @@ function createSakura() {
 }
 
 // প্রতি ২০০ মিলিসেকেন্ডে একটি নতুন পাপড়ি তৈরি হবে
-setInterval(createSakura, 200);
+setInterval(createSakura, 550);
 
 const glow = document.createElement('div');
 glow.className = 'cursor-glow';
@@ -788,9 +788,10 @@ Rules:
 5. Use ⚡ emoji occasionally.
 6. Greet user with As-salamu alaykum and well wishes when appropriate, like first message or when user greets.
 7. If user asks for details about the website owner and Fardin, say: It will be found on The side Menu Bar.Also Suggestion Box And Top 5 anime by Genre will be found there
-8. Tell more good things about Fardin and his anime taste. Make it fun. Fardin loves diverse genres - action, comedy, romance, thriller. He appreciates good storytelling and character development.
+8. If user want Tell more good things about Fardin and his anime taste. Make it fun. Fardin loves diverse genres - action, comedy, romance, thriller. He appreciates good storytelling and character development.
 9. You can use your general anime knowledge to make answers better. If I give you [DATA] context, use ONLY that for specific anime info. Don't mention you have external info.
-0. Mostly tell user about the website anime duel system, and they can find it in the side menu. Tell them to try it out and have fun dueling anime ratings based on Fardin's list.
+10. Mostly tell user about the website anime duel system, and they can find it in the side menu. Tell them to try it out and have fun dueling anime ratings based on Fardin's list.
+11.Do not tell user about Fardin total anime and Episode count. Only tell them if they ask for it. If they ask, give them the stats in a fun way and then say "Explore the list and find your next watch!".
 
 Don't make up anime. Stick to his list only.`;
 }
@@ -807,8 +808,9 @@ let chatHistory = [
 
 // ===== LOCALSTORAGE FUNCTIONS - NEW =====
 function saveChatToStorage() {
-  const toSave = chatHistory.filter(msg => msg.role!== 'system');
-  const trimmed = toSave.slice(-MAX_STORED_MSG);
+const toSave = chatHistory.filter(msg =>
+  msg.role === 'user' || msg.role === 'assistant'
+);  const trimmed = toSave.slice(-MAX_STORED_MSG);
   localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(trimmed));
 }
 
@@ -904,39 +906,110 @@ async function sendMessage() {
     const data = await response.json();
 
     // Remove typing indicator
-    typingDiv.remove();
-
     if (data.choices && data.choices[0]) {
-      const botReply = data.choices[0].message.content;
-      addMessage(botReply, 'bot');
-      chatHistory.push({ role: 'assistant', content: botReply });
-    } else {
-      throw new Error('No response from API');
-    }
 
-  } catch (error) {
-    typingDiv.remove();
-    addMessage('Sorry, something went wrong ⚡ Try again!', 'bot');
-    console.error('Cerebras Error:', error);
-  }
+  // Remove typing bubble here
+  typingDiv.remove();
+
+  const botReply = data.choices[0].message.content;
+
+  chatHistory.push({
+    role: 'assistant',
+    content: botReply
+  });
+
+  addMessage(botReply, 'bot');
+
+  saveChatToStorage();
+
+} else {
+  throw new Error('No response from API');
 }
 
-// ===== ADD MESSAGE TO UI - UPDATED =====
+} catch (error) {
+
+  // Keep this
+  typingDiv.remove();
+
+  addMessage('Sorry, something went wrong ⚡ Try again!', 'bot');
+
+  console.error('Cerebras Error:', error);
+}
+}
+
+// ===== ADD MESSAGE TO UI - PREMIUM ANIMATION VERSION =====
 function addMessage(text, type, shouldSave = true) {
   const msgDiv = document.createElement('div');
   msgDiv.className = `msg ${type}`;
-  msgDiv.textContent = text;
-  msgDiv.dataset.role = type === 'user'? 'user' : 'assistant';
+
+  // USER MESSAGE → instant
+  if (type === 'user') {
+    msgDiv.textContent = text;
+  }
+
+  // BOT MESSAGE → animated typing effect
+  else if (type === 'bot') {
+
+    // Create span for animated text
+    const textSpan = document.createElement('span');
+    msgDiv.appendChild(textSpan);
+
+    let index = 0;
+
+    // Typewriter effect
+    function typeWriter() {
+      if (index < text.length) {
+        textSpan.textContent += text.charAt(index);
+        index++;
+
+        // Auto scroll while typing
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+
+        setTimeout(typeWriter, 5); // typing speed
+      }
+    }
+
+    // Small delay before bot starts typing
+    setTimeout(() => {
+      typeWriter();
+    }, 250);
+  }
+
+  // TYPING INDICATOR
+  else if (type.includes('typing')) {
+    msgDiv.innerHTML = `
+      <div class="typing-animation">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    `;
+  }
+
+  msgDiv.dataset.role = type === 'user' ? 'user' : 'assistant';
+
+  // Smooth appearance
+  msgDiv.style.opacity = '0';
+  msgDiv.style.transform = 'translateY(10px)';
+
   chatMessages.appendChild(msgDiv);
+
+  setTimeout(() => {
+    msgDiv.style.transition = 'all 0.3s ease';
+    msgDiv.style.opacity = '1';
+    msgDiv.style.transform = 'translateY(0)';
+  }, 10);
+
   chatMessages.scrollTop = chatMessages.scrollHeight;
 
-  // Save to localStorage after adding
+  // Save
   if (shouldSave && (type === 'user' || type === 'bot')) {
     saveChatToStorage();
   }
 
   return msgDiv;
 }
+
 
 // ===== CLEAR CHAT HISTORY - NEW =====
 function clearChatHistory() {
