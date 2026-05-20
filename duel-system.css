@@ -1813,3 +1813,435 @@ body.duel-mode-active .card:hover {
     display: none !important;
   }
 }
+
+
+
+
+/* ============================================================
+   📱 MOBILE COMPLETE FIX — Duel Arena
+   ============================================================ */
+
+@media (max-width: 768px) {
+
+  /* ── Overlay Full Screen ───────────────────────────────── */
+  .duel-overlay {
+    padding: 0 !important;
+    align-items: flex-start !important;
+  }
+
+  .duel-arena {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-height: 100vh !important;
+    border-radius: 0 !important;
+    padding: 16px 12px !important;
+    margin: 0 !important;
+  }
+
+  /* ── Header ────────────────────────────────────────────── */
+  .duel-header {
+    margin-bottom: 16px !important;
+  }
+
+  .duel-header__text {
+    font-size: 1.2rem !important;
+    letter-spacing: 1.5px !important;
+  }
+
+  .duel-header__icon {
+    font-size: 1rem !important;
+  }
+
+  .duel-header__subtitle {
+    font-size: 9px !important;
+    letter-spacing: 2px !important;
+  }
+
+  /* ── Close Button ──────────────────────────────────────── */
+  .duel-close-btn {
+    top: 10px !important;
+    right: 10px !important;
+    width: 30px !important;
+    height: 30px !important;
+    font-size: 13px !important;
+  }
+
+  /* ============================================================
+     ⚔️ FIGHTERS — STACK VERTICALLY on mobile
+     ============================================================ */
+
+  .duel-fighters {
+    display: flex !important;          /* Grid → Flex */
+    flex-direction: column !important; /* Stack vertically */
+    gap: 0 !important;
+    align-items: stretch !important;
+    margin-bottom: 16px !important;
+    position: relative !important;
+  }
+
+  /* ── Fighter Cards ─────────────────────────────────────── */
+  .duel-fighter {
+    display: flex !important;
+    flex-direction: row !important;    /* Horizontal layout */
+    align-items: center !important;
+    gap: 12px !important;
+    padding: 12px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    border-radius: 10px !important;
+  }
+
+  .duel-fighter--p1 {
+    order: 1 !important;
+    border-bottom: none !important;
+    border-bottom-left-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
+  }
+
+  .duel-fighter--p2 {
+    order: 3 !important;
+    border-top-left-radius: 0 !important;
+    border-top-right-radius: 0 !important;
+  }
+
+  /* ── VS Center — Between fighters ─────────────────────── */
+  .duel-vs-center {
+    order: 2 !important;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 12px !important;
+    padding: 8px 12px !important;
+    background: rgba(0, 0, 0, 0.3) !important;
+    border-left: 1px solid rgba(0, 212, 255, 0.15) !important;
+    border-right: 1px solid rgba(255, 107, 107, 0.15) !important;
+    width: 100% !important;
+    z-index: 5 !important;
+  }
+
+  .duel-vs__ring {
+    width: 44px !important;
+    height: 44px !important;
+    flex-shrink: 0 !important;
+  }
+
+  .duel-vs__text {
+    font-size: 1rem !important;
+  }
+
+  .duel-vs__subtitle {
+    font-size: 8px !important;
+    letter-spacing: 1.5px !important;
+  }
+
+  /* ── Poster — Smaller on mobile ────────────────────────── */
+  .duel-fighter__poster {
+    width: 60px !important;
+    height: 80px !important;
+    flex-shrink: 0 !important;
+    border-radius: 8px !important;
+  }
+
+  .duel-fighter__poster img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+  }
+
+  /* ── Fighter Info — Right side of poster ───────────────── */
+  .duel-fighter__info-wrap,
+  .duel-fighter > :not(.duel-fighter__poster):not(.duel-fighter__label) {
+    flex: 1 !important;
+    min-width: 0 !important;
+  }
+
+  .duel-fighter__label {
+    font-size: 9px !important;
+    padding: 3px 8px !important;
+    letter-spacing: 1px !important;
+    align-self: flex-start !important;
+    margin-bottom: 4px !important;
+  }
+
+  .duel-fighter__name {
+    font-size: 13px !important;
+    max-width: 100% !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    margin: 4px 0 !important;
+  }
+
+  .duel-fighter__genre {
+    font-size: 9px !important;
+    margin-bottom: 6px !important;
+  }
+
+  .duel-fighter__power-preview {
+    min-width: auto !important;
+    padding: 4px 10px !important;
+    flex-direction: row !important;
+    gap: 6px !important;
+    align-items: center !important;
+    align-self: flex-start !important;
+  }
+
+  .duel-fighter__power-preview span {
+    font-size: 8px !important;
+  }
+
+  .duel-fighter__power-preview strong {
+    font-size: 1rem !important;
+  }
+
+  /* ── DEFEATED stamp ────────────────────────────────────── */
+  .fighter--defeat::after {
+    font-size: 0.65rem !important;
+    padding: 3px 10px !important;
+    letter-spacing: 2px !important;
+  }
+
+  /* ── Victory crown ─────────────────────────────────────── */
+  .fighter--victory::before {
+    font-size: 1.2rem !important;
+    top: -22px !important;
+  }
+
+  /* ── Stats Section ─────────────────────────────────────── */
+  .duel-stats-section {
+    padding-top: 16px !important;
+    margin-bottom: 14px !important;
+  }
+
+  .duel-stats__heading {
+    font-size: 10px !important;
+    letter-spacing: 2px !important;
+    margin-bottom: 14px !important;
+  }
+
+  .duel-stat-row {
+    grid-template-columns: 1fr 80px 1fr !important;
+    gap: 6px !important;
+    margin-bottom: 10px !important;
+  }
+
+  .duel-stat__label {
+    font-size: 10px !important;
+  }
+
+  .duel-stat__label small {
+    font-size: 8px !important;
+  }
+
+  .duel-stat__bar {
+    height: 8px !important;
+  }
+
+  .duel-stat__value {
+    font-size: 12px !important;
+    min-width: 26px !important;
+  }
+
+  /* ── Total Power ───────────────────────────────────────── */
+  .duel-power-total {
+    gap: 8px !important;
+    padding: 10px 8px !important;
+    margin-top: 12px !important;
+  }
+
+  .duel-power-total__label {
+    font-size: 8px !important;
+    letter-spacing: 1px !important;
+  }
+
+  .power-value {
+    font-size: 1.2rem !important;
+  }
+
+  .power-label {
+    font-size: 8px !important;
+  }
+
+  /* ── Winner Section ────────────────────────────────────── */
+  .duel-winner-section {
+    padding-top: 16px !important;
+    margin-bottom: 14px !important;
+  }
+
+  .winner-announcement {
+    padding: 14px 12px !important;
+  }
+
+  .winner__trophy,
+  .winner__crown {
+    font-size: 2rem !important;
+    margin-bottom: 6px !important;
+  }
+
+  .winner__title--victory {
+    font-size: 1.3rem !important;
+    letter-spacing: 1px !important;
+  }
+
+  .winner__title--draw {
+    font-size: 1.1rem !important;
+  }
+
+  .winner__badge {
+    font-size: 9px !important;
+    padding: 4px 14px !important;
+    letter-spacing: 1px !important;
+  }
+
+  .winner__subtitle {
+    font-size: 11px !important;
+    margin-bottom: 10px !important;
+  }
+
+  .winner__score-comparison {
+    gap: 6px !important;
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+  }
+
+  .winner__score {
+    min-width: 75px !important;
+    padding: 6px 10px !important;
+  }
+
+  .score-label {
+    font-size: 8px !important;
+  }
+
+  .score-value {
+    font-size: 1rem !important;
+  }
+
+  .winner__fighter-highlight img {
+    width: 55px !important;
+    height: 72px !important;
+  }
+
+  /* ── Action Buttons ────────────────────────────────────── */
+  .duel-actions {
+    flex-direction: column !important;
+    gap: 8px !important;
+    align-items: stretch !important;
+  }
+
+  .duel-btn {
+    padding: 12px 20px !important;
+    font-size: 12px !important;
+    text-align: center !important;
+  }
+
+  /* ── Toast ─────────────────────────────────────────────── */
+  .duel-toast {
+    right: 10px !important;
+    left: 10px !important;
+    top: 80px !important;
+    max-width: 100% !important;
+    min-width: auto !important;
+    font-size: 12px !important;
+  }
+
+  .toast-title {
+    font-size: 12px !important;
+  }
+
+  .toast-message {
+    font-size: 10px !important;
+  }
+
+  /* ── Floating Indicator ────────────────────────────────── */
+  .duel-mode-indicator {
+    bottom: 70px !important; /* navigation bar এর উপরে */
+    font-size: 11px !important;
+    padding: 8px 16px !important;
+    gap: 8px !important;
+  }
+
+  .indicator__text {
+    font-size: 10px !important;
+    letter-spacing: 1px !important;
+  }
+
+  .indicator__sub {
+    font-size: 10px !important;
+  }
+
+  /* ── Genre Mismatch Modal ──────────────────────────────── */
+  .mismatch-content {
+    padding: 20px 14px !important;
+    border-radius: 14px !important;
+  }
+
+  .mismatch-title {
+    font-size: 1.3rem !important;
+    letter-spacing: 2px !important;
+  }
+
+  .mismatch-versus {
+    grid-template-columns: 1fr !important;
+    gap: 8px !important;
+  }
+
+  .mismatch-vs {
+    flex-direction: row !important;
+    justify-content: center !important;
+    padding: 4px 0 !important;
+  }
+
+  .mismatch-btn {
+    padding: 10px 24px !important;
+    font-size: 12px !important;
+    width: 100% !important;
+  }
+}
+
+/* ============================================================
+   📱 VERY SMALL PHONES (< 380px)
+   ============================================================ */
+
+@media (max-width: 380px) {
+
+  .duel-arena {
+    padding: 12px 10px !important;
+  }
+
+  .duel-header__text {
+    font-size: 1rem !important;
+    letter-spacing: 1px !important;
+  }
+
+  .duel-fighter__poster {
+    width: 50px !important;
+    height: 68px !important;
+  }
+
+  .duel-fighter__name {
+    font-size: 11px !important;
+  }
+
+  .duel-stat-row {
+    grid-template-columns: 1fr 70px 1fr !important;
+    gap: 4px !important;
+  }
+
+  .duel-stat__value {
+    font-size: 10px !important;
+    min-width: 22px !important;
+  }
+
+  .winner__title--victory {
+    font-size: 1.1rem !important;
+  }
+
+  .power-value {
+    font-size: 1rem !important;
+  }
+}
+
