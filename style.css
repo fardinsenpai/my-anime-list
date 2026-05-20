@@ -1468,6 +1468,7 @@
   bottom: 108px !important;
   right: 28px !important;
   width: 350px;
+  max-width: 90vw;
   max-height: 520px;
   background: #060612;
   border-radius: 20px;
@@ -1571,6 +1572,67 @@
   background: rgba(245,197,24,0.25);
   transform: rotate(90deg);
   box-shadow: 0 0 12px rgba(245,197,24,0.4);
+}
+
+/* ══════════════════════════════════════
+   📱 MOBILE RESPONSIVE FIX FOR CHAT BOX
+══════════════════════════════════════ */
+
+@media (max-width: 768px) {
+  .chat-box {
+    width: calc(100vw - 20px) !important;  /* Screen width - 10px gap দুই পাশে */
+    max-width: none !important;
+    right: 10px !important;
+    left: 10px !important;
+    bottom: 85px !important;               /* Bubble এর উপরে gap */
+    height: 65vh !important;               /* Screen এর 65% height */
+    max-height: none !important;           /* পুরোনো 520px override করো */
+  }
+
+  .chat-bubble {
+    bottom: 15px !important;
+    right: 15px !important;
+    width: 58px !important;
+    height: 58px !important;
+    font-size: 26px !important;
+  }
+
+  .chat-messages {
+    max-height: calc(65vh - 130px) !important; /* Header 60px + Input 70px বাদ */
+  }
+
+  .chat-header {
+    font-size: 12px !important;
+    padding: 12px 15px !important;
+  }
+
+  .chat-input-area {
+    padding: 10px 12px !important;
+  }
+
+  .chat-input-area input {
+    font-size: 16px !important; /* iOS zoom বন্ধ করে */
+  }
+
+  .chat-input-area button {
+    padding: 10px 12px !important;
+    font-size: 10px !important;
+  }
+}
+
+/* iPhone SE / ছোট screen এর জন্য */
+@media (max-width: 380px) {
+  .chat-box {
+    bottom: 75px !important;
+    height: 60vh !important;
+  }
+  
+  .chat-bubble {
+    width: 52px !important;
+    height: 52px !important;
+    bottom: 12px !important;
+    right: 12px !important;
+  }
 }
 
 /* ── Messages ── */
@@ -1701,14 +1763,6 @@
   right: 28px;
   z-index: 9999;
 }
-
-.chat-box {
-  position: fixed;
-  bottom: 100px;
-  right: 28px;
-  z-index: 9998;
-}
-
 /* ── Suggestion Box Position ── */
 .chat-icon {
   position: fixed;
