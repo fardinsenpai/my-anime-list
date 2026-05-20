@@ -714,9 +714,9 @@ window.addEventListener('beforeunload', function (e) {
 // চ্যাট বক্স বন্ধ করলে flag রিসেট হবে না
 // কারণ ইউজার আবার খুলতে পারে। রিলোড দিলেই শুধু memory যাবে
 
-const CEREBRAS_API_KEY = 'csk-r84k3e2j2mwc4cm55d8c4chex3hteydpxn5kexj6ymr9de3d'
-const apiUrl = 'https://api.cerebras.ai/v1/chat/completions'
-const proxyUrl = 'https://corsproxy.io/?' 
+const CEREBRAS_API_KEY = 'csk-r84k3e2j2mwc4cm55d8c4chex3hteydpxn5kexj6ymr9de3d'; // এখানে তোমার key বসাও
+const apiUrl = 'https://api.cerebras.ai/v1/chat/completions';
+const proxyUrl = 'https://corsproxy.io/?';
 
 // ===== LOCALSTORAGE CONFIG - NEW =====
 const CHAT_STORAGE_KEY = 'fardin_ai_chat_ui_history';
