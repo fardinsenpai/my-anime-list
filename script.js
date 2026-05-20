@@ -688,35 +688,12 @@ if (window.scrollY > document.body.scrollHeight / 3) {
 })();
 
 
-// ===== SMART RELOAD WARNING =====
-let aiUsed = false;
 
-// Track যখন ইউজার আসলেই AI কে মেসেজ পাঠায়
-const originalSendMessage = sendMessage;
-sendMessage = async function() {
-  aiUsed = true; // AI ইউজ হইছে
-  return originalSendMessage.apply(this, arguments);
-}
-
-// পেজ রিলোড/ক্লোজ করার আগে চেক করো
-window.addEventListener('beforeunload', function (e) {
-  // শুধু তখনই warning যখন: 
-  // 1. AI ইউজ হইছে AND 
-  // 2. চ্যাটে কমপক্ষে 1টা user + 1টা bot মেসেজ আছে
-  if (aiUsed && chatHistory.length > 2) {
-    e.preventDefault();
-    const message = 'Your AI chat history will be lost if you leave this page.';
-    e.returnValue = message;
-    return message;
-  }
-});
 
 // চ্যাট বক্স বন্ধ করলে flag রিসেট হবে না
 // কারণ ইউজার আবার খুলতে পারে। রিলোড দিলেই শুধু memory যাবে
 
-const CEREBRAS_API_KEY = 'csk-r84k3e2j2mwc4cm55d8c4chex3hteydpxn5kexj6ymr9de3d'; // এখানে তোমার key বসাও
-const apiUrl = 'https://api.cerebras.ai/v1/chat/completions';
-const proxyUrl = 'https://corsproxy.io/?';
+const apiUrl = 'https://anime-api-brown-phi.vercel.app/api/chat';
 
 // ===== LOCALSTORAGE CONFIG - NEW =====
 const CHAT_STORAGE_KEY = 'fardin_ai_chat_ui_history';
@@ -886,12 +863,11 @@ async function sendMessage() {
       };
     }
 
-    const response = await fetch(proxyUrl + encodeURIComponent(apiUrl), {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${CEREBRAS_API_KEY}`,
-        'Content-Type': 'application/json'
-      },
+   const response = await fetch(apiUrl, {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json'
+  },
       body: JSON.stringify({
         model: 'llama3.1-8b',
         messages: messagesToSend,
@@ -1111,3 +1087,48 @@ function clearChatHistory() {
     addMessage('চ্যাট ক্লিয়ার হয়ে গেছে ⚡ নতুন করে শুরু করো!', 'bot');
   }
 }
+
+
+// Duel mode এ chat bubble auto hide
+setInterval(() => {
+  document.querySelector('.chat-bubble').style.display = 
+    document.body.classList.contains('duel-mode-active') ? 'none' : 'flex';
+}, 200);
+
+/* ══════════════════════════════════════
+   🤖 SIDEBAR AI CHAT - SIMPLE & WORKING
+══════════════════════════════════════ */
+
+// Sidebar button click
+document.addEventListener('click', function(e) {
+  // AI Chat menu button
+  if (e.target.closest('#aiChatMenuBtn')) {
+    e.preventDefault();
+    
+    // Sidebar বন্ধ করো
+    document.getElementById('sideBar')?.classList.remove('open');
+    document.querySelector('.sidebar-overlay')?.classList.remove('active');
+    
+    // Chat bubble এ click করো - এটাই original way
+    document.querySelector('.chat-bubble')?.click();
+  }
+  
+  // Close button click - bubble hide থাকলে manual close
+  if (e.target.closest('.chat-box .chat-close, .chat-box #chatCloseBtn')) {
+    const chatBox = document.querySelector('.chat-box');
+    chatBox?.classList.remove('open');
+    chatBox.style.display = 'none'; // Force hide
+  }
+});
+
+function toggleChat() {
+  // চ্যাট ওপেন/ক্লোজ করার code এখানে
+  const chatBox = document.querySelector('.chat-box');
+  chatBox?.classList.toggle('open');
+  
+  // Sidebar বন্ধ করার জন্য এই লাইন যোগ করো
+  if (typeof closeMenu === 'function') closeMenu();
+}
+
+// AI Chat button এ এই function call করো
+document.getElementById('aiChatMenuBtn')?.addEventListener('click', toggleChat);
