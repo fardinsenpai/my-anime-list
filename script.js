@@ -10,8 +10,9 @@ window.onload = () => {
   });
 
   // Counter start
-  counterUp("animeCount", 236, duration);
-  counterUp("seasonCount", 347, duration);
+const stats = getStats();
+counterUp("animeCount", stats.animeCount, duration);  
+counterUp("seasonCount", 347, duration);
   counterUp("episodeCount", 6166, duration);
 };
 
@@ -177,13 +178,6 @@ document.addEventListener('DOMContentLoaded', () => {
     };
   }
 });
-
-window.addEventListener('load', function() {
-  const duelScript = document.createElement('script');
-  duelScript.src = 'duel-system.js';
-  document.body.appendChild(duelScript);
-});
-
 // ===============================
 // SUGGESTION PANEL
 // ===============================
@@ -985,15 +979,6 @@ function addMessage(text, type, shouldSave = true) {
 }
 
 
-// ===== CLEAR CHAT HISTORY - NEW =====
-function clearChatHistory() {
-  localStorage.removeItem(CHAT_STORAGE_KEY);
-  chatMessages.innerHTML = '';
-  chatHistory = [
-    { role: "system", content: getSystemPrompt() }
-  ];
-}
-
 // ===== ENTER KEY SUPPORT =====
 chatInput.addEventListener('keydown', (e) => {
   if (e.key === 'Enter') {
@@ -1089,11 +1074,6 @@ function clearChatHistory() {
 }
 
 
-// Duel mode এ chat bubble auto hide
-setInterval(() => {
-  document.querySelector('.chat-bubble').style.display = 
-    document.body.classList.contains('duel-mode-active') ? 'none' : 'flex';
-}, 200);
 
 /* ══════════════════════════════════════
    🤖 SIDEBAR AI CHAT - SIMPLE & WORKING
