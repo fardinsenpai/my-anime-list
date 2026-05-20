@@ -445,7 +445,7 @@ function checkGenreCompatibility(anime1, anime2) {
               <div class="spark spark--3"></div>
               <div class="spark spark--4"></div>
             </div>
-            <div class="duel-vs__subtitle">MAY THE BEST WIN</div>
+            <div class="duel-vs__subtitle">Don't Take It Seriously </div>
           </div>
 
           ${fighterHTML(a2, 'p2', '🔥 ANIME 2')}
@@ -474,11 +474,15 @@ function checkGenreCompatibility(anime1, anime2) {
           <div class="duel-winner__content" id="duel-winner-content"></div>
         </div>
 
+        
+
         <div class="duel-actions" id="duel-actions">
           <button class="duel-btn duel-btn--reset" id="duel-reset-btn">🔄 Reset Duel</button>
           <button class="duel-btn duel-btn--exit"  id="duel-exit-btn" >🚪 Exit Duel Mode</button>
         </div>
       </div>`;
+
+      
 
     // Events
     ov.querySelector('#duel-close-btn').addEventListener('click', () => closeOverlay(ov));
@@ -665,9 +669,17 @@ function checkGenreCompatibility(anime1, anime2) {
     `;
   }
 
+
+  
   section.classList.add('winner--visible');
   ov.querySelector('#duel-actions')?.classList.add('actions--visible');
+
+  
+
 }
+
+
+
   /* ── VISUAL EFFECTS ────────────────────────────────── */
   function generateParticles(container) {
     if (!container) return;
