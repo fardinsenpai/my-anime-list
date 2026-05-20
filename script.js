@@ -714,7 +714,9 @@ window.addEventListener('beforeunload', function (e) {
 // চ্যাট বক্স বন্ধ করলে flag রিসেট হবে না
 // কারণ ইউজার আবার খুলতে পারে। রিলোড দিলেই শুধু memory যাবে
 
-
+const CEREBRAS_API_KEY = 'csk-r84k3e2j2mwc4cm55d8c4chex3hteydpxn5kexj6ymr9de3d'
+const apiUrl = 'https://api.cerebras.ai/v1/chat/completions'
+const proxyUrl = 'https://corsproxy.io/?' 
 
 // ===== LOCALSTORAGE CONFIG - NEW =====
 const CHAT_STORAGE_KEY = 'fardin_ai_chat_ui_history';
@@ -884,15 +886,21 @@ async function sendMessage() {
       };
     }
 
-    const response = await fetch('/.netlify/functions/chat', {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json'
-  },
-  body: JSON.stringify({
-    messages: messagesToSend
-  })
-});
+    const response = await fetch(proxyUrl + encodeURIComponent(apiUrl), {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${CEREBRAS_API_KEY}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        model: 'llama3.1-8b',
+        messages: messagesToSend,
+        temperature: 0.8,
+        max_tokens: 200,
+        stream: false
+      })
+    });
+
     const data = await response.json();
 
     // Remove typing indicator
