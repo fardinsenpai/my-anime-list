@@ -524,7 +524,7 @@ function checkGenreCompatibility(anime1, anime2) {
       <div class="duel-fighter__genre">${anime.genre || ''}</div>
 
       <div class="duel-fighter__power-preview" id="power-preview-${id}">
-        <span>Power Score</span>
+        <span></span>
         <strong id="power-value-${id}">??</strong>
       </div>
     </div>
@@ -663,7 +663,7 @@ function checkGenreCompatibility(anime1, anime2) {
         </div>
         <h2 class="winner-name">${result.winner.title}</h2>
         <div class="winner-score">
-          Power Score: <strong>${(isP1Winner ? result.scores.anime1 : result.scores.anime2).toFixed(3)}</strong>
+          Total Score: <strong>${(isP1Winner ? result.scores.anime1 : result.scores.anime2).toFixed(3)}</strong>
         </div>
       </div>
     `;
