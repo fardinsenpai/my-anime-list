@@ -1,11 +1,4 @@
 /* ============================================================
-   ⚔️  ANIME DUEL SYSTEM - duel-system.css
-   ------------------------------------------------------------
-   Cyberpunk/Otaku থিমে — তোমার existing style-এর সাথে 
-   perfectly blend করে।
-   ============================================================ */
-
-/* ============================================================
    🔧 SECTION 1: CSS CUSTOM PROPERTIES
    — Duel System-এর নিজস্ব color variables
    ============================================================ */
@@ -434,18 +427,15 @@ body.duel-mode-active .card:hover {
 /* Overlay — topbar এর নিচে শুরু */
 .duel-overlay {
   position: fixed;
-  top: 48px; /* topbar height */
+  top: 48px;
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(2, 4, 16, 0.97);
-  z-index: 9000; /* topbar এর নিচে */
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
-  overflow-y: auto;
-  padding: 16px 12px 32px;
-  backdrop-filter: blur(6px);
+  overflow-y: auto !important;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch; /* iOS scroll fix */
+  padding: 12px 10px 40px;
+  z-index: 9000;
 }
 
 /* Arena panel */
@@ -453,6 +443,7 @@ body.duel-mode-active .card:hover {
   width: 100%;
   max-width: 780px;
   background: rgba(6, 10, 30, 0.98);
+  position: relative;
   border-radius: 18px;
   border: 1px solid rgba(0, 212, 255, 0.2);
   overflow: hidden;
@@ -550,39 +541,78 @@ body.duel-mode-active .card:hover {
   margin-top: 3px;
 }
 
-/* Power preview */
+/* ==========================================
+   ⚡ POWER PREVIEW - FIXED & RESPONSIVE
+   ========================================== */
 .duel-fighter__power-preview {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 6px 16px;
+  justify-content: center;
+  text-align: center;
+  padding: 6px 14px;
   border-radius: 8px;
-  min-width: 80px;
+  min-width: 75px;
+  box-sizing: border-box;
+  transition: all 0.3s ease;
 }
 
+/* পাওয়ার টেক্সটের ছোট লেবেল (SPAN) */
 .duel-fighter__power-preview span {
   font-size: 9px;
   letter-spacing: 1px;
-  color: rgba(255,255,255,0.4);
+  color: rgba(255, 255, 255, 0.5);
   text-transform: uppercase;
+  margin-bottom: 2px;
+  line-height: 1;
 }
 
+/* পাওয়ারের সংখ্যা/মান (STRONG) */
 .duel-fighter__power-preview strong {
   font-family: 'Bebas Neue', 'Orbitron', sans-serif;
   font-size: 1.4rem;
-  letter-spacing: 2px;
+  letter-spacing: 1.5px;
+  line-height: 1.1;
+  margin-top: 2px;
 }
 
+/* Player 1 (Blue) Theme */
 .duel-fighter__power-preview--p1 {
-  background: rgba(0,212,255,0.08);
-  border: 1px solid rgba(0,212,255,0.25);
+  background: rgba(0, 212, 255, 0.08);
+  border: 1px solid rgba(0, 212, 255, 0.25);
+  box-shadow: inset 0 0 8px rgba(0, 212, 255, 0.05);
+}
+.duel-fighter__power-preview--p1 strong { 
+  color: #00d4ff; 
+  text-shadow: 0 0 8px rgba(0, 212, 255, 0.3);
 }
 
-.duel-fighter__power-preview--p1 strong { color: #00d4ff; }
-
+/* Player 2 (Red) Theme */
 .duel-fighter__power-preview--p2 {
-  background: rgba(255,63,63,0.08);
-  border: 1px solid rgba(255,63,63,0.25);
+  background: rgba(255, 63, 63, 0.08);
+  border: 1px solid rgba(255, 63, 63, 0.25);
+  box-shadow: inset 0 0 8px rgba(255, 63, 63, 0.05);
+}
+.duel-fighter__power-preview--p2 strong { 
+  color: #ff3f3f; 
+  text-shadow: 0 0 8px rgba(255, 63, 63, 0.3);
+}
+
+/* 📱 ছোট মোবাইল স্ক্রিনের জন্য রেসপন্সিভ ফিক্স (Media Query) */
+@media (max-width: 480px) {
+  .duel-fighter__power-preview {
+    min-width: 65px !important; /* মোবাইলে চওড়া একটু কমাবে যেন স্ক্রিন থেকে বের না হয় */
+    padding: 4px 10px !important; /* প্যাডিং কমাবে */
+  }
+  
+  .duel-fighter__power-preview strong {
+    font-size: 1.1rem !important; /* ফন্ট সাইজ কিছুটা ছোট করবে যেন ওভারল্যাপ না হয় */
+    letter-spacing: 1px !important;
+  }
+  
+  .duel-fighter__power-preview span {
+    font-size: 8px !important; /* লেবেল আরও ছোট করবে */
+  }
 }
 
 .duel-fighter__power-preview--p2 strong { color: #ff3f3f; }
@@ -2450,6 +2480,30 @@ body.duel-mode-active .card:hover {
 
   .power-value {
     font-size: 1rem !important;
+  }
+}
+
+/* 📱 মোবাইল স্ক্রিনে ডুয়েল এরিনা স্ক্রোলিং ফিক্স */
+@media (max-width: 480px) {
+  /* যদি পুরো এরিনা একটি পপআপ বা মোডাল বা ফিক্সড বক্স হয় */
+  .duel-arena, [class*="duel-arena"], .duel-system-container {
+    max-height: 90vh !important;       /* স্ক্রিনের ৯০% হাইট নিবে */
+    overflow-y: auto !important;       /* উপর-নিচ স্ক্রোলিং অন করবে */
+    -webkit-overflow-scrolling: touch; /* আইফোনে স্মুথ স্ক্রোলের জন্য */
+  }
+
+  /* এরিনার ভেতরের মেইন কন্টেন্ট বা র‍্যাপার */
+  .duel-arena__body, .duel-stage, .duel-wrapper {
+    overflow-y: visible !important;
+    height: auto !important;
+  }
+}
+
+/* অতি ছোট ফোনের জন্য (< 380px) */
+@media (max-width: 380px) {
+  .duel-arena, [class*="duel-arena"] {
+    max-height: 85vh !important;       /* হাইট আরেকটু এডজাস্ট করা হলো */
+    overflow-y: auto !important;
   }
 }
 
