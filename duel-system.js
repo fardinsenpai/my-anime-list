@@ -386,11 +386,13 @@ function checkGenreCompatibility(anime1, anime2) {
 
   /* ── POWER SCORE ───────────────────────────────────── */
   function calcPower(anime) {
-    const mal   = parseFloat(anime.malScore    || anime.mal_score    || 0);
-    const story = parseFloat(anime.storyRating || anime.story_rating || 0);
-    const anim  = parseFloat(anime.animRating  || anime.anim_rating  || anime.animationRating || 0);
-    return parseFloat(((mal * 0.4) + (story * 0.4) + (anim * 0.2)).toFixed(3));
-  }
+  const mal   = parseFloat(anime.malScore    || anime.mal_score    || 0);
+  const story = parseFloat(anime.storyRating || anime.story_rating || 0);
+  const anim  = parseFloat(anime.animRating  || anime.anim_rating  || anime.animationRating || 0);
+  const chars = parseFloat(anime.characters  || 0);
+  const rewch = parseFloat(anime.rewatch     || 0);
+  return parseFloat(((mal * 0.3) + (story * 0.3) + (anim * 0.2) + (chars * 0.1) + (rewch * 0.1)).toFixed(3));
+}
 
   function getWinner(a1, a2) {
     const s1 = calcPower(a1), s2 = calcPower(a2);
@@ -508,6 +510,9 @@ function checkGenreCompatibility(anime1, anime2) {
         ${statRowHTML('mal',   '⭐ MAL Score', '/10')}
         ${statRowHTML('story', '📖 Story',     '/10')}
         ${statRowHTML('anim',  '🎨 Animation', '/10')}
+        ${statRowHTML('chars', '👥 Characters', '/10')}  
+        ${statRowHTML('rewch', '🔄 Rewatch',    '/10')} 
+
         <div class="duel-power-total" id="duel-power-total">
           <div class="duel-power-total__p1" id="total-p1">
             <span class="power-label">POWER</span>
@@ -640,7 +645,8 @@ if (pp2) pp2.textContent = result.scores.anime2.toFixed(3);
     setTimeout(() => animateBar(ov, 'mal',   s1.malScore,    s2.malScore,    10), 300);
     setTimeout(() => animateBar(ov, 'story', s1.storyRating, s2.storyRating, 10), 700);
     setTimeout(() => animateBar(ov, 'anim',  s1.animRating,  s2.animRating,  10), 1100);
-
+    setTimeout(() => animateBar(ov, 'chars', s1.characters,  s2.characters,  10), 1500); 
+    setTimeout(() => animateBar(ov, 'rewch', s1.rewatch,     s2.rewatch,     10), 1900);
     setTimeout(() => {
       ov.querySelector('#duel-power-total')?.classList.add('power-total--visible');
       animCounter(ov.querySelector('#total-val-p1'), 0, result.scores.anime1, 800, 3);
@@ -775,6 +781,8 @@ if (pp2) pp2.textContent = result.scores.anime2.toFixed(3);
       malScore:    parseFloat(anime.malScore    || anime.mal_score    || 0),
       storyRating: parseFloat(anime.storyRating || anime.story_rating || 0),
       animRating:  parseFloat(anime.animRating  || anime.anim_rating  || anime.animationRating || 0),
+      characters:  parseFloat(anime.characters  || anime.charRating   || 0),
+      rewatch:     parseFloat(anime.rewatch     || anime.rewatchRating || 0),
     };
   }
 
