@@ -424,100 +424,131 @@ function checkGenreCompatibility(anime1, anime2) {
 
   /* ── OVERLAY BUILD ─────────────────────────────────── */
   function buildOverlay(a1, a2, result) {
-    const ov = document.createElement('div');
-    ov.id        = 'duel-overlay';
-    ov.className = 'duel-overlay';
-    ov.setAttribute('role','dialog');
-    ov.setAttribute('aria-modal','true');
+  const ov = document.createElement('div');
+  ov.id        = 'duel-overlay';
+  ov.className = 'duel-overlay';
+  ov.setAttribute('role', 'dialog');
+  ov.setAttribute('aria-modal', 'true');
 
-    ov.innerHTML = `
-      <div class="duel-bg-effect" aria-hidden="true">
-        <div class="duel-lightning-left"></div>
-        <div class="duel-lightning-right"></div>
-        <div class="duel-particles" id="duel-particles"></div>
+  ov.innerHTML = `
+    <div class="duel-bg-effect" aria-hidden="true">
+      <div class="duel-particles" id="duel-particles"></div>
+    </div>
+
+    <div class="duel-arena">
+
+      <!-- CLOSE BTN -->
+      <button class="duel-close-btn" id="duel-close-btn" aria-label="Close">✕</button>
+
+      <!-- HEADER -->
+      <div class="duel-header">
+        <div class="duel-header__title">
+          <span>⚔️</span>
+          <h2 class="duel-header__text">ANIME DUEL ARENA</h2>
+          <span>⚔️</span>
+        </div>
       </div>
 
-      <div class="duel-arena">
-        <button class="duel-close-btn" id="duel-close-btn" aria-label="Close">✕</button>
+      <!-- FIGHTERS -->
+      <div class="duel-fighters" id="duel-fighters">
 
-        <div class="duel-header">
-          <div class="duel-header__title">
-            <span class="duel-header__icon">⚔️</span>
-            <h2 class="duel-header__text">ANIME DUEL ARENA</h2>
-            <span class="duel-header__icon">⚔️</span>
+        <!-- P1 -->
+        <div class="duel-fighter duel-fighter--p1" id="duel-fighter-p1">
+          <div class="duel-fighter__label duel-fighter__label--p1">⚡ ANIME 1</div>
+          <div class="duel-fighter__poster">
+            ${(a1.image||a1.poster||a1.img)
+              ? `<img src="${a1.image||a1.poster||a1.img}" alt="${a1.title}" onerror="this.style.display='none'">`
+              : '<span class="duel-fighter__poster-fallback">🎌</span>'}
           </div>
-          <p class="duel-header__subtitle">Who will emerge victorious?</p>
-        </div>
-
-        <div class="duel-fighters" id="duel-fighters">
-          ${fighterHTML(a1, 'p1', '⚡ ANIME 1')}
-
-          <div class="duel-vs-center" id="duel-vs-center">
-            <div class="duel-vs__ring">
-              <span class="duel-vs__text">VS</span>
-            </div>
-            <div class="duel-vs__spark" id="duel-vs-spark" aria-hidden="true">
-              <div class="spark spark--1"></div>
-              <div class="spark spark--2"></div>
-              <div class="spark spark--3"></div>
-              <div class="spark spark--4"></div>
-            </div>
-            <div class="duel-vs__subtitle">Don't Take It Seriously </div>
+          <div class="duel-fighter__info">
+            <h3 class="duel-fighter__name">${a1.title||'Unknown'}</h3>
+            <div class="duel-fighter__genre">${a1.genre||''}</div>
           </div>
-
-          ${fighterHTML(a2, 'p2', '🔥 ANIME 2')}
-        </div>
-
-        <div class="duel-stats-section" id="duel-stats-section">
-          <h3 class="duel-stats__heading">📊 BATTLE STATS COMPARISON</h3>
-          ${statRowHTML('mal',   '⭐ MAL Score', '/10')}
-          ${statRowHTML('story', '📖 Story',     '/10')}
-          ${statRowHTML('anim',  '🎨 Animation', '/10')}
-
-          <div class="duel-power-total" id="duel-power-total">
-            <div class="duel-power-total__p1" id="total-p1">
-              <span class="power-label">POWER</span>
-              <span class="power-value" id="total-val-p1">0.000</span>
-            </div>
-            <div class="duel-power-total__label">⚡ TOTAL POWER ⚡</div>
-            <div class="duel-power-total__p2" id="total-p2">
-              <span class="power-label">POWER</span>
-              <span class="power-value" id="total-val-p2">0.000</span>
-            </div>
+          <div class="duel-fighter__power-preview duel-fighter__power-preview--p1">
+            <span>POWER</span>
+            <strong id="power-value-p1">??</strong>
           </div>
         </div>
 
-        <div class="duel-winner-section" id="duel-winner-section">
-          <div class="duel-winner__content" id="duel-winner-content"></div>
+        <!-- VS -->
+        <div class="duel-vs-center" id="duel-vs-center">
+          <div class="duel-vs__ring">
+            <span class="duel-vs__text">VS</span>
+          </div>
+          <div class="duel-vs__spark" id="duel-vs-spark" aria-hidden="true">
+            <div class="spark spark--1"></div>
+            <div class="spark spark--2"></div>
+            <div class="spark spark--3"></div>
+            <div class="spark spark--4"></div>
+          </div>
         </div>
 
-        
-
-        <div class="duel-actions" id="duel-actions">
-          <button class="duel-btn duel-btn--reset" id="duel-reset-btn">🔄 Reset Duel</button>
-          <button class="duel-btn duel-btn--exit"  id="duel-exit-btn" >🚪 Exit Duel Mode</button>
+        <!-- P2 -->
+        <div class="duel-fighter duel-fighter--p2" id="duel-fighter-p2">
+          <div class="duel-fighter__label duel-fighter__label--p2">🔥 ANIME 2</div>
+          <div class="duel-fighter__poster">
+            ${(a2.image||a2.poster||a2.img)
+              ? `<img src="${a2.image||a2.poster||a2.img}" alt="${a2.title}" onerror="this.style.display='none'">`
+              : '<span class="duel-fighter__poster-fallback">🎌</span>'}
+          </div>
+          <div class="duel-fighter__info">
+            <h3 class="duel-fighter__name">${a2.title||'Unknown'}</h3>
+            <div class="duel-fighter__genre">${a2.genre||''}</div>
+          </div>
+          <div class="duel-fighter__power-preview duel-fighter__power-preview--p2">
+            <span>POWER</span>
+            <strong id="power-value-p2">??</strong>
+          </div>
         </div>
-      </div>`;
+      </div>
 
-      
+      <!-- STATS -->
+      <div class="duel-stats-section" id="duel-stats-section">
+        <h3 class="duel-stats__heading">📊 BATTLE STATS COMPARISON</h3>
+        ${statRowHTML('mal',   '⭐ MAL Score', '/10')}
+        ${statRowHTML('story', '📖 Story',     '/10')}
+        ${statRowHTML('anim',  '🎨 Animation', '/10')}
+        <div class="duel-power-total" id="duel-power-total">
+          <div class="duel-power-total__p1" id="total-p1">
+            <span class="power-label">POWER</span>
+            <span class="power-value" id="total-val-p1">0.000</span>
+          </div>
+          <div class="duel-power-total__label">⚡ TOTAL POWER ⚡</div>
+          <div class="duel-power-total__p2" id="total-p2">
+            <span class="power-label">POWER</span>
+            <span class="power-value" id="total-val-p2">0.000</span>
+          </div>
+        </div>
+      </div>
 
-    // Events
-    ov.querySelector('#duel-close-btn').addEventListener('click', () => closeOverlay(ov));
-    ov.querySelector('#duel-reset-btn').addEventListener('click', () => {
-      closeOverlay(ov); resetDuelSelection();
-      showDuelToast('🔄 Reset!', 'নতুন করে select করো।', 'info');
-    });
-    ov.querySelector('#duel-exit-btn').addEventListener('click', () => {
-      closeOverlay(ov); deactivateDuelMode();
-    });
-    ov.addEventListener('click', e => { if (e.target === ov) closeOverlay(ov); });
-    document.addEventListener('keydown', function esc(e) {
-      if (e.key === 'Escape') { closeOverlay(ov); document.removeEventListener('keydown', esc); }
-    });
+      <!-- WINNER -->
+      <div class="duel-winner-section" id="duel-winner-section">
+        <div class="duel-winner__content" id="duel-winner-content"></div>
+      </div>
 
-    generateParticles(ov.querySelector('#duel-particles'));
-    return ov;
-  }
+      <!-- ACTIONS -->
+      <div class="duel-actions" id="duel-actions">
+        <button class="duel-btn duel-btn--reset" id="duel-reset-btn">🔄 Reset</button>
+        <button class="duel-btn duel-btn--exit"  id="duel-exit-btn">🚪 Exit</button>
+      </div>
+    </div>`;
+
+  ov.querySelector('#duel-close-btn').addEventListener('click', () => closeOverlay(ov));
+  ov.querySelector('#duel-reset-btn').addEventListener('click', () => {
+    closeOverlay(ov); resetDuelSelection();
+    showDuelToast('🔄 Reset!', 'নতুন করে select করো।', 'info');
+  });
+  ov.querySelector('#duel-exit-btn').addEventListener('click', () => {
+    closeOverlay(ov); deactivateDuelMode();
+  });
+  ov.addEventListener('click', e => { if (e.target === ov) closeOverlay(ov); });
+  document.addEventListener('keydown', function esc(e) {
+    if (e.key === 'Escape') { closeOverlay(ov); document.removeEventListener('keydown', esc); }
+  });
+
+  generateParticles(ov.querySelector('#duel-particles'));
+  return ov;
+}
 
   function fighterHTML(anime, id, label) {
   // সব সম্ভাব্য ইমেজ ফিল্ড চেক করা
@@ -601,10 +632,10 @@ function checkGenreCompatibility(anime1, anime2) {
 
     const s1 = getStats(a1), s2 = getStats(a2);
 
-    const pp1 = ov.querySelector('#power-preview-p1 strong');
-    const pp2 = ov.querySelector('#power-preview-p2 strong');
-    if (pp1) pp1.textContent = result.scores.anime1.toFixed(3);
-    if (pp2) pp2.textContent = result.scores.anime2.toFixed(3);
+const pp1 = ov.querySelector('#power-value-p1');
+const pp2 = ov.querySelector('#power-value-p2');
+if (pp1) pp1.textContent = result.scores.anime1.toFixed(3);
+if (pp2) pp2.textContent = result.scores.anime2.toFixed(3);
 
     setTimeout(() => animateBar(ov, 'mal',   s1.malScore,    s2.malScore,    10), 300);
     setTimeout(() => animateBar(ov, 'story', s1.storyRating, s2.storyRating, 10), 700);
@@ -848,3 +879,4 @@ function checkGenreCompatibility(anime1, anime2) {
 
 }(window, document));
 // ← IIFE শেষ — এর বাইরে কোনো variable নেই!
+
