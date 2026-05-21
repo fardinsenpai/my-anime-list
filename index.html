@@ -82,9 +82,9 @@
 
 
 
-  <div class="header">
-<h1 onclick="window.location.reload()" style="cursor:pointer;" title="Click to refresh">Let's See What Anime I Have Watched:-</h1>  </div>
-
+ <div class="header">
+  <h1 onclick="window.location.reload()" style="cursor:pointer;" title="Click to refresh" class="heading-glitch" data-text="Let's See What Anime I Have Watched:-">Let's See What Anime I Have Watched:-</h1>
+</div>
   <div class="search-wrap">
     <input type="text" id="searchBox" placeholder="🔍 Search anime..." oninput="filterCards()"/>
   </div>
@@ -692,7 +692,20 @@
 
 <!-- AI Chatbot Widget -->
 <div class="chat-bubble" id="chatBubble" onclick="toggleChat()">
-  🤖
+  <svg width="35" height="35" viewBox="0 0 100 100">
+  <!-- Outer circle -->
+  <circle cx="50" cy="50" r="45" fill="#8b0000" stroke="#ff2200" stroke-width="3"/>
+  <!-- Pupil -->
+  <circle cx="50" cy="50" r="15" fill="#1a0000"/>
+  <!-- Tomoe 1 -->
+  <circle cx="50" cy="28" r="7" fill="#1a0000"/>
+  <!-- Tomoe 2 -->
+  <circle cx="69" cy="61" r="7" fill="#1a0000"/>
+  <!-- Tomoe 3 -->
+  <circle cx="31" cy="61" r="7" fill="#1a0000"/>
+  <!-- Center dot -->
+  <circle cx="50" cy="50" r="6" fill="#ff2200"/>
+</svg>
   <span class="ai-dot"></span>
 </div>
 
