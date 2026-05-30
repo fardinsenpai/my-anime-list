@@ -69,7 +69,7 @@
       <a href="#" id="duel-nav-link" class="duel-nav-link"
          aria-label="Anime Duel Mode" role="button" aria-pressed="false">
         <span class="duel-nav-icon">⚔️</span>
-        <span class="duel-nav-text">Anime Duel</span>
+        <span class="duel-nav-text" style="color:#ff3333;">Anime Duel</span>
         <span class="duel-status-badge" id="duel-status-badge">OFF</span>
       </a>`;
     sideNav.appendChild(li);
@@ -212,11 +212,16 @@ if (counterContainer) counterContainer.style.display = '';
   const title = extractTitle(card);
   if (!title) return;
 
-  const anime = findAnime(title, extractRank(card));
+  const rank = extractRank(card);
+  const anime = findAnime(title, rank);
   if (!anime) {
     showDuelToast('❌ Data পাওয়া যায়নি!', `"${title}" database-এ নেই।`, 'error');
     return;
   }
+
+  // rank টা anime object-এ store করো (genre matching-এর জন্য)
+  anime._rank = rank;
+  anime.number = rank;
 
   // ⬇️ Card থেকে সব data extract করে anime object enrich করা
   enrichAnimeFromCard(anime, card);
@@ -298,7 +303,11 @@ function enrichAnimeFromCard(anime, card) {
 
   function extractRank(card) {
     const b = card.querySelector('.badge,.rank-badge,[data-rank]');
-    if (b) { const n = parseInt(b.textContent || b.getAttribute('data-rank')); return isNaN(n)?null:n; }
+    if (b) {
+      const txt = b.textContent || b.getAttribute('data-rank') || '';
+      const m = txt.match(/\d+/);
+      if (m) return parseInt(m[0], 10);
+    }
     return null;
   }
 
@@ -326,7 +335,7 @@ function getAnimeGenres(rank) {
   if (!rank) return [];
   
   // GENRES data access করো
-  const genresData = window.ANIME_GENRES || GENRES_FALLBACK;
+  const genresData = window.ANIME_GENRES;
   if (!genresData) {
     console.warn('⚠️ GENRES data not found!');
     return [];
@@ -357,9 +366,14 @@ function getAnimeGenres(rank) {
  * @returns {Object} — { canFight, commonGenres, anime1Genres, anime2Genres }
  */
 function checkGenreCompatibility(anime1, anime2) {
+  // GENRES data না থাকলে সব duel অনুমোদিত
+  if (!window.ANIME_GENRES) {
+    return { canFight: true, commonGenres: [], anime1Genres: [], anime2Genres: [] };
+  }
+
   // দুইটার rank বের করো
-  const rank1 = anime1.rank || anime1.id || anime1.number;
-  const rank2 = anime2.rank || anime2.id || anime2.number;
+  const rank1 = anime1.rank || anime1.id || anime1.number || anime1._rank;
+  const rank2 = anime2.rank || anime2.id || anime2.number || anime2._rank;
   
   const genres1 = getAnimeGenres(rank1);
   const genres2 = getAnimeGenres(rank2);
@@ -390,8 +404,8 @@ function checkGenreCompatibility(anime1, anime2) {
   const story = parseFloat(anime.storyRating || anime.story_rating || 0);
   const anim  = parseFloat(anime.animRating  || anime.anim_rating  || anime.animationRating || 0);
   const chars = parseFloat(anime.characters  || 0);
-  const rewch = parseFloat(anime.rewatch     || 0);
-  return parseFloat(((mal * 0.3) + (story * 0.3) + (anim * 0.2) + (chars * 0.1) + (rewch * 0.1)).toFixed(3));
+  const anilist = parseFloat(anime.anilist   || 0) / 10;
+  return parseFloat(((mal * 0.25) + (story * 0.3) + (anim * 0.2) + (chars * 0.1) + (anilist * 0.15)).toFixed(3));
 }
 
   function getWinner(a1, a2) {
@@ -405,12 +419,91 @@ function checkGenreCompatibility(anime1, anime2) {
     };
   }
 
+  /* ── GENRE CLASH OVERLAY ──────────────────────────── */
+  function showGenreClashOverlay(a1, a2, compatibility) {
+    const ov = document.createElement('div');
+    ov.id = 'duel-overlay';
+    ov.className = 'duel-overlay';
+    ov.setAttribute('role', 'dialog');
+    ov.setAttribute('aria-modal', 'true');
+
+    const g1 = compatibility.anime1Genres.map(g => g.name).join(', ');
+    const g2 = compatibility.anime2Genres.map(g => g.name).join(', ');
+
+    ov.innerHTML = `
+      <div class="duel-arena" style="max-width:700px;margin-top:40px;">
+        <button class="duel-close-btn" id="clash-close-btn" aria-label="Close">✕</button>
+        <div class="duel-header">
+          <div class="duel-header__title">
+            <span>🚫</span>
+            <h2 class="duel-header__text" style="color:#ff4444;">GENRE CLASH</h2>
+            <span>🚫</span>
+          </div>
+        </div>
+
+        <div class="duel-fighters" style="margin:10px 0;">
+          <div class="duel-fighter duel-fighter--p1">
+            <div class="duel-fighter__poster">
+              ${(a1.image||a1.poster||a1.img)
+                ? `<img src="${a1.image||a1.poster||a1.img}" alt="${a1.title}" onerror="this.style.display='none'">`
+                : '<span class="duel-fighter__poster-fallback">🎌</span>'}
+            </div>
+            <div class="duel-fighter__info" style="text-align:center;">
+              <h3 class="duel-fighter__name">${a1.title||'Unknown'}</h3>
+              <div style="color:#ffcc00;font-size:13px;margin-top:4px;">${g1}</div>
+            </div>
+          </div>
+
+          <div style="display:flex;align-items:center;justify-content:center;flex-shrink:0;padding:0 10px;">
+            <div style="font-size:32px;font-weight:900;color:#ff4444;text-shadow:0 0 20px rgba(255,68,68,0.5);">✖</div>
+          </div>
+
+          <div class="duel-fighter duel-fighter--p2">
+            <div class="duel-fighter__poster">
+              ${(a2.image||a2.poster||a2.img)
+                ? `<img src="${a2.image||a2.poster||a2.img}" alt="${a2.title}" onerror="this.style.display='none'">`
+                : '<span class="duel-fighter__poster-fallback">🎌</span>'}
+            </div>
+            <div class="duel-fighter__info" style="text-align:center;">
+              <h3 class="duel-fighter__name">${a2.title||'Unknown'}</h3>
+              <div style="color:#ffcc00;font-size:13px;margin-top:4px;">${g2}</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="text-align:center;padding:20px 20px 30px;">
+          <div style="font-size:22px;font-weight:700;color:#ff6666;margin-bottom:6px;">No Common Ground!</div>
+          <div style="font-size:14px;color:#888;">These two are from completely different worlds.</div>
+          <div style="font-size:13px;color:#666;margin-top:4px;">Pick two anime that share at least one genre.</div>
+          <button class="duel-btn duel-btn--reset" id="clash-reset-btn" style="margin-top:20px;display:inline-flex;">🔄 Reset & Try Again</button>
+        </div>
+      </div>`;
+
+    document.body.appendChild(ov);
+    requestAnimationFrame(() => requestAnimationFrame(() =>
+      ov.classList.add('duel-overlay--visible')
+    ));
+
+    ov.querySelector('#clash-close-btn').addEventListener('click', () => closeOverlay(ov));
+    ov.querySelector('#clash-reset-btn').addEventListener('click', () => { closeOverlay(ov); resetDuelSelection(); });
+    ov.addEventListener('click', e => { if (e.target === ov) closeOverlay(ov); });
+  }
+
   /* ── BATTLE ────────────────────────────────────────── */
   function initiateBattle() {
     if (DuelState.selectedAnime.length < 2) return;
-    DuelState.isAnimating = true;
 
     const [a1, a2] = DuelState.selectedAnime;
+
+    // 🎭 Genre check — common genre না থাকলে duel হবে না
+    const compatibility = checkGenreCompatibility(a1, a2);
+    if (!compatibility.canFight) {
+      showGenreClashOverlay(a1, a2, compatibility);
+      return;
+    }
+
+    DuelState.isAnimating = true;
+
     const result   = getWinner(a1, a2);
     const overlay  = buildOverlay(a1, a2, result);
 
@@ -431,6 +524,20 @@ function checkGenreCompatibility(anime1, anime2) {
   ov.className = 'duel-overlay';
   ov.setAttribute('role', 'dialog');
   ov.setAttribute('aria-modal', 'true');
+
+  const rank1 = a1.rank || a1.id || a1.number || a1._rank;
+  const rank2 = a2.rank || a2.id || a2.number || a2._rank;
+  const compat = checkGenreCompatibility(a1, a2);
+  const commonSet = new Set(compat.commonGenres.map(g => g.name));
+  const genreHTML = (genres) => {
+    const text = genres.map(g =>
+      `<span style="color:${commonSet.has(g.name) ? '#44ff44' : '#ffcc00'}">${g.name}</span>`
+    ).join(' · ');
+    const align = genres.length === 1 ? 'center' : 'left';
+    return `<div style="font-size:12px;margin-top:3px;text-align:${align};">${text}</div>`;
+  };
+  const g1 = window.ANIME_GENRES ? genreHTML(compat.anime1Genres) : '';
+  const g2 = window.ANIME_GENRES ? genreHTML(compat.anime2Genres) : '';
 
   ov.innerHTML = `
     <div class="duel-bg-effect" aria-hidden="true">
@@ -464,6 +571,7 @@ function checkGenreCompatibility(anime1, anime2) {
           </div>
           <div class="duel-fighter__info">
             <h3 class="duel-fighter__name">${a1.title||'Unknown'}</h3>
+            ${g1 || ''}
             <div class="duel-fighter__genre">${a1.genre||''}</div>
           </div>
           <div class="duel-fighter__power-preview duel-fighter__power-preview--p1">
@@ -495,6 +603,7 @@ function checkGenreCompatibility(anime1, anime2) {
           </div>
           <div class="duel-fighter__info">
             <h3 class="duel-fighter__name">${a2.title||'Unknown'}</h3>
+            ${g2 || ''}
             <div class="duel-fighter__genre">${a2.genre||''}</div>
           </div>
           <div class="duel-fighter__power-preview duel-fighter__power-preview--p2">
@@ -511,7 +620,8 @@ function checkGenreCompatibility(anime1, anime2) {
         ${statRowHTML('story', '📖 Story',     '/10')}
         ${statRowHTML('anim',  '🎨 Animation', '/10')}
         ${statRowHTML('chars', '👥 Characters', '/10')}  
-        ${statRowHTML('rewch', '🔄 Rewatch',    '/10')} 
+        ${statRowHTML('anilist', '📊 AniList',   '/100')}
+        ${statRowHTML('animePlanet', '🌍 Anime-Planet', '/5')}
 
         <div class="duel-power-total" id="duel-power-total">
           <div class="duel-power-total__p1" id="total-p1">
@@ -645,8 +755,9 @@ if (pp2) pp2.textContent = result.scores.anime2.toFixed(3);
     setTimeout(() => animateBar(ov, 'mal',   s1.malScore,    s2.malScore,    10), 300);
     setTimeout(() => animateBar(ov, 'story', s1.storyRating, s2.storyRating, 10), 700);
     setTimeout(() => animateBar(ov, 'anim',  s1.animRating,  s2.animRating,  10), 1100);
-    setTimeout(() => animateBar(ov, 'chars', s1.characters,  s2.characters,  10), 1500); 
-    setTimeout(() => animateBar(ov, 'rewch', s1.rewatch,     s2.rewatch,     10), 1900);
+    setTimeout(() => animateBar(ov, 'chars', s1.characters,  s2.characters,  10), 1500);
+    setTimeout(() => animateBar(ov, 'anilist', s1.anilist, s2.anilist, 100), 1900);
+    setTimeout(() => animateBar(ov, 'animePlanet', s1.animePlanet, s2.animePlanet, 5), 2100);
     setTimeout(() => {
       ov.querySelector('#duel-power-total')?.classList.add('power-total--visible');
       animCounter(ov.querySelector('#total-val-p1'), 0, result.scores.anime1, 800, 3);
@@ -695,6 +806,7 @@ if (pp2) pp2.textContent = result.scores.anime2.toFixed(3);
     content.innerHTML = `
       <div class="winner-result draw">
         <h2>🤝 IT'S A DRAW!</h2>
+        <p style="margin-top:10px;font-size:13px;color:#ff4444;text-align:center;">⚠️ Bro Some ratings are AI-generated. Don't take it too seriously! Have A Fun.</p>
       </div>`;
   } else {
     const isP1Winner = result.winner === a1;
@@ -719,6 +831,7 @@ if (pp2) pp2.textContent = result.scores.anime2.toFixed(3);
         <div class="winner-score">
           Total Score: <strong>${(isP1Winner ? result.scores.anime1 : result.scores.anime2).toFixed(3)}</strong>
         </div>
+        <p style="margin-top:10px;font-size:13px;color:#ff4444;text-align:center;">⚠️ Bro Some ratings are AI-generated. Don't take it too seriously! Have A Fun.</p>
       </div>
     `;
   }
@@ -782,7 +895,8 @@ if (pp2) pp2.textContent = result.scores.anime2.toFixed(3);
       storyRating: parseFloat(anime.storyRating || anime.story_rating || 0),
       animRating:  parseFloat(anime.animRating  || anime.anim_rating  || anime.animationRating || 0),
       characters:  parseFloat(anime.characters  || anime.charRating   || 0),
-      rewatch:     parseFloat(anime.rewatch     || anime.rewatchRating || 0),
+      anilist:     parseFloat(anime.anilist     || 0),
+      animePlanet: parseFloat(anime.animePlanet || 0),
     };
   }
 
