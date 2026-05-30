@@ -38,14 +38,14 @@
     <span>Fardin's Anime</span>
   </div>
   
-  <nav class="side-nav">
-<div class="side-divider">⭐ Top 5 Picks</div>
+   <nav class="side-nav">
+<a href="#" class="home-link" id="homeLink"><i>🏠</i> Home</a>
 <div class="side-dropdown" id="topFiveDropdown">
-  <button class="dropdown-btn" id="dropBtn">🎭 By Genre <i class="arrow">▼</i></button>
+  <button class="dropdown-btn" id="dropBtn"> 📊 Top 5 Picks By Genre <i class="arrow">▾</i></button>
   <div class="dropdown-container">
     <a href="javascript:void(0)" onclick="filterTopFive('Action')">⚔ Action</a>
     <a href="javascript:void(0)" onclick="filterTopFive('Adventure')">🗺 Adventure</a>
-    <a href="javascript:void(0)" onclick="filterTopFive('Isekai')">🌀 Isekai</a>
+    <a href="javascript:void(0)" onclick="filterTopFive('Isekai')">🌌 Isekai</a>
     <a href="javascript:void(0)" onclick="filterTopFive('Comedy')">😂 Comedy</a>
     <a href="javascript:void(0)" onclick="filterTopFive('Sports')">🏆 Sports</a>
     <a href="javascript:void(0)" onclick="filterTopFive('Romcom')">💕 Romcom</a>
@@ -61,21 +61,139 @@
 <li id="duel-nav-item">
   <a href="#" id="duel-nav-link" class="duel-nav-link">
     <span class="duel-nav-icon">⚔️</span>
-    <span class="duel-nav-text">Anime Duel</span>
+    <span class="duel-nav-text" style="color:#ff3333;">Anime Duel</span>
     <span class="duel-status-badge" id="duel-status-badge">OFF</span>
   </a>
 </li>
 
 
   <a href="javascript:void(0)" class="side-nav-link" id="aiChatMenuBtn">
-    <span>🤖 AI Chat</span>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="20" height="20" style="vertical-align:middle;margin-right:2px">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#FFD700"/>
+      <stop offset="100%" stop-color="#00D4FF"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Outer Shape -->
+  <path d="M64 14
+           L96 34
+           L104 74
+           L64 114
+           L24 74
+           L32 34 Z"
+        fill="#0A0A20"
+        stroke="url(#g)"
+        stroke-width="4"/>
+
+  <!-- Fox Ears -->
+  <path d="M42 30 L28 10 L48 22 Z"
+        fill="url(#g)"/>
+  <path d="M86 30 L100 10 L80 22 Z"
+        fill="url(#g)"/>
+
+  <!-- Eyes -->
+  <path d="M38 56 L54 50 L48 62 Z"
+        fill="#00D4FF"/>
+  <path d="M90 56 L74 50 L80 62 Z"
+        fill="#00D4FF"/>
+
+  <!-- Nose -->
+  <polygon points="64,68 58,76 70,76"
+           fill="#FFD700"/>
+
+  <!-- Anime Mark -->
+  <path d="M52 88 Q64 96 76 88"
+        stroke="#FFD700"
+        stroke-width="4"
+        fill="none"
+        stroke-linecap="round"/>
+</svg>
+    <span>AI Anime Discussion</span>
   </a>
 
+<li>
+  <a href="javascript:void(0)" onclick="showAllAwardWinners()">
+    <i>👑</i>Anime of the Year
+  </a>
+</li>
+
+<a href="#" onclick="openWaifus()">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="20" height="20" style="vertical-align:middle;margin-right:2px">
+  <defs>
+    <linearGradient id="waifuGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFD700"/>
+      <stop offset="100%" stop-color="#00D4FF"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Hair -->
+  <path d="M16 24
+           Q18 10 32 10
+           Q46 10 48 24
+           L48 34
+           Q42 28 38 24
+           Q35 28 32 28
+           Q29 28 26 24
+           Q22 28 16 34 Z"
+        fill="none"
+        stroke="url(#waifuGrad)"
+        stroke-width="3"
+        stroke-linejoin="round"/>
+
+  <!-- Twin tails -->
+  <path d="M16 26 Q8 30 12 42"
+        fill="none"
+        stroke="url(#waifuGrad)"
+        stroke-width="3"
+        stroke-linecap="round"/>
+
+  <path d="M48 26 Q56 30 52 42"
+        fill="none"
+        stroke="url(#waifuGrad)"
+        stroke-width="3"
+        stroke-linecap="round"/>
+
+  <!-- Face -->
+  <circle cx="32" cy="34" r="12"
+          fill="none"
+          stroke="url(#waifuGrad)"
+          stroke-width="3"/>
+
+  <!-- Eyes -->
+  <circle cx="27" cy="33" r="2.2" fill="#00D4FF"/>
+  <circle cx="37" cy="33" r="2.2" fill="#00D4FF"/>
+
+  <!-- Smile -->
+  <path d="M27 40 Q32 44 37 40"
+        fill="none"
+        stroke="#FFD700"
+        stroke-width="2"
+        stroke-linecap="round"/>
+
+  <!-- Bow -->
+  <path d="M28 16 L22 12 L24 20 Z"
+        fill="#FFD700"/>
+
+  <path d="M36 16 L42 12 L40 20 Z"
+        fill="#FFD700"/>
+
+  <circle cx="32" cy="17" r="2" fill="#00D4FF"/>
+</svg>
+  Find Your Waifus
+</a>
+
 <a href="javascript:void(0)" onclick="openSuggestion()">
-  <i>💬</i> Drop Suggestion
-</a>  
+  <i>📬</i> Drop Suggestion
+</a>
   
-  <a href="https://facebook.com/fardin.senpai" target="_blank"><i>💙</i> Facebook</a>
+  <a href="https://facebook.com/fardin.senpai" target="_blank">
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="#29c6f5" style="vertical-align:middle;margin-right:2px">
+      <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+    </svg>
+    Facebook
+  </a>
   </nav>
 </div>
 <div class="menu-overlay" id="menuOverlay"></div>
@@ -105,10 +223,11 @@
   </div>
 
   
-  <!-- ⚡ Lightning Canvas ⚡ -->
+  
+  <!-- ? Lightning Canvas ? -->
   <canvas id="lightningCanvas"></canvas>
   
-  <!-- বাকি আপনার কন্টেন্ট -->
+  <!-- Cards Section -->
   <div class="sticky-search" id="stickySearch">
     ...
   </div>
@@ -194,29 +313,29 @@
 
 <div class="card"><div class="card-inner"><div class="card-front"><div class="poster-wrap"><img src="https://media.kitsu.app/anime/poster_images/41099/large.jpg" alt="Radiant" loading="lazy"/><span class="badge">#36</span></div><div class="info"><div class="number">NO. 36</div><div class="title">Radiant</div></div></div><div class="card-back"><div class="back-content"><div class="back-title">Radiant</div><div class="back-season">🌸 Season-1,2</div><div class="back-episodes">📺 Total Episodes: 42</div><div class="back-tap-hint">click to flip back</div></div></div></div></div>
 
-<div class="card"><div class="card-inner"><div class="card-front"><div class="poster-wrap"><img src="https://media.kitsu.app/anime/486/poster_image/large-d7ec3ada948851369b7eb6726235cc0d.jpeg" alt="Pokemon" loading="lazy"/><span class="badge">#37</span></div><div class="info"><div class="number">NO. 37</div><div class="title">Pokemon</div></div></div><div class="card-back"><div class="back-content"><div class="back-title">Pokemon</div><div class="back-season">🌸 ∞ Ongoing</div><div class="back-episodes">📺 Total Episodes: 1000+</div><div class="back-tap-hint">click to flip back</div></div></div></div></div>
+<div class="card"><div class="card-inner"><div class="card-front"><div class="poster-wrap"><img src="https://media.kitsu.app/anime/486/poster_image/large-d7ec3ada948851369b7eb6726235cc0d.jpeg" alt="Pokemon" loading="lazy"/><span class="badge">#37</span></div><div class="info"><div class="number">NO. 37</div><div class="title">Pokemon</div></div></div><div class="card-back"><div class="back-content"><div class="back-title">Pokemon</div><div class="back-season">🌸 8 Ongoing</div><div class="back-episodes">📺 Total Episodes: 1000+</div><div class="back-tap-hint">click to flip back</div></div></div></div></div>
 
-<div class="card"><div class="card-inner"><div class="card-front"><div class="poster-wrap"><img src="https://media.kitsu.app/anime/poster_images/11614/large.jpg" alt="Your Name" loading="lazy"/><span class="badge">#38</span></div><div class="info"><div class="number">NO. 38</div><div class="title">Your Name</div></div></div><div class="card-back"><div class="back-content"><div class="back-title">Your Name</div><div class="back-season">🌸 Movie</div><div class="back-episodes">🎬 Runtime: 106 mins</div><div class="back-tap-hint">click to flip back</div></div></div></div></div>
+<div class="card"><div class="card-inner"><div class="card-front"><div class="poster-wrap"><img src="https://media.kitsu.app/anime/poster_images/11614/large.jpg" alt="Your Name" loading="lazy"/><span class="badge">#38</span></div><div class="info"><div class="number">NO. 38</div><div class="title">Your Name</div></div></div><div class="card-back"><div class="back-content"><div class="back-title">Your Name</div><div class="back-season">🎬 Movie</div><div class="back-episodes">🎬 Runtime: 106 mins</div><div class="back-tap-hint">click to flip back</div></div></div></div></div>
 
-<div class="card"><div class="card-inner"><div class="card-front"><div class="poster-wrap"><img src="https://media.kitsu.app/anime/45597/poster_image/large-f6967ba3fb60478606925e7122373aba.jpeg" alt="Suzume" loading="lazy"/><span class="badge">#39</span></div><div class="info"><div class="number">NO. 39</div><div class="title">Suzume</div></div></div><div class="card-back"><div class="back-content"><div class="back-title">Suzume</div><div class="back-season">🌸 Movie</div><div class="back-episodes">🎬 Runtime: 122 mins</div><div class="back-tap-hint">click to flip back</div></div></div></div></div>
+<div class="card"><div class="card-inner"><div class="card-front"><div class="poster-wrap"><img src="https://media.kitsu.app/anime/45597/poster_image/large-f6967ba3fb60478606925e7122373aba.jpeg" alt="Suzume" loading="lazy"/><span class="badge">#39</span></div><div class="info"><div class="number">NO. 39</div><div class="title">Suzume</div></div></div><div class="card-back"><div class="back-content"><div class="back-title">Suzume</div><div class="back-season">🎬 Movie</div><div class="back-episodes">🎬 Runtime: 122 mins</div><div class="back-tap-hint">click to flip back</div></div></div></div></div>
 
 <div class="card"><div class="card-inner"><div class="card-front"><div class="poster-wrap"><img src="https://media.kitsu.app/anime/46954/poster_image/large-2adb6dcb745a6963b5377651868ba407.jpeg" alt="Zom 100" loading="lazy"/><span class="badge">#40</span></div><div class="info"><div class="number">NO. 40</div><div class="title">Zom 100: Bucket List of the Dead</div></div></div><div class="card-back"><div class="back-content"><div class="back-title">Zom 100: Bucket List of the Dead</div><div class="back-season">🌸 Season-1</div><div class="back-episodes">📺 Total Episodes: 12</div><div class="back-tap-hint">click to flip back</div></div></div></div></div>
 
 <div class="card"><div class="card-inner"><div class="card-front"><div class="poster-wrap"><img src="https://media.kitsu.app/anime/45521/poster_image/large-aa4976026d5b59706b89e8e6d4b2922a.jpeg" alt="More Than a Married Couple" loading="lazy"/><span class="badge">#41</span></div><div class="info"><div class="number">NO. 41</div><div class="title">More Than a Married Couple, But Not Lovers</div></div></div><div class="card-back"><div class="back-content"><div class="back-title">More Than a Married Couple, But Not Lovers</div><div class="back-season">🌸 Season-1 & Manga Ongoing</div><div class="back-episodes">📺 Total Episodes: 12</div><div class="back-tap-hint">click to flip back</div></div></div></div></div>
 
-<div class="card"><div class="card-inner"><div class="card-front"><div class="poster-wrap"><img src="https://media.kitsu.app/anime/poster_images/42586/large.jpg" alt="Mugen Train" loading="lazy"/><span class="badge">#42</span></div><div class="info"><div class="number">NO. 42</div><div class="title">Demon Slayer: Mugen Train</div></div></div><div class="card-back"><div class="back-content"><div class="back-title">Demon Slayer: Mugen Train</div><div class="back-season">🌸 Movie</div><div class="back-episodes">🎬 Runtime: 117 mins</div><div class="back-tap-hint">click to flip back</div></div></div></div></div>
+<div class="card"><div class="card-inner"><div class="card-front"><div class="poster-wrap"><img src="https://media.kitsu.app/anime/poster_images/42586/large.jpg" alt="Mugen Train" loading="lazy"/><span class="badge">#42</span></div><div class="info"><div class="number">NO. 42</div><div class="title">Demon Slayer: Mugen Train</div></div></div><div class="card-back"><div class="back-content"><div class="back-title">Demon Slayer: Mugen Train</div><div class="back-season">🎬 Movie</div><div class="back-episodes">🎬 Runtime: 117 mins</div><div class="back-tap-hint">click to flip back</div></div></div></div></div>
 
 <div class="card"><div class="card-inner"><div class="card-front"><div class="poster-wrap"><img src="https://media.kitsu.app/anime/46650/poster_image/large-acfbd40a8065df94e5903b2d8e6dda97.jpeg" alt="Buddy Daddies" loading="lazy"/><span class="badge">#43</span></div><div class="info"><div class="number">NO. 43</div><div class="title">Buddy Daddies</div></div></div><div class="card-back"><div class="back-content"><div class="back-title">Buddy Daddies</div><div class="back-season">🌸 Season-1</div><div class="back-episodes">📺 Total Episodes: 13</div><div class="back-tap-hint">click to flip back</div></div></div></div></div>
 
-<div class="card"><div class="card-inner"><div class="card-front"><div class="poster-wrap"><img src="https://media.kitsu.app/anime/50211/poster_image/large-6e7406c785a55003492ac5a8bb2b800c.jpeg" alt="Blue Lock Episode Nagi" loading="lazy"/><span class="badge">#44</span></div><div class="info"><div class="number">NO. 44</div><div class="title">Blue Lock: Episode Nagi</div></div></div><div class="card-back"><div class="back-content"><div class="back-title">Blue Lock: Episode Nagi</div><div class="back-season">🌸 Movie</div><div class="back-episodes">🎬 Runtime: 119 mins</div><div class="back-tap-hint">click to flip back</div></div></div></div></div>
+<div class="card"><div class="card-inner"><div class="card-front"><div class="poster-wrap"><img src="https://media.kitsu.app/anime/50211/poster_image/large-6e7406c785a55003492ac5a8bb2b800c.jpeg" alt="Blue Lock Episode Nagi" loading="lazy"/><span class="badge">#44</span></div><div class="info"><div class="number">NO. 44</div><div class="title">Blue Lock: Episode Nagi</div></div></div><div class="card-back"><div class="back-content"><div class="back-title">Blue Lock: Episode Nagi</div><div class="back-season">🎬 Movie</div><div class="back-episodes">🎬 Runtime: 119 mins</div><div class="back-tap-hint">click to flip back</div></div></div></div></div>
 
 <div class="card"><div class="card-inner"><div class="card-front"><div class="poster-wrap"><img src="https://media.kitsu.app/anime/46529/poster_image/large-88e6c2a6d1f806960f8fce74cfeb66fa.jpeg" alt="Yamada-kun at Lv999" loading="lazy"/><span class="badge">#45</span></div><div class="info"><div class="number">NO. 45</div><div class="title">My Love Story with Yamada-kun at Lv999</div></div></div><div class="card-back"><div class="back-content"><div class="back-title">My Love Story with Yamada-kun at Lv999</div><div class="back-season">🌸 Season-1</div><div class="back-episodes">📺 Total Episodes: 13</div><div class="back-tap-hint">click to flip back</div></div></div></div></div>
 
-<div class="card"><div class="card-inner"><div class="card-front"><div class="poster-wrap"><img src="https://media.kitsu.app/anime/poster_images/44209/large.jpg" alt="MHA World Heroes Mission" loading="lazy"/><span class="badge">#46</span></div><div class="info"><div class="number">NO. 46</div><div class="title">MHA: World Heroes' Mission</div></div></div><div class="card-back"><div class="back-content"><div class="back-title">MHA: World Heroes' Mission</div><div class="back-season">🌸 Movie</div><div class="back-episodes">🎬 Runtime: 104 mins</div><div class="back-tap-hint">click to flip back</div></div></div></div></div>
+<div class="card"><div class="card-inner"><div class="card-front"><div class="poster-wrap"><img src="https://media.kitsu.app/anime/poster_images/44209/large.jpg" alt="MHA World Heroes Mission" loading="lazy"/><span class="badge">#46</span></div><div class="info"><div class="number">NO. 46</div><div class="title">MHA: World Heroes' Mission</div></div></div><div class="card-back"><div class="back-content"><div class="back-title">MHA: World Heroes' Mission</div><div class="back-season">🎬 Movie</div><div class="back-episodes">🎬 Runtime: 104 mins</div><div class="back-tap-hint">click to flip back</div></div></div></div></div>
 
 <div class="card"><div class="card-inner"><div class="card-front"><div class="poster-wrap"><img src="https://media.kitsu.app/anime/poster_images/11110/large.jpg" alt="Erased" loading="lazy"/><span class="badge">#47</span></div><div class="info"><div class="number">NO. 47</div><div class="title">Erased</div></div></div><div class="card-back"><div class="back-content"><div class="back-title">Erased</div><div class="back-season">🌸 Season-1</div><div class="back-episodes">📺 Total Episodes: 12</div><div class="back-tap-hint">click to flip back</div></div></div></div></div>
 
-<div class="card"><div class="card-inner"><div class="card-front"><div class="poster-wrap"><img src="https://media.kitsu.app/anime/44212/poster_image/large-025f4587e9eccc77dcb3f204b2a8457c.jpeg" alt="Jujutsu Kaisen 0" loading="lazy"/><span class="badge">#48</span></div><div class="info"><div class="number">NO. 48</div><div class="title">Jujutsu Kaisen 0</div></div></div><div class="card-back"><div class="back-content"><div class="back-title">Jujutsu Kaisen 0</div><div class="back-season">🌸 Movie</div><div class="back-episodes">🎬 Runtime: 105 mins</div><div class="back-tap-hint">click to flip back</div></div></div></div></div>
+<div class="card"><div class="card-inner"><div class="card-front"><div class="poster-wrap"><img src="https://media.kitsu.app/anime/44212/poster_image/large-025f4587e9eccc77dcb3f204b2a8457c.jpeg" alt="Jujutsu Kaisen 0" loading="lazy"/><span class="badge">#48</span></div><div class="info"><div class="number">NO. 48</div><div class="title">Jujutsu Kaisen 0</div></div></div><div class="card-back"><div class="back-content"><div class="back-title">Jujutsu Kaisen 0</div><div class="back-season">🎬 Movie</div><div class="back-episodes">🎬 Runtime: 105 mins</div><div class="back-tap-hint">click to flip back</div></div></div></div></div>
 
 <div class="card"><div class="card-inner"><div class="card-front"><div class="poster-wrap"><img src="https://media.kitsu.app/anime/poster_images/41083/large.jpg" alt="Dororo" loading="lazy"/><span class="badge">#49</span></div><div class="info"><div class="number">NO. 49</div><div class="title">Dororo</div></div></div><div class="card-back"><div class="back-content"><div class="back-title">Dororo</div><div class="back-season">🌸 Season-1</div><div class="back-episodes">📺 Total Episodes: 24</div><div class="back-tap-hint">click to flip back</div></div></div></div></div>
 
@@ -278,11 +397,11 @@
 
 <div class="card"><div class="card-inner"><div class="card-front"><div class="poster-wrap"><img src="https://media.kitsu.app/anime/45372/poster_image/large-f6c7bd8c7af881b12548e9ee81e41a30.jpeg" alt="Tokyo 24th Ward" loading="lazy"/><span class="badge">#78</span></div><div class="info"><div class="number">NO. 78</div><div class="title">Tokyo 24th Ward</div></div></div><div class="card-back"><div class="back-content"><div class="back-title">Tokyo 24th Ward</div><div class="back-season">🌸 Season-1</div><div class="back-episodes">📺 Total Episodes: 12</div><div class="back-tap-hint">click to flip back</div></div></div></div></div>
 
-<div class="card"><div class="card-inner"><div class="card-front"><div class="poster-wrap"><img src="https://media.kitsu.app/anime/48617/poster_image/large-1e53afc2c41c18084643f3895c7e7bf8.jpeg" alt="My Oni Girl" loading="lazy"/><span class="badge">#79</span></div><div class="info"><div class="number">NO. 79</div><div class="title">My Oni Girl</div></div></div><div class="card-back"><div class="back-content"><div class="back-title">My Oni Girl</div><div class="back-season">🌸 Movie</div><div class="back-episodes">🎬 Runtime: 96 mins</div><div class="back-tap-hint">click to flip back</div></div></div></div></div>
+<div class="card"><div class="card-inner"><div class="card-front"><div class="poster-wrap"><img src="https://media.kitsu.app/anime/48617/poster_image/large-1e53afc2c41c18084643f3895c7e7bf8.jpeg" alt="My Oni Girl" loading="lazy"/><span class="badge">#79</span></div><div class="info"><div class="number">NO. 79</div><div class="title">My Oni Girl</div></div></div><div class="card-back"><div class="back-content"><div class="back-title">My Oni Girl</div><div class="back-season">🎬 Movie</div><div class="back-episodes">🎬 Runtime: 96 mins</div><div class="back-tap-hint">click to flip back</div></div></div></div></div>
 
 <div class="card"><div class="card-inner"><div class="card-front"><div class="poster-wrap"><img src="https://media.kitsu.app/anime/poster_images/44022/large.jpg" alt="The Detective Is Already Dead" loading="lazy"/><span class="badge">#80</span></div><div class="info"><div class="number">NO. 80</div><div class="title">The Detective Is Already Dead</div></div></div><div class="card-back"><div class="back-content"><div class="back-title">The Detective Is Already Dead</div><div class="back-season">🌸 Season-1</div><div class="back-episodes">📺 Total Episodes: 13</div><div class="back-tap-hint">click to flip back</div></div></div></div></div>
 
-<div class="card"><div class="card-inner"><div class="card-front"><div class="poster-wrap"><img src="https://media.kitsu.app/anime/44242/poster_image/large-f642d932051109e6fb3a5f07262b18d0.jpeg" alt="Black Clover: Sword of the Wizard King" loading="lazy"/><span class="badge">#81</span></div><div class="info"><div class="number">NO. 81</div><div class="title">Black Clover: Sword of the Wizard King</div></div></div><div class="card-back"><div class="back-content"><div class="back-title">Black Clover: Sword of the Wizard King</div><div class="back-season">🌸 Movie</div><div class="back-episodes">🎬 Runtime: 113 mins</div><div class="back-tap-hint">click to flip back</div></div></div></div></div>
+<div class="card"><div class="card-inner"><div class="card-front"><div class="poster-wrap"><img src="https://media.kitsu.app/anime/44242/poster_image/large-f642d932051109e6fb3a5f07262b18d0.jpeg" alt="Black Clover: Sword of the Wizard King" loading="lazy"/><span class="badge">#81</span></div><div class="info"><div class="number">NO. 81</div><div class="title">Black Clover: Sword of the Wizard King</div></div></div><div class="card-back"><div class="back-content"><div class="back-title">Black Clover: Sword of the Wizard King</div><div class="back-season">🎬 Movie</div><div class="back-episodes">🎬 Runtime: 113 mins</div><div class="back-tap-hint">click to flip back</div></div></div></div></div>
 
 <div class="card"><div class="card-inner"><div class="card-front"><div class="poster-wrap"><img src="https://media.kitsu.app/anime/46856/poster_image/large-253770f680c68583c996807ff7863e10.jpeg" alt="I'm in love with villainess" loading="lazy"/><span class="badge">#82</span></div><div class="info"><div class="number">NO. 82</div><div class="title">I'm in Love with the Villainess</div></div></div><div class="card-back"><div class="back-content"><div class="back-title">I'm in Love with the Villainess</div><div class="back-season">🌸 Season-1</div><div class="back-episodes">📺 Total Episodes: 12</div><div class="back-tap-hint">click to flip back</div></div></div></div></div>
 
@@ -367,7 +486,7 @@
 
 <div class="card"><div class="card-inner"><div class="card-front"><div class="poster-wrap"><img src="https://media.kitsu.app/anime/46644/poster_image/large-0f238c5a6e79a9c0fcd5fe5fc33a3f9a.jpeg" alt="Bartender Glass of God" loading="lazy"/><span class="badge">#121</span></div><div class="info"><div class="number">NO. 121</div><div class="title">Bartender Glass of God</div></div></div><div class="card-back"><div class="back-content"><div class="back-title">Bartender Glass of God</div><div class="back-season">🌸 Season-1</div><div class="back-episodes">📺 Total Episodes: 13</div><div class="back-tap-hint">click to flip back</div></div></div></div></div>
 
-<div class="card"><div class="card-inner"><div class="card-front"><div class="poster-wrap"><img src="https://media.kitsu.app/anime/42965/poster_image/large-1193a6fc0e565abe593237f3c713c232.jpeg" alt="A Whisker Away" loading="lazy"/><span class="badge">#122</span></div><div class="info"><div class="number">NO. 122</div><div class="title">A Whisker Away</div></div></div><div class="card-back"><div class="back-content"><div class="back-title">A Whisker Away</div><div class="back-season">🌸 Movie</div><div class="back-episodes">🎬 Runtime: 104 mins</div><div class="back-tap-hint">click to flip back</div></div></div></div></div>
+<div class="card"><div class="card-inner"><div class="card-front"><div class="poster-wrap"><img src="https://media.kitsu.app/anime/42965/poster_image/large-1193a6fc0e565abe593237f3c713c232.jpeg" alt="A Whisker Away" loading="lazy"/><span class="badge">#122</span></div><div class="info"><div class="number">NO. 122</div><div class="title">A Whisker Away</div></div></div><div class="card-back"><div class="back-content"><div class="back-title">A Whisker Away</div><div class="back-season">🎬 Movie</div><div class="back-episodes">🎬 Runtime: 104 mins</div><div class="back-tap-hint">click to flip back</div></div></div></div></div>
 
 <div class="card"><div class="card-inner"><div class="card-front"><div class="poster-wrap"><img src="https://media.kitsu.app/anime/poster_images/13265/large.jpg" alt="School Babysitters" loading="lazy"/><span class="badge">#123</span></div><div class="info"><div class="number">NO. 123</div><div class="title">School Babysitters</div></div></div><div class="card-back"><div class="back-content"><div class="back-title">School Babysitters</div><div class="back-season">🌸 Season-1</div><div class="back-episodes">📺 Total Episodes: 13</div><div class="back-tap-hint">click to flip back</div></div></div></div></div>
 
@@ -381,7 +500,7 @@
 
 <div class="card"><div class="card-inner"><div class="card-front"><div class="poster-wrap"><img src="https://media.kitsu.app/anime/48842/poster_image/large-20ca00f76571774a30f3f19393010759.jpeg" alt="Possibly the Greatest Alchemist of All Time" loading="lazy"/><span class="badge">#128</span></div><div class="info"><div class="number">NO. 128</div><div class="title">Possibly the Greatest Alchemist of All Time</div></div></div><div class="card-back"><div class="back-content"><div class="back-title">Possibly the Greatest Alchemist of All Time</div><div class="back-season">🌸 Season-1</div><div class="back-episodes">📺 Total Episodes: 13</div><div class="back-tap-hint">click to flip back</div></div></div></div></div>
 
-<div class="card"><div class="card-inner"><div class="card-front"><div class="poster-wrap"><img src="https://media.kitsu.app/anime/48646/poster_image/large-57e67342cf7e2033752a54ae848691bb.jpeg" alt="Baki Hanma VS Kengan Ashura" loading="lazy"/><span class="badge">#129</span></div><div class="info"><div class="number">NO. 129</div><div class="title">Baki Hanma VS Kengan Ashura</div></div></div><div class="card-back"><div class="back-content"><div class="back-title">Baki Hanma VS Kengan Ashura</div><div class="back-season">🌸 Movie</div><div class="back-episodes">🎬 Runtime: 90 mins</div><div class="back-tap-hint">click to flip back</div></div></div></div></div>
+<div class="card"><div class="card-inner"><div class="card-front"><div class="poster-wrap"><img src="https://media.kitsu.app/anime/48646/poster_image/large-57e67342cf7e2033752a54ae848691bb.jpeg" alt="Baki Hanma VS Kengan Ashura" loading="lazy"/><span class="badge">#129</span></div><div class="info"><div class="number">NO. 129</div><div class="title">Baki Hanma VS Kengan Ashura</div></div></div><div class="card-back"><div class="back-content"><div class="back-title">Baki Hanma VS Kengan Ashura</div><div class="back-season">🎬 Movie</div><div class="back-episodes">🎬 Runtime: 90 mins</div><div class="back-tap-hint">click to flip back</div></div></div></div></div>
 
 <div class="card"><div class="card-inner"><div class="card-front"><div class="poster-wrap"><img src="https://media.kitsu.app/anime/47786/poster_image/large-ed6384832e4aad256106735ddc814825.jpeg" alt="Why Does Nobody Remember Me in This World" loading="lazy"/><span class="badge">#130</span></div><div class="info"><div class="number">NO. 130</div><div class="title">Why Does Nobody Remember Me in This World</div></div></div><div class="card-back"><div class="back-content"><div class="back-title">Why Does Nobody Remember Me in This World</div><div class="back-season">🌸 Season-1</div><div class="back-episodes">📺 Total Episodes: 12</div><div class="back-tap-hint">click to flip back</div></div></div></div></div>
 
@@ -481,7 +600,7 @@
 
 <div class="card"><div class="card-inner"><div class="card-front"><div class="poster-wrap"><img src="https://media.kitsu.app/anime/49357/poster_image/large-7edcbaabc3f7b4bbbf7d97c9e3b504cf.jpeg" alt="Dekin no Mogura The Earthbound Mole" loading="lazy"/><span class="badge">#178</span></div><div class="info"><div class="number">NO. 178</div><div class="title">Dekin no Mogura The Earthbound Mole</div></div></div><div class="card-back"><div class="back-content"><div class="back-title">Dekin no Mogura The Earthbound Mole</div><div class="back-season">🌸 Season-1</div><div class="back-episodes">📺 Total Episodes: 13</div><div class="back-tap-hint">click to flip back</div></div></div></div></div>
 
-<div class="card"><div class="card-inner"><div class="card-front"><div class="poster-wrap"><img src="https://cdn.myanimelist.net/images/anime/1943/129491.jpg" alt="New Saga" loading="lazy"/><span class="badge">#179</span></div><div class="info"><div class="number">NO. 179</div><div class="title">New Saga</div></div></div><div class="card-back"><div class="back-content"><div class="back-title">New Saga</div><div class="back-season">🌸 Season-1</div><div class="back-episodes">📺 Total Episodes: 12</div><div class="back-tap-hint">click to flip back</div></div></div></div></div>
+<div class="card"><div class="card-inner"><div class="card-front"><div class="poster-wrap"><img src="https://m.media-amazon.com/images/S/compressed.photo.goodreads.com/books/1694399006i/197520655.jpg" alt="New Saga" loading="lazy"/><span class="badge">#179</span></div><div class="info"><div class="number">NO. 179</div><div class="title">New Saga</div></div></div><div class="card-back"><div class="back-content"><div class="back-title">New Saga</div><div class="back-season">🌸 Season-1</div><div class="back-episodes">📺 Total Episodes: 12</div><div class="back-tap-hint">click to flip back</div></div></div></div></div>
 
 <div class="card"><div class="card-inner"><div class="card-front"><div class="poster-wrap"><img src="https://media.kitsu.app/anime/poster_images/1547/large.jpg" alt="Devil May Cry" loading="lazy"/><span class="badge">#180</span></div><div class="info"><div class="number">NO. 180</div><div class="title">Devil May Cry</div></div></div><div class="card-back"><div class="back-content"><div class="back-title">Devil May Cry</div><div class="back-season">🌸 Season-1</div><div class="back-episodes">📺 Total Episodes: 12</div><div class="back-tap-hint">click to flip back</div></div></div></div></div>
 
@@ -577,52 +696,51 @@
 
 <div class="card"><div class="card-inner"><div class="card-front"><div class="poster-wrap"><img src="https://media.kitsu.app/anime/45884/poster_image/large-440b2b11f508b045582bdbf663fdc9ac.jpeg" alt="Black Summoner" loading="lazy"/><span class="badge">#226</span></div><div class="info"><div class="number">NO. 226</div><div class="title">Black Summoner</div></div></div><div class="card-back"><div class="back-content"><div class="back-title">Black Summoner</div><div class="back-season">🌸 Season-1</div><div class="back-episodes">📺 Total Episodes: 12</div><div class="back-tap-hint">click to flip back</div></div></div></div></div>
 
-<div class="card"><div class="card-inner"><div class="card-front"><div class="poster-wrap"><img src="https://encrypted-tbn3.gstatic.com/images?q=tbn:ANd9GcRa7iT4QDIoSKpL7qO1ImUOpCXOPlKc5HhvqZypy-WAM2aa9da1" alt="Yaiba Samurai Legend" loading="lazy"/><span class="badge">#227</span></div><div class="info"><div class="number">NO. 227</div><div class="title">Yaiba Samurai Legend</div></div></div><div class="card-back"><div class="back-content"><div class="back-title">Yaiba Samurai Legend</div><div class="back-season">🌸 Season-1 Ongoing</div><div class="back-episodes">📺 Total Episodes: 12+</div><div class="back-tap-hint">click to flip back</div></div></div></div></div>
+<div class="card"><div class="card-inner"><div class="card-front"><div class="poster-wrap"><img src="https://media.kitsu.app/anime/48841/poster_image/large-be3a4fec9a08c82c4041614a1a8aa03d.jpeg" alt="Yaiba Samurai Legend" loading="lazy"/><span class="badge">#227</span></div><div class="info"><div class="number">NO. 227</div><div class="title">Yaiba Samurai Legend</div></div></div><div class="card-back"><div class="back-content"><div class="back-title">Yaiba Samurai Legend</div><div class="back-season">🌸 Season-1 Ongoing</div><div class="back-episodes">📺 Total Episodes: 12+</div><div class="back-tap-hint">click to flip back</div></div></div></div></div>
 
-<div class="card"><div class="card-inner"><div class="card-front"><div class="poster-wrap"><img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQj4xX7yWWzXgeQmnxP_ZkjQ5ALr20whyP2Zg&s" alt="Arifureta" loading="lazy"/><span class="badge">#228</span></div><div class="info"><div class="number">NO. 228</div><div class="title">Arifureta: From Commonplace to World's Strongest</div></div></div><div class="card-back"><div class="back-content"><div class="back-title">Arifureta: From Commonplace to World's Strongest</div><div class="back-season">🌸 Season-1,2,3</div><div class="back-episodes">📺 Total Episodes: 37</div><div class="back-tap-hint">click to flip back</div></div></div></div></div>
+<div class="card"><div class="card-inner"><div class="card-front"><div class="poster-wrap"><img src="https://media.kitsu.app/anime/poster_images/14043/large.jpg" alt="Arifureta" loading="lazy"/><span class="badge">#228</span></div><div class="info"><div class="number">NO. 228</div><div class="title">Arifureta: From Commonplace to World's Strongest</div></div></div><div class="card-back"><div class="back-content"><div class="back-title">Arifureta: From Commonplace to World's Strongest</div><div class="back-season">🌸 Season-1,2,3</div><div class="back-episodes">📺 Total Episodes: 37</div><div class="back-tap-hint">click to flip back</div></div></div></div></div>
 
-<div class="card"><div class="card-inner"><div class="card-front"><div class="poster-wrap"><img src="https://m.media-amazon.com/images/M/MV5BMGZjNGZkYzgtZjJiNi00YTE4LWIyZDgtYWVmYTdlOGU5OTkyXkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg" alt="Miss Kuroitsu" loading="lazy"/><span class="badge">#229</span></div><div class="info"><div class="number">NO. 229</div><div class="title">Miss Kuroitsu from the Monster Development Department</div></div></div><div class="card-back"><div class="back-content"><div class="back-title">Miss Kuroitsu from the Monster Development Department</div><div class="back-season">🌸 Season-1</div><div class="back-episodes">📺 Total Episodes: 12</div><div class="back-tap-hint">click to flip back</div></div></div></div></div>
+<div class="card"><div class="card-inner"><div class="card-front"><div class="poster-wrap"><img src="https://media.kitsu.app/anime/44876/poster_image/large-9494c1dd7ba9d11011fa4d6249dafc19.jpeg" alt="Miss Kuroitsu" loading="lazy"/><span class="badge">#229</span></div><div class="info"><div class="number">NO. 229</div><div class="title">Miss Kuroitsu from the Monster Development Department</div></div></div><div class="card-back"><div class="back-content"><div class="back-title">Miss Kuroitsu from the Monster Development Department</div><div class="back-season">🌸 Season-1</div><div class="back-episodes">📺 Total Episodes: 12</div><div class="back-tap-hint">click to flip back</div></div></div></div></div>
 
-<div class="card"><div class="card-inner"><div class="card-front"><div class="poster-wrap"><img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQKbRDaBfkr1cp90BT1Yf2GeMgJEaT5rqatvA&s" alt="Dandelion" loading="lazy"/><span class="badge">#230</span></div><div class="info"><div class="number">NO. 230</div><div class="title">Dandelion</div></div></div><div class="card-back"><div class="back-content"><div class="back-title">Dandelion</div><div class="back-season">🌸 Season-1 Ongoing</div><div class="back-episodes">📺 Total Episodes: 13+</div><div class="back-tap-hint">click to flip back</div></div></div></div></div>
+<div class="card"><div class="card-inner"><div class="card-front"><div class="poster-wrap"><img src="https://media.kitsu.app/anime/50657/poster_image/large-e1a27fdca91186099e24ab3e518b3167.jpeg" alt="Dandelion" loading="lazy"/><span class="badge">#230</span></div><div class="info"><div class="number">NO. 230</div><div class="title">Dandelion</div></div></div><div class="card-back"><div class="back-content"><div class="back-title">Dandelion</div><div class="back-season">🌸 Season-1 Ongoing</div><div class="back-episodes">📺 Total Episodes: 13+</div><div class="back-tap-hint">click to flip back</div></div></div></div></div>
 
-<div class="card"><div class="card-inner"><div class="card-front"><div class="poster-wrap"><img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRw_Hu-6t7gkTxJQugZTKd4yF2gcZPthydoFFXWJXYw3PQnmE3aaqeYJVTsCXGlk6Zmqy0FYw&s=10" alt="Fullmetal Alchemist Brotherhood" loading="lazy"/><span class="badge">#231</span></div><div class="info"><div class="number">NO. 231</div><div class="title">Fullmetal Alchemist Brotherhood</div></div></div><div class="card-back"><div class="back-content"><div class="back-title">Fullmetal Alchemist Brotherhood</div><div class="back-season">🌸 Season-1</div><div class="back-episodes">📺 Total Episodes: 64</div><div class="back-tap-hint">click to flip back</div></div></div></div></div>
+<div class="card"><div class="card-inner"><div class="card-front"><div class="poster-wrap"><img src="https://media.kitsu.app/anime/poster_images/3936/large.jpg" alt="Fullmetal Alchemist Brotherhood" loading="lazy"/><span class="badge">#231</span></div><div class="info"><div class="number">NO. 231</div><div class="title">Fullmetal Alchemist Brotherhood</div></div></div><div class="card-back"><div class="back-content"><div class="back-title">Fullmetal Alchemist Brotherhood</div><div class="back-season">🌸 Season-1</div><div class="back-episodes">📺 Total Episodes: 64</div><div class="back-tap-hint">click to flip back</div></div></div></div></div>
 
-<div class="card"><div class="card-inner"><div class="card-front"><div class="poster-wrap"><img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTQM9yOI9XOXPTPgs_KriERIFcHxAGB7cZQiyqLFIgaormNITeFh99w8AahG9JEPjA8b1iqpg1wxndrZGcI34dlC5Wpl643UJUHYaAUpw&s=10" alt="Sentenced to Be a Hero" loading="lazy"/><span class="badge">#232</span></div><div class="info"><div class="number">NO. 232</div><div class="title">Sentenced to Be a Hero</div></div></div><div class="card-back"><div class="back-content"><div class="back-title">Sentenced to Be a Hero</div><div class="back-season">🌸 Season-1 Ongoing</div><div class="back-episodes">📺 Total Episodes: 12+</div><div class="back-tap-hint">click to flip back</div></div></div></div></div>
+<div class="card"><div class="card-inner"><div class="card-front"><div class="poster-wrap"><img src="https://media.kitsu.app/anime/47759/poster_image/large-fadac60d40bf1a14768ec6c52dd6c43b.jpeg" alt="Sentenced to Be a Hero" loading="lazy"/><span class="badge">#232</span></div><div class="info"><div class="number">NO. 232</div><div class="title">Sentenced to Be a Hero</div></div></div><div class="card-back"><div class="back-content"><div class="back-title">Sentenced to Be a Hero</div><div class="back-season">🌸 Season-1 Ongoing</div><div class="back-episodes">📺 Total Episodes: 12+</div><div class="back-tap-hint">click to flip back</div></div></div></div></div>
 
-<div class="card"><div class="card-inner"><div class="card-front"><div class="poster-wrap"><img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSN4q4Fnmt-zQIAsSAIUjLNSbWHpVCOFpOvOM5_oJxLIFBMNxCQTLp9nkumGogvAYRDVOto&s=10" alt="She Professed Herself Pupil of the Wise Man" loading="lazy"/><span class="badge">#233</span></div><div class="info"><div class="number">NO. 233</div><div class="title">She Professed Herself Pupil of the Wise Man</div></div></div><div class="card-back"><div class="back-content"><div class="back-title">She Professed Herself Pupil of the Wise Man</div><div class="back-season">🌸 Season-1</div><div class="back-episodes">📺 Total Episodes: 12</div><div class="back-tap-hint">click to flip back</div></div></div></div></div>
+<div class="card"><div class="card-inner"><div class="card-front"><div class="poster-wrap"><img src="https://media.kitsu.app/anime/44121/poster_image/large-0dbc395fea965ab709dd748a998a1b5e.jpeg" alt="She Professed Herself Pupil of the Wise Man" loading="lazy"/><span class="badge">#233</span></div><div class="info"><div class="number">NO. 233</div><div class="title">She Professed Herself Pupil of the Wise Man</div></div></div><div class="card-back"><div class="back-content"><div class="back-title">She Professed Herself Pupil of the Wise Man</div><div class="back-season">🌸 Season-1</div><div class="back-episodes">📺 Total Episodes: 12</div><div class="back-tap-hint">click to flip back</div></div></div></div></div>
 
-<div class="card"><div class="card-inner"><div class="card-front"><div class="poster-wrap"><img src="https://m.media-amazon.com/images/M/MV5BODEzNTFjOTgtZGJmNi00MmQ4LTlhY2QtNWUwNTJiY2ViNzI5XkEyXkFqcGc@._V1_.jpg" alt="Ultraviolet Code 044" loading="lazy"/><span class="badge">#234</span></div><div class="info"><div class="number">NO. 234</div><div class="title">Ultraviolet Code 044</div></div></div><div class="card-back"><div class="back-content"><div class="back-title">Ultraviolet Code 044</div><div class="back-season">🌸 Season-1</div><div class="back-episodes">📺 Total Episodes: 12</div><div class="back-tap-hint">click to flip back</div></div></div></div></div>
+<div class="card"><div class="card-inner"><div class="card-front"><div class="poster-wrap"><img src="https://media.kitsu.app/anime/poster_images/3542/large.jpg" alt="Ultraviolet Code 044" loading="lazy"/><span class="badge">#234</span></div><div class="info"><div class="number">NO. 234</div><div class="title">Ultraviolet Code 044</div></div></div><div class="card-back"><div class="back-content"><div class="back-title">Ultraviolet Code 044</div><div class="back-season">🌸 Season-1</div><div class="back-episodes">📺 Total Episodes: 12</div><div class="back-tap-hint">click to flip back</div></div></div></div></div>
 
-<div class="card"><div class="card-inner"><div class="card-front"><div class="poster-wrap"><img src="https://m.media-amazon.com/images/M/MV5BMjhkMmY4YjktNTNmYy00NGVjLWI5ZTEtOTQzZDg1NzFlMjM3XkEyXkFqcGc@._V1_.jpg" alt="Yuri on Ice" loading="lazy"/><span class="badge">#235</span></div><div class="info"><div class="number">NO. 235</div><div class="title">Yuri!!! on Ice</div></div></div><div class="card-back"><div class="back-content"><div class="back-title">Yuri!!! on Ice</div><div class="back-season">🌸 Season-1</div><div class="back-episodes">📺 Total Episodes: 12</div><div class="back-tap-hint">click to flip back</div></div></div></div></div>
+<div class="card"><div class="card-inner"><div class="card-front"><div class="poster-wrap"><img src="https://media.kitsu.app/anime/11999/poster_image/large-60e50583621348bf1956fbaa81837c85.jpeg" alt="Yuri on Ice" loading="lazy"/><span class="badge">#235</span></div><div class="info"><div class="number">NO. 235</div><div class="title">Yuri!!! on Ice</div></div></div><div class="card-back"><div class="back-content"><div class="back-title">Yuri!!! on Ice</div><div class="back-season">🌸 Season-1</div><div class="back-episodes">📺 Total Episodes: 12</div><div class="back-tap-hint">click to flip back</div></div></div></div></div>
 
  <div class="card"><div class="card-inner"><div class="card-front"><div class="poster-wrap"><img src="https://myanimelist.net/images/anime/1310/148243l.jpg" alt="I Left My A-Rank Party to Help My Former Students Reach the Dungeon Depths!" loading="lazy"/><span class="badge">#236</span></div><div class="info"><div class="number">NO. 236</div><div class="title">I Left My A-Rank Party to Help My Former Students Reach the Dungeon Depths!</div></div></div><div class="card-back"><div class="back-content"><div class="back-title">I Left My A-Rank Party to Help My Former Students Reach the Dungeon Depths!</div><div class="back-season">🌸 Season-1</div><div class="back-episodes">📺 Total Episodes: 24</div><div class="back-tap-hint">click to flip back</div></div></div></div></div>
 
- <!-- New Card Templete
+<div class="card"><div class="card-inner"><div class="card-front"><div class="poster-wrap"><img src="https://media.kitsu.app/anime/50023/poster_image/large-83bcc1806d52156538574d1eeb8ba4bd.jpeg" alt="Daemons of the Shadow Realm" loading="lazy"/><span class="badge">#237</span></div><div class="info"><div class="number">NO. 237</div><div class="title">Daemons of the Shadow Realm</div></div></div><div class="card-back"><div class="back-content"><div class="back-title">Daemons of the Shadow Realm</div><div class="back-season">🌸 Season-1</div><div class="back-episodes">📺 Total Episodes: 24</div><div class="back-tap-hint">click to flip back</div></div></div></div></div>
 
- <div class="card">
-  <div class="card-inner">
-    <div class="card-front">
-      <div class="poster-wrap">
-        <img src="POSTER_IMAGE_URL" alt="ANIME_NAME" loading="lazy"/>
-        <span class="badge">#236</span>
-      </div>
-      <div class="info">
-        <div class="number">NO. 236</div>
-        <div class="title">ANIME_TITLE_HERE</div>
-      </div>
-    </div>
-    <div class="card-back">
-      <div class="back-content">
-        <div class="back-title">ANIME_TITLE_HERE</div>
-        <div class="back-season">🌸 SEASON_INFO_HERE</div>
-        <div class="back-episodes">📺 Total Episodes: NUMBER_HERE</div>
-        <div class="back-tap-hint">click to flip back</div>
-      </div>
-    </div>
-  </div>
-</div>
+<div class="card"><div class="card-inner"><div class="card-front"><div class="poster-wrap"><img src="https://media.kitsu.app/anime/49912/poster_image/large-65aca3102fa434a339df342a9ac0d241.jpeg" alt="An Observation Log of My Fianc�e Who Calls Herself a Villainess" loading="lazy"/><span class="badge">#238</span></div><div class="info"><div class="number">NO. 238</div><div class="title">An Observation Log of My Fianc�e Who Calls Herself a Villainess</div></div></div><div class="card-back"><div class="back-content"><div class="back-title">An Observation Log of My Fianc�e Who Calls Herself a Villainess</div><div class="back-season">🌸 Season-1</div><div class="back-episodes">📺 Total Episodes: 12</div><div class="back-tap-hint">click to flip back</div></div></div></div></div>
 
--->
+<div class="card"><div class="card-inner"><div class="card-front"><div class="poster-wrap"><img src="https://media.kitsu.app/anime/46043/poster_image/large-ef088c3ffa0345c7843b1d5d99171b47.jpeg" alt="Witch Hat Atelier" loading="lazy"/><span class="badge">#239</span></div><div class="info"><div class="number">NO. 239</div><div class="title">Witch Hat Atelier</div></div></div><div class="card-back"><div class="back-content"><div class="back-title">Witch Hat Atelier</div><div class="back-season">🌸 Season-1</div><div class="back-episodes">📺 Total Episodes: 13</div><div class="back-tap-hint">click to flip back</div></div></div></div></div>
+
+<div class="card"><div class="card-inner"><div class="card-front"><div class="poster-wrap"><img src="https://media.kitsu.app/anime/49930/poster_image/large-0019a2a921c6a35f183a848090f2cb2f.jpeg" alt="The Warrior Princess and the Barbaric King" loading="lazy"/><span class="badge">#240</span></div><div class="info"><div class="number">NO. 240</div><div class="title">The Warrior Princess and the Barbaric King</div></div></div><div class="card-back"><div class="back-content"><div class="back-title">The Warrior Princess and the Barbaric King</div><div class="back-season">🌸 Season-1</div><div class="back-episodes">📺 Total Episodes: 12</div><div class="back-tap-hint">click to flip back</div></div></div></div></div>
+
+<div class="card"><div class="card-inner"><div class="card-front"><div class="poster-wrap"><img src="https://media.kitsu.app/anime/50465/poster_image/large-0ef2159f3805f003deb7ee03b9a9f956.jpeg" alt="The Ramparts of Ice" loading="lazy"/><span class="badge">#241</span></div><div class="info"><div class="number">NO. 241</div><div class="title">The Ramparts of Ice</div></div></div><div class="card-back"><div class="back-content"><div class="back-title">The Ramparts of Ice</div><div class="back-season">🌸 Season-1</div><div class="back-episodes">📺 Total Episodes: 12</div><div class="back-tap-hint">click to flip back</div></div></div></div></div>
+
+<div class="card"><div class="card-inner"><div class="card-front"><div class="poster-wrap"><img src="https://media.kitsu.app/anime/49681/poster_image/large-eb7b8b15ebbc700a3e87727717de04d3.jpeg" alt="Scum of the Brave" loading="lazy"/><span class="badge">#242</span></div><div class="info"><div class="number">NO. 242</div><div class="title">Scum of the Brave</div></div></div><div class="card-back"><div class="back-content"><div class="back-title">Scum of the Brave</div><div class="back-season">🌸 Season-1</div><div class="back-episodes">📺 Total Episodes: 24</div><div class="back-tap-hint">click to flip back</div></div></div></div></div>
+
+<div class="card"><div class="card-inner"><div class="card-front"><div class="poster-wrap"><img src="https://media.kitsu.app/anime/50218/poster_image/large-56ea2b0a4517d18a7b00d458324ad615.jpeg" alt="Marriage Toxin" loading="lazy"/><span class="badge">#243</span></div><div class="info"><div class="number">NO. 243</div><div class="title">Marriage Toxin</div></div></div><div class="card-back"><div class="back-content"><div class="back-title">Marriage Toxin</div><div class="back-season">🌸 Season-1</div><div class="back-episodes">📺 Total Episodes: 13</div><div class="back-tap-hint">click to flip back</div></div></div></div></div>
+
+<div class="card"><div class="card-inner"><div class="card-front"><div class="poster-wrap"><img src="https://media.kitsu.app/anime/50108/poster_image/large-72566980f13de5aeae5c636ff3381917.jpeg" alt="Liar Game" loading="lazy"/><span class="badge">#244</span></div><div class="info"><div class="number">NO. 244</div><div class="title">Liar Game</div></div></div><div class="card-back"><div class="back-content"><div class="back-title">Liar Game</div><div class="back-season">🌸 Season-1</div><div class="back-episodes">📺 Total Episodes: 24</div><div class="back-tap-hint">click to flip back</div></div></div></div></div>
+
+<div class="card"><div class="card-inner"><div class="card-front"><div class="poster-wrap"><img src="https://media.kitsu.app/anime/47987/poster_image/large-d9dc9f96eda345f9b42e538e3b7a2f21.jpeg" alt="I Made Friends with the Second Prettiest Girl in My Class" loading="lazy"/><span class="badge">#245</span></div><div class="info"><div class="number">NO. 245</div><div class="title">I Made Friends with the Second Prettiest Girl in My Class</div></div></div><div class="card-back"><div class="back-content"><div class="back-title">I Made Friends with the Second Prettiest Girl in My Class</div><div class="back-season">🌸 Season-1</div><div class="back-episodes">📺 Total Episodes: 12</div><div class="back-tap-hint">click to flip back</div></div></div></div></div>
+
+<div class="card"><div class="card-inner"><div class="card-front"><div class="poster-wrap"><img src="https://media.kitsu.app/anime/46806/poster_image/large-39e3deb9d1b6f4c8059ad32acb1284af.jpeg" alt="Eren the Southpaw" loading="lazy"/><span class="badge">#246</span></div><div class="info"><div class="number">NO. 246</div><div class="title">Eren the Southpaw</div></div></div><div class="card-back"><div class="back-content"><div class="back-title">Eren the Southpaw</div><div class="back-season">🌸 Season-1</div><div class="back-episodes">📺 Total Episodes: 12</div><div class="back-tap-hint">click to flip back</div></div></div></div></div>
+
+<div class="card"><div class="card-inner"><div class="card-front"><div class="poster-wrap"><img src="https://media.kitsu.app/anime/45218/poster_image/large-6d682e8691f69ec1f6b15e041698ba41.jpeg" alt="BlackRock Shooter Dawn Fall" loading="lazy"/><span class="badge">#247</span></div><div class="info"><div class="number">NO. 247</div><div class="title">BlackRock Shooter Dawn Fall</div></div></div><div class="card-back"><div class="back-content"><div class="back-title">BlackRock Shooter Dawn Fall</div><div class="back-season">🌸 Season-1</div><div class="back-episodes">📺 Total Episodes: 12</div><div class="back-tap-hint">click to flip back</div></div></div></div></div>
+
+<div class="card"><div class="card-inner"><div class="card-front"><div class="poster-wrap"><img src="https://media.kitsu.app/anime/poster_images/13230/large.jpg" alt="Devilman Crybaby" loading="lazy"/><span class="badge">#248</span></div><div class="info"><div class="number">NO. 248</div><div class="title">Devilman Crybaby</div></div></div><div class="card-back"><div class="back-content"><div class="back-title">Devilman Crybaby</div><div class="back-season">🌸 Season-1</div><div class="back-episodes">📺 Total Episodes: 10</div><div class="back-tap-hint">click to flip back</div></div></div></div></div>
+
+<div class="card"><div class="card-inner"><div class="card-front"><div class="poster-wrap"><img src="https://media.kitsu.app/anime/poster_images/13273/large.jpg" alt="Made in Abyss" loading="lazy"/><span class="badge">#249</span></div><div class="info"><div class="number">NO. 249</div><div class="title">Made in Abyss</div></div></div><div class="card-back"><div class="back-content"><div class="back-title">Made in Abyss</div><div class="back-season">🌸 Season-1,2 & Movie</div><div class="back-episodes">📺 Total Episodes: 25</div><div class="back-tap-hint">click to flip back</div></div></div></div></div>
 
 </div>
 
@@ -636,10 +754,10 @@
 
   <div class="footer-glow"></div>
 
-  <h2>✨ End of Fardin's Anime Journey ✨</h2>
+  <h2>? End of Fardin's Anime Journey ?</h2>
 
   <p>
-    Thanks for exploring my anime universe 🌌
+    Thanks for exploring my anime universe 🌸
   </p>
 
   <div class="footer-line"></div>
@@ -653,7 +771,7 @@
  <div class="suggestion-panel" id="suggestionPanel">
 
   <div class="suggestion-header">
-    <span>💬 Drop Suggestion</span>
+    <span>💡 Drop Suggestion</span>
     <button onclick="closeSuggestion()">✕</button>
   </div>
 
@@ -673,20 +791,32 @@
     <input
       type="text"
       name="anime"
-      placeholder="🎌 Anime Name"
+      placeholder="📺 Anime Name"
       required
     >
 
     <textarea
       name="reason"
-      placeholder="✨ Why should I watch it? (Optional)"
+      placeholder="Why should I watch it? (Optional)"
     ></textarea>
 
     <button type="submit" class="send-btn">
-      🚀 Send Suggestion
+      📨 Send Suggestion
     </button>
 
   </form>
+
+</div>
+
+<div id="waifuOverlay" class="waifu-overlay">
+
+  <div class="waifu-overlay-header">
+    <h2>Find Your Waifus</h2>
+    <button class="waifu-close-btn" onclick="closeWaifus()">✕</button>
+  </div>
+
+  <div class="waifu-grid" id="waifuGrid"></div>
+
 
 </div>
 
@@ -712,10 +842,10 @@
 <div class="chat-box" id="chatBox">
   <div class="chat-header">
     <span>🤖 AI As Your Assistant</span>
-    <button onclick="toggleChat()">✕</button>
+    <button onclick="toggleChat()">?</button>
   </div>
   <div class="chat-messages" id="chatMessages">
-    <div class="msg bot">😊 Hello! Welcome to Fardin's Anime Hub! I'm Fardin's personal anime assistant. Ask me anything — episodes, seasons, random picks, or genre recommendations! ✨</div>
+    <div class="msg bot">🤖 Hello! Welcome to Fardin's Anime Hub! I'm Fardin's personal anime assistant. Ask me anything � episodes, seasons, random picks, or genre recommendations! ?</div>
   </div>
   <div class="chat-input-area">
     <input type="text" id="chatInput" placeholder="Type a message..." onkeydown="if(event.key==='Enter') sendMessage()" />
