@@ -1,124 +1,62 @@
-/* ============================================================
-   🔧 SECTION 1: CSS CUSTOM PROPERTIES
-   — Duel System-এর নিজস্ব color variables
-   ============================================================ */
-
 :root {
-  /* Duel Color Palette */
-  --duel-primary:      #00d4ff;   /* Electric Blue */
-  --duel-secondary:    #ffcc00;   /* Golden Yellow */
-  --duel-danger:       #ff4757;   /* Red */
-  --duel-success:      #00ff88;   /* Green */
-  --duel-p1-color:     #00d4ff;   /* Player 1 — Blue */
-  --duel-p2-color:     #ff6b6b;   /* Player 2 — Red */
-  --duel-bg:           rgba(0, 5, 20, 0.97);
-  --duel-panel-bg:     rgba(5, 15, 35, 0.95);
-  --duel-border:       rgba(0, 212, 255, 0.3);
-  --duel-glow-blue:    0 0 20px rgba(0, 212, 255, 0.6);
-  --duel-glow-gold:    0 0 15px rgba(255, 204, 0, 0.8);
-  --duel-glow-red:     0 0 20px rgba(255, 71, 87, 0.6);
-
-  /* Timing */
-  --duel-transition:   cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  --duel-spring:       cubic-bezier(0.34, 1.56, 0.64, 1);
+  --neon-cyan:      #00f0ff;
+  --neon-magenta:   #ff00aa;
+  --neon-purple:    #aa00ff;
+  --neon-yellow:    #ffee00;
+  --neon-red:       #ff2255;
+  --neon-green:     #00ff88;
+  --neon-orange:    #ff6600;
+  --dark-bg:        #0a0a12;
+  --panel-bg:       rgba(14, 14, 28, 0.96);
+  --border-glow:    0 0 12px rgba(0, 240, 255, 0.25);
+  --glow-cyan:      0 0 20px rgba(0, 240, 255, 0.5);
+  --glow-magenta:   0 0 20px rgba(255, 0, 170, 0.5);
+  --glow-yellow:    0 0 20px rgba(255, 238, 0, 0.5);
+  --spring:         cubic-bezier(0.34, 1.56, 0.64, 1);
+  --smooth:         cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
-
-/* ============================================================
-   🔧 SECTION 2: GLOBAL DUEL MODE BODY STATE
-   ============================================================ */
-
-/* Duel Mode active থাকলে body-তে এই class থাকবে */
-body.duel-mode-active {
-  --card-cursor: crosshair;
-}
-
-/* Duel Mode active থাকলে cards-এর flip prevent করা */
 body.duel-mode-active .card {
   cursor: crosshair !important;
   pointer-events: all !important;
 }
-
-/* Normal card flip animation Duel Mode-এ disable করা */
 body.duel-mode-active .card:hover .card-inner,
 body.duel-mode-active .card.flipped .card-inner {
   transform: none !important;
 }
 
-/* Card hover effect Duel Mode-এ */
-body.duel-mode-active .card:hover {
-  transform: translateY(-4px) scale(1.02);
-  transition: transform 0.2s var(--duel-transition);
-}
-
-
-/* ============================================================
-   🔧 SECTION 3: SELECTED CARD STYLING
-   — .selected-for-duel class
-   ============================================================ */
-
 .card.selected-for-duel {
   position: relative;
   outline: none !important;
-
-  /* Glowing border effect */
-  box-shadow:
-    0 0 0 3px var(--duel-primary),
-    0 0 15px rgba(0, 212, 255, 0.5),
-    0 0 35px rgba(0, 212, 255, 0.2),
-    inset 0 0 20px rgba(0, 212, 255, 0.05);
-
-  border-radius: inherit;
-  animation: card-selected-pulse 1.5s ease-in-out infinite;
-  transform: translateY(-6px) scale(1.04) !important;
-  transition: all 0.3s var(--duel-spring) !important;
   z-index: 10;
+  transform: translateY(-6px) scale(1.02) !important;
+  transition: all 0.3s var(--spring) !important;
+  animation: sel-pulse 1.4s ease-in-out infinite;
 }
-
-/* Player 2 selected card — লাল glow */
+.card.selected-for-duel {
+  box-shadow:
+    0 0 0 3px var(--neon-cyan),
+    0 0 18px rgba(0, 240, 255, 0.5),
+    0 0 40px rgba(0, 240, 255, 0.15),
+    inset 0 0 20px rgba(0, 240, 255, 0.04);
+}
 .card.selected-for-duel[data-duel-player="P2"] {
   box-shadow:
-    0 0 0 3px var(--duel-p2-color),
-    0 0 15px rgba(255, 107, 107, 0.5),
-    0 0 35px rgba(255, 107, 107, 0.2),
-    inset 0 0 20px rgba(255, 107, 107, 0.05);
-
-  animation: card-selected-pulse-red 1.5s ease-in-out infinite;
+    0 0 0 3px var(--neon-magenta),
+    0 0 18px rgba(255, 0, 170, 0.5),
+    0 0 40px rgba(255, 0, 170, 0.15),
+    inset 0 0 20px rgba(255, 0, 170, 0.04);
+  animation: sel-pulse-p2 1.4s ease-in-out infinite;
+}
+@keyframes sel-pulse {
+  0%, 100% { box-shadow: 0 0 0 3px var(--neon-cyan), 0 0 18px rgba(0,240,255,0.5), 0 0 40px rgba(0,240,255,0.15); }
+  50%      { box-shadow: 0 0 0 3px var(--neon-cyan), 0 0 30px rgba(0,240,255,0.8), 0 0 60px rgba(0,240,255,0.3); }
+}
+@keyframes sel-pulse-p2 {
+  0%, 100% { box-shadow: 0 0 0 3px var(--neon-magenta), 0 0 18px rgba(255,0,170,0.5), 0 0 40px rgba(255,0,170,0.15); }
+  50%      { box-shadow: 0 0 0 3px var(--neon-magenta), 0 0 30px rgba(255,0,170,0.8), 0 0 60px rgba(255,0,170,0.3); }
 }
 
-/* Selected card pulse animation — নীল */
-@keyframes card-selected-pulse {
-  0%, 100% {
-    box-shadow:
-      0 0 0 3px var(--duel-primary),
-      0 0 15px rgba(0, 212, 255, 0.5),
-      0 0 35px rgba(0, 212, 255, 0.2);
-  }
-  50% {
-    box-shadow:
-      0 0 0 3px var(--duel-primary),
-      0 0 25px rgba(0, 212, 255, 0.8),
-      0 0 50px rgba(0, 212, 255, 0.4);
-  }
-}
-
-/* Selected card pulse — লাল */
-@keyframes card-selected-pulse-red {
-  0%, 100% {
-    box-shadow:
-      0 0 0 3px var(--duel-p2-color),
-      0 0 15px rgba(255, 107, 107, 0.5),
-      0 0 35px rgba(255, 107, 107, 0.2);
-  }
-  50% {
-    box-shadow:
-      0 0 0 3px var(--duel-p2-color),
-      0 0 25px rgba(255, 107, 107, 0.8),
-      0 0 50px rgba(255, 107, 107, 0.4);
-  }
-}
-
-/* Card-এ Selection Badge */
 .duel-selection-badge {
   position: absolute;
   top: -12px;
@@ -127,52 +65,32 @@ body.duel-mode-active .card:hover {
   display: flex;
   align-items: center;
   gap: 4px;
-  padding: 4px 12px;
+  padding: 4px 14px;
   border-radius: 20px;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 800;
-  letter-spacing: 1px;
+  letter-spacing: 1.5px;
   text-transform: uppercase;
   z-index: 20;
-  animation: badge-bounce-in 0.4s var(--duel-spring);
   white-space: nowrap;
+  animation: badge-in 0.4s var(--spring);
 }
-
 .duel-selection-badge--p1 {
-  background: linear-gradient(135deg, #003d5c, #0080a8);
-  color: var(--duel-primary);
-  border: 1px solid var(--duel-primary);
-  box-shadow: 0 0 10px rgba(0, 212, 255, 0.4);
+  background: linear-gradient(135deg, #001a33, #003366);
+  color: var(--neon-cyan);
+  border: 1px solid var(--neon-cyan);
+  box-shadow: 0 0 12px rgba(0,240,255,0.3);
 }
-
 .duel-selection-badge--p2 {
-  background: linear-gradient(135deg, #5c0000, #a80000);
-  color: var(--duel-p2-color);
-  border: 1px solid var(--duel-p2-color);
-  box-shadow: 0 0 10px rgba(255, 107, 107, 0.4);
+  background: linear-gradient(135deg, #33001a, #660033);
+  color: var(--neon-magenta);
+  border: 1px solid var(--neon-magenta);
+  box-shadow: 0 0 12px rgba(255,0,170,0.3);
 }
-
-@keyframes badge-bounce-in {
+@keyframes badge-in {
   0%   { transform: translateX(-50%) scale(0) translateY(10px); opacity: 0; }
   70%  { transform: translateX(-50%) scale(1.15) translateY(-3px); opacity: 1; }
   100% { transform: translateX(-50%) scale(1) translateY(0); }
-}
-
-
-/* ============================================================
-   🔧 SECTION 4: SIDEBAR DUEL LINK
-   ============================================================ */
-
-#duel-nav-item {
-  margin-top: auto; /* নিচের দিকে push করা */
-  border-top: 1px solid rgba(0, 212, 255, 0.15);
-  padding-top: 8px;
-  animation: nav-item-slide-in 0.5s var(--duel-spring);
-}
-
-@keyframes nav-item-slide-in {
-  from { transform: translateX(-20px); opacity: 0; }
-  to   { transform: translateX(0); opacity: 1; }
 }
 
 .duel-nav-link {
@@ -181,95 +99,62 @@ body.duel-mode-active .card:hover {
   gap: 10px;
   padding: 12px 16px;
   text-decoration: none;
-  color: rgba(255, 255, 255, 0.7);
+  color: rgba(255,255,255,0.6);
   border-radius: 10px;
-  transition: all 0.3s var(--duel-transition);
+  transition: all 0.3s var(--smooth);
+  font-weight: 600;
   position: relative;
   overflow: hidden;
-  font-weight: 600;
-  letter-spacing: 0.5px;
 }
-
-/* Hover shimmer effect */
 .duel-nav-link::before {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    135deg,
-    rgba(0, 212, 255, 0.1),
-    rgba(0, 212, 255, 0.05)
-  );
+  background: linear-gradient(135deg, rgba(0,240,255,0.08), transparent);
   opacity: 0;
   transition: opacity 0.3s;
   border-radius: inherit;
 }
-
 .duel-nav-link:hover::before,
-.duel-nav-link.duel-link--active::before {
-  opacity: 1;
-}
-
+.duel-nav-link.duel-link--active::before { opacity: 1; }
 .duel-nav-link:hover {
-  color: var(--duel-primary);
+  color: var(--neon-cyan);
   transform: translateX(4px);
-  box-shadow: var(--duel-glow-blue);
 }
-
-/* Active state — Duel Mode ON */
 .duel-nav-link.duel-link--active {
-  color: var(--duel-primary);
-  border: 1px solid rgba(0, 212, 255, 0.4);
-  background: rgba(0, 212, 255, 0.08);
-  box-shadow: var(--duel-glow-blue);
-  animation: nav-link-active-glow 2s ease-in-out infinite;
+  color: var(--neon-cyan);
+  border: 1px solid rgba(0,240,255,0.3);
+  background: rgba(0,240,255,0.06);
+  box-shadow: 0 0 15px rgba(0,240,255,0.2);
+  animation: nav-glow 2s ease-in-out infinite;
+}
+@keyframes nav-glow {
+  0%, 100% { box-shadow: 0 0 8px rgba(0,240,255,0.2); }
+  50%      { box-shadow: 0 0 20px rgba(0,240,255,0.5); }
 }
 
-@keyframes nav-link-active-glow {
-  0%, 100% { box-shadow: 0 0 10px rgba(0, 212, 255, 0.3); }
-  50%       { box-shadow: 0 0 20px rgba(0, 212, 255, 0.6); }
-}
-
-.duel-nav-icon {
-  font-size: 1.2rem;
-  flex-shrink: 0;
-}
-
-.duel-nav-text {
-  flex: 1;
-  font-size: 0.9rem;
-}
-
-/* ON/OFF Status Badge */
 .duel-status-badge {
   font-size: 9px;
   font-weight: 900;
   letter-spacing: 1px;
-  padding: 2px 7px;
+  padding: 2px 8px;
   border-radius: 10px;
-  background: rgba(255, 255, 255, 0.1);
-  color: rgba(255, 255, 255, 0.4);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255,255,255,0.08);
+  color: rgba(255,255,255,0.3);
+  border: 1px solid rgba(255,255,255,0.1);
   transition: all 0.3s;
 }
-
 .duel-status-badge.badge--active {
-  background: rgba(0, 212, 255, 0.2);
-  color: var(--duel-primary);
-  border-color: var(--duel-primary);
-  box-shadow: 0 0 8px rgba(0, 212, 255, 0.4);
+  background: rgba(0,240,255,0.15);
+  color: var(--neon-cyan);
+  border-color: var(--neon-cyan);
+  box-shadow: 0 0 10px rgba(0,240,255,0.3);
   animation: badge-pulse 1s ease-in-out infinite;
 }
-
 @keyframes badge-pulse {
   0%, 100% { opacity: 1; }
-  50%       { opacity: 0.6; }
+  50%      { opacity: 0.5; }
 }
-
-
-/* ============================================================
-   🔧 SECTION 5: FLOATING DUEL MODE INDICATOR
-   ============================================================ */
 
 .duel-mode-indicator {
   position: fixed;
@@ -279,61 +164,42 @@ body.duel-mode-active .card:hover {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 12px 24px;
-  background: var(--duel-panel-bg);
-  border: 1px solid var(--duel-primary);
+  padding: 10px 22px;
+  background: var(--panel-bg);
+  border: 1px solid var(--neon-cyan);
   border-radius: 50px;
-  color: var(--duel-primary);
-  font-size: 13px;
+  color: var(--neon-cyan);
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 1px;
   z-index: 1000;
   opacity: 0;
-  transition:
-    transform 0.5s var(--duel-spring),
-    opacity 0.3s;
-  box-shadow: var(--duel-glow-blue), inset 0 0 20px rgba(0, 212, 255, 0.05);
-  backdrop-filter: blur(20px);
+  transition: transform 0.5s var(--spring), opacity 0.3s;
+  box-shadow: 0 0 20px rgba(0,240,255,0.15), inset 0 0 20px rgba(0,240,255,0.03);
+  backdrop-filter: blur(24px);
   white-space: nowrap;
 }
-
 .duel-mode-indicator.indicator--visible {
   opacity: 1;
   transform: translateX(-50%) translateY(0);
 }
-
 .indicator__pulse {
-  width: 8px;
-  height: 8px;
+  width: 8px; height: 8px;
   border-radius: 50%;
-  background: var(--duel-primary);
-  animation: indicator-pulse 1s ease-in-out infinite;
-  box-shadow: 0 0 8px var(--duel-primary);
+  background: var(--neon-cyan);
+  animation: ind-pulse 1s ease-in-out infinite;
+  box-shadow: 0 0 10px var(--neon-cyan);
 }
-
-@keyframes indicator-pulse {
+@keyframes ind-pulse {
   0%, 100% { transform: scale(1); opacity: 1; }
-  50%       { transform: scale(1.5); opacity: 0.5; }
+  50%      { transform: scale(1.6); opacity: 0.4; }
 }
-
-.indicator__icon { font-size: 1rem; }
-
-.indicator__text {
-  text-transform: uppercase;
-  font-size: 11px;
-}
-
 .indicator__sub {
-  font-size: 11px;
-  opacity: 0.7;
-  border-left: 1px solid rgba(0, 212, 255, 0.3);
+  font-size: 10px;
+  opacity: 0.6;
+  border-left: 1px solid rgba(0,240,255,0.2);
   padding-left: 10px;
 }
-
-
-/* ============================================================
-   🔧 SECTION 6: TOAST NOTIFICATION
-   ============================================================ */
 
 .duel-toast {
   position: fixed;
@@ -341,1126 +207,490 @@ body.duel-mode-active .card:hover {
   right: 24px;
   display: flex;
   align-items: flex-start;
-  gap: 12px;
-  min-width: 280px;
-  max-width: 380px;
-  padding: 14px 16px;
+  gap: 10px;
+  min-width: 260px;
+  max-width: 360px;
+  padding: 12px 16px;
   border-radius: 12px;
-  background: var(--duel-panel-bg);
-  border-left: 4px solid var(--duel-primary);
+  background: var(--panel-bg);
+  border-left: 3px solid var(--neon-cyan);
   color: #fff;
   z-index: 9999;
   opacity: 0;
   transform: translateX(120%);
-  transition:
-    transform 0.4s var(--duel-spring),
-    opacity 0.3s;
+  transition: transform 0.4s var(--spring), opacity 0.3s;
   backdrop-filter: blur(20px);
-  box-shadow:
-    0 8px 32px rgba(0, 0, 0, 0.5),
-    0 0 20px rgba(0, 212, 255, 0.1);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.6), 0 0 20px rgba(0,240,255,0.06);
+  font-size: 12px;
 }
-
-.duel-toast.toast--visible {
-  opacity: 1;
-  transform: translateX(0);
-}
-
-.duel-toast.toast--hiding {
-  opacity: 0;
-  transform: translateX(120%);
-}
-
-/* Toast Types */
-.duel-toast--info    { border-left-color: var(--duel-primary); }
-.duel-toast--success { border-left-color: var(--duel-success); }
-.duel-toast--warning { border-left-color: var(--duel-secondary); }
-.duel-toast--error   { border-left-color: var(--duel-danger); }
-
-.toast-icon {
-  font-size: 1.2rem;
-  flex-shrink: 0;
-  margin-top: 1px;
-}
-
-.toast-content {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-}
-
-.toast-title {
-  font-size: 13px;
-  font-weight: 700;
-  color: #fff;
-  letter-spacing: 0.3px;
-}
-
-.toast-message {
-  font-size: 11px;
-  color: rgba(255, 255, 255, 0.6);
-  line-height: 1.4;
-}
-
+.duel-toast.toast--visible { opacity: 1; transform: translateX(0); }
+.duel-toast.toast--hiding { opacity: 0; transform: translateX(120%); }
+.duel-toast--success { border-left-color: var(--neon-green); }
+.duel-toast--warning { border-left-color: var(--neon-yellow); }
+.duel-toast--error   { border-left-color: var(--neon-red); }
+.toast-title { font-weight: 700; color: #fff; }
+.toast-message { font-size: 10px; color: rgba(255,255,255,0.5); }
 .toast-close {
-  background: none;
-  border: none;
-  color: rgba(255, 255, 255, 0.4);
-  cursor: pointer;
-  font-size: 14px;
-  padding: 0;
-  line-height: 1;
-  transition: color 0.2s;
+  background: none; border: none;
+  color: rgba(255,255,255,0.3);
+  cursor: pointer; font-size: 14px;
+  padding: 0; line-height: 1;
   flex-shrink: 0;
 }
-
 .toast-close:hover { color: #fff; }
 
-
-/* ============================================================
-   🔧 SECTION 7: DUEL OVERLAY — MAIN PANEL
-   ============================================================ */
-
-/* ── NEW ARENA REDESIGN ── */
-
-/* Overlay — topbar এর নিচে শুরু */
 .duel-overlay {
   position: fixed;
-  top: 48px;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  overflow-y: auto !important;
-  overflow-x: hidden;
-  -webkit-overflow-scrolling: touch; /* iOS scroll fix */
-  padding: 12px 10px 40px;
+  top: 48px; left: 0; right: 0; bottom: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   z-index: 9000;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 20px 20px 40px;
+  background: rgba(6, 6, 18, 0.97);
 }
-
-/* Arena panel */
 .duel-arena {
   width: 100%;
-  max-width: 780px;
-  background: rgba(6, 10, 30, 0.98);
+  max-width: 800px;
+  background: linear-gradient(160deg, #0c0c1e, #060612);
   position: relative;
-  border-radius: 18px;
-  border: 1px solid rgba(0, 212, 255, 0.2);
+  border-radius: 20px;
+  border: 1px solid rgba(0,240,255,0.15);
   overflow: hidden;
-  position: relative;
-  box-shadow: 0 30px 80px rgba(0,0,0,0.7), 0 0 60px rgba(0,212,255,0.06);
+  box-shadow: 0 40px 100px rgba(0,0,0,0.8), 0 0 80px rgba(0,240,255,0.04);
 }
-
-/* Header */
-.duel-header {
-  padding: 18px 20px 14px;
-  text-align: center;
-  border-bottom: 1px solid rgba(255,255,255,0.06);
-  background: linear-gradient(180deg, rgba(0,212,255,0.06) 0%, transparent 100%);
-  position: relative;
-}
-
-.duel-header::before {
+.duel-arena::before {
   content: '';
   position: absolute;
   top: 0; left: 0; right: 0;
   height: 2px;
-  background: linear-gradient(90deg, transparent, #00d4ff, #ffd700, #ff3f3f, transparent);
+  background: linear-gradient(90deg, transparent, var(--neon-cyan), var(--neon-magenta), transparent);
 }
-
-.duel-header__text {
-  font-family: 'Bebas Neue', 'Orbitron', sans-serif;
-  font-size: clamp(1.2rem, 4vw, 1.8rem);
-  letter-spacing: 5px;
-  color: #fff;
-  text-shadow: 0 0 20px rgba(0,212,255,0.5);
-}
-
-/* Fighters grid */
-.duel-fighters {
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  gap: 0;
-  padding: 20px 16px;
-  align-items: center;
-  background: linear-gradient(180deg, rgba(0,0,0,0.2) 0%, transparent 100%);
-}
-
-/* Fighter card */
-.duel-fighter {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-}
-
-/* Poster */
-.duel-fighter__poster {
-  width: 110px;
-  height: 150px;
-  border-radius: 12px;
-  overflow: hidden;
-  position: relative;
-  flex-shrink: 0;
-}
-
-.duel-fighter__poster img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.duel-fighter--p1 .duel-fighter__poster {
-  box-shadow: 0 0 0 2px #00d4ff, 0 0 20px rgba(0,212,255,0.5), 0 0 50px rgba(0,212,255,0.2);
-}
-
-.duel-fighter--p2 .duel-fighter__poster {
-  box-shadow: 0 0 0 2px #ff3f3f, 0 0 20px rgba(255,63,63,0.5), 0 0 50px rgba(255,63,63,0.2);
-}
-
-/* Title + genre */
-.duel-fighter__info {
-  text-align: center;
-}
-
-.duel-fighter__name {
-  font-family: 'Rajdhani', sans-serif;
-  font-size: clamp(0.85rem, 2.5vw, 1.1rem);
-  font-weight: 700;
-  color: #fff;
-  line-height: 1.3;
-  max-width: 140px;
-  word-break: break-word;
-}
-
-.duel-fighter__genre {
-  font-size: 10px;
-  color: rgba(255,255,255,0.4);
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  margin-top: 3px;
-}
-
-/* ==========================================
-   ⚡ POWER PREVIEW - FIXED & RESPONSIVE
-   ========================================== */
-.duel-fighter__power-preview {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  padding: 6px 14px;
-  border-radius: 8px;
-  min-width: 75px;
-  box-sizing: border-box;
-  transition: all 0.3s ease;
-}
-
-/* পাওয়ার টেক্সটের ছোট লেবেল (SPAN) */
-.duel-fighter__power-preview span {
-  font-size: 9px;
-  letter-spacing: 1px;
-  color: rgba(255, 255, 255, 0.5);
-  text-transform: uppercase;
-  margin-bottom: 2px;
-  line-height: 1;
-}
-
-/* পাওয়ারের সংখ্যা/মান (STRONG) */
-.duel-fighter__power-preview strong {
-  font-family: 'Bebas Neue', 'Orbitron', sans-serif;
-  font-size: 1.4rem;
-  letter-spacing: 1.5px;
-  line-height: 1.1;
-  margin-top: 2px;
-}
-
-/* Player 1 (Blue) Theme */
-.duel-fighter__power-preview--p1 {
-  background: rgba(0, 212, 255, 0.08);
-  border: 1px solid rgba(0, 212, 255, 0.25);
-  box-shadow: inset 0 0 8px rgba(0, 212, 255, 0.05);
-}
-.duel-fighter__power-preview--p1 strong { 
-  color: #00d4ff; 
-  text-shadow: 0 0 8px rgba(0, 212, 255, 0.3);
-}
-
-/* Player 2 (Red) Theme */
-.duel-fighter__power-preview--p2 {
-  background: rgba(255, 63, 63, 0.08);
-  border: 1px solid rgba(255, 63, 63, 0.25);
-  box-shadow: inset 0 0 8px rgba(255, 63, 63, 0.05);
-}
-.duel-fighter__power-preview--p2 strong { 
-  color: #ff3f3f; 
-  text-shadow: 0 0 8px rgba(255, 63, 63, 0.3);
-}
-
-/* 📱 ছোট মোবাইল স্ক্রিনের জন্য রেসপন্সিভ ফিক্স (Media Query) */
-@media (max-width: 480px) {
-  .duel-fighter__power-preview {
-    min-width: 65px !important; /* মোবাইলে চওড়া একটু কমাবে যেন স্ক্রিন থেকে বের না হয় */
-    padding: 4px 10px !important; /* প্যাডিং কমাবে */
-  }
-  
-  .duel-fighter__power-preview strong {
-    font-size: 1.1rem !important; /* ফন্ট সাইজ কিছুটা ছোট করবে যেন ওভারল্যাপ না হয় */
-    letter-spacing: 1px !important;
-  }
-  
-  .duel-fighter__power-preview span {
-    font-size: 8px !important; /* লেবেল আরও ছোট করবে */
-  }
-}
-
-.duel-fighter__power-preview--p2 strong { color: #ff3f3f; }
-
-/* Label */
-.duel-fighter__label {
-  font-family: 'Bebas Neue', 'Orbitron', sans-serif;
-  font-size: 11px;
-  letter-spacing: 2px;
-  padding: 4px 12px;
-  border-radius: 4px;
-  clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%);
-}
-
-.duel-fighter__label--p1 {
-  background: rgba(0,212,255,0.15);
-  color: #00d4ff;
-  border: 1px solid rgba(0,212,255,0.4);
-}
-
-.duel-fighter__label--p2 {
-  background: rgba(255,63,63,0.15);
-  color: #ff3f3f;
-  border: 1px solid rgba(255,63,63,0.4);
-}
-
-/* VS */
-.duel-vs-center {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  padding: 0 8px;
-  z-index: 2;
-}
-
-.duel-vs__ring {
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  background: radial-gradient(circle, #1a1a3e, #0d0d2b);
-  border: 2px solid #ffd700;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 0 20px rgba(255,215,0,0.4);
-  animation: vs-pulse 2s ease-in-out infinite;
-}
-
-.duel-vs__text {
-  font-family: 'Bebas Neue', 'Orbitron', sans-serif;
-  font-size: 1.3rem;
-  letter-spacing: 2px;
-  background: linear-gradient(135deg, #00d4ff, #ffd700, #ff3f3f);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-/* Victory/Defeat */
-.fighter--victory .duel-fighter__poster {
-  box-shadow: 0 0 0 3px #ffd700, 0 0 30px rgba(255,215,0,0.6);
-}
-
-.fighter--defeat {
-  opacity: 0.5;
-  filter: grayscale(0.6);
-}
-
-.fighter--defeat .duel-fighter__poster::after {
-  content: 'DEFEATED';
-  position: absolute;
-  top: 50%; left: 50%;
-  transform: translate(-50%, -50%) rotate(-15deg);
-  font-family: 'Bebas Neue', 'Orbitron', sans-serif;
-  font-size: 0.8rem;
-  letter-spacing: 3px;
-  color: #ff3f3f;
-  border: 2px solid #ff3f3f;
-  padding: 4px 10px;
-  border-radius: 4px;
-  background: rgba(255,63,63,0.1);
-  white-space: nowrap;
-  z-index: 5;
-}
-
-.fighter--victory::before {
-  content: '👑';
-  position: absolute;
-  top: -28px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 1.4rem;
-  animation: crown-float 2s ease-in-out infinite;
-}
-
-/* ── MOBILE ── */
-@media (max-width: 600px) {
-  .duel-overlay { padding: 10px 8px 24px; }
-
-  .duel-fighters {
-    padding: 14px 8px;
-    gap: 4px;
-  }
-
-  .duel-fighter__poster {
-    width: 80px;
-    height: 108px;
-    border-radius: 8px;
-  }
-
-  .duel-fighter__name {
-    font-size: 0.78rem;
-    max-width: 100px;
-  }
-
-  .duel-fighter__genre { font-size: 9px; }
-
-  .duel-fighter__power-preview {
-    padding: 5px 10px;
-    min-width: 65px;
-  }
-
-  .duel-fighter__power-preview strong { font-size: 1.1rem; }
-
-  .duel-vs__ring { width: 46px; height: 46px; }
-  .duel-vs__text { font-size: 1rem; }
-
-  .duel-header__text { font-size: 1rem; letter-spacing: 3px; }
-
-  .duel-fighter__label { font-size: 9px; padding: 3px 8px; }
-}
-
-@media (max-width: 380px) {
-  .duel-fighter__poster { width: 65px; height: 88px; }
-  .duel-fighter__name { font-size: 0.7rem; max-width: 80px; }
-  .duel-vs__ring { width: 38px; height: 38px; }
-  .duel-vs__text { font-size: 0.85rem; }
-}
-
-
-/* ============================================================
-   🔧 SECTION 8: LIGHTNING BACKGROUND EFFECTS
-   ============================================================ */
-
-.duel-lightning-left,
-.duel-lightning-right {
-  position: absolute;
-  top: 0;
-  width: 40%;
-  height: 100%;
-  opacity: 0.4;
-  pointer-events: none;
-}
-
-.duel-lightning-left {
-  left: 0;
-  background: radial-gradient(
-    ellipse at left center,
-    rgba(0, 212, 255, 0.2) 0%,
-    transparent 70%
-  );
-  animation: lightning-pulse-left 3s ease-in-out infinite;
-}
-
-.duel-lightning-right {
-  right: 0;
-  background: radial-gradient(
-    ellipse at right center,
-    rgba(255, 107, 107, 0.2) 0%,
-    transparent 70%
-  );
-  animation: lightning-pulse-right 3s ease-in-out infinite;
-}
-
-@keyframes lightning-pulse-left {
-  0%, 100% { opacity: 0.2; }
-  50%       { opacity: 0.5; }
-}
-
-@keyframes lightning-pulse-right {
-  0%, 100% { opacity: 0.2; }
-  50%       { opacity: 0.5; }
-}
-
-/* Floating Particles */
-.duel-particle {
-  position: absolute;
-  bottom: -10px;
-  border-radius: 50%;
-  background: var(--duel-primary);
-  opacity: 0;
-  animation: particle-float linear infinite;
-}
-
-@keyframes particle-float {
-  0%   { bottom: -10px; opacity: 0; }
-  10%  { opacity: 0.8; }
-  90%  { opacity: 0.4; }
-  100% { bottom: 110%; opacity: 0; }
-}
-
-/* Screen Flash */
-.duel-screen-flash {
-  position: absolute;
-  inset: 0;
-  background: rgba(0, 212, 255, 0.3);
-  border-radius: 20px;
-  opacity: 0;
-  pointer-events: none;
-  z-index: 100;
-}
-
-.duel-screen-flash.flash--active {
-  animation: screen-flash 0.4s ease-out;
-}
-
-@keyframes screen-flash {
-  0%   { opacity: 1; }
-  100% { opacity: 0; }
-}
-
-
-/* ============================================================
-   🔧 SECTION 9: CLOSE BUTTON
-   ============================================================ */
-
-.duel-close-btn {
-  position: absolute;
-  top: 16px;
-  right: 16px;
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  background: rgba(255, 255, 255, 0.05);
-  color: rgba(255, 255, 255, 0.6);
-  font-size: 16px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 10;
-  transition: all 0.2s;
-}
-
-.duel-close-btn:hover {
-  border-color: var(--duel-danger);
-  color: var(--duel-danger);
-  background: rgba(255, 71, 87, 0.1);
-  box-shadow: 0 0 15px rgba(255, 71, 87, 0.3);
-  transform: rotate(90deg) scale(1.1);
-}
-
-
-/* ============================================================
-   🔧 SECTION 10: ARENA HEADER
-   ============================================================ */
 
 .duel-header {
+  padding: 20px 20px 16px;
   text-align: center;
-  margin-bottom: 28px;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
 }
-
 .duel-header__title {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 12px;
-  margin-bottom: 6px;
 }
-
-.duel-header__icon {
-  font-size: 1.5rem;
-  animation: icon-float 2s ease-in-out infinite alternate;
-}
-
-.duel-header__icon:last-child {
-  animation-direction: alternate-reverse;
-}
-
-@keyframes icon-float {
-  from { transform: translateY(0) rotate(-5deg); }
-  to   { transform: translateY(-6px) rotate(5deg); }
-}
-
 .duel-header__text {
-  font-size: clamp(1.2rem, 4vw, 1.8rem);
+  font-family: 'Orbitron', sans-serif;
+  font-size: clamp(1rem, 3.5vw, 1.6rem);
   font-weight: 900;
-  letter-spacing: 3px;
+  letter-spacing: 6px;
   text-transform: uppercase;
-  background: linear-gradient(135deg, var(--duel-primary), var(--duel-secondary));
+  background: linear-gradient(135deg, var(--neon-cyan), var(--neon-magenta));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  margin: 0;
+  text-shadow: none;
+  filter: drop-shadow(0 0 20px rgba(0,240,255,0.3));
 }
 
-.duel-header__subtitle {
-  font-size: 11px;
-  letter-spacing: 4px;
-  text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.4);
-  margin: 0;
+.duel-close-btn {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.1);
+  background: rgba(255,255,255,0.03);
+  color: rgba(255,255,255,0.4);
+  font-size: 15px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  transition: all 0.25s;
+}
+.duel-close-btn:hover {
+  border-color: var(--neon-red);
+  color: var(--neon-red);
+  background: rgba(255,34,85,0.08);
+  box-shadow: 0 0 15px rgba(255,34,85,0.2);
+  transform: rotate(90deg) scale(1.1);
 }
 
-
-/* ============================================================
-   🔧 SECTION 11: FIGHTER CARDS
-   ============================================================ */
-
-/* Duel Fighters - Balanced Layout */
 .duel-fighters {
   display: grid;
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  justify-content: center;
-  gap: 40px;
-  margin: 30px 0;
-  min-height: 280px; /* এই লাইনটা গুরুত্বপূর্ণ */
+  padding: 24px 20px;
+  gap: 16px;
+  background: radial-gradient(ellipse at center, rgba(0,240,255,0.03) 0%, transparent 60%);
 }
-
-/* দুই পাশের কার্ড সমানভাবে দেখানো */
 .duel-fighter {
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: 100%;
-  max-width: 200px;
-  opacity: 1 !important; /* যেন কখনো হাইড না হয় */
+  gap: 10px;
+  padding: 16px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,0.04);
+  background: rgba(255,255,255,0.02);
+  transition: all 0.3s;
+  max-width: 100%;
+  overflow: visible;
 }
-
-/* VS এর চারপাশে স্পেস */
-.duel-vs-center {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-width: 100px;
+.duel-fighter__power-preview {
+  flex-shrink: 0;
 }
-
-/* যদি কোনো পাশ খালি থাকে তাহলে এই স্টাইল */
-.duel-fighter:empty {
-  visibility: hidden;
-}
-.duel-fighter--p1 {
-  background: linear-gradient(160deg, rgba(0, 80, 160, 0.3), transparent);
-  border: 1px solid rgba(0, 212, 255, 0.2);
-  animation-delay: 0.2s;
-}
-
-.duel-fighter--p2 {
-  background: linear-gradient(200deg, rgba(160, 0, 0, 0.3), transparent);
-  border: 1px solid rgba(255, 107, 107, 0.2);
-  animation-delay: 0.4s;
-}
-
-@keyframes fighter-appear {
-  from { opacity: 0; transform: scale(0.85) translateY(20px); }
-  to   { opacity: 1; transform: scale(1) translateY(0); }
-}
-
-/* Player Label */
+.duel-fighter--p1 { border-color: rgba(0,240,255,0.12); background: rgba(0,240,255,0.03); }
+.duel-fighter--p2 { border-color: rgba(255,0,170,0.12); background: rgba(255,0,170,0.03); }
 .duel-fighter__label {
-  font-size: 10px;
-  font-weight: 900;
-  letter-spacing: 2px;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 3px;
   text-transform: uppercase;
-  padding: 4px 12px;
-  border-radius: 20px;
+  padding: 3px 12px;
+  border-radius: 4px;
 }
-
 .duel-fighter--p1 .duel-fighter__label {
-  color: var(--duel-p1-color);
-  background: rgba(0, 212, 255, 0.1);
-  border: 1px solid rgba(0, 212, 255, 0.3);
+  color: var(--neon-cyan);
+  border: 1px solid rgba(0,240,255,0.25);
+  background: rgba(0,240,255,0.06);
 }
-
 .duel-fighter--p2 .duel-fighter__label {
-  color: var(--duel-p2-color);
-  background: rgba(255, 107, 107, 0.1);
-  border: 1px solid rgba(255, 107, 107, 0.3);
+  color: var(--neon-magenta);
+  border: 1px solid rgba(255,0,170,0.25);
+  background: rgba(255,0,170,0.06);
 }
-
-/* Poster Image */
 .duel-fighter__poster {
-  width: 90px;
-  height: 120px;
+  width: 100px;
+  height: 140px;
   border-radius: 10px;
   overflow: hidden;
   position: relative;
   flex-shrink: 0;
 }
-
 .duel-fighter__poster img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.4s;
 }
-
 .duel-fighter--p1 .duel-fighter__poster {
-  border: 2px solid rgba(0, 212, 255, 0.4);
-  box-shadow: 0 0 15px rgba(0, 212, 255, 0.2);
+  border: 2px solid rgba(0,240,255,0.35);
+  box-shadow: 0 0 15px rgba(0,240,255,0.15);
 }
-
 .duel-fighter--p2 .duel-fighter__poster {
-  border: 2px solid rgba(255, 107, 107, 0.4);
-  box-shadow: 0 0 15px rgba(255, 107, 107, 0.2);
+  border: 2px solid rgba(255,0,170,0.35);
+  box-shadow: 0 0 15px rgba(255,0,170,0.15);
 }
-
-.duel-fighter__poster-fallback {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 3rem;
-  background: rgba(255, 255, 255, 0.05);
-}
-
-/* Anime Name */
 .duel-fighter__name {
-  font-size: 13px;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: clamp(0.8rem, 2vw, 1rem);
   font-weight: 700;
-  text-align: center;
   color: #fff;
-  margin: 0;
-  line-height: 1.3;
-  text-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
-  max-width: 140px;
-}
-
-.duel-fighter--p2 .duel-fighter__name {
-  text-shadow: 0 0 10px rgba(255, 107, 107, 0.3);
-}
-
-.duel-fighter__genre {
-  font-size: 10px;
-  color: rgba(255, 255, 255, 0.4);
   text-align: center;
-  letter-spacing: 0.5px;
+  line-height: 1.2;
+  max-width: 130px;
+  word-break: break-word;
+}
+.duel-fighter--p1 .duel-fighter__name { text-shadow: 0 0 10px rgba(0,240,255,0.2); }
+.duel-fighter--p2 .duel-fighter__name { text-shadow: 0 0 10px rgba(255,0,170,0.2); }
+.duel-fighter__genre {
+  font-size: 9px;
+  color: rgba(255,255,255,0.3);
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
-/* Power Preview */
 .duel-fighter__power-preview {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2px;
-  padding: 8px 14px;
-  border-radius: 10px;
-  background: rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  min-width: 100px;
-}
-
-.duel-fighter__power-preview span {
-  font-size: 9px;
-  letter-spacing: 1px;
-  color: rgba(255, 255, 255, 0.4);
-  text-transform: uppercase;
-}
-
-.duel-fighter__power-preview strong {
-  font-size: 1.2rem;
-  font-weight: 900;
-}
-
-.duel-fighter--p1 .duel-fighter__power-preview strong {
-  color: var(--duel-p1-color);
-  text-shadow: var(--duel-glow-blue);
-}
-
-.duel-fighter--p2 .duel-fighter__power-preview strong {
-  color: var(--duel-p2-color);
-  text-shadow: var(--duel-glow-red);
-}
-
-/* Clash Animations */
-.fighter--clash-in-left {
-  animation: clash-slide-left 0.6s var(--duel-spring) forwards !important;
-}
-
-.fighter--clash-in-right {
-  animation: clash-slide-right 0.6s var(--duel-spring) forwards !important;
-}
-
-@keyframes clash-slide-left {
-  0%   { transform: scale(1) translateX(0); }
-  60%  { transform: scale(1.08) translateX(20px); }
-  100% { transform: scale(1) translateX(0); }
-}
-
-@keyframes clash-slide-right {
-  0%   { transform: scale(1) translateX(0); }
-  60%  { transform: scale(1.08) translateX(-20px); }
-  100% { transform: scale(1) translateX(0); }
-}
-
-.fighter--clash-impact {
-  animation: clash-impact 0.3s ease-out !important;
-}
-
-@keyframes clash-impact {
-  0%, 100% { transform: scale(1); }
-  50%       { transform: scale(0.95) rotate(-1deg); filter: brightness(1.5); }
-}
-
-/* Victory / Defeat states */
-/* ============================================================
-   🔧 FIGHTER STATES — Victory & Defeat
-   ============================================================ */
-
-/* Victory state — Winner */
-.fighter--victory {
-  animation: fighter-victory 0.8s var(--duel-spring) !important;
-  border-color: var(--duel-secondary) !important;
-  box-shadow: 
-    0 0 30px rgba(255, 204, 0, 0.4),
-    inset 0 0 20px rgba(255, 204, 0, 0.1) !important;
-  transform: scale(1.05) !important;
-  z-index: 10;
-  position: relative;
-}
-
-/* ⭐ Victory crown floating effect */
-.fighter--victory::before {
-  content: '👑';
-  position: absolute;
-  top: -25px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 1.5rem;
-  animation: crown-float 1.5s ease-in-out infinite;
-  z-index: 20;
-}
-
-@keyframes crown-float {
-  0%, 100% { transform: translateX(-50%) translateY(0); }
-  50%      { transform: translateX(-50%) translateY(-5px); }
-}
-
-/* 🔻 Defeat state — Loser (VS এর পাশে থাকবে কিন্তু dimmed) */
-.fighter--defeat {
-  opacity: 0.55;                          /* ⬅️ Visible রাখো */
-  filter: grayscale(70%) brightness(0.7); /* Faded look */
-  transform: scale(0.92) !important;
-  transition: all 0.8s var(--duel-transition) !important;
-  position: relative;
-  /* ⬇️ display:none বা hide করবে না */
-}
-
-/* 💔 Defeat overlay effect */
-.fighter--defeat::after {
-  content: 'DEFEATED';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%) rotate(-15deg);
-  font-size: 0.9rem;
-  font-weight: 900;
-  letter-spacing: 3px;
-  color: var(--duel-danger);
-  background: rgba(0, 0, 0, 0.75);
-  padding: 4px 16px;
-  border: 2px solid var(--duel-danger);
+  justify-content: center;
+  padding: 4px 10px;
   border-radius: 6px;
-  text-shadow: 0 0 10px var(--duel-danger);
-  box-shadow: 0 0 20px rgba(255, 71, 87, 0.5);
-  pointer-events: none;
-  z-index: 15;
-  animation: defeat-stamp 0.6s var(--duel-spring) 0.3s both;
+  min-width: 0;
+  width: 100%;
+  max-width: 110px;
+  box-sizing: border-box;
 }
-
-@keyframes defeat-stamp {
-  0%   { transform: translate(-50%, -50%) rotate(-15deg) scale(2); opacity: 0; }
-  100% { transform: translate(-50%, -50%) rotate(-15deg) scale(1); opacity: 1; }
+.duel-fighter__power-preview span {
+  font-size: 7px;
+  letter-spacing: 1px;
+  color: rgba(255,255,255,0.35);
+  text-transform: uppercase;
+  line-height: 1;
 }
-
-/* 💀 Defeat poster effect */
-.fighter--defeat .duel-fighter__poster {
-  border-color: rgba(255, 71, 87, 0.3) !important;
-  box-shadow: 0 0 10px rgba(255, 71, 87, 0.2) !important;
+.duel-fighter__power-preview strong {
+  font-family: 'Rajdhani', 'Orbitron', sans-serif;
+  font-size: 1.1rem;
+  letter-spacing: 0;
+  line-height: 1.1;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
-
-/* Defeat name color */
-.fighter--defeat .duel-fighter__name {
-  color: rgba(255, 255, 255, 0.5);
-  text-decoration: line-through;
-  text-decoration-color: rgba(255, 71, 87, 0.5);
+.duel-fighter--p1 .duel-fighter__power-preview {
+  border: 1px solid rgba(0,240,255,0.15);
+  background: rgba(0,240,255,0.04);
 }
-
-/* ============================================================
-   🔧 SECTION 12: VS CENTER
-   ============================================================ */
+.duel-fighter--p1 .duel-fighter__power-preview strong {
+  color: var(--neon-cyan);
+  text-shadow: 0 0 8px rgba(0,240,255,0.3);
+}
+.duel-fighter--p2 .duel-fighter__power-preview {
+  border: 1px solid rgba(255,0,170,0.15);
+  background: rgba(255,0,170,0.04);
+}
+.duel-fighter--p2 .duel-fighter__power-preview strong {
+  color: var(--neon-magenta);
+  text-shadow: 0 0 8px rgba(255,0,170,0.3);
+}
 
 .duel-vs-center {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
-  position: relative;
-  z-index: 5;
+  gap: 6px;
+  z-index: 2;
 }
-
 .duel-vs__ring {
-  width: 70px;
-  height: 70px;
+  width: 64px;
+  height: 64px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(0, 0, 0, 0.5);
-  border: 2px solid var(--duel-border);
+  background: rgba(0,0,0,0.5);
+  border: 2px solid rgba(255,255,255,0.08);
   position: relative;
   transition: all 0.4s;
 }
-
-/* Rotating ring effect */
 .duel-vs__ring::before {
   content: '';
   position: absolute;
-  inset: -4px;
+  inset: -3px;
   border-radius: 50%;
   border: 2px solid transparent;
-  border-top-color: var(--duel-primary);
-  border-right-color: var(--duel-secondary);
-  animation: vs-ring-spin 2s linear infinite;
+  border-top-color: var(--neon-cyan);
+  border-right-color: var(--neon-magenta);
+  animation: vs-spin 2s linear infinite;
 }
-
-@keyframes vs-ring-spin {
-  to { transform: rotate(360deg); }
-}
-
+@keyframes vs-spin { to { transform: rotate(360deg); } }
 .duel-vs__text {
-  font-size: 1.4rem;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1.2rem;
   font-weight: 900;
   letter-spacing: 2px;
-  background: linear-gradient(135deg, var(--duel-primary), var(--duel-secondary));
+  background: linear-gradient(135deg, var(--neon-cyan), var(--neon-magenta));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
-
-/* VS Pulse animation */
-.vs--pulse .duel-vs__ring {
-  animation: vs-pulse 0.5s ease-in-out;
-}
-
+.vs--pulse .duel-vs__ring { animation: vs-pulse 0.5s ease-in-out; }
 @keyframes vs-pulse {
   0%   { transform: scale(1); }
-  50%  { transform: scale(1.4); border-color: var(--duel-primary); }
+  50%  { transform: scale(1.5); border-color: var(--neon-cyan); }
   100% { transform: scale(1); }
 }
-
 .vs--impact .duel-vs__ring {
-  border-color: var(--duel-secondary);
-  box-shadow: var(--duel-glow-gold), 0 0 40px rgba(255, 204, 0, 0.4);
+  border-color: var(--neon-yellow);
+  box-shadow: 0 0 30px rgba(255,238,0,0.4);
 }
-
-/* Spark Effects */
 .duel-vs__spark {
   position: absolute;
   inset: 0;
   pointer-events: none;
 }
-
 .spark {
   position: absolute;
-  width: 3px;
-  height: 3px;
+  width: 3px; height: 3px;
   border-radius: 50%;
-  background: var(--duel-primary);
+  background: var(--neon-cyan);
   opacity: 0;
 }
-
-.spark--1 { top: 0;   left: 50%; transform: translateX(-50%); }
+.spark--1 { top: 0; left: 50%; transform: translateX(-50%); }
 .spark--2 { bottom: 0; left: 50%; transform: translateX(-50%); }
-.spark--3 { left: 0;   top: 50%;  transform: translateY(-50%); }
-.spark--4 { right: 0;  top: 50%;  transform: translateY(-50%); }
-
-.spark--active .spark {
-  animation: spark-fly 0.6s ease-out forwards;
-}
-
+.spark--3 { left: 0; top: 50%; transform: translateY(-50%); }
+.spark--4 { right: 0; top: 50%; transform: translateY(-50%); }
+.spark--active .spark { animation: spark-fly 0.6s ease-out forwards; }
 .spark--active .spark--1 { animation-delay: 0s; }
 .spark--active .spark--2 { animation-delay: 0.1s; }
 .spark--active .spark--3 { animation-delay: 0.05s; }
 .spark--active .spark--4 { animation-delay: 0.15s; }
-
 @keyframes spark-fly {
-  0%   { transform: translate(-50%, -50%) scale(1); opacity: 1; }
-  100% {
-    transform:
-      translate(
-        calc(-50% + var(--spark-dx, 30px)),
-        calc(-50% + var(--spark-dy, -30px))
-      )
-      scale(0);
-    opacity: 0;
-  }
+  0%   { transform: translate(-50%,-50%) scale(1); opacity: 1; }
+  100% { transform: translate(calc(-50% + 40px), calc(-50% - 40px)) scale(0); opacity: 0; }
 }
 
-.duel-vs__subtitle {
-  font-size: 8px;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.3);
-  white-space: nowrap;
+.fighter--clash-in-left { animation: clash-left 0.5s var(--spring) forwards !important; }
+.fighter--clash-in-right { animation: clash-right 0.5s var(--spring) forwards !important; }
+@keyframes clash-left {
+  0%   { transform: translateX(0); }
+  60%  { transform: translateX(18px) scale(1.05); }
+  100% { transform: translateX(0); }
+}
+@keyframes clash-right {
+  0%   { transform: translateX(0); }
+  60%  { transform: translateX(-18px) scale(1.05); }
+  100% { transform: translateX(0); }
+}
+.fighter--clash-impact { animation: clash-impact 0.3s ease-out !important; }
+@keyframes clash-impact {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(0.93) rotate(-1deg); filter: brightness(1.6); }
 }
 
-
-/* ============================================================
-   🔧 SECTION 13: STATS COMPARISON SECTION
-   ============================================================ */
+.fighter--victory {
+  animation: fighter-win 0.8s var(--spring) !important;
+  border-color: var(--neon-yellow) !important;
+  box-shadow: 0 0 30px rgba(255,238,0,0.3), inset 0 0 20px rgba(255,238,0,0.06) !important;
+  transform: scale(1.05) !important;
+  z-index: 10;
+  position: relative;
+}
+.fighter--victory::before {
+  content: '👑';
+  position: absolute;
+  top: -22px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 1.4rem;
+  animation: crown-float 1.5s ease-in-out infinite;
+  z-index: 20;
+}
+@keyframes crown-float { 0%,100% { transform: translateX(-50%) translateY(0); } 50% { transform: translateX(-50%) translateY(-5px); } }
+.fighter--victory .duel-fighter__poster {
+  box-shadow: 0 0 0 3px var(--neon-yellow), 0 0 30px rgba(255,238,0,0.5);
+}
+.fighter--defeat {
+  opacity: 0.5;
+  filter: grayscale(70%) brightness(0.65);
+  transform: scale(0.92) !important;
+  transition: all 0.8s var(--smooth) !important;
+  position: relative;
+}
+.fighter--defeat::after {
+  content: 'DEFEATED';
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%,-50%) rotate(-15deg);
+  font-size: 0.85rem;
+  font-weight: 900;
+  letter-spacing: 3px;
+  color: var(--neon-red);
+  background: rgba(0,0,0,0.75);
+  padding: 4px 14px;
+  border: 2px solid var(--neon-red);
+  border-radius: 6px;
+  text-shadow: 0 0 10px var(--neon-red);
+  box-shadow: 0 0 20px rgba(255,34,85,0.4);
+  pointer-events: none;
+  z-index: 15;
+  animation: defeat-stamp 0.6s var(--spring) 0.3s both;
+}
+@keyframes defeat-stamp {
+  0%   { transform: translate(-50%,-50%) rotate(-15deg) scale(2); opacity: 0; }
+  100% { transform: translate(-50%,-50%) rotate(-15deg) scale(1); opacity: 1; }
+}
+.fighter--defeat .duel-fighter__name {
+  color: rgba(255,255,255,0.4);
+  text-decoration: line-through;
+  text-decoration-color: rgba(255,34,85,0.4);
+}
 
 .duel-stats-section {
   opacity: 0;
   transform: translateY(20px);
-  transition:
-    opacity 0.6s var(--duel-transition),
-    transform 0.6s var(--duel-spring);
-  border-top: 1px solid var(--duel-border);
-  padding-top: 24px;
-  margin-bottom: 20px;
+  transition: opacity 0.6s var(--smooth), transform 0.6s var(--spring);
+  border-top: 1px solid rgba(255,255,255,0.04);
+  padding: 24px 20px 16px;
   pointer-events: none;
 }
-
 .duel-stats-section.stats--visible {
   opacity: 1;
   transform: translateY(0);
   pointer-events: all;
 }
-
 .duel-stats__heading {
   text-align: center;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 800;
-  letter-spacing: 3px;
+  letter-spacing: 4px;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.5);
+  color: rgba(255,255,255,0.3);
   margin: 0 0 20px;
 }
-
-/* Stat Row */
 .duel-stat-row {
   display: grid;
-  grid-template-columns: 1fr 120px 1fr;
+  grid-template-columns: 1fr 100px 1fr;
   gap: 12px;
   align-items: center;
-  margin-bottom: 16px;
+  margin-bottom: 14px;
 }
-
-/* Label center */
 .duel-stat__label {
   text-align: center;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2px;
-  font-size: 12px;
-  color: rgba(255, 255, 255, 0.7);
+  gap: 1px;
+  font-size: 11px;
+  color: rgba(255,255,255,0.6);
   font-weight: 700;
 }
-
-.duel-stat__label small {
-  font-size: 9px;
-  color: rgba(255, 255, 255, 0.3);
-}
-
-/* Bar Wrapper */
+.duel-stat__label small { font-size: 8px; color: rgba(255,255,255,0.2); }
 .duel-stat__bar-wrap {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
-
-.duel-stat__bar-wrap--left {
-  flex-direction: row-reverse; /* P1 bar বামে থেকে ডানে যাবে */
-}
-
-.duel-stat__bar-wrap--right {
-  flex-direction: row; /* P2 bar ডানে থেকে বামে যাবে */
-}
-
-/* Progress Bar */
+.duel-stat__bar-wrap--left { flex-direction: row-reverse; }
 .duel-stat__bar {
   flex: 1;
-  height: 10px;
+  height: 8px;
   border-radius: 10px;
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255,255,255,0.05);
   overflow: hidden;
-  position: relative;
 }
-
 .duel-stat__fill {
   height: 100%;
   border-radius: 10px;
   width: 0%;
-  position: relative;
 }
-
-/* P1 Bar Color */
 .duel-stat__bar--p1 .duel-stat__fill {
-  background: linear-gradient(90deg, rgba(0, 212, 255, 0.4), var(--duel-p1-color));
-  box-shadow: 0 0 8px rgba(0, 212, 255, 0.5);
-  float: right; /* বামে থেকে শুরু */
+  background: linear-gradient(90deg, rgba(0,240,255,0.3), var(--neon-cyan));
+  box-shadow: 0 0 6px rgba(0,240,255,0.4);
+  float: right;
 }
-
-/* P2 Bar Color */
 .duel-stat__bar--p2 .duel-stat__fill {
-  background: linear-gradient(90deg, var(--duel-p2-color), rgba(255, 107, 107, 0.4));
-  box-shadow: 0 0 8px rgba(255, 107, 107, 0.5);
+  background: linear-gradient(90deg, var(--neon-magenta), rgba(255,0,170,0.3));
+  box-shadow: 0 0 6px rgba(255,0,170,0.4);
 }
-
-/* Winner bar highlight */
 .duel-stat__bar.bar--winner .duel-stat__fill {
-  box-shadow: 0 0 15px currentColor;
+  box-shadow: 0 0 12px currentColor;
 }
-
 .duel-stat__bar--p1.bar--winner .duel-stat__fill {
-  background: linear-gradient(90deg, rgba(0, 212, 255, 0.6), var(--duel-primary));
-  box-shadow: 0 0 15px rgba(0, 212, 255, 0.8);
+  background: linear-gradient(90deg, rgba(0,240,255,0.5), var(--neon-cyan));
+  box-shadow: 0 0 12px rgba(0,240,255,0.6);
 }
-
 .duel-stat__bar--p2.bar--winner .duel-stat__fill {
-  background: linear-gradient(90deg, var(--duel-p2-color), rgba(255, 107, 107, 0.6));
-  box-shadow: 0 0 15px rgba(255, 107, 107, 0.8);
+  background: linear-gradient(90deg, var(--neon-magenta), rgba(255,0,170,0.5));
+  box-shadow: 0 0 12px rgba(255,0,170,0.6);
 }
-
-/* Stat Value Text */
 .duel-stat__value {
-  font-size: 14px;
-  font-weight: 900;
-  min-width: 32px;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  min-width: 28px;
   text-align: center;
 }
+.duel-stat__bar-wrap--left .duel-stat__value { color: var(--neon-cyan); }
+.duel-stat__bar-wrap--right .duel-stat__value { color: var(--neon-magenta); }
 
-.duel-stat__bar-wrap--left .duel-stat__value {
-  color: var(--duel-p1-color);
-}
-
-.duel-stat__bar-wrap--right .duel-stat__value {
-  color: var(--duel-p2-color);
-}
-
-/* Total Power Score */
 .duel-power-total {
   display: grid;
   grid-template-columns: 1fr auto 1fr;
@@ -1468,31 +698,23 @@ body.duel-mode-active .card:hover {
   align-items: center;
   margin-top: 20px;
   padding: 16px;
-  border-radius: 14px;
-  background: rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  background: rgba(0,0,0,0.35);
+  border: 1px solid rgba(255,255,255,0.03);
   opacity: 0;
   transform: scale(0.95);
-  transition:
-    opacity 0.5s var(--duel-transition),
-    transform 0.5s var(--duel-spring);
+  transition: opacity 0.5s var(--smooth), transform 0.5s var(--spring);
 }
-
-.duel-power-total.power-total--visible {
-  opacity: 1;
-  transform: scale(1);
-}
-
+.duel-power-total.power-total--visible { opacity: 1; transform: scale(1); }
 .duel-power-total__label {
-  font-size: 10px;
+  font-size: 9px;
   font-weight: 800;
   letter-spacing: 2px;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.4);
+  color: rgba(255,255,255,0.25);
   text-align: center;
   white-space: nowrap;
 }
-
 .duel-power-total__p1,
 .duel-power-total__p2 {
   display: flex;
@@ -1502,1008 +724,213 @@ body.duel-mode-active .card:hover {
   padding: 10px;
   border-radius: 10px;
   transition: all 0.4s;
+  border: 1px solid rgba(255,255,255,0.04);
 }
-
-.duel-power-total__p1 { border: 1px solid rgba(0, 212, 255, 0.2); }
-.duel-power-total__p2 { border: 1px solid rgba(255, 107, 107, 0.2); }
-
-.power-label {
-  font-size: 9px;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.4);
-}
-
+.duel-power-total__p1 { border-color: rgba(0,240,255,0.12); }
+.duel-power-total__p2 { border-color: rgba(255,0,170,0.12); }
+.power-label { font-size: 8px; letter-spacing: 2px; text-transform: uppercase; color: rgba(255,255,255,0.3); }
 .power-value {
-  font-size: 1.6rem;
+  font-family: 'Rajdhani', 'Orbitron', sans-serif;
+  font-size: 1.2rem;
   font-weight: 900;
   line-height: 1;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
-
-.duel-power-total__p1 .power-value { color: var(--duel-p1-color); }
-.duel-power-total__p2 .power-value { color: var(--duel-p2-color); }
-
-/* Winner total highlight */
+.duel-power-total__p1 .power-value { color: var(--neon-cyan); }
+.duel-power-total__p2 .power-value { color: var(--neon-magenta); }
 .duel-power-total__p1.power--winner,
 .duel-power-total__p2.power--winner {
-  border-color: var(--duel-secondary);
-  background: rgba(255, 204, 0, 0.08);
-  box-shadow: 0 0 20px rgba(255, 204, 0, 0.2);
-  animation: power-winner-glow 1s ease-in-out infinite alternate;
+  border-color: var(--neon-yellow);
+  background: rgba(255,238,0,0.05);
+  box-shadow: 0 0 20px rgba(255,238,0,0.15);
+  animation: power-glow 1s ease-in-out infinite alternate;
 }
-
-.duel-power-total__p1.power--winner .power-value {
-  color: var(--duel-secondary);
-  text-shadow: var(--duel-glow-gold);
-}
-
+.duel-power-total__p1.power--winner .power-value,
 .duel-power-total__p2.power--winner .power-value {
-  color: var(--duel-secondary);
-  text-shadow: var(--duel-glow-gold);
+  color: var(--neon-yellow);
+  text-shadow: var(--glow-yellow);
 }
-
-@keyframes power-winner-glow {
-  from { box-shadow: 0 0 15px rgba(255, 204, 0, 0.2); }
-  to   { box-shadow: 0 0 30px rgba(255, 204, 0, 0.4); }
-}
-
-
-/* ============================================================
-   🔧 SECTION 14: WINNER ANNOUNCEMENT
-   ============================================================ */
+@keyframes power-glow { from { box-shadow: 0 0 10px rgba(255,238,0,0.1); } to { box-shadow: 0 0 30px rgba(255,238,0,0.3); } }
 
 .duel-winner-section {
   opacity: 0;
   transform: translateY(30px) scale(0.95);
-  transition:
-    opacity 0.7s var(--duel-transition),
-    transform 0.7s var(--duel-spring);
+  transition: opacity 0.7s var(--smooth), transform 0.7s var(--spring);
   text-align: center;
-  border-top: 1px solid var(--duel-border);
-  padding-top: 24px;
-  margin-bottom: 20px;
+  border-top: 1px solid rgba(255,255,255,0.04);
+  padding: 24px 20px 16px;
 }
+.duel-winner-section.winner--visible { opacity: 1; transform: translateY(0) scale(1); }
 
-.duel-winner-section.winner--visible {
-  opacity: 1;
-  transform: translateY(0) scale(1);
-}
-
-/* Winner Announcement Box */
-.winner-announcement {
-  padding: 20px;
-  border-radius: 16px;
-  position: relative;
-  overflow: hidden;
-}
-
-.winner-announcement--victory {
-  background: linear-gradient(
-    160deg,
-    rgba(255, 204, 0, 0.08),
-    rgba(0, 0, 0, 0.3)
-  );
-  border: 1px solid rgba(255, 204, 0, 0.3);
-  box-shadow: 0 0 40px rgba(255, 204, 0, 0.1);
-}
-
-.winner-announcement--draw {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-}
-
-.winner__trophy,
-.winner__crown {
-  font-size: 3rem;
-  display: block;
-  margin-bottom: 8px;
-  animation: crown-bounce 0.8s var(--duel-spring);
-}
-
-@keyframes crown-bounce {
-  0%   { transform: scale(0) rotate(-20deg); opacity: 0; }
-  70%  { transform: scale(1.2) rotate(5deg); }
-  100% { transform: scale(1) rotate(0); opacity: 1; }
-}
-
-.winner__badge {
+.winner-result { padding: 10px 0; }
+.winner-crown { font-size: 2.5rem; display: block; margin-bottom: 6px; }
+.winner-badge {
   display: inline-block;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 900;
-  letter-spacing: 2px;
+  letter-spacing: 3px;
   text-transform: uppercase;
-  padding: 6px 20px;
+  padding: 5px 18px;
   border-radius: 20px;
-  margin-bottom: 12px;
-  animation: badge-pop 0.5s var(--duel-spring) 0.3s both;
+  margin-bottom: 10px;
 }
-
-@keyframes badge-pop {
-  from { transform: scale(0.5); opacity: 0; }
-  to   { transform: scale(1); opacity: 1; }
+.winner-badge.p1 {
+  background: rgba(0,240,255,0.1);
+  color: var(--neon-cyan);
+  border: 1px solid rgba(0,240,255,0.3);
 }
-
-.winner__badge--p1 {
-  background: rgba(0, 212, 255, 0.15);
-  color: var(--duel-p1-color);
-  border: 1px solid var(--duel-p1-color);
-  box-shadow: 0 0 15px rgba(0, 212, 255, 0.3);
+.winner-badge.p2 {
+  background: rgba(255,0,170,0.1);
+  color: var(--neon-magenta);
+  border: 1px solid rgba(255,0,170,0.3);
 }
-
-.winner__badge--p2 {
-  background: rgba(255, 107, 107, 0.15);
-  color: var(--duel-p2-color);
-  border: 1px solid var(--duel-p2-color);
-  box-shadow: 0 0 15px rgba(255, 107, 107, 0.3);
-}
-
-/* Winner Title — THE MAIN EVENT! */
-.winner__title--victory {
-  font-size: clamp(1.4rem, 5vw, 2.2rem);
+.winner-name {
+  font-family: 'Orbitron', sans-serif;
+  font-size: clamp(1rem, 3.5vw, 1.6rem);
   font-weight: 900;
-  letter-spacing: 2px;
-  margin: 0 0 8px;
-
-  /* তোমার requested glowing text shadow */
-  text-shadow:
-    0 0 15px #ffcc00,
-    0 0 30px rgba(255, 204, 0, 0.6),
-    0 0 60px rgba(255, 204, 0, 0.3);
-
-  background: linear-gradient(135deg, #ffcc00, #fff5a0, #ffcc00);
+  letter-spacing: 1px;
+  margin: 0 0 6px;
+  background: linear-gradient(135deg, var(--neon-yellow), #fff5a0);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  animation:
-    winner-title-appear 0.8s var(--duel-spring) 0.5s both,
-    winner-title-shimmer 3s ease-in-out 1.3s infinite;
+  filter: drop-shadow(0 0 15px rgba(255,238,0,0.4));
 }
-
-@keyframes winner-title-appear {
-  from { transform: scale(0.7) translateY(20px); opacity: 0; }
-  to   { transform: scale(1) translateY(0); opacity: 1; }
-}
-
-@keyframes winner-title-shimmer {
-  0%, 100% { filter: brightness(1); }
-  50%       { filter: brightness(1.3); }
-}
-
-.winner__title--draw {
+.winner-score { font-size: 12px; color: rgba(255,255,255,0.5); letter-spacing: 1px; }
+.winner-score strong { color: #fff; }
+.winner-result.draw h2 {
+  font-family: 'Orbitron', sans-serif;
   font-size: clamp(1.2rem, 4vw, 1.8rem);
-  font-weight: 900;
-  color: rgba(255, 255, 255, 0.7);
-  letter-spacing: 3px;
-  margin: 0 0 8px;
+  color: rgba(255,255,255,0.5);
+  letter-spacing: 4px;
 }
-
-.winner__subtitle {
-  font-size: 13px;
-  color: rgba(255, 255, 255, 0.5);
-  margin: 0 0 16px;
-  letter-spacing: 1px;
-}
-
-/* Score Comparison */
-.winner__score-comparison {
-  display: flex;
-  justify-content: center;
-  gap: 12px;
-  flex-wrap: wrap;
-  margin-bottom: 16px;
-}
-
-.winner__score {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  padding: 10px 16px;
-  border-radius: 10px;
-  min-width: 90px;
-}
-
-.winner__score--winner {
-  background: rgba(255, 204, 0, 0.1);
-  border: 1px solid rgba(255, 204, 0, 0.4);
-}
-
-.winner__score--loser {
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  opacity: 0.6;
-}
-
-.winner__score--margin {
-  background: rgba(0, 255, 136, 0.08);
-  border: 1px solid rgba(0, 255, 136, 0.2);
-}
-
-.score-label {
-  font-size: 9px;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.5);
-}
-
-.score-value {
-  font-size: 1.3rem;
-  font-weight: 900;
-}
-
-.winner__score--winner .score-value {
-  color: var(--duel-secondary);
-  text-shadow: 0 0 10px rgba(255, 204, 0, 0.5);
-}
-
-.winner__score--margin .score-value {
-  color: var(--duel-success);
-}
-
-/* Fighter Highlight Image */
-.winner__fighter-highlight {
-  display: inline-block;
-  position: relative;
-  margin-top: 8px;
-}
-
-.winner__fighter-highlight img {
-  width: 80px;
-  height: 100px;
-  object-fit: cover;
-  border-radius: 10px;
-  border: 2px solid var(--duel-secondary);
-  box-shadow: 0 0 20px rgba(255, 204, 0, 0.4);
-  animation: winner-img-float 2s ease-in-out infinite;
-}
-
-@keyframes winner-img-float {
-  0%, 100% { transform: translateY(0); }
-  50%       { transform: translateY(-8px); }
-}
-
-.winner__glow-ring {
-  position: absolute;
-  inset: -8px;
-  border-radius: 14px;
-  border: 2px solid rgba(255, 204, 0, 0.4);
-  animation: glow-ring-pulse 1.5s ease-in-out infinite;
-}
-
-@keyframes glow-ring-pulse {
-  0%, 100% { transform: scale(1); opacity: 0.6; }
-  50%       { transform: scale(1.05); opacity: 1; }
-}
-
-/* Draw Score Display */
-.winner__score-display {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 16px;
-  margin-top: 12px;
-  font-size: 1.2rem;
-  font-weight: 900;
-  color: rgba(255, 255, 255, 0.6);
-}
-
-.winner__no-img {
-  font-size: 4rem;
-  display: block;
-  animation: winner-img-float 2s ease-in-out infinite;
-}
-
-
-/* ============================================================
-   🔧 SECTION 15: ACTION BUTTONS
-   ============================================================ */
 
 .duel-actions {
   display: flex;
   justify-content: center;
   gap: 12px;
   flex-wrap: wrap;
+  padding: 0 20px 24px;
   opacity: 0;
   transform: translateY(10px);
-  transition:
-    opacity 0.5s var(--duel-transition),
-    transform 0.5s var(--duel-spring);
+  transition: opacity 0.5s var(--smooth), transform 0.5s var(--spring);
   pointer-events: none;
 }
-
-.duel-actions.actions--visible {
-  opacity: 1;
-  transform: translateY(0);
-  pointer-events: all;
-}
-
+.duel-actions.actions--visible { opacity: 1; transform: translateY(0); pointer-events: all; }
 .duel-btn {
-  padding: 12px 28px;
+  padding: 10px 24px;
   border-radius: 30px;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 1px;
   cursor: pointer;
   border: none;
-  transition: all 0.3s var(--duel-transition);
+  transition: all 0.3s var(--smooth);
   text-transform: uppercase;
   position: relative;
   overflow: hidden;
 }
-
-/* Button shimmer effect */
 .duel-btn::before {
   content: '';
   position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.1),
-    transparent
-  );
+  top: 0; left: -100%;
+  width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent);
   transition: left 0.4s;
 }
-
 .duel-btn:hover::before { left: 100%; }
-
-/* Reset Button */
 .duel-btn--reset {
-  background: linear-gradient(135deg, #003d5c, #0080a8);
-  color: var(--duel-primary);
-  border: 1px solid var(--duel-primary);
-  box-shadow: 0 0 15px rgba(0, 212, 255, 0.2);
+  background: linear-gradient(135deg, #002244, #003366);
+  color: var(--neon-cyan);
+  border: 1px solid var(--neon-cyan);
+  box-shadow: 0 0 12px rgba(0,240,255,0.15);
 }
-
 .duel-btn--reset:hover {
-  background: linear-gradient(135deg, #0080a8, #00d4ff);
+  background: linear-gradient(135deg, #003366, #00ccdd);
   color: #000;
-  box-shadow: 0 0 25px rgba(0, 212, 255, 0.5);
+  box-shadow: 0 0 25px rgba(0,240,255,0.4);
   transform: translateY(-2px) scale(1.03);
 }
-
-/* Exit Button */
 .duel-btn--exit {
-  background: linear-gradient(135deg, rgba(255, 71, 87, 0.1), rgba(255, 71, 87, 0.05));
-  color: rgba(255, 255, 255, 0.6);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255,34,85,0.06);
+  color: rgba(255,255,255,0.4);
+  border: 1px solid rgba(255,255,255,0.08);
 }
-
 .duel-btn--exit:hover {
-  background: rgba(255, 71, 87, 0.2);
-  color: var(--duel-danger);
-  border-color: var(--duel-danger);
-  box-shadow: 0 0 20px rgba(255, 71, 87, 0.3);
+  background: rgba(255,34,85,0.15);
+  color: var(--neon-red);
+  border-color: var(--neon-red);
+  box-shadow: 0 0 15px rgba(255,34,85,0.25);
   transform: translateY(-2px);
 }
 
-
-/* ============================================================
-   🔧 SECTION 16: CONFETTI
-   ============================================================ */
+.duel-bg-effect { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+.duel-particles { position: absolute; inset: 0; }
+.duel-particle {
+  position: absolute;
+  bottom: -10px;
+  border-radius: 50%;
+  background: var(--neon-cyan);
+  opacity: 0;
+  animation: particle-float linear infinite;
+}
+@keyframes particle-float {
+  0%   { bottom: -10px; opacity: 0; }
+  10%  { opacity: 0.6; }
+  90%  { opacity: 0.2; }
+  100% { bottom: 110%; opacity: 0; }
+}
+.duel-screen-flash {
+  position: absolute;
+  inset: 0;
+  background: rgba(255,255,255,0.08);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 100;
+}
+.duel-screen-flash.flash--active { animation: flash 0.4s ease-out; }
+@keyframes flash { 0% { opacity: 1; } 100% { opacity: 0; } }
 
 .duel-confetti {
   position: fixed;
   top: -10px;
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
   border-radius: 2px;
   pointer-events: none;
   z-index: 9001;
-  animation: confetti-fall 2s ease-in forwards;
+  animation: confetti-fall 2.5s ease-in forwards;
 }
-
 @keyframes confetti-fall {
   0%   { top: -10px; opacity: 1; transform: rotate(0deg) translateX(0); }
-  100% {
-    top: 100vh;
-    opacity: 0;
-    transform: rotate(720deg) translateX(calc(sin(var(--i, 0) * 1rad) * 100px));
-  }
+  100% { top: 100vh; opacity: 0; transform: rotate(720deg) translateX(calc(sin(var(--i,0)*1rad)*80px)); }
 }
 
-
-/* ============================================================
-   🔧 SECTION 17: RESPONSIVE DESIGN
-   ============================================================ */
-
-@media (max-width: 680px) {
-  .duel-arena {
-    padding: 20px 14px;
-    max-height: 95vh;
-    border-radius: 14px;
-  }
-
-  .duel-fighters {
-    grid-template-columns: 1fr auto 1fr;
-    gap: 10px;
-  }
-
-  .duel-fighter {
-    padding: 14px 8px;
-  }
-
-  .duel-fighter__poster {
-    width: 65px;
-    height: 85px;
-  }
-
-  .duel-fighter__name {
-    font-size: 11px;
-    max-width: 100px;
-  }
-
-  .duel-vs__ring {
-    width: 50px;
-    height: 50px;
-  }
-
-  .duel-vs__text {
-    font-size: 1rem;
-  }
-
-  .duel-stat-row {
-    grid-template-columns: 1fr 90px 1fr;
-    gap: 8px;
-  }
-
-  .duel-stat__label {
-    font-size: 10px;
-  }
-
-  .winner__score-comparison {
-    gap: 8px;
-  }
-
-  .winner__score {
-    min-width: 70px;
-    padding: 8px 10px;
-  }
-
-  .duel-toast {
-    right: 12px;
-    left: 12px;
-    max-width: none;
-    min-width: auto;
-  }
-
-  .duel-header__text {
-    letter-spacing: 1px;
-  }
-
-  .duel-mode-indicator {
-    padding: 10px 16px;
-    font-size: 11px;
-  }
+@media (max-width: 640px) {
+  .duel-overlay { padding: 10px 10px 24px; }
+  .duel-arena { border-radius: 14px; }
+  .duel-fighters { grid-template-columns: 1fr auto 1fr; gap: 8px; padding: 16px 10px; }
+  .duel-fighter { padding: 10px 6px; }
+  .duel-fighter__poster { width: 72px; height: 100px; }
+  .duel-fighter__name { font-size: 0.75rem; max-width: 90px; }
+  .duel-vs__ring { width: 48px; height: 48px; }
+  .duel-vs__text { font-size: 0.9rem; }
+  .duel-stat-row { grid-template-columns: 1fr 70px 1fr; gap: 6px; }
+  .duel-stat__label { font-size: 9px; }
+  .duel-power-total__label { font-size: 8px; }
+  .duel-toast { right: 12px; left: 12px; max-width: none; min-width: auto; }
+  .duel-mode-indicator { padding: 8px 14px; font-size: 10px; gap: 6px; }
+  .duel-header__text { letter-spacing: 3px; }
 }
 
 @media (max-width: 400px) {
-  .duel-fighters {
-    grid-template-columns: 1fr 40px 1fr;
-    gap: 6px;
-  }
-
-  .duel-vs__ring {
-    width: 38px;
-    height: 38px;
-  }
-
-  .duel-vs__text { font-size: 0.75rem; }
-
-  .winner__score-comparison {
-    flex-direction: column;
-    align-items: center;
-  }
+  .duel-fighters { grid-template-columns: 1fr 36px 1fr; gap: 4px; }
+  .duel-fighter__poster { width: 60px; height: 84px; }
+  .duel-vs__ring { width: 36px; height: 36px; }
+  .duel-vs__text { font-size: 0.7rem; }
+  .duel-fighter__power-preview { padding: 3px 8px; max-width: 90px; }
+  .duel-fighter__power-preview strong { font-size: 0.95rem; }
 }
-
-
-/* ============================================================
-   🔧 SECTION 18: ACCESSIBILITY & REDUCED MOTION
-   ============================================================ */
-
-@media (prefers-reduced-motion: reduce) {
-  /* সব animations কমিয়ে দেওয়া */
-  .duel-overlay,
-  .duel-arena,
-  .duel-fighter,
-  .duel-stats-section,
-  .duel-winner-section,
-  .duel-actions,
-  .duel-power-total,
-  .card.selected-for-duel,
-  .duel-mode-indicator,
-  .duel-toast,
-  .winner__title--victory {
-    animation: none !important;
-    transition-duration: 0.1s !important;
-  }
-
-  .duel-overlay--visible .duel-arena {
-    transform: none !important;
-  }
-
-  .winner__fighter-highlight img {
-    animation: none !important;
-  }
-}
-
-/* Focus visible for keyboard navigation */
-.duel-btn:focus-visible,
-.duel-close-btn:focus-visible,
-.duel-nav-link:focus-visible {
-  outline: 2px solid var(--duel-primary);
-  outline-offset: 3px;
-}
-
-
-/* ============================================================
-   🔧 SECTION 19: PRINT STYLES
-   ============================================================ */
-
-@media print {
-  .duel-overlay,
-  .duel-toast,
-  .duel-mode-indicator,
-  #duel-nav-item {
-    display: none !important;
-  }
-}
-
-
-
-
-/* ============================================================
-   📱 MOBILE COMPLETE FIX — Duel Arena
-   ============================================================ */
-
-@media (max-width: 768px) {
-
-  /* ── Overlay Full Screen ───────────────────────────────── */
-  .duel-overlay {
-    padding: 0 !important;
-    align-items: flex-start !important;
-  }
-
-  .duel-arena {
-    width: 100% !important;
-    max-width: 100% !important;
-    min-height: 100vh !important;
-    border-radius: 0 !important;
-    padding: 16px 12px !important;
-    margin: 0 !important;
-  }
-
-  /* ── Header ────────────────────────────────────────────── */
-  .duel-header {
-    margin-bottom: 16px !important;
-  }
-
-  .duel-header__text {
-    font-size: 1.2rem !important;
-    letter-spacing: 1.5px !important;
-  }
-
-  .duel-header__icon {
-    font-size: 1rem !important;
-  }
-
-  .duel-header__subtitle {
-    font-size: 9px !important;
-    letter-spacing: 2px !important;
-  }
-
-  /* ── Close Button ──────────────────────────────────────── */
-  .duel-close-btn {
-    top: 10px !important;
-    right: 10px !important;
-    width: 30px !important;
-    height: 30px !important;
-    font-size: 13px !important;
-  }
-
-  /* ============================================================
-     ⚔️ FIGHTERS — STACK VERTICALLY on mobile
-     ============================================================ */
-
-  .duel-fighters {
-    display: flex !important;          /* Grid → Flex */
-    flex-direction: column !important; /* Stack vertically */
-    gap: 0 !important;
-    align-items: stretch !important;
-    margin-bottom: 16px !important;
-    position: relative !important;
-  }
-
-  /* ── Fighter Cards ─────────────────────────────────────── */
-  .duel-fighter {
-    display: flex !important;
-    flex-direction: row !important;    /* Horizontal layout */
-    align-items: center !important;
-    gap: 12px !important;
-    padding: 12px !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    min-width: 0 !important;
-    border-radius: 10px !important;
-  }
-
-  .duel-fighter--p1 {
-    order: 1 !important;
-    border-bottom: none !important;
-    border-bottom-left-radius: 0 !important;
-    border-bottom-right-radius: 0 !important;
-  }
-
-  .duel-fighter--p2 {
-    order: 3 !important;
-    border-top-left-radius: 0 !important;
-    border-top-right-radius: 0 !important;
-  }
-
-  /* ── VS Center — Between fighters ─────────────────────── */
-  .duel-vs-center {
-    order: 2 !important;
-    display: flex !important;
-    flex-direction: row !important;
-    align-items: center !important;
-    justify-content: center !important;
-    gap: 12px !important;
-    padding: 8px 12px !important;
-    background: rgba(0, 0, 0, 0.3) !important;
-    border-left: 1px solid rgba(0, 212, 255, 0.15) !important;
-    border-right: 1px solid rgba(255, 107, 107, 0.15) !important;
-    width: 100% !important;
-    z-index: 5 !important;
-  }
-
-  .duel-vs__ring {
-    width: 44px !important;
-    height: 44px !important;
-    flex-shrink: 0 !important;
-  }
-
-  .duel-vs__text {
-    font-size: 1rem !important;
-  }
-
-  .duel-vs__subtitle {
-    font-size: 8px !important;
-    letter-spacing: 1.5px !important;
-  }
-
-  /* ── Poster — Smaller on mobile ────────────────────────── */
-  .duel-fighter__poster {
-    width: 60px !important;
-    height: 80px !important;
-    flex-shrink: 0 !important;
-    border-radius: 8px !important;
-  }
-
-  .duel-fighter__poster img {
-    width: 100% !important;
-    height: 100% !important;
-    object-fit: cover !important;
-  }
-
-  /* ── Fighter Info — Right side of poster ───────────────── */
-  .duel-fighter__info-wrap,
-  .duel-fighter > :not(.duel-fighter__poster):not(.duel-fighter__label) {
-    flex: 1 !important;
-    min-width: 0 !important;
-  }
-
-  .duel-fighter__label {
-    font-size: 9px !important;
-    padding: 3px 8px !important;
-    letter-spacing: 1px !important;
-    align-self: flex-start !important;
-    margin-bottom: 4px !important;
-  }
-
-  .duel-fighter__name {
-    font-size: 13px !important;
-    max-width: 100% !important;
-    white-space: nowrap !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-    margin: 4px 0 !important;
-  }
-
-  .duel-fighter__genre {
-    font-size: 9px !important;
-    margin-bottom: 6px !important;
-  }
-
-  .duel-fighter__power-preview {
-    min-width: auto !important;
-    padding: 4px 10px !important;
-    flex-direction: row !important;
-    gap: 6px !important;
-    align-items: center !important;
-    align-self: flex-start !important;
-  }
-
-  .duel-fighter__power-preview span {
-    font-size: 8px !important;
-  }
-
-  .duel-fighter__power-preview strong {
-    font-size: 1rem !important;
-  }
-
-  /* ── DEFEATED stamp ────────────────────────────────────── */
-  .fighter--defeat::after {
-    font-size: 0.65rem !important;
-    padding: 3px 10px !important;
-    letter-spacing: 2px !important;
-  }
-
-  /* ── Victory crown ─────────────────────────────────────── */
-  .fighter--victory::before {
-    font-size: 1.2rem !important;
-    top: -22px !important;
-  }
-
-  /* ── Stats Section ─────────────────────────────────────── */
-  .duel-stats-section {
-    padding-top: 16px !important;
-    margin-bottom: 14px !important;
-  }
-
-  .duel-stats__heading {
-    font-size: 10px !important;
-    letter-spacing: 2px !important;
-    margin-bottom: 14px !important;
-  }
-
-  .duel-stat-row {
-    grid-template-columns: 1fr 80px 1fr !important;
-    gap: 6px !important;
-    margin-bottom: 10px !important;
-  }
-
-  .duel-stat__label {
-    font-size: 10px !important;
-  }
-
-  .duel-stat__label small {
-    font-size: 8px !important;
-  }
-
-  .duel-stat__bar {
-    height: 8px !important;
-  }
-
-  .duel-stat__value {
-    font-size: 12px !important;
-    min-width: 26px !important;
-  }
-
-  /* ── Total Power ───────────────────────────────────────── */
-  .duel-power-total {
-    gap: 8px !important;
-    padding: 10px 8px !important;
-    margin-top: 12px !important;
-  }
-
-  .duel-power-total__label {
-    font-size: 8px !important;
-    letter-spacing: 1px !important;
-  }
-
-  .power-value {
-    font-size: 1.2rem !important;
-  }
-
-  .power-label {
-    font-size: 8px !important;
-  }
-
-  /* ── Winner Section ────────────────────────────────────── */
-  .duel-winner-section {
-    padding-top: 16px !important;
-    margin-bottom: 14px !important;
-  }
-
-  .winner-announcement {
-    padding: 14px 12px !important;
-  }
-
-  .winner__trophy,
-  .winner__crown {
-    font-size: 2rem !important;
-    margin-bottom: 6px !important;
-  }
-
-  .winner__title--victory {
-    font-size: 1.3rem !important;
-    letter-spacing: 1px !important;
-  }
-
-  .winner__title--draw {
-    font-size: 1.1rem !important;
-  }
-
-  .winner__badge {
-    font-size: 9px !important;
-    padding: 4px 14px !important;
-    letter-spacing: 1px !important;
-  }
-
-  .winner__subtitle {
-    font-size: 11px !important;
-    margin-bottom: 10px !important;
-  }
-
-  .winner__score-comparison {
-    gap: 6px !important;
-    flex-direction: row !important;
-    flex-wrap: wrap !important;
-    justify-content: center !important;
-  }
-
-  .winner__score {
-    min-width: 75px !important;
-    padding: 6px 10px !important;
-  }
-
-  .score-label {
-    font-size: 8px !important;
-  }
-
-  .score-value {
-    font-size: 1rem !important;
-  }
-
-  .winner__fighter-highlight img {
-    width: 55px !important;
-    height: 72px !important;
-  }
-
-  /* ── Action Buttons ────────────────────────────────────── */
-  .duel-actions {
-    flex-direction: column !important;
-    gap: 8px !important;
-    align-items: stretch !important;
-  }
-
-  .duel-btn {
-    padding: 12px 20px !important;
-    font-size: 12px !important;
-    text-align: center !important;
-  }
-
-  /* ── Toast ─────────────────────────────────────────────── */
-  .duel-toast {
-    right: 10px !important;
-    left: 10px !important;
-    top: 80px !important;
-    max-width: 100% !important;
-    min-width: auto !important;
-    font-size: 12px !important;
-  }
-
-  .toast-title {
-    font-size: 12px !important;
-  }
-
-  .toast-message {
-    font-size: 10px !important;
-  }
-
-  /* ── Floating Indicator ────────────────────────────────── */
-  .duel-mode-indicator {
-    bottom: 70px !important; /* navigation bar এর উপরে */
-    font-size: 11px !important;
-    padding: 8px 16px !important;
-    gap: 8px !important;
-  }
-
-  .indicator__text {
-    font-size: 10px !important;
-    letter-spacing: 1px !important;
-  }
-
-  .indicator__sub {
-    font-size: 10px !important;
-  }
-
-  /* ── Genre Mismatch Modal ──────────────────────────────── */
-  .mismatch-content {
-    padding: 20px 14px !important;
-    border-radius: 14px !important;
-  }
-
-  .mismatch-title {
-    font-size: 1.3rem !important;
-    letter-spacing: 2px !important;
-  }
-
-  .mismatch-versus {
-    grid-template-columns: 1fr !important;
-    gap: 8px !important;
-  }
-
-  .mismatch-vs {
-    flex-direction: row !important;
-    justify-content: center !important;
-    padding: 4px 0 !important;
-  }
-
-  .mismatch-btn {
-    padding: 10px 24px !important;
-    font-size: 12px !important;
-    width: 100% !important;
-  }
-}
-
-/* ============================================================
-   📱 VERY SMALL PHONES (< 380px)
-   ============================================================ */
-
-@media (max-width: 380px) {
-
-  .duel-arena {
-    padding: 12px 10px !important;
-  }
-
-  .duel-header__text {
-    font-size: 1rem !important;
-    letter-spacing: 1px !important;
-  }
-
-  .duel-fighter__poster {
-    width: 50px !important;
-    height: 68px !important;
-  }
-
-  .duel-fighter__name {
-    font-size: 11px !important;
-  }
-
-  .duel-stat-row {
-    grid-template-columns: 1fr 70px 1fr !important;
-    gap: 4px !important;
-  }
-
-  .duel-stat__value {
-    font-size: 10px !important;
-    min-width: 22px !important;
-  }
-
-  .winner__title--victory {
-    font-size: 1.1rem !important;
-  }
-
-  .power-value {
-    font-size: 1rem !important;
-  }
-}
-
-/* 📱 মোবাইল স্ক্রিনে ডুয়েল এরিনা স্ক্রোলিং ফিক্স */
-@media (max-width: 480px) {
-  /* যদি পুরো এরিনা একটি পপআপ বা মোডাল বা ফিক্সড বক্স হয় */
-  .duel-arena, [class*="duel-arena"], .duel-system-container {
-    max-height: 90vh !important;       /* স্ক্রিনের ৯০% হাইট নিবে */
-    overflow-y: auto !important;       /* উপর-নিচ স্ক্রোলিং অন করবে */
-    -webkit-overflow-scrolling: touch; /* আইফোনে স্মুথ স্ক্রোলের জন্য */
-  }
-
-  /* এরিনার ভেতরের মেইন কন্টেন্ট বা র‍্যাপার */
-  .duel-arena__body, .duel-stage, .duel-wrapper {
-    overflow-y: visible !important;
-    height: auto !important;
-  }
-}
-
-/* অতি ছোট ফোনের জন্য (< 380px) */
-@media (max-width: 380px) {
-  .duel-arena, [class*="duel-arena"] {
-    max-height: 85vh !important;       /* হাইট আরেকটু এডজাস্ট করা হলো */
-    overflow-y: auto !important;
-  }
-}
-
