@@ -26,9 +26,9 @@
     .card.hidden{display:none}
     footer{text-align:center;margin-top:70px;color:#333;font-size:.78rem}
     
-   /* ══════════════════════════════════════
+   /* --------------------------------------
    TOP NAVIGATION BAR - SLIM VERSION
-══════════════════════════════════════ */
+-------------------------------------- */
 .topbar {
   position: fixed;
   top: 0;
@@ -121,11 +121,11 @@
 }
 
 .search-btn svg {
-  width: 22px !important; /* আইকনটি বড় করা হয়েছে */
+  width: 22px !important; /* */
   height: 22px !important;
-  stroke: #f5c518 !important; /* বর্ডার কালার */
-  fill: none; /* যাতে ভেতরটা খালি থাকে */
-  filter: drop-shadow(0 0 8px rgba(245, 197, 24, 0.7)); /* উজ্জ্বল গ্লো ইফেক্ট */
+  stroke: #f5c518 !important; /* */
+  fill: none; /* */
+  filter: drop-shadow(0 0 8px rgba(245, 197, 24, 0.7)); /* */
   display: block;
 }
 
@@ -177,10 +177,11 @@
   align-items: center !important;
   gap: 14px !important;
   padding: 14px 22px !important;
-  color: #d0d0e0 !important;
+  color: #29c6f5 !important;
   text-decoration: none !important;
-  font-size: 15px !important;
-  font-weight: 500 !important;
+  font-family: 'Cinzel Decorative', cursive !important;
+  font-size: 14px !important;
+  font-weight: 700 !important;
   transition: all 0.2s !important;
   border-left: 3px solid transparent !important;
 }
@@ -231,7 +232,8 @@
   padding: 14px 22px;
   background: none;
   border: none;
-  color: #d0d0e0;
+  color: #29c6f5;
+  font-family: 'Cinzel Decorative', cursive !important;
   font-size: 15px;
   cursor: pointer;
   display: flex;
@@ -240,7 +242,7 @@
   transition: 0.3s;
 }
 
-.dropdown-btn:hover { color: #ffcc00; }
+.dropdown-btn:hover { color: #5dd8ff; }
 
 .dropdown-container {
   display: none;
@@ -254,6 +256,8 @@
 .dropdown-container a {
   padding: 10px 40px !important;
   font-size: 13px !important;
+  font-family: 'Cinzel Decorative', cursive !important;
+  color: #29c6f5 !important;
 }
 
 .arrow {
@@ -266,12 +270,12 @@
 }
 
 .sidemenu {
-  /* ... তোমার আগের কোড ... */
-  overflow-y: auto !important; /* সাইডবার লম্বা হলে এর ভেতরেই স্ক্রল হবে */
-  max-height: 100vh !important; /* স্ক্রিনের উচ্চতার বেশি হবে না */
+  /* style */
+  overflow-y: auto !important; /* */
+  max-height: 100vh !important; /* */
 }
 
-/* স্ক্রলবারটিকে সুন্দর করার জন্য (ঐচ্ছিক) */
+  /* style */
 .sidemenu::-webkit-scrollbar {
   width: 5px;
 }
@@ -280,7 +284,7 @@
   border-radius: 10px;
 }
 
-/* === 2. PIKACHU বাউন্স লুপ === */
+  /* style */
 .topbar-logo img {
   animation: pikaBounce 1.8s ease-in-out infinite;
   filter: drop-shadow(0 0 6px #ffcc00);
@@ -290,7 +294,7 @@
   50% { transform: translateY(-3px); }
 }
 
-/* === 4. হ্যামবার্গার + সার্চ পালস === */
+  /* style */
 .menu-btn span, #topSearchBtn {
   animation: iconPulse 2s infinite;
 }
@@ -298,9 +302,9 @@
   0%, 100% { opacity: 1; }
   50% { opacity: 0.7; }
 }
-    /* ══════════════════════════════════════
+    /* --------------------------------------
    SEARCH BOX ANIMATION
-══════════════════════════════════════ */
+-------------------------------------- */
 
 /* Fade in from top */
 .search-wrap {
@@ -371,9 +375,9 @@
 }
 
 
-/* ══════════════════════════════════════
+/* --------------------------------------
    GENRE / FILTER PILLS ANIMATION
-══════════════════════════════════════ */
+-------------------------------------- */
 
 /* Filter section fade in from bottom */
 .filter-section {
@@ -451,7 +455,7 @@
   100% { transform: translateY(-1px); }
 }
 
-/* ✅ ADD THIS - no vanish on click */
+/* ? ADD THIS - no vanish on click */
 .pill.active {
   border-color: #ff6b9d;
   background: linear-gradient(
@@ -479,12 +483,12 @@
     transform: translateY(0);
   }
 }
-    /* ── Flip Card Fix ── */
+    /* -- Flip Card Fix -- */
 .card {
   perspective: 1000px;
   cursor: pointer;
   background: transparent !important;
-  height: 380px; /* fixed height দাও */
+  height: 380px; /* fixed height */
 }
 
 .card-inner {
@@ -567,7 +571,7 @@
   text-shadow: 0 0 10px rgba(167, 139, 250, 0.5);
 }
 
-/* ── REMOVE tap hint / hide it ── */
+/* -- REMOVE tap hint / hide it -- */
 .back-tap-hint {
   display: none !important;
 }
@@ -640,24 +644,24 @@
     transform: translateY(0px);
   }
 }   
-    /* সব কার্ডের সিজন টেক্সটের রঙ পরিবর্তনের জন্য */
+  /* style */
 .season {
-    color: #FFC0CB; /* এখানে আপনার পছন্দমতো কালার কোড দিন (যেমন: গোলাপী) */
-    font-weight: bold; /* চাইলে লেখাটি একটু মোটাও করতে পারেন */
+    color: #FFC0CB; /* */
+    font-weight: bold; /* */
 }
 
 
     /* Default PC layout */
 .grid {
   display: grid;
-  grid-template-columns: repeat(5, 1fr); /* PC তে 4 কার্ড একসাথে */
+  grid-template-columns: repeat(5, 1fr); /* style */
   gap: 20px;
 }
 
-/* 📱 Mobile layout */
+/* style */
 @media (max-width: 767px) {
   .grid {
-    grid-template-columns: repeat(2, 1fr); /* Mobile এ 2 কার্ড একসাথে */
+    grid-template-columns: repeat(2, 1fr); /* Mobile ? 2 */
   }
 }
 .counter-box {
@@ -685,7 +689,7 @@
   margin: 20px 0;
 }
 
-/* প্রতিটা box */
+  /* style */
 .counter-box {
   position: relative;
   display: inline-block;
@@ -748,31 +752,31 @@
   margin-top: 8px;
 }
 
-/* 🖥️ PC Layout (default) */
+  /* style */
 @media (min-width: 768px) {
   .counter-container {
-    flex-direction: row; /* PC তে side by side */
+    flex-direction: row; /* style */
   }
   .counter-box {
     max-width: 200px;
   }
 }
 
-/* 📱 Mobile Layout */
+/* style */
 @media (max-width: 767px) {
   .counter-container {
-    flex-direction: column; /* Mobile এ একটার নিচে একটা */
+    flex-direction: column; /* Mobile ? */
     align-items: center;
   }
   .counter-box {
-    width: 80%; /* Mobile এ ছোট হবে */
+    width: 80%; /* Mobile ? */
     margin-bottom: 15px;
   }
   .counter {
-    font-size: 22px; /* Mobile এ সংখ্যা ছোট */
+    font-size: 22px; /* Mobile ? */
   }
   .counter-box p {
-    font-size: 12px; /* Mobile এ টেক্সট ছোট */
+    font-size: 12px; /* Mobile ? */
   }
 }
 
@@ -808,19 +812,19 @@
 
 
 
-/* স্টিকি সার্চ বক্সের স্টাইল */
+  /* style */
 .sticky-search {
     position: fixed;
     top: 20px;
     right: 20px;
     z-index: 1000;
-    display: none; /* শুরুতে এটি লুকানো থাকবে */
+    display: none; /* */
 }
 
 .sticky-search input {
     padding: 10px 15px;
     border-radius: 20px;
-    border: 2px solid #ff4757; /* আপনার থিমের সাথে মিল রেখে কালার দিতে পারেন */
+    border: 2px solid #ff4757; /* */
     background: #1e1e2f;
     color: white;
     box-shadow: 0 4px 15px rgba(0,0,0,0.3);
@@ -828,40 +832,40 @@
 
 /* style.css */
 
-/* পাপড়ির বেসিক স্টাইল */
+  /* style */
 .sakura {
     position: fixed;
-    top: -10vh; /* স্ক্রিনের সামান্য ওপর থেকে শুরু হবে */
-    background: #ffb7c5; /* চেরি ব্লসমের হালকা গোলাপী রঙ */
-    border-radius: 100% 0% 100% 0% / 100% 0% 100% 0%; /* বাস্তবসম্মত পাপড়ির আকার */
+    top: -10vh; /* */
+    background: #ffb7c5; /* */
+    border-radius: 100% 0% 100% 0% / 100% 0% 100% 0%; /* */
     opacity: 0.8;
     z-index: -1;
-    pointer-events: none; /* যাতে ক্লিক বা স্ক্রলে বাধা না দেয় */
+    pointer-events: none; /* */
     
-    /* ঘোরার এবং দুলার জন্য */
+  /* style */
     transform-origin: center;
     
-    /* একাধিক অ্যানিমেশন একসাথে */
+  /* style */
     animation: fall linear infinite, sway ease-in-out infinite alternate;
 }
 
-/* নিচে পড়ার অ্যানিমেশন (সব পাপড়ির জন্য একই গতি) */
+  /* style */
 @keyframes fall {
     0% {
         top: -10vh;
     }
     100% {
-        top: 110vh; /* স্ক্রিনের একদম নিচে চলে যাবে */
+        top: 110vh; /* */
     }
 }
 
-/* দুলার এবং ঘোরার অ্যানিমেশন (ইউনিক লুকের জন্য) */
+  /* style */
 @keyframes sway {
     0% {
         transform: translateX(0px) rotate(0deg);
     }
     100% {
-        transform: translateX(50px) rotate(180deg); /* হালকা বাতাস এবং ঘূর্ণন */
+        transform: translateX(50px) rotate(180deg); /* */
     }
 }
 
@@ -873,7 +877,7 @@
     flex-wrap: wrap;
 }
 
-/* কন্টেইনার স্টাইল */
+  /* style */
 .filter-container {
     display: flex;
     justify-content: center;
@@ -882,9 +886,9 @@
     flex-wrap: wrap;
 }
 
-/* বেসিক বাটন স্টাইল */
+  /* style */
 .filter-btn {
-    background: rgba(26, 26, 46, 0.8); /* হালকা স্বচ্ছ ব্যাকগ্রাউন্ড */
+    background: rgba(26, 26, 46, 0.8); /* */
     color: #ffffff;
     border: 1px solid #2a2a4a;
     padding: 10px 25px;
@@ -895,20 +899,20 @@
     border-radius: 12px;
     cursor: pointer;
     transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    backdrop-filter: blur(5px); /* গ্লাস ইফেক্ট */
+    backdrop-filter: blur(5px); /* */
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
-/* হোভার করলে গ্লোয়িং ইফেক্ট */
+  /* style */
 .filter-btn:hover {
     background: linear-gradient(135deg, #fbc2eb 0%, #a6c1ee 100%);
     color: #1a1a2e;
     border-color: transparent;
-    transform: translateY(-5px); /* হালকা উপরে উঠবে */
+    transform: translateY(-5px); /* */
     box-shadow: 0 10px 20px rgba(251, 194, 235, 0.4);
 }
 
-/* একটি বাটন যখন এক্টিভ বা সিলেক্ট করা থাকবে */
+  /* style */
 .filter-btn.active {
     background: #ff6b6b;
     color: white;
@@ -969,7 +973,7 @@
 
 .header h1::before {
   animation: glitch-top 6s infinite;
-  clip-path: polygon(0 35%, 100% 35%, 100% 65%, 0 65%); /* ← middle */
+  clip-path: polygon(0 35%, 100% 35%, 100% 65%, 0 65%); /* ? middle */
   filter: hue-rotate(90deg);
 }
 
@@ -1013,7 +1017,7 @@
 }
 
 .header h1 {
-  /* existing properties গুলো রাখো, শুধু animation বদলাও */
+  /* style */
   animation:
     heading-entry 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) both,
     titleFloat 4s ease-in-out 1.2s infinite,
@@ -1034,39 +1038,39 @@
     position: fixed;
     pointer-events: none;
     border-radius: 50%;
-    z-index: -1; /* যাতে লেখা বা কার্ডের পেছনে থাকে */
+    z-index: -1; /* */
     transform: translate(-50%, -50%);
     transition: 0.1s ease-out;
 }
 
 .card-content {
-    background: rgba(255, 255, 255, 0.05); /* হালকা সাদা স্বচ্ছতা */
-    backdrop-filter: blur(10px); /* পেছনে ঝাপসা করার ম্যাজিক */
+    background: rgba(255, 255, 255, 0.05); /* */
+    backdrop-filter: blur(10px); /* */
     border-top: 1px solid rgba(255, 255, 255, 0.1);
     padding: 15px;
     border-radius: 0 0 15px 15px;
 }
 
 
-/* ৩. মাউস নিলে স্থির থাকবে */
+  /* style */
 .card:hover {
   animation-play-state: paused !important;
   box-shadow: 0 10px 30px rgba(255, 107, 107, 0.4);
-  transform: scale(1.02); /* হোভারে হালকা বড় হবে */
+  transform: scale(1.02); /* */
 }
 
-/* ⚡ LIGHTNING CANVAS STYLING ⚡ */
+/* ? LIGHTNING CANVAS STYLING ? */
 #lightningCanvas {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  z-index: -1; /* সবসময় নিচে থাকবে */
+  z-index: -1; /* */
   pointer-events: none;
   display: block;
-  background: transparent !important; /* স্বচ্ছ রাখুন */
-  mix-blend-mode: screen; /* Thunder উজ্জ্বল হবে */
+  background: transparent !important; /* */
+  mix-blend-mode: screen; /* Thunder */
 }
 
 
@@ -1224,7 +1228,7 @@
 }
 
 
-/* ── Filter heading ─────────────────────────── */
+/* -- Filter heading --------------------------- */
 .filter-heading {
   font-size: 11px;
   font-weight: 600;
@@ -1243,7 +1247,7 @@
   background: linear-gradient(90deg, rgba(255,107,157,0.3), transparent);
 }
 
-/* ── Pill buttons ───────────────────────────── */
+/* -- Pill buttons ----------------------------- */
 .pills-wrap {
   display: flex;
   flex-wrap: wrap;
@@ -1295,7 +1299,7 @@
   color: #fff;
 }
 
-/* ── Status bar ─────────────────────────────── */
+/* -- Status bar ------------------------------- */
 .filter-status-bar {
   display: flex;
   align-items: center;
@@ -1325,24 +1329,24 @@
 }
 .filter-clear.hidden { display: none; }
 
-/* ── Card hidden state ──────────────────────── */
+/* -- Card hidden state ------------------------ */
 .card.hidden { display: none; }
 .card { transition: transform 0.2s ease, box-shadow 0.2s ease; }
 
-/* Grid stagger - 5 কলামের জন্য */
+  /* style */
 .card:nth-child(5n+1) { animation-delay: 0.08s; }
 .card:nth-child(5n+2) { animation-delay: 0.12s; }
 .card:nth-child(5n+3) { animation-delay: 0.16s; }
 .card:nth-child(5n+4) { animation-delay: 0.2s; }
 .card:nth-child(5n+5) { animation-delay: 0.24s; }
 
-/* Mobile এর জন্য (2 কলাম) */
+  /* style */
 @media (max-width: 767px) {
   .card:nth-child(2n+1) { animation-delay: 0.08s; }
   .card:nth-child(2n+2) { animation-delay: 0.16s; }
 }
 
-/* ── Back to Top Button ── */
+/* -- Back to Top Button -- */
 #backToTop {
   position: fixed;
   bottom: 30px;
@@ -1383,9 +1387,9 @@
 }
 
 
-/* ══════════════════════════════════════
-   🤖 CYBER ANIME AI CHAT - ULTRA UNIQUE
-══════════════════════════════════════ */
+/* --------------------------------------
+   ✨ CYBER ANIME AI CHAT - ULTRA UNIQUE
+-------------------------------------- */
 
 .chat-bubble {
   position: fixed !important;
@@ -1449,7 +1453,7 @@
 
 
 
-/* ── Chat Box ── */
+/* -- Chat Box -- */
 .chat-box {
   position: fixed !important;
   bottom: 108px !important;
@@ -1482,7 +1486,7 @@
   transform: translateY(0) scale(1) !important;
 }
 
-/* ── Cyber scan line effect ── */
+/* -- Cyber scan line effect -- */
 .chat-box::before {
   content: '';
   position: absolute;
@@ -1498,7 +1502,7 @@
   100% { transform: translateX(100%); }
 }
 
-/* ── Header ── */
+/* -- Header -- */
 .chat-header {
   background: linear-gradient(135deg, #0d0d1f 0%, #1a1a35 100%);
   border-bottom: 1px solid rgba(245,197,24,0.25);
@@ -1561,19 +1565,19 @@
   box-shadow: 0 0 12px rgba(245,197,24,0.4);
 }
 
-/* ══════════════════════════════════════
+/* --------------------------------------
    📱 MOBILE RESPONSIVE FIX FOR CHAT BOX
-══════════════════════════════════════ */
+-------------------------------------- */
 
 @media (max-width: 768px) {
   .chat-box {
-    width: calc(100vw - 20px) !important;  /* Screen width - 10px gap দুই পাশে */
+    width: calc(100vw - 20px) !important;  /* Screen width - 10px gap */
     max-width: none !important;
     right: 10px !important;
     left: 10px !important;
-    bottom: 85px !important;               /* Bubble এর উপরে gap */
-    height: 65vh !important;               /* Screen এর 65% height */
-    max-height: none !important;           /* পুরোনো 520px override করো */
+    bottom: 85px !important;               /* style */
+    height: 65vh !important;               /* style */
+    max-height: none !important;           /* */
   }
 
   .chat-bubble {
@@ -1585,7 +1589,7 @@
   }
 
   .chat-messages {
-    max-height: calc(65vh - 130px) !important; /* Header 60px + Input 70px বাদ */
+    max-height: calc(65vh - 130px) !important; /* Header 60px + Input 70px */
   }
 
   .chat-header {
@@ -1598,7 +1602,7 @@
   }
 
   .chat-input-area input {
-    font-size: 16px !important; /* iOS zoom বন্ধ করে */
+    font-size: 16px !important; /* iOS zoom */
   }
 
   .chat-input-area button {
@@ -1607,7 +1611,7 @@
   }
 }
 
-/* iPhone SE / ছোট screen এর জন্য */
+  /* style */
 @media (max-width: 380px) {
   .chat-box {
     bottom: 75px !important;
@@ -1622,7 +1626,7 @@
   }
 }
 
-/* ── Messages ── */
+/* -- Messages -- */
 .chat-messages {
   flex: 1;
   overflow-y: auto;
@@ -1790,7 +1794,7 @@
 }
 
 .chat-bubble:hover svg {
-  animation: sharingan-spin 0.5s linear infinite; /* hover এ fast spin */
+  animation: sharingan-spin 0.5s linear infinite; /* hover ? fast spin */
 }
 
 @keyframes sharingan-spin {
@@ -1930,46 +1934,46 @@
   transition:0.4s ease;
 }
 
-/* ══════════════════════════════════════
+/* --------------------------------------
    MOBILE SIDEBAR FINAL REPAIR
-══════════════════════════════════════ */
+-------------------------------------- */
 @media (max-width: 480px) {
-    /* পুরো প্যানেলকে ভিউপোর্টের উচ্চতায় লক করা */
+  /* style */
     .suggestion-panel {
         display: flex !important;
         flex-direction: column !important;
-        height: 100dvh !important; /* ব্রাউজার বার থাকলেও বাটন নিচে নামবে না */
+        height: 100dvh !important; /* */
         max-height: 100dvh !important;
         overflow: hidden !important; 
         padding: 15px !important;
     }
 
-    /* ফর্ম কন্টেইনার স্ক্রল করার অনুমতি দেওয়া */
+  /* style */
     .suggestion-form {
         display: flex !important;
         flex-direction: column !important;
         flex: 1 !important; 
-        overflow-y: auto !important; /* শুধুমাত্র ফর্মের ভেতর স্ক্রল হবে */
+        overflow-y: auto !important; /* */
         gap: 12px !important;
         padding-bottom: 20px !important;
     }
 
-    /* টেক্সট এরিয়া যাতে বাটনকে নিচে পুশ না করে */
+  /* style */
     .suggestion-form textarea {
         min-height: 100px !important;
         max-height: 160px !important;
         flex-shrink: 0 !important;
     }
 
-    /* প্রিমিয়াম ডিজাইনের বাটন */
+  /* style */
     .send-btn {
         margin-top: auto !important; 
         position: relative !important;
         width: 100% !important;
         min-height: 52px !important;
-        background: linear-gradient(135deg, #ff6b35, #f5c518) !important; /* গ্লোসি অরেঞ্জ কালার */
+        background: linear-gradient(135deg, #ff6b35, #f5c518) !important; /* */
         color: #000 !important;
-        font-family: 'Orbitron', sans-serif !important; /* পিসির মতো ফন্ট */
+        font-family: 'Orbitron', sans-serif !important; /* */
         font-size: 13px !important;
         font-weight: 800 !important;
         border-radius: 12px !important;
@@ -1979,14 +1983,14 @@
     }
 }
 
-    /* টেক্সট এরিয়া যাতে বাটনকে নিচে না ঠেলে */
+  /* style */
     .suggestion-form textarea {
         min-height: 100px !important;
         max-height: 180px !important;
         flex-shrink: 0 !important;
     }
 
-    /* বাটন ফিক্স (রঙ ও পজিশন) */
+  /* style */
     .send-btn {
         margin-top: auto !important; 
         position: relative !important;
@@ -2049,3 +2053,261 @@
   padding: 10px;
   margin-bottom: 10px;
 }
+
+
+/* ===== WAIFU SECTION ===== */
+
+.waifu-overlay{
+  display:none;
+  position:fixed;
+  top:48px;
+  left:0;
+  width:100%;
+  height:calc(100vh - 48px);
+  background:radial-gradient(ellipse at 20% 50%,#1a0533 0%,#0a0a14 60%,#050510 100%);
+  z-index:9000;
+  overflow-y:auto;
+  padding:20px 30px 40px;
+  box-sizing:border-box;
+}
+
+.waifu-overlay::before{
+  content:'';
+  position:fixed;
+  top:48px;left:0;width:100%;height:100%;
+  background:
+    radial-gradient(2px 2px at 10% 20%,rgba(255,100,200,.4),transparent),
+    radial-gradient(2px 2px at 30% 60%,rgba(100,200,255,.3),transparent),
+    radial-gradient(2px 2px at 50% 10%,rgba(255,200,100,.3),transparent),
+    radial-gradient(2px 2px at 70% 80%,rgba(200,100,255,.3),transparent),
+    radial-gradient(2px 2px at 90% 40%,rgba(255,150,100,.2),transparent);
+  pointer-events:none;
+  z-index:0;
+}
+
+
+.waifu-overlay-header{
+  position:relative;
+  z-index:1;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  margin-bottom:30px;
+  padding:20px 60px 18px;
+  border-bottom:2px solid;
+  border-image:linear-gradient(90deg,transparent,#ff6b9d,#c44dff,#ff6b9d,transparent) 1;
+  background:linear-gradient(180deg,rgba(255,100,200,.05),transparent);
+}
+
+.waifu-close-btn{
+  position:absolute;
+  right:20px;
+  top:50%;
+  transform:translateY(-50%);
+}
+
+.waifu-overlay-header h2{
+  font-family:'Cinzel Decorative',cursive;
+  font-size:2.2rem;
+  font-weight:700;
+  background:linear-gradient(135deg,#ff6b9d,#ffd700,#c44dff,#ff6b9d);
+  background-size:300% 300%;
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  background-clip:text;
+  animation:waifuTextShimmer 3s ease-in-out infinite;
+  letter-spacing:2px;
+  text-shadow:none;
+  position:relative;
+}
+
+@keyframes waifuTextShimmer {
+  0%,100%{background-position:0% 50%}
+  50%{background-position:100% 50%}
+}
+
+.waifu-overlay-header h2::before{
+  content:'💖 ';
+  -webkit-text-fill-color:initial;
+}
+
+.waifu-overlay-header h2::after{
+  content:' ✨';
+  -webkit-text-fill-color:initial;
+}
+
+.waifu-close-btn{
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.1);
+  color:#fff;
+  font-size:1.3rem;
+  width:40px;
+  height:40px;
+  border-radius:12px;
+  cursor:pointer;
+  transition:.25s;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.waifu-close-btn:hover{
+  background:rgba(255,70,70,.25);
+  border-color:#ff4646;
+  transform:translateY(-50%) rotate(90deg) scale(1.1);
+}
+
+.waifu-grid{
+  position:relative;
+  z-index:1;
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
+  gap:18px;
+}
+
+.waifu-card{
+  height:340px;
+  perspective:1200px;
+  cursor:pointer;
+  transition:transform .3s;
+}
+
+.waifu-card:hover .waifu-inner{
+  box-shadow:0 0 30px rgba(255,100,200,.15),0 0 60px rgba(100,200,255,.08);
+}
+
+.waifu-inner{
+  position:relative;
+  width:100%;
+  height:100%;
+  transition:.6s cubic-bezier(.4,0,.2,1);
+  transform-style:preserve-3d;
+  border-radius:18px;
+  box-shadow:0 4px 20px rgba(0,0,0,.4);
+}
+
+.waifu-card.flip .waifu-inner{
+  transform:rotateY(180deg);
+}
+
+.waifu-front,
+.waifu-back{
+  position:absolute;
+  width:100%;
+  height:100%;
+  border-radius:18px;
+  overflow:hidden;
+  backface-visibility:hidden;
+  background:linear-gradient(145deg,#1a1a2e,#16213e);
+  border:1px solid rgba(255,255,255,.06);
+}
+
+.waifu-front::after{
+  content:'';
+  position:absolute;
+  bottom:0;left:0;width:100%;height:40%;
+  background:linear-gradient(transparent,rgba(0,0,0,.6));
+  pointer-events:none;
+  z-index:1;
+}
+
+.waifu-front img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  transition:transform .5s;
+}
+
+.waifu-card:hover .waifu-front img{
+  transform:scale(1.05);
+}
+
+.waifu-badge{
+  position:absolute;
+  top:10px;
+  left:10px;
+  z-index:3;
+  background:linear-gradient(135deg,#ff6b9d,#c44dff);
+  color:#fff;
+  font-size:.7rem;
+  font-weight:700;
+  padding:4px 11px;
+  border-radius:20px;
+  pointer-events:none;
+  box-shadow:0 2px 12px rgba(196,77,255,.4);
+  letter-spacing:.5px;
+}
+
+.waifu-badge::before{
+  content:'⭐ ';
+  font-size:.6rem;
+}
+
+.waifu-info{
+  position:absolute;
+  bottom:0;
+  left:0;
+  width:100%;
+  padding:15px 14px 12px;
+  z-index:2;
+}
+
+.waifu-info h3{
+  color:#fff;
+  font-size:1.05rem;
+  font-weight:600;
+  text-shadow:0 2px 8px rgba(0,0,0,.6);
+}
+
+.waifu-back{
+  transform:rotateY(180deg);
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  text-align:center;
+  padding:25px 20px;
+  background:linear-gradient(135deg,#1a1a2e 0%,#0f0f23 100%);
+  border:1px solid rgba(255,100,200,.15);
+  box-shadow:inset 0 0 40px rgba(255,100,200,.05);
+}
+
+.waifu-back h3{
+  color:#ff9ddb;
+  font-size:1.15rem;
+  font-weight:700;
+  margin-bottom:12px;
+  text-shadow:0 0 20px rgba(255,100,200,.2);
+}
+
+.waifu-back p{
+  color:#a0aec0;
+  font-size:.9rem;
+  line-height:1.5;
+  max-width:180px;
+}
+
+.waifu-back::before{
+  content:'💕';
+  font-size:2rem;
+  margin-bottom:10px;
+  display:block;
+  opacity:.5;
+}
+
+@media(max-width:767px){
+  .waifu-overlay-header h2{
+    font-size:1.3rem;
+    letter-spacing:1px;
+  }
+  .waifu-overlay-header h2::before{content:'💖 '}
+  .waifu-overlay-header h2::after{content:' ✨'}
+  .waifu-grid{
+    grid-template-columns:repeat(2,1fr);
+    gap:12px;
+  }
+  .waifu-card{
+    height:280px;
+  }
+}
+
