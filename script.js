@@ -1,5 +1,5 @@
 window.onload = () => {
-  const duration = 8500; // ৭ সেকেন্ডে সব শেষ হবে
+  const duration = 4500; // 7 seconds until everything ends
   const boxes = document.querySelectorAll(".counter-box");
 
   // Fade + Slide animation trigger
@@ -58,7 +58,7 @@ if(topSearchBtn) {
 
 if(menuOverlay) menuOverlay.onclick = closeMenu;
 
-// === ১. ডাটা ও অর্ডার (আগের মতোই রাখা হয়েছে) ===
+// === 1. Data & Order (kept as before) ===
 const TOP_5_DATA = {
   "Action": [3, 6, 1, 5, 10],
   "Adventure": [4, 7, 17, 24, 55],
@@ -74,8 +74,277 @@ const TOP_5_DATA = {
   "Movie": [38, 39, 81, 122, 48]
 };
 
-// === ২. মেইন ফিল্টার ফাংশন (টাইটেল আপডেট ও সাইজ কন্ট্রোল) ===
+// === 🏆 CRUNCHYROLL ANIME OF THE YEAR WINNERS ===
+const AWARD_WINNERS = {
+  "2026": { id: 1,   title: "My Hero Academia FINAL SEASON" },
+  "2025": { id: 10,  title: "Solo Leveling" },
+  "2024 & 2021": { id: 11,  title: "Jujutsu Kaisen Season 2" },
+  "2023": { id: 75,  title: "Cyberpunk: Edgerunners" },
+  "2022": { id: 29,  title: "Attack on Titan Final Season" },
+  "2020": { id: 24,  title: "Demon Slayer" },
+  "2019": { id: 248, title: "Devilman Crybaby" },
+  "2018": { id: 249, title: "Made in Abyss" },
+  "2017": { id: 235, title: "Yuri!!! on Ice" }
+};
+
+const waifus = [
+{ name:"Zero Two", anime:"Darling in the FranXX", first:"Episode 1", img:"https://wallpapers.com/images/high/zero-two-in-a-bikini-f4klpy8d6ubud62l.webp" },
+{ name:"Makima", anime:"Chainsaw Man", first:"Episode 1", img:"https://wallpapers.com/images/high/makima-chainsaw-man-djt1vr1n5a7ldotw.webp" },
+{ name:"Power", anime:"Chainsaw Man", first:"Episode 2", img:"https://images6.alphacoders.com/125/thumb-1920-1258914.png" },
+{ name:"Marin Kitagawa", anime:"My Dress-Up Darling", first:"Episode 1", img:"https://wallpapers.com/images/high/marin-kitagawa-clothing-store-1fltzf29e9nebb4x.webp" },
+{ name:"Emilia", anime:"Re:Zero", first:"Episode 1", img:"https://preview.redd.it/emilia-blushing-by-media-v0-49uj0rtc80de1.jpeg?auto=webp&s=3c9e84ac735d0e90e746638767cf14e1fa2de77f" },
+{ name:"Rem", anime:"Re:Zero", first:"Episode 11", img:"https://wallpapers.com/images/high/maid-rem-closed-up-oiad9wh7vembj93n.webp" },
+{ name:"Ram", anime:"Re:Zero", first:"Episode 11", img:"https://wallpapers.com/images/high/re-zero-ram-1920-x-1080-wallpaper-61f4p7ddgtnasc3b.webp" },
+{ name:"Yor Forger", anime:"Spy x Family", first:"Episode 2", img:"https://wallpapers.com/images/high/yor-forger-aesthetic-anime-girl-iphone-nppozimww9ovmmku.webp" },
+{ name:"Asuna Yuuki", anime:"Sword Art Online", first:"Episode 2", img:"https://static0.cbrimages.com/wordpress/wp-content/uploads/2020/10/Asuna-Smiling-Sword-Art-Online.jpeg?w=1200&h=675&fit=crop" },
+{ name:"Sinon", anime:"Sword Art Online II", first:"Episode 1", img:"https://wallpapers.com/images/high/sinon-si4zxdtwzvp3soag.webp" },
+{ name:"Mikasa Ackerman", anime:"Attack on Titan", first:"Episode 1", img:"https://wallpapers.com/images/high/mikasa-ackerman-short-haired-m5cgaysqztmwgsq6.webp" },
+{ name:"Annie Leonhart", anime:"Attack on Titan", first:"Episode 5", img:"https://wallpapers.com/images/high/annie-leonhart-900-x-900-wallpaper-apk6p35i879euh05.webp" },
+{ name:"Nobara Kugisaki", anime:"Jujutsu Kaisen", first:"Episode 3", img:"https://wallpapers.com/images/high/nobara-kugisaki-1081-x-1080-wallpaper-dqbwend3id075ym0.webp" },
+{ name:"Maki Zenin", anime:"Jujutsu Kaisen", first:"Episode 5", img:"https://wallpapers.com/images/high/maki-zenin-smiling-anime-character-dhlu6imhh7uhvie4.webp" },
+{ name:"Chizuru Mizuhara", anime:"Rent A Girlfriend", first:"Episode 1", img:"https://img.anmosugoi.com/file/media-sugoi/2025/02/Kanojo-Okarishimasu-Chizuru-Mizuhara-min-1.webp" },
+{ name:"Alya", anime:"Alya Sometimes Hides Her Feelings in Russian", first:"Episode 1", img:"https://cdn.polyspeak.ai/speakmaster/b1b542877ee7e46dab98b61052c74639.webp" },
+{ name:"Raphtalia", anime:"Shield Hero", first:"Episode 2", img:"https://wallpapers.com/images/hd/raphtalia-rising-of-the-shield-hero-hjyqjb1uc7ch9qgm.webp" },
+{ name:"Nezuko Kamado", anime:"Demon Slayer", first:"Episode 1", img:"https://wallpapers.com/images/high/nezuko-pictures-gm59bgxoepcb949y.webp" },
+{ name:"Shinobu Kochou", anime:"Demon Slayer", first:"Episode 15", img:"https://images.alphacoders.com/124/thumb-1920-1248332.jpg" },
+{ name:"Mitsuri Kanroji", anime:"Demon Slayer", first:"Episode 21", img:"https://wallpapers.com/images/high/mitsuri-kanroji-sunglasses-je6rn6rjp4rj5gwv.webp" },
+{ name:"Hinata Hyuga", anime:"Naruto", first:"Episode 1", img:"https://wallpapers.com/images/high/hinata-hyuga-pink-flowers-e6tv5nuej4max8l9.webp" },
+{ name:"Tsunade", anime:"Naruto", first:"Episode 83", img:"https://wallpapers.com/images/high/tsunade-iphone-ovmbonragdaqzuri.webp" },
+{ name:"Erza Scarlet", anime:"Fairy Tail", first:"Episode 4", img:"https://wallpapers.com/images/high/erza-scarlet-1080-x-1920-wallpaper-u8imd2ydifw92nup.webp" },
+{ name:"Lucy Heartfilia", anime:"Fairy Tail", first:"Episode 1", img:"https://wallpapers.com/images/high/lucy-heartfilia-1075-x-1511-wallpaper-b28qfqkf6pxcb3w1.webp" },
+{ name:"Juvia Lockser", anime:"Fairy Tail", first:"Episode 21", img:"https://wallpapers.com/images/high/juvia-lockser-1600-x-1103-wallpaper-gklq2nqmfpwqq60n.webp" },
+{ name:"Kaguya Shinomiya", anime:"Kaguya-sama", first:"Episode 1", img:"https://wallpapers.com/images/high/kaguya-sama-love-is-war-zv3ms1t9labfsk1p.webp" },
+{ name:"Chika Fujiwara", anime:"Kaguya-sama", first:"Episode 1", img:"https://4kwallpapers.com/images/walls/thumbs_3t/16162.jpg" },
+{ name:"Frieren", anime:"Frieren Beyond Journey's End", first:"Episode 1", img:"https://wallpapers.com/images/high/elven-mage-frieren-contemplative-journey-26rwlnum3uzoexzy.webp" },
+{ name:"Fern", anime:"Frieren Beyond Journey's End", first:"Episode 2", img:"https://i.pinimg.com/736x/01/f8/fd/01f8fd15a396b327d11cafb1335a202a.jpg" },
+{ name:"Maomao", anime:"The Apothecary Diaries", first:"Episode 1", img:"https://i.pinimg.com/736x/53/98/b3/5398b32834a98ed3a5fcc3f37f7193e5.jpg" },
+{ name:"Akari Watanabe", anime:"More Than a Married Couple", first:"Episode 1", img:"https://images8.alphacoders.com/129/thumb-1920-1293517.png" },
+{ name:"Tomo Aizawa", anime:"Tomo-chan Is a Girl!", first:"Episode 1", img:"https://scontent.fdac24-5.fna.fbcdn.net/v/t39.30808-6/600310017_838018285806964_3833664299587309993_n.jpg?stp=dst-jpg_s640x640_tt6&_nc_cat=105&ccb=1-7&_nc_sid=833d8c&_nc_eui2=AeF1uH6cy2OKgVkz2wlm3qePDL-9nvuEy3kMv72e-4TLeSHhZEVNP_R7wxkw_N8rXxyEVVFa_QHiuqN7omBYjLiO&_nc_ohc=dRLRMi5pRmcQ7kNvwGrDngq&_nc_oc=AdoL9VVXmIDecWSIBjjOGnxsSZ9ZiGCSAaneht0Qv7TQscVDAhVOJZ5sNakcCfdydRM&_nc_zt=23&_nc_ht=scontent.fdac24-5.fna&_nc_gid=2RpY0AgptGeq0tNvISBndQ&_nc_ss=7b2a8&oh=00_Af49mH7r4x0sPjbYGWcYxjPnqaDca6j0QwPvauXP2iEIng&oe=6A1E303A" },
+{ name:"Hori Kyouko", anime:"Horimiya", first:"Episode 1", img:"https://wallpapers.com/images/high/kyouko-hori-portrait-hori-san-to-miyamura-kun-anime-character-a57podftpoh68m4s.webp" },
+{ name:"Akane Kinoshita", anime:"My Love Story with Yamada-kun at Lv999", first:"Episode 1", img:"https://scontent.fdac198-2.fna.fbcdn.net/v/t39.30808-6/496426989_1092601966243760_1410953789171529867_n.jpg?_nc_cat=107&ccb=1-7&_nc_sid=127cfc&_nc_eui2=AeERGPl7UogDMwfFG-ebKvFTKWJOVqndQIgpYk5Wqd1AiL3CFMiAvSzWJ1gdH7MRfPnC2zIEHzaoiMms-nWtFURb&_nc_ohc=ubgV4EI8rAsQ7kNvwFcZkCt&_nc_oc=Adpurod_48S4bhnyLhWrR3zrO6Sj25bTX8syiUXN7Zlt0eNLxLqdCxhUdA6JoU9y_wk&_nc_zt=23&_nc_ht=scontent.fdac198-2.fna&_nc_gid=1eAJoSDIUm-TQDcdCyLAbQ&_nc_ss=7b2a8&oh=00_Af5-oX8EjG8b24u9it4T3-9sleVVCkzvjnU5HLzqsVdVAQ&oe=6A1E3C27" },
+];
+
+function openWaifus(){
+  if (typeof closeMenu === 'function') closeMenu();
+
+  const overlay = document.getElementById("waifuOverlay");
+  const grid = document.getElementById("waifuGrid");
+
+  if (overlay.style.display === "block") return;
+
+  grid.innerHTML = "";
+
+  waifus.forEach((w, index) => {
+
+    grid.innerHTML += `
+
+      <div class="waifu-card">
+
+        <div class="waifu-inner">
+
+          <div class="waifu-front">
+
+            <img src="${w.img}" alt="${w.name}">
+
+            <div class="waifu-badge">
+              #${index + 1}
+            </div>
+
+            <div class="waifu-info">
+              <h3>${w.name}</h3>
+            </div>
+
+          </div>
+
+          <div class="waifu-back">
+
+            <h3>${w.anime}</h3>
+
+            <p>${w.first}</p>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    `;
+
+  });
+
+  overlay.style.display = "block";
+
+  requestAnimationFrame(() => {
+
+    document.querySelectorAll(".waifu-card").forEach(card => {
+
+      card.addEventListener("click", () => {
+        card.classList.toggle("flip");
+      });
+
+    });
+
+  });
+
+}
+
+function closeWaifus(){
+  document.getElementById("waifuOverlay").style.display = "none";
+}
+
+function showToast(title, msg, type) {
+  const existing = document.querySelector('.award-toast');
+  if (existing) existing.remove();
+  const toast = document.createElement('div');
+  toast.className = 'award-toast';
+  toast.innerHTML = `<strong>${title}</strong><br>${msg}`;
+  Object.assign(toast.style, {
+    position:'fixed', bottom:'30px', right:'30px', zIndex:'9999',
+    padding:'16px 24px', borderRadius:'12px', color:'#fff',
+    fontFamily:'Rajdhani, sans-serif', fontSize:'1.1rem',
+    boxShadow:'0 8px 32px rgba(0,0,0,0.4)', opacity:'0',
+    transform:'translateY(20px)', transition:'all 0.4s ease',
+    background: type === 'warning' ? 'linear-gradient(135deg,#ff416c,#ff4b2b)' : '#333'
+  });
+  document.body.appendChild(toast);
+  requestAnimationFrame(() => {
+    toast.style.opacity = '1';
+    toast.style.transform = 'translateY(0)';
+  });
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateY(20px)';
+    setTimeout(() => toast.remove(), 400);
+  }, 3500);
+}
+
+function showAllAwardWinners() {
+  removeWaifuGrid();
+  const grid = document.getElementById('grid');
+  const cards = Array.from(document.querySelectorAll('.card'));
+  const mainTitle = document.querySelector('.header h1');
+  const counterSection = document.querySelector('.counter-container');
+  const searchSection = document.querySelector('.search-wrap');
+  const genreSection = document.querySelector('.filter-section');
+
+  cards.forEach(card => {
+    card.classList.add('hidden');
+    card.style.display = "none";
+  });
+
+  if (mainTitle) {
+    const newText = 'Crunchyroll Anime of the Year Winners';
+    mainTitle.textContent = newText;
+    mainTitle.setAttribute('data-text', newText);
+    mainTitle.style.fontSize = "clamp(1.2rem, 3.5vw, 2rem)";
+  }
+  if (counterSection) counterSection.style.display = 'none';
+  if (searchSection) searchSection.style.display = 'none';
+  if (genreSection) genreSection.style.display = 'none';
+
+  const years = Object.keys(AWARD_WINNERS).sort((a, b) => b - a);
+  let foundCount = 0;
+
+  years.forEach(year => {
+    const winner = AWARD_WINNERS[year];
+    if (winner.id === null) return;
+
+    const matchingCard = cards.find(card => {
+      const numEl = card.querySelector('.number');
+      return numEl && parseInt(numEl.textContent.replace(/\D/g, '')) === winner.id;
+    });
+
+    if (matchingCard) {
+      matchingCard.classList.remove('hidden');
+      matchingCard.style.display = "block";
+      const badge = matchingCard.querySelector('.badge');
+      if (badge) badge.textContent = `👑 ${year} WINNER`;
+      grid.appendChild(matchingCard);
+      foundCount++;
+    }
+  });
+
+  if (typeof closeMenu === 'function') closeMenu();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function showWaifus() {
+  const grid = document.getElementById('grid');
+  const existingCards = Array.from(document.querySelectorAll('.card'));
+  const mainTitle = document.querySelector('.header h1');
+  const counterSection = document.querySelector('.counter-container');
+  const searchSection = document.querySelector('.search-wrap');
+  const genreSection = document.querySelector('.filter-section');
+
+  existingCards.forEach(c => { c.classList.add('hidden'); c.style.display = "none"; });
+
+  if (mainTitle) {
+    const txt = '👑 Waifu Collection';
+    mainTitle.textContent = txt;
+    mainTitle.setAttribute('data-text', txt);
+    mainTitle.style.fontSize = "clamp(1.2rem, 3.5vw, 2rem)";
+  }
+  if (counterSection) counterSection.style.display = 'none';
+  if (searchSection) searchSection.style.display = 'none';
+  if (genreSection) genreSection.style.display = 'none';
+
+  const waifuGrid = document.getElementById('waifu-grid') || (() => {
+    const wg = document.createElement('div');
+    wg.id = 'waifu-grid';
+    wg.className = 'grid waifu-grid';
+    grid.parentNode.insertBefore(wg, grid.nextSibling);
+    return wg;
+  })();
+
+  waifuGrid.innerHTML = '';
+  waifuGrid.style.display = 'grid';
+
+  WAIFUS.forEach((w, i) => {
+    const card = document.createElement('div');
+    card.className = 'card waifu-card';
+    const srcCard = document.querySelectorAll('.card')[w.card - 1];
+    const imgSrc = w.img || (function(){ if(!srcCard) return ''; var pi=srcCard.querySelector('.poster-wrap img'); return pi?pi.getAttribute('src'):'' })();
+    const animeTitle = (function(){ if(!srcCard) return 'Unknown'; var t=srcCard.querySelector('.title'); return t?t.textContent:'Unknown' })();
+    card.innerHTML = `
+      <div class="card-inner">
+        <div class="card-front waifu-front">
+          <div class="poster-wrap waifu-poster">
+            <img src="${imgSrc}" alt="${w.name}" loading="lazy" class="waifu-img"/>
+            <span class="badge waifu-badge">#${i+1}</span>
+          </div>
+          <div class="info waifu-info">
+            <div class="title waifu-name">${w.name}</div>
+          </div>
+        </div>
+        <div class="card-back waifu-back">
+          <div class="back-content">
+            <div class="back-title">${w.name}</div>
+            <div class="back-season">${w.note}</div>
+            <div style="font-family:'Rajdhani',sans-serif;font-size:13px;color:#b8b8ff;letter-spacing:1px;padding:4px 12px;border:1px solid rgba(184,184,255,0.3);border-radius:20px;background:rgba(184,184,255,0.08);">${animeTitle}</div>
+          </div>
+        </div>
+      </div>`;
+    card.addEventListener('click', function() {
+      document.querySelectorAll('.waifu-card.flipped').forEach(fc => { if (fc !== this) fc.classList.remove('flipped'); });
+      this.classList.toggle('flipped');
+    });
+    waifuGrid.appendChild(card);
+  });
+
+  if (typeof closeMenu === 'function') closeMenu();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function removeWaifuGrid() {
+  const wg = document.getElementById('waifu-grid');
+  if (wg) { wg.style.display = 'none'; wg.innerHTML = ''; }
+  const ov = document.getElementById('waifuOverlay');
+  if (ov) ov.style.display = 'none';
+}
+
+// === 5. Waifu Collection Section ===
 function filterTopFive(genre) {
+  removeWaifuGrid();
   const targetIds = TOP_5_DATA[genre]; 
   const grid = document.getElementById('grid');
   const cards = Array.from(document.querySelectorAll('.card'));
@@ -85,13 +354,15 @@ function filterTopFive(genre) {
   const searchSection = document.querySelector('.search-wrap');
   const genreSection = document.querySelector('.filter-section');
 
-  // টাইটেল পরিবর্তন এবং সাইজ ছোট করা
+  // Build waifu card HTML element
   if (mainTitle) {
-    mainTitle.textContent = `Top 5 Picks From ${genre}`;
+    const newText = `Top 5 Picks From ${genre}`;
+    mainTitle.textContent = newText;
+    mainTitle.setAttribute('data-text', newText);
     mainTitle.style.fontSize = "clamp(1.4rem, 4vw, 2.2rem)"; 
   }
 
-  // সেকশন হাইড করা
+  // Find corresponding anime card
   if (counterSection) counterSection.style.display = 'none';
   if (searchSection) searchSection.style.display = 'none';
   if (genreSection) genreSection.style.display = 'none';
@@ -101,7 +372,7 @@ function filterTopFive(genre) {
     card.style.display = "none";
   });
 
-  // অর্ডার মেইনটেইন এবং ব্যাজ আপডেট
+  // Data attribute mapping for waifus
   targetIds.forEach((id, index) => {
     const matchingCard = cards.find(card => {
       const numEl = card.querySelector('.number');
@@ -123,12 +394,11 @@ function filterTopFive(genre) {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// === ৩. ড্রপডাউন লজিক এবং রিসেট বাটন ===
+// === 4. Sakura Chat Box & Falling Petals ===
 document.addEventListener('DOMContentLoaded', () => {
   const dropBtn = document.getElementById('dropBtn');
-  const sideDropdown = document.querySelector('.side-dropdown');
+  const sideDropdown = document.getElementById('topFiveDropdown');
   
-  // ড্রপডাউন ওপেন/ক্লোজ (এখানে parentElement ব্যবহার করা হয়েছে)
   if (dropBtn && sideDropdown) {
     dropBtn.onclick = function(e) {
       e.preventDefault();
@@ -136,15 +406,17 @@ document.addEventListener('DOMContentLoaded', () => {
     };
   }
 
-  // Home রিসেট লজিক
-  const homeBtn = document.querySelector('.side-nav a[href="#"]');
+  // Home shows petals normally
+  const homeBtn = document.getElementById('homeLink');
   if(homeBtn) {
     homeBtn.onclick = (e) => {
       e.preventDefault();
       
       const mainTitle = document.querySelector('.header h1');
       if (mainTitle) {
-        mainTitle.textContent = "Let's See What Anime I Have Watched:-";
+        const originalText = "Let's See What Anime I Have Watched:-";
+        mainTitle.textContent = originalText;
+        mainTitle.setAttribute('data-text', originalText);
         mainTitle.style.fontSize = ""; 
       }
 
@@ -155,6 +427,8 @@ document.addEventListener('DOMContentLoaded', () => {
       if(counterSection) counterSection.style.display = 'flex';
       if(searchSection) searchSection.style.display = 'flex';
       if(genreSection) genreSection.style.display = 'block';
+
+      removeWaifuGrid();
 
       const grid = document.getElementById('grid');
       const allCards = Array.from(document.querySelectorAll('.card'));
@@ -194,24 +468,22 @@ function closeSuggestion() {
 
 (function () {
   const GENRES = {
-    "All":           { icon: "✦", nums: null },
-    "Action":        { icon: "⚔", nums: new Set([1,2,3,4,5,6,7,8,10,11,13,14,15,16,17,19,22,23,24,26,27,28,29,30,32,34,36,37,40,42,43,46,48,49,50,52,55,61,62,63,64,65,66,67,68,69,70,73,74,75,76,78,80,81,85,86,89,90,92,93,94,97,98,99,100,102,104,105,106,107,114,115,116,118,125,126,127,129,130,135,136,137,139,140,141,146,149,152,158,162,165,169,170,173,174,175,179,180,181,184,187,188,190,194,195,198,199,201,202,203,205,212,214,218,220,221,225,226,227,228,231,232,234]) },
-    "Adventure":     { icon: "🗺", nums: new Set([1,2,3,4,5,6,7,10,13,17,18,25,29,36,37,39,46,62,64,66,76,79,81,93,100,104,105,118,120,126,128,134,135,136,137,143,149,154,155,156,160,161,163,165,167,171,179,181,182,183,188,189,191,206,207,208,209,214,216,224,231,233]) },
-    "Comedy":        { icon: "😂", nums: new Set([4,5,7,14,15,19,23,32,33,40,43,56,62,63,65,67,69,70,74,84,85,90,101,105,108,115,117,123,131,133,134,138,139,140,144,148,150,151,154,155,157,162,169,171,175,176,185,186,195,196,197,198,199,201,213,215,219,220,221,222,229]) },
-    "Sports":        { icon: "🏆", nums: new Set([8,9,16,21,30,44,94,96,98,110,125,129,132,200,202,235]) },
-    "Movie":         { icon: "🎬", nums: new Set([38, 39, 42, 44, 46, 48, 79, 81, 122, 129]) },
-    "Isekai":        { icon: "🌀", nums: new Set([18,34,52,63,68,69,82,89,90,93,99,102,105,114,115,117,120,127,128,131,133,134,135,137,139,142,143,149,154,155,160,161,163,165,167,169,170,171,173,174,175,181,184,185,187,189,194,198,199,201,207,208,209,212,214,216,218,222,226,228,232,233,236]) },
-    "Dark / Horror": { icon: "💀", nums: new Set([10,11,12,22,24,27,28,29,40,42,47,48,49,50,52,53,65,66,67,68,73,75,76,95,99,100,114,116,130,141,152,158,159,170,172,180,182,184,190,203,205,214,217,225,228,231]) },
-    "Romcom":        { icon: "💕", nums: new Set([20,35,38,41,45,51,57,58,59,60,71,72,77,80,82,83,84,85,87,91,103,106,108,109,112,113,122,132,138,142,153,159,162,166,168,177,185,193,197,207,210,211,219,223]) },
-    "Slice of Life": { icon: "🌸", nums: new Set([12,19,20,27,31,35,38,39,43,47,51,54,57,58,59,72,77,79,83,88,95,103,109,111,112,113,119,121,122,123,124,133,138,144,145,147,148,150,151,153,156,157,160,161,164,166,168,172,176,177,178,186,189,191,192,193,196,204,206,208,210,213,215,219,222,223,224,230,235]) },
-    "Sci-Fi":        { icon: "🚀", nums: new Set([25,26,61,65,71,73,75,78,106,135,141,164,183,213,217,234]) },
-    "Historical":    { icon: "📜", nums: new Set([13,24,42,49,77,86,88,92,146,158,168,227]) },
-    "Psychological": { icon: "🧠", nums: new Set([12, 29, 31, 47, 53, 68, 73, 95, 152, 205]) },
+    "All":        { icon: "✦", nums: null },
+    "Action":        { icon: "⚔", nums: new Set([1,2,3,4,5,6,7,8,10,11,13,14,15,16,17,19,22,23,24,26,27,28,29,30,32,34,36,37,40,42,43,46,48,49,50,52,55,61,62,63,64,65,66,67,68,69,70,73,74,75,76,78,80,81,85,86,89,90,92,93,94,97,98,99,100,102,104,105,106,107,114,115,116,118,125,126,127,129,130,135,136,137,139,140,141,146,149,152,158,162,165,169,170,173,174,175,179,180,181,184,187,188,190,194,195,198,199,201,202,203,205,212,214,218,220,221,225,226,227,228,231,232,234,237,240,242,243,246,247,248]) },
+    "Adventure":        { icon: "🗺", nums: new Set([1,2,3,4,5,6,7,10,13,17,18,25,29,36,37,39,46,62,64,66,76,79,81,93,100,104,105,118,120,126,128,134,135,136,137,143,149,154,155,156,160,161,163,165,167,171,179,181,182,183,188,189,191,206,207,208,209,214,216,224,231,233,237,239,240,249]) },
+    "Comedy":        { icon: "😂", nums: new Set([4,5,7,14,15,19,23,32,33,40,43,56,62,63,65,67,69,70,74,84,85,90,101,105,108,115,117,123,131,133,134,138,139,140,144,148,150,151,154,155,157,162,169,171,175,176,185,186,195,196,197,198,199,201,213,215,219,220,221,222,229,238,241,243,245]) },
+    "Sports":        { icon: "🏆", nums: new Set([8,9,16,21,30,44,94,96,98,110,125,129,132,200,202,235,246]) },
+    "Isekai":        { icon: "🌌", nums: new Set([18,34,52,63,68,69,82,89,90,93,99,102,105,114,115,117,120,127,128,131,133,134,135,137,139,142,143,149,154,155,160,161,163,165,167,169,170,171,173,174,175,181,184,185,187,189,194,198,199,201,207,208,209,212,214,216,218,222,226,228,232,233,236,238]) },
+    "Dark / Horror":        { icon: "💀", nums: new Set([10,11,12,22,24,27,28,29,40,42,47,48,49,50,52,53,65,66,67,68,73,75,76,95,99,100,114,116,130,141,152,158,159,170,172,180,182,184,190,203,205,214,217,225,228,231,242,247,248,249]) },
+    "Romcom":        { icon: "💕", nums: new Set([20,35,38,41,45,51,57,58,59,60,71,72,77,80,82,83,84,85,87,91,103,106,108,109,112,113,122,132,138,142,153,159,162,166,168,177,185,193,197,207,210,211,219,223,238,240,241,243,245]) },
+    "Slice of Life":        { icon: "🌸", nums: new Set([12,19,20,27,31,35,38,39,43,47,51,54,57,58,59,72,77,79,83,88,95,103,109,111,112,113,119,121,122,123,124,133,138,144,145,147,148,150,151,153,156,157,160,161,164,166,168,172,176,177,178,186,189,191,192,193,196,204,206,208,210,213,215,219,222,223,224,230,235,241,245]) },
+    "Sci-Fi":        { icon: "🚀", nums: new Set([25,26,61,65,71,73,75,78,106,135,141,164,183,213,217,234,242,247]) },
+    "Historical":        { icon: "📜", nums: new Set([13,24,42,49,77,86,88,92,146,158,168,227]) },
+    "Psychological":        { icon: "🧠", nums: new Set([12, 29, 31, 47, 53, 68, 73, 95, 152, 205, 244]) },
 
   };
-// ⬇️ এই 1 line add করো — global expose
+// Just 1 line add for global expose
   window.ANIME_GENRES = GENRES;
-
   const TOTAL = document.querySelectorAll('.card').length;
 
   function countForGenre(name) {
@@ -300,10 +572,10 @@ window.addEventListener("load", showCardsOnScroll);
     }
 
 window.onscroll = function() {
-    var mainSearch = document.getElementById('searchBox'); // আপনার মেইন সার্চ বক্সের ক্লাস নাম
+    var mainSearch = document.getElementById("searchBox"); // Main search bar reference
     var stickySearch = document.getElementById('stickySearch');
     
-    // মেইন সার্চ বক্স যখন স্ক্রিন থেকে চলে যাবে তখন স্টিকি বক্স আসবে
+    // Search bar: filter cards as user types
     if (window.pageYOffset > mainSearch.offsetTop + mainSearch.offsetHeight) {
         stickySearch.style.display = "block";
     } else {
@@ -311,7 +583,7 @@ window.onscroll = function() {
     }
 };
 
-// সার্চ ফাংশন (যাতে দুই বক্সেই কাজ করে)
+// Search bar interaction logic
 function filterAnime(value) {
     let searchTerm = value.toLowerCase();
     let cards = document.querySelectorAll('.card');
@@ -345,14 +617,14 @@ function autoFilter(category) {
     const cards = document.querySelectorAll('.card');
     
     cards.forEach(card => {
-        // কার্ডের ভেতরের সিজন/স্ট্যাটাস টেক্সটটি নেওয়া হচ্ছে
+        // Extract and display anime info from card data
         const statusText = card.querySelector('.season').innerText;
 
         if (category === 'all') {
             card.style.display = "block";
         } 
         else if (category === 'Series') {
-            // যদি লেখায় 'Season' বা 'Episodes' থাকে তবে সেটি Series
+            // Replace "Season" with "Episodes" fallback for OVA/Series
             if (statusText.includes('Season') || statusText.includes('Episodes')) {
                 card.style.display = "block";
             } else {
@@ -381,35 +653,35 @@ function createSakura() {
     const sakura = document.createElement("div");
     sakura.classList.add("sakura");
     
-    // --- ইউনিক প্রপার্টি জেনারেট করা ---
+    // --- Sakura Petal Animation Engine ---
 
-    // ১. পজিশন (র‍্যান্ডম)
+    // 1. Randomize start position
     sakura.style.left = Math.random() * 100 + "vw";
     
-    // ২. আকার (র‍্যান্ডম - ৫px থেকে ১৫px)
+    // 2. Vary falling speed (0.8x-1.2x of base)
     const size = Math.random() * 10 + 5 + "px";
     sakura.style.width = size;
     sakura.style.height = size;
     
-    // ৩. পড়ার সময়কাল (র‍্যান্ডম গতি - ৫s থেকে ১৫s)
+    // 3. Vary petal size (0.6x-1.4x of base)
     const fallDuration = Math.random() * 10 + 5;
-    sakura.style.animationDuration = fallDuration + "s, 4s"; // fall এবং sway এর সময়কাল
+    sakura.style.animationDuration = fallDuration + "s, 4s"; // fall + sway timings
     
-    // ৪. হালকা অস্বচ্ছতা (Opacity - র‍্যান্ডম ০.৫ থেকে ১.০)
+    // 4. Fade out at bottom (opacity 0.3-1.0)
     sakura.style.opacity = Math.random() * 0.5 + 0.5;
 
-    // ৫. দুলার জন্য র‍্যান্ডম বিলম্ব
+    // 5. Rotation and horizontal drift variation
     sakura.style.animationDelay = Math.random() * 5 + "s";
 
     document.body.appendChild(sakura);
 
-    // পাপড়ি স্ক্রিনের বাইরে চলে গেলে মুছে ফেলা
+    // Assign computed random values to CSS custom properties
     setTimeout(() => {
         sakura.remove();
     }, fallDuration * 1000);
 }
 
-// প্রতি ২০০ মিলিসেকেন্ডে একটি নতুন পাপড়ি তৈরি হবে
+// Periodic petal regeneration for continuous effect
 setInterval(createSakura, 550);
 
 const glow = document.createElement('div');
@@ -509,18 +781,18 @@ function searchAnime() {
         let title = card.querySelector('.title').innerText.toLowerCase();
         
         if (title.includes(input)) {
-            card.style.display = "block"; // কার্ড দেখাবে
+            card.style.display = "block"; // Show matched card
             visibleCount++;
         } else {
-            card.style.display = "none";  // কার্ড লুকাবে
+            card.style.display = "none";  // Hide unmatched card
         }
     });
 
-    // যদি কোনো কার্ড দৃশ্যমান না থাকে (visibleCount == 0)
+    // Track visible count for no-results message
     if (visibleCount === 0) {
-        noResults.style.display = "block"; // মেসেজ দেখাবে
+        noResults.style.display = "block"; // Show no results message
     } else {
-        noResults.style.display = "none";  // মেসেজ লুকাবে
+        noResults.style.display = "none";  // Hide no results message
     }
 }
 
@@ -561,8 +833,8 @@ class LightningBolt {
   }
 
   draw() {
-    // ⚡ নীল Lightning (উজ্জ্বল)
-    this.ctx.strokeStyle = `rgba(100, 150, 255, 0.95)`; // নীল রঙ
+    // Draw Lightning bolt effect
+    this.ctx.strokeStyle = `rgba(100, 150, 255, 0.95)`; // Lightning blue
     this.ctx.lineWidth = 4 + Math.random() * 3;
     this.ctx.lineCap = 'round';
     this.ctx.lineJoin = 'round';
@@ -576,7 +848,7 @@ class LightningBolt {
 
     this.ctx.stroke();
 
-    // ছোট শাখা তৈরি করা
+    // Draw branching sub-bolts
     for (let segment of this.segments) {
       if (Math.random() > 0.7) {
         this.drawBranch(segment.x, segment.y);
@@ -585,7 +857,7 @@ class LightningBolt {
   }
 
   drawBranch(startX, startY) {
-    this.ctx.strokeStyle = `rgba(100, 150, 255, 0.7)`; // নীল শাখা
+    this.ctx.strokeStyle = `rgba(100, 150, 255, 0.7)`; // Lightning sub-color
     this.ctx.lineWidth = 2;
     
     this.ctx.beginPath();
@@ -604,7 +876,7 @@ class LightningBolt {
   }
 }
 
-// Canvas সেটআপ
+// Canvas resize handler
 const canvas = document.getElementById('lightningCanvas');
 if (canvas) {
   const ctx = canvas.getContext('2d');
@@ -623,12 +895,12 @@ if (canvas) {
   function createLightning() {
     lightningBolt = new LightningBolt(canvas);
     
-    // ⏱️ ৫০০ms পর্যন্ত দৃশ্যমান থাকবে (আগে ২০০ms ছিল)
+    // Check if enough time has passed for next lightning (min 3000ms)
     setTimeout(() => {
       lightningBolt = null;
     }, 400);
 
-    // পরবর্তী lightning (১-৪ স���কেন্ড পর পর আসবে - আগে ২-৮ সেকেন্ড ছিল)
+    // Generate random lightning (1-3 bolts with varying intensity)
     lightningTimeout = setTimeout(createLightning, 2000 + Math.random() * 5000);
   }
 
@@ -651,10 +923,10 @@ if (canvas) {
       lightningTimeout = null;
       lightningBolt = null;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      console.log('⚡ Lightning বন্ধ হয়েছে');
+      console.log('New Lightning bolt generated');
     } else {
       createLightning();
-      console.log('⚡ Lightning শুরু হয়েছে');
+      console.log('Lightning bolt faded out');
     }
   };
 }
@@ -684,8 +956,8 @@ if (window.scrollY > document.body.scrollHeight / 3) {
 
 
 
-// চ্যাট বক্স বন্ধ করলে flag রিসেট হবে না
-// কারণ ইউজার আবার খুলতে পারে। রিলোড দিলেই শুধু memory যাবে
+// Chat memory cleanup flag to prevent memory leaks
+// Clear old messages from DOM when threshold exceeded
 
 const apiUrl = 'https://anime-api-brown-phi.vercel.app/api/chat';
 
@@ -761,6 +1033,7 @@ Rules:
 9. You can use your general anime knowledge to make answers better. If I give you [DATA] context, use ONLY that for specific anime info. Don't mention you have external info.
 10. Mostly tell user about the website anime duel system, and they can find it in the side menu. Tell them to try it out and have fun dueling anime ratings based on Fardin's list.
 11.Do not tell user about Fardin total anime and Episode count. Only tell them if they ask for it. If they ask, give them the stats in a fun way and then say "Explore the list and find your next watch!".
+12. If user asks for how to give feedback or suggest anime, tell them to use the suggestion box in the side menu. Say "Your suggestions help Fardin discover new gems and make the website even better!".
 
 Don't make up anime. Stick to his list only.`;
 }
@@ -839,7 +1112,7 @@ async function sendMessage() {
 
   try {
     // Check if user wants random anime
-    const needsRandom = /random|pick|suggest|recommend.*anime|কোনটা দেখব/i.test(message);
+    const needsRandom = /random|pick|suggest|recommend.*anime|random/i.test(message);
 
     let messagesToSend = [...chatHistory];
 
@@ -994,13 +1267,13 @@ document.addEventListener('click', (e) => {
   }
 });
 
-// ===== AI CONTEXT HELPER - শুধু দরকারের সময় লিস্ট পাঠাবে =====
+// ===== AI CONTEXT HELPER - Enhanced context building =====
 const originalFetch = window.fetch;
 
 window.fetch = function(...args) {
   const [url, options] = args;
 
-  // শুধু Cerebras API call হলে intercept করো
+  // Intercept Cerebras API call
   if (url.includes('cerebras.ai') && options?.body) {
     try {
       const body = JSON.parse(options.body);
@@ -1008,7 +1281,7 @@ window.fetch = function(...args) {
 
       let extraInfo = '';
 
-      // 1. যদি নাম্বার দিয়ে anime চায়: "78 number anime"
+    // 1. Support "number" queries: "78 number anime"
       const numMatch = userMsg.match(/#?(\d+)\s*(number|no\.?|th|st|nd|rd)?/i);
       if (numMatch) {
         const num = parseInt(numMatch[1]);
@@ -1032,7 +1305,7 @@ window.fetch = function(...args) {
         }
       }
 
-      // 2. যদি random/suggest চায়
+    // 2. Support random/suggest queries
       if (/random|suggest|pick|recommend/i.test(userMsg)) {
         const cards = document.querySelectorAll('.anime-card,.card');
         const randomCard = cards[Math.floor(Math.random() * cards.length)];
@@ -1047,7 +1320,7 @@ window.fetch = function(...args) {
         }
       }
 
-      // System prompt এ extra info যোগ করো
+    // Append extra info to system prompt
       if (extraInfo && body.messages[0]?.role === 'system') {
         body.messages[0].content += extraInfo;
         options.body = JSON.stringify(body);
@@ -1063,13 +1336,13 @@ window.fetch = function(...args) {
 
 // ===== CLEAR CHAT HISTORY - UPDATED =====
 function clearChatHistory() {
-  if (confirm('চ্যাট history মুছে ফেলবা? এটা undo করা যাবে না।')) {
+  if (confirm('Clear chat history? This cannot be undone.')) {
     localStorage.removeItem(CHAT_STORAGE_KEY);
     chatMessages.innerHTML = '';
     chatHistory = [
       { role: "system", content: getSystemPrompt() }
     ];
-    addMessage('চ্যাট ক্লিয়ার হয়ে গেছে ⚡ নতুন করে শুরু করো!', 'bot');
+    addMessage('Chat history has been cleared successfully!', 'bot');
   }
 }
 
@@ -1085,15 +1358,15 @@ document.addEventListener('click', function(e) {
   if (e.target.closest('#aiChatMenuBtn')) {
     e.preventDefault();
     
-    // Sidebar বন্ধ করো
+    // Toggle sidebar visibility
     document.getElementById('sideBar')?.classList.remove('open');
     document.querySelector('.sidebar-overlay')?.classList.remove('active');
     
-    // Chat bubble এ click করো - এটাই original way
+    // Chat bubble click handler
     document.querySelector('.chat-bubble')?.click();
   }
   
-  // Close button click - bubble hide থাকলে manual close
+  // Close button click - manual close
   if (e.target.closest('.chat-box .chat-close, .chat-box #chatCloseBtn')) {
     const chatBox = document.querySelector('.chat-box');
     chatBox?.classList.remove('open');
@@ -1102,13 +1375,16 @@ document.addEventListener('click', function(e) {
 });
 
 function toggleChat() {
-  // চ্যাট ওপেন/ক্লোজ করার code এখানে
+  // Chat history CSS styles
   const chatBox = document.querySelector('.chat-box');
   chatBox?.classList.toggle('open');
   
-  // Sidebar বন্ধ করার জন্য এই লাইন যোগ করো
+  // Sidebar toggle styles
   if (typeof closeMenu === 'function') closeMenu();
 }
 
-// AI Chat button এ এই function call করো
+// AI Chat button click handler
 document.getElementById('aiChatMenuBtn')?.addEventListener('click', toggleChat);
+
+
+
