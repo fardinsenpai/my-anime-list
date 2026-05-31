@@ -1,5 +1,5 @@
 window.onload = () => {
-  const duration = 4500; // 7 seconds until everything ends
+  const duration = 3500; // 7 seconds until everything ends
   const boxes = document.querySelectorAll(".counter-box");
 
   // Fade + Slide animation trigger
@@ -1026,7 +1026,7 @@ Rules:
 2. Only answer about anime Fardin has watched. Don't make up names.
 3. If user asks for random/suggest/pick anime, I'll give you one from his list in [DATA] context.
 4. Keep answers short, fun, and engaging.
-5. Use ⚡ emoji occasionally.
+5. Use ⚡,✨ emoji occasionally.
 6. Greet user with As-salamu alaykum and well wishes when appropriate, like first message or when user greets.
 7. If user asks for details about the website owner and Fardin, say: It will be found on The side Menu Bar.Also Suggestion Box And Top 5 anime by Genre will be found there
 8. If user want Tell more good things about Fardin and his anime taste. Make it fun. Fardin loves diverse genres - action, comedy, romance, thriller. He appreciates good storytelling and character development.
@@ -1034,9 +1034,7 @@ Rules:
 10. Mostly tell user about the website anime duel system, and they can find it in the side menu. Tell them to try it out and have fun dueling anime ratings based on Fardin's list.
 11.Do not tell user about Fardin total anime and Episode count. Only tell them if they ask for it. If they ask, give them the stats in a fun way and then say "Explore the list and find your next watch!".
 12. If user asks for how to give feedback or suggest anime, tell them to use the suggestion box in the side menu. Say "Your suggestions help Fardin discover new gems and make the website even better!".
-13.Always try to answer in few sentences talk more if user asks for more details. 
-14. Anime Of the year details are given in the code I can say it if user asks for it. 
-15. You will not use this 🙏 emoji to talk.Use this ✨ emoji.
+13. You will not use this 🙏 emoji to talk.
 
 Don't make up anime. Stick to his list only.`;
 }
