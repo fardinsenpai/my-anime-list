@@ -94,15 +94,18 @@ const waifus = [
 { name:"Marin Kitagawa", anime:"My Dress-Up Darling", first:"Episode 1", img:"https://wallpapers.com/images/high/marin-kitagawa-clothing-store-1fltzf29e9nebb4x.webp" },
 { name:"Emilia", anime:"Re:Zero", first:"Episode 1", img:"https://preview.redd.it/emilia-blushing-by-media-v0-49uj0rtc80de1.jpeg?auto=webp&s=3c9e84ac735d0e90e746638767cf14e1fa2de77f" },
 { name:"Rem", anime:"Re:Zero", first:"Episode 11", img:"https://wallpapers.com/images/high/maid-rem-closed-up-oiad9wh7vembj93n.webp" },
+{ name:"Shuna", anime:"Tensura", first:"Episode 6", img:"https://i.pinimg.com/736x/71/1c/12/711c12c2ca519d52763ee58ba08dee70.jpg" },
+{ name:"Shion", anime:"Tensura", first:"Episode 6", img:"https://i.pinimg.com/736x/1e/85/b4/1e85b4851c7db1a340ab9274248acb7a.jpg" },
 { name:"Ram", anime:"Re:Zero", first:"Episode 11", img:"https://wallpapers.com/images/high/re-zero-ram-1920-x-1080-wallpaper-61f4p7ddgtnasc3b.webp" },
 { name:"Yor Forger", anime:"Spy x Family", first:"Episode 2", img:"https://wallpapers.com/images/high/yor-forger-aesthetic-anime-girl-iphone-nppozimww9ovmmku.webp" },
 { name:"Asuna Yuuki", anime:"Sword Art Online", first:"Episode 2", img:"https://static0.cbrimages.com/wordpress/wp-content/uploads/2020/10/Asuna-Smiling-Sword-Art-Online.jpeg?w=1200&h=675&fit=crop" },
 { name:"Sinon", anime:"Sword Art Online II", first:"Episode 1", img:"https://wallpapers.com/images/high/sinon-si4zxdtwzvp3soag.webp" },
 { name:"Mikasa Ackerman", anime:"Attack on Titan", first:"Episode 1", img:"https://wallpapers.com/images/high/mikasa-ackerman-short-haired-m5cgaysqztmwgsq6.webp" },
+{ name:"Elfaria Albis Serfort", anime:"Wistoria: Wand and Sword", first:"Episode 1", img:"https://i.pinimg.com/736x/be/aa/2b/beaa2b29ec7c6ea102b1a44efb32d29e.jpg" },
 { name:"Annie Leonhart", anime:"Attack on Titan", first:"Episode 5", img:"https://wallpapers.com/images/high/annie-leonhart-900-x-900-wallpaper-apk6p35i879euh05.webp" },
 { name:"Nobara Kugisaki", anime:"Jujutsu Kaisen", first:"Episode 3", img:"https://wallpapers.com/images/high/nobara-kugisaki-1081-x-1080-wallpaper-dqbwend3id075ym0.webp" },
 { name:"Maki Zenin", anime:"Jujutsu Kaisen", first:"Episode 5", img:"https://wallpapers.com/images/high/maki-zenin-smiling-anime-character-dhlu6imhh7uhvie4.webp" },
-{ name:"Chizuru Mizuhara", anime:"Rent A Girlfriend", first:"Episode 1", img:"https://img.anmosugoi.com/file/media-sugoi/2025/02/Kanojo-Okarishimasu-Chizuru-Mizuhara-min-1.webp" },
+{ name:"Chizuru Mizuhara", anime:"Rent A Girlfriend", first:"Episode 1", img:"https://i.pinimg.com/736x/f2/ab/db/f2abdbf17a7ec5929c1b7c63351759f1.jpg" },
 { name:"Alya", anime:"Alya Sometimes Hides Her Feelings in Russian", first:"Episode 1", img:"https://cdn.polyspeak.ai/speakmaster/b1b542877ee7e46dab98b61052c74639.webp" },
 { name:"Raphtalia", anime:"Shield Hero", first:"Episode 2", img:"https://wallpapers.com/images/hd/raphtalia-rising-of-the-shield-hero-hjyqjb1uc7ch9qgm.webp" },
 { name:"Nezuko Kamado", anime:"Demon Slayer", first:"Episode 1", img:"https://wallpapers.com/images/high/nezuko-pictures-gm59bgxoepcb949y.webp" },
@@ -190,6 +193,15 @@ function openWaifus(){
 
 function closeWaifus(){
   document.getElementById("waifuOverlay").style.display = "none";
+}
+
+function filterWaifus(val) {
+  const q = val.toLowerCase().trim();
+  document.querySelectorAll("#waifuGrid .waifu-card").forEach(card => {
+    const name = card.querySelector(".waifu-info h3")?.textContent?.toLowerCase() || '';
+    const anime = card.querySelector(".waifu-back h3")?.textContent?.toLowerCase() || '';
+    card.style.display = (!q || name.includes(q) || anime.includes(q)) ? '' : 'none';
+  });
 }
 
 function showToast(title, msg, type) {
@@ -730,6 +742,8 @@ const searchBox = document.getElementById('searchBox');
 const counterContainer = document.querySelector('.counter-container');
 const filterSection = document.querySelector('.filter-section');
 
+const footerEl = document.querySelector('.anime-footer');
+
 searchBox.addEventListener('input', function () {
   const value = this.value.trim();
 
@@ -751,6 +765,8 @@ searchBox.addEventListener('input', function () {
     filterSection.style.marginBottom = '0';
     filterSection.style.transition = 'all 0.4s ease';
 
+    if (footerEl) footerEl.style.display = 'none';
+
   } else {
     // Show counter and genre when search is empty
     counterContainer.style.opacity = '1';
@@ -768,6 +784,8 @@ searchBox.addEventListener('input', function () {
     filterSection.style.overflow = '';
     filterSection.style.marginBottom = '';
     filterSection.style.transition = 'all 0.4s ease';
+
+    if (footerEl) footerEl.style.display = '';
   }
 });
 
