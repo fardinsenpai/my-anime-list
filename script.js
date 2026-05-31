@@ -1136,7 +1136,7 @@ async function sendMessage() {
     'Content-Type': 'application/json'
   },
       body: JSON.stringify({
-        model: 'llama3.1-8b',
+        model: 'gpt-oss-120b',
         messages: messagesToSend,
         temperature: 0.8,
         max_tokens: 200,
