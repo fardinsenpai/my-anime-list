@@ -26,11 +26,25 @@
       if (!res.ok) throw new Error(res.status);
       const data = await res.json();
       DuelState.animeDatabase = Array.isArray(data) ? data : Object.values(data);
+      // প্রতিটা entry-তে rank বসাও (JSON key থেকে)
+      if (!Array.isArray(data)) {
+        let i = 1;
+        for (const key of Object.keys(data)) {
+          const entry = DuelState.animeDatabase[i - 1];
+          if (entry) entry.rank = parseInt(key, 10);
+          i++;
+        }
+      }
       console.log(`✅ Duel System: ${DuelState.animeDatabase.length}টা Anime লোড হয়েছে।`);
     } catch (e) {
       console.error('❌ Database load failed:', e);
       DuelState.animeDatabase = [];
     }
+  }
+
+  function normalizeTitle(t) {
+    if (!t) return '';
+    return t.toLowerCase().replace(/[^a-z0-9]/g, '');
   }
 
   function injectDuelSidebarLink() {
@@ -313,12 +327,24 @@ function enrichAnimeFromCard(anime, card) {
 
   function findAnime(title, rank) {
     const db = DuelState.animeDatabase;
-    let found = db.find(a => a.title?.toLowerCase() === title?.toLowerCase());
-    if (!found) found = db.find(a =>
-      a.title?.toLowerCase().includes(title?.toLowerCase()) ||
-      title?.toLowerCase().includes(a.title?.toLowerCase())
-    );
+    const norm = normalizeTitle(title);
+    // 1st pass: normalized exact match
+    let found = db.find(a => normalizeTitle(a.title) === norm);
+    // 2nd pass: one contains the other (handles truncation like "Dr.Stone" vs "Dr. Stone")
+    if (!found) found = db.find(a => {
+      const an = normalizeTitle(a.title);
+      return an.includes(norm) || norm.includes(an);
+    });
+    // 3rd pass: rank-based (works when JSON keys match badge numbers)
     if (!found && rank) found = db.find(a => a.rank===rank || a.id===rank);
+    // 4th pass: partial word match (e.g. "MHA" matches "My Hero Academia")
+    if (!found) {
+      const words = norm.split(/\s+/).filter(Boolean);
+      found = db.find(a => {
+        const an = normalizeTitle(a.title);
+        return words.some(w => w.length > 2 && an.includes(w));
+      });
+    }
     return found || null;
   }
 
