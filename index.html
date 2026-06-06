@@ -7,7 +7,7 @@
   <title>Fardin's Anime Hub</title>
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="duel-system.css">
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600;700&family=Exo+2:wght@400;600;700&display=swap" rel="stylesheet">
  
 </head>
 
@@ -39,159 +39,116 @@
   </div>
   
    <nav class="side-nav">
-<a href="#" class="home-link" id="homeLink"><i>🏠</i> Home</a>
-<div class="side-dropdown" id="topFiveDropdown">
-  <button class="dropdown-btn" id="dropBtn"> 📊 Top 5 Picks By Genre <i class="arrow">▾</i></button>
-  <div class="dropdown-container">
-    <a href="javascript:void(0)" onclick="filterTopFive('Action')">⚔ Action</a>
-    <a href="javascript:void(0)" onclick="filterTopFive('Adventure')">🗺 Adventure</a>
-    <a href="javascript:void(0)" onclick="filterTopFive('Isekai')">🌌 Isekai</a>
-    <a href="javascript:void(0)" onclick="filterTopFive('Comedy')">😂 Comedy</a>
-    <a href="javascript:void(0)" onclick="filterTopFive('Sports')">🏆 Sports</a>
-    <a href="javascript:void(0)" onclick="filterTopFive('Romcom')">💕 Romcom</a>
-    <a href="javascript:void(0)" onclick="filterTopFive('Sci-Fi')">🚀 Sci-Fi</a>
-    <a href="javascript:void(0)" onclick="filterTopFive('Historical')">📜 History</a>
-    <a href="javascript:void(0)" onclick="filterTopFive('Dark / Horror')">💀 Dark</a>
-    <a href="javascript:void(0)" onclick="filterTopFive('Slice of Life')">🌸 SOL</a>
-    <a href="javascript:void(0)" onclick="filterTopFive('Psychological')">🧠 Psychological</a>
-    <a href="javascript:void(0)" onclick="filterTopFive('Movie')">🎬 Movie</a>
-  </div>
-</div>  
+<a href="#" class="home-link" id="homeLink"><i><svg width="32" height="32" viewBox="0 0 64 64" fill="none">
+  <path d="M10 30L32 12L54 30" stroke="#00E5FF" stroke-width="4" stroke-linecap="round"/>
+  <rect x="18" y="30" width="28" height="22" rx="4" stroke="#00E5FF" stroke-width="4"/>
+  <rect x="28" y="38" width="8" height="14" fill="#FFD700"/>
+</svg></i> Home</a>
+
+<a href="javascript:void(0)" id="topFiveSideBtn">
+  <svg width="32" height="32" viewBox="0 0 64 64">
+    <rect x="10" y="30" width="10" height="24" fill="#00E5FF"/>
+    <rect x="27" y="20" width="10" height="34" fill="#FFD700"/>
+    <rect x="44" y="10" width="10" height="44" fill="#FF69B4"/>
+  </svg> Top 5 Picks By Genre
+</a>
 
 <li id="duel-nav-item">
   <a href="#" id="duel-nav-link" class="duel-nav-link">
-    <span class="duel-nav-icon">⚔️</span>
+    <span class="duel-nav-icon"><svg width="32" height="32" viewBox="0 0 64 64">
+  <polygon points="32,4 40,24 60,32 40,40 32,60 24,40 4,32 24,24"
+           fill="#FF4040"/>
+  <text x="32" y="38"
+        text-anchor="middle"
+        font-size="14"
+        font-weight="bold"
+        fill="white">VS</text>
+</svg></span>
     <span class="duel-nav-text" style="color:#ff3333;">Anime Duel</span>
     <span class="duel-status-badge" id="duel-status-badge">OFF</span>
   </a>
 </li>
 
+<li>
+  <a href="javascript:void(0)" id="analysisSideBtn">
+    <svg width="32" height="32" viewBox="0 0 64 64" fill="none">
+      <circle cx="32" cy="32" r="24" stroke="#FFD700" stroke-width="4"/>
+      <path d="M32 12V32L44 44" stroke="#FFD700" stroke-width="4" stroke-linecap="round"/>
+      <circle cx="32" cy="32" r="6" fill="#FFD700"/>
+    </svg> Analysis
+  </a>
+</li>
+<li>
+  <a href="javascript:void(0)" id="topSecretsBtn">
+    <svg width="32" height="32" viewBox="0 0 64 64" fill="none">
+      <rect x="10" y="24" width="44" height="32" rx="4" stroke="#FF6B6B" stroke-width="3.5" fill="none"/>
+      <path d="M22 24V16a10 10 0 0 1 20 0v8" stroke="#FF6B6B" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+      <circle cx="32" cy="35" r="4" fill="#FF6B6B"/>
+      <path d="M32 39v7" stroke="#FF6B6B" stroke-width="3" stroke-linecap="round"/>
+    </svg> Top Secrets
+  </a>
+</li>
 
   <a href="javascript:void(0)" class="side-nav-link" id="aiChatMenuBtn">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="20" height="20" style="vertical-align:middle;margin-right:2px">
-  <defs>
-    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#FFD700"/>
-      <stop offset="100%" stop-color="#00D4FF"/>
-    </linearGradient>
-  </defs>
-
-  <!-- Outer Shape -->
-  <path d="M64 14
-           L96 34
-           L104 74
-           L64 114
-           L24 74
-           L32 34 Z"
-        fill="#0A0A20"
-        stroke="url(#g)"
-        stroke-width="4"/>
-
-  <!-- Fox Ears -->
-  <path d="M42 30 L28 10 L48 22 Z"
-        fill="url(#g)"/>
-  <path d="M86 30 L100 10 L80 22 Z"
-        fill="url(#g)"/>
-
-  <!-- Eyes -->
-  <path d="M38 56 L54 50 L48 62 Z"
-        fill="#00D4FF"/>
-  <path d="M90 56 L74 50 L80 62 Z"
-        fill="#00D4FF"/>
-
-  <!-- Nose -->
-  <polygon points="64,68 58,76 70,76"
-           fill="#FFD700"/>
-
-  <!-- Anime Mark -->
-  <path d="M52 88 Q64 96 76 88"
-        stroke="#FFD700"
-        stroke-width="4"
-        fill="none"
-        stroke-linecap="round"/>
+    <svg width="32" height="32" viewBox="0 0 64 64" fill="none">
+  <circle cx="32" cy="32" r="20" stroke="#00E5FF" stroke-width="4"/>
+  <circle cx="25" cy="28" r="3" fill="#00E5FF"/>
+  <circle cx="39" cy="28" r="3" fill="#00E5FF"/>
+  <path d="M25 40C29 44 35 44 39 40" stroke="#00E5FF" stroke-width="3" stroke-linecap="round"/>
+  <line x1="32" y1="8" x2="32" y2="16" stroke="#00E5FF" stroke-width="4"/>
+  <circle cx="32" cy="6" r="3" fill="#FFD700"/>
 </svg>
     <span>AI Anime Discussion</span>
   </a>
 
 <li>
   <a href="javascript:void(0)" onclick="showAllAwardWinners()">
-    <i>👑</i>Anime of the Year
+    <i>
+      <svg width="32" height="32" viewBox="0 0 64 64" fill="none">
+  <path d="M20 10H44V22C44 32 38 38 32 38C26 38 20 32 20 22V10Z"
+        fill="#FFD700"/>
+  <path d="M24 42H40V48H24V42Z" fill="#FFD700"/>
+  <path d="M20 48H44V54H20V48Z" fill="#FFD700"/>
+  <path d="M20 14H12C12 24 16 28 20 28" stroke="#FFD700" stroke-width="4"/>
+  <path d="M44 14H52C52 24 48 28 44 28" stroke="#FFD700" stroke-width="4"/>
+</svg>
+</i>Anime of the Year
   </a>
 </li>
 
 <a href="#" onclick="openWaifus()">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="20" height="20" style="vertical-align:middle;margin-right:2px">
-  <defs>
-    <linearGradient id="waifuGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#FFD700"/>
-      <stop offset="100%" stop-color="#00D4FF"/>
-    </linearGradient>
-  </defs>
-
-  <!-- Hair -->
-  <path d="M16 24
-           Q18 10 32 10
-           Q46 10 48 24
-           L48 34
-           Q42 28 38 24
-           Q35 28 32 28
-           Q29 28 26 24
-           Q22 28 16 34 Z"
-        fill="none"
-        stroke="url(#waifuGrad)"
-        stroke-width="3"
-        stroke-linejoin="round"/>
-
-  <!-- Twin tails -->
-  <path d="M16 26 Q8 30 12 42"
-        fill="none"
-        stroke="url(#waifuGrad)"
-        stroke-width="3"
-        stroke-linecap="round"/>
-
-  <path d="M48 26 Q56 30 52 42"
-        fill="none"
-        stroke="url(#waifuGrad)"
-        stroke-width="3"
-        stroke-linecap="round"/>
-
-  <!-- Face -->
-  <circle cx="32" cy="34" r="12"
-          fill="none"
-          stroke="url(#waifuGrad)"
-          stroke-width="3"/>
-
-  <!-- Eyes -->
-  <circle cx="27" cy="33" r="2.2" fill="#00D4FF"/>
-  <circle cx="37" cy="33" r="2.2" fill="#00D4FF"/>
-
-  <!-- Smile -->
-  <path d="M27 40 Q32 44 37 40"
-        fill="none"
-        stroke="#FFD700"
-        stroke-width="2"
-        stroke-linecap="round"/>
-
-  <!-- Bow -->
-  <path d="M28 16 L22 12 L24 20 Z"
-        fill="#FFD700"/>
-
-  <path d="M36 16 L42 12 L40 20 Z"
-        fill="#FFD700"/>
-
-  <circle cx="32" cy="17" r="2" fill="#00D4FF"/>
+    <svg width="32" height="32" viewBox="0 0 64 64" fill="none">
+  <path d="M32 54L10 32C4 26 4 16 12 10C18 6 26 8 32 14C38 8 46 6 52 10C60 16 60 26 54 32L32 54Z"
+        stroke="#FF69B4" stroke-width="4"/>
+  <circle cx="24" cy="26" r="3" fill="#00E5FF"/>
+  <circle cx="40" cy="26" r="3" fill="#00E5FF"/>
 </svg>
   Find Your Waifus
 </a>
 
-<a href="javascript:void(0)" onclick="openSuggestion()">
-  <i>📬</i> Drop Suggestion
+  <a href="javascript:void(0)" onclick="openSuggestion()">
+  <i><svg width="32" height="32" viewBox="0 0 64 64" fill="none">
+  <rect x="12" y="20" width="40" height="28" rx="4"
+        stroke="#00E5FF" stroke-width="4"/>
+  <path d="M12 24L32 38L52 24"
+        stroke="#FFD700" stroke-width="4"/>
+</svg></i> Drop Suggestion
 </a>
+
+  <a href="javascript:void(0)" id="tourGuideBtn">
+    <svg width="32" height="32" viewBox="0 0 64 64" fill="none">
+      <circle cx="32" cy="32" r="24" stroke="#FFD700" stroke-width="4"/>
+      <path d="M28 22L42 32L28 42Z" fill="#FFD700"/>
+      <circle cx="32" cy="32" r="3" fill="#0a0e1a"/>
+    </svg> Tour Guide
+  </a>
   
   <a href="https://facebook.com/fardin.senpai" target="_blank">
-    <svg viewBox="0 0 24 24" width="18" height="18" fill="#29c6f5" style="vertical-align:middle;margin-right:2px">
-      <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-    </svg>
+    <svg width="32" height="32" viewBox="0 0 64 64" fill="none">
+  <circle cx="32" cy="32" r="24" stroke="#00E5FF" stroke-width="4"/>
+  <path d="M36 18H30C27 18 25 20 25 24V30H20V36H25V46H32V36H37L38 30H32V25C32 24 33 23 34 23H38V18H36Z"
+        fill="#00E5FF"/>
+</svg>
     Facebook
   </a>
   </nav>
@@ -238,6 +195,209 @@
   </div>
 
   <div id="petals-container"></div>
+
+<div class="body-topfive" id="topFiveDropdown" style="display:none;">
+  <div class="topfive-heading">🏆 Top 5 Picks By Genre</div>
+  <div class="body-dropdown-container" style="display:flex;">
+    <a href="javascript:void(0)" onclick="filterTopFive('Action')" class="topfive-active">⚔ Action</a>
+    <a href="javascript:void(0)" onclick="filterTopFive('Adventure')">🗺 Adventure</a>
+    <a href="javascript:void(0)" onclick="filterTopFive('Isekai')">🌌 Isekai</a>
+    <a href="javascript:void(0)" onclick="filterTopFive('Comedy')">😂 Comedy</a>
+    <a href="javascript:void(0)" onclick="filterTopFive('Sports')">🏆 Sports</a>
+    <a href="javascript:void(0)" onclick="filterTopFive('Romcom')">💕 Romcom</a>
+    <a href="javascript:void(0)" onclick="filterTopFive('Sci-Fi')">🚀 Sci-Fi</a>
+    <a href="javascript:void(0)" onclick="filterTopFive('Historical')">📜 History</a>
+    <a href="javascript:void(0)" onclick="filterTopFive('Dark / Horror')">💀 Dark</a>
+    <a href="javascript:void(0)" onclick="filterTopFive('Slice of Life')">🌸 SOL</a>
+    <a href="javascript:void(0)" onclick="filterTopFive('Psychological')">🧠 Psychological</a>
+    <a href="javascript:void(0)" onclick="filterTopFive('Movie')">🎬 Movie</a>
+    <a href="javascript:void(0)" onclick="filterTopFive('Psychological')">🧠 Psychological</a>
+    <a href="javascript:void(0)" onclick="filterTopFive('Slice of Life')">🌸 SOL</a>
+  </div>
+  <div class="topfive-results" id="topFiveResults"></div>
+</div>
+
+<div class="body-analysis" id="analysisContainer" style="display:none;">
+  <div class="analysis-heading" id="analysisHeading">📊 Genre Analysis</div>
+  <div class="analysis-wrapper">
+    <canvas id="pieChart" width="300" height="300"></canvas>
+    <div class="analysis-legend" id="analysisLegend"></div>
+  </div>
+  <div class="analysis-heading" style="margin-top:28px;">📺 OTT Platform Analysis</div>
+  <div class="analysis-wrapper">
+    <canvas id="ottChart" width="300" height="300"></canvas>
+    <div class="analysis-legend" id="ottLegend"></div>
+  </div>
+  <div class="analysis-heading" style="margin-top:28px;">🎬 Top Anime Studios</div>
+  <div class="analysis-wrapper">
+    <canvas id="studioChart" width="300" height="300"></canvas>
+    <div class="analysis-legend" id="studioLegend"></div>
+  </div>
+  <div class="analysis-heading" style="margin-top:28px;">📺 Episodes Per Series</div>
+  <div class="analysis-wrapper">
+    <canvas id="episodeChart" width="300" height="300"></canvas>
+    <div class="analysis-legend" id="episodeLegend"></div>
+  </div>
+  <div class="analysis-heading" style="margin-top:28px;">📈 Top 10 on Crunchyroll</div>
+  <div class="analysis-wrapper chart-wrapper">
+    <canvas id="ratingChart" width="600" height="360"></canvas>
+  </div>
+</div>
+
+<div class="body-top-secrets" id="topSecretsContainer" style="display:none;">
+  <div class="analysis-heading"><span class="heading-icon">🔐</span> <span class="heading-text">Top Secrets</span></div>
+
+  <div class="site-section">
+    <div class="site-section-title">⬇️ English Dub Download [ZIP]</div>
+    <div class="site-grid">
+      <div class="site-card" data-name="Anime Kaizoku">
+        <div class="site-name">Anime Kaizoku</div>
+        <div class="site-desc">High-quality English dubbed anime in ZIP</div>
+        <div class="site-actions">
+          <a href="https://www.animekaizoku.xyz" target="_blank" class="site-btn">Visit</a>
+          <button class="copy-btn" title="Copy name">📋</button>
+        </div>
+      </div>
+      <div class="site-card" data-name="Kayo Anime">
+        <div class="site-name">Kayo Anime</div>
+        <div class="site-desc">English dubbed anime direct downloads</div>
+        <div class="site-actions">
+          <a href="https://kayoanime.com" target="_blank" class="site-btn">Visit</a>
+          <button class="copy-btn" title="Copy name">📋</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="site-section">
+    <div class="site-section-title">Hindi Dub Download [ZIP]</div>
+    <div class="site-grid">
+      <div class="site-card" data-name="Dead Toons India">
+        <div class="site-name">Dead Toons India</div>
+        <div class="site-desc">Hindi dubbed anime & cartoons download</div>
+        <div class="site-actions">
+          <a href="https://deadtoons.org" target="_blank" class="site-btn">Visit</a>
+          <button class="copy-btn" title="Copy name">📋</button>
+        </div>
+      </div>
+      <div class="site-card" data-name="NX Prime">
+        <div class="site-name">NX Prime</div>
+        <div class="site-desc">Hindi dubbed anime downloads</div>
+        <div class="site-actions">
+          <a href="https://nxprime.in/home.html" target="_blank" class="site-btn">Visit</a>
+          <button class="copy-btn" title="Copy name">📋</button>
+        </div>
+      </div>
+      <div class="site-card" data-name="Rare Animes India">
+        <div class="site-name">Rare Animes India</div>
+        <div class="site-desc">Rare Hindi dubbed anime collection</div>
+        <div class="site-actions">
+          <a href="https://www.rareanimes.buzz/home/" target="_blank" class="site-btn">Visit</a>
+          <button class="copy-btn" title="Copy name">📋</button>
+        </div>
+      </div>
+      <div class="site-card" data-name="Anime Dub Hindi">
+        <div class="site-name">Anime Dub Hindi</div>
+        <div class="site-desc">Hindi dubbed anime direct download</div>
+        <div class="site-actions">
+          <a href="https://www.animedubhindi.cc" target="_blank" class="site-btn">Visit</a>
+          <button class="copy-btn" title="Copy name">📋</button>
+        </div>
+      </div>
+      <div class="site-card" data-name="ToonWorld4All">
+        <div class="site-name">ToonWorld4All</div>
+        <div class="site-desc">Toons & anime in Hindi download</div>
+        <div class="site-actions">
+          <a href="https://toonworld4all.me" target="_blank" class="site-btn">Visit</a>
+          <button class="copy-btn" title="Copy name">📋</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="site-section">
+    <div class="site-section-title">📺 Watch Anime In English</div>
+    <div class="site-grid">
+      <div class="site-card" data-name="HiAnime">
+        <div class="site-name">HiAnime</div>
+        <div class="site-desc">Stream English sub & dub anime free</div>
+        <div class="site-actions">
+          <a href="https://hianime.dk" target="_blank" class="site-btn">Visit</a>
+          <button class="copy-btn" title="Copy name">📋</button>
+        </div>
+      </div>
+      <div class="site-card" data-name="9 Anime">
+        <div class="site-name">9 Anime</div>
+        <div class="site-desc">Large library of sub & dub anime</div>
+        <div class="site-actions">
+          <a href="https://9anime.me.uk" target="_blank" class="site-btn">Visit</a>
+          <button class="copy-btn" title="Copy name">📋</button>
+        </div>
+      </div>
+      <div class="site-card" data-name="AniLab">
+        <div class="site-name">AniLab</div>
+        <div class="site-desc">Anime streaming app & website</div>
+        <div class="site-actions">
+          <a href="https://anilab.org" target="_blank" class="site-btn">Visit</a>
+          <button class="copy-btn" title="Copy name">📋</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="site-section">
+    <div class="site-section-title">Hindi Dub Watch</div>
+    <div class="site-grid">
+      <div class="site-card" data-name="Movie Box">
+        <div class="site-name">Movie Box</div>
+        <div class="site-desc">Hindi dubbed movies & anime app</div>
+        <div class="site-actions">
+          <span class="site-btn site-btn-na">App</span>
+          <button class="copy-btn" title="Copy name">📋</button>
+        </div>
+      </div>
+      <div class="site-card" data-name="Anime Salt">
+        <div class="site-name">Anime Salt</div>
+        <div class="site-desc">Watch Hindi dubbed anime online</div>
+        <div class="site-actions">
+          <a href="https://animesalt.ac" target="_blank" class="site-btn">Visit</a>
+          <button class="copy-btn" title="Copy name">📋</button>
+        </div>
+      </div>
+      <div class="site-card" data-name="Anime World India">
+        <div class="site-name">Anime World India</div>
+        <div class="site-desc">Hindi dubbed anime streaming</div>
+        <div class="site-actions">
+          <a href="https://watchanimeworld.net" target="_blank" class="site-btn">Visit</a>
+          <button class="copy-btn" title="Copy name">📋</button>
+        </div>
+      </div>
+      <div class="site-card" data-name="YourAnime">
+        <div class="site-name">YourAnime</div>
+        <div class="site-desc">Hindi sub & dub anime watch</div>
+        <div class="site-actions">
+          <a href="https://www.youranime.in/index.php" target="_blank" class="site-btn">Visit</a>
+          <button class="copy-btn" title="Copy name">📋</button>
+        </div>
+      </div>
+      <div class="site-card" data-name="Dead Toons India">
+        <div class="site-name">Dead Toons India</div>
+        <div class="site-desc">Hindi dubbed anime & cartoons watch</div>
+        <div class="site-actions">
+          <a href="https://deadtoons.org" target="_blank" class="site-btn">Visit</a>
+          <button class="copy-btn" title="Copy name">📋</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="analysis-heading" style="margin-top:28px;">💡 Tips</div>
+  <div class="tips-list">
+    <div class="tip-item">🔁 Due to copyright issues, website domains change regularly. If a link doesn't work, copy the site name and search it on your browser.</div>
+    <div class="tip-item">🎬 Use <strong>Pot Player</strong> on PC and <strong>MX Player</strong> on mobile for the best playback with downloaded anime.</div>
+    <div class="tip-item">🛡️ Use <strong>uBlock Origin</strong> (PC extension) or <strong>Brave Browser</strong> (mobile) for ad-free streaming.</div>
+  </div>
+</div>
 
   <div class="grid" id="grid">
 
@@ -680,7 +840,7 @@
 
 <div class="card"><div class="card-inner"><div class="card-front"><div class="poster-wrap"><img src="https://media.kitsu.app/anime/poster_images/43367/large.jpg" alt="I'm Standing on a Million Lives" loading="lazy"/><span class="badge">#218</span></div><div class="info"><div class="number">NO. 218</div><div class="title">I'm Standing on a Million Lives</div></div></div><div class="card-back"><div class="back-content"><div class="back-title">I'm Standing on a Million Lives</div><div class="back-season">🌸 Season-1,2</div><div class="back-episodes">📺 Total Episodes: 24</div><div class="back-tap-hint">click to flip back</div></div></div></div></div>
 
-<div class="card"><div class="card-inner"><div class="card-front"><div class="poster-wrap"><img src="https://media.kitsu.app/anime/poster_images/44551/large.jpg" alt="Komi Can't Communicate" loading="lazy"/><span class="badge">#219</span></div><div class="info"><div class="number">NO. 219</div><div class="title">Komi Can't Communicate</div></div></div><div class="card-back"><div class="back-content"><div class="back-title">Komi Can't Communicate</div><div class="back-season">🌸 Season-1</div><div class="back-episodes">📺 Total Episodes: 12</div><div class="back-tap-hint">click to flip back</div></div></div></div></div>
+<div class="card"><div class="card-inner"><div class="card-front"><div class="poster-wrap"><img src="https://media.kitsu.app/anime/poster_images/44551/large.jpg" alt="Komi Can't Communicate" loading="lazy"/><span class="badge">#219</span></div><div class="info"><div class="number">NO. 219</div><div class="title">Komi Can't Communicate</div></div></div><div class="card-back"><div class="back-content"><div class="back-title">Komi Can't Communicate</div><div class="back-season">🌸 Season-1,2</div><div class="back-episodes">📺 Total Episodes: 24</div><div class="back-tap-hint">click to flip back</div></div></div></div></div>
 
 <div class="card"><div class="card-inner"><div class="card-front"><div class="poster-wrap"><img src="https://media.kitsu.app/anime/46672/poster_image/large-cc55c47c646f9c54d51e4e654f1c7dbc.jpeg" alt="To Be Hero X" loading="lazy"/><span class="badge">#220</span></div><div class="info"><div class="number">NO. 220</div><div class="title">To Be Hero X</div></div></div><div class="card-back"><div class="back-content"><div class="back-title">To Be Hero X</div><div class="back-season">🌸 Season-1</div><div class="back-episodes">📺 Total Episodes: 13</div><div class="back-tap-hint">click to flip back</div></div></div></div></div>
 
@@ -797,7 +957,7 @@
 
     <textarea
       name="reason"
-      placeholder="Why should I watch it? (Optional)"
+      placeholder="🤔 Why should I watch it? (Optional)"
     ></textarea>
 
     <button type="submit" class="send-btn">
@@ -843,10 +1003,10 @@
 <div class="chat-box" id="chatBox">
   <div class="chat-header">
     <span>🤖 AI As Your Assistant</span>
-    <button onclick="toggleChat()">?</button>
+    <button class="chat-close" onclick="toggleChat()">✕</button>
   </div>
   <div class="chat-messages" id="chatMessages">
-    <div class="msg bot">🤖 Hello! Welcome to Fardin's Anime Hub! I'm Fardin's personal anime assistant. Ask me anything � episodes, seasons, random picks, or genre recommendations! ?</div>
+    <div class="msg bot">🤖 Hello! Welcome to Fardin's Anime Hub! I'm Fardin's personal anime assistant. Ask me anything about episodes, seasons, random picks, or genre recommendations!</div>
   </div>
   <div class="chat-input-area">
     <input type="text" id="chatInput" placeholder="Type a message..." onkeydown="if(event.key==='Enter') sendMessage()" />
