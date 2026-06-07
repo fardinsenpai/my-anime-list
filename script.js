@@ -2119,8 +2119,8 @@ document.getElementById('aiChatMenuBtn')?.addEventListener('click', toggleChat);
   var tourActive = false;
   var currentStep = 0;
   var tourSteps;
-  var overlay, highlight, tooltip, arrow;
-  var closeBtn, titleEl, descEl, progressEl, prevBtn, nextBtn;
+  var overlay, highlight, tooltip, arrow, autoCloseTimer, autoCloseCount;
+  var closeBtn, titleEl, descEl, progressEl, prevBtn, nextBtn, skipBtn;
 
   function initTour() {
     overlay = document.createElement('div');
@@ -2137,6 +2137,7 @@ document.getElementById('aiChatMenuBtn')?.addEventListener('click', toggleChat);
         '<div class="tour-footer">' +
           '<span class="tour-progress"></span>' +
           '<div class="tour-buttons">' +
+            '<button class="tour-btn tour-btn-skip">Skip</button>' +
             '<button class="tour-btn tour-btn-prev">\u2190 Back</button>' +
             '<button class="tour-btn tour-btn-next">Next \u2192</button>' +
           '</div>' +
@@ -2156,13 +2157,15 @@ document.getElementById('aiChatMenuBtn')?.addEventListener('click', toggleChat);
     progressEl = tooltip.querySelector('.tour-progress');
     prevBtn = tooltip.querySelector('.tour-btn-prev');
     nextBtn = tooltip.querySelector('.tour-btn-next');
+    skipBtn = tooltip.querySelector('.tour-btn-skip');
 
-    closeBtn.addEventListener('click', endTour);
+    closeBtn.addEventListener('click', function () { clearInterval(autoCloseTimer); endTour(); });
     prevBtn.addEventListener('click', function () { if (currentStep > 0) showStep(currentStep - 1); });
     nextBtn.addEventListener('click', function () {
       if (currentStep < tourSteps.length - 1) { showStep(currentStep + 1); }
       else { endTour(); }
     });
+    skipBtn.addEventListener('click', function () { clearInterval(autoCloseTimer); endTour(); });
   }
 
   function showStep(index) {
@@ -2198,6 +2201,17 @@ document.getElementById('aiChatMenuBtn')?.addEventListener('click', toggleChat);
 
       prevBtn.style.display = index === 0 ? 'none' : '';
       nextBtn.textContent = index === tourSteps.length - 1 ? '\uD83C\uDF89 Done' : 'Next \u2192';
+      skipBtn.style.display = index === 0 ? '' : 'none';
+      if (index === 0) { skipBtn.textContent = 'Skip 10'; autoCloseCount = 10; }
+
+      clearInterval(autoCloseTimer);
+      if (index === 0) {
+        autoCloseTimer = setInterval(function () {
+          autoCloseCount--;
+          if (autoCloseCount <= 0) { clearInterval(autoCloseTimer); endTour(); return; }
+          skipBtn.textContent = 'Skip ' + autoCloseCount;
+        }, 1000);
+      }
 
       tooltip.style.display = 'block';
       tooltip.style.left = '-9999px';
@@ -2219,6 +2233,10 @@ document.getElementById('aiChatMenuBtn')?.addEventListener('click', toggleChat);
     var gap = 14;
     var vw = window.innerWidth;
     var vh = window.innerHeight;
+    var minSpace = 220;
+    if (side === 'right' && rect.right + gap + minSpace > vw) side = 'bottom';
+    if (side === 'left' && rect.left - gap - minSpace < 0) side = 'bottom';
+    if (side === 'top' && rect.top - gap - 200 < 0) side = 'bottom';
     var left, top;
 
     arrow.className = 'tour-arrow';
@@ -2251,6 +2269,27 @@ document.getElementById('aiChatMenuBtn')?.addEventListener('click', toggleChat);
     if (top < 10) top = 10;
     if (top + th > vh - 10) top = vh - th - 10;
 
+    if (left + tw > rect.left && left < rect.right && top + th > rect.top && top < rect.bottom) {
+      var fallback = side === 'left' || side === 'right' ? 'top' : 'bottom';
+      arrow.className = 'tour-arrow';
+      switch (fallback) {
+        case 'top':
+          left = rect.left + rect.width / 2 - tw / 2;
+          top = rect.top - th - gap;
+          arrow.className += ' tour-arrow-down';
+          break;
+        default:
+          left = rect.left + rect.width / 2 - tw / 2;
+          top = rect.bottom + gap;
+          arrow.className += ' tour-arrow-up';
+          break;
+      }
+      if (left < 10) left = 10;
+      if (left + tw > vw - 10) left = vw - tw - 10;
+      if (top < 10) top = 10;
+      if (top + th > vh - 10) top = vh - th - 10;
+    }
+
     tt.style.left = Math.round(left) + 'px';
     tt.style.top = Math.round(top) + 'px';
   }
@@ -2276,7 +2315,7 @@ document.getElementById('aiChatMenuBtn')?.addEventListener('click', toggleChat);
     return [
       {
         element: '.heading-glitch',
-        popover: { title: '\uD83D\uDC4B Welcome!', description: 'This is <strong>Fardin\'s Anime Hub</strong> \u2014 your personal anime collection dashboard. Let\'s explore what you can do here!', side: 'bottom' }
+        popover: { title: '\uD83D\uDC4B Welcome!', description: 'This is <strong>Fardin\'s Anime Hub</strong> \u2014 your personal anime collection dashboard. Let\'s explore what you can do here!<br><br>You can find this tour again anytime from the <strong>sidebar \u2192 Tour Guide</strong>.', side: 'bottom' }
       },
       {
         element: '.counter-container',
@@ -2314,14 +2353,6 @@ document.getElementById('aiChatMenuBtn')?.addEventListener('click', toggleChat);
         popover: { title: '\u2694\uFE0F Anime Duel', description: 'Battle two anime head-to-head! Compare ratings and see which one wins. A fun way to discover top-rated shows.', side: 'right' }
       },
       {
-        element: '#analysisSideBtn',
-        popover: { title: '\uD83D\uDCC8 Analysis', description: 'Interactive pie charts and bar charts for genre distribution, OTT platforms, studios, episodes, and ratings.', side: 'right' }
-      },
-      {
-        element: '#topSecretsBtn',
-        popover: { title: '\uD83D\uDD10 Top Secrets', description: 'Hidden resource guide! Get download sites, streaming platforms, and pro tips for watching anime.', side: 'right' }
-      },
-      {
         element: 'nav.side-nav a[onclick*="showAllAwardWinners"]',
         popover: { title: '\uD83C\uDFC5 Anime of the Year', description: 'See Crunchyroll\'s Anime of the Year winners from 2017 to 2026, filtered from Fardin\'s list.', side: 'right' }
       },
@@ -2335,15 +2366,24 @@ document.getElementById('aiChatMenuBtn')?.addEventListener('click', toggleChat);
         onHighlightStarted: function () { if (!sideMenu || !sideMenu.classList.contains('open')) openMenu(); }
       },
       {
+        element: '#analysisSideBtn',
+        popover: { title: '\uD83D\uDCC8 Analysis', description: 'Interactive pie charts and bar charts for genre distribution, OTT platforms, studios, episodes, and ratings.', side: 'right' }
+      },
+      {
+        element: '#topSecretsBtn',
+        popover: { title: '\uD83D\uDD10 Top Secrets', description: 'Hidden resource guide! Get download sites, streaming platforms, and pro tips for watching anime.', side: 'right' }
+      },
+      {
         element: '#chatBubble',
-        popover: { title: '\uD83E\uDD16 AI Chat', description: 'Chat with Fardin\'s personal AI assistant! Ask about any anime, get recommendations, or just have fun.', side: 'left' }
+        popover: { title: '\uD83E\uDD16 AI Chat', description: 'Chat with Fardin\'s personal AI assistant! Ask about any anime, get recommendations, or just have fun.', side: 'left' },
+        onHighlightStarted: function () { closeMenu(); }
       },
     ];
   }
 
   document.addEventListener('keydown', function (e) {
     if (!tourActive) return;
-    if (e.key === 'Escape') { endTour(); }
+    if (e.key === 'Escape') { clearInterval(autoCloseTimer); endTour(); }
     else if (e.key === 'ArrowRight' || e.key === 'Enter') {
       if (currentStep < tourSteps.length - 1) showStep(currentStep + 1);
       else endTour();
