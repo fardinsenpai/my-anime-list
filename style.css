@@ -2759,6 +2759,17 @@
   background: rgba(255,255,255,0.14);
   color: #fff;
 }
+.tour-btn-skip {
+  background: rgba(255,50,50,0.15);
+  color: #ff4444;
+  border: 1px solid rgba(255,68,68,0.4);
+  font-size: 11px;
+  padding: 6px 12px;
+}
+.tour-btn-skip:hover {
+  background: rgba(255,50,50,0.25);
+  border-color: #ff4444;
+}
 .tour-arrow {
   position: absolute;
   width: 0;
@@ -2808,5 +2819,42 @@
 }
 .topfive-results .card {
   height: 380px;
+}
+@media (max-width: 767px) {
+  .topfive-results {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 12px;
+    padding: 12px;
+  }
+  .topfive-results .card {
+    width: auto !important;
+    height: 300px;
+  }
+  .topfive-results .card:nth-child(5) {
+    grid-column: 1 / -1 !important;
+    width: 50% !important;
+    margin: 0 auto !important;
+  }
+}
+@media (max-width: 767px) {
+  .tour-tooltip {
+    max-width: calc(100vw - 24px);
+    min-width: 200px;
+  }
+  .tour-title {
+    font-size: 12px;
+    padding: 10px 40px 8px 12px;
+  }
+  .tour-desc {
+    font-size: 13px;
+    padding: 12px 14px 4px;
+  }
+  .tour-footer {
+    padding: 6px 14px 12px;
+  }
+  .tour-btn {
+    font-size: 11px;
+    padding: 6px 14px;
+  }
 }
 
