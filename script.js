@@ -412,6 +412,38 @@ function showAllAwardWinners() {
     };
   }
 
+  const hotTakesBtn = document.getElementById('hotTakesBtn');
+  const hotTakesContainer = document.getElementById('hotTakesContainer');
+  if (hotTakesBtn && hotTakesContainer) {
+    hotTakesBtn.onclick = function(e) {
+      e.preventDefault();
+      document.getElementById('topFiveDropdown').style.display = 'none';
+      document.getElementById('analysisContainer').style.display = 'none';
+      document.getElementById('topSecretsContainer').style.display = 'none';
+      if (typeof closeSuggestion === 'function') closeSuggestion();
+      hotTakesContainer.style.display = 'block';
+      const grid = document.getElementById('grid');
+      if (grid) grid.style.display = 'none';
+      const mainTitle = document.querySelector('.header h1');
+      if (mainTitle) {
+        mainTitle.textContent = ' Hot Takes';
+        mainTitle.setAttribute('data-text', ' Hot Takes');
+      }
+      const counterSection = document.querySelector('.counter-container');
+      const searchSection = document.querySelector('.search-wrap');
+      const genreSection = document.querySelector('.filter-section');
+      const footerEl = document.querySelector('.anime-footer');
+      const chatBubble = document.getElementById('chatBubble');
+      if (counterSection) counterSection.style.display = 'none';
+      if (searchSection) searchSection.style.display = 'none';
+      if (genreSection) genreSection.style.display = 'none';
+      if (footerEl) footerEl.style.display = 'none';
+      if (chatBubble) chatBubble.style.display = 'none';
+      if (typeof closeMenu === 'function') closeMenu();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+  }
+
   // Refresh page when Top Secrets heading is clicked
   document.addEventListener('click', function(e) {
     const heading = e.target.closest('.body-top-secrets .analysis-heading');
@@ -1060,13 +1092,13 @@ function drawEpisodePie() {
       const f = isHover ? a : 0;
       const sr = r * (1 + 0.04 * f);
       const off = 12 * f;
-      const ox = Math.cos(sl.mid) * off;
-      const oy = Math.sin(sl.mid) * off;
+      const ox = Math.cos(s.mid) * off;
+      const oy = Math.sin(s.mid) * off;
       ctx.beginPath();
       ctx.moveTo(cx + ox, cy + oy);
-      ctx.arc(cx + ox, cy + oy, sr, sl.start - Math.PI / 2, end - Math.PI / 2);
+      ctx.arc(cx + ox, cy + oy, sr, s.start - Math.PI / 2, end - Math.PI / 2);
       ctx.closePath();
-      ctx.fillStyle = sl.color;
+      ctx.fillStyle = s.color;
       ctx.fill();
       ctx.strokeStyle = isHover && f > 0.3 ? '#ffd700' : '#0a0e1a';
       ctx.lineWidth = isHover && f > 0.3 ? 3.5 : 2;
@@ -2361,6 +2393,10 @@ document.getElementById('aiChatMenuBtn')?.addEventListener('click', toggleChat);
         popover: { title: '\uD83D\uDC95 Find Your Waifus', description: 'Browse a gallery of beloved anime waifus with flip cards. Search by name or series!', side: 'right' }
       },
       {
+        element: '#hotTakesBtn',
+        popover: { title: '\uD83D\uDD25 Hot Takes', description: 'Share your hot takes on any anime! Post comments and see what others think in real-time.', side: 'right' }
+      },
+      {
         element: 'nav.side-nav a[onclick*="openSuggestion"]',
         popover: { title: '\uD83D\uDCA1 Drop Suggestion', description: 'Have an anime you think Fardin should watch? Drop your suggestion here!', side: 'right' },
         onHighlightStarted: function () { if (!sideMenu || !sideMenu.classList.contains('open')) openMenu(); }
@@ -2400,7 +2436,186 @@ document.getElementById('aiChatMenuBtn')?.addEventListener('click', toggleChat);
     localStorage.setItem('fardin_tour_done', '1');
     setTimeout(startTour, 1000);
   }
+
+  // ========== Hot Takes ==========
+  var ADMIN_NAME = 'Fardin';
+  var LS_KEY = 'fardin_hot_takes';
+  var USER_ID_KEY = 'fardin_uid';
+
+  var myId = localStorage.getItem(USER_ID_KEY);
+  if (!myId) {
+    myId = 'u' + Math.random().toString(36).substr(2, 9);
+    localStorage.setItem(USER_ID_KEY, myId);
+  }
+
+  function loadComments() {
+    try { return JSON.parse(localStorage.getItem(LS_KEY)) || []; }
+    catch(e) { return []; }
+  }
+
+  function saveComments(arr) {
+    try { localStorage.setItem(LS_KEY, JSON.stringify(arr)); }
+    catch(e) {}
+  }
+
+  function escHtml(s) {
+    var d = document.createElement('div');
+    d.appendChild(document.createTextNode(s));
+    return d.innerHTML;
+  }
+
+  function formatTime(iso) {
+    if (!iso) return '';
+    var date = new Date(iso);
+    if (isNaN(date)) return '';
+    return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  }
+
+  var adminMode = false;
+  var FEED = document.getElementById('htFeed');
+
+  var adminBadge = null;
+  var heading = document.querySelector('.hot-takes-heading');
+  if (heading) {
+    heading.style.cursor = 'pointer';
+    heading.title = '';
+    adminBadge = document.createElement('span');
+    adminBadge.style.cssText = 'display:none;margin-left:8px;vertical-align:middle;cursor:pointer;';
+    adminBadge.innerHTML = '<svg width="22" height="22" viewBox="0 0 64 64" fill="none"><path d="M32 6L8 18v12c0 18 10 28 24 28s24-10 24-28V18L32 6z" fill="#1a1a2e" stroke="#ffd700" stroke-width="3"/><path d="M22 32l7 7 13-13" stroke="#ffd700" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    heading.appendChild(adminBadge);
+    var clickCount = 0;
+    var clickTimer = null;
+    heading.addEventListener('click', function() {
+      clickCount++;
+      if (clickCount === 3) {
+        clickCount = 0;
+        clearTimeout(clickTimer);
+        adminMode = !adminMode;
+        adminBadge.style.display = adminMode ? 'inline' : 'none';
+        renderFeed(loadComments());
+      } else {
+        clearTimeout(clickTimer);
+        clickTimer = setTimeout(function() { clickCount = 0; }, 500);
+      }
+    });
+  }
+
+  function renderFeed(comments) {
+    if (!FEED) return;
+    FEED.innerHTML = '';
+    if (!comments || comments.length === 0) {
+      FEED.innerHTML = '<p class="ht-empty">No takes yet. Be the first!</p>';
+      return;
+    }
+    comments.sort(function(a, b) { return (b._ts || 0) - (a._ts || 0); });
+    for (var i = 0; i < comments.length; i++) {
+      FEED.appendChild(renderCommentEl(comments[i], i));
+    }
+  }
+
+  function renderCommentEl(c, index) {
+    var div = document.createElement('div');
+    div.className = 'ht-comment';
+    div.dataset.index = index;
+
+    var canDelete = adminMode || c._userId === myId;
+
+    var topHtml = '<div class="ht-comment-top">' +
+      '<span class="ht-comment-user">\uD83D\uDC64 ' + escHtml(c.userName) + '</span>' +
+      '<span class="ht-comment-actions">' +
+      (adminMode ? '<button class="ht-reply-btn" data-index="' + index + '">\u21A9 Reply</button>' : '') +
+      (canDelete ? '<button class="ht-del-btn" data-index="' + index + '">\uD83D\uDDD1\uFE0F</button>' : '') +
+      '</span>' +
+    '</div>' +
+    '<div class="ht-comment-text">' + escHtml(c.comment) + '</div>' +
+    (c.createdAt ? '<div class="ht-comment-time">\uD83D\uDD52 ' + formatTime(c.createdAt) + '</div>' : '');
+
+    var repliesHtml = '';
+    if (c.replies && c.replies.length > 0) {
+      repliesHtml += '<div class="ht-replies">';
+      for (var r = 0; r < c.replies.length; r++) {
+        var rep = c.replies[r];
+        repliesHtml += '<div class="ht-reply">' +
+          '<div class="ht-reply-top"><span class="ht-reply-admin"><svg width="16" height="16" viewBox="0 0 64 64" fill="none" style="vertical-align:middle;margin-right:3px;"><path d="M32 6L8 18v12c0 18 10 28 24 28s24-10 24-28V18L32 6z" fill="#1a1a2e" stroke="#ffd700" stroke-width="3"/><path d="M22 32l7 7 13-13" stroke="#ffd700" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>' + escHtml(rep.userName) + '</span></div>' +
+          '<div class="ht-reply-text">' + escHtml(rep.comment) + '</div>' +
+          (rep.createdAt ? '<div class="ht-comment-time">' + formatTime(rep.createdAt) + '</div>' : '') +
+        '</div>';
+      }
+      repliesHtml += '</div>';
+    }
+
+    div.innerHTML = topHtml + repliesHtml;
+
+    var delBtn = div.querySelector('.ht-del-btn');
+    if (delBtn) delBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      if (confirm('Delete this comment?')) {
+        var all = loadComments();
+        all.splice(index, 1);
+        saveComments(all);
+        renderFeed(all);
+      }
+    });
+
+    var replyBtn = div.querySelector('.ht-reply-btn');
+    if (replyBtn) replyBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      var existing = div.querySelector('.ht-reply-form');
+      if (existing) { existing.remove(); return; }
+      var form = document.createElement('div');
+      form.className = 'ht-reply-form';
+      form.innerHTML =
+        '<textarea class="ht-reply-input" placeholder="Reply as ' + ADMIN_NAME + '..." maxlength="500"></textarea>' +
+        '<button class="ht-reply-submit">Reply</button>';
+      div.appendChild(form);
+      var textarea = form.querySelector('.ht-reply-input');
+      var submitBtn = form.querySelector('.ht-reply-submit');
+      textarea.focus();
+      submitBtn.addEventListener('click', function() {
+        var text = textarea.value.trim();
+        if (!text) return;
+        var all = loadComments();
+        if (all[index]) {
+          if (!all[index].replies) all[index].replies = [];
+          all[index].replies.push({
+            userName: ADMIN_NAME,
+            comment: text,
+            createdAt: new Date().toISOString()
+          });
+          saveComments(all);
+          renderFeed(all);
+        }
+      });
+    });
+
+    return div;
+  }
+
+  renderFeed(loadComments());
+
+  var nameInput = document.getElementById('htUserName');
+  var commentInput = document.getElementById('htComment');
+  var submitBtn = document.getElementById('htSubmitBtn');
+
+  submitBtn.addEventListener('click', function() {
+    var name = nameInput.value.trim();
+    var comment = commentInput.value.trim();
+    if (!name) { alert('Please enter your name.'); nameInput.focus(); return; }
+    if (!comment) { alert('Please write a take.'); commentInput.focus(); return; }
+
+    var all = loadComments();
+    all.push({
+      userName: name,
+      comment: comment,
+      createdAt: new Date().toISOString(),
+      _ts: Date.now(),
+      _userId: myId,
+      replies: []
+    });
+    saveComments(all);
+    renderFeed(all);
+
+    nameInput.value = '';
+    commentInput.value = '';
+  });
 })();
-
-
-
