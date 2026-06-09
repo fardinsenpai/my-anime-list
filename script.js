@@ -2615,29 +2615,34 @@ document.getElementById('aiChatMenuBtn')?.addEventListener('click', toggleChat);
   renderFeed(loadComments());
 
   if (firestoreAvailable && db) {
-    db.collection('hotTakes').orderBy('createdAt', 'desc').onSnapshot(function(snapshot) {
-      var fbComments = [];
-      snapshot.forEach(function(doc) {
-        var d = doc.data();
-        d._id = doc.id;
-        d._ts = d.createdAt ? d.createdAt.toMillis() : 0;
-        fbComments.push(d);
-      });
-      saveComments(fbComments);
-      renderFeed(fbComments);
-    }, function(err) {
-      console.warn('Firestore snapshot error:', err);
-      if (err.code === 'permission-denied') {
-        var feed = document.getElementById('htFeed');
-        if (feed && !feed.querySelector('.ht-firebase-error')) {
-          var warn = document.createElement('p');
-          warn.className = 'ht-firebase-error';
-          warn.style.cssText = 'color:#FF6B6B;font-size:12px;text-align:center;padding:8px;background:rgba(255,0,0,0.05);border-radius:8px;margin-bottom:10px;';
-          warn.textContent = 'Firestore rules need to be set to public. Go to Firebase Console -> Firestore -> Rules and set: allow read, write: if true;';
-          feed.parentNode.insertBefore(warn, feed);
+    function syncFromFirestore() {
+      db.collection('hotTakes').orderBy('createdAt', 'desc').get().then(function(snapshot) {
+        var fbComments = [];
+        snapshot.forEach(function(doc) {
+          var d = doc.data();
+          d._id = doc.id;
+          d._ts = d.createdAt ? d.createdAt.toMillis() : 0;
+          fbComments.push(d);
+        });
+        if (fbComments.length > 0) {
+          saveComments(fbComments);
+          renderFeed(fbComments);
         }
-      }
-    });
+      }).catch(function(err) {
+        if (err.code === 'permission-denied') {
+          var feed = document.getElementById('htFeed');
+          if (feed && !feed.querySelector('.ht-firebase-error')) {
+            var warn = document.createElement('p');
+            warn.className = 'ht-firebase-error';
+            warn.style.cssText = 'color:#FF6B6B;font-size:12px;text-align:center;padding:8px;background:rgba(255,0,0,0.05);border-radius:8px;margin-bottom:10px;';
+            warn.textContent = 'Firestore rules need to be set to public. Go to Firebase Console -> Firestore -> Rules and set: allow read, write: if true;';
+            feed.parentNode.insertBefore(warn, feed);
+          }
+        }
+      });
+    }
+    syncFromFirestore();
+    setInterval(syncFromFirestore, 10000);
   }
 
   var nameInput = document.getElementById('htUserName');
