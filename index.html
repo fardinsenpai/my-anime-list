@@ -108,6 +108,16 @@
   Find Your Waifus
 </a>
 
+<li>
+  <a href="javascript:void(0)" id="hotTakesBtn">
+    <svg width="32" height="32" viewBox="0 0 64 64" fill="none">
+      <path d="M20 8C16 22 10 30 10 38C10 48 18 56 32 56C46 56 54 48 54 38C54 30 48 22 44 8C38 18 32 22 32 22C32 22 26 18 20 8Z" fill="#FF4500"/>
+      <path d="M24 44C26 48 30 50 32 50" stroke="#FFD700" stroke-width="3" stroke-linecap="round"/>
+      <circle cx="32" cy="34" r="4" fill="#FFD700"/>
+    </svg> Hot Takes 🔥
+  </a>
+</li>
+
   <a href="javascript:void(0)" onclick="openSuggestion()">
   <i><svg width="32" height="32" viewBox="0 0 64 64" fill="none">
   <rect x="12" y="20" width="40" height="28" rx="4"
@@ -244,6 +254,16 @@
   <div class="analysis-wrapper chart-wrapper">
     <canvas id="ratingChart" width="600" height="360"></canvas>
   </div>
+</div>
+
+<div class="body-hot-takes" id="hotTakesContainer" style="display:none;">
+  <div class="hot-takes-heading">🔥 Hot Takes</div>
+  <div class="hot-takes-form">
+    <input type="text" id="htUserName" class="ht-input" placeholder="Your name" maxlength="20">
+    <textarea id="htComment" class="ht-textarea" placeholder="What's your take on this anime?" maxlength="500"></textarea>
+    <button id="htSubmitBtn" class="ht-submit">Post 🔥</button>
+  </div>
+  <div class="ht-feed" id="htFeed"><p class="ht-empty">No takes yet. Be the first!</p></div>
 </div>
 
 <div class="body-top-secrets" id="topSecretsContainer" style="display:none;">
@@ -1018,6 +1038,8 @@
 </div>
 
 
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
   <script src="duel-system.js"></script>
   <script src="script.js"></script>
 </body>
