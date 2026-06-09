@@ -2451,20 +2451,21 @@ document.getElementById('aiChatMenuBtn')?.addEventListener('click', toggleChat);
   var firestoreAvailable = false;
   var db = null;
   try {
-    if (typeof firebase !== 'undefined' && firebase.apps && !firebase.apps.length) {
-      firebase.initializeApp({
-        apiKey: "AIzaSyCsE5p0VwNg17utMxakkX_UaJtO1T0TSi8",
-        authDomain: "fardin-anime-list.firebaseapp.com",
-        projectId: "fardin-anime-list",
-        storageBucket: "fardin-anime-list.firebasestorage.app",
-        messagingSenderId: "360752427679",
-        appId: "1:360752427679:web:9cf42b5d4f5541115968aa",
-        measurementId: "G-52CJ4F7EF8"
-      });
-    }
     if (typeof firebase !== 'undefined') {
+      if (!firebase.apps || !firebase.apps.length) {
+        firebase.initializeApp({
+          apiKey: "AIzaSyCsE5p0VwNg17utMxakkX_UaJtO1T0TSi8",
+          authDomain: "fardin-anime-list.firebaseapp.com",
+          projectId: "fardin-anime-list",
+          storageBucket: "fardin-anime-list.firebasestorage.app",
+          messagingSenderId: "360752427679",
+          appId: "1:360752427679:web:9cf42b5d4f5541115968aa",
+          measurementId: "G-52CJ4F7EF8"
+        });
+      }
       db = firebase.firestore();
       firestoreAvailable = true;
+      console.log('Firebase connected');
     }
   } catch(e) { console.warn('Firebase init failed:', e); }
 
@@ -2626,6 +2627,16 @@ document.getElementById('aiChatMenuBtn')?.addEventListener('click', toggleChat);
       renderFeed(fbComments);
     }, function(err) {
       console.warn('Firestore snapshot error:', err);
+      if (err.code === 'permission-denied') {
+        var feed = document.getElementById('htFeed');
+        if (feed && !feed.querySelector('.ht-firebase-error')) {
+          var warn = document.createElement('p');
+          warn.className = 'ht-firebase-error';
+          warn.style.cssText = 'color:#FF6B6B;font-size:12px;text-align:center;padding:8px;background:rgba(255,0,0,0.05);border-radius:8px;margin-bottom:10px;';
+          warn.textContent = 'Firestore rules need to be set to public. Go to Firebase Console -> Firestore -> Rules and set: allow read, write: if true;';
+          feed.parentNode.insertBefore(warn, feed);
+        }
+      }
     });
   }
 
