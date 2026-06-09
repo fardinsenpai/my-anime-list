@@ -2448,6 +2448,26 @@ document.getElementById('aiChatMenuBtn')?.addEventListener('click', toggleChat);
     localStorage.setItem(USER_ID_KEY, myId);
   }
 
+  var firestoreAvailable = false;
+  var db = null;
+  try {
+    if (typeof firebase !== 'undefined' && firebase.apps && !firebase.apps.length) {
+      firebase.initializeApp({
+        apiKey: "AIzaSyCsE5p0VwNg17utMxakkX_UaJtO1T0TSi8",
+        authDomain: "fardin-anime-list.firebaseapp.com",
+        projectId: "fardin-anime-list",
+        storageBucket: "fardin-anime-list.firebasestorage.app",
+        messagingSenderId: "360752427679",
+        appId: "1:360752427679:web:9cf42b5d4f5541115968aa",
+        measurementId: "G-52CJ4F7EF8"
+      });
+    }
+    if (typeof firebase !== 'undefined') {
+      db = firebase.firestore();
+      firestoreAvailable = true;
+    }
+  } catch(e) { console.warn('Firebase init failed:', e); }
+
   function loadComments() {
     try { return JSON.parse(localStorage.getItem(LS_KEY)) || []; }
     catch(e) { return []; }
@@ -2593,6 +2613,22 @@ document.getElementById('aiChatMenuBtn')?.addEventListener('click', toggleChat);
 
   renderFeed(loadComments());
 
+  if (firestoreAvailable && db) {
+    db.collection('hotTakes').orderBy('createdAt', 'desc').onSnapshot(function(snapshot) {
+      var fbComments = [];
+      snapshot.forEach(function(doc) {
+        var d = doc.data();
+        d._id = doc.id;
+        d._ts = d.createdAt ? d.createdAt.toMillis() : 0;
+        fbComments.push(d);
+      });
+      saveComments(fbComments);
+      renderFeed(fbComments);
+    }, function(err) {
+      console.warn('Firestore snapshot error:', err);
+    });
+  }
+
   var nameInput = document.getElementById('htUserName');
   var commentInput = document.getElementById('htComment');
   var submitBtn = document.getElementById('htSubmitBtn');
@@ -2604,16 +2640,29 @@ document.getElementById('aiChatMenuBtn')?.addEventListener('click', toggleChat);
     if (!comment) { alert('Please write a take.'); commentInput.focus(); return; }
 
     var all = loadComments();
-    all.push({
+    var entry = {
       userName: name,
       comment: comment,
       createdAt: new Date().toISOString(),
       _ts: Date.now(),
       _userId: myId,
       replies: []
-    });
+    };
+    all.push(entry);
     saveComments(all);
     renderFeed(all);
+
+    if (firestoreAvailable && db) {
+      db.collection('hotTakes').add({
+        userName: name,
+        comment: comment,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        _userId: myId,
+        replies: []
+      }).catch(function(err) {
+        console.warn('Firestore write error:', err);
+      });
+    }
 
     nameInput.value = '';
     commentInput.value = '';
