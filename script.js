@@ -2448,26 +2448,20 @@ document.getElementById('aiChatMenuBtn')?.addEventListener('click', toggleChat);
     localStorage.setItem(USER_ID_KEY, myId);
   }
 
-  var firestoreAvailable = false;
-  var db = null;
-  try {
-    if (typeof firebase !== 'undefined') {
-      if (!firebase.apps || !firebase.apps.length) {
-        firebase.initializeApp({
-          apiKey: "AIzaSyCsE5p0VwNg17utMxakkX_UaJtO1T0TSi8",
-          authDomain: "fardin-anime-list.firebaseapp.com",
-          projectId: "fardin-anime-list",
-          storageBucket: "fardin-anime-list.firebasestorage.app",
-          messagingSenderId: "360752427679",
-          appId: "1:360752427679:web:9cf42b5d4f5541115968aa",
-          measurementId: "G-52CJ4F7EF8"
-        });
-      }
-      db = firebase.firestore();
-      firestoreAvailable = true;
-      console.log('Firebase connected');
-    }
-  } catch(e) { console.warn('Firebase init failed:', e); }
+  var SUPABASE_URL = 'https://ldzlefdklcgvqcbqibtt.supabase.co';
+  var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxkemxlZmRrbGNndnFjYnFpYnR0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwMzk1OTAsImV4cCI6MjA5NjYxNTU5MH0.X3TGuLIpjrnPXMgCv4ZKIIjB6pItPgkdebf4JPdhuYs';
+
+  function supabaseFetch(path, options) {
+    return fetch(SUPABASE_URL + '/rest/v1/' + path, {
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': 'Bearer ' + SUPABASE_KEY,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=representation'
+      },
+      ...options
+    });
+  }
 
   function loadComments() {
     try { return JSON.parse(localStorage.getItem(LS_KEY)) || []; }
@@ -2614,36 +2608,22 @@ document.getElementById('aiChatMenuBtn')?.addEventListener('click', toggleChat);
 
   renderFeed(loadComments());
 
-  if (firestoreAvailable && db) {
-    function syncFromFirestore() {
-      db.collection('hotTakes').orderBy('createdAt', 'desc').get().then(function(snapshot) {
-        var fbComments = [];
-        snapshot.forEach(function(doc) {
-          var d = doc.data();
-          d._id = doc.id;
-          d._ts = d.createdAt ? d.createdAt.toMillis() : 0;
-          fbComments.push(d);
-        });
-        if (fbComments.length > 0) {
-          saveComments(fbComments);
-          renderFeed(fbComments);
-        }
-      }).catch(function(err) {
-        if (err.code === 'permission-denied') {
-          var feed = document.getElementById('htFeed');
-          if (feed && !feed.querySelector('.ht-firebase-error')) {
-            var warn = document.createElement('p');
-            warn.className = 'ht-firebase-error';
-            warn.style.cssText = 'color:#FF6B6B;font-size:12px;text-align:center;padding:8px;background:rgba(255,0,0,0.05);border-radius:8px;margin-bottom:10px;';
-            warn.textContent = 'Firestore rules need to be set to public. Go to Firebase Console -> Firestore -> Rules and set: allow read, write: if true;';
-            feed.parentNode.insertBefore(warn, feed);
-          }
-        }
-      });
-    }
-    syncFromFirestore();
-    setInterval(syncFromFirestore, 10000);
+  function syncFromSupabase() {
+    supabaseFetch('hot_takes?order=createdAt.desc').then(function(r) {
+      if (!r.ok) throw new Error('Supabase fetch error: ' + r.status);
+      return r.json();
+    }).then(function(data) {
+      if (data && data.length > 0) {
+        var mapped = data.map(function(row) { row._ts = new Date(row.createdAt).getTime(); return row; });
+        saveComments(mapped);
+        renderFeed(mapped);
+      }
+    }).catch(function(err) {
+      console.warn('Supabase sync error:', err);
+    });
   }
+  syncFromSupabase();
+  setInterval(syncFromSupabase, 15000);
 
   var nameInput = document.getElementById('htUserName');
   var commentInput = document.getElementById('htComment');
@@ -2668,17 +2648,19 @@ document.getElementById('aiChatMenuBtn')?.addEventListener('click', toggleChat);
     saveComments(all);
     renderFeed(all);
 
-    if (firestoreAvailable && db) {
-      db.collection('hotTakes').add({
+    supabaseFetch('hot_takes', {
+      method: 'POST',
+      body: JSON.stringify({
         userName: name,
         comment: comment,
-        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
         _userId: myId,
         replies: []
-      }).catch(function(err) {
-        console.warn('Firestore write error:', err);
-      });
-    }
+      })
+    }).then(function(r) {
+      if (!r.ok) console.warn('Supabase write status:', r.status);
+    }).catch(function(err) {
+      console.warn('Supabase write error:', err);
+    });
 
     nameInput.value = '';
     commentInput.value = '';
