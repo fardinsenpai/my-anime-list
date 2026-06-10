@@ -439,6 +439,8 @@ function showAllAwardWinners() {
       if (genreSection) genreSection.style.display = 'none';
       if (footerEl) footerEl.style.display = 'none';
       if (chatBubble) chatBubble.style.display = 'none';
+      var backToTopBtn = document.getElementById('backToTop');
+      if (backToTopBtn) backToTopBtn.style.display = 'none';
       if (typeof closeMenu === 'function') closeMenu();
       window.scrollTo({ top: 0, behavior: 'smooth' });
     };
@@ -2483,7 +2485,20 @@ document.getElementById('aiChatMenuBtn')?.addEventListener('click', toggleChat);
     if (!iso) return '';
     var date = new Date(iso);
     if (isNaN(date)) return '';
-    return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    var now = new Date();
+    var diff = Math.floor((now - date) / 1000);
+    if (diff < 60) return 'just now';
+    if (diff < 3600) return Math.floor(diff / 60) + 'm ago';
+    if (diff < 86400) return Math.floor(diff / 3600) + 'h ago';
+    if (diff < 172800) return 'yesterday';
+    var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    var mon = months[date.getMonth()];
+    var day = date.getDate();
+    var h = date.getHours();
+    var m = date.getMinutes();
+    var ampm = h >= 12 ? 'PM' : 'AM';
+    h = h % 12 || 12;
+    return mon + ' ' + day + ' \u00B7 ' + (h < 10 ? '0' : '') + h + ':' + (m < 10 ? '0' : '') + m + ' ' + ampm;
   }
 
   var adminMode = false;
@@ -2535,6 +2550,11 @@ document.getElementById('aiChatMenuBtn')?.addEventListener('click', toggleChat);
 
     var canDelete = adminMode || c._userId === myId;
 
+    var likes = c.likes || [];
+    var dislikes = c.dislikes || [];
+    var liked = likes.indexOf(myId) !== -1;
+    var disliked = dislikes.indexOf(myId) !== -1;
+
     var topHtml = '<div class="ht-comment-top">' +
       '<span class="ht-comment-user">\uD83D\uDC64 ' + escHtml(c.userName) + '</span>' +
       '<span class="ht-comment-actions">' +
@@ -2543,6 +2563,10 @@ document.getElementById('aiChatMenuBtn')?.addEventListener('click', toggleChat);
       '</span>' +
     '</div>' +
     '<div class="ht-comment-text">' + escHtml(c.comment) + '</div>' +
+    '<div class="ht-vote-row">' +
+      '<button class="ht-vote ht-vote-up' + (liked ? ' ht-voted' : '') + '" data-index="' + index + '" data-type="like"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg> <span class="ht-vote-count">' + likes.length + '</span></button>' +
+      '<button class="ht-vote ht-vote-down' + (disliked ? ' ht-voted' : '') + '" data-index="' + index + '" data-type="dislike"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3H10zM17 2h3a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-3"/></svg> <span class="ht-vote-count">' + dislikes.length + '</span></button>' +
+    '</div>' +
     (c.createdAt ? '<div class="ht-comment-time">\uD83D\uDD52 ' + formatTime(c.createdAt) + '</div>' : '');
 
     var repliesHtml = '';
@@ -2550,9 +2574,17 @@ document.getElementById('aiChatMenuBtn')?.addEventListener('click', toggleChat);
       repliesHtml += '<div class="ht-replies">';
       for (var r = 0; r < c.replies.length; r++) {
         var rep = c.replies[r];
+        var rLikes = rep.likes || [];
+        var rDislikes = rep.dislikes || [];
+        var rLiked = rLikes.indexOf(myId) !== -1;
+        var rDisliked = rDislikes.indexOf(myId) !== -1;
         repliesHtml += '<div class="ht-reply">' +
-          '<div class="ht-reply-top"><span class="ht-reply-admin"><svg width="16" height="16" viewBox="0 0 64 64" fill="none" style="vertical-align:middle;margin-right:3px;"><path d="M32 6L8 18v12c0 18 10 28 24 28s24-10 24-28V18L32 6z" fill="#1a1a2e" stroke="#ffd700" stroke-width="3"/><path d="M22 32l7 7 13-13" stroke="#ffd700" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>' + escHtml(rep.userName) + '</span></div>' +
+          '<div class="ht-reply-top"><span class="ht-reply-admin"><svg width="16" height="16" viewBox="0 0 64 64" fill="none" style="vertical-align:middle;margin-right:3px;"><path d="M32 6L8 18v12c0 18 10 28 24 28s24-10 24-28V18L32 6z" fill="#1a1a2e" stroke="#ffd700" stroke-width="3"/><path d="M22 32l7 7 13-13" stroke="#ffd700" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>' + escHtml(rep.userName) + '</span>' + (adminMode ? '<button class="ht-reply-del" data-index="' + index + '" data-reply="' + r + '">\uD83D\uDDD1\uFE0F</button>' : '') + '</div>' +
           '<div class="ht-reply-text">' + escHtml(rep.comment) + '</div>' +
+          '<div class="ht-vote-row">' +
+            '<button class="ht-vote ht-vote-up' + (rLiked ? ' ht-voted' : '') + '" data-index="' + index + '" data-reply="' + r + '" data-type="like"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg> <span class="ht-vote-count">' + rLikes.length + '</span></button>' +
+            '<button class="ht-vote ht-vote-down' + (rDisliked ? ' ht-voted' : '') + '" data-index="' + index + '" data-reply="' + r + '" data-type="dislike"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3H10zM17 2h3a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-3"/></svg> <span class="ht-vote-count">' + rDislikes.length + '</span></button>' +
+          '</div>' +
           (rep.createdAt ? '<div class="ht-comment-time">' + formatTime(rep.createdAt) + '</div>' : '') +
         '</div>';
       }
@@ -2561,14 +2593,70 @@ document.getElementById('aiChatMenuBtn')?.addEventListener('click', toggleChat);
 
     div.innerHTML = topHtml + repliesHtml;
 
+    function voteHandler(e) {
+      var btn = e.currentTarget;
+      var idx = parseInt(btn.dataset.index);
+      var type = btn.dataset.type;
+      var replyIdx = btn.dataset.reply !== undefined ? parseInt(btn.dataset.reply) : -1;
+      var all = loadComments();
+      if (!all[idx]) return;
+      var target = replyIdx >= 0 && all[idx].replies ? all[idx].replies[replyIdx] : all[idx];
+      if (!target) return;
+      if (!target.likes) target.likes = [];
+      if (!target.dislikes) target.dislikes = [];
+
+      var likesArr = target.likes;
+      var dislikesArr = target.dislikes;
+      var likeIdx = likesArr.indexOf(myId);
+      var dislikeIdx = dislikesArr.indexOf(myId);
+
+      if (type === 'like') {
+        if (likeIdx !== -1) { likesArr.splice(likeIdx, 1); }
+        else { if (dislikeIdx !== -1) dislikesArr.splice(dislikeIdx, 1); likesArr.push(myId); }
+      } else {
+        if (dislikeIdx !== -1) { dislikesArr.splice(dislikeIdx, 1); }
+        else { if (likeIdx !== -1) likesArr.splice(likeIdx, 1); dislikesArr.push(myId); }
+      }
+
+      btn.classList.remove('ht-burst');
+      void btn.offsetWidth;
+      btn.classList.add('ht-burst');
+
+      saveComments(all);
+      renderFeed(all);
+
+      if (c.id) {
+        var patchBody = {};
+        if (replyIdx < 0) {
+          patchBody.likes = all[idx].likes;
+          patchBody.dislikes = all[idx].dislikes;
+        } else {
+          patchBody.replies = all[idx].replies;
+        }
+        supabaseFetch('hot_takes?id=eq.' + c.id, {
+          method: 'PATCH',
+          body: JSON.stringify(patchBody)
+        }).catch(function(err) { console.warn('Supabase vote error:', err); });
+      }
+    }
+
+    var voteBtns = div.querySelectorAll('.ht-vote');
+    for (var v = 0; v < voteBtns.length; v++) {
+      voteBtns[v].addEventListener('click', voteHandler);
+    }
+
     var delBtn = div.querySelector('.ht-del-btn');
     if (delBtn) delBtn.addEventListener('click', function(e) {
       e.stopPropagation();
       if (confirm('Delete this comment?')) {
         var all = loadComments();
-        all.splice(index, 1);
+        var deleted = all.splice(index, 1);
         saveComments(all);
         renderFeed(all);
+        if (deleted[0] && deleted[0].id) {
+          supabaseFetch('hot_takes?id=eq.' + deleted[0].id, { method: 'DELETE' })
+            .catch(function(err) { console.warn('Supabase delete error:', err); });
+        }
       }
     });
 
@@ -2595,13 +2683,46 @@ document.getElementById('aiChatMenuBtn')?.addEventListener('click', toggleChat);
           all[index].replies.push({
             userName: ADMIN_NAME,
             comment: text,
-            createdAt: new Date().toISOString()
+            createdAt: new Date().toISOString(),
+            likes: [],
+            dislikes: []
           });
           saveComments(all);
           renderFeed(all);
+
+          if (c.id) {
+            supabaseFetch('hot_takes?id=eq.' + c.id, {
+              method: 'PATCH',
+              body: JSON.stringify({ replies: all[index].replies })
+            }).catch(function(err) { console.warn('Supabase reply error:', err); });
+          }
         }
       });
     });
+
+    var replyDelBtns = div.querySelectorAll('.ht-reply-del');
+    for (var rd = 0; rd < replyDelBtns.length; rd++) {
+      (function(rdBtn) {
+        rdBtn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          if (!confirm('Delete this admin reply?')) return;
+          var idx = parseInt(rdBtn.dataset.index);
+          var repIdx = parseInt(rdBtn.dataset.reply);
+          var all = loadComments();
+          if (all[idx] && all[idx].replies && all[idx].replies[repIdx]) {
+            all[idx].replies.splice(repIdx, 1);
+            saveComments(all);
+            renderFeed(all);
+            if (c.id) {
+              supabaseFetch('hot_takes?id=eq.' + c.id, {
+                method: 'PATCH',
+                body: JSON.stringify({ replies: all[idx].replies })
+              }).catch(function(err) { console.warn('Supabase reply delete error:', err); });
+            }
+          }
+        });
+      })(replyDelBtns[rd]);
+    }
 
     return div;
   }
@@ -2642,7 +2763,9 @@ document.getElementById('aiChatMenuBtn')?.addEventListener('click', toggleChat);
       createdAt: new Date().toISOString(),
       _ts: Date.now(),
       _userId: myId,
-      replies: []
+      replies: [],
+      likes: [],
+      dislikes: []
     };
     all.push(entry);
     saveComments(all);
@@ -2654,7 +2777,9 @@ document.getElementById('aiChatMenuBtn')?.addEventListener('click', toggleChat);
         userName: name,
         comment: comment,
         _userId: myId,
-        replies: []
+        replies: [],
+        likes: [],
+        dislikes: []
       })
     }).then(function(r) {
       if (!r.ok) console.warn('Supabase write status:', r.status);
