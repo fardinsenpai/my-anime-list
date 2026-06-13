@@ -118,6 +118,28 @@
   </a>
 </li>
 
+<li>
+  <a href="javascript:void(0)" onclick="openRandomPick()">
+    <svg width="32" height="32" viewBox="0 0 64 64" fill="none">
+      <rect x="8" y="8" width="48" height="48" rx="8" stroke="#FFD700" stroke-width="3.5" fill="none"/>
+      <text x="32" y="40" text-anchor="middle" font-size="22" font-weight="bold" fill="#FFD700">?</text>
+      <path d="M8 20L56 20" stroke="#FFD700" stroke-width="2" opacity="0.4"/>
+      <path d="M8 44L56 44" stroke="#FFD700" stroke-width="2" opacity="0.4"/>
+    </svg> Random Pick
+  </a>
+</li>
+
+<li>
+  <a href="javascript:void(0)" onclick="showDuelLeaderboard()">
+    <svg width="32" height="32" viewBox="0 0 64 64" fill="none">
+      <rect x="8" y="16" width="48" height="36" rx="4" stroke="#FFD700" stroke-width="3" fill="none"/>
+      <path d="M32 8L32 16" stroke="#FFD700" stroke-width="3"/>
+      <path d="M24 8L40 8" stroke="#FFD700" stroke-width="3"/>
+      <text x="32" y="44" text-anchor="middle" font-size="20" font-weight="bold" fill="#FFD700">🏆</text>
+    </svg> Duel Leaderboard
+  </a>
+</li>
+
   <a href="javascript:void(0)" onclick="openSuggestion()">
   <i><svg width="32" height="32" viewBox="0 0 64 64" fill="none">
   <rect x="12" y="20" width="40" height="28" rx="4"
@@ -191,8 +213,24 @@
     </div>
   </div>
 
-  
-  
+  <!-- Currently Watching -->
+  <div class="current-watch" onclick="document.querySelector('.card:nth-child(105)')?.click(); document.querySelector('.card:nth-child(105)')?.scrollIntoView({behavior:'smooth', block:'center'})">
+    <div class="current-watch-label">&#x1F3AC; Currently Watching</div>
+    <div class="current-watch-inner">
+      <div class="current-watch-poster">
+        <img src="https://media.kitsu.app/anime/poster_images/41024/large.jpg" alt="Tensura">
+      </div>
+      <div class="current-watch-info">
+        <div class="current-watch-title">Tensura (That Time I Got Reincarnated as a Slime)</div>
+        <div class="current-watch-season">Season 3</div>
+        <div class="current-watch-bar-track">
+          <div class="current-watch-bar-fill" style="width: 45%;"></div>
+        </div>
+        <div class="current-watch-eps">Episode 10 / 24</div>
+      </div>
+    </div>
+  </div>
+
   <!-- ? Lightning Canvas ? -->
   <canvas id="lightningCanvas"></canvas>
   
@@ -925,6 +963,10 @@
 
 <div class="card"><div class="card-inner"><div class="card-front"><div class="poster-wrap"><img src="https://media.kitsu.app/anime/poster_images/13273/large.jpg" alt="Made in Abyss" loading="lazy"/><span class="badge">#249</span></div><div class="info"><div class="number">NO. 249</div><div class="title">Made in Abyss</div></div></div><div class="card-back"><div class="back-content"><div class="back-title">Made in Abyss</div><div class="back-season">🌸 Season-1,2 & Movie</div><div class="back-episodes">📺 Total Episodes: 25</div><div class="back-tap-hint">click to flip back</div></div></div></div></div>
 
+<div class="card"><div class="card-inner"><div class="card-front"><div class="poster-wrap"><img src="https://scontent.fdac198-1.fna.fbcdn.net/v/t39.30808-6/506590905_24519807780953956_5649375479429359340_n.jpg?stp=dst-jpg_tt6&cstp=mx1200x1800&ctp=p526x296&_nc_cat=104&ccb=1-7&_nc_sid=aa7b47&_nc_eui2=AeGTxh1kRTqshMJMyTljoq9ai5gI6AqyVG-LmAjoCrJUbxY7nQD0stUpCkNEz7WfiLnbZfXHHwpYMqAy2Mb7yO82&_nc_ohc=n1Mn9UbqitAQ7kNvwGjF_pi&_nc_oc=AdrG-91Ell-BzEt6IWNqwX0QLpf4M9SJ_pZoC8nLJstWiDs-07IpwlUrLXfLijI5GMM&_nc_zt=23&_nc_ht=scontent.fdac198-1.fna&_nc_gid=qmOIeQ6aHcIOi5F2YRJS4w&_nc_ss=7b2a8&oh=00_Af8euEfZJiWnCgBrLn7iiWqJFFLlILeQbN3ldiFrtNevXw&oe=6A330510" alt="Wise Man's Grandchild" loading="lazy"/><span class="badge">#250</span></div><div class="info"><div class="number">NO. 250</div><div class="title">Wise Man's Grandchild</div></div></div><div class="card-back"><div class="back-content"><div class="back-title">Wise Man's Grandchild</div><div class="back-season">🌸 Season-1</div><div class="back-episodes">📺 Total Episodes: 12</div><div class="back-tap-hint">click to flip back</div></div></div></div></div>
+
+<div class="card"><div class="card-inner"><div class="card-front"><div class="poster-wrap"><img src="https://cdn.myanimelist.net/s/common/uploaded_files/1774453995-f8df0575b85782035ef0a11bca6d0cdf.jpeg" alt="Oshi no Ko" loading="lazy"/><span class="badge">#251</span></div><div class="info"><div class="number">NO. 251</div><div class="title">Oshi no Ko</div></div></div><div class="card-back"><div class="back-content"><div class="back-title">Oshi no Ko</div><div class="back-season">🌸 Season-1</div><div class="back-episodes">📺 Total Episodes: 11</div><div class="back-tap-hint">click to flip back</div></div></div></div></div>
+
 </div>
 
 
@@ -1002,6 +1044,32 @@
   <div class="waifu-grid" id="waifuGrid"></div>
 
 
+</div>
+
+<!-- Random Pick Modal -->
+<div class="random-modal" id="randomModal">
+  <div class="random-modal-inner">
+    <button class="random-modal-close" onclick="closeRandomPick()">&times;</button>
+    <div class="random-modal-content" id="randomModalContent">
+      <div class="random-spinner" id="randomSpinner">
+        <div class="random-spinner-inner">&#x1F3B2;</div>
+      </div>
+      <div class="random-result" id="randomResult" style="display:none;">
+        <div class="random-poster-wrap" id="randomPosterWrap">
+          <img id="randomPoster" src="" alt="">
+        </div>
+        <div class="random-info">
+          <div class="random-badge" id="randomBadge">#0</div>
+          <div class="random-title" id="randomTitle">-</div>
+          <div class="random-season" id="randomSeason">-</div>
+          <div class="random-episodes" id="randomEpisodes">-</div>
+        </div>
+      </div>
+    </div>
+    <div class="random-modal-footer">
+      <button class="random-pick-again" onclick="openRandomPick()">&#x1F500; Pick Again</button>
+    </div>
+  </div>
 </div>
 
 <!-- AI Chatbot Widget -->
