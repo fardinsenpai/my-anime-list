@@ -2365,7 +2365,7 @@ document.getElementById('aiChatMenuBtn')?.addEventListener('click', toggleChat);
       },
       {
         element: '#grid',
-        popover: { title: '\uD83D\uDCDA Anime Collection', description: 'Browse all <strong>243 anime</strong> Fardin has watched. Click any card to flip it and see details.', side: 'top' }
+        popover: { title: '\uD83D\uDCDA Anime Collection', description: 'Browse all <strong>' + document.querySelectorAll('#grid .card').length + ' anime</strong> Fardin has watched. Click any card to flip it and see details.', side: 'top' }
       },
       {
         element: '.menu-btn',
@@ -2397,6 +2397,10 @@ document.getElementById('aiChatMenuBtn')?.addEventListener('click', toggleChat);
       {
         element: '#hotTakesBtn',
         popover: { title: '\uD83D\uDD25 Hot Takes', description: 'Share your hot takes on any anime! Post comments and see what others think in real-time.', side: 'right' }
+      },
+      {
+        element: 'nav.side-nav a[onclick*="openRandomPick"]',
+        popover: { title: '\uD83C\uDFB2 Random Pick', description: 'Can\'t decide what to watch? Click here and let fate choose a random anime from Fardin\'s collection for you!', side: 'right' }
       },
       {
         element: 'nav.side-nav a[onclick*="openSuggestion"]',
@@ -2746,6 +2750,67 @@ document.getElementById('aiChatMenuBtn')?.addEventListener('click', toggleChat);
   syncFromSupabase();
   setInterval(syncFromSupabase, 15000);
 
+  /* ══════════════════════════════════════
+     🎲 RANDOM ANIME PICKER
+  ══════════════════════════════════════ */
+  window.openRandomPick = function() {
+    var modal = document.getElementById('randomModal');
+    var spinner = document.getElementById('randomSpinner');
+    var result = document.getElementById('randomResult');
+    var poster = document.getElementById('randomPoster');
+    var badge = document.getElementById('randomBadge');
+    var title = document.getElementById('randomTitle');
+    var season = document.getElementById('randomSeason');
+    var episodes = document.getElementById('randomEpisodes');
+
+    spinner.style.display = 'block';
+    result.style.display = 'none';
+    modal.classList.add('open');
+
+    var cards = Array.from(document.querySelectorAll('#grid .card'));
+    if (cards.length === 0) {
+      title.textContent = 'No anime found!';
+      spinner.style.display = 'none';
+      result.style.display = 'flex';
+      return;
+    }
+
+    var randomCard = cards[Math.floor(Math.random() * cards.length)];
+
+    var img = randomCard.querySelector('.poster-wrap img');
+    var num = randomCard.querySelector('.number');
+    var titleEl = randomCard.querySelector('.title');
+    var backSeason = randomCard.querySelector('.back-season');
+    var backEpisodes = randomCard.querySelector('.back-episodes');
+
+    setTimeout(function() {
+      spinner.querySelector('.random-spinner-inner').style.animation = 'none';
+      spinner.style.display = 'none';
+
+      poster.src = img ? img.src : '';
+      poster.alt = titleEl ? titleEl.textContent.trim() : '';
+      badge.textContent = num ? num.textContent.trim() : '#?';
+      title.textContent = titleEl ? titleEl.textContent.trim() : 'Unknown';
+      season.textContent = backSeason ? backSeason.textContent.trim() : '';
+      episodes.textContent = backEpisodes ? backEpisodes.textContent.trim() : '';
+
+      result.style.display = 'flex';
+
+      setTimeout(function() {
+        spinner.querySelector('.random-spinner-inner').style.animation = 'random-dice-spin 0.3s linear infinite';
+      }, 100);
+    }, 600);
+  };
+
+  window.closeRandomPick = function() {
+    document.getElementById('randomModal').classList.remove('open');
+  };
+
+  document.addEventListener('click', function(e) {
+    var modal = document.getElementById('randomModal');
+    if (e.target === modal) closeRandomPick();
+  });
+
   var nameInput = document.getElementById('htUserName');
   var commentInput = document.getElementById('htComment');
   var submitBtn = document.getElementById('htSubmitBtn');
@@ -2790,4 +2855,139 @@ document.getElementById('aiChatMenuBtn')?.addEventListener('click', toggleChat);
     nameInput.value = '';
     commentInput.value = '';
   });
+})();
+
+/* ══════════════════════════════════════
+   🖼️ WEBP SRCSET FOR ALL CARD IMAGES
+══════════════════════════════════════ */
+(function() {
+  function isWebPSupported() {
+    var canvas = document.createElement('canvas');
+    if (canvas.getContext && canvas.getContext('2d')) {
+      return canvas.toDataURL('image/webp').indexOf('image/webp') === 0;
+    }
+    return false;
+  }
+
+  if (!isWebPSupported()) return;
+
+  function webpUrl(url) {
+    var extMatch = url.match(/\.(jpe?g|png)(\?.*)?$/i);
+    if (!extMatch) return null;
+    var base = url.substring(0, url.lastIndexOf(extMatch[0]));
+    var params = extMatch[2] || '';
+    var connector = params ? '&' : '?';
+    return base + '.webp' + params + connector + 'fmt=webp';
+  }
+
+  function upgradeImages() {
+    document.querySelectorAll('#grid .card .poster-wrap img').forEach(function(img) {
+      if (img.closest('picture')) return;
+      var origSrc = img.getAttribute('src');
+      var wp = webpUrl(origSrc);
+      if (!wp) return;
+
+      var picture = document.createElement('picture');
+      var source = document.createElement('source');
+      source.srcset = wp;
+      source.type = 'image/webp';
+
+      img.parentNode.insertBefore(picture, img);
+      picture.appendChild(source);
+      picture.appendChild(img);
+    });
+  }
+
+  if (document.readyState === 'complete') upgradeImages();
+  else window.addEventListener('load', upgradeImages);
+})();
+
+/* ══════════════════════════════════════
+   🔗 SHARE BUTTON ON EACH CARD
+══════════════════════════════════════ */
+(function() {
+  function injectShareButtons() {
+    document.querySelectorAll('#grid .card').forEach(function(card) {
+      if (card.querySelector('.share-btn')) return;
+      var numEl = card.querySelector('.number');
+      if (!numEl) return;
+      var num = numEl.textContent.replace(/\D/g, '');
+      var titleEl = card.querySelector('.title');
+      var title = titleEl ? titleEl.textContent.trim() : 'Anime #' + num;
+
+      var btn = document.createElement('button');
+      btn.className = 'share-btn';
+      btn.setAttribute('aria-label', 'Share ' + title);
+      btn.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.59 13.51l6.83 3.98M15.41 6.51l-6.82 3.98"/></svg>';
+      btn.title = 'Share this anime';
+
+      btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        var url = window.location.origin + window.location.pathname + '#anime-' + num;
+        var shareData = { title: title, text: title + ' | Fardin\'s Anime Hub', url: url };
+
+        if (navigator.share) {
+          navigator.share(shareData).catch(function() {});
+        } else {
+          navigator.clipboard.writeText(url).then(function() {
+            showShareToast(title);
+          }).catch(function() {
+            prompt('Copy this link:', url);
+          });
+        }
+      });
+
+      card.querySelector('.poster-wrap').appendChild(btn);
+    });
+  }
+
+  function showShareToast(title) {
+    var t = document.createElement('div');
+    t.className = 'share-toast';
+    t.textContent = 'Link copied: ' + title;
+    document.body.appendChild(t);
+    requestAnimationFrame(function() {
+      t.style.opacity = '1';
+      t.style.transform = 'translateX(-50%) translateY(0)';
+    });
+    setTimeout(function() {
+      t.style.opacity = '0';
+      t.style.transform = 'translateX(-50%) translateY(20px)';
+      setTimeout(function() { t.remove(); }, 400);
+    }, 2500);
+  }
+
+  // Handle hash on load — scroll to and flip card
+  function handleHash() {
+    var match = window.location.hash.match(/^#anime-(\d+)$/);
+    if (!match) return;
+    var targetNum = match[1];
+    var cards = document.querySelectorAll('#grid .card');
+    for (var i = 0; i < cards.length; i++) {
+      var numEl = cards[i].querySelector('.number');
+      if (numEl && numEl.textContent.replace(/\D/g, '') === targetNum) {
+        cards[i].scrollIntoView({ behavior: 'smooth', block: 'center' });
+        setTimeout(function(c) { return function() { c.classList.add('flipped'); }; }(cards[i]), 600);
+        break;
+      }
+    }
+  }
+
+  if (document.readyState === 'complete') {
+    injectShareButtons();
+    handleHash();
+  } else {
+    window.addEventListener('load', function() {
+      injectShareButtons();
+      handleHash();
+    });
+  }
+
+  // Re-inject when home is clicked (cards get re-shuffled)
+  var origHome = document.getElementById('homeLink');
+  if (origHome) {
+    origHome.addEventListener('click', function() {
+      setTimeout(injectShareButtons, 100);
+    });
+  }
 })();
