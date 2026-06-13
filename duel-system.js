@@ -860,6 +860,9 @@ if (pp2) pp2.textContent = result.scores.anime2.toFixed(3);
         <p style="margin-top:10px;font-size:13px;color:#ff4444;text-align:center;">⚠️ Bro Some ratings are AI-generated. Don't take it too seriously! Have A Fun.</p>
       </div>
     `;
+    var winner = result.winner;
+    var loser = winner === a1 ? a2 : a1;
+    saveDuelResult(winner, loser);
   }
 
 
@@ -913,6 +916,121 @@ if (pp2) pp2.textContent = result.scores.anime2.toFixed(3);
       }, i * 30);
     }
   }
+
+  /* ══════════════════════════════════════════════════════
+     🏆 DUEL LEADERBOARD — localStorage + Supabase
+  ══════════════════════════════════════════════════════ */
+  var LB_STORAGE_KEY = 'anime_duel_results';
+
+  function getLocalResults() {
+    try {
+      var raw = localStorage.getItem(LB_STORAGE_KEY);
+      return raw ? JSON.parse(raw) : [];
+    } catch (e) { return []; }
+  }
+
+  function saveDuelResult(winner, loser) {
+    var wName = (winner.title || 'Unknown').slice(0, 200);
+    var lName = (loser.title || 'Unknown').slice(0, 200);
+
+    var results = getLocalResults();
+    results.push({ winner_name: wName, loser_name: lName });
+    try { localStorage.setItem(LB_STORAGE_KEY, JSON.stringify(results)); } catch (e) {}
+
+    /* Try Supabase sync (silent) */
+    var SB_URL = 'https://ldzlefdklcgvqcbqibtt.supabase.co';
+    var SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxkemxlZmRrbGNndnFjYnFpYnR0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwMzk1OTAsImV4cCI6MjA5NjYxNTU5MH0.X3TGuLIpjrnPXMgCv4ZKIIjB6pItPgkdebf4JPdhuYs';
+    fetch(SB_URL + '/rest/v1/duel_results', {
+      method: 'POST',
+      headers: {
+        'apikey': SB_KEY,
+        'Authorization': 'Bearer ' + SB_KEY,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=representation'
+      },
+      body: JSON.stringify({ winner_name: wName, loser_name: lName, winner_score: 1, loser_score: 0 })
+    }).catch(function() {});
+  }
+
+  function computeEntries(rows) {
+    var wins = {}, losses = {};
+    rows.forEach(function(row) {
+      wins[row.winner_name] = (wins[row.winner_name] || 0) + 1;
+      losses[row.loser_name] = (losses[row.loser_name] || 0) + 1;
+    });
+    var allNames = new Set(Object.keys(wins).concat(Object.keys(losses)));
+    var entries = [];
+    allNames.forEach(function(name) {
+      var w = wins[name] || 0;
+      var l = losses[name] || 0;
+      var total = w + l;
+      entries.push({ name: name, wins: w, losses: l, total: total, pct: total ? (w / total * 100).toFixed(1) : 0 });
+    });
+    entries.sort(function(a, b) { return b.wins - a.wins || a.losses - b.losses; });
+    return entries;
+  }
+
+  function renderLbOverlay(entries) {
+    var overlay = document.createElement('div');
+    overlay.id = 'duel-lb-overlay';
+    overlay.className = 'duel-lb-overlay';
+    var headerLabel = '🏆 Duel Leaderboard';
+    overlay.innerHTML = '<div class="duel-lb-modal">' +
+      '<button class="duel-lb-close" onclick="this.closest(\'.duel-lb-overlay\').remove()">&times;</button>' +
+      '<div class="duel-lb-header">' + headerLabel + '</div>' +
+      (entries.length === 0
+        ? '<div class="duel-lb-empty">No duels yet. Start battling!</div>'
+        : '<div class="duel-lb-table-wrap"><table class="duel-lb-table"><thead><tr><th>#</th><th>Anime</th><th>Wins</th><th>Losses</th><th>Win %</th></tr></thead><tbody>' +
+          entries.map(function(e, i) {
+            var cls = i === 0 ? 'duel-lb-row--gold' : i === 1 ? 'duel-lb-row--silver' : i === 2 ? 'duel-lb-row--bronze' : 'duel-lb-row--normal';
+            return '<tr class="' + cls + '"><td>' + (i + 1) + '</td><td class="duel-lb-name">' + e.name + '</td><td class="duel-lb-wins">' + e.wins + '</td><td class="duel-lb-losses">' + e.losses + '</td><td class="duel-lb-pct">' + e.pct + '%</td></tr>';
+          }).join('') +
+          '</tbody></table></div>'
+      ) +
+      '<div class="duel-lb-footer"><button class="duel-lb-refresh" onclick="showDuelLeaderboard()">🔄 Refresh</button></div></div>';
+    document.body.appendChild(overlay);
+    requestAnimationFrame(function() { overlay.classList.add('duel-lb--visible'); });
+    overlay.addEventListener('click', function(e) { if (e.target === overlay) e.currentTarget.remove(); });
+  }
+
+  window.showDuelLeaderboard = function() {
+    closeSidebar();
+    var existing = document.getElementById('duel-lb-overlay');
+    if (existing) existing.remove();
+
+    // 1. Show local data instantly
+    var local = getLocalResults();
+    var entries = computeEntries(local);
+    renderLbOverlay(entries);
+
+    // 2. Try Supabase in background — merge & re-render if newer data comes
+    var SB_URL = 'https://ldzlefdklcgvqcbqibtt.supabase.co';
+    var SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxkemxlZmRrbGNndnFjYnFpYnR0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwMzk1OTAsImV4cCI6MjA5NjYxNTU5MH0.X3TGuLIpjrnPXMgCv4ZKIIjB6pItPgkdebf4JPdhuYs';
+    fetch(SB_URL + '/rest/v1/duel_results?select=winner_name,loser_name&order=created_at.desc', {
+      headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY }
+    }).then(function(r) {
+      if (!r.ok) throw new Error('status ' + r.status);
+      return r.json();
+    }).then(function(rows) {
+      if (!rows || !rows.length) return;
+      // Merge: prefer remote, but ensure local-only results aren't lost
+      var merged = rows.slice();
+      var remoteSet = {};
+      rows.forEach(function(r) { remoteSet[r.winner_name + '|' + r.loser_name] = true; });
+      local.forEach(function(r) {
+        if (!remoteSet[r.winner_name + '|' + r.loser_name]) merged.push(r);
+      });
+      var mergedEntries = computeEntries(merged);
+      mergedEntries.__supaLoaded = true;
+
+      // Replace old overlay with synced data
+      var oldOv = document.getElementById('duel-lb-overlay');
+      if (oldOv) oldOv.remove();
+      renderLbOverlay(mergedEntries);
+    }).catch(function() {
+      // Supabase failed — local data is already shown, nothing more to do
+    });
+  };
 
   /* ── UTILITY ───────────────────────────────────────── */
   function getStats(anime) {
