@@ -1921,7 +1921,7 @@ async function sendMessage() {
         model: 'gpt-oss-120b',
         messages: messagesToSend,
         temperature: 0.8,
-        max_tokens: 200,
+        max_tokens: 400,
         stream: false
       })
     });
