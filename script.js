@@ -1923,7 +1923,7 @@ async function sendMessage() {
     'Content-Type': 'application/json'
   },
       body: JSON.stringify({
-        model: 'llama-3.3-70b-versatile',
+        model: 'gpt-oss-120b',
         messages: messagesToSend,
         temperature: 0.8,
         max_tokens: 400,
@@ -1932,7 +1932,6 @@ async function sendMessage() {
     });
 
     const data = await response.json();
-    console.log('API response:', JSON.stringify(data));
 
     // Remove typing indicator
     if (data.choices && data.choices[0]) {
@@ -1968,7 +1967,6 @@ async function sendMessage() {
 
 // ===== ADD MESSAGE TO UI - PREMIUM ANIMATION VERSION =====
 function addMessage(text, type, shouldSave = true) {
-  if (text == null) text = '';
   const msgDiv = document.createElement('div');
   msgDiv.className = `msg ${type}`;
 
@@ -2068,8 +2066,8 @@ const originalFetch = window.fetch;
 window.fetch = function(...args) {
   const [url, options] = args;
 
-  // Intercept Groq API call
-  if (url.includes('groq.com') && options?.body) {
+  // Intercept Cerebras API call
+  if (url.includes('cerebras.ai') && options?.body) {
     try {
       const body = JSON.parse(options.body);
       const userMsg = body.messages[body.messages.length - 1]?.content || '';
