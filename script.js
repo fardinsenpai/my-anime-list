@@ -288,6 +288,10 @@ function showAllAwardWinners() {
   if (counterSection) counterSection.style.display = 'none';
   if (searchSection) searchSection.style.display = 'none';
   if (genreSection) genreSection.style.display = 'none';
+  var watchEl = document.querySelector('.current-watch');
+  if (watchEl) watchEl.style.display = 'none';
+  var moodEl = document.querySelector('.mood-picker');
+  if (moodEl) moodEl.style.display = 'none';
 
   const years = Object.keys(AWARD_WINNERS).sort((a, b) => b - a);
   let foundCount = 0;
@@ -339,6 +343,9 @@ function showAllAwardWinners() {
       if (genreSection) genreSection.style.display = 'none';
       if (footerEl) footerEl.style.display = 'none';
       if (chatBubble) chatBubble.style.display = 'none';
+      var watchEl = document.querySelector('.current-watch');
+      if (watchEl) watchEl.style.display = 'none';
+
       // Force reflow so canvases render correctly
       void analysisContainer.offsetHeight;
       drawPieChart();
@@ -377,6 +384,9 @@ function showAllAwardWinners() {
       if (genreSection) genreSection.style.display = 'none';
       if (footerEl) footerEl.style.display = 'none';
       if (chatBubble) chatBubble.style.display = 'none';
+      var watchEl = document.querySelector('.current-watch');
+      if (watchEl) watchEl.style.display = 'none';
+
       if (typeof closeMenu === 'function') closeMenu();
       window.scrollTo({ top: 0, behavior: 'smooth' });
     };
@@ -407,6 +417,9 @@ function showAllAwardWinners() {
       if (genreSection) genreSection.style.display = 'none';
       if (footerEl) footerEl.style.display = 'none';
       if (chatBubble) chatBubble.style.display = 'none';
+      var watchEl = document.querySelector('.current-watch');
+      if (watchEl) watchEl.style.display = 'none';
+
       if (typeof closeMenu === 'function') closeMenu();
       window.scrollTo({ top: 0, behavior: 'smooth' });
     };
@@ -439,6 +452,9 @@ function showAllAwardWinners() {
       if (genreSection) genreSection.style.display = 'none';
       if (footerEl) footerEl.style.display = 'none';
       if (chatBubble) chatBubble.style.display = 'none';
+      var watchEl = document.querySelector('.current-watch');
+      if (watchEl) watchEl.style.display = 'none';
+
       var backToTopBtn = document.getElementById('backToTop');
       if (backToTopBtn) backToTopBtn.style.display = 'none';
       if (typeof closeMenu === 'function') closeMenu();
@@ -503,6 +519,9 @@ function showAllAwardWinners() {
       if(genreSection) genreSection.style.display = 'block';
       if(footerEl) footerEl.style.display = 'block';
       if(chatBubble) chatBubble.style.display = 'flex';
+      var watchEl = document.querySelector('.current-watch');
+      if (watchEl) watchEl.style.display = '';
+
 
       const analysisContainer = document.getElementById('analysisContainer');
       const topFiveContainer = document.getElementById('topFiveDropdown');
@@ -1849,6 +1868,7 @@ function toggleChat() {
   chatBox.classList.toggle('open');
   if (chatBox.classList.contains('open')) {
     chatInput.focus();
+    if (typeof closeMenu === 'function') closeMenu();
   }
 }
 
@@ -2014,6 +2034,12 @@ function addMessage(text, type, shouldSave = true) {
 }
 
 
+// ===== QUICK ACTION BUTTONS =====
+function quickAction(text) {
+  chatInput.value = text;
+  sendMessage();
+}
+
 // ===== ENTER KEY SUPPORT =====
 chatInput.addEventListener('keydown', (e) => {
   if (e.key === 'Enter') {
@@ -2135,15 +2161,6 @@ document.addEventListener('click', function(e) {
     chatBox.style.display = 'none'; // Force hide
   }
 });
-
-function toggleChat() {
-  // Chat history CSS styles
-  const chatBox = document.querySelector('.chat-box');
-  chatBox?.classList.toggle('open');
-  
-  // Sidebar toggle styles
-  if (typeof closeMenu === 'function') closeMenu();
-}
 
 // AI Chat button click handler
 document.getElementById('aiChatMenuBtn')?.addEventListener('click', toggleChat);
@@ -2365,7 +2382,13 @@ document.getElementById('aiChatMenuBtn')?.addEventListener('click', toggleChat);
       },
       {
         element: '#grid',
-        popover: { title: '\uD83D\uDCDA Anime Collection', description: 'Browse all <strong>' + document.querySelectorAll('#grid .card').length + ' anime</strong> Fardin has watched. Click any card to flip it and see details.', side: 'top' }
+        popover: { title: '\uD83D\uDCDA Anime Collection', description: 'Browse all <strong>' + document.querySelectorAll('#grid .card').length + ' anime</strong> Fardin has watched. Click any card to flip it and see details.', side: 'top' },
+        onHighlightStarted: function () { var _c = document.querySelector('.card'); if (_c) { setTimeout(function() { _c.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 50); } }
+      },
+      {
+        element: '.share-btn',
+        popover: { title: '\uD83D\uDD17 Share Cards', description: 'Click the <strong>gold share icon</strong> on any card to share it with friends! Copies the link so you can send it anywhere.', side: 'bottom' },
+        onHighlightStarted: function () { var _s = document.querySelector('.share-btn'); if (_s) { _s.closest('.card') && _s.closest('.card').scrollIntoView({ behavior: 'smooth', block: 'center' }); } }
       },
       {
         element: '.menu-btn',
@@ -2400,7 +2423,7 @@ document.getElementById('aiChatMenuBtn')?.addEventListener('click', toggleChat);
       },
       {
         element: 'nav.side-nav a[onclick*="openRandomPick"]',
-        popover: { title: '\uD83C\uDFB2 Random Pick', description: 'Can\'t decide what to watch? Click here and let fate choose a random anime from Fardin\'s collection for you!', side: 'right' }
+        popover: { title: '\uD83C\uDFA8 Random Pick by Mood', description: 'Choose your mood \u2014 Funny, Sad, Romantic, Dark & more! We\'ll pick a matching anime just for your vibe.', side: 'right' }
       },
       {
         element: 'nav.side-nav a[onclick*="openSuggestion"]',
@@ -2467,6 +2490,31 @@ document.getElementById('aiChatMenuBtn')?.addEventListener('click', toggleChat);
       },
       ...options
     });
+  }
+
+  /* Retry wrapper with exponential backoff */
+  function supabaseFetchWithRetry(path, options, maxRetries) {
+    if (maxRetries === undefined) maxRetries = 2;
+    var delay = 1000;
+    function attempt(remaining) {
+      return supabaseFetch(path, options).then(function(r) {
+        if (!r.ok && remaining > 0 && r.status >= 500) {
+          return new Promise(function(resolve) { setTimeout(resolve, delay); }).then(function() {
+            delay *= 2; return attempt(remaining - 1);
+          });
+        }
+        if (!r.ok) throw new Error('status ' + r.status);
+        return r;
+      }).catch(function(err) {
+        if (remaining > 0) {
+          return new Promise(function(resolve) { setTimeout(resolve, delay); }).then(function() {
+            delay *= 2; return attempt(remaining - 1);
+          });
+        }
+        throw err;
+      });
+    }
+    return attempt(maxRetries);
   }
 
   function loadComments() {
@@ -2637,10 +2685,10 @@ document.getElementById('aiChatMenuBtn')?.addEventListener('click', toggleChat);
         } else {
           patchBody.replies = all[idx].replies;
         }
-        supabaseFetch('hot_takes?id=eq.' + c.id, {
+        supabaseFetchWithRetry('hot_takes?id=eq.' + c.id, {
           method: 'PATCH',
           body: JSON.stringify(patchBody)
-        }).catch(function(err) { console.warn('Supabase vote error:', err); });
+        }, 1).catch(function(err) { console.warn('Supabase vote error:', err); });
       }
     }
 
@@ -2658,7 +2706,7 @@ document.getElementById('aiChatMenuBtn')?.addEventListener('click', toggleChat);
         saveComments(all);
         renderFeed(all);
         if (deleted[0] && deleted[0].id) {
-          supabaseFetch('hot_takes?id=eq.' + deleted[0].id, { method: 'DELETE' })
+          supabaseFetchWithRetry('hot_takes?id=eq.' + deleted[0].id, { method: 'DELETE' }, 1)
             .catch(function(err) { console.warn('Supabase delete error:', err); });
         }
       }
@@ -2695,10 +2743,10 @@ document.getElementById('aiChatMenuBtn')?.addEventListener('click', toggleChat);
           renderFeed(all);
 
           if (c.id) {
-            supabaseFetch('hot_takes?id=eq.' + c.id, {
+            supabaseFetchWithRetry('hot_takes?id=eq.' + c.id, {
               method: 'PATCH',
               body: JSON.stringify({ replies: all[index].replies })
-            }).catch(function(err) { console.warn('Supabase reply error:', err); });
+            }, 1).catch(function(err) { console.warn('Supabase reply error:', err); });
           }
         }
       });
@@ -2734,8 +2782,7 @@ document.getElementById('aiChatMenuBtn')?.addEventListener('click', toggleChat);
   renderFeed(loadComments());
 
   function syncFromSupabase() {
-    supabaseFetch('hot_takes?order=createdAt.desc').then(function(r) {
-      if (!r.ok) throw new Error('Supabase fetch error: ' + r.status);
+    supabaseFetchWithRetry('hot_takes?order=createdAt.desc', {}, 1).then(function(r) {
       return r.json();
     }).then(function(data) {
       if (data && data.length > 0) {
@@ -2751,10 +2798,25 @@ document.getElementById('aiChatMenuBtn')?.addEventListener('click', toggleChat);
   setInterval(syncFromSupabase, 15000);
 
   /* ══════════════════════════════════════
-     🎲 RANDOM ANIME PICKER
+     🎲 RANDOM ANIME PICKER + MOOD PICKER
   ══════════════════════════════════════ */
-  window.openRandomPick = function() {
-    var modal = document.getElementById('randomModal');
+  var MOOD_GENRES = {
+    funny:    ['Comedy'],
+    sad:      ['Slice of Life'],
+    exciting: ['Action', 'Adventure', 'Sports'],
+    romantic: ['Romcom'],
+    fantasy:  ['Isekai', 'Adventure'],
+    pumped:   ['Sports', 'Action'],
+    dark:     ['Dark / Horror', 'Psychological'],
+    mindbend: ['Psychological', 'Sci-Fi']
+  };
+  var MOOD_LABELS = {
+    any: '🎲 Surprise', funny: '😆 Funny', sad: '😢 Sad', exciting: '⚡ Exciting',
+    romantic: '💕 Romantic', fantasy: '🌌 Fantasy', pumped: '🏆 Pumped',
+    dark: '💀 Dark', mindbend: '🧠 Mind-bend'
+  };
+
+  function doPick(cards, mood, label) {
     var spinner = document.getElementById('randomSpinner');
     var result = document.getElementById('randomResult');
     var poster = document.getElementById('randomPoster');
@@ -2763,25 +2825,15 @@ document.getElementById('aiChatMenuBtn')?.addEventListener('click', toggleChat);
     var season = document.getElementById('randomSeason');
     var episodes = document.getElementById('randomEpisodes');
 
-    spinner.style.display = 'block';
+    var pick = cards[Math.floor(Math.random() * cards.length)];
+    var img = pick.querySelector('.poster-wrap img') || pick.querySelector('img');
+    var num = pick.querySelector('.number');
+    var titleEl = pick.querySelector('.title');
+    var backSeason = pick.querySelector('.back-season');
+    var backEpisodes = pick.querySelector('.back-episodes');
+
     result.style.display = 'none';
-    modal.classList.add('open');
-
-    var cards = Array.from(document.querySelectorAll('#grid .card'));
-    if (cards.length === 0) {
-      title.textContent = 'No anime found!';
-      spinner.style.display = 'none';
-      result.style.display = 'flex';
-      return;
-    }
-
-    var randomCard = cards[Math.floor(Math.random() * cards.length)];
-
-    var img = randomCard.querySelector('.poster-wrap img');
-    var num = randomCard.querySelector('.number');
-    var titleEl = randomCard.querySelector('.title');
-    var backSeason = randomCard.querySelector('.back-season');
-    var backEpisodes = randomCard.querySelector('.back-episodes');
+    spinner.style.display = 'block';
 
     setTimeout(function() {
       spinner.querySelector('.random-spinner-inner').style.animation = 'none';
@@ -2789,21 +2841,49 @@ document.getElementById('aiChatMenuBtn')?.addEventListener('click', toggleChat);
 
       poster.src = img ? img.src : '';
       poster.alt = titleEl ? titleEl.textContent.trim() : '';
-      badge.textContent = num ? num.textContent.trim() : '#?';
+      badge.textContent = (num ? num.textContent.trim() : '#?') + ' ' + label;
       title.textContent = titleEl ? titleEl.textContent.trim() : 'Unknown';
       season.textContent = backSeason ? backSeason.textContent.trim() : '';
       episodes.textContent = backEpisodes ? backEpisodes.textContent.trim() : '';
 
       result.style.display = 'flex';
-
       setTimeout(function() {
         spinner.querySelector('.random-spinner-inner').style.animation = 'random-dice-spin 0.3s linear infinite';
       }, 100);
     }, 600);
+  }
+
+  window.openRandomPick = function() {
+    document.getElementById('randomModal').classList.add('open');
+    doPick(Array.from(document.querySelectorAll('#grid .card')), null, '🎲 Surprise');
   };
 
   window.closeRandomPick = function() {
     document.getElementById('randomModal').classList.remove('open');
+  };
+
+  window.pickByMood = function(mood) {
+    var cards = Array.from(document.querySelectorAll('#grid .card'));
+    if (cards.length === 0) return;
+
+    if (mood === 'any') {
+      doPick(cards, null, '🎲 Surprise');
+      return;
+    }
+
+    var genres = MOOD_GENRES[mood];
+    if (!genres) return;
+    var genreSets = genres.map(function(g) { return (window.ANIME_GENRES || {})[g] && (window.ANIME_GENRES[g].nums); }).filter(Boolean);
+    if (genreSets.length === 0) return;
+
+    var matches = cards.filter(function(card) {
+      var n = parseInt((card.querySelector('.number') || {}).textContent.replace(/\D/g, ''), 10);
+      if (!n) return false;
+      return genreSets.some(function(set) { return set.has(n); });
+    });
+
+    if (matches.length === 0) return;
+    doPick(matches, mood, MOOD_LABELS[mood] || mood);
   };
 
   document.addEventListener('click', function(e) {
@@ -2836,7 +2916,7 @@ document.getElementById('aiChatMenuBtn')?.addEventListener('click', toggleChat);
     saveComments(all);
     renderFeed(all);
 
-    supabaseFetch('hot_takes', {
+    supabaseFetchWithRetry('hot_takes', {
       method: 'POST',
       body: JSON.stringify({
         userName: name,
@@ -2846,8 +2926,8 @@ document.getElementById('aiChatMenuBtn')?.addEventListener('click', toggleChat);
         likes: [],
         dislikes: []
       })
-    }).then(function(r) {
-      if (!r.ok) console.warn('Supabase write status:', r.status);
+    }, 2).then(function(r) {
+      if (!r.ok) showToast('⚠️ Sync Warning', 'Comment saved locally but cloud sync failed', 'warning');
     }).catch(function(err) {
       console.warn('Supabase write error:', err);
     });
