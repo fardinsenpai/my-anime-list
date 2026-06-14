@@ -121,10 +121,11 @@
 <li>
   <a href="javascript:void(0)" onclick="openRandomPick()">
     <svg width="32" height="32" viewBox="0 0 64 64" fill="none">
-      <rect x="8" y="8" width="48" height="48" rx="8" stroke="#FFD700" stroke-width="3.5" fill="none"/>
-      <text x="32" y="40" text-anchor="middle" font-size="22" font-weight="bold" fill="#FFD700">?</text>
-      <path d="M8 20L56 20" stroke="#FFD700" stroke-width="2" opacity="0.4"/>
-      <path d="M8 44L56 44" stroke="#FFD700" stroke-width="2" opacity="0.4"/>
+      <circle cx="32" cy="20" r="12" stroke="#ffb7c5" stroke-width="3" fill="none"/>
+      <circle cx="22" cy="18" r="3" fill="#ffb7c5"/>
+      <circle cx="42" cy="18" r="3" fill="#ffb7c5"/>
+      <path d="M22 30C26 36 38 36 42 30" stroke="#ffb7c5" stroke-width="3" stroke-linecap="round"/>
+      <path d="M10 50L54 50" stroke="#ffb7c5" stroke-width="3" stroke-linecap="round"/>
     </svg> Random Pick
   </a>
 </li>
@@ -222,7 +223,7 @@
       </div>
       <div class="current-watch-info">
         <div class="current-watch-title">Tensura (That Time I Got Reincarnated as a Slime)</div>
-        <div class="current-watch-season">Season 3</div>
+        <div class="current-watch-season">Season 4</div>
         <div class="current-watch-bar-track">
           <div class="current-watch-bar-fill" style="width: 45%;"></div>
         </div>
@@ -1051,7 +1052,7 @@
   <div class="random-modal-inner">
     <button class="random-modal-close" onclick="closeRandomPick()">&times;</button>
     <div class="random-modal-content" id="randomModalContent">
-      <div class="random-spinner" id="randomSpinner">
+      <div class="random-spinner" id="randomSpinner" style="display:none;">
         <div class="random-spinner-inner">&#x1F3B2;</div>
       </div>
       <div class="random-result" id="randomResult" style="display:none;">
@@ -1065,8 +1066,21 @@
           <div class="random-episodes" id="randomEpisodes">-</div>
         </div>
       </div>
+      <div class="mood-picker-step" id="moodPickerStep">
+        <div class="mood-buttons">
+          <button class="mood-btn" data-mood="any" onclick="pickByMood('any')">&#x1F3B2; Any</button>
+          <button class="mood-btn" data-mood="funny" onclick="pickByMood('funny')">&#x1F606; Funny</button>
+          <button class="mood-btn" data-mood="sad" onclick="pickByMood('sad')">&#x1F622; Sad</button>
+          <button class="mood-btn" data-mood="exciting" onclick="pickByMood('exciting')">&#x26A1; Exciting</button>
+          <button class="mood-btn" data-mood="romantic" onclick="pickByMood('romantic')">&#x1F495; Romantic</button>
+          <button class="mood-btn" data-mood="fantasy" onclick="pickByMood('fantasy')">&#x1F30C; Fantasy</button>
+          <button class="mood-btn" data-mood="pumped" onclick="pickByMood('pumped')">&#x1F3C6; Pumped</button>
+          <button class="mood-btn" data-mood="dark" onclick="pickByMood('dark')">&#x1F480; Dark</button>
+          <button class="mood-btn" data-mood="mindbend" onclick="pickByMood('mindbend')">&#x1F9E0; Mind-bend</button>
+        </div>
+      </div>
     </div>
-    <div class="random-modal-footer">
+    <div class="random-modal-footer" id="randomModalFooter">
       <button class="random-pick-again" onclick="openRandomPick()">&#x1F500; Pick Again</button>
     </div>
   </div>
@@ -1102,7 +1116,18 @@
   <div class="chat-input-area">
     <input type="text" id="chatInput" placeholder="Type a message..." onkeydown="if(event.key==='Enter') sendMessage()" />
     <button onclick="sendMessage()">Send</button>
-    <button onclick="clearChatHistory()" class="clear-btn">🗑️</button>
+    <button onclick="clearChatHistory()" class="clear-btn" title="Clear chat">🗑️</button>
+  </div>
+  <div class="chat-quick-actions">
+    <button onclick="quickAction('Recommend me an isekai anime')">🎯 Isekai</button>
+    <button onclick="quickAction('Suggest a random anime')">🎲 Random</button>
+    <button onclick="quickAction('What\'s the highest rated anime?')">⭐ Top Rated</button>
+    <button onclick="quickAction('Recommend a romance anime')">💕 Romance</button>
+    <button onclick="quickAction('Suggest a comedy anime')">😂 Comedy</button>
+    <button onclick="quickAction('Recommend an action anime')">⚔ Action</button>
+    <button onclick="quickAction('When was this site last updated?')">📅 Last Updated</button>
+    <button onclick="quickAction('What should I watch tonight?')">🌙 Tonight</button>
+    <button onclick="quickAction('Tell me about Fardin')">👤 Fardin</button>
   </div>
 </div>
 
