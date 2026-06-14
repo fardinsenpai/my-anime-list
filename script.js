@@ -1923,7 +1923,7 @@ async function sendMessage() {
     'Content-Type': 'application/json'
   },
       body: JSON.stringify({
-        model: 'gpt-oss-120b',
+        model: 'llama3-70b-8192',
         messages: messagesToSend,
         temperature: 0.8,
         max_tokens: 400,
@@ -2066,8 +2066,8 @@ const originalFetch = window.fetch;
 window.fetch = function(...args) {
   const [url, options] = args;
 
-  // Intercept Cerebras API call
-  if (url.includes('cerebras.ai') && options?.body) {
+  // Intercept Groq API call
+  if (url.includes('groq.com') && options?.body) {
     try {
       const body = JSON.parse(options.body);
       const userMsg = body.messages[body.messages.length - 1]?.content || '';
