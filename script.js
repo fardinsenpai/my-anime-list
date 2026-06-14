@@ -1932,7 +1932,7 @@ async function sendMessage() {
     });
 
     const data = await response.json();
-    console.log('API response:', data);
+    console.log('API response:', JSON.stringify(data));
 
     // Remove typing indicator
     if (data.choices && data.choices[0]) {
