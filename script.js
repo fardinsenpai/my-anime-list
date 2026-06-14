@@ -1739,7 +1739,7 @@ if (window.scrollY > document.body.scrollHeight / 3) {
 // Chat memory cleanup flag to prevent memory leaks
 // Clear old messages from DOM when threshold exceeded
 
-const apiUrl = 'https://anime-api-brown-phi.vercel.app/api/chat';
+const apiUrl = 'https://api.groq.com/openai/v1/chat/completions';
 
 // ===== LOCALSTORAGE CONFIG - NEW =====
 const CHAT_STORAGE_KEY = 'fardin_ai_chat_ui_history';
@@ -1810,16 +1810,17 @@ Rules:
 6. Only say "As-salamu alaykum" on the user's first message. Don't repeat it after that. Always end your first reply with a fun fact about anime or Fardin's taste. For example: "Did you know Fardin loves anime with strong character development? Ask me for a recommendation!".
 7. If user asks about Fardin (the website owner), tell them his full info is in the sidebar under "Owner Info". Keep it fun and positive.
 8. If user wants to hear good things about Fardin and his taste, make it fun. Fardin loves diverse genres — action, comedy, romance, thriller. He appreciates good storytelling and character development.
-9. You can use your general anime knowledge to make answers better. If I give you [DATA] context, use ONLY that for specific anime info. Don't mention you have external info.
-10. Encourage users to try Anime Duel from the sidebar — it's the most fun feature.
-11. Do not tell the user about Fardin's total anime or episode count unless they ask. If they ask, give the stats in a fun way then say "Explore the list and find your next watch!".
-12. If user asks how to give feedback or suggest anime, tell them to use the suggestion box in the sidebar. Say "Your suggestions help Fardin discover new gems and make the website even better!".
-13. Never use the 🙏 emoji.
-14. Be passionate and hype — act like an anime-obsessed friend, not a robot. Use words like "absolute banger", "goated", "peak fiction" casually.
-15. Occasionally challenge the user: ask them if they've seen an underrated gem from Fardin's list and tease them to check it out.
-16. End every third reply with a unique signature like "⚡ Stay weeb, stay deadly ⚡" or "✨ Peace out, weeb ✨" or "🔥 Another day, another anime 🔥" — rotate them, don't repeat the same one twice in a row.
-17. If the user seems bored or asks "what to watch", don't just suggest — hype them up first ("Oh you haven't seen THIS yet??") before giving the recommendation.
-18. Do not give Assalamu alaykum on "Recommend a " this type of questions. Only on the very first user message ever. After that, never repeat it.
+9. NEVER guess or make up genres, episode counts, or descriptions. The [DATA] context in the system prompt has the COMPLETE list of Fardin's anime with correct genres, episodes, and seasons. Use ONLY that data for any anime-specific answers. You may use general knowledge for casual conversation but NOT for facts about any anime in Fardin's list.
+10. If you see [FORCED] in the system prompt, you MUST obey it exactly. It overrides all other instructions. Do not be creative or funny — just follow the [FORCED] instruction literally.
+11. Encourage users to try Anime Duel from the sidebar — it's the most fun feature.
+12. Do not tell the user about Fardin's total anime or episode count unless they ask. If they ask, give the stats in a fun way then say "Explore the list and find your next watch!".
+13. If user asks how to give feedback or suggest anime, tell them to use the suggestion box in the sidebar. Say "Your suggestions help Fardin discover new gems and make the website even better!".
+14. Never use the 🙏 emoji.
+15. Be passionate and hype — act like an anime-obsessed friend, not a robot. Use words like "absolute banger", "goated", "peak fiction" casually.
+16. Occasionally challenge the user: ask them if they've seen an underrated gem from Fardin's list and tease them to check it out.
+17. End every third reply with a unique signature like "⚡ Stay weeb, stay deadly ⚡" or "✨ Peace out, weeb ✨" or "🔥 Another day, another anime 🔥" — rotate them, don't repeat the same one twice in a row.
+18. If the user seems bored or asks "what to watch", don't just suggest — hype them up first ("Oh you haven't seen THIS yet??") before giving the recommendation.
+19. Do not give Assalamu alaykum on "Recommend a " this type of questions. Only on the very first user message ever. After that, never repeat it.
 
 Don't make up anime. Stick to his list only.`;
 }
@@ -1898,32 +1899,16 @@ async function sendMessage() {
   const typingDiv = addMessage('Typing...', 'bot typing');
 
   try {
-    // Check if user wants random anime
-    const needsRandom = /random|pick|suggest|recommend.*anime|random/i.test(message);
-
     let messagesToSend = [...chatHistory];
-
-    // If random needed, inject the list + instruction
-    if (needsRandom) {
-      const animeObj = JSON.parse(getAnimeListJSON());
-      const titles = Object.keys(animeObj);
-      const randomTitle = titles[Math.floor(Math.random() * titles.length)];
-      const epCount = animeObj[randomTitle];
-
-      // Replace last user message with enhanced version
-      messagesToSend[messagesToSend.length - 1] = {
-        role: 'user',
-        content: `User asked: "${message}". I randomly picked from Fardin's list: "${randomTitle}" which has ${epCount} episodes. Now reply in a fun way about this anime, mention the episode count, and ask if they want details.`
-      };
-    }
 
    const response = await fetch(apiUrl, {
   method: 'POST',
   headers: {
-    'Content-Type': 'application/json'
+    'Content-Type': 'application/json',
+    'Authorization': 'Bearer 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'
   },
       body: JSON.stringify({
-        model: 'gpt-oss-120b',
+        model: 'llama-3.1-8b-instant',
         messages: messagesToSend,
         temperature: 0.8,
         max_tokens: 400,
@@ -2066,54 +2051,83 @@ const originalFetch = window.fetch;
 window.fetch = function(...args) {
   const [url, options] = args;
 
-  // Intercept Cerebras API call
-  if (url.includes('cerebras.ai') && options?.body) {
+  // Intercept Groq API call
+  if (url.includes('groq.com') && options?.body) {
+    console.log('Interceptor fired');
     try {
       const body = JSON.parse(options.body);
       const userMsg = body.messages[body.messages.length - 1]?.content || '';
 
-      let extraInfo = '';
+      // Build genre reverse-map: anime number → genres
+      const animeGenres = window.ANIME_GENRES || {};
+      const numToGenres = {};
+      Object.keys(animeGenres).forEach(genre => {
+        const nums = animeGenres[genre].nums;
+        if (!nums) return;
+        nums.forEach(n => {
+          if (!numToGenres[n]) numToGenres[n] = [];
+          numToGenres[n].push(genre);
+        });
+      });
 
-    // 1. Support "number" queries: "78 number anime"
+      let extraInfo = '';
+      const cards = [...document.querySelectorAll('.anime-card,.card')];
+
+      // Number query: find card by number
       const numMatch = userMsg.match(/#?(\d+)\s*(number|no\.?|th|st|nd|rd)?/i);
       if (numMatch) {
         const num = parseInt(numMatch[1]);
-        const cards = document.querySelectorAll('.anime-card,.card');
+        const found = cards.find(c => {
+          const n = c.querySelector('[class*="number"], [class*="no"]')?.textContent?.replace(/\D/g, '');
+          return n && parseInt(n) === num;
+        });
+        if (found) {
+          const t = found.querySelector('.title, .back-title, h3')?.textContent?.trim();
+          extraInfo += `\n[DATA]: Anime #${num} is "${t}".`;
+        } else {
+          extraInfo += `\n[DATA]: Fardin hasn't watched anime #${num} yet.`;
+        }
+      }
 
-        for (let card of cards) {
-          const numEl = card.querySelector('[class*="number"], [class*="no"]');
-          const titleEl = card.querySelector('h3, [class*="title"]');
-
-          if (numEl && titleEl) {
-            const cardNum = parseInt(numEl.textContent.replace(/\D/g, ''));
-            if (cardNum === num) {
-              extraInfo = `\n[DATA]: Anime #${num} is "${titleEl.textContent.trim()}". Use this exact info.`;
-              break;
+      // Random/suggest: pick one and override
+      if (/random|suggest|pick|recommend|give.*anime/i.test(userMsg)) {
+        let forcedTitle = '', forcedGenre = '', forcedEp = '', forcedSeas = '';
+        const genreMatch = userMsg.match(/(sports|action|romance|comedy|romcom|isekai|horror|dark|sci.fi|thriller|slice.of.life|adventure|fantasy|psychological|historical)/i);
+        if (genreMatch) {
+          const askedGenre = genreMatch[1].toLowerCase();
+          const genreKey = Object.keys(animeGenres).find(k => k.toLowerCase().includes(askedGenre) || askedGenre.includes(k.toLowerCase()));
+          if (genreKey) {
+            const validNums = [...animeGenres[genreKey].nums];
+            const validCards = cards.filter(c => {
+              const n = c.querySelector('[class*="number"], [class*="no"]')?.textContent?.replace(/\D/g, '');
+              return n && validNums.includes(parseInt(n));
+            });
+            const validCard = validCards.length ? validCards[Math.floor(Math.random() * validCards.length)] : null;
+            if (validCard) {
+              forcedTitle = validCard.querySelector('.title, .back-title, h3')?.textContent?.trim() || '';
+              forcedEp = validCard.querySelector('.back-episodes')?.textContent?.trim() || '';
+              forcedSeas = validCard.querySelector('.back-season')?.textContent?.trim() || '';
+              forcedGenre = genreKey;
             }
           }
+        } else {
+          const randomCard = cards[Math.floor(Math.random() * cards.length)];
+          forcedTitle = randomCard.querySelector('.title, .back-title, h3')?.textContent?.trim() || '';
+          forcedEp = randomCard.querySelector('.back-episodes')?.textContent?.trim() || '';
+          forcedSeas = randomCard.querySelector('.back-season')?.textContent?.trim() || '';
         }
-
-        if (!extraInfo) {
-          extraInfo = `\n[DATA]: Fardin hasn't watched anime #${num} yet.`;
-        }
-      }
-
-    // 2. Support random/suggest queries
-      if (/random|suggest|pick|recommend/i.test(userMsg)) {
-        const cards = document.querySelectorAll('.anime-card,.card');
-        const randomCard = cards[Math.floor(Math.random() * cards.length)];
-
-        const numEl = randomCard.querySelector('[class*="number"], [class*="no"]');
-        const titleEl = randomCard.querySelector('h3, [class*="title"]');
-
-        if (numEl && titleEl) {
-          const num = numEl.textContent.replace(/\D/g, '');
-          const title = titleEl.textContent.trim();
-          extraInfo = `\n[DATA]: Suggest this anime: #${num} "${title}". Talk about it.`;
+        if (forcedTitle) {
+          const forcedMsg = forcedGenre
+            ? `Here's a ${forcedGenre} anime from Fardin's list:\n\n**${forcedTitle}**\n${forcedEp} • ${forcedSeas}\n\nThis is an absolute banger from Fardin's collection! Want to know more about it? ⚡`
+            : `Here's a random pick from Fardin's list:\n\n**${forcedTitle}**\n${forcedEp} • ${forcedSeas}\n\nGive it a watch if you haven't already! ⚡`;
+          // Return fake response — no API call needed
+          return Promise.resolve({
+            json: () => Promise.resolve({ choices: [{ message: { content: forcedMsg } }] }),
+            status: 200
+          });
         }
       }
 
-    // Append extra info to system prompt
       if (extraInfo && body.messages[0]?.role === 'system') {
         body.messages[0].content += extraInfo;
         options.body = JSON.stringify(body);
