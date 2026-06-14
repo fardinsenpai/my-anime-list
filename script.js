@@ -1967,6 +1967,7 @@ async function sendMessage() {
 
 // ===== ADD MESSAGE TO UI - PREMIUM ANIMATION VERSION =====
 function addMessage(text, type, shouldSave = true) {
+  if (text == null) text = '';
   const msgDiv = document.createElement('div');
   msgDiv.className = `msg ${type}`;
 
