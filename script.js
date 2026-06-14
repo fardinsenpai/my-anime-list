@@ -1499,18 +1499,17 @@ document.querySelectorAll('.pill').forEach((pill, index) => {
   pill.style.animationDelay = `${0.1 + index * 0.05}s`;
 });
 
-// Hide counter and genre when searching
+// Hide counter, genre, and currently watching when searching
 const searchBox = document.getElementById('searchBox');
 const counterContainer = document.querySelector('.counter-container');
 const filterSection = document.querySelector('.filter-section');
-
+const currentWatchEl = document.querySelector('.current-watch');
 const footerEl = document.querySelector('.anime-footer');
 
 searchBox.addEventListener('input', function () {
   const value = this.value.trim();
 
   if (value.length > 0) {
-    // Hide counter and genre when typing
     counterContainer.style.opacity = '0';
     counterContainer.style.transform = 'translateY(-20px)';
     counterContainer.style.pointerEvents = 'none';
@@ -1527,10 +1526,10 @@ searchBox.addEventListener('input', function () {
     filterSection.style.marginBottom = '0';
     filterSection.style.transition = 'all 0.4s ease';
 
+    if (currentWatchEl) currentWatchEl.style.display = 'none';
     if (footerEl) footerEl.style.display = 'none';
 
   } else {
-    // Show counter and genre when search is empty
     counterContainer.style.opacity = '1';
     counterContainer.style.transform = 'translateY(0)';
     counterContainer.style.pointerEvents = 'auto';
@@ -1547,6 +1546,7 @@ searchBox.addEventListener('input', function () {
     filterSection.style.marginBottom = '';
     filterSection.style.transition = 'all 0.4s ease';
 
+    if (currentWatchEl) currentWatchEl.style.display = '';
     if (footerEl) footerEl.style.display = '';
   }
 });
@@ -1878,12 +1878,17 @@ function toggleChat() {
   }
 }
 
+let isResponding = false;
+
 // ===== SEND MESSAGE =====
 async function sendMessage() {
+  if (isResponding) return;
   const message = chatInput.value.trim();
   if (!message) return;
 
-  // Add user message to UI
+  isResponding = true;
+  chatInput.disabled = true;
+
   addMessage(message, 'user');
   chatInput.value = '';
 
@@ -1940,14 +1945,14 @@ async function sendMessage() {
 }
 
 } catch (error) {
-
-  // Keep this
   typingDiv.remove();
-
-  addMessage('Sorry, something went wrong ⚡ Try again!', 'bot');
-
+  addMessage('I wroked Too Much Today, Try Again After a While! Till then, Enjoy many features from SideBar! ✨', 'bot');
   console.error('Cerebras Error:', error);
 }
+
+  isResponding = false;
+  chatInput.disabled = false;
+  chatInput.focus();
 }
 
 // ===== ADD MESSAGE TO UI - PREMIUM ANIMATION VERSION =====
