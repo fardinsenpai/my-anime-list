@@ -2169,7 +2169,7 @@ function addMessage(text, type, shouldSave = true) {
         // Auto scroll while typing
         chatMessages.scrollTop = chatMessages.scrollHeight;
 
-        setTimeout(typeWriter, 5); // typing speed
+        setTimeout(typeWriter, 1); // typing speed
       }
     }
 
