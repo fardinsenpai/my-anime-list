@@ -1,0 +1,2270 @@
+{
+    "1": {
+        "malScore": 7.9,
+        "characters": 8.5,
+        "animRating": 8.8,
+        "animePlanet": 4,
+        "anilist": 77,
+        "title": "My Hero Academia",
+        "storyRating": 8
+    },
+    "2": {
+        "malScore": 8.3,
+        "characters": 9,
+        "animRating": 6.5,
+        "animePlanet": 4.2,
+        "anilist": 80,
+        "title": "Naruto",
+        "storyRating": 8.3
+    },
+    "3": {
+        "malScore": 8.2,
+        "characters": 9,
+        "animRating": 7.8,
+        "animePlanet": 4.1,
+        "anilist": 82,
+        "title": "Naruto Shippuden",
+        "storyRating": 9.1
+    },
+    "4": {
+        "malScore": 8.7,
+        "characters": 9.5,
+        "animRating": 7.8,
+        "animePlanet": 4.4,
+        "anilist": 87,
+        "title": "One Piece",
+        "storyRating": 9.2
+    },
+    "5": {
+        "malScore": 8.1,
+        "characters": 8,
+        "animRating": 8.2,
+        "animePlanet": 4,
+        "anilist": 79,
+        "title": "Black Clover",
+        "storyRating": 7.8
+    },
+    "6": {
+        "malScore": 7.9,
+        "characters": 8.5,
+        "animRating": 7.6,
+        "animePlanet": 4,
+        "anilist": 79,
+        "title": "Bleach",
+        "storyRating": 8
+    },
+    "7": {
+        "malScore": 8,
+        "characters": 8.5,
+        "animRating": 7.8,
+        "animePlanet": 4,
+        "anilist": 72,
+        "title": "Fairy Tail",
+        "storyRating": 7.5
+    },
+    "8": {
+        "malScore": 7.7,
+        "characters": 7.5,
+        "animRating": 7.8,
+        "animePlanet": 3.8,
+        "anilist": 76,
+        "title": "Baki Hanma",
+        "storyRating": 7.2
+    },
+    "9": {
+        "malScore": 8.4,
+        "characters": 8.8,
+        "animRating": 8.5,
+        "animePlanet": 4.2,
+        "anilist": 80,
+        "title": "Blue Lock",
+        "storyRating": 8.6
+    },
+    "10": {
+        "malScore": 8.5,
+        "characters": 8.5,
+        "animRating": 9,
+        "animePlanet": 4.2,
+        "anilist": 81,
+        "title": "Solo Leveling",
+        "storyRating": 8.3
+    },
+    "11": {
+        "malScore": 8.6,
+        "characters": 9,
+        "animRating": 9.2,
+        "animePlanet": 4.3,
+        "anilist": 84,
+        "title": "Jujutsu Kaisen",
+        "storyRating": 8.7
+    },
+    "12": {
+        "malScore": 8.6,
+        "characters": 9.5,
+        "animRating": 8.5,
+        "animePlanet": 4.3,
+        "anilist": 84,
+        "title": "Death Note",
+        "storyRating": 9.5
+    },
+    "13": {
+        "malScore": 8.7,
+        "characters": 9.5,
+        "animRating": 8.8,
+        "animePlanet": 4.4,
+        "anilist": 87,
+        "title": "Vinland Saga",
+        "storyRating": 9.3
+    },
+    "14": {
+        "malScore": 8.1,
+        "characters": 9,
+        "animRating": 8,
+        "animePlanet": 4,
+        "anilist": 79,
+        "title": "Assassination Classroom",
+        "storyRating": 8.5
+    },
+    "15": {
+        "malScore": 8.1,
+        "characters": 7.8,
+        "animRating": 8.3,
+        "animePlanet": 4,
+        "anilist": 76,
+        "title": "Mashle: Magic and Muscles",
+        "storyRating": 7.5
+    },
+    "16": {
+        "malScore": 7.8,
+        "characters": 7.5,
+        "animRating": 7.8,
+        "animePlanet": 3.9,
+        "anilist": 71,
+        "title": "Viral Hit",
+        "storyRating": 7.6
+    },
+    "17": {
+        "malScore": 9,
+        "characters": 9.5,
+        "animRating": 8.5,
+        "animePlanet": 4.5,
+        "anilist": 83,
+        "title": "Hunter x Hunter",
+        "storyRating": 9.5
+    },
+    "18": {
+        "malScore": 8.4,
+        "characters": 8.5,
+        "animRating": 9,
+        "animePlanet": 4.2,
+        "anilist": 82,
+        "title": "Mushoku Tensei Jobless Reincarnation",
+        "storyRating": 8.5
+    },
+    "19": {
+        "malScore": 8.2,
+        "characters": 9,
+        "animRating": 8.7,
+        "animePlanet": 4.1,
+        "anilist": 83,
+        "title": "Spy x Family",
+        "storyRating": 8.3
+    },
+    "20": {
+        "malScore": 8.1,
+        "characters": 8.5,
+        "animRating": 7.8,
+        "animePlanet": 4,
+        "anilist": 78,
+        "title": "ReLIFE",
+        "storyRating": 8.4
+    },
+    "21": {
+        "malScore": 8.7,
+        "characters": 9.5,
+        "animRating": 8.8,
+        "animePlanet": 4.4,
+        "anilist": 84,
+        "title": "Haikyuu!!",
+        "storyRating": 9
+    },
+    "22": {
+        "malScore": 7.9,
+        "characters": 8,
+        "animRating": 7.9,
+        "animePlanet": 4,
+        "anilist": 77,
+        "title": "Tokyo Revengers",
+        "storyRating": 7.8
+    },
+    "23": {
+        "malScore": 8.7,
+        "characters": 9,
+        "animRating": 9.3,
+        "animePlanet": 4.4,
+        "anilist": 83,
+        "title": "One-Punch Man",
+        "storyRating": 8.2
+    },
+    "24": {
+        "malScore": 8.7,
+        "characters": 9,
+        "animRating": 9.5,
+        "animePlanet": 4.4,
+        "anilist": 83,
+        "title": "Demon Slayer: Kimetsu no Yaiba",
+        "storyRating": 8.3
+    },
+    "25": {
+        "malScore": 8.3,
+        "characters": 8.5,
+        "animRating": 8.4,
+        "animePlanet": 4.2,
+        "anilist": 81,
+        "title": "Dr. Stone",
+        "storyRating": 8.6
+    },
+    "26": {
+        "malScore": 7.8,
+        "characters": 8,
+        "animRating": 8.6,
+        "animePlanet": 3.9,
+        "anilist": 81,
+        "title": "Kaiju No. 8",
+        "storyRating": 7.8
+    },
+    "27": {
+        "malScore": 7.5,
+        "characters": 7.8,
+        "animRating": 7.5,
+        "animePlanet": 3.8,
+        "anilist": 72,
+        "title": "Lookism",
+        "storyRating": 7.8
+    },
+    "28": {
+        "malScore": 8.6,
+        "characters": 9,
+        "animRating": 9.3,
+        "animePlanet": 4.3,
+        "anilist": 83,
+        "title": "Chainsaw Man",
+        "storyRating": 8.8
+    },
+    "29": {
+        "malScore": 9,
+        "characters": 9.5,
+        "animRating": 9.2,
+        "animePlanet": 4.5,
+        "anilist": 85,
+        "title": "Attack on Titan",
+        "storyRating": 9.7
+    },
+    "30": {
+        "malScore": 7.9,
+        "characters": 8,
+        "animRating": 8.4,
+        "animePlanet": 4,
+        "anilist": 77,
+        "title": "Wind Breaker",
+        "storyRating": 7.7
+    },
+    "31": {
+        "malScore": 8.1,
+        "characters": 8.5,
+        "animRating": 8,
+        "animePlanet": 4,
+        "anilist": 76,
+        "title": "Classroom of the Elite",
+        "storyRating": 8.6
+    },
+    "32": {
+        "malScore": 7.6,
+        "characters": 7.5,
+        "animRating": 7.8,
+        "animePlanet": 3.8,
+        "anilist": 73,
+        "title": "The Daily Life of the Immortal King",
+        "storyRating": 7.5
+    },
+    "33": {
+        "malScore": 7.8,
+        "characters": 7.5,
+        "animRating": 7.8,
+        "animePlanet": 3.9,
+        "anilist": 73,
+        "title": "Prison School",
+        "storyRating": 7.6
+    },
+    "34": {
+        "malScore": 6.2,
+        "characters": 5.5,
+        "animRating": 6.8,
+        "animePlanet": 3.1,
+        "anilist": 63,
+        "title": "I Got a Cheat Skill in Another World",
+        "storyRating": 5.5
+    },
+    "35": {
+        "malScore": 7.4,
+        "characters": 7,
+        "animRating": 7.8,
+        "animePlanet": 3.7,
+        "anilist": 66,
+        "title": "Rent A Girlfriend",
+        "storyRating": 6.8
+    },
+    "36": {
+        "malScore": 7.2,
+        "characters": 7,
+        "animRating": 7.5,
+        "animePlanet": 3.6,
+        "anilist": 65,
+        "title": "Radiant",
+        "storyRating": 7
+    },
+    "37": {
+        "malScore": 7.4,
+        "characters": 8.5,
+        "animRating": 7.2,
+        "animePlanet": 3.7,
+        "anilist": 73,
+        "title": "Pokemon",
+        "storyRating": 7
+    },
+    "38": {
+        "malScore": 8.9,
+        "characters": 9,
+        "animRating": 9.6,
+        "animePlanet": 4.4,
+        "anilist": 86,
+        "title": "Your Name",
+        "storyRating": 9.2
+    },
+    "39": {
+        "malScore": 8.4,
+        "characters": 8.5,
+        "animRating": 9.5,
+        "animePlanet": 4.2,
+        "anilist": 81,
+        "title": "Suzume",
+        "storyRating": 8.3
+    },
+    "40": {
+        "malScore": 7.7,
+        "characters": 7.8,
+        "animRating": 8.2,
+        "animePlanet": 3.8,
+        "anilist": 76,
+        "title": "Zom 100: Bucket List of the Dead",
+        "storyRating": 7.6
+    },
+    "41": {
+        "malScore": 7.2,
+        "characters": 7.2,
+        "animRating": 7.5,
+        "animePlanet": 3.6,
+        "anilist": 76,
+        "title": "More Than a Married Couple, But Not Lovers",
+        "storyRating": 7
+    },
+    "42": {
+        "malScore": 8.3,
+        "characters": 8.5,
+        "animRating": 9.7,
+        "animePlanet": 4.2,
+        "anilist": 82,
+        "title": "Demon Slayer: Mugen Train",
+        "storyRating": 8
+    },
+    "43": {
+        "malScore": 7.5,
+        "characters": 8,
+        "animRating": 8,
+        "animePlanet": 3.8,
+        "anilist": 80,
+        "title": "Buddy Daddies",
+        "storyRating": 7.6
+    },
+    "44": {
+        "malScore": 7.9,
+        "characters": 8,
+        "animRating": 9,
+        "animePlanet": 4,
+        "anilist": 73,
+        "title": "Blue Lock The Movie: Episode Nagi",
+        "storyRating": 7.8
+    },
+    "45": {
+        "malScore": 7.8,
+        "characters": 8,
+        "animRating": 8,
+        "animePlanet": 3.9,
+        "anilist": 77,
+        "title": "My Love Story with Yamada-kun at Lv999",
+        "storyRating": 7.9
+    },
+    "46": {
+        "malScore": 7.9,
+        "characters": 7.8,
+        "animRating": 9.2,
+        "animePlanet": 4,
+        "anilist": 76,
+        "title": "My Hero Academia: World Heroes' Mission",
+        "storyRating": 7.5
+    },
+    "47": {
+        "malScore": 8.6,
+        "characters": 9,
+        "animRating": 8.5,
+        "animePlanet": 4.3,
+        "anilist": 81,
+        "title": "Erased",
+        "storyRating": 9
+    },
+    "48": {
+        "malScore": 8.1,
+        "characters": 8.5,
+        "animRating": 9.4,
+        "animePlanet": 4,
+        "anilist": 83,
+        "title": "Jujutsu Kaisen 0",
+        "storyRating": 8
+    },
+    "49": {
+        "malScore": 8.2,
+        "characters": 9,
+        "animRating": 8.3,
+        "animePlanet": 4.1,
+        "anilist": 81,
+        "title": "Dororo",
+        "storyRating": 8.7
+    },
+    "50": {
+        "malScore": 8,
+        "characters": 8.5,
+        "animRating": 8.6,
+        "animePlanet": 4,
+        "anilist": 80,
+        "title": "Hell's Paradise",
+        "storyRating": 8.2
+    },
+    "51": {
+        "malScore": 7.7,
+        "characters": 7.8,
+        "animRating": 7.8,
+        "animePlanet": 3.8,
+        "anilist": 75,
+        "title": "Alya Sometimes Hides Her Feelings in Russian",
+        "storyRating": 7.5
+    },
+    "52": {
+        "malScore": 6.8,
+        "characters": 6.5,
+        "animRating": 7,
+        "animePlanet": 3.4,
+        "anilist": 63,
+        "title": "Failure Frame",
+        "storyRating": 6.5
+    },
+    "53": {
+        "malScore": 7.5,
+        "characters": 7.5,
+        "animRating": 7.3,
+        "animePlanet": 3.8,
+        "anilist": 54,
+        "title": "Uzumaki",
+        "storyRating": 7.8
+    },
+    "54": {
+        "malScore": 7.6,
+        "characters": 8,
+        "animRating": 7.5,
+        "animePlanet": 3.8,
+        "anilist": 72,
+        "title": "Trillion Game",
+        "storyRating": 7.8
+    },
+    "55": {
+        "malScore": 7.9,
+        "characters": 8,
+        "animRating": 8.8,
+        "animePlanet": 4,
+        "anilist": 76,
+        "title": "Fire Force",
+        "storyRating": 7.7
+    },
+    "56": {
+        "malScore": 7.6,
+        "characters": 8,
+        "animRating": 7.8,
+        "animePlanet": 3.8,
+        "anilist": 76,
+        "title": "Tomo-chan Is a Girl!",
+        "storyRating": 7.5
+    },
+    "57": {
+        "malScore": 7,
+        "characters": 7.2,
+        "animRating": 7.5,
+        "animePlanet": 3.5,
+        "anilist": 67,
+        "title": "My Tiny Senpai",
+        "storyRating": 6.8
+    },
+    "58": {
+        "malScore": 7,
+        "characters": 7.2,
+        "animRating": 7.3,
+        "animePlanet": 3.5,
+        "anilist": 63,
+        "title": "True Beauty",
+        "storyRating": 7.2
+    },
+    "59": {
+        "malScore": 7.1,
+        "characters": 7,
+        "animRating": 7.5,
+        "animePlanet": 3.6,
+        "anilist": 64,
+        "title": "Domestic Girlfriend",
+        "storyRating": 7
+    },
+    "60": {
+        "malScore": 7.2,
+        "characters": 7.2,
+        "animRating": 7.4,
+        "animePlanet": 3.6,
+        "anilist": 73,
+        "title": "Tying the Knot with an Amagami Sister",
+        "storyRating": 7
+    },
+    "61": {
+        "malScore": 6.5,
+        "characters": 6.3,
+        "animRating": 6.8,
+        "animePlanet": 3.2,
+        "anilist": 64,
+        "title": "Mechanical Arms",
+        "storyRating": 6.3
+    },
+    "62": {
+        "malScore": 7,
+        "characters": 6.8,
+        "animRating": 7,
+        "animePlanet": 3.5,
+        "anilist": 73,
+        "title": "The Ossan Newbie Adventurer",
+        "storyRating": 6.8
+    },
+    "63": {
+        "malScore": 6.9,
+        "characters": 6.5,
+        "animRating": 7,
+        "animePlanet": 3.4,
+        "anilist": 68,
+        "title": "I Parry Everything",
+        "storyRating": 6.5
+    },
+    "64": {
+        "malScore": 7.5,
+        "characters": 7.5,
+        "animRating": 8,
+        "animePlanet": 3.8,
+        "anilist": 79,
+        "title": "Wistoria: Wand and Sword",
+        "storyRating": 7.3
+    },
+    "65": {
+        "malScore": 8.5,
+        "characters": 8.8,
+        "animRating": 9.3,
+        "animePlanet": 4.2,
+        "anilist": 83,
+        "title": "Dandadan",
+        "storyRating": 8.4
+    },
+    "66": {
+        "malScore": 6.7,
+        "characters": 6.5,
+        "animRating": 7.2,
+        "animePlanet": 3.4,
+        "anilist": 61,
+        "title": "The Kingdoms of Ruin",
+        "storyRating": 6.5
+    },
+    "67": {
+        "malScore": 7.3,
+        "characters": 7.5,
+        "animRating": 7.5,
+        "animePlanet": 3.6,
+        "anilist": 69,
+        "title": "Blood Lad",
+        "storyRating": 7
+    },
+    "68": {
+        "malScore": 8.3,
+        "characters": 9,
+        "animRating": 8.8,
+        "animePlanet": 4.2,
+        "anilist": 81,
+        "title": "Re:Zero - Starting Life in Another World",
+        "storyRating": 8.8
+    },
+    "69": {
+        "malScore": 7.1,
+        "characters": 7,
+        "animRating": 7.5,
+        "animePlanet": 3.6,
+        "anilist": 66,
+        "title": "How Not to Summon a Demon Lord",
+        "storyRating": 6.5
+    },
+    "70": {
+        "malScore": 7.5,
+        "characters": 8,
+        "animRating": 8,
+        "animePlanet": 3.8,
+        "anilist": 74,
+        "title": "Mission: Yozakura Family",
+        "storyRating": 7.6
+    },
+    "71": {
+        "malScore": 6.5,
+        "characters": 6.2,
+        "animRating": 7.2,
+        "animePlanet": 3.2,
+        "anilist": 65,
+        "title": "Love Flops",
+        "storyRating": 6
+    },
+    "72": {
+        "malScore": 7.3,
+        "characters": 7.5,
+        "animRating": 7.5,
+        "animePlanet": 3.6,
+        "anilist": 70,
+        "title": "Hokkaido Gals Are Super Adorable!",
+        "storyRating": 7
+    },
+    "73": {
+        "malScore": 8.7,
+        "characters": 9.5,
+        "animRating": 8.5,
+        "animePlanet": 4.4,
+        "anilist": 85,
+        "title": "Code Geass",
+        "storyRating": 9.3
+    },
+    "74": {
+        "malScore": 8.1,
+        "characters": 8.5,
+        "animRating": 8.8,
+        "animePlanet": 4,
+        "anilist": 76,
+        "title": "Sakamoto Days",
+        "storyRating": 8
+    },
+    "75": {
+        "malScore": 8.6,
+        "characters": 9.2,
+        "animRating": 9.2,
+        "animePlanet": 4.3,
+        "anilist": 85,
+        "title": "Cyberpunk: Edgerunners",
+        "storyRating": 8.8
+    },
+    "76": {
+        "malScore": 7.9,
+        "characters": 8,
+        "animRating": 8.2,
+        "animePlanet": 4,
+        "anilist": 74,
+        "title": "Tower of God",
+        "storyRating": 8
+    },
+    "77": {
+        "malScore": 8,
+        "characters": 8.5,
+        "animRating": 8.3,
+        "animePlanet": 4,
+        "anilist": 76,
+        "title": "My Happy Marriage",
+        "storyRating": 8.2
+    },
+    "78": {
+        "malScore": 7.6,
+        "characters": 7.5,
+        "animRating": 8.5,
+        "animePlanet": 3.8,
+        "anilist": 70,
+        "title": "Sword Art Online",
+        "storyRating": 7.2
+    },
+    "79": {
+        "malScore": 8.6,
+        "characters": 9.2,
+        "animRating": 8.7,
+        "animePlanet": 4.3,
+        "anilist": 88,
+        "title": "The Apothecary Diaries",
+        "storyRating": 8.8
+    },
+    "80": {
+        "malScore": 8.1,
+        "characters": 8.5,
+        "animRating": 8.2,
+        "animePlanet": 4,
+        "anilist": 77,
+        "title": "Overlord",
+        "storyRating": 8
+    },
+    "81": {
+        "malScore": 8.1,
+        "characters": 8.5,
+        "animRating": 8.3,
+        "animePlanet": 4,
+        "anilist": 80,
+        "title": "That Time I Got Reincarnated as a Slime",
+        "storyRating": 8
+    },
+    "82": {
+        "malScore": 8.1,
+        "characters": 8.5,
+        "animRating": 8.5,
+        "animePlanet": 4,
+        "anilist": 77,
+        "title": "No Game No Life",
+        "storyRating": 8
+    },
+    "83": {
+        "malScore": 8.1,
+        "characters": 9,
+        "animRating": 8,
+        "animePlanet": 4,
+        "anilist": 79,
+        "title": "Konosuba",
+        "storyRating": 7.8
+    },
+    "84": {
+        "malScore": 8,
+        "characters": 8.5,
+        "animRating": 8.8,
+        "animePlanet": 4,
+        "anilist": 79,
+        "title": "The Ancient Magus Bride",
+        "storyRating": 8.3
+    },
+    "85": {
+        "malScore": 8.7,
+        "characters": 9.2,
+        "animRating": 9.5,
+        "animePlanet": 4.4,
+        "anilist": 84,
+        "title": "Mob Psycho 100",
+        "storyRating": 8.8
+    },
+    "86": {
+        "malScore": 8.6,
+        "characters": 9,
+        "animRating": 8.8,
+        "animePlanet": 4.3,
+        "anilist": 84,
+        "title": "The Promised Neverland",
+        "storyRating": 9
+    },
+    "87": {
+        "malScore": 8.5,
+        "characters": 9.5,
+        "animRating": 8.3,
+        "animePlanet": 4.2,
+        "anilist": 84,
+        "title": "Banana Fish",
+        "storyRating": 9
+    },
+    "88": {
+        "malScore": 8.1,
+        "characters": 8.5,
+        "animRating": 8,
+        "animePlanet": 4,
+        "anilist": 76,
+        "title": "91 Days",
+        "storyRating": 8.5
+    },
+    "89": {
+        "malScore": 8,
+        "characters": 8.5,
+        "animRating": 8,
+        "animePlanet": 4,
+        "anilist": 83,
+        "title": "Given",
+        "storyRating": 8.2
+    },
+    "90": {
+        "malScore": 7.9,
+        "characters": 8.5,
+        "animRating": 8.5,
+        "animePlanet": 4,
+        "anilist": 79,
+        "title": "Sk8 the Infinity",
+        "storyRating": 7.8
+    },
+    "91": {
+        "malScore": 8.1,
+        "characters": 9,
+        "animRating": 8,
+        "animePlanet": 4,
+        "anilist": 79,
+        "title": "Yona of the Dawn",
+        "storyRating": 8.3
+    },
+    "92": {
+        "malScore": 7.9,
+        "characters": 8.5,
+        "animRating": 8.5,
+        "animePlanet": 4,
+        "anilist": 78,
+        "title": "Toilet-Bound Hanako-kun",
+        "storyRating": 8
+    },
+    "93": {
+        "malScore": 7.8,
+        "characters": 8.5,
+        "animRating": 8.3,
+        "animePlanet": 3.9,
+        "anilist": 78,
+        "title": "The Case Study of Vanitas",
+        "storyRating": 7.8
+    },
+    "94": {
+        "malScore": 8,
+        "characters": 8.8,
+        "animRating": 8,
+        "animePlanet": 4,
+        "anilist": 80,
+        "title": "Moriarty the Patriot",
+        "storyRating": 8.3
+    },
+    "95": {
+        "malScore": 8,
+        "characters": 8.5,
+        "animRating": 8.3,
+        "animePlanet": 4,
+        "anilist": 78,
+        "title": "Noragami",
+        "storyRating": 8
+    },
+    "96": {
+        "malScore": 7.5,
+        "characters": 7.8,
+        "animRating": 7.8,
+        "animePlanet": 3.8,
+        "anilist": 73,
+        "title": "Seraph of the End",
+        "storyRating": 7.5
+    },
+    "97": {
+        "malScore": 7.8,
+        "characters": 8,
+        "animRating": 7.8,
+        "animePlanet": 3.9,
+        "anilist": 73,
+        "title": "Akame ga Kill!",
+        "storyRating": 7.5
+    },
+    "98": {
+        "malScore": 7.7,
+        "characters": 8,
+        "animRating": 7.8,
+        "animePlanet": 3.8,
+        "anilist": 73,
+        "title": "The Seven Deadly Sins",
+        "storyRating": 7.5
+    },
+    "99": {
+        "malScore": 7.8,
+        "characters": 7.8,
+        "animRating": 8.5,
+        "animePlanet": 3.9,
+        "anilist": 75,
+        "title": "Sword Art Online: Alicization",
+        "storyRating": 7.5
+    },
+    "100": {
+        "malScore": 8.3,
+        "characters": 9,
+        "animRating": 8.3,
+        "animePlanet": 4.2,
+        "anilist": 79,
+        "title": "Fullmetal Alchemist (2003)",
+        "storyRating": 8.5
+    },
+    "101": {
+        "malScore": 7.7,
+        "characters": 7.8,
+        "animRating": 8.8,
+        "animePlanet": 3.8,
+        "anilist": 70,
+        "title": "Sword Art Online: Progressive",
+        "storyRating": 7.5
+    },
+    "102": {
+        "malScore": 8.5,
+        "characters": 9.2,
+        "animRating": 9,
+        "animePlanet": 4.2,
+        "anilist": 83,
+        "title": "86 - Eighty Six",
+        "storyRating": 8.8
+    },
+    "103": {
+        "malScore": 8.7,
+        "characters": 9,
+        "animRating": 9,
+        "animePlanet": 4.4,
+        "anilist": 84,
+        "title": "Oshi no Ko",
+        "storyRating": 9
+    },
+    "104": {
+        "malScore": 8.8,
+        "characters": 9.5,
+        "animRating": 9.2,
+        "animePlanet": 4.4,
+        "anilist": 87,
+        "title": "Bocchi the Rock!",
+        "storyRating": 8.5
+    },
+    "105": {
+        "malScore": 8.3,
+        "characters": 9,
+        "animRating": 8.8,
+        "animePlanet": 4.2,
+        "anilist": 81,
+        "title": "Lycoris Recoil",
+        "storyRating": 8
+    },
+    "106": {
+        "malScore": 7.2,
+        "characters": 7.5,
+        "animRating": 7.8,
+        "animePlanet": 3.6,
+        "anilist": 66,
+        "title": "Engage Kiss",
+        "storyRating": 7
+    },
+    "107": {
+        "malScore": 7,
+        "characters": 7,
+        "animRating": 7.3,
+        "animePlanet": 3.5,
+        "anilist": 68,
+        "title": "Beast Tamer",
+        "storyRating": 6.8
+    },
+    "108": {
+        "malScore": 6.5,
+        "characters": 6.2,
+        "animRating": 7,
+        "animePlanet": 3.2,
+        "anilist": 55,
+        "title": "World's End Harem",
+        "storyRating": 6
+    },
+    "109": {
+        "malScore": 7.3,
+        "characters": 7.5,
+        "animRating": 7.5,
+        "animePlanet": 3.6,
+        "anilist": 74,
+        "title": "Reincarnated as a Sword",
+        "storyRating": 7
+    },
+    "110": {
+        "malScore": 6.3,
+        "characters": 6,
+        "animRating": 6.5,
+        "animePlanet": 3.2,
+        "anilist": 50,
+        "title": "The Fruit of Evolution",
+        "storyRating": 6
+    },
+    "111": {
+        "malScore": 7.2,
+        "characters": 7.5,
+        "animRating": 7.5,
+        "animePlanet": 3.6,
+        "anilist": 55,
+        "title": "Muv-Luv Alternative",
+        "storyRating": 7.3
+    },
+    "112": {
+        "malScore": 7,
+        "characters": 7.2,
+        "animRating": 7.3,
+        "animePlanet": 3.5,
+        "anilist": 71,
+        "title": "Trapped in a Dating Sim",
+        "storyRating": 7
+    },
+    "113": {
+        "malScore": 7.3,
+        "characters": 7.8,
+        "animRating": 7.5,
+        "animePlanet": 3.6,
+        "anilist": 73,
+        "title": "Love After World Domination",
+        "storyRating": 7.2
+    },
+    "114": {
+        "malScore": 7,
+        "characters": 7,
+        "animRating": 7.3,
+        "animePlanet": 3.5,
+        "anilist": 70,
+        "title": "Skeleton Knight in Another World",
+        "storyRating": 6.8
+    },
+    "115": {
+        "malScore": 8.4,
+        "characters": 9.2,
+        "animRating": 8.8,
+        "animePlanet": 4.2,
+        "anilist": 83,
+        "title": "Love is War",
+        "storyRating": 8.5
+    },
+    "116": {
+        "malScore": 7.5,
+        "characters": 8,
+        "animRating": 7.5,
+        "animePlanet": 3.8,
+        "anilist": 71,
+        "title": "Aharen-san wa Hakarenai",
+        "storyRating": 7.2
+    },
+    "117": {
+        "malScore": 7.3,
+        "characters": 7.5,
+        "animRating": 7.5,
+        "animePlanet": 3.6,
+        "anilist": 68,
+        "title": "Date A Live",
+        "storyRating": 7
+    },
+    "118": {
+        "malScore": 8,
+        "characters": 8.5,
+        "animRating": 8.3,
+        "animePlanet": 4,
+        "anilist": 82,
+        "title": "The Eminence in Shadow Season 2",
+        "storyRating": 7.8
+    },
+    "119": {
+        "malScore": 7,
+        "characters": 7,
+        "animRating": 7.3,
+        "animePlanet": 3.5,
+        "anilist": 73,
+        "title": "Reincarnated as the Seventh Prince",
+        "storyRating": 6.8
+    },
+    "120": {
+        "malScore": 6.8,
+        "characters": 6.5,
+        "animRating": 7,
+        "animePlanet": 3.4,
+        "anilist": 59,
+        "title": "The Strongest Tank's Labyrinth Raids",
+        "storyRating": 6.5
+    },
+    "121": {
+        "malScore": 7,
+        "characters": 7.2,
+        "animRating": 7.3,
+        "animePlanet": 3.5,
+        "anilist": 71,
+        "title": "Villainess Level 99",
+        "storyRating": 6.8
+    },
+    "122": {
+        "malScore": 7,
+        "characters": 7,
+        "animRating": 7.2,
+        "animePlanet": 3.5,
+        "anilist": 73,
+        "title": "I Was Reincarnated as the 7th Prince",
+        "storyRating": 6.8
+    },
+    "123": {
+        "malScore": 7.8,
+        "characters": 8,
+        "animRating": 7.8,
+        "animePlanet": 3.9,
+        "anilist": 76,
+        "title": "Tsukimichi: Moonlit Fantasy",
+        "storyRating": 7.6
+    },
+    "124": {
+        "malScore": 6.8,
+        "characters": 6.5,
+        "animRating": 7,
+        "animePlanet": 3.4,
+        "anilist": 63,
+        "title": "Failure Frame Season 2",
+        "storyRating": 6.5
+    },
+    "125": {
+        "malScore": 8.7,
+        "characters": 9.2,
+        "animRating": 8.8,
+        "animePlanet": 4.4,
+        "anilist": 85,
+        "title": "Dungeon Meshi",
+        "storyRating": 8.8
+    },
+    "126": {
+        "malScore": 7.8,
+        "characters": 8.2,
+        "animRating": 8,
+        "animePlanet": 3.9,
+        "anilist": 81,
+        "title": "A Sign of Affection",
+        "storyRating": 7.8
+    },
+    "127": {
+        "malScore": 7.5,
+        "characters": 7.8,
+        "animRating": 8,
+        "animePlanet": 3.8,
+        "anilist": 75,
+        "title": "Arknights: Perish in Frost",
+        "storyRating": 7.5
+    },
+    "128": {
+        "malScore": 6.8,
+        "characters": 6.8,
+        "animRating": 7.5,
+        "animePlanet": 3.4,
+        "anilist": 59,
+        "title": "Metallic Rouge",
+        "storyRating": 6.5
+    },
+    "129": {
+        "malScore": 7.5,
+        "characters": 7.8,
+        "animRating": 7.8,
+        "animePlanet": 3.8,
+        "anilist": 76,
+        "title": "Brave Bang Bravern!",
+        "storyRating": 7.5
+    },
+    "130": {
+        "malScore": 7.5,
+        "characters": 7.8,
+        "animRating": 7.8,
+        "animePlanet": 3.8,
+        "anilist": 75,
+        "title": "The Wrong Way to Use Healing Magic",
+        "storyRating": 7.3
+    },
+    "131": {
+        "malScore": 7.2,
+        "characters": 7.2,
+        "animRating": 7.5,
+        "animePlanet": 3.6,
+        "anilist": 69,
+        "title": "Seirei Gensouki: Spirit Chronicles",
+        "storyRating": 7
+    },
+    "132": {
+        "malScore": 7.8,
+        "characters": 8,
+        "animRating": 8,
+        "animePlanet": 3.9,
+        "anilist": 71,
+        "title": "Goblin Slayer",
+        "storyRating": 7.8
+    },
+    "133": {
+        "malScore": 7.9,
+        "characters": 8.2,
+        "animRating": 8.2,
+        "animePlanet": 4,
+        "anilist": 73,
+        "title": "Is It Wrong to Try to Pick Up Girls in a Dungeon?",
+        "storyRating": 7.8
+    },
+    "134": {
+        "malScore": 7.3,
+        "characters": 7.5,
+        "animRating": 7.5,
+        "animePlanet": 3.6,
+        "anilist": 69,
+        "title": "Highschool DxD",
+        "storyRating": 6.8
+    },
+    "135": {
+        "malScore": 7.3,
+        "characters": 7.5,
+        "animRating": 7.5,
+        "animePlanet": 3.6,
+        "anilist": 73,
+        "title": "The Hero is Overpowered but Overly Cautious",
+        "storyRating": 7
+    },
+    "136": {
+        "malScore": 8.2,
+        "characters": 9,
+        "animRating": 8,
+        "animePlanet": 4.1,
+        "anilist": 78,
+        "title": "Toradora!",
+        "storyRating": 8.5
+    },
+    "137": {
+        "malScore": 8.1,
+        "characters": 9,
+        "animRating": 8,
+        "animePlanet": 4,
+        "anilist": 77,
+        "title": "Clannad",
+        "storyRating": 8.8
+    },
+    "138": {
+        "malScore": 8.1,
+        "characters": 8.8,
+        "animRating": 8.5,
+        "animePlanet": 4,
+        "anilist": 77,
+        "title": "Angel Beats!",
+        "storyRating": 8.5
+    },
+    "139": {
+        "malScore": 8.2,
+        "characters": 9,
+        "animRating": 8.3,
+        "animePlanet": 4.1,
+        "anilist": 80,
+        "title": "Anohana",
+        "storyRating": 8.8
+    },
+    "140": {
+        "malScore": 9.1,
+        "characters": 9.5,
+        "animRating": 8.8,
+        "animePlanet": 4.6,
+        "anilist": 89,
+        "title": "Steins;Gate",
+        "storyRating": 9.8
+    },
+    "141": {
+        "malScore": 8.7,
+        "characters": 9.2,
+        "animRating": 9.8,
+        "animePlanet": 4.4,
+        "anilist": 85,
+        "title": "Violet Evergarden",
+        "storyRating": 9
+    },
+    "142": {
+        "malScore": 8.9,
+        "characters": 9.2,
+        "animRating": 9.5,
+        "animePlanet": 4.4,
+        "anilist": 88,
+        "title": "A Silent Voice",
+        "storyRating": 9.2
+    },
+    "143": {
+        "malScore": 8.5,
+        "characters": 9,
+        "animRating": 8.5,
+        "animePlanet": 4.2,
+        "anilist": 83,
+        "title": "Grave of the Fireflies",
+        "storyRating": 9.2
+    },
+    "144": {
+        "malScore": 8.7,
+        "characters": 9,
+        "animRating": 9,
+        "animePlanet": 4.4,
+        "anilist": 85,
+        "title": "Made in Abyss",
+        "storyRating": 9
+    },
+    "145": {
+        "malScore": 8.6,
+        "characters": 9.5,
+        "animRating": 7.8,
+        "animePlanet": 4.3,
+        "anilist": 84,
+        "title": "Berserk (1997)",
+        "storyRating": 9.3
+    },
+    "146": {
+        "malScore": 8.5,
+        "characters": 9.5,
+        "animRating": 8,
+        "animePlanet": 4.2,
+        "anilist": 83,
+        "title": "Neon Genesis Evangelion",
+        "storyRating": 9
+    },
+    "147": {
+        "malScore": 8.8,
+        "characters": 9.5,
+        "animRating": 8.8,
+        "animePlanet": 4.4,
+        "anilist": 86,
+        "title": "Cowboy Bebop",
+        "storyRating": 9
+    },
+    "148": {
+        "malScore": 8.2,
+        "characters": 9,
+        "animRating": 8,
+        "animePlanet": 4.1,
+        "anilist": 80,
+        "title": "Trigun",
+        "storyRating": 8.5
+    },
+    "149": {
+        "malScore": 8.3,
+        "characters": 9,
+        "animRating": 8,
+        "animePlanet": 4.2,
+        "anilist": 79,
+        "title": "Rurouni Kenshin",
+        "storyRating": 8.5
+    },
+    "150": {
+        "malScore": 8.2,
+        "characters": 9,
+        "animRating": 7.8,
+        "animePlanet": 4.1,
+        "anilist": 80,
+        "title": "Dragon Ball Z",
+        "storyRating": 8
+    },
+    "151": {
+        "malScore": 7.2,
+        "characters": 7.2,
+        "animRating": 7.8,
+        "animePlanet": 3.6,
+        "anilist": 69,
+        "title": "Sword Art Online: Gun Gale Online",
+        "storyRating": 7
+    },
+    "152": {
+        "malScore": 7.5,
+        "characters": 7.8,
+        "animRating": 8,
+        "animePlanet": 3.8,
+        "anilist": 77,
+        "title": "The Time I Got Reincarnated as a Slime Movie",
+        "storyRating": 7.3
+    },
+    "153": {
+        "malScore": 6.8,
+        "characters": 6.8,
+        "animRating": 7.2,
+        "animePlanet": 3.4,
+        "anilist": 62,
+        "title": "Orient",
+        "storyRating": 6.5
+    },
+    "154": {
+        "malScore": 7.3,
+        "characters": 7.5,
+        "animRating": 7.5,
+        "animePlanet": 3.6,
+        "anilist": 74,
+        "title": "Gushing over Magical Girls",
+        "storyRating": 7.2
+    },
+    "155": {
+        "malScore": 8,
+        "characters": 8.3,
+        "animRating": 7.8,
+        "animePlanet": 4,
+        "anilist": 79,
+        "title": "Classroom of the Elite Season 2",
+        "storyRating": 8.3
+    },
+    "156": {
+        "malScore": 8.2,
+        "characters": 8.8,
+        "animRating": 8,
+        "animePlanet": 4.1,
+        "anilist": 81,
+        "title": "The Dangers in My Heart",
+        "storyRating": 8.3
+    },
+    "157": {
+        "malScore": 7.5,
+        "characters": 7.8,
+        "animRating": 7.8,
+        "animePlanet": 3.8,
+        "anilist": 71,
+        "title": "High Card",
+        "storyRating": 7.5
+    },
+    "158": {
+        "malScore": 7,
+        "characters": 7.2,
+        "animRating": 7.3,
+        "animePlanet": 3.5,
+        "anilist": 72,
+        "title": "I'll Become a Villainess Who Goes Down in History",
+        "storyRating": 7
+    },
+    "159": {
+        "malScore": 6.8,
+        "characters": 6.5,
+        "animRating": 7,
+        "animePlanet": 3.4,
+        "anilist": 65,
+        "title": "Loner Life in Another World",
+        "storyRating": 6.5
+    },
+    "160": {
+        "malScore": 7.8,
+        "characters": 8,
+        "animRating": 8.3,
+        "animePlanet": 3.9,
+        "anilist": 82,
+        "title": "Shangri-La Frontier Season 2",
+        "storyRating": 7.8
+    },
+    "161": {
+        "malScore": 6.8,
+        "characters": 6.5,
+        "animRating": 7,
+        "animePlanet": 3.4,
+        "anilist": 64,
+        "title": "The Unaware Atelier Master",
+        "storyRating": 6.5
+    },
+    "162": {
+        "malScore": 7.2,
+        "characters": 7.5,
+        "animRating": 7.5,
+        "animePlanet": 3.6,
+        "anilist": 74,
+        "title": "The Magical Girl and the Evil Lieutenant Used to Be Archenemies",
+        "storyRating": 7.2
+    },
+    "163": {
+        "malScore": 7,
+        "characters": 7,
+        "animRating": 7.3,
+        "animePlanet": 3.5,
+        "anilist": 71,
+        "title": "As a Reincarnated Aristocrat, I'll Use My Appraisal Skill to Rise in the World",
+        "storyRating": 6.8
+    },
+    "164": {
+        "malScore": 7.3,
+        "characters": 7.5,
+        "animRating": 7.8,
+        "animePlanet": 3.6,
+        "anilist": 70,
+        "title": "Robotics;Notes",
+        "storyRating": 7.5
+    },
+    "165": {
+        "malScore": 6.5,
+        "characters": 6,
+        "animRating": 7,
+        "animePlanet": 3.2,
+        "anilist": 61,
+        "title": "My Unique Skill Makes Me OP Even at Level 1",
+        "storyRating": 6
+    },
+    "166": {
+        "malScore": 8.2,
+        "characters": 8.8,
+        "animRating": 8.3,
+        "animePlanet": 4.1,
+        "anilist": 77,
+        "title": "TONIKAWA: Over the Moon for You",
+        "storyRating": 8
+    },
+    "167": {
+        "malScore": 7.2,
+        "characters": 7.2,
+        "animRating": 7.5,
+        "animePlanet": 3.6,
+        "anilist": 63,
+        "title": "Quality Assurance in Another World",
+        "storyRating": 7.2
+    },
+    "168": {
+        "malScore": 7,
+        "characters": 7.2,
+        "animRating": 7.5,
+        "animePlanet": 3.5,
+        "anilist": 72,
+        "title": "Nina the Starry Bride",
+        "storyRating": 7.2
+    },
+    "169": {
+        "malScore": 6.5,
+        "characters": 6.2,
+        "animRating": 7,
+        "animePlanet": 3.2,
+        "anilist": 65,
+        "title": "KamiKatsu: Working for God in a Godless World",
+        "storyRating": 6.2
+    },
+    "170": {
+        "malScore": 7.6,
+        "characters": 8,
+        "animRating": 7.8,
+        "animePlanet": 3.8,
+        "anilist": 72,
+        "title": "Dead Mount Death Play",
+        "storyRating": 7.8
+    },
+    "171": {
+        "malScore": 7.3,
+        "characters": 7.5,
+        "animRating": 7.5,
+        "animePlanet": 3.6,
+        "anilist": 70,
+        "title": "The Great Cleric",
+        "storyRating": 7.2
+    },
+    "172": {
+        "malScore": 7.9,
+        "characters": 8.5,
+        "animRating": 8.5,
+        "animePlanet": 4,
+        "anilist": 78,
+        "title": "Toilet-Bound Hanako-kun",
+        "storyRating": 8
+    },
+    "173": {
+        "malScore": 6.5,
+        "characters": 6,
+        "animRating": 7,
+        "animePlanet": 3.2,
+        "anilist": 70,
+        "title": "My Gift Level 9999 Unlimited Gacha",
+        "storyRating": 6
+    },
+    "174": {
+        "malScore": 6.7,
+        "characters": 6.3,
+        "animRating": 7,
+        "animePlanet": 3.4,
+        "anilist": 63,
+        "title": "Even Given the Worthless Appraiser Class, I'm Actually the Strongest",
+        "storyRating": 6.3
+    },
+    "175": {
+        "malScore": 6.8,
+        "characters": 6.5,
+        "animRating": 7.2,
+        "animePlanet": 3.4,
+        "anilist": 62,
+        "title": "Demon Lord, Retry!",
+        "storyRating": 6.5
+    },
+    "176": {
+        "malScore": 7.2,
+        "characters": 7.2,
+        "animRating": 7.5,
+        "animePlanet": 3.6,
+        "anilist": 64,
+        "title": "After School Dice Club",
+        "storyRating": 7
+    },
+    "177": {
+        "malScore": 7.3,
+        "characters": 7.5,
+        "animRating": 7.8,
+        "animePlanet": 3.6,
+        "anilist": 71,
+        "title": "Heroines Run the Show",
+        "storyRating": 7.3
+    },
+    "178": {
+        "malScore": 6.8,
+        "characters": 6.8,
+        "animRating": 7,
+        "animePlanet": 3.4,
+        "anilist": 65,
+        "title": "Dekin no Mogura: The Earthbound Mole",
+        "storyRating": 6.8
+    },
+    "179": {
+        "malScore": 6.5,
+        "characters": 6.3,
+        "animRating": 7,
+        "animePlanet": 3.2,
+        "anilist": 65,
+        "title": "New Saga",
+        "storyRating": 6.3
+    },
+    "180": {
+        "malScore": 7.8,
+        "characters": 8,
+        "animRating": 8.8,
+        "animePlanet": 3.9,
+        "anilist": 66,
+        "title": "Devil May Cry",
+        "storyRating": 7.5
+    },
+    "181": {
+        "malScore": 8,
+        "characters": 8.2,
+        "animRating": 8.5,
+        "animePlanet": 4,
+        "anilist": 80,
+        "title": "Shangri-La Frontier",
+        "storyRating": 8
+    },
+    "182": {
+        "malScore": 8.2,
+        "characters": 8.5,
+        "animRating": 8.3,
+        "animePlanet": 4.1,
+        "anilist": 84,
+        "title": "Lord of Mysteries",
+        "storyRating": 8.5
+    },
+    "183": {
+        "malScore": 7.3,
+        "characters": 7.5,
+        "animRating": 8,
+        "animePlanet": 3.6,
+        "anilist": 59,
+        "title": "Bye Bye, Earth",
+        "storyRating": 7.5
+    },
+    "184": {
+        "malScore": 6.8,
+        "characters": 6.5,
+        "animRating": 7.2,
+        "animePlanet": 3.4,
+        "anilist": 65,
+        "title": "Re:Monster",
+        "storyRating": 6.5
+    },
+    "185": {
+        "malScore": 7.2,
+        "characters": 7.5,
+        "animRating": 7.5,
+        "animePlanet": 3.6,
+        "anilist": 73,
+        "title": "May I Ask for One Final Thing?",
+        "storyRating": 7.5
+    },
+    "186": {
+        "malScore": 8.1,
+        "characters": 8.5,
+        "animRating": 8.3,
+        "animePlanet": 4,
+        "anilist": 71,
+        "title": "Food Wars!: Shokugeki no Soma",
+        "storyRating": 8
+    },
+    "187": {
+        "malScore": 6.8,
+        "characters": 6.5,
+        "animRating": 7.2,
+        "animePlanet": 3.4,
+        "anilist": 66,
+        "title": "My Status as an Assassin Obviously Exceeds the Hero's",
+        "storyRating": 6.5
+    },
+    "188": {
+        "malScore": 6.5,
+        "characters": 6.3,
+        "animRating": 7,
+        "animePlanet": 3.2,
+        "anilist": 77,
+        "title": "Clevatess",
+        "storyRating": 6.3
+    },
+    "189": {
+        "malScore": 7.5,
+        "characters": 7.5,
+        "animRating": 7.8,
+        "animePlanet": 3.8,
+        "anilist": 76,
+        "title": "Campfire Cooking in Another World with My Absurd Skill",
+        "storyRating": 7.3
+    },
+    "190": {
+        "malScore": 7.5,
+        "characters": 7.8,
+        "animRating": 7.8,
+        "animePlanet": 3.8,
+        "anilist": 74,
+        "title": "Ragna Crimson",
+        "storyRating": 7.5
+    },
+    "191": {
+        "malScore": 9,
+        "characters": 9.5,
+        "animRating": 9.3,
+        "animePlanet": 4.5,
+        "anilist": 91,
+        "title": "Frieren: Beyond Journey's End",
+        "storyRating": 9.5
+    },
+    "192": {
+        "malScore": 7,
+        "characters": 7,
+        "animRating": 7.3,
+        "animePlanet": 3.5,
+        "anilist": 79,
+        "title": "Fujimoto 17-26",
+        "storyRating": 7
+    },
+    "193": {
+        "malScore": 7.2,
+        "characters": 7.3,
+        "animRating": 7.5,
+        "animePlanet": 3.6,
+        "anilist": 52,
+        "title": "Let's Play",
+        "storyRating": 7.2
+    },
+    "194": {
+        "malScore": 7.2,
+        "characters": 7.2,
+        "animRating": 7.5,
+        "animePlanet": 3.6,
+        "anilist": 65,
+        "title": "Reborn to Master the Blade",
+        "storyRating": 7
+    },
+    "195": {
+        "malScore": 7.6,
+        "characters": 7.8,
+        "animRating": 7.8,
+        "animePlanet": 3.8,
+        "anilist": 72,
+        "title": "The Misfit of Demon King Academy",
+        "storyRating": 7.5
+    },
+    "196": {
+        "malScore": 7.5,
+        "characters": 7.8,
+        "animRating": 7.8,
+        "animePlanet": 3.8,
+        "anilist": 73,
+        "title": "My Clueless First Friend",
+        "storyRating": 7.5
+    },
+    "197": {
+        "malScore": 7.2,
+        "characters": 7.2,
+        "animRating": 7.5,
+        "animePlanet": 3.6,
+        "anilist": 63,
+        "title": "And You Thought There Is Never a Girl Online?",
+        "storyRating": 7
+    },
+    "198": {
+        "malScore": 6.8,
+        "characters": 6.5,
+        "animRating": 7.2,
+        "animePlanet": 3.4,
+        "anilist": 74,
+        "title": "A Wild Last Boss Appeared!",
+        "storyRating": 6.5
+    },
+    "199": {
+        "malScore": 7,
+        "characters": 7,
+        "animRating": 7.5,
+        "animePlanet": 3.5,
+        "anilist": 66,
+        "title": "The Red Ranger Becomes an Adventurer in Another World",
+        "storyRating": 7
+    },
+    "200": {
+        "malScore": 8.1,
+        "characters": 8.5,
+        "animRating": 8.3,
+        "animePlanet": 4,
+        "anilist": 78,
+        "title": "Kuroko's Basketball",
+        "storyRating": 8
+    },
+    "201": {
+        "malScore": 8.2,
+        "characters": 8.5,
+        "animRating": 8.5,
+        "animePlanet": 4.1,
+        "anilist": 81,
+        "title": "The Eminence in Shadow",
+        "storyRating": 8
+    },
+    "202": {
+        "malScore": 7.5,
+        "characters": 7.5,
+        "animRating": 7.8,
+        "animePlanet": 3.8,
+        "anilist": 74,
+        "title": "MF Ghost",
+        "storyRating": 7.3
+    },
+    "203": {
+        "malScore": 7.8,
+        "characters": 8,
+        "animRating": 8.2,
+        "animePlanet": 3.9,
+        "anilist": 82,
+        "title": "Gachiakuta",
+        "storyRating": 7.8
+    },
+    "204": {
+        "malScore": 6.5,
+        "characters": 6.3,
+        "animRating": 7,
+        "animePlanet": 3.2,
+        "anilist": 66,
+        "title": "Mechanical Marie",
+        "storyRating": 6.3
+    },
+    "205": {
+        "malScore": 7.8,
+        "characters": 8,
+        "animRating": 8,
+        "animePlanet": 3.9,
+        "anilist": 76,
+        "title": "Tokyo Ghoul",
+        "storyRating": 7.5
+    },
+    "206": {
+        "malScore": 6.8,
+        "characters": 6.8,
+        "animRating": 7.2,
+        "animePlanet": 3.4,
+        "anilist": 64,
+        "title": "An Adventurer's Daily Grind at Age 29",
+        "storyRating": 6.8
+    },
+    "207": {
+        "malScore": 7.2,
+        "characters": 7.5,
+        "animRating": 7.5,
+        "animePlanet": 3.6,
+        "anilist": 62,
+        "title": "There Was a Cute Girl in the Hero's Party, So I Tried Confessing to Her",
+        "storyRating": 7.2
+    },
+    "208": {
+        "malScore": 6.8,
+        "characters": 6.5,
+        "animRating": 7,
+        "animePlanet": 3.4,
+        "anilist": 60,
+        "title": "A Gatherer's Adventure in Isekai",
+        "storyRating": 6.5
+    },
+    "209": {
+        "malScore": 7,
+        "characters": 7,
+        "animRating": 7.3,
+        "animePlanet": 3.5,
+        "anilist": 65,
+        "title": "Kunon the Sorcerer Can See",
+        "storyRating": 7
+    },
+    "210": {
+        "malScore": 7,
+        "characters": 7.2,
+        "animRating": 7.3,
+        "animePlanet": 3.5,
+        "anilist": 68,
+        "title": "Hana-Kimi",
+        "storyRating": 7
+    },
+    "211": {
+        "malScore": 7.3,
+        "characters": 7.5,
+        "animRating": 7.5,
+        "animePlanet": 3.6,
+        "anilist": 83,
+        "title": "You and I Are Polar Opposites",
+        "storyRating": 7.2
+    },
+    "212": {
+        "malScore": 7.7,
+        "characters": 7.8,
+        "animRating": 8,
+        "animePlanet": 3.8,
+        "anilist": 74,
+        "title": "BOFURI: I Don't Want to Get Hurt, so I'll Max Out My Defense",
+        "storyRating": 7.3
+    },
+    "213": {
+        "malScore": 8.1,
+        "characters": 8.5,
+        "animRating": 8.3,
+        "animePlanet": 4,
+        "anilist": 74,
+        "title": "Cells at Work!",
+        "storyRating": 8
+    },
+    "214": {
+        "malScore": 8,
+        "characters": 8.2,
+        "animRating": 8.3,
+        "animePlanet": 4,
+        "anilist": 77,
+        "title": "The Rising of the Shield Hero",
+        "storyRating": 7.8
+    },
+    "215": {
+        "malScore": 7,
+        "characters": 7.2,
+        "animRating": 7.3,
+        "animePlanet": 3.5,
+        "anilist": 64,
+        "title": "A Misanthrope Teaches a Class for Demi-Humans",
+        "storyRating": 7
+    },
+    "216": {
+        "malScore": 6.8,
+        "characters": 6.5,
+        "animRating": 7,
+        "animePlanet": 3.4,
+        "anilist": 67,
+        "title": "Jack-of-All-Trades, Party of None",
+        "storyRating": 6.5
+    },
+    "217": {
+        "malScore": 8.6,
+        "characters": 9,
+        "animRating": 8.8,
+        "animePlanet": 4.3,
+        "anilist": 83,
+        "title": "Summer Time Rendering",
+        "storyRating": 9
+    },
+    "218": {
+        "malScore": 7,
+        "characters": 7,
+        "animRating": 7.3,
+        "animePlanet": 3.5,
+        "anilist": 63,
+        "title": "I'm Standing on a Million Lives",
+        "storyRating": 7
+    },
+    "219": {
+        "malScore": 7.7,
+        "characters": 8.5,
+        "animRating": 8,
+        "animePlanet": 3.8,
+        "anilist": 79,
+        "title": "Komi Can't Communicate",
+        "storyRating": 7.8
+    },
+    "220": {
+        "malScore": 7.2,
+        "characters": 7.2,
+        "animRating": 7.8,
+        "animePlanet": 3.6,
+        "anilist": 85,
+        "title": "To Be Hero X",
+        "storyRating": 7
+    },
+    "221": {
+        "malScore": 8.9,
+        "characters": 9.8,
+        "animRating": 8.5,
+        "animePlanet": 4.4,
+        "anilist": 85,
+        "title": "Gintama",
+        "storyRating": 9.2
+    },
+    "222": {
+        "malScore": 7.2,
+        "characters": 7.2,
+        "animRating": 7.5,
+        "animePlanet": 3.6,
+        "anilist": 68,
+        "title": "Chillin' in My 30s After Getting Fired From the Demon King's Army",
+        "storyRating": 7
+    },
+    "223": {
+        "malScore": 8.7,
+        "characters": 9.2,
+        "animRating": 9,
+        "animePlanet": 4.4,
+        "anilist": 84,
+        "title": "Your Lie in April",
+        "storyRating": 9.3
+    },
+    "224": {
+        "malScore": 8.6,
+        "characters": 9.2,
+        "animRating": 8.8,
+        "animePlanet": 4.3,
+        "anilist": 83,
+        "title": "Ranking of Kings",
+        "storyRating": 9
+    },
+    "225": {
+        "malScore": 7.5,
+        "characters": 7.8,
+        "animRating": 7.8,
+        "animePlanet": 3.8,
+        "anilist": 64,
+        "title": "Reign of the Seven Spellblades",
+        "storyRating": 7.3
+    },
+    "226": {
+        "malScore": 6.8,
+        "characters": 6.5,
+        "animRating": 7.2,
+        "animePlanet": 3.4,
+        "anilist": 69,
+        "title": "Black Summoner",
+        "storyRating": 6.5
+    },
+    "227": {
+        "malScore": 7.3,
+        "characters": 7.5,
+        "animRating": 7.8,
+        "animePlanet": 3.6,
+        "anilist": 71,
+        "title": "Yaiba: Samurai Legend",
+        "storyRating": 7.2
+    },
+    "228": {
+        "malScore": 7,
+        "characters": 7,
+        "animRating": 7.5,
+        "animePlanet": 3.5,
+        "anilist": 65,
+        "title": "Arifureta: From Commonplace to World's Strongest",
+        "storyRating": 6.8
+    },
+    "229": {
+        "malScore": 7.5,
+        "characters": 7.8,
+        "animRating": 7.8,
+        "animePlanet": 3.8,
+        "anilist": 65,
+        "title": "Miss Kuroitsu from the Monster Development Department",
+        "storyRating": 7.5
+    },
+    "230": {
+        "malScore": 7,
+        "characters": 7.2,
+        "animRating": 7.5,
+        "animePlanet": 3.5,
+        "anilist": 72,
+        "title": "Dandelion",
+        "storyRating": 7
+    },
+    "231": {
+        "malScore": 9.1,
+        "characters": 9.8,
+        "animRating": 9.2,
+        "animePlanet": 4.6,
+        "anilist": 90,
+        "title": "Fullmetal Alchemist: Brotherhood",
+        "storyRating": 9.7
+    },
+    "232": {
+        "malScore": 7,
+        "characters": 7,
+        "animRating": 7.3,
+        "animePlanet": 3.5,
+        "anilist": 81,
+        "title": "Sentenced to Be a Hero",
+        "storyRating": 7
+    },
+    "233": {
+        "malScore": 6.7,
+        "characters": 6.3,
+        "animRating": 7.2,
+        "animePlanet": 3.4,
+        "anilist": 60,
+        "title": "She Professed Herself Pupil of the Wise Man",
+        "storyRating": 6.3
+    },
+    "234": {
+        "malScore": 6.5,
+        "characters": 6.3,
+        "animRating": 7,
+        "animePlanet": 3.2,
+        "anilist": 48,
+        "title": "Ultraviolet Code 044",
+        "storyRating": 6.3
+    },
+    "235": {
+        "malScore": 8.1,
+        "characters": 8.8,
+        "animRating": 8.8,
+        "animePlanet": 4,
+        "anilist": 78,
+        "title": "Yuri!!! on Ice",
+        "storyRating": 8
+    },
+    "236": {
+        "malScore": 7,
+        "characters": 7,
+        "animRating": 7.3,
+        "animePlanet": 3.5,
+        "anilist": 65,
+        "title": "I Left My A-Rank Party to Help My Former Students Reach the Dungeon Depths!",
+        "storyRating": 7
+    },
+    "237": {
+        "malScore": 7,
+        "characters": 7,
+        "animRating": 7,
+        "animePlanet": 3.5,
+        "anilist": 68,
+        "title": "Daemons of the Shadow Realm",
+        "storyRating": 7
+    },
+    "238": {
+        "malScore": 7,
+        "characters": 7,
+        "animRating": 7,
+        "animePlanet": 3.5,
+        "anilist": 68,
+        "title": "An Observation Log of My Fiancée Who Calls Herself a Villainess",
+        "storyRating": 7
+    },
+    "239": {
+        "malScore": 7.5,
+        "characters": 8,
+        "animRating": 8,
+        "animePlanet": 4,
+        "anilist": 76,
+        "title": "Witch Hat Atelier",
+        "storyRating": 7.5
+    },
+    "240": {
+        "malScore": 6.5,
+        "characters": 7,
+        "animRating": 7,
+        "animePlanet": 3.5,
+        "anilist": 65,
+        "title": "The Warrior Princess and the Barbaric King",
+        "storyRating": 6.5
+    },
+    "241": {
+        "malScore": 6.8,
+        "characters": 7,
+        "animRating": 7,
+        "animePlanet": 3.5,
+        "anilist": 67,
+        "title": "The Ramparts of Ice",
+        "storyRating": 6.5
+    },
+    "242": {
+        "malScore": 6.5,
+        "characters": 6.5,
+        "animRating": 6.5,
+        "animePlanet": 3,
+        "anilist": 64,
+        "title": "Scum of the Brave",
+        "storyRating": 6
+    },
+    "243": {
+        "malScore": 7,
+        "characters": 7.5,
+        "animRating": 7,
+        "animePlanet": 3.5,
+        "anilist": 70,
+        "title": "Marriage Toxin",
+        "storyRating": 7
+    },
+    "244": {
+        "malScore": 7.5,
+        "characters": 8,
+        "animRating": 7.5,
+        "animePlanet": 4,
+        "anilist": 75,
+        "title": "Liar Game",
+        "storyRating": 7.5
+    },
+    "245": {
+        "malScore": 7,
+        "characters": 7.5,
+        "animRating": 7,
+        "animePlanet": 3.5,
+        "anilist": 70,
+        "title": "I Made Friends with the Second Prettiest Girl in My Class",
+        "storyRating": 7
+    },
+    "246": {
+        "malScore": 6.5,
+        "characters": 7,
+        "animRating": 6.5,
+        "animePlanet": 3.5,
+        "anilist": 65,
+        "title": "Eren the Southpaw",
+        "storyRating": 6.5
+    },
+    "247": {
+        "malScore": 6.5,
+        "characters": 7,
+        "animRating": 6.5,
+        "animePlanet": 3.5,
+        "anilist": 64,
+        "title": "BlackRock Shooter Dawn Fall",
+        "storyRating": 6.5
+    },
+    "248": {
+        "malScore": 7.8,
+        "characters": 8,
+        "animRating": 8.5,
+        "animePlanet": 4,
+        "anilist": 78,
+        "title": "Devilman Crybaby",
+        "storyRating": 8
+    },
+    "249": {
+        "malScore": 8.5,
+        "characters": 8.5,
+        "animRating": 8.8,
+        "animePlanet": 4.3,
+        "anilist": 84,
+        "title": "Made in Abyss",
+        "storyRating": 9
+    },
+    "250": {
+        "malScore": 6.6,
+        "characters": 7,
+        "animRating": 6.5,
+        "animePlanet": 3.5,
+        "anilist": 66,
+        "title": "Wise Man's Grandchild",
+        "storyRating": 6.5
+    },
+    "251": {
+        "malScore": 8.5,
+        "characters": 9,
+        "animRating": 9,
+        "animePlanet": 4.3,
+        "anilist": 86,
+        "title": "Oshi no Ko",
+        "storyRating": 8.5
+    },
+    "252": {
+        "malScore": 7.6,
+        "characters": 8,
+        "animRating": 7.5,
+        "animePlanet": 4,
+        "anilist": 75,
+        "title": "Blue Spring Ride",
+        "storyRating": 7.5
+    }
+}

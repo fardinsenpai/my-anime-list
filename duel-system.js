@@ -1,0 +1,1218 @@
+// duel-system.js — COMPLETE FILE
+
+(function (window, document) {
+  'use strict';
+
+  // ─── Guard ───────────────────────────────────────────────
+  if (window.__DUEL_LOADED__) return;
+  window.__DUEL_LOADED__ = true;
+  // ─────────────────────────────────────────────────────────
+
+  console.log('⚔️ Anime Duel System initializing...');
+
+  /* ── STATE ─────────────────────────────────────────── */
+  const DuelState = {
+    isActive     : false,
+    selectedCards: [],
+    selectedAnime: [],
+    animeDatabase: [],
+    isAnimating  : false,
+  };
+
+  /* ── DATA LOADING (cached) ─────────────────────────── */
+  var DB_CACHE_KEY = 'fardin_anime_db';
+  var DB_CACHE_VER = 1;
+
+  async function loadAnimeDatabase() {
+    // Try localStorage cache first
+    try {
+      var cached = localStorage.getItem(DB_CACHE_KEY);
+      if (cached) {
+        var parsed = JSON.parse(cached);
+        if (parsed && parsed._version === DB_CACHE_VER && Array.isArray(parsed.data)) {
+          DuelState.animeDatabase = parsed.data;
+          console.log('✅ Duel System: loaded from cache (' + DuelState.animeDatabase.length + ' anime)');
+          return;
+        }
+      }
+    } catch (e) {}
+
+    // Fetch fresh
+    try {
+      const res  = await fetch('anime-ratings.json');
+      if (!res.ok) throw new Error(res.status);
+      const data = await res.json();
+      DuelState.animeDatabase = Array.isArray(data) ? data : Object.values(data);
+      // প্রতিটা entry-তে rank বসাও (JSON key থেকে)
+      if (!Array.isArray(data)) {
+        let i = 1;
+        for (const key of Object.keys(data)) {
+          const entry = DuelState.animeDatabase[i - 1];
+          if (entry) entry.rank = parseInt(key, 10);
+          i++;
+        }
+      }
+      // Save to cache
+      try {
+        localStorage.setItem(DB_CACHE_KEY, JSON.stringify({ _version: DB_CACHE_VER, data: DuelState.animeDatabase }));
+      } catch (e) {}
+      console.log(`✅ Duel System: ${DuelState.animeDatabase.length}টা Anime লোড হয়েছে।`);
+    } catch (e) {
+      console.error('❌ Database load failed:', e);
+      DuelState.animeDatabase = [];
+    }
+  }
+
+  function normalizeTitle(t) {
+    if (!t) return '';
+    return t.toLowerCase().replace(/[^a-z0-9]/g, '');
+  }
+
+  function injectDuelSidebarLink() {
+    // ─── Already exists check ───────────────────────────
+    // HTML-এ manually আছে কিনা দেখো
+    const existingLink = document.getElementById('duel-nav-link');
+    
+    if (existingLink) {
+      // Link already আছে — শুধু event listener attach করো
+      console.log('✅ Duel nav link found in HTML — attaching event...');
+      
+      // পুরানো listener remove করে নতুন দাও (duplicate এড়াতে)
+      const newLink = existingLink.cloneNode(true);
+      existingLink.parentNode.replaceChild(newLink, existingLink);
+      
+      document.getElementById('duel-nav-link')
+              .addEventListener('click', e => { 
+                e.preventDefault(); 
+                toggleDuelMode(); 
+              });
+      return; // inject করার দরকার নেই
+    }
+
+    // ─── না থাকলে নতুন inject করো ──────────────────────
+    const sideNav = document.querySelector('nav.side-nav')
+                 || document.querySelector('.side-nav');
+                 
+    if (!sideNav) { 
+      console.warn('⚠️ .side-nav পাওয়া যায়নি'); 
+      return; 
+    }
+
+    const li = document.createElement('li');
+    li.id    = 'duel-nav-item';
+    li.innerHTML = `
+      <a href="#" id="duel-nav-link" class="duel-nav-link"
+         aria-label="Anime Duel Mode" role="button" aria-pressed="false">
+        <span class="duel-nav-icon">⚔️</span>
+        <span class="duel-nav-text" style="color:#ff3333;">Anime Duel</span>
+        <span class="duel-status-badge" id="duel-status-badge">OFF</span>
+      </a>`;
+    sideNav.appendChild(li);
+
+    document.getElementById('duel-nav-link')
+            .addEventListener('click', e => { 
+              e.preventDefault(); 
+              toggleDuelMode(); 
+            });
+            
+    console.log('✅ Duel nav link injected!');
+  }
+
+  function activateDuelMode() {
+    DuelState.isActive = true;
+    document.body.classList.add('duel-mode-active');
+
+    const link  = document.getElementById('duel-nav-link');
+    const badge = document.getElementById('duel-status-badge');
+    link ?.classList.add('duel-link--active');
+    link ?.setAttribute('aria-pressed', 'true');
+    if (badge) { badge.textContent = 'ON'; badge.classList.add('badge--active'); }
+
+    // Chat bubble hide
+const bubble = document.querySelector('.chat-bubble');
+if (bubble) bubble.style.display = 'none';
+
+// Counter hide (genre filter stays visible)
+const counterContainer = document.querySelector('.counter-container');
+if (counterContainer) counterContainer.style.display = 'none';
+var watchEl = document.querySelector('.current-watch');
+if (watchEl) watchEl.style.display = 'none';
+
+
+    showDuelModeIndicator();
+    showDuelToast('⚔️ Duel Mode চালু!', 'দুইটা Anime card select করো।', 'info');
+    // URL update
+    history.pushState(null, '', 'anime-duel');
+}  // ← এখানে বন্ধ হবে
+
+  function toggleDuelMode() {
+  // ⬇️ Sidebar auto-close করো
+  closeSidebar();
+  
+  DuelState.isActive ? deactivateDuelMode() : activateDuelMode();
+}
+
+/**
+ * Sidebar বন্ধ করা — multiple selectors try করে
+ */
+function closeSidebar() {
+  // Sidebar element খুঁজে বের করা
+  const sidebar = document.getElementById('sideMenu') 
+               || document.querySelector('.sidemenu')
+               || document.querySelector('.sidebar');
+  
+  if (!sidebar) {
+    console.warn('⚠️ Sidebar element পাওয়া যায়নি');
+    return;
+  }
+  
+  // Method 1: Common class names remove করো
+  sidebar.classList.remove('open', 'active', 'show', 'visible', 'expanded');
+  
+  // Method 2: Common class names add করো (closed state)
+  sidebar.classList.add('closed', 'hidden');
+  
+  // Method 3: যদি menu toggle button থাকে — click trigger করো
+  const menuBtn = document.querySelector('.menu-btn')
+              || document.querySelector('.hamburger')
+              || document.querySelector('.menu-toggle')
+              || document.querySelector('[data-menu-toggle]');
+  
+  // যদি sidebar এখনো open আছে, তাহলে toggle button click করো
+  if (menuBtn && sidebar.classList.contains('open')) {
+    menuBtn.click();
+  }
+  
+  // Method 4: Backdrop/overlay click trigger
+  const backdrop = document.querySelector('.sidebar-backdrop')
+                || document.querySelector('.menu-overlay')
+                || document.querySelector('.backdrop');
+  if (backdrop) backdrop.click();
+  
+  console.log('🚪 Sidebar closed');
+}
+
+  function deactivateDuelMode() {
+    DuelState.isActive = false;
+    document.body.classList.remove('duel-mode-active');
+
+    const link  = document.getElementById('duel-nav-link');
+    const badge = document.getElementById('duel-status-badge');
+    link ?.classList.remove('duel-link--active');
+    link ?.setAttribute('aria-pressed', 'false');
+    if (badge) { badge.textContent = 'OFF'; badge.classList.remove('badge--active'); }
+    
+    // Chat bubble show
+const bubble = document.querySelector('.chat-bubble');
+if (bubble) bubble.style.display = 'flex';
+
+// Counter show
+const counterContainer = document.querySelector('.counter-container');
+if (counterContainer) counterContainer.style.display = '';
+var watchEl = document.querySelector('.current-watch');
+if (watchEl) watchEl.style.display = '';
+
+
+    resetDuelSelection();
+    hideDuelModeIndicator();
+    showDuelToast('🔕 Duel Mode বন্ধ।', '', 'warning');
+    // URL back — use replaceState so one back press = exit duel
+    history.replaceState(null, '', '.');
+  }
+
+  // Back/forward navigation — exit duel mode if URL doesn't match
+  window.addEventListener('popstate', function () {
+    if (DuelState.isActive && !location.pathname.endsWith('/anime-duel')) {
+      DuelState.isActive = false;
+      deactivateDuelMode();
+    }
+  });
+
+  /* ── CARD INTERCEPTION ─────────────────────────────── */
+  function handleCardClick(e) {
+    if (!DuelState.isActive) return;
+
+    const card = e.target.closest('.card');
+    if (!card) return;
+
+    e.stopPropagation();
+    e.preventDefault();
+
+    if (DuelState.isAnimating) {
+      showDuelToast('⏳ অপেক্ষা করো...', 'Battle চলছে!', 'warning');
+      return;
+    }
+
+    if (card.classList.contains('selected-for-duel')) {
+      deselectCard(card); return;
+    }
+
+    if (DuelState.selectedCards.length >= 2) {
+      showDuelToast('⚠️ ইতিমধ্যে ২টা selected!', 'Reset করো।', 'warning');
+      return;
+    }
+
+    selectCard(card);
+  }
+
+  function selectCard(card) {
+  const title = extractTitle(card);
+  if (!title) return;
+
+  const rank = extractRank(card);
+  const anime = findAnime(title, rank);
+  if (!anime) {
+    showDuelToast('❌ Data পাওয়া যায়নি!', `"${title}" database-এ নেই।`, 'error');
+    return;
+  }
+
+  // rank টা anime object-এ store করো (genre matching-এর জন্য)
+  anime._rank = rank;
+  anime.number = rank;
+
+  // ⬇️ Card থেকে সব data extract করে anime object enrich করা
+  enrichAnimeFromCard(anime, card);
+
+  DuelState.selectedCards.push(card);
+  DuelState.selectedAnime.push(anime);
+
+  const n = DuelState.selectedCards.length;
+  card.classList.add('selected-for-duel');
+  card.setAttribute('data-duel-player', n === 1 ? 'P1' : 'P2');
+  addSelectionBadge(card, n);
+  updateIndicatorCount();
+
+  if (n === 1) {
+    showDuelToast('⚡ Anime 1 Selected!', `"${anime.title}"`, 'success');
+  } else {
+    showDuelToast('🔥 Anime 2 Selected!', `"${anime.title}"`, 'success');
+    setTimeout(initiateBattle, 600);
+  }
+}
+
+/**
+ * Card থেকে image, episode info ইত্যাদি extract করে 
+ * anime object এ inject করা
+ */
+function enrichAnimeFromCard(anime, card) {
+  // 🖼️ Poster image extract
+  const posterImg = card.querySelector('.poster-wrap img')
+                 || card.querySelector('.card-front img')
+                 || card.querySelector('img');
+  
+  if (posterImg && posterImg.src) {
+    anime.image = posterImg.src;
+    anime._cardImage = posterImg.src; // backup
+  }
+
+  // 📺 Back side থেকে episodes
+  const episodesEl = card.querySelector('.back-episodes');
+  if (episodesEl) {
+    const match = episodesEl.textContent.match(/\d+/);
+    if (match) anime.episodes = match[0];
+  }
+
+  // 🌸 Season info
+  const seasonEl = card.querySelector('.back-season');
+  if (seasonEl) {
+    anime.season = seasonEl.textContent.replace(/🌸/g, '').trim();
+  }
+
+  // 🔢 Number/rank
+  const numberEl = card.querySelector('.number, .badge');
+  if (numberEl) {
+    const match = numberEl.textContent.match(/\d+/);
+    if (match) anime.cardNumber = match[0];
+  }
+
+  console.log('✅ Enriched anime:', anime);
+}
+
+  function deselectCard(card) {
+    const i = DuelState.selectedCards.indexOf(card);
+    if (i > -1) { DuelState.selectedCards.splice(i,1); DuelState.selectedAnime.splice(i,1); }
+    card.classList.remove('selected-for-duel');
+    card.removeAttribute('data-duel-player');
+    card.querySelector('.duel-selection-badge')?.remove();
+    updateIndicatorCount();
+    showDuelToast('↩️ Selection সরানো হয়েছে।', '', 'info');
+  }
+
+  /* ── DATA HELPERS ──────────────────────────────────── */
+  function extractTitle(card) {
+    const selectors = ['.card-title','.anime-title','h3','h4','.title','.card-front h3'];
+    for (const s of selectors) {
+      const el = card.querySelector(s);
+      if (el) return el.getAttribute('data-title') || el.textContent.trim();
+    }
+    return card.getAttribute('data-anime') || card.getAttribute('data-title') || null;
+  }
+
+  function extractRank(card) {
+    const b = card.querySelector('.badge,.rank-badge,[data-rank]');
+    if (b) {
+      const txt = b.textContent || b.getAttribute('data-rank') || '';
+      const m = txt.match(/\d+/);
+      if (m) return parseInt(m[0], 10);
+    }
+    return null;
+  }
+
+  function findAnime(title, rank) {
+    const db = DuelState.animeDatabase;
+    const norm = normalizeTitle(title);
+    // 1st pass: normalized exact match
+    let found = db.find(a => normalizeTitle(a.title) === norm);
+    // 2nd pass: one contains the other (handles truncation like "Dr.Stone" vs "Dr. Stone")
+    if (!found) found = db.find(a => {
+      const an = normalizeTitle(a.title);
+      return an.includes(norm) || norm.includes(an);
+    });
+    // 3rd pass: rank-based (works when JSON keys match badge numbers)
+    if (!found && rank) found = db.find(a => a.rank===rank || a.id===rank);
+    // 4th pass: partial word match (e.g. "MHA" matches "My Hero Academia")
+    if (!found) {
+      const words = norm.split(/\s+/).filter(Boolean);
+      found = db.find(a => {
+        const an = normalizeTitle(a.title);
+        return words.some(w => w.length > 2 && an.includes(w));
+      });
+    }
+    return found || null;
+  }
+
+  /* ============================================================
+   🎭 GENRE MATCHING SYSTEM
+   ============================================================ */
+
+/**
+ * একটা anime এর rank নিয়ে তার সব genres বের করা
+ * @param {number} rank — anime এর rank number
+ * @returns {string[]} — array of genre names
+ */
+function getAnimeGenres(rank) {
+  if (!rank) return [];
+  
+  // GENRES data access করো
+  const genresData = window.ANIME_GENRES;
+  if (!genresData) {
+    console.warn('⚠️ GENRES data not found!');
+    return [];
+  }
+  
+  const matchedGenres = [];
+  
+  // প্রতিটা genre এর nums Set এ search করো
+  for (const [genreName, genreInfo] of Object.entries(genresData)) {
+    if (genreName === 'All') continue;
+    if (genreName === 'Movie') continue; // Movie is format, not genre
+    
+    if (genreInfo.nums && genreInfo.nums.has(rank)) {
+      matchedGenres.push({
+        name: genreName,
+        icon: genreInfo.icon
+      });
+    }
+  }
+  
+  return matchedGenres;
+}
+
+/**
+ * দুইটা anime এর genres compare করে common genres বের করা
+ * @param {Object} anime1
+ * @param {Object} anime2
+ * @returns {Object} — { canFight, commonGenres, anime1Genres, anime2Genres }
+ */
+function checkGenreCompatibility(anime1, anime2) {
+  // GENRES data না থাকলে সব duel অনুমোদিত
+  if (!window.ANIME_GENRES) {
+    return { canFight: true, commonGenres: [], anime1Genres: [], anime2Genres: [] };
+  }
+
+  // দুইটার rank বের করো
+  const rank1 = anime1.rank || anime1.id || anime1.number || anime1._rank;
+  const rank2 = anime2.rank || anime2.id || anime2.number || anime2._rank;
+  
+  const genres1 = getAnimeGenres(rank1);
+  const genres2 = getAnimeGenres(rank2);
+  
+  // Common genres খোঁজা
+  const genres2Names = new Set(genres2.map(g => g.name));
+  const commonGenres = genres1.filter(g => genres2Names.has(g.name));
+  
+  console.log('🎭 Genre Check:', {
+    anime1: anime1.title,
+    anime1Genres: genres1.map(g => g.name),
+    anime2: anime2.title,
+    anime2Genres: genres2.map(g => g.name),
+    common: commonGenres.map(g => g.name)
+  });
+  
+  return {
+    canFight: commonGenres.length > 0,
+    commonGenres,
+    anime1Genres: genres1,
+    anime2Genres: genres2,
+  };
+}
+
+  /* ── POWER SCORE ───────────────────────────────────── */
+  function calcPower(anime) {
+  const mal   = parseFloat(anime.malScore    || anime.mal_score    || 0);
+  const story = parseFloat(anime.storyRating || anime.story_rating || 0);
+  const anim  = parseFloat(anime.animRating  || anime.anim_rating  || anime.animationRating || 0);
+  const chars = parseFloat(anime.characters  || 0);
+  const anilist = parseFloat(anime.anilist   || 0) / 10;
+  return parseFloat(((mal * 0.25) + (story * 0.3) + (anim * 0.2) + (chars * 0.1) + (anilist * 0.15)).toFixed(3));
+}
+
+  function getWinner(a1, a2) {
+    const s1 = calcPower(a1), s2 = calcPower(a2);
+    const isDraw = Math.abs(s1 - s2) < 0.001;
+    return {
+      winner: isDraw ? null : (s1 > s2 ? a1 : a2),
+      loser : isDraw ? null : (s1 > s2 ? a2 : a1),
+      isDraw,
+      scores: { anime1: s1, anime2: s2 },
+    };
+  }
+
+  /* ── GENRE CLASH OVERLAY ──────────────────────────── */
+  function showGenreClashOverlay(a1, a2, compatibility) {
+    const ov = document.createElement('div');
+    ov.id = 'duel-overlay';
+    ov.className = 'duel-overlay';
+    ov.setAttribute('role', 'dialog');
+    ov.setAttribute('aria-modal', 'true');
+
+    const g1 = compatibility.anime1Genres.map(g => g.name).join(', ');
+    const g2 = compatibility.anime2Genres.map(g => g.name).join(', ');
+
+    ov.innerHTML = `
+      <div class="duel-arena" style="max-width:700px;margin-top:40px;">
+        <button class="duel-close-btn" id="clash-close-btn" aria-label="Close">✕</button>
+        <div class="duel-header">
+          <div class="duel-header__title">
+            <span>🚫</span>
+            <h2 class="duel-header__text" style="color:#ff4444;">GENRE CLASH</h2>
+            <span>🚫</span>
+          </div>
+        </div>
+
+        <div class="duel-fighters" style="margin:10px 0;">
+          <div class="duel-fighter duel-fighter--p1">
+            <div class="duel-fighter__poster">
+              ${(a1.image||a1.poster||a1.img)
+                ? `<img src="${a1.image||a1.poster||a1.img}" alt="${a1.title}" onerror="this.style.display='none'">`
+                : '<span class="duel-fighter__poster-fallback">🎌</span>'}
+            </div>
+            <div class="duel-fighter__info" style="text-align:center;">
+              <h3 class="duel-fighter__name">${a1.title||'Unknown'}</h3>
+              <div style="color:#ffcc00;font-size:13px;margin-top:4px;">${g1}</div>
+            </div>
+          </div>
+
+          <div style="display:flex;align-items:center;justify-content:center;flex-shrink:0;padding:0 10px;">
+            <div style="font-size:32px;font-weight:900;color:#ff4444;text-shadow:0 0 20px rgba(255,68,68,0.5);">✖</div>
+          </div>
+
+          <div class="duel-fighter duel-fighter--p2">
+            <div class="duel-fighter__poster">
+              ${(a2.image||a2.poster||a2.img)
+                ? `<img src="${a2.image||a2.poster||a2.img}" alt="${a2.title}" onerror="this.style.display='none'">`
+                : '<span class="duel-fighter__poster-fallback">🎌</span>'}
+            </div>
+            <div class="duel-fighter__info" style="text-align:center;">
+              <h3 class="duel-fighter__name">${a2.title||'Unknown'}</h3>
+              <div style="color:#ffcc00;font-size:13px;margin-top:4px;">${g2}</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="text-align:center;padding:20px 20px 30px;">
+          <div style="font-size:22px;font-weight:700;color:#ff6666;margin-bottom:6px;">No Common Ground!</div>
+          <div style="font-size:14px;color:#888;">These two are from completely different worlds.</div>
+          <div style="font-size:13px;color:#666;margin-top:4px;">Pick two anime that share at least one genre.</div>
+          <button class="duel-btn duel-btn--reset" id="clash-reset-btn" style="margin-top:20px;display:inline-flex;">🔄 Reset & Try Again</button>
+        </div>
+      </div>`;
+
+    document.body.appendChild(ov);
+    requestAnimationFrame(() => requestAnimationFrame(() =>
+      ov.classList.add('duel-overlay--visible')
+    ));
+
+    ov.querySelector('#clash-close-btn').addEventListener('click', () => closeOverlay(ov));
+    ov.querySelector('#clash-reset-btn').addEventListener('click', () => { closeOverlay(ov); resetDuelSelection(); });
+    ov.addEventListener('click', e => { if (e.target === ov) closeOverlay(ov); });
+  }
+
+  /* ── BATTLE ────────────────────────────────────────── */
+  function initiateBattle() {
+    if (DuelState.selectedAnime.length < 2) return;
+
+    const [a1, a2] = DuelState.selectedAnime;
+
+    // 🎭 Genre check — common genre না থাকলে duel হবে না
+    const compatibility = checkGenreCompatibility(a1, a2);
+    if (!compatibility.canFight) {
+      showGenreClashOverlay(a1, a2, compatibility);
+      return;
+    }
+
+    DuelState.isAnimating = true;
+
+    const result   = getWinner(a1, a2);
+    const overlay  = buildOverlay(a1, a2, result);
+
+    document.body.appendChild(overlay);
+    requestAnimationFrame(() => requestAnimationFrame(() =>
+      overlay.classList.add('duel-overlay--visible')
+    ));
+
+    setTimeout(() => clashAnimation(overlay),          400);
+    setTimeout(() => revealStats(overlay, a1, a2, result), 2200);
+    setTimeout(() => { announceWinner(overlay, result); DuelState.isAnimating = false; }, 3800);
+  }
+
+  /* ── OVERLAY BUILD ─────────────────────────────────── */
+  function buildOverlay(a1, a2, result) {
+  const ov = document.createElement('div');
+  ov.id        = 'duel-overlay';
+  ov.className = 'duel-overlay';
+  ov.setAttribute('role', 'dialog');
+  ov.setAttribute('aria-modal', 'true');
+
+  const rank1 = a1.rank || a1.id || a1.number || a1._rank;
+  const rank2 = a2.rank || a2.id || a2.number || a2._rank;
+  const compat = checkGenreCompatibility(a1, a2);
+  const commonSet = new Set(compat.commonGenres.map(g => g.name));
+  const genreHTML = (genres) => {
+    const text = genres.map(g =>
+      `<span style="color:${commonSet.has(g.name) ? '#44ff44' : '#ffcc00'}">${g.name}</span>`
+    ).join(' · ');
+    const align = genres.length === 1 ? 'center' : 'left';
+    return `<div style="font-size:12px;margin-top:3px;text-align:${align};">${text}</div>`;
+  };
+  const g1 = window.ANIME_GENRES ? genreHTML(compat.anime1Genres) : '';
+  const g2 = window.ANIME_GENRES ? genreHTML(compat.anime2Genres) : '';
+
+  ov.innerHTML = `
+    <div class="duel-bg-effect" aria-hidden="true">
+      <div class="duel-particles" id="duel-particles"></div>
+    </div>
+
+    <div class="duel-arena">
+
+      <!-- CLOSE BTN -->
+      <button class="duel-close-btn" id="duel-close-btn" aria-label="Close">✕</button>
+
+      <!-- HEADER -->
+      <div class="duel-header">
+        <div class="duel-header__title">
+          <span>⚔️</span>
+          <h2 class="duel-header__text">ANIME DUEL ARENA</h2>
+          <span>⚔️</span>
+        </div>
+      </div>
+
+      <!-- FIGHTERS -->
+      <div class="duel-fighters" id="duel-fighters">
+
+        <!-- P1 -->
+        <div class="duel-fighter duel-fighter--p1" id="duel-fighter-p1">
+          <div class="duel-fighter__label duel-fighter__label--p1">⚡ ANIME 1</div>
+          <div class="duel-fighter__poster">
+            ${(a1.image||a1.poster||a1.img)
+              ? `<img src="${a1.image||a1.poster||a1.img}" alt="${a1.title}" onerror="this.style.display='none'">`
+              : '<span class="duel-fighter__poster-fallback">🎌</span>'}
+          </div>
+          <div class="duel-fighter__info">
+            <h3 class="duel-fighter__name">${a1.title||'Unknown'}</h3>
+            ${g1 || ''}
+            <div class="duel-fighter__genre">${a1.genre||''}</div>
+          </div>
+          <div class="duel-fighter__power-preview duel-fighter__power-preview--p1">
+            <span>POWER</span>
+            <strong id="power-value-p1">??</strong>
+          </div>
+        </div>
+
+        <!-- VS -->
+        <div class="duel-vs-center" id="duel-vs-center">
+          <div class="duel-vs__ring">
+            <span class="duel-vs__text">VS</span>
+          </div>
+          <div class="duel-vs__spark" id="duel-vs-spark" aria-hidden="true">
+            <div class="spark spark--1"></div>
+            <div class="spark spark--2"></div>
+            <div class="spark spark--3"></div>
+            <div class="spark spark--4"></div>
+          </div>
+        </div>
+
+        <!-- P2 -->
+        <div class="duel-fighter duel-fighter--p2" id="duel-fighter-p2">
+          <div class="duel-fighter__label duel-fighter__label--p2">🔥 ANIME 2</div>
+          <div class="duel-fighter__poster">
+            ${(a2.image||a2.poster||a2.img)
+              ? `<img src="${a2.image||a2.poster||a2.img}" alt="${a2.title}" onerror="this.style.display='none'">`
+              : '<span class="duel-fighter__poster-fallback">🎌</span>'}
+          </div>
+          <div class="duel-fighter__info">
+            <h3 class="duel-fighter__name">${a2.title||'Unknown'}</h3>
+            ${g2 || ''}
+            <div class="duel-fighter__genre">${a2.genre||''}</div>
+          </div>
+          <div class="duel-fighter__power-preview duel-fighter__power-preview--p2">
+            <span>POWER</span>
+            <strong id="power-value-p2">??</strong>
+          </div>
+        </div>
+      </div>
+
+      <!-- STATS -->
+      <div class="duel-stats-section" id="duel-stats-section">
+        <h3 class="duel-stats__heading">📊 BATTLE STATS COMPARISON</h3>
+        ${statRowHTML('mal',   '⭐ MAL Score', '/10')}
+        ${statRowHTML('story', '📖 Story',     '/10')}
+        ${statRowHTML('anim',  '🎨 Animation', '/10')}
+        ${statRowHTML('chars', '👥 Characters', '/10')}  
+        ${statRowHTML('anilist', '📊 AniList',   '/100')}
+        ${statRowHTML('animePlanet', '🌍 Anime-Planet', '/5')}
+
+        <div class="duel-power-total" id="duel-power-total">
+          <div class="duel-power-total__p1" id="total-p1">
+            <span class="power-label">POWER</span>
+            <span class="power-value" id="total-val-p1">0.000</span>
+          </div>
+          <div class="duel-power-total__label">⚡ TOTAL POWER ⚡</div>
+          <div class="duel-power-total__p2" id="total-p2">
+            <span class="power-label">POWER</span>
+            <span class="power-value" id="total-val-p2">0.000</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- WINNER -->
+      <div class="duel-winner-section" id="duel-winner-section">
+        <div class="duel-winner__content" id="duel-winner-content"></div>
+      </div>
+
+      <!-- ACTIONS -->
+      <div class="duel-actions" id="duel-actions">
+        <button class="duel-btn duel-btn--reset" id="duel-reset-btn">🔄 Reset</button>
+        <button class="duel-btn duel-btn--exit"  id="duel-exit-btn">🚪 Exit</button>
+      </div>
+    </div>`;
+
+  ov.querySelector('#duel-close-btn').addEventListener('click', () => closeOverlay(ov));
+  ov.querySelector('#duel-reset-btn').addEventListener('click', () => {
+    closeOverlay(ov); resetDuelSelection();
+    showDuelToast('🔄 Reset!', 'নতুন করে select করো।', 'info');
+  });
+  ov.querySelector('#duel-exit-btn').addEventListener('click', () => {
+    closeOverlay(ov); deactivateDuelMode();
+  });
+  ov.addEventListener('click', e => { if (e.target === ov) closeOverlay(ov); });
+  document.addEventListener('keydown', function esc(e) {
+    if (e.key === 'Escape') { closeOverlay(ov); document.removeEventListener('keydown', esc); }
+  });
+
+  generateParticles(ov.querySelector('#duel-particles'));
+  return ov;
+}
+
+  function fighterHTML(anime, id, label) {
+  // সব সম্ভাব্য ইমেজ ফিল্ড চেক করা
+  const imgSrc = anime.image || anime.poster || anime.banner || anime.cover || anime.img || '';
+
+  return `
+    <div class="duel-fighter duel-fighter--${id}" id="duel-fighter-${id}">
+      <div class="duel-fighter__label">${label}</div>
+      
+      <div class="duel-fighter__poster">
+        ${imgSrc 
+          ? `<img src="${imgSrc}" alt="${anime.title}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">` 
+          : ''
+        }
+        <div class="duel-fighter__poster-fallback" ${imgSrc ? 'style="display:none"' : ''}>
+          <span>🎌</span>
+        </div>
+      </div>
+
+      <h3 class="duel-fighter__name">${anime.title || 'Unknown'}</h3>
+      <div class="duel-fighter__genre">${anime.genre || ''}</div>
+
+      <div class="duel-fighter__power-preview" id="power-preview-${id}">
+        <span></span>
+        <strong id="power-value-${id}">??</strong>
+      </div>
+    </div>
+  `;
+}
+
+  function statRowHTML(key, label, sub) {
+    return `
+      <div class="duel-stat-row">
+        <div class="duel-stat__bar-wrap duel-stat__bar-wrap--left">
+          <div class="duel-stat__bar duel-stat__bar--p1" id="bar-p1-${key}">
+            <div class="duel-stat__fill" style="width:0%"></div>
+          </div>
+          <span class="duel-stat__value" id="val-p1-${key}">0</span>
+        </div>
+        <div class="duel-stat__label"><span>${label}</span><small>${sub}</small></div>
+        <div class="duel-stat__bar-wrap duel-stat__bar-wrap--right">
+          <span class="duel-stat__value" id="val-p2-${key}">0</span>
+          <div class="duel-stat__bar duel-stat__bar--p2" id="bar-p2-${key}">
+            <div class="duel-stat__fill" style="width:0%"></div>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  /* ── ANIMATIONS ────────────────────────────────────── */
+  function clashAnimation(ov) {
+    const p1 = ov.querySelector('#duel-fighter-p1');
+    const p2 = ov.querySelector('#duel-fighter-p2');
+    const vs = ov.querySelector('#duel-vs-center');
+
+    p1?.classList.add('fighter--clash-in-left');
+    p2?.classList.add('fighter--clash-in-right');
+
+    setTimeout(() => {
+      vs?.classList.add('vs--pulse');
+      ov.querySelector('#duel-vs-spark')?.classList.add('spark--active');
+      screenFlash(ov);
+    }, 600);
+
+    setTimeout(() => {
+      vs?.classList.add('vs--impact');
+      p1?.classList.add('fighter--clash-impact');
+      p2?.classList.add('fighter--clash-impact');
+    }, 900);
+
+    setTimeout(() => {
+      p1?.classList.remove('fighter--clash-impact');
+      p2?.classList.remove('fighter--clash-impact');
+    }, 1200);
+  }
+
+  function revealStats(ov, a1, a2, result) {
+    const section = ov.querySelector('#duel-stats-section');
+    if (!section) return;
+    section.classList.add('stats--visible');
+
+    const s1 = getStats(a1), s2 = getStats(a2);
+
+const pp1 = ov.querySelector('#power-value-p1');
+const pp2 = ov.querySelector('#power-value-p2');
+if (pp1) pp1.textContent = result.scores.anime1.toFixed(3);
+if (pp2) pp2.textContent = result.scores.anime2.toFixed(3);
+
+    setTimeout(() => animateBar(ov, 'mal',   s1.malScore,    s2.malScore,    10), 300);
+    setTimeout(() => animateBar(ov, 'story', s1.storyRating, s2.storyRating, 10), 700);
+    setTimeout(() => animateBar(ov, 'anim',  s1.animRating,  s2.animRating,  10), 1100);
+    setTimeout(() => animateBar(ov, 'chars', s1.characters,  s2.characters,  10), 1500);
+    setTimeout(() => animateBar(ov, 'anilist', s1.anilist, s2.anilist, 100), 1900);
+    setTimeout(() => animateBar(ov, 'animePlanet', s1.animePlanet, s2.animePlanet, 5), 2100);
+    setTimeout(() => {
+      ov.querySelector('#duel-power-total')?.classList.add('power-total--visible');
+      animCounter(ov.querySelector('#total-val-p1'), 0, result.scores.anime1, 800, 3);
+      animCounter(ov.querySelector('#total-val-p2'), 0, result.scores.anime2, 800, 3);
+
+      if (!result.isDraw) {
+        const isP1 = result.winner === a1;
+        ov.querySelector(`#total-${isP1 ? 'p1' : 'p2'}`)?.classList.add('power--winner');
+      }
+    }, 1500);
+  }
+
+  function animateBar(ov, key, v1, v2, max) {
+    const pct1 = Math.min((v1/max)*100, 100);
+    const pct2 = Math.min((v2/max)*100, 100);
+
+    const f1 = ov.querySelector(`#bar-p1-${key} .duel-stat__fill`);
+    const f2 = ov.querySelector(`#bar-p2-${key} .duel-stat__fill`);
+    const t1 = ov.querySelector(`#val-p1-${key}`);
+    const t2 = ov.querySelector(`#val-p2-${key}`);
+
+    if (f1) { f1.style.transition='width 0.9s ease'; f1.style.width=`${pct1}%`; }
+    if (f2) { f2.style.transition='width 0.9s ease'; f2.style.width=`${pct2}%`; }
+
+    animCounter(t1, 0, v1, 900, 1);
+    animCounter(t2, 0, v2, 900, 1);
+
+    if (v1 !== v2) {
+      setTimeout(() => {
+        ov.querySelector(`#bar-p1-${key}`)?.classList.toggle('bar--winner', v1 > v2);
+        ov.querySelector(`#bar-p2-${key}`)?.classList.toggle('bar--winner', v2 > v1);
+      }, 950);
+    }
+  }
+
+  function announceWinner(ov, result) {
+  const section = ov.querySelector('#duel-winner-section');
+  const content = ov.querySelector('#duel-winner-content');
+  if (!section || !content) return;
+
+  const [a1, a2] = DuelState.selectedAnime;
+  const p1 = ov.querySelector('#duel-fighter-p1');
+  const p2 = ov.querySelector('#duel-fighter-p2');
+
+  if (result.isDraw) {
+    content.innerHTML = `
+      <div class="winner-result draw">
+        <h2>🤝 IT'S A DRAW!</h2>
+        <p style="margin-top:10px;font-size:13px;color:#ff4444;text-align:center;">⚠️ Bro Some ratings are AI-generated. Don't take it too seriously! Have A Fun.</p>
+      </div>`;
+  } else {
+    const isP1Winner = result.winner === a1;
+
+    // দুই পাশেই কার্ড থাকবে
+    if (isP1Winner) {
+      p1?.classList.add('fighter--victory');
+      p2?.classList.add('fighter--defeat');
+    } else {
+      p2?.classList.add('fighter--victory');
+      p1?.classList.add('fighter--defeat');
+    }
+
+    // নিচে শুধু Winner ঘোষণা করবো
+    content.innerHTML = `
+      <div class="winner-result">
+        <div class="winner-crown">👑</div>
+        <div class="winner-badge ${isP1Winner ? 'p1' : 'p2'}">
+          ${isP1Winner ? 'ANIME 1 WINS!' : 'ANIME 2 WINS!'}
+        </div>
+        <h2 class="winner-name">${result.winner.title}</h2>
+        <div class="winner-score">
+          Total Score: <strong>${(isP1Winner ? result.scores.anime1 : result.scores.anime2).toFixed(3)}</strong>
+        </div>
+        <p style="margin-top:10px;font-size:13px;color:#ff4444;text-align:center;">⚠️ Bro Some ratings are AI-generated. Don't take it too seriously! Have A Fun.</p>
+      </div>
+    `;
+    var winner = result.winner;
+    var loser = winner === a1 ? a2 : a1;
+    saveDuelResult(winner, loser);
+  }
+
+
+  
+  section.classList.add('winner--visible');
+  ov.querySelector('#duel-actions')?.classList.add('actions--visible');
+
+  
+
+}
+
+
+
+  /* ── VISUAL EFFECTS ────────────────────────────────── */
+  function generateParticles(container) {
+    if (!container) return;
+    for (let i = 0; i < 30; i++) {
+      const p = document.createElement('div');
+      p.className = 'duel-particle';
+      p.style.cssText = `
+        left:${Math.random()*100}%;
+        animation-delay:${Math.random()*3}s;
+        animation-duration:${2+Math.random()*3}s;
+        width:${2+Math.random()*4}px;
+        height:${2+Math.random()*4}px;`;
+      container.appendChild(p);
+    }
+  }
+
+  function screenFlash(ov) {
+    const f = document.createElement('div');
+    f.className = 'duel-screen-flash';
+    ov.appendChild(f);
+    requestAnimationFrame(() => f.classList.add('flash--active'));
+    setTimeout(() => f.remove(), 500);
+  }
+
+  function confetti(ov) {
+    const colors = ['#00d4ff','#ffcc00','#ff6b6b','#00ff88','#ff00ff'];
+    for (let i = 0; i < 50; i++) {
+      setTimeout(() => {
+        const c = document.createElement('div');
+        c.className = 'duel-confetti';
+        c.style.cssText = `
+          left:${Math.random()*100}%;
+          background:${colors[Math.floor(Math.random()*colors.length)]};
+          transform:rotate(${Math.random()*360}deg);
+          animation-delay:${Math.random()*1000}ms;`;
+        ov.appendChild(c);
+        setTimeout(() => c.remove(), 3000);
+      }, i * 30);
+    }
+  }
+
+  /* ══════════════════════════════════════════════════════
+     🏆 DUEL LEADERBOARD — localStorage + Supabase
+  ══════════════════════════════════════════════════════ */
+  var LB_STORAGE_KEY = 'anime_duel_results';
+
+  function getLocalResults() {
+    try {
+      var raw = localStorage.getItem(LB_STORAGE_KEY);
+      return raw ? JSON.parse(raw) : [];
+    } catch (e) { return []; }
+  }
+
+  /* Retry fetch with exponential backoff */
+  function lbFetchWithRetry(url, opts, maxRetries) {
+    if (maxRetries === undefined) maxRetries = 2;
+    var delay = 1000;
+    function attempt(remaining) {
+      return fetch(url, opts).then(function(r) {
+        if (!r.ok && remaining > 0 && r.status >= 500) {
+          return new Promise(function(resolve) { setTimeout(resolve, delay); }).then(function() {
+            delay *= 2; return attempt(remaining - 1);
+          });
+        }
+        if (!r.ok) throw new Error('status ' + r.status);
+        return r;
+      }).catch(function(err) {
+        if (remaining > 0) {
+          return new Promise(function(resolve) { setTimeout(resolve, delay); }).then(function() {
+            delay *= 2; return attempt(remaining - 1);
+          });
+        }
+        throw err;
+      });
+    }
+    return attempt(maxRetries);
+  }
+
+  function saveDuelResult(winner, loser) {
+    var wName = (winner.title || 'Unknown').slice(0, 200);
+    var lName = (loser.title || 'Unknown').slice(0, 200);
+
+    var results = getLocalResults();
+    results.push({ winner_name: wName, loser_name: lName });
+    try { localStorage.setItem(LB_STORAGE_KEY, JSON.stringify(results)); } catch (e) {}
+
+    /* Try Supabase sync with retry */
+    var SB_URL = 'https://ldzlefdklcgvqcbqibtt.supabase.co';
+    var SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxkemxlZmRrbGNndnFjYnFpYnR0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwMzk1OTAsImV4cCI6MjA5NjYxNTU5MH0.X3TGuLIpjrnPXMgCv4ZKIIjB6pItPgkdebf4JPdhuYs';
+    lbFetchWithRetry(SB_URL + '/rest/v1/duel_results', {
+      method: 'POST',
+      headers: {
+        'apikey': SB_KEY,
+        'Authorization': 'Bearer ' + SB_KEY,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=representation'
+      },
+      body: JSON.stringify({ winner_name: wName, loser_name: lName, winner_score: 1, loser_score: 0 })
+    }, 2).then(function(r) {
+      console.log('✅ Duel result synced to Supabase');
+    }).catch(function(err) {
+      console.warn('⚠️ Duel sync failed (saved locally):', err);
+    });
+  }
+
+  function computeEntries(rows) {
+    var wins = {}, losses = {};
+    rows.forEach(function(row) {
+      wins[row.winner_name] = (wins[row.winner_name] || 0) + 1;
+      losses[row.loser_name] = (losses[row.loser_name] || 0) + 1;
+    });
+    var allNames = new Set(Object.keys(wins).concat(Object.keys(losses)));
+    var entries = [];
+    allNames.forEach(function(name) {
+      var w = wins[name] || 0;
+      var l = losses[name] || 0;
+      var total = w + l;
+      entries.push({ name: name, wins: w, losses: l, total: total, pct: total ? (w / total * 100).toFixed(1) : 0 });
+    });
+    entries.sort(function(a, b) { return b.wins - a.wins || a.losses - b.losses; });
+    return entries;
+  }
+
+  function renderLbOverlay(entries) {
+    var overlay = document.createElement('div');
+    overlay.id = 'duel-lb-overlay';
+    overlay.className = 'duel-lb-overlay';
+    var headerLabel = '🏆 Duel Leaderboard';
+    overlay.innerHTML = '<div class="duel-lb-modal">' +
+      '<button class="duel-lb-close" onclick="this.closest(\'.duel-lb-overlay\').remove()">&times;</button>' +
+      '<div class="duel-lb-header">' + headerLabel + '</div>' +
+      (entries.length === 0
+        ? '<div class="duel-lb-empty">No duels yet. Start battling!</div>'
+        : '<div class="duel-lb-table-wrap"><table class="duel-lb-table"><thead><tr><th>#</th><th>Anime</th><th>Wins</th><th>Losses</th><th>Win %</th></tr></thead><tbody>' +
+          entries.map(function(e, i) {
+            var cls = i === 0 ? 'duel-lb-row--gold' : i === 1 ? 'duel-lb-row--silver' : i === 2 ? 'duel-lb-row--bronze' : 'duel-lb-row--normal';
+            return '<tr class="' + cls + '"><td>' + (i + 1) + '</td><td class="duel-lb-name">' + e.name + '</td><td class="duel-lb-wins">' + e.wins + '</td><td class="duel-lb-losses">' + e.losses + '</td><td class="duel-lb-pct">' + e.pct + '%</td></tr>';
+          }).join('') +
+          '</tbody></table></div>'
+      ) +
+      '<div class="duel-lb-footer"><button class="duel-lb-refresh" onclick="showDuelLeaderboard()">🔄 Refresh</button></div></div>';
+    document.body.appendChild(overlay);
+    requestAnimationFrame(function() { overlay.classList.add('duel-lb--visible'); });
+    overlay.addEventListener('click', function(e) { if (e.target === overlay) e.currentTarget.remove(); });
+  }
+
+  window.showDuelLeaderboard = function() {
+    closeSidebar();
+    var existing = document.getElementById('duel-lb-overlay');
+    if (existing) existing.remove();
+
+    // 1. Show local data instantly
+    var local = getLocalResults();
+    var entries = computeEntries(local);
+    renderLbOverlay(entries);
+
+    // 2. Try Supabase in background — merge & re-render if newer data comes
+    var SB_URL = 'https://ldzlefdklcgvqcbqibtt.supabase.co';
+    var SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxkemxlZmRrbGNndnFjYnFpYnR0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwMzk1OTAsImV4cCI6MjA5NjYxNTU5MH0.X3TGuLIpjrnPXMgCv4ZKIIjB6pItPgkdebf4JPdhuYs';
+    lbFetchWithRetry(SB_URL + '/rest/v1/duel_results?select=winner_name,loser_name&order=created_at.desc', {
+      headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY }
+    }, 1).then(function(r) {
+      return r.json();
+    }).then(function(rows) {
+      if (!rows || !rows.length) return;
+      // Merge: prefer remote, but ensure local-only results aren't lost
+      var merged = rows.slice();
+      var remoteSet = {};
+      rows.forEach(function(r) { remoteSet[r.winner_name + '|' + r.loser_name] = true; });
+      local.forEach(function(r) {
+        if (!remoteSet[r.winner_name + '|' + r.loser_name]) merged.push(r);
+      });
+      var mergedEntries = computeEntries(merged);
+      mergedEntries.__supaLoaded = true;
+
+      // Replace old overlay with synced data
+      var oldOv = document.getElementById('duel-lb-overlay');
+      if (oldOv) oldOv.remove();
+      renderLbOverlay(mergedEntries);
+    }).catch(function(err) {
+      console.warn('⚠️ Supabase leaderboard fetch failed (table may not exist):', err);
+      // Local data already shown — no change needed
+    });
+  };
+
+  /* ── UTILITY ───────────────────────────────────────── */
+  function getStats(anime) {
+    return {
+      malScore:    parseFloat(anime.malScore    || anime.mal_score    || 0),
+      storyRating: parseFloat(anime.storyRating || anime.story_rating || 0),
+      animRating:  parseFloat(anime.animRating  || anime.anim_rating  || anime.animationRating || 0),
+      characters:  parseFloat(anime.characters  || anime.charRating   || 0),
+      anilist:     parseFloat(anime.anilist     || 0),
+      animePlanet: parseFloat(anime.animePlanet || 0),
+    };
+  }
+
+  function animCounter(el, from, to, dur, dec) {
+    if (!el) return;
+    const start = performance.now();
+    (function tick(now) {
+      const p = Math.min((now - start) / dur, 1);
+      el.textContent = (from + (to - from) * (1 - Math.pow(1-p, 3))).toFixed(dec);
+      if (p < 1) requestAnimationFrame(tick);
+    })(start);
+  }
+
+  function addSelectionBadge(card, n) {
+    card.querySelector('.duel-selection-badge')?.remove();
+    const b = document.createElement('div');
+    b.className = `duel-selection-badge duel-selection-badge--p${n}`;
+    b.innerHTML = n === 1 ? '<span>⚡</span><span>P1</span>' : '<span>🔥</span><span>P2</span>';
+    card.appendChild(b);
+  }
+
+  function resetDuelSelection() {
+    DuelState.selectedCards.forEach(c => {
+      c.classList.remove('selected-for-duel');
+      c.removeAttribute('data-duel-player');
+      c.querySelector('.duel-selection-badge')?.remove();
+    });
+    DuelState.selectedCards = [];
+    DuelState.selectedAnime = [];
+    DuelState.isAnimating   = false;
+    updateIndicatorCount();
+  }
+
+  function closeOverlay(ov) {
+    ov.classList.remove('duel-overlay--visible');
+    ov.classList.add('duel-overlay--hiding');
+    setTimeout(() => ov.remove(), 500);
+  }
+
+  function showDuelToast(title, msg, type) {
+    document.querySelector('.duel-toast')?.remove();
+    const icons = { info:'ℹ️', success:'✅', warning:'⚠️', error:'❌' };
+    const t = document.createElement('div');
+    t.className = `duel-toast duel-toast--${type}`;
+    t.innerHTML = `
+      <div class="toast-icon">${icons[type]||'ℹ️'}</div>
+      <div class="toast-content">
+        <strong class="toast-title">${title}</strong>
+        ${msg ? `<span class="toast-message">${msg}</span>` : ''}
+      </div>
+      <button class="toast-close" aria-label="Close">✕</button>`;
+    document.body.appendChild(t);
+    t.querySelector('.toast-close').addEventListener('click', () => {
+      t.classList.add('toast--hiding'); setTimeout(() => t.remove(), 300);
+    });
+    setTimeout(() => { if (t.parentNode) { t.classList.add('toast--hiding'); setTimeout(()=>t.remove(),300); } }, 3500);
+    requestAnimationFrame(() => requestAnimationFrame(() => t.classList.add('toast--visible')));
+  }
+
+  function showDuelModeIndicator() {
+    let ind = document.getElementById('duel-mode-indicator');
+    if (!ind) {
+      ind = document.createElement('div');
+      ind.id        = 'duel-mode-indicator';
+      ind.className = 'duel-mode-indicator';
+      ind.innerHTML = `
+        <div class="indicator__pulse"></div>
+        <span class="indicator__icon">⚔️</span>
+        <span class="indicator__text">DUEL MODE</span>
+        <span class="indicator__sub"><span id="duel-selection-count">0</span>/2 Selected</span>`;
+      document.body.appendChild(ind);
+    }
+    ind.classList.add('indicator--visible');
+  }
+
+  function hideDuelModeIndicator() {
+    document.getElementById('duel-mode-indicator')?.classList.remove('indicator--visible');
+  }
+
+  function updateIndicatorCount() {
+    const el = document.getElementById('duel-selection-count');
+    if (el) el.textContent = DuelState.selectedCards.length;
+  }
+
+  /* ── INIT ──────────────────────────────────────────── */
+  async function initDuelSystem() {
+    await loadAnimeDatabase();
+    injectDuelSidebarLink();
+    // Capture phase দিয়ে card click intercept করা
+    document.addEventListener('click', handleCardClick, true);
+    console.log('✅ Duel System ready!');
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initDuelSystem);
+  } else {
+    initDuelSystem();
+  }
+
+  // Global expose
+  window.DuelSystem = { state: DuelState, toggle: toggleDuelMode, reset: resetDuelSelection };
+
+  // Additive export for Tournament Mode — reuses the exact power/winner logic
+  // (single source of truth; no behavior change to the duel system itself).
+  window.DuelCalc = {
+    calcPower, getWinner, getStats,
+    getAnimeGenres, checkGenreCompatibility,
+    findAnime, normalizeTitle, loadAnimeDatabase
+  };
+
+}(window, document));
+// ← IIFE শেষ — এর বাইরে কোনো variable নেই!
+
