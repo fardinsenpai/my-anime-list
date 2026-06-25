@@ -363,11 +363,74 @@ function showAllAwardWinners() {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
+function goHome() {
+  history.pushState(null, '', 'home');
+  closeWaifus();
+
+  var ids = ['analysisContainer', 'topSecretsContainer', 'hotTakesContainer', 'topFiveDropdown'];
+  ids.forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.style.display = 'none';
+  });
+
+  var pb = document.getElementById('scrollProgress');
+  if (pb) pb.style.display = 'block';
+
+  var grid = document.getElementById('grid');
+  if (grid) {
+    grid.style.display = '';
+    var allCards = Array.from(document.querySelectorAll('.card'));
+    allCards.sort(function(a, b) {
+      var numA = parseInt((a.querySelector('.number') || {}).textContent.replace(/\D/g, '') || '0');
+      var numB = parseInt((b.querySelector('.number') || {}).textContent.replace(/\D/g, '') || '0');
+      return numA - numB;
+    }).forEach(function(card) {
+      card.classList.remove('hidden');
+      card.style.display = 'block';
+      var badge = card.querySelector('.badge');
+      var originalNum = (card.querySelector('.number') || {}).textContent.replace(/\D/g, '');
+      if (badge) badge.textContent = '#' + originalNum;
+      grid.appendChild(card);
+    });
+  }
+
+  var showEls = ['.counter-container', '.search-wrap', '.filter-section', '.anime-footer', '.current-watch', '.mood-picker'];
+  showEls.forEach(function(sel) {
+    var el = document.querySelector(sel);
+    if (el) el.style.display = '';
+  });
+  var counter = document.querySelector('.counter-container');
+  if (counter) counter.style.display = 'flex';
+  var search = document.querySelector('.search-wrap');
+  if (search) search.style.display = 'flex';
+  var chatBubble = document.getElementById('chatBubble');
+  if (chatBubble) chatBubble.style.display = 'flex';
+
+  var mainTitle = document.querySelector('.header h1');
+  if (mainTitle) {
+    mainTitle.textContent = "Let's See What Anime I Have Watched:-";
+    mainTitle.setAttribute('data-text', "Let's See What Anime I Have Watched:-");
+    mainTitle.style.fontSize = '';
+  }
+
+  if (typeof toggleDuelMode === 'function' && window.DuelState && window.DuelState.isActive) {
+    toggleDuelMode();
+  }
+
+  if (typeof removeOverlay === 'function') removeOverlay();
+
+  if (typeof closeMenu === 'function') closeMenu();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
 // Unified back-navigation handler for section views
 window.addEventListener('popstate', function () {
   var ov = document.getElementById('waifuOverlay');
   if (ov && ov.style.display === 'block' && !location.pathname.endsWith('/waifus')) {
     closeWaifus(); return;
+  }
+  if (location.pathname.endsWith('/home')) {
+    goHome(); return;
   }
   var ht = document.getElementById('hotTakesContainer');
   var ac = document.getElementById('analysisContainer');
@@ -515,62 +578,9 @@ window.addEventListener('popstate', function () {
   // Home shows petals normally
   const homeBtn = document.getElementById('homeLink');
   if(homeBtn) {
-    homeBtn.onclick = (e) => {
+    homeBtn.onclick = function(e) {
       e.preventDefault();
-      closeWaifus();
-      var pb = document.getElementById('scrollProgress');
-      if (pb) pb.style.display = 'block';
-      
-      const mainTitle = document.querySelector('.header h1');
-      if (mainTitle) {
-        const originalText = "Let's See What Anime I Have Watched:-";
-        mainTitle.textContent = originalText;
-        mainTitle.setAttribute('data-text', originalText);
-        mainTitle.style.fontSize = ""; 
-      }
-
-      const counterSection = document.querySelector('.counter-container');
-      const searchSection = document.querySelector('.search-wrap');
-      const genreSection = document.querySelector('.filter-section');
-      const footerEl = document.querySelector('.anime-footer');
-      const chatBubble = document.getElementById('chatBubble');
-      
-      if(counterSection) counterSection.style.display = 'flex';
-      if(searchSection) searchSection.style.display = 'flex';
-      if(genreSection) genreSection.style.display = 'block';
-      if(footerEl) footerEl.style.display = 'block';
-      if(chatBubble) chatBubble.style.display = 'flex';
-      var watchEl = document.querySelector('.current-watch');
-      if (watchEl) watchEl.style.display = '';
-
-
-      const analysisContainer = document.getElementById('analysisContainer');
-      const topFiveContainer = document.getElementById('topFiveDropdown');
-      const topSecretsContainer = document.getElementById('topSecretsContainer');
-      if (analysisContainer) analysisContainer.style.display = 'none';
-      if (topFiveContainer) topFiveContainer.style.display = 'none';
-      if (topSecretsContainer) topSecretsContainer.style.display = 'none';
-
-      const grid = document.getElementById('grid');
-      const allCards = Array.from(document.querySelectorAll('.card'));
-      allCards.sort((a, b) => {
-        const numA = parseInt(a.querySelector('.number').textContent.replace(/\D/g, ''));
-        const numB = parseInt(b.querySelector('.number').textContent.replace(/\D/g, ''));
-        return numA - numB;
-      }).forEach(card => {
-        card.classList.remove('hidden');
-        card.style.display = "block";
-        
-        const badge = card.querySelector('.badge');
-        const originalNum = card.querySelector('.number').textContent.replace(/\D/g, '');
-        if (badge) badge.textContent = `#${originalNum}`;
-        
-        grid.appendChild(card);
-      });
-      
-      if (grid) grid.style.display = '';
-      if (typeof closeMenu === 'function') closeMenu();
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      goHome();
     };
   }
 // ===============================
@@ -1815,55 +1825,43 @@ if (window.scrollY > document.body.scrollHeight / 3) {
 
 const apiUrl = 'https://api.groq.com/openai/v1/chat/completions';
 
-const GROQ_API_KEYS = [
-  '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',
-  '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',
-  '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',
-  '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',
-  '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',
-  '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'
-];
-let currentKeyIndex = 0;
-
-function getNextKeyIndex() {
-  currentKeyIndex = (currentKeyIndex + 1) % GROQ_API_KEYS.length;
-  return currentKeyIndex;
+function getGroqKey() {
+  var key = localStorage.getItem('groq_api_key');
+  if (!key) {
+    key = prompt('Enter your Groq API key to enable AI Chat:\n(Get one free at https://console.groq.com/keys)');
+    if (key && key.trim()) {
+      key = key.trim();
+      localStorage.setItem('groq_api_key', key);
+    }
+  }
+  return key || '';
 }
 
 async function fetchWithFallback(body) {
-  let lastError = null;
-  const startIndex = currentKeyIndex;
-  let attempts = 0;
+  var key = getGroqKey();
+  if (!key) throw new Error('No Groq API key set');
 
-  do {
-    const key = GROQ_API_KEYS[currentKeyIndex];
-    try {
-      const res = await fetch(apiUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + key
-        },
-        body: JSON.stringify(body)
-      });
-      if (res.ok) return res;
-      // Rate limited or auth error → try next key
-      if (res.status === 429 || res.status === 401 || res.status >= 500) {
-        lastError = new Error('Groq API error: ' + res.status);
-        getNextKeyIndex();
-        attempts++;
-        continue;
-      }
-      // Other error, not retriable
-      return res;
-    } catch (err) {
-      lastError = err;
-      getNextKeyIndex();
-      attempts++;
+  try {
+    var res = await fetch(apiUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + key
+      },
+      body: JSON.stringify(body)
+    });
+    if (res.ok) return res;
+    if (res.status === 401) {
+      localStorage.removeItem('groq_api_key');
+      throw new Error('Groq API key invalid. Please set a new one.');
     }
-  } while (attempts < GROQ_API_KEYS.length);
-
-  throw lastError || new Error('All Groq API keys exhausted');
+    if (res.status === 429 || res.status >= 500) {
+      throw new Error('Groq API error: ' + res.status);
+    }
+    return res;
+  } catch (err) {
+    throw err;
+  }
 }
 
 // ===== LOCALSTORAGE CONFIG - NEW =====
@@ -3527,7 +3525,9 @@ document.addEventListener('click', function(e) {
   // GitHub Pages SPA routing — auto-open feature based on URL path
   function routeOnPath() {
     var p = window.location.pathname;
-    if (p.endsWith('/anime-duel') && typeof toggleDuelMode === 'function') {
+    if (p.endsWith('/home') || p === '/my-anime-list/' || p.endsWith('/my-anime-list') || p === '/' || p === '') {
+      if (typeof goHome === 'function') goHome();
+    } else if (p.endsWith('/anime-duel') && typeof toggleDuelMode === 'function') {
       toggleDuelMode();
     } else if (p.endsWith('/tournament') && typeof openTournament === 'function') {
       openTournament();
