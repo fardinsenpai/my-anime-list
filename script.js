@@ -2131,7 +2131,7 @@ async function sendMessage() {
     if (typingDiv) typingDiv.remove();
     const msg = (error.message || '').includes('401') || (error.message || '').includes('429')
       ? 'The AI service is currently unavailable. Please try again later! ✨'
-      : 'I wroked Too Much Today, Try Again After a While! Till then, Enjoy many features from SideBar! ✨';
+      : 'I worked Too Much Today, Try Again After a While! Till then, Enjoy many features from SideBar! ✨';
     addMessage(msg, 'bot');
     console.error('Chat Error:', error);
   }
