@@ -290,47 +290,52 @@ function showToast(title, msg, type) {
   }, 3500);
 }
 
+function hideAllSections() {
+  var ids = ['scrollProgress', 'topFiveDropdown', 'analysisContainer', 'topSecretsContainer', 'hotTakesContainer', 'chatBubble', 'grid'];
+  ids.forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.style.display = 'none';
+  });
+  var selectors = ['.counter-container', '.search-wrap', '.filter-section', '.anime-footer', '.current-watch', '.mood-picker'];
+  selectors.forEach(function(sel) {
+    var el = document.querySelector(sel);
+    if (el) el.style.display = 'none';
+  });
+  if (typeof closeSuggestion === 'function') closeSuggestion();
+}
+
+function showChartLoading() {
+  ['pieChart', 'ottChart', 'studioChart', 'episodeChart', 'ratingChart'].forEach(function(id) {
+    var c = document.getElementById(id);
+    if (!c) return;
+    var ctx = c.getContext('2d');
+    ctx.clearRect(0, 0, c.width, c.height);
+    ctx.fillStyle = '#b0d4f0';
+    ctx.font = '14px Exo 2';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('Loading...', c.width / 2, c.height / 2);
+  });
+}
+
 function showAllAwardWinners() {
   history.pushState(null, '', 'aoy');
   closeWaifus();
-  var pb = document.getElementById('scrollProgress');
-  if (pb) pb.style.display = 'none';
+  hideAllSections();
   const grid = document.getElementById('grid');
   const cards = Array.from(document.querySelectorAll('.card'));
-  const mainTitle = document.querySelector('.header h1');
-  const counterSection = document.querySelector('.counter-container');
-  const searchSection = document.querySelector('.search-wrap');
-  const genreSection = document.querySelector('.filter-section');
 
   cards.forEach(card => {
     card.classList.add('hidden');
     card.style.display = "none";
   });
 
+  const mainTitle = document.querySelector('.header h1');
   if (mainTitle) {
-    const newText = 'Crunchyroll Anime of the Year Winners';
-    mainTitle.textContent = newText;
-    mainTitle.setAttribute('data-text', newText);
+    mainTitle.textContent = 'Crunchyroll Anime of the Year Winners';
+    mainTitle.setAttribute('data-text', 'Crunchyroll Anime of the Year Winners');
     mainTitle.style.fontSize = "clamp(1.2rem, 3.5vw, 2rem)";
   }
-  if (counterSection) counterSection.style.display = 'none';
-  if (searchSection) searchSection.style.display = 'none';
-  if (genreSection) genreSection.style.display = 'none';
-      var watchEl = document.querySelector('.current-watch');
-      if (watchEl) watchEl.style.display = 'none';
-      var htContainer = document.getElementById('hotTakesContainer');
-      if (htContainer) htContainer.style.display = 'none';
-  var moodEl = document.querySelector('.mood-picker');
-  if (moodEl) moodEl.style.display = 'none';
-  var ht = document.getElementById('hotTakesContainer');
-  if (ht) ht.style.display = 'none';
-  var tf = document.getElementById('topFiveDropdown');
-  if (tf) tf.style.display = 'none';
-  var ac = document.getElementById('analysisContainer');
-  if (ac) ac.style.display = 'none';
-  var ts = document.getElementById('topSecretsContainer');
-  if (ts) ts.style.display = 'none';
-  if (typeof closeSuggestion === 'function') closeSuggestion();
 
   const years = Object.keys(AWARD_WINNERS).sort((a, b) => b - a);
   let foundCount = 0;
@@ -388,35 +393,15 @@ window.addEventListener('popstate', function () {
       e.preventDefault();
       history.pushState(null, '', 'analysis');
       closeWaifus();
-      var pb = document.getElementById('scrollProgress');
-      if (pb) pb.style.display = 'none';
-      document.getElementById('topFiveDropdown').style.display = 'none';
+      hideAllSections();
       analysisContainer.style.display = 'block';
-      const grid = document.getElementById('grid');
-      if (grid) grid.style.display = 'none';
       const mainTitle = document.querySelector('.header h1');
       if (mainTitle) {
         mainTitle.textContent = 'Analysis';
         mainTitle.setAttribute('data-text', 'Analysis');
       }
-      const counterSection = document.querySelector('.counter-container');
-      const searchSection = document.querySelector('.search-wrap');
-      const genreSection = document.querySelector('.filter-section');
-      const footerEl = document.querySelector('.anime-footer');
-      const chatBubble = document.getElementById('chatBubble');
-      if (counterSection) counterSection.style.display = 'none';
-      if (searchSection) searchSection.style.display = 'none';
-      if (genreSection) genreSection.style.display = 'none';
-      if (footerEl) footerEl.style.display = 'none';
-      if (chatBubble) chatBubble.style.display = 'none';
-      var watchEl = document.querySelector('.current-watch');
-      if (watchEl) watchEl.style.display = 'none';
-      var acHt = document.getElementById('hotTakesContainer');
-      if (acHt) acHt.style.display = 'none';
-      var acTs = document.getElementById('topSecretsContainer');
-      if (acTs) acTs.style.display = 'none';
 
-      // Force reflow so canvases render correctly
+      showChartLoading();
       void analysisContainer.offsetHeight;
       drawPieChart();
       setTimeout(() => { try { drawOttPie(); } catch(e) { console.error(e); } }, 200);
@@ -434,10 +419,7 @@ window.addEventListener('popstate', function () {
     topFiveBtn.onclick = function(e) {
       e.preventDefault();
       closeWaifus();
-      var pb = document.getElementById('scrollProgress');
-      if (pb) pb.style.display = 'none';
-      document.getElementById('analysisContainer').style.display = 'none';
-      document.getElementById('topSecretsContainer').style.display = 'none';
+      hideAllSections();
       topFiveContainer.style.display = 'block';
       if (!document.getElementById('topFiveNote')) {
         var note = document.createElement('div');
@@ -448,26 +430,11 @@ window.addEventListener('popstate', function () {
         if (heading) heading.after(note);
       }
       filterTopFive('Action');
-      var grid = document.getElementById('grid');
-      if (grid) grid.style.display = 'none';
       var mainTitle = document.querySelector('.header h1');
       if (mainTitle) {
         mainTitle.textContent = 'Top 5 Picks';
         mainTitle.setAttribute('data-text', 'Top 5 Picks');
       }
-      var counterSection = document.querySelector('.counter-container');
-      var searchSection = document.querySelector('.search-wrap');
-      var genreSection = document.querySelector('.filter-section');
-      var footerEl = document.querySelector('.anime-footer');
-      var chatBubble = document.getElementById('chatBubble');
-      if (counterSection) counterSection.style.display = 'none';
-      if (searchSection) searchSection.style.display = 'none';
-      if (genreSection) genreSection.style.display = 'none';
-      if (footerEl) footerEl.style.display = 'none';
-      if (chatBubble) chatBubble.style.display = 'none';
-      var watchEl = document.querySelector('.current-watch');
-      if (watchEl) watchEl.style.display = 'none';
-
       if (typeof closeMenu === 'function') closeMenu();
       window.scrollTo({ top: 0, behavior: 'smooth' });
     };
@@ -480,33 +447,13 @@ window.addEventListener('popstate', function () {
       e.preventDefault();
       history.pushState(null, '', 'top-secrets');
       closeWaifus();
-      var pb = document.getElementById('scrollProgress');
-      if (pb) pb.style.display = 'none';
-      document.getElementById('topFiveDropdown').style.display = 'none';
-      document.getElementById('analysisContainer').style.display = 'none';
+      hideAllSections();
       topSecretsContainer.style.display = 'block';
-      const grid = document.getElementById('grid');
-      if (grid) grid.style.display = 'none';
       const mainTitle = document.querySelector('.header h1');
       if (mainTitle) {
         mainTitle.textContent = ' Top Secrets';
         mainTitle.setAttribute('data-text', ' Top Secrets');
       }
-      const counterSection = document.querySelector('.counter-container');
-      const searchSection = document.querySelector('.search-wrap');
-      const genreSection = document.querySelector('.filter-section');
-      const footerEl = document.querySelector('.anime-footer');
-      const chatBubble = document.getElementById('chatBubble');
-      if (counterSection) counterSection.style.display = 'none';
-      if (searchSection) searchSection.style.display = 'none';
-      if (genreSection) genreSection.style.display = 'none';
-      if (footerEl) footerEl.style.display = 'none';
-      if (chatBubble) chatBubble.style.display = 'none';
-      var watchEl = document.querySelector('.current-watch');
-      if (watchEl) watchEl.style.display = 'none';
-      var htSecrets = document.getElementById('hotTakesContainer');
-      if (htSecrets) htSecrets.style.display = 'none';
-
       if (typeof closeMenu === 'function') closeMenu();
       window.scrollTo({ top: 0, behavior: 'smooth' });
     };
@@ -519,32 +466,13 @@ window.addEventListener('popstate', function () {
       e.preventDefault();
       history.pushState(null, '', 'hot-takes');
       closeWaifus();
-      var pb = document.getElementById('scrollProgress');
-      if (pb) pb.style.display = 'none';
-      document.getElementById('topFiveDropdown').style.display = 'none';
-      document.getElementById('analysisContainer').style.display = 'none';
-      document.getElementById('topSecretsContainer').style.display = 'none';
+      hideAllSections();
       hotTakesContainer.style.display = 'block';
-      const grid = document.getElementById('grid');
-      if (grid) grid.style.display = 'none';
       const mainTitle = document.querySelector('.header h1');
       if (mainTitle) {
         mainTitle.textContent = ' Hot Takes';
         mainTitle.setAttribute('data-text', ' Hot Takes');
       }
-      const counterSection = document.querySelector('.counter-container');
-      const searchSection = document.querySelector('.search-wrap');
-      const genreSection = document.querySelector('.filter-section');
-      const footerEl = document.querySelector('.anime-footer');
-      const chatBubble = document.getElementById('chatBubble');
-      if (counterSection) counterSection.style.display = 'none';
-      if (searchSection) searchSection.style.display = 'none';
-      if (genreSection) genreSection.style.display = 'none';
-      if (footerEl) footerEl.style.display = 'none';
-      if (chatBubble) chatBubble.style.display = 'none';
-      var watchEl = document.querySelector('.current-watch');
-      if (watchEl) watchEl.style.display = 'none';
-
       var backToTopBtn = document.getElementById('backToTop');
       if (backToTopBtn) backToTopBtn.style.display = 'none';
       if (typeof closeMenu === 'function') closeMenu();
@@ -1888,12 +1816,12 @@ if (window.scrollY > document.body.scrollHeight / 3) {
 const apiUrl = 'https://api.groq.com/openai/v1/chat/completions';
 
 const GROQ_API_KEYS = [
-  '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',
-  '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',
-  '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',
-  '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',
-  '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',
-  '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'
+  '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',
+  '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',
+  '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',
+  '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',
+  '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',
+  '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'
 ];
 let currentKeyIndex = 0;
 
