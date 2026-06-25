@@ -331,6 +331,7 @@
 
     arena.insertAdjacentHTML("beforeend",
       '<div class="tourney-setup" id="tourneySetup">' +
+        '<div class="tourney-desktop-notice">💻 For the best experience, use Desktop Site mode on mobile</div>' +
         '<div class="tourney-setup__step">' +
           '<div class="tourney-setup__step-num">01</div>' +
           '<div class="tourney-setup__step-title">Choose Your Battlefield</div>' +

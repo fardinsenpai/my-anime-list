@@ -1440,3 +1440,15 @@
   .tourney-size-btn { font-size: 14px; }
   .tourney-pick-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
 }
+
+.tourney-desktop-notice {
+  text-align: center;
+  font-size: 12px;
+  color: #ffaa00;
+  background: rgba(255, 170, 0, 0.08);
+  border: 1px solid rgba(255, 170, 0, 0.2);
+  border-radius: 8px;
+  padding: 6px 12px;
+  margin-bottom: 12px;
+  font-family: 'Exo 2', sans-serif;
+}
