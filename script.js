@@ -698,12 +698,19 @@ function closeSuggestion() {
     if (clr) clr.classList.toggle('hidden', name === 'All');
   }
 
-  document.addEventListener('DOMContentLoaded', () => {
+  if (document.readyState === 'complete' || document.readyState === 'interactive') {
     buildPills();
     injectCardGenres();
-    const clr = document.getElementById('clearBtn');
-    if (clr) clr.addEventListener('click', () => applyFilter('All'));
-  });
+    var clr = document.getElementById('clearBtn');
+    if (clr) clr.addEventListener('click', function() { applyFilter('All'); });
+  } else {
+    document.addEventListener('DOMContentLoaded', function() {
+      buildPills();
+      injectCardGenres();
+      var clr = document.getElementById('clearBtn');
+      if (clr) clr.addEventListener('click', function() { applyFilter('All'); });
+    });
+  }
 
     
 
