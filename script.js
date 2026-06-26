@@ -1825,43 +1825,50 @@ if (window.scrollY > document.body.scrollHeight / 3) {
 
 const apiUrl = 'https://api.groq.com/openai/v1/chat/completions';
 
-function getGroqKey() {
-  var key = localStorage.getItem('groq_api_key');
-  if (!key) {
-    key = prompt('Enter your Groq API key to enable AI Chat:\n(Get one free at https://console.groq.com/keys)');
-    if (key && key.trim()) {
-      key = key.trim();
-      localStorage.setItem('groq_api_key', key);
-    }
-  }
-  return key || '';
+const GROQ_API_KEYS = [
+  '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',
+  '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',
+  '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'
+];
+let currentKeyIndex = 0;
+
+function getNextKeyIndex() {
+  currentKeyIndex = (currentKeyIndex + 1) % GROQ_API_KEYS.length;
+  return currentKeyIndex;
 }
 
 async function fetchWithFallback(body) {
-  var key = getGroqKey();
-  if (!key) throw new Error('No Groq API key set');
+  let lastError = null;
+  const startIndex = currentKeyIndex;
+  let attempts = 0;
 
-  try {
-    var res = await fetch(apiUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + key
-      },
-      body: JSON.stringify(body)
-    });
-    if (res.ok) return res;
-    if (res.status === 401) {
-      localStorage.removeItem('groq_api_key');
-      throw new Error('Groq API key invalid. Please set a new one.');
+  do {
+    const key = GROQ_API_KEYS[currentKeyIndex];
+    try {
+      const res = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + key
+        },
+        body: JSON.stringify(body)
+      });
+      if (res.ok) return res;
+      if (res.status === 429 || res.status === 401 || res.status >= 500) {
+        lastError = new Error('Groq API error: ' + res.status);
+        getNextKeyIndex();
+        attempts++;
+        continue;
+      }
+      return res;
+    } catch (err) {
+      lastError = err;
+      getNextKeyIndex();
+      attempts++;
     }
-    if (res.status === 429 || res.status >= 500) {
-      throw new Error('Groq API error: ' + res.status);
-    }
-    return res;
-  } catch (err) {
-    throw err;
-  }
+  } while (attempts < GROQ_API_KEYS.length);
+
+  throw lastError || new Error('All Groq API keys exhausted');
 }
 
 // ===== LOCALSTORAGE CONFIG - NEW =====
