@@ -386,7 +386,7 @@ function goHome() {
       return numA - numB;
     }).forEach(function(card) {
       card.classList.remove('hidden');
-      card.style.display = 'block';
+      card.style.display = '';
       var badge = card.querySelector('.badge');
       var originalNum = (card.querySelector('.number') || {}).textContent.replace(/\D/g, '');
       if (badge) badge.textContent = '#' + originalNum;
@@ -686,6 +686,7 @@ function closeSuggestion() {
     cards.forEach(card => {
       const n = getNum(card);
       const show = n !== null && (!set || set.has(n));
+      card.style.display = '';
       card.classList.toggle('hidden', !show);
       if (show) vis++;
     });
@@ -1428,6 +1429,7 @@ window.addEventListener("load", showCardsOnScroll);
       const q=document.getElementById('searchBox').value.toLowerCase();
       document.querySelectorAll('.card').forEach(c=>{
         const title = c.querySelector('.title');
+        c.style.display = '';
         c.classList.toggle('hidden', !(title && title.textContent.toLowerCase().includes(q)));
       });
       updateBadgeNumbers();
