@@ -2618,7 +2618,10 @@ document.addEventListener('click', function(e) {
     tourBtn.addEventListener('click', function (e) { e.preventDefault(); startTour(); });
   }
 
-  setTimeout(startTour, 1000);
+  var p = window.location.pathname;
+  if (p.endsWith('/home') || p.endsWith('/my-anime-list') || p === '/' || p === '') {
+    setTimeout(startTour, 1000);
+  }
 
   // ========== Hot Takes ==========
   var ADMIN_NAME = 'Fardin';
