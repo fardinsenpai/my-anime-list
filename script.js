@@ -2615,7 +2615,7 @@ document.addEventListener('click', function(e) {
 
   var tourBtn = document.getElementById('tourGuideBtn');
   if (tourBtn) {
-    tourBtn.addEventListener('click', function (e) { e.preventDefault(); startTour(); });
+    tourBtn.addEventListener('click', function (e) { e.preventDefault(); goHome(); setTimeout(startTour, 300); });
   }
 
   var p = window.location.pathname;
