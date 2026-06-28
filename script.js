@@ -2619,7 +2619,8 @@ document.addEventListener('click', function(e) {
   }
 
   var p = window.location.pathname;
-  if (p.endsWith('/home') || p.endsWith('/my-anime-list') || p === '/' || p === '') {
+  if (!localStorage.getItem('fardin_tour_done') && (p.endsWith('/home') || p.endsWith('/my-anime-list') || p === '/' || p === '')) {
+    localStorage.setItem('fardin_tour_done', '1');
     setTimeout(startTour, 1000);
   }
 
