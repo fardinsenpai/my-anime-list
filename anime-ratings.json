@@ -2266,5 +2266,23 @@
         "anilist": 75,
         "title": "Blue Spring Ride",
         "storyRating": 7.5
+    },
+    "253": {
+        "malScore": 7.1,
+        "characters": 7.5,
+        "animRating": 7.2,
+        "animePlanet": 3.8,
+        "anilist": 73,
+        "title": "Easygoing Territory Defense by the Optimistic Lord",
+        "storyRating": 7
+    },
+    "254": {
+        "malScore": 8.1,
+        "characters": 8.5,
+        "animRating": 8,
+        "animePlanet": 4.1,
+        "anilist": 81,
+        "title": "Terror in Resonance",
+        "storyRating": 8.5
     }
 }
