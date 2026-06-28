@@ -2618,10 +2618,7 @@ document.addEventListener('click', function(e) {
     tourBtn.addEventListener('click', function (e) { e.preventDefault(); startTour(); });
   }
 
-  if (!localStorage.getItem('fardin_tour_done')) {
-    localStorage.setItem('fardin_tour_done', '1');
-    setTimeout(startTour, 1000);
-  }
+  setTimeout(startTour, 1000);
 
   // ========== Hot Takes ==========
   var ADMIN_NAME = 'Fardin';

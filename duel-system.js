@@ -21,7 +21,7 @@
 
   /* ── DATA LOADING (cached) ─────────────────────────── */
   var DB_CACHE_KEY = 'fardin_anime_db';
-  var DB_CACHE_VER = 1;
+  var DB_CACHE_VER = 2;
 
   async function loadAnimeDatabase() {
     // Try localStorage cache first
