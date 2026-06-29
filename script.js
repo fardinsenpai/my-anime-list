@@ -1835,9 +1835,9 @@ if (window.scrollY > document.body.scrollHeight / 3) {
 const apiUrl = 'https://api.groq.com/openai/v1/chat/completions';
 
 const GROQ_API_KEYS = [
-  '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',
-  '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',
-  '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'
+  'GROQ_KEY_1',
+  'GROQ_KEY_2',
+  'GROQ_KEY_3'
 ];
 let currentKeyIndex = 0;
 
