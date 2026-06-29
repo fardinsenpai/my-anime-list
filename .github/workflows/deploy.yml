@@ -9,20 +9,28 @@ permissions:
   id-token: write
 concurrency:
   group: pages
-  cancel-in-progress: true
+  cancel-in-progress: false
 jobs:
   build:
     runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
       - name: Inject API keys
+        env:
+          KEY1: ${{ secrets.GROQ_KEY_1 }}
+          KEY2: ${{ secrets.GROQ_KEY_2 }}
+          KEY3: ${{ secrets.GROQ_KEY_3 }}
         run: |
-          sed -i "s/GROQ_KEY_1/${{ secrets.GROQ_KEY_1 }}/g" script.js
-          sed -i "s/GROQ_KEY_2/${{ secrets.GROQ_KEY_2 }}/g" script.js
-          sed -i "s/GROQ_KEY_3/${{ secrets.GROQ_KEY_3 }}/g" script.js
+          sed -i "s/GROQ_KEY_1/${KEY1}/g" script.js
+          sed -i "s/GROQ_KEY_2/${KEY2}/g" script.js
+          sed -i "s/GROQ_KEY_3/${KEY3}/g" script.js
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: .
       - name: Deploy to Pages
+        id: deployment
         uses: actions/deploy-pages@v4
