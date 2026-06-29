@@ -3468,6 +3468,13 @@ document.addEventListener('click', function(e) {
       if (window.__perfSakuraInterval) { clearInterval(window.__perfSakuraInterval); window.__perfSakuraInterval = null; }
       return;
     }
+    if (mode === 'ultra') {
+      document.body.classList.add('perf-no-thunder', 'perf-no-counter-anim',
+        'perf-no-blink');
+      if (window.__perfLightning) window.__perfLightning.stop();
+      if (window.__perfSakuraInterval) { clearInterval(window.__perfSakuraInterval); window.__perfSakuraInterval = null; }
+      return;
+    }
   }
 
   // Store sakura interval reference for perf manager
@@ -3485,7 +3492,7 @@ document.addEventListener('click', function(e) {
     // Restore saved mode
     var saved;
     try { saved = localStorage.getItem('perfMode'); } catch (e) {}
-    if (saved && ['advanced','high','poor','low'].indexOf(saved) >= 0) {
+    if (saved && ['advanced','high','poor','low','ultra'].indexOf(saved) >= 0) {
       setPerfMode(saved);
       popup.querySelectorAll('.perf-mode-btn').forEach(function (b) {
         b.classList.toggle('perf-mode-btn--active', b.getAttribute('data-mode') === saved);
