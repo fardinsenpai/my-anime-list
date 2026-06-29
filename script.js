@@ -3440,14 +3440,21 @@ document.addEventListener('click', function(e) {
     document.body.classList.remove('perf-no-thunder', 'perf-no-counter-anim',
       'perf-no-blink', 'perf-no-card-float', 'perf-no-heading-anim');
 
+    if (mode === 'ultra') {
+      if (window.__perfLightning) window.__perfLightning.start();
+      if (window.__perfSakuraInterval) { clearInterval(window.__perfSakuraInterval); window.__perfSakuraInterval = null; }
+      window.__perfSakuraInterval = setInterval(createSakura, 550);
+      return;
+    }
     if (mode === 'advanced') {
+      document.body.classList.add('perf-no-card-float', 'perf-no-heading-anim');
       if (window.__perfLightning) window.__perfLightning.start();
       if (window.__perfSakuraInterval) { clearInterval(window.__perfSakuraInterval); window.__perfSakuraInterval = null; }
       window.__perfSakuraInterval = setInterval(createSakura, 550);
       return;
     }
     if (mode === 'high') {
-      document.body.classList.add('perf-no-thunder', 'perf-no-blink');
+      document.body.classList.add('perf-no-thunder', 'perf-no-blink', 'perf-no-card-float', 'perf-no-heading-anim');
       if (window.__perfLightning) window.__perfLightning.stop();
       if (window.__perfSakuraInterval) { clearInterval(window.__perfSakuraInterval); window.__perfSakuraInterval = null; }
       window.__perfSakuraInterval = setInterval(createSakura, 550);
@@ -3455,7 +3462,7 @@ document.addEventListener('click', function(e) {
     }
     if (mode === 'poor') {
       document.body.classList.add('perf-no-thunder', 'perf-no-counter-anim',
-        'perf-no-blink');
+        'perf-no-blink', 'perf-no-card-float', 'perf-no-heading-anim');
       if (window.__perfLightning) window.__perfLightning.stop();
       if (window.__perfSakuraInterval) { clearInterval(window.__perfSakuraInterval); window.__perfSakuraInterval = null; }
       window.__perfSakuraInterval = setInterval(createSakura, 1400);
@@ -3464,13 +3471,6 @@ document.addEventListener('click', function(e) {
     if (mode === 'low') {
       document.body.classList.add('perf-no-thunder', 'perf-no-counter-anim',
         'perf-no-blink', 'perf-no-card-float', 'perf-no-heading-anim');
-      if (window.__perfLightning) window.__perfLightning.stop();
-      if (window.__perfSakuraInterval) { clearInterval(window.__perfSakuraInterval); window.__perfSakuraInterval = null; }
-      return;
-    }
-    if (mode === 'ultra') {
-      document.body.classList.add('perf-no-thunder', 'perf-no-counter-anim',
-        'perf-no-blink');
       if (window.__perfLightning) window.__perfLightning.stop();
       if (window.__perfSakuraInterval) { clearInterval(window.__perfSakuraInterval); window.__perfSakuraInterval = null; }
       return;
