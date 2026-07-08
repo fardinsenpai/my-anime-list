@@ -38,7 +38,7 @@
 <!-- === UPDATED SIDEMENU === -->
 <div class="sidemenu" id="sideMenu">
   <div class="side-header">
-    <img src="logo.png" alt="Logo" style="width:48px;height:48px;object-fit:contain;filter:drop-shadow(0 0 8px #00e6ff);animation:pikaGlow 2s infinite alternate;">
+    <img src="logo.png" alt="Logo" style="object-fit:contain;filter:drop-shadow(0 0 8px #00e6ff);animation:pikaGlow 2s infinite alternate;">
     <span>Fardin's Anime</span>
   </div>
   
@@ -177,6 +177,15 @@
       <path d="M32 12V32L44 44" stroke="#FFD700" stroke-width="4" stroke-linecap="round"/>
       <circle cx="32" cy="32" r="6" fill="#FFD700"/>
     </svg> Analysis
+  </a>
+</li>
+<li>
+  <a href="javascript:void(0)" id="statsBarBtn">
+    <svg width="32" height="32" viewBox="0 0 64 64" fill="none">
+      <rect x="8" y="34" width="12" height="22" rx="2" fill="#00E5FF"/>
+      <rect x="26" y="22" width="12" height="34" rx="2" fill="#FFD700"/>
+      <rect x="44" y="10" width="12" height="46" rx="2" fill="#FF69B4"/>
+    </svg> Stats Bar
   </a>
 </li>
 <li>
@@ -456,6 +465,44 @@
           <a href="https://deadtoons.org" target="_blank" class="site-btn">Visit</a>
           <button class="copy-btn" title="Copy name">📋</button>
         </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="body-stats-bar" id="statsBarContainer" style="display:none;">
+  <div class="stats-bar-heading">📊 Stats Bar</div>
+
+  <div class="stats-bar-card">
+    <div class="stats-bar-label">🎬 Currently Watching</div>
+    <div class="stats-bar-inner">
+      <div class="stats-bar-poster">
+        <img src="https://media.kitsu.app/anime/poster_images/41024/large.jpg" alt="Tensura">
+      </div>
+      <div class="stats-bar-info">
+        <div class="stats-bar-title">Tensura (That Time I Got Reincarnated as a Slime)</div>
+        <div class="stats-bar-meta">Season 4</div>
+        <div class="stats-bar-track">
+          <div class="stats-bar-fill" style="width: 45%;"></div>
+        </div>
+        <div class="stats-bar-eps">Episode 10 / 24</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="stats-bar-card">
+    <div class="stats-bar-label">📖 Currently Reading</div>
+    <div class="stats-bar-inner">
+      <div class="stats-bar-poster">
+        <img src="https://media.kitsu.app/anime/44973/poster_image/large-ca235304c71f4233e60f6efb3967654d.jpeg" alt="Blue Lock">
+      </div>
+      <div class="stats-bar-info">
+        <div class="stats-bar-title">Blue Lock</div>
+        <div class="stats-bar-meta">Manga</div>
+        <div class="stats-bar-track">
+          <div class="stats-bar-fill" style="width: 60%;"></div>
+        </div>
+        <div class="stats-bar-eps">Chapter 180 / 300</div>
       </div>
     </div>
   </div>
@@ -980,23 +1027,6 @@
 
 <div class="section-divider"></div>
 
-<div class="current-watch" onclick="document.querySelector('.card:nth-child(105)')?.click(); document.querySelector('.card:nth-child(105)')?.scrollIntoView({behavior:'smooth', block:'center'})">
-  <div class="current-watch-label">&#x1F3AC; Currently Watching</div>
-  <div class="current-watch-inner">
-    <div class="current-watch-poster">
-      <img src="https://media.kitsu.app/anime/poster_images/41024/large.jpg" alt="Tensura">
-    </div>
-    <div class="current-watch-info">
-      <div class="current-watch-title">Tensura (That Time I Got Reincarnated as a Slime)</div>
-      <div class="current-watch-season">Season 4</div>
-      <div class="current-watch-bar-track">
-        <div class="current-watch-bar-fill" style="width: 45%;"></div>
-      </div>
-      <div class="current-watch-eps">Episode 10 / 24</div>
-    </div>
-  </div>
-</div>
-
 <div class="quote-wrap">
   <button class="quote-btn quote-prev" id="quotePrevBtn">&#10094;</button>
   <div class="anime-quote" id="animeQuote"></div>
@@ -1176,7 +1206,7 @@
       <button class="perf-mode-btn perf-mode-btn--active" data-mode="advanced">
         <span class="perf-mode-btn__icon">🚀</span>
         <span class="perf-mode-btn__label">Advanced</span>
-        <span class="perf-mode-btn__sub">All features on</span>
+        <span class="perf-mode-btn__sub">Standard Features On </span>
       </button>
       <button class="perf-mode-btn" data-mode="high">
         <span class="perf-mode-btn__icon">⚡</span>

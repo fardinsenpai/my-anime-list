@@ -135,10 +135,6 @@ if (bubble) bubble.style.display = 'none';
 // Counter hide (genre filter stays visible)
 const counterContainer = document.querySelector('.counter-container');
 if (counterContainer) counterContainer.style.display = 'none';
-var watchEl = document.querySelector('.current-watch');
-if (watchEl) watchEl.style.display = 'none';
-
-
     showDuelModeIndicator();
     showDuelToast('⚔️ Duel Mode চালু!', 'দুইটা Anime card select করো।', 'info');
     // URL update
@@ -209,10 +205,6 @@ if (bubble) bubble.style.display = 'flex';
 // Counter show
 const counterContainer = document.querySelector('.counter-container');
 if (counterContainer) counterContainer.style.display = '';
-var watchEl = document.querySelector('.current-watch');
-if (watchEl) watchEl.style.display = '';
-
-
     resetDuelSelection();
     hideDuelModeIndicator();
     showDuelToast('🔕 Duel Mode বন্ধ।', '', 'warning');

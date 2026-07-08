@@ -291,12 +291,12 @@ function showToast(title, msg, type) {
 }
 
 function hideAllSections() {
-  var ids = ['scrollProgress', 'topFiveDropdown', 'analysisContainer', 'topSecretsContainer', 'hotTakesContainer', 'chatBubble', 'grid'];
+  var ids = ['scrollProgress', 'topFiveDropdown', 'analysisContainer', 'statsBarContainer', 'topSecretsContainer', 'hotTakesContainer', 'chatBubble', 'grid'];
   ids.forEach(function(id) {
     var el = document.getElementById(id);
     if (el) el.style.display = 'none';
   });
-  var selectors = ['.counter-container', '.search-wrap', '.filter-section', '.anime-footer', '.current-watch', '.mood-picker'];
+  var selectors = ['.counter-container', '.search-wrap', '.filter-section', '.anime-footer', '.mood-picker'];
   selectors.forEach(function(sel) {
     var el = document.querySelector(sel);
     if (el) el.style.display = 'none';
@@ -367,7 +367,7 @@ function goHome() {
   history.pushState(null, '', 'home');
   closeWaifus();
 
-  var ids = ['analysisContainer', 'topSecretsContainer', 'hotTakesContainer', 'topFiveDropdown'];
+  var ids = ['analysisContainer', 'statsBarContainer', 'topSecretsContainer', 'hotTakesContainer', 'topFiveDropdown'];
   ids.forEach(function(id) {
     var el = document.getElementById(id);
     if (el) el.style.display = 'none';
@@ -394,7 +394,7 @@ function goHome() {
     });
   }
 
-  var showEls = ['.counter-container', '.search-wrap', '.filter-section', '.anime-footer', '.current-watch', '.mood-picker'];
+  var showEls = ['.counter-container', '.search-wrap', '.filter-section', '.anime-footer', '.mood-picker'];
   showEls.forEach(function(sel) {
     var el = document.querySelector(sel);
     if (el) el.style.display = '';
@@ -435,15 +435,18 @@ window.addEventListener('popstate', function () {
   var ht = document.getElementById('hotTakesContainer');
   var ac = document.getElementById('analysisContainer');
   var ts = document.getElementById('topSecretsContainer');
+  var sb = document.getElementById('statsBarContainer');
   var h1 = document.querySelector('.header h1');
   var inSection = (ht && ht.style.display === 'block') ||
                   (ac && ac.style.display === 'block') ||
                   (ts && ts.style.display === 'block') ||
+                  (sb && sb.style.display === 'block') ||
                   (h1 && h1.textContent === 'Crunchyroll Anime of the Year Winners');
   if (inSection) {
     var onPath = location.pathname.endsWith('/hot-takes') ||
                  location.pathname.endsWith('/analysis') ||
                  location.pathname.endsWith('/top-secrets') ||
+                 location.pathname.endsWith('/stats-bar') ||
                  location.pathname.endsWith('/aoy');
     if (!onPath) location.reload();
   }
@@ -516,6 +519,25 @@ window.addEventListener('popstate', function () {
       if (mainTitle) {
         mainTitle.textContent = ' Top Secrets';
         mainTitle.setAttribute('data-text', ' Top Secrets');
+      }
+      if (typeof closeMenu === 'function') closeMenu();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+  }
+
+  const statsBarBtn = document.getElementById('statsBarBtn');
+  const statsBarContainer = document.getElementById('statsBarContainer');
+  if (statsBarBtn && statsBarContainer) {
+    statsBarBtn.onclick = function(e) {
+      e.preventDefault();
+      history.pushState(null, '', 'stats-bar');
+      closeWaifus();
+      hideAllSections();
+      statsBarContainer.style.display = 'block';
+      const mainTitle = document.querySelector('.header h1');
+      if (mainTitle) {
+        mainTitle.textContent = ' Stats Bar';
+        mainTitle.setAttribute('data-text', ' Stats Bar');
       }
       if (typeof closeMenu === 'function') closeMenu();
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1597,7 +1619,6 @@ document.querySelectorAll('.pill').forEach((pill, index) => {
 const searchBox = document.getElementById('searchBox');
 const counterContainer = document.querySelector('.counter-container');
 const filterSection = document.querySelector('.filter-section');
-const currentWatchEl = document.querySelector('.current-watch');
 const footerEl = document.querySelector('.anime-footer');
 
 searchBox.addEventListener('input', function () {
@@ -1620,7 +1641,6 @@ searchBox.addEventListener('input', function () {
     filterSection.style.marginBottom = '0';
     filterSection.style.transition = 'all 0.4s ease';
 
-    if (currentWatchEl) currentWatchEl.style.display = 'none';
     if (footerEl) footerEl.style.display = 'none';
 
   } else {
@@ -1640,7 +1660,6 @@ searchBox.addEventListener('input', function () {
     filterSection.style.marginBottom = '';
     filterSection.style.transition = 'all 0.4s ease';
 
-    if (currentWatchEl) currentWatchEl.style.display = '';
     if (footerEl) footerEl.style.display = '';
   }
 });
@@ -3567,6 +3586,9 @@ document.addEventListener('click', function(e) {
       if (btn) btn.click();
     } else if (p.endsWith('/top-secrets')) {
       var btn = document.getElementById('topSecretsBtn');
+      if (btn) btn.click();
+    } else if (p.endsWith('/stats-bar')) {
+      var btn = document.getElementById('statsBarBtn');
       if (btn) btn.click();
     }
   }
