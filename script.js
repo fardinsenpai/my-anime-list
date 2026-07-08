@@ -2620,6 +2620,10 @@ document.addEventListener('click', function(e) {
         popover: { title: '\uD83D\uDCC8 Analysis', description: 'Interactive pie charts and bar charts for genre distribution, OTT platforms, studios, episodes, and ratings.', side: 'right' }
       },
       {
+        element: '#statsBarBtn',
+        popover: { title: '\uD83D\uDCCA Stats Bar', description: 'Track what you\'re currently watching & reading! See Tensura season progress and Blue Lock manga chapters at a glance.', side: 'right' }
+      },
+      {
         element: '#topSecretsBtn',
         popover: { title: '\uD83D\uDD10 Top Secrets', description: 'Hidden resource guide! Get download sites, streaming platforms, and pro tips for watching anime.', side: 'right' }
       },
