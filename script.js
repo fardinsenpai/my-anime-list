@@ -605,6 +605,15 @@ window.addEventListener('popstate', function () {
       goHome();
     };
   }
+
+  // Click topbar (outside menu/search buttons) goes home
+  const topbar = document.querySelector('.topbar');
+  if (topbar) {
+    topbar.addEventListener('click', function(e) {
+      if (e.target.closest('.menu-btn') || e.target.closest('#topSearchBtn')) return;
+      goHome();
+    });
+  }
 // ===============================
 // SUGGESTION PANEL
 // ===============================
