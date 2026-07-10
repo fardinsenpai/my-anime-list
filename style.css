@@ -10,7 +10,7 @@
     .search-wrap{display:flex;justify-content:center;margin-bottom:40px}
     .search-wrap input{width:100%;max-width:480px;padding:12px 22px;border-radius:50px;
       border:1px solid #2a2a4a;background:#13132a;color:#fff;font-size:.88rem;
-      font-family:'Poppins',sans-serif;outline:none;transition:border .3s}
+      font-family:'Rajdhani',sans-serif;font-weight:600;letter-spacing:0.5px;outline:none;transition:border .3s}
     .search-wrap input:focus{border-color:#ff6b6b}
     .search-wrap input::placeholder{color:#44445a}
     .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(165px,1fr));gap:22px;max-width:1600px;margin:0 auto}
@@ -3703,6 +3703,7 @@
   padding: 1px;
   background: linear-gradient(135deg, rgba(255,215,0,0.3), transparent 40%, transparent 60%, rgba(255,20,147,0.2));
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
   pointer-events: none;
