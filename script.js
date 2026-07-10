@@ -1461,7 +1461,11 @@ window.addEventListener("load", showCardsOnScroll);
       let visible = 0;
       document.querySelectorAll('.card').forEach(c=>{
         const title = c.querySelector('.title');
-        const match = title && title.textContent.toLowerCase().includes(q);
+        const badge = c.querySelector('.badge');
+        const number = c.querySelector('.number');
+        const titleMatch = title && title.textContent.toLowerCase().includes(q);
+        const numMatch = (badge && badge.textContent.toLowerCase().includes(q)) || (number && number.textContent.toLowerCase().includes(q));
+        const match = titleMatch || numMatch;
         c.style.display = '';
         c.classList.toggle('hidden', !match);
         if (match) visible++;
