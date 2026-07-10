@@ -17,8 +17,8 @@ window.onload = () => {
   // Counter start
 const stats = getStats();
 counterUp("animeCount", stats.animeCount, duration);  
-  counterUp("seasonCount", 348, duration);
-  counterUp("episodeCount", 6178, duration);
+  counterUp("seasonCount", 353, duration);
+  counterUp("episodeCount", 6288, duration);
 };
 
 // === TOPBAR MENU & SEARCH ===
