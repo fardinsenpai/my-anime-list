@@ -1457,13 +1457,28 @@ window.addEventListener("scroll", function() {
 window.addEventListener("load", showCardsOnScroll);
 
     function filterCards(){
-      const q=document.getElementById('searchBox').value.toLowerCase();
+      const q=document.getElementById('searchBox').value.toLowerCase().trim();
+      let visible = 0;
       document.querySelectorAll('.card').forEach(c=>{
         const title = c.querySelector('.title');
+        const match = title && title.textContent.toLowerCase().includes(q);
         c.style.display = '';
-        c.classList.toggle('hidden', !(title && title.textContent.toLowerCase().includes(q)));
+        c.classList.toggle('hidden', !match);
+        if (match) visible++;
       });
       updateBadgeNumbers();
+      let msg = document.getElementById('noResultMsg');
+      if (!q) { if (msg) msg.remove(); return; }
+      if (!msg) {
+        msg = document.createElement('div');
+        msg.id = 'noResultMsg';
+        msg.style.cssText = 'grid-column:1/-1;text-align:center;padding:60px 20px;color:rgba(255,255,255,0.3);font-family:Poppins,sans-serif;font-size:15px;';
+        msg.innerHTML = '😕 No anime found matching "<strong>' + q + '</strong>"';
+        document.getElementById('grid').appendChild(msg);
+      } else {
+        msg.innerHTML = '😕 No anime found matching "<strong>' + q + '</strong>"';
+      }
+      msg.style.display = visible === 0 && q ? '' : 'none';
     }
 
 window.onscroll = function() {
