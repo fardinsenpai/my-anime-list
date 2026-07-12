@@ -3631,3 +3631,32 @@ document.addEventListener('click', function(e) {
     document.addEventListener('DOMContentLoaded', routeOnPath);
   }
 })();
+
+// === PWA Install Prompt ===
+let deferredPrompt = null;
+window.addEventListener('beforeinstallprompt', function(e) {
+  e.preventDefault();
+  deferredPrompt = e;
+  var btn = document.getElementById('installAppBtn');
+  if (btn) btn.style.display = '';
+});
+
+window.addEventListener('appinstalled', function() {
+  deferredPrompt = null;
+  var btn = document.getElementById('installAppBtn');
+  if (btn) btn.style.display = 'none';
+});
+
+document.addEventListener('click', function(e) {
+  var target = e.target.closest('#installAppBtn');
+  if (!target) return;
+  if (!deferredPrompt) return;
+  deferredPrompt.prompt();
+  deferredPrompt.userChoice.then(function(result) {
+    if (result.outcome === 'accepted') {
+      var btn = document.getElementById('installAppBtn');
+      if (btn) btn.style.display = 'none';
+    }
+    deferredPrompt = null;
+  });
+});
