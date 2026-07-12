@@ -3597,6 +3597,19 @@ document.addEventListener('click', function(e) {
     document.addEventListener('DOMContentLoaded', initEnhancements);
   }
 
+  // Consume SPA redirect from 404.html (mobile-friendly)
+  (function() {
+    var redirect = sessionStorage.getItem('spaRedirect');
+    if (redirect) {
+      sessionStorage.removeItem('spaRedirect');
+      var base = location.origin + '/my-anime-list';
+      var path = redirect.replace(base, '').split('?')[0];
+      if (path && path !== '/') {
+        history.replaceState(null, '', base + path);
+      }
+    }
+  })();
+
   // GitHub Pages SPA routing — auto-open feature based on URL path
   function routeOnPath() {
     var p = window.location.pathname;
