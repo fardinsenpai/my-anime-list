@@ -16,6 +16,12 @@
 
 <body>
 
+<div id="splashScreen" style="position:fixed;inset:0;z-index:99999;background:#080810;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .6s">
+  <img src="logo-2.png" alt="Logo" style="width:120px;height:120px;object-fit:contain;filter:drop-shadow(0 0 20px rgba(245,197,24,0.6));animation:splashPulse 1.2s ease-in-out infinite alternate">
+  <div style="margin-top:20px;font:700 22px/1 'Orbitron',sans-serif;background:linear-gradient(135deg,#FFD700,#FF69B4,#00E5FF);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Fardin's Anime Hub</div>
+</div>
+<style>@keyframes splashPulse{from{transform:scale(1);opacity:.8}to{transform:scale(1.08);opacity:1}}</style>
+
 <div id="scrollProgress"></div>
 
   <!-- ===== TOP NAVIGATION BAR ===== -->
