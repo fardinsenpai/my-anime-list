@@ -3645,19 +3645,6 @@ document.addEventListener('click', function(e) {
   }
 })();
 
-// === Splash Screen (only in PWA / standalone mode) ===
-(function() {
-  var splash = document.getElementById('splashScreen');
-  if (splash && window.matchMedia('(display-mode: standalone)').matches) {
-    setTimeout(function() {
-      splash.style.opacity = '0';
-      setTimeout(function() { splash.style.display = 'none'; }, 600);
-    }, 2500);
-  } else if (splash) {
-    splash.style.display = 'none';
-  }
-})();
-
 // === Service Worker Registration ===
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function() {
