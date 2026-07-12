@@ -3336,6 +3336,7 @@ document.addEventListener('click', function(e) {
 
   // 4. Card hover glow trail
   document.addEventListener('mousemove', function(e) {
+    if (document.body.classList.contains('perf-no-glow')) return;
     var cards = document.querySelectorAll('#grid .card:hover .card-glow');
     cards.forEach(function(glow) {
       var rect = glow.parentElement.getBoundingClientRect();
@@ -3489,7 +3490,7 @@ document.addEventListener('click', function(e) {
     perfMode = mode;
     try { localStorage.setItem('perfMode', mode); } catch (e) {}
     document.body.classList.remove('perf-no-thunder', 'perf-no-counter-anim',
-      'perf-no-blink', 'perf-no-card-float', 'perf-no-heading-anim');
+      'perf-no-blink', 'perf-no-card-float', 'perf-no-heading-anim', 'perf-no-glow', 'perf-no-blur');
 
     if (mode === 'ultra') {
       if (window.__perfLightning) window.__perfLightning.start();
@@ -3513,7 +3514,7 @@ document.addEventListener('click', function(e) {
     }
     if (mode === 'poor') {
       document.body.classList.add('perf-no-thunder', 'perf-no-counter-anim',
-        'perf-no-blink', 'perf-no-card-float', 'perf-no-heading-anim');
+        'perf-no-blink', 'perf-no-card-float', 'perf-no-heading-anim', 'perf-no-glow', 'perf-no-blur');
       if (window.__perfLightning) window.__perfLightning.stop();
       if (window.__perfSakuraInterval) { clearInterval(window.__perfSakuraInterval); window.__perfSakuraInterval = null; }
       window.__perfSakuraInterval = setInterval(createSakura, 1400);
@@ -3521,7 +3522,7 @@ document.addEventListener('click', function(e) {
     }
     if (mode === 'low') {
       document.body.classList.add('perf-no-thunder', 'perf-no-counter-anim',
-        'perf-no-blink', 'perf-no-card-float', 'perf-no-heading-anim');
+        'perf-no-blink', 'perf-no-card-float', 'perf-no-heading-anim', 'perf-no-glow', 'perf-no-blur');
       if (window.__perfLightning) window.__perfLightning.stop();
       if (window.__perfSakuraInterval) { clearInterval(window.__perfSakuraInterval); window.__perfSakuraInterval = null; }
       return;
