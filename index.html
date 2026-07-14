@@ -217,13 +217,12 @@
     </svg> Install App
   </a>
 
-  <a href="https://facebook.com/fardin.senpai" target="_blank">
+  <a href="javascript:void(0)" onclick="openOwnerInfo()">
     <svg width="32" height="32" viewBox="0 0 64 64" fill="none">
-  <circle cx="32" cy="32" r="24" stroke="#00E5FF" stroke-width="4"/>
-  <path d="M36 18H30C27 18 25 20 25 24V30H20V36H25V46H32V36H37L38 30H32V25C32 24 33 23 34 23H38V18H36Z"
-        fill="#00E5FF"/>
-</svg>
-    Facebook
+      <circle cx="32" cy="18" r="10" stroke="#FFD700" stroke-width="3.5" fill="none"/>
+      <path d="M14 52C14 42 22 34 32 34C42 34 50 42 50 52" stroke="#FFD700" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+      <circle cx="32" cy="48" r="3" fill="#FFD700"/>
+    </svg> Owner Info
   </a>
   </nav>
 </div>
@@ -1242,6 +1241,45 @@
     </div>
     <div class="perf-popup__note">💡 If the website is not lagging, keep it on <b>Advanced</b> — no changes needed.</div>
     <button class="perf-popup__close" id="perfClose">✕</button>
+  </div>
+
+  <div class="owner-panel" id="ownerPanel">
+    <div class="owner-panel-inner">
+      <button class="owner-close" onclick="closeOwnerInfo()">✕</button>
+      <div class="owner-avatar">
+        <img src="my-pic.jpeg" alt="Fardin">
+      </div>
+      <h2 class="owner-name">Fardin Ahmed Tasfin</h2>
+      <p class="owner-bio">Anime enthusiast & web developer. Creator of this anime hub — tracking every series I've watched since day one.</p>
+      <div class="owner-details">
+        <div class="owner-detail-row">
+          <span class="owner-label">🎯</span>
+          <span>Anime Collector</span>
+        </div>
+        <div class="owner-detail-row">
+          <span class="owner-label">🌐</span>
+          <span>Web Developer</span>
+        </div>
+        <div class="owner-detail-row">
+          <span class="owner-label">🎬</span>
+          <span>259+ Anime Watched</span>
+        </div>
+      </div>
+      <div class="owner-social">
+        <a href="https://facebook.com/fardin.senpai" target="_blank" title="Facebook">
+          <svg width="28" height="28" viewBox="0 0 64 64" fill="none">
+            <circle cx="32" cy="32" r="24" stroke="#00E5FF" stroke-width="4"/>
+            <path d="M36 18H30C27 18 25 20 25 24V30H20V36H25V46H32V36H37L38 30H32V25C32 24 33 23 34 23H38V18H36Z" fill="#00E5FF"/>
+          </svg>
+        </a>
+        <a href="https://github.com/fardinsenpai" target="_blank" title="GitHub">
+          <svg width="28" height="28" viewBox="0 0 64 64" fill="none">
+            <circle cx="32" cy="32" r="24" stroke="#FFD700" stroke-width="4"/>
+            <path d="M32 12C21 12 12 21 12 32C12 41 17.8 49 25.6 51.6C26.6 51.8 27 51.2 27 50.6V47C21.6 48.2 20.2 44.8 20.2 44.8C19.2 42.4 17.8 41.8 17.8 41.8C15.8 40.6 18 40.6 18 40.6C20.2 40.6 21.4 42.8 21.4 42.8C23.4 46.4 27 45.6 28.6 45C28.8 43.6 29.4 42.6 30.2 42C24.6 41.4 18.8 39.6 18.8 31.6C18.8 29.4 19.6 27.4 21 26C20.8 25.4 20 23.2 21.2 20.4C21.2 20.4 23.2 19.8 27 22.4C28.8 21.8 30.8 21.6 32.8 21.6C34.8 21.6 36.8 21.8 38.6 22.4C42.4 19.8 44.4 20.4 44.4 20.4C45.6 23.2 44.8 25.4 44.6 26C46 27.4 46.8 29.4 46.8 31.6C46.8 39.6 41 41.4 35.4 42C36.4 42.8 37 44 37 45.6V50.6C37 51.2 37.4 51.8 38.4 51.6C46.2 49 52 41 52 32C52 21 43 12 32 12Z" fill="#FFD700"/>
+          </svg>
+        </a>
+      </div>
+    </div>
   </div>
 
   <script src="duel-system.js"></script>

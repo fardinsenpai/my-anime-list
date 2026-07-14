@@ -628,6 +628,15 @@ function closeSuggestion() {
   suggestionPanel.classList.remove("open");
 }
 
+function openOwnerInfo() {
+  var p = document.getElementById('ownerPanel');
+  if (p) p.classList.add('open');
+}
+function closeOwnerInfo() {
+  var p = document.getElementById('ownerPanel');
+  if (p) p.classList.remove('open');
+}
+
 (function () {
   const GENRES = {
     "All":        { icon: "✦", nums: null },
