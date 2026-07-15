@@ -646,6 +646,11 @@ function copyEmail() {
     document.body.appendChild(ta); ta.select();
     document.execCommand('copy'); document.body.removeChild(ta);
   }
+  var t = document.createElement('div');
+  t.textContent = '✓ Email copied!';
+  t.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#212121;color:#ffd900;padding:10px 22px;border-radius:8px;font:600 14px/1 "Rajdhani",sans-serif;z-index:100003;box-shadow:0 4px 20px rgba(0,0,0,0.5);transition:opacity .3s';
+  document.body.appendChild(t);
+  setTimeout(function() { t.style.opacity = '0'; setTimeout(function() { t.remove(); }, 300); }, 1500);
 }
 
 (function () {
