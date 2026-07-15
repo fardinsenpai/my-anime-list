@@ -4440,8 +4440,24 @@ body.perf-no-heading-anim .header h1::after { animation: none !important; }
 }
 .owner-panel.open { opacity: 1; pointer-events: auto; }
 
-/* ---- Comic card inside overlay ---- */
-.owner-card {
+/* Close button on comic card */
+.owner-panel .owner-close {
+  position: absolute; top: 6px; right: 6px; z-index: 2;
+  width: 28px; height: 28px; border-radius: 50%;
+  border: 2px solid var(--ink-black, #212121);
+  background: var(--primary-yellow, #ffd900);
+  color: var(--ink-black, #212121); font-size: 13px; font-weight: 700;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: 0.2s; line-height: 1; padding: 0;
+}
+.owner-panel .owner-close:hover { background: var(--accent-red, #d92b2b); color: #fff; }
+
+/* Comic card avatar img */
+.owner-panel .card-avatar img,
+.owner-panel .card-image-container img { width: 100%; height: 100%; object-fit: cover; }
+
+/* === COMIC CARD (Owner Info) === */
+.comic-card {
   --paper-white: #fefae8;
   --primary-yellow: #ffd900;
   --accent-red: #d92b2b;
@@ -4455,97 +4471,153 @@ body.perf-no-heading-anim .header h1::after { animation: none !important; }
   flex-direction: column;
   width: 18em;
   max-width: 333px;
+  max-height: 444px;
   background-color: var(--paper-white);
   border: var(--border-stroke) solid var(--ink-black);
   border-radius: 0.5em;
   padding: 1em;
-  box-shadow: 0.5em 0.5em 0 var(--ink-black), 0 0 30px rgba(0,0,0,0.4);
+  box-shadow: 0.5em 0.5em 0 var(--ink-black);
+  transition:
+    transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 0.2s ease;
   transform-origin: bottom left;
 }
-.owner-card .owner-close {
-  position: absolute; top: 6px; right: 6px; z-index: 2;
-  width: 30px; height: 30px; border-radius: 50%;
-  border: 2px solid var(--ink-black);
-  background: var(--primary-yellow);
-  color: var(--ink-black); font-size: 14px; font-weight: 700;
-  cursor: pointer; display: flex; align-items: center; justify-content: center;
-  transition: 0.2s; line-height: 1;
+.comic-card:hover {
+  transform: translateY(-0.6em) rotate(-2deg);
+  box-shadow: 0.8em 0.8em 0 0.1em var(--accent-red);
 }
-.owner-card .owner-close:hover { background: var(--accent-red); color: var(--paper-white); }
-.owner-card .card-header {
-  display: flex; align-items: center; margin-bottom: 0.8em;
+.card-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.8em;
 }
-.owner-card .card-avatar {
-  width: 3.5em; height: 3.5em; border-radius: 50%;
+.card-avatar {
+  width: 3.5em;
+  height: 3.5em;
+  border-radius: 50%;
   background: linear-gradient(45deg, var(--accent-blue), #6ba9e4);
   border: var(--border-stroke) solid var(--ink-black);
-  flex-shrink: 0; overflow: hidden;
+  flex-shrink: 0;
+  overflow: hidden;
   transition: transform 0.3s ease;
 }
-.owner-card:hover .card-avatar { transform: scale(1.1); }
-.owner-card .card-avatar img { width: 100%; height: 100%; object-fit: cover; }
-.owner-card .card-user-info { margin-left: 0.8em; text-transform: uppercase; }
-.owner-card .card-username {
-  margin: 0; font-size: 1em; font-weight: 300;
+.comic-card:hover .card-avatar {
+  transform: scale(1.1);
+}
+.card-user-info {
+  margin-left: 0.8em;
+  text-transform: uppercase;
+}
+.card-username {
+  margin: 0;
+  font-size: 1.2em;
+  font-weight: 300;
   color: var(--ink-black);
   background-color: var(--primary-yellow);
   padding: 0.1em 0.5em;
   clip-path: polygon(0 0, 100% 0, 95% 100%, 5% 100%);
   letter-spacing: 1px;
 }
-.owner-card .card-handle {
-  margin: 0.2em 0 0 0; font-size: 0.8em;
-  color: var(--ink-black); font-weight: 100; letter-spacing: 2px;
+.card-handle {
+  margin: 0.2em 0 0 0;
+  font-size: 0.8em;
+  color: var(--ink-black);
+  font-weight: 100;
+  letter-spacing: 2px;
 }
-.owner-card .card-image-container {
-  width: 100%; height: 9em;
+.card-content {
+  flex-grow: 1;
+}
+.card-image-container {
+  width: 100%;
+  height: 9em;
   border-radius: 0.2em;
   border: var(--border-stroke) solid var(--ink-black);
   overflow: hidden;
   background-color: var(--accent-blue);
-  background-image: radial-gradient(circle, var(--dot-color) 0.05em, transparent 0.05em);
+  background-image: radial-gradient(
+    circle,
+    var(--dot-color) 0.05em,
+    transparent 0.05em
+  );
   background-size: 0.5em 0.5em;
-  background-position: 0 0, 0.25em 0.25em;
+  background-position:
+    0 0,
+    0.25em 0.25em;
   transition: transform 0.3s ease;
 }
-.owner-card:hover .card-image-container { transform: skewX(-3deg) scale(1.02); }
-.owner-card .card-image-container img { width: 100%; height: 100%; object-fit: cover; }
-.owner-card .card-caption {
-  position: relative; margin: 0.8em 0; padding: 0.6em 0.8em;
+.comic-card:hover .card-image-container {
+  transform: skewX(-3deg) scale(1.02);
+}
+.card-caption {
+  position: relative;
+  margin: 0.8em 0;
+  padding: 0.6em 0.8em;
   background-color: var(--paper-white);
   border: var(--border-stroke) solid var(--ink-black);
   border-radius: 0.5em;
-  font-size: 0.85em; line-height: 1.3; color: var(--ink-black);
-  font-family: Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif;
+  font-size: 0.9em;
+  line-height: 1.3;
+  color: var(--ink-black);
 }
-.owner-card .card-caption::after {
-  content: ""; position: absolute; bottom: -0.6em; left: 1.5em;
-  width: 0; height: 0;
+.card-caption::after {
+  content: "";
+  position: absolute;
+  bottom: -0.6em;
+  left: 1.5em;
+  width: 0;
+  height: 0;
   border: 0.5em solid var(--ink-black);
   border-color: var(--ink-black) transparent transparent transparent;
 }
-.owner-card .card-caption::before {
-  content: ""; position: absolute; bottom: -0.4em; left: 1.6em;
-  width: 0; height: 0;
+.card-caption::before {
+  content: "";
+  position: absolute;
+  bottom: -0.4em;
+  left: 1.6em;
+  width: 0;
+  height: 0;
   border: 0.4em solid var(--paper-white);
   border-color: var(--paper-white) transparent transparent transparent;
 }
-.owner-card .card-actions {
-  display: flex; justify-content: space-around; margin-top: auto; padding-top: 0.5em;
+.card-actions {
+  display: flex;
+  justify-content: space-around;
+  margin-top: auto;
+  padding-top: 0.5em;
 }
-.owner-card .action-button {
+.action-button {
   background-color: var(--primary-yellow);
   border: var(--border-stroke) solid var(--ink-black);
-  padding: 0.5em; cursor: pointer;
+  padding: 0.5em;
+  cursor: pointer;
   border-radius: 0.5em;
   box-shadow: 0.2em 0.2em 0 var(--ink-black);
-  transition: transform 0.1s ease, box-shadow 0.1s ease, background-color 0.2s ease;
+  transition:
+    transform 0.1s ease,
+    box-shadow 0.1s ease,
+    background-color 0.2s ease;
 }
-.owner-card .action-button:hover { background-color: var(--accent-red); }
-.owner-card .action-button:active { transform: translate(0.2em, 0.2em); box-shadow: none; }
-.owner-card .action-button svg {
-  width: 1.3em; height: 1.3em; display: block;
+.action-button:hover {
+  background-color: var(--accent-red);
 }
-.owner-card .action-button:hover svg path,
-.owner-card .action-button:hover svg circle { stroke: var(--paper-white) !important; }
-.owner-card .action-button:hover svg path[fill] { fill: var(--paper-white) !important; }
+.action-button:active {
+  transform: translate(0.2em, 0.2em);
+  box-shadow: none;
+}
+.action-button-icon {
+  width: 1.3em;
+  height: 1.3em;
+  stroke-width: 3;
+  stroke: var(--ink-black);
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  display: block;
+}
+.action-button:hover .action-button-icon {
+  stroke: var(--paper-white);
+}
+.like-button:hover .action-button-icon {
+  fill: var(--paper-white);
+}
