@@ -636,6 +636,17 @@ function closeOwnerInfo() {
   var p = document.getElementById('ownerPanel');
   if (p) p.classList.remove('open');
 }
+function copyEmail() {
+  var email = 'fardinsenpai.io@gmail.com';
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(email);
+  } else {
+    var ta = document.createElement('textarea');
+    ta.value = email; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select();
+    document.execCommand('copy'); document.body.removeChild(ta);
+  }
+}
 
 (function () {
   const GENRES = {
