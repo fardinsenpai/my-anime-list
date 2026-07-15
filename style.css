@@ -4439,54 +4439,113 @@ body.perf-no-heading-anim .header h1::after { animation: none !important; }
   transition: opacity 0.35s ease;
 }
 .owner-panel.open { opacity: 1; pointer-events: auto; }
-.owner-panel-inner {
-  background: linear-gradient(145deg, rgba(20,20,40,0.98), rgba(10,10,25,0.98));
-  border: 1px solid rgba(255,215,0,0.2);
-  border-radius: 20px; padding: 40px 32px 28px;
-  width: 340px; max-width: 90vw;
-  text-align: center; position: relative;
-  box-shadow: 0 0 40px rgba(255,215,0,0.08), 0 0 80px rgba(0,229,255,0.04);
+
+/* ---- Comic card inside overlay ---- */
+.owner-card {
+  --paper-white: #fefae8;
+  --primary-yellow: #ffd900;
+  --accent-red: #d92b2b;
+  --accent-blue: #2b80d9;
+  --ink-black: #212121;
+  --border-stroke: 0.15em;
+  --dot-color: rgba(0, 0, 0, 0.2);
+
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 18em;
+  max-width: 333px;
+  background-color: var(--paper-white);
+  border: var(--border-stroke) solid var(--ink-black);
+  border-radius: 0.5em;
+  padding: 1em;
+  box-shadow: 0.5em 0.5em 0 var(--ink-black), 0 0 30px rgba(0,0,0,0.4);
+  transform-origin: bottom left;
 }
-.owner-close {
-  position: absolute; top: 12px; right: 14px;
-  width: 32px; height: 32px; border-radius: 10px;
-  border: 1px solid rgba(255,255,255,0.1);
-  background: rgba(255,255,255,0.05);
-  color: #999; font-size: 16px; cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  transition: all 0.2s;
+.owner-card .owner-close {
+  position: absolute; top: 6px; right: 6px; z-index: 2;
+  width: 30px; height: 30px; border-radius: 50%;
+  border: 2px solid var(--ink-black);
+  background: var(--primary-yellow);
+  color: var(--ink-black); font-size: 14px; font-weight: 700;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: 0.2s; line-height: 1;
 }
-.owner-close:hover { background: rgba(255,80,80,0.2); color: #ff6b6b; border-color: rgba(255,80,80,0.3); }
-.owner-avatar {
-  width: 100px; height: 100px; border-radius: 50%;
-  margin: 0 auto 14px; overflow: hidden;
-  border: 3px solid #FFD700; box-shadow: 0 0 20px rgba(255,215,0,0.25);
+.owner-card .owner-close:hover { background: var(--accent-red); color: var(--paper-white); }
+.owner-card .card-header {
+  display: flex; align-items: center; margin-bottom: 0.8em;
 }
-.owner-avatar img { width: 100%; height: 100%; object-fit: cover; }
-.owner-name {
-  font-family: 'Orbitron', sans-serif; font-size: 18px; font-weight: 700;
-  background: linear-gradient(135deg, #FFD700, #FF69B4);
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-  margin-bottom: 6px;
+.owner-card .card-avatar {
+  width: 3.5em; height: 3.5em; border-radius: 50%;
+  background: linear-gradient(45deg, var(--accent-blue), #6ba9e4);
+  border: var(--border-stroke) solid var(--ink-black);
+  flex-shrink: 0; overflow: hidden;
+  transition: transform 0.3s ease;
 }
-.owner-bio {
-  font-family: 'Poppins', sans-serif; font-size: 13px; color: #aaa;
-  line-height: 1.5; margin-bottom: 18px; padding: 0 6px;
+.owner-card:hover .card-avatar { transform: scale(1.1); }
+.owner-card .card-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.owner-card .card-user-info { margin-left: 0.8em; text-transform: uppercase; }
+.owner-card .card-username {
+  margin: 0; font-size: 1em; font-weight: 300;
+  color: var(--ink-black);
+  background-color: var(--primary-yellow);
+  padding: 0.1em 0.5em;
+  clip-path: polygon(0 0, 100% 0, 95% 100%, 5% 100%);
+  letter-spacing: 1px;
 }
-.owner-details {
-  display: flex; flex-direction: column; gap: 8px;
-  margin-bottom: 20px;
+.owner-card .card-handle {
+  margin: 0.2em 0 0 0; font-size: 0.8em;
+  color: var(--ink-black); font-weight: 100; letter-spacing: 2px;
 }
-.owner-detail-row {
-  display: flex; align-items: center; gap: 10px;
-  font-family: 'Rajdhani', sans-serif; font-size: 15px; font-weight: 600;
-  color: #ccc; padding: 6px 14px;
-  background: rgba(255,255,255,0.04); border-radius: 10px;
+.owner-card .card-image-container {
+  width: 100%; height: 9em;
+  border-radius: 0.2em;
+  border: var(--border-stroke) solid var(--ink-black);
+  overflow: hidden;
+  background-color: var(--accent-blue);
+  background-image: radial-gradient(circle, var(--dot-color) 0.05em, transparent 0.05em);
+  background-size: 0.5em 0.5em;
+  background-position: 0 0, 0.25em 0.25em;
+  transition: transform 0.3s ease;
 }
-.owner-label { font-size: 18px; }
-.owner-social {
-  display: flex; justify-content: center; gap: 14px;
-  padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.06);
+.owner-card:hover .card-image-container { transform: skewX(-3deg) scale(1.02); }
+.owner-card .card-image-container img { width: 100%; height: 100%; object-fit: cover; }
+.owner-card .card-caption {
+  position: relative; margin: 0.8em 0; padding: 0.6em 0.8em;
+  background-color: var(--paper-white);
+  border: var(--border-stroke) solid var(--ink-black);
+  border-radius: 0.5em;
+  font-size: 0.85em; line-height: 1.3; color: var(--ink-black);
+  font-family: Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif;
 }
-.owner-social a { transition: transform 0.2s; display: flex; }
-.owner-social a:hover { transform: scale(1.15); }
+.owner-card .card-caption::after {
+  content: ""; position: absolute; bottom: -0.6em; left: 1.5em;
+  width: 0; height: 0;
+  border: 0.5em solid var(--ink-black);
+  border-color: var(--ink-black) transparent transparent transparent;
+}
+.owner-card .card-caption::before {
+  content: ""; position: absolute; bottom: -0.4em; left: 1.6em;
+  width: 0; height: 0;
+  border: 0.4em solid var(--paper-white);
+  border-color: var(--paper-white) transparent transparent transparent;
+}
+.owner-card .card-actions {
+  display: flex; justify-content: space-around; margin-top: auto; padding-top: 0.5em;
+}
+.owner-card .action-button {
+  background-color: var(--primary-yellow);
+  border: var(--border-stroke) solid var(--ink-black);
+  padding: 0.5em; cursor: pointer;
+  border-radius: 0.5em;
+  box-shadow: 0.2em 0.2em 0 var(--ink-black);
+  transition: transform 0.1s ease, box-shadow 0.1s ease, background-color 0.2s ease;
+}
+.owner-card .action-button:hover { background-color: var(--accent-red); }
+.owner-card .action-button:active { transform: translate(0.2em, 0.2em); box-shadow: none; }
+.owner-card .action-button svg {
+  width: 1.3em; height: 1.3em; display: block;
+}
+.owner-card .action-button:hover svg path,
+.owner-card .action-button:hover svg circle { stroke: var(--paper-white) !important; }
+.owner-card .action-button:hover svg path[fill] { fill: var(--paper-white) !important; }
