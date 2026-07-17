@@ -4552,6 +4552,17 @@ body.perf-no-heading-anim .header h1::after { animation: none !important; }
   border: 0.4em solid var(--paper-white);
   border-color: var(--paper-white) transparent transparent transparent;
 }
+.card-qualification {
+  margin: 0.5em 0 0;
+  padding: 0.5em 0.8em;
+  background: linear-gradient(135deg, #1e1b4b, #312e81);
+  border: 2px solid rgba(245,197,24,0.3);
+  border-radius: 0.5em;
+  font-size: 0.85em;
+  text-align: center;
+  color: #f5c518;
+  font-weight: 600;
+}
 .card-actions {
   display: flex;
   justify-content: space-around;
