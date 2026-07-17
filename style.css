@@ -4622,3 +4622,14 @@ body.perf-no-heading-anim .header h1::after { animation: none !important; }
 .like-button:hover .action-button-icon {
   fill: var(--paper-white);
 }
+
+/* === CUSTOM SCROLLBAR === */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: #0d0d1e; }
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #00E5FF, #FFD700);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover { background: linear-gradient(180deg, #FF69B4, #FFD700); }
+/* Firefox */
+* { scrollbar-width: thin; scrollbar-color: #00E5FF #0d0d1e; }
