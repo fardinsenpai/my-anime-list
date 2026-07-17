@@ -3706,31 +3706,3 @@ document.addEventListener('click', function(e) {
     deferredPrompt = null;
   });
 });
-
-/* ---- Custom scrollbar ---- */
-(function(){
-  var fill = document.getElementById('scrollBar-fill');
-  if (!fill) return;
-  function update(){
-    var sh = document.documentElement.scrollHeight;
-    var ch = window.innerHeight;
-    var maxScroll = sh - ch;
-    if (maxScroll <= 0) { fill.style.height = '0'; return; }
-    var pct = Math.min(100, (window.scrollY / maxScroll) * 100);
-    fill.style.height = pct + '%';
-  }
-  window.addEventListener('scroll', update);
-  window.addEventListener('load', update);
-  update();
-  var bar = fill.parentElement;
-  bar.addEventListener('click', function(e){
-    if (e.target === fill) return;
-    var rect = bar.getBoundingClientRect();
-    var sh = document.documentElement.scrollHeight;
-    var ch = window.innerHeight;
-    var maxScroll = sh - ch;
-    if (maxScroll <= 0) return;
-    var y = e.clientY - rect.top;
-    window.scrollTo(0, (y / rect.height) * maxScroll);
-  });
-})();

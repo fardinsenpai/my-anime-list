@@ -4624,39 +4624,15 @@ body.perf-no-heading-anim .header h1::after { animation: none !important; }
 }
 
 /* === SCROLLBAR === */
-/* Hide native */
-html::-webkit-scrollbar { width: 0; background: transparent; }
-html { scrollbar-width: none; }
-/* Thunder scrollbar */
-@keyframes thunderGlow {
-  0%, 100% { box-shadow: 0 0 12px rgba(255,215,0,0.4), 0 0 25px rgba(0,191,255,0.1); }
-  50% { box-shadow: 0 0 25px rgba(255,215,0,0.7), 0 0 50px rgba(0,191,255,0.3); }
+html { overflow-y: scroll; scrollbar-gutter: stable; }
+html::-webkit-scrollbar { width: 14px; background: #0a0a15; }
+html::-webkit-scrollbar-track { background: #0a0a15; }
+html::-webkit-scrollbar-thumb {
+  background: #cc0000;
+  border-radius: 7px;
+  border: 3px solid #0a0a15;
+  min-height: 40px;
 }
-@keyframes thunderFlicker {
-  0%, 100% { filter: brightness(1); }
-  93% { filter: brightness(1); }
-  94% { filter: brightness(2); }
-  95% { filter: brightness(0.7); }
-  96% { filter: brightness(1.6); }
-  97% { filter: brightness(0.8); }
-  98% { filter: brightness(1); }
-}
-#scrollBar {
-  position: fixed; right: 0; top: 0; bottom: 0;
-  width: 28px; z-index: 999999;
-  background: linear-gradient(90deg, transparent 30%, rgba(255,215,0,0.04) 100%);
-  border-left: 1px solid rgba(255,215,0,0.08);
-  cursor: pointer;
-}
-#scrollBar-fill {
-  position: absolute; left: 2px; right: 2px; bottom: 0;
-  height: 0;
-  background: linear-gradient(0deg, #FFD700 0%, #FFF 40%, #00BFFF 100%);
-  border-radius: 6px 6px 0 0;
-  transition: height 0.04s linear;
-  animation: thunderGlow 2s ease infinite, thunderFlicker 4s ease infinite;
-}
-@media (pointer: coarse) {
-  #scrollBar { width: 34px; }
-  #scrollBar-fill { left: 3px; right: 3px; border-radius: 8px 8px 0 0; }
-}
+html::-webkit-scrollbar-thumb:hover { background: #ff0000; }
+/* Firefox */
+html { scrollbar-width: auto; scrollbar-color: #cc0000 #0a0a15; }
