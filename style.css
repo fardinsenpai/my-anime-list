@@ -2177,7 +2177,6 @@
   background: #ff2d2d;
   border-radius: 50%;
   border: 2.5px solid #fff;
-  animation: ai-blink 1.3s ease-in-out infinite;
   z-index: 100000;
 }
 
@@ -2275,7 +2274,6 @@
   height: 8px;
   background: #ff2d2d;
   border-radius: 50%;
-  animation: ai-blink 1.3s ease-in-out infinite;
   box-shadow: 0 0 6px #ff2d2d;
 }
 
@@ -4424,7 +4422,6 @@
 /* ---- Performance body classes ---- */
 body.perf-no-thunder #lightningCanvas { display: none !important; }
 body.perf-no-counter-anim .counter-box { transition: none !important; }
-body.perf-no-blink .ai-dot { animation: none !important; opacity: 0.5 !important; }
 body.perf-no-card-float .card { animation: none !important; }
 body.perf-no-heading-anim .header h1,
 body.perf-no-heading-anim .header h1::before,
