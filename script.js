@@ -3503,62 +3503,6 @@ document.addEventListener('click', function(e) {
     injectCardEnhancements();
     randomizeCardTilt();
     createAmbientParticles();
-    initScrollbar();
-  }
-
-  /* ---- Custom scrollbar ---- */
-  function initScrollbar() {
-    var track = document.getElementById('scrollTrack');
-    var thumb = document.getElementById('scrollThumb');
-    if (!track || !thumb) return;
-    var dragging = false, startY, startTop;
-    function update(){
-      var sh = document.documentElement.scrollHeight;
-      var ch = window.innerHeight;
-      if (sh <= ch) { thumb.style.display = 'none'; return; }
-      thumb.style.display = '';
-      var maxScroll = sh - ch;
-      var scrollY = window.scrollY;
-      var trackH = track.offsetHeight;
-      var thumbH = Math.max(30, trackH * ch / sh);
-      thumb.style.height = thumbH + 'px';
-      var maxTop = trackH - thumbH;
-      thumb.style.top = maxTop > 0 ? ((scrollY / maxScroll) * maxTop) + 'px' : '0px';
-    }
-    window.addEventListener('scroll', update);
-    window.addEventListener('resize', update);
-    update();
-    thumb.addEventListener('mousedown', function(e){
-      dragging = true; startY = e.clientY; startTop = parseFloat(thumb.style.top) || 0;
-      e.preventDefault();
-    });
-    document.addEventListener('mousemove', function(e){
-      if (!dragging) return;
-      var sh = document.documentElement.scrollHeight;
-      var ch = window.innerHeight;
-      var maxScroll = sh - ch;
-      var trackH = track.offsetHeight;
-      var thumbH = thumb.offsetHeight;
-      var maxTop = trackH - thumbH;
-      if (maxTop <= 0) return;
-      var dy = e.clientY - startY;
-      var top = Math.max(0, Math.min(maxTop, startTop + dy));
-      window.scrollTo(0, (top / maxTop) * maxScroll);
-    });
-    document.addEventListener('mouseup', function(){ dragging = false; });
-    track.addEventListener('click', function(e){
-      if (e.target === thumb) return;
-      var rect = track.getBoundingClientRect();
-      var y = e.clientY - rect.top;
-      var sh = document.documentElement.scrollHeight;
-      var ch = window.innerHeight;
-      var maxScroll = sh - ch;
-      var trackH = track.offsetHeight;
-      var thumbH = thumb.offsetHeight;
-      var maxTop = trackH - thumbH;
-      var ratio = (y - thumbH / 2) / trackH;
-      window.scrollTo(0, Math.max(0, Math.min(1, ratio)) * maxScroll);
-    });
   }
 
   /* ============================================================
