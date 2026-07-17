@@ -3316,26 +3316,27 @@ document.addEventListener('click', function(e) {
     function update(){
       var sh = document.documentElement.scrollHeight
       var ch = window.innerHeight
-      if (sh <= ch) { st.style.display = 'none'; return }
-      st.style.display = ''
       var maxScroll = sh - ch
+      if (maxScroll <= 0) { st.style.display = 'none'; return }
+      st.style.display = ''
       var scrollY = window.scrollY
-      var trackH = sc.clientHeight - 8
-      var thumbH = Math.max(30, trackH * ch / sh)
+      var trackH = sc.offsetHeight
+      var thumbH = Math.max(30, Math.min(trackH, trackH * ch / sh))
       st.style.height = thumbH + 'px'
-      st.style.top = ((trackH - thumbH) * (scrollY / maxScroll)) + 'px'
+      st.style.top = ((trackH - thumbH) * (Math.min(scrollY, maxScroll) / maxScroll)) + 'px'
     }
     window.addEventListener('scroll', update)
     window.addEventListener('resize', update)
-    update()
+    setTimeout(update, 100)
     st.addEventListener('mousedown', function(e){
       dragging = true; startY = e.clientY; startTop = parseFloat(st.style.top) || 0
+      st.style.transition = 'none'
       e.preventDefault()
     })
     document.addEventListener('mousemove', function(e){
       if (!dragging) return
-      var trackH = sc.clientHeight - 8
-      var thumbH = st.clientHeight
+      var trackH = sc.offsetHeight
+      var thumbH = st.offsetHeight
       var sh = document.documentElement.scrollHeight
       var ch = window.innerHeight
       var maxScroll = sh - ch
@@ -3343,17 +3344,17 @@ document.addEventListener('click', function(e) {
       var ratio = (startTop + dy) / (trackH - thumbH)
       window.scrollTo(0, Math.max(0, Math.min(1, ratio)) * maxScroll)
     })
-    document.addEventListener('mouseup', function(){ dragging = false })
+    document.addEventListener('mouseup', function(){ dragging = false; st.style.transition = '' })
     sc.addEventListener('click', function(e){
       if (e.target === st) return
       var rect = sc.getBoundingClientRect()
-      var y = e.clientY - rect.top - 4
-      var trackH = sc.clientHeight - 8
-      var thumbH = st.clientHeight
+      var y = e.clientY - rect.top
+      var trackH = sc.offsetHeight
+      var thumbH = st.offsetHeight
       var sh = document.documentElement.scrollHeight
       var ch = window.innerHeight
       var maxScroll = sh - ch
-      var ratio = y / trackH
+      var ratio = (y - thumbH / 2) / trackH
       window.scrollTo(0, Math.max(0, Math.min(1, ratio)) * maxScroll)
     })
   }()
