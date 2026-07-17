@@ -929,11 +929,11 @@
 
   /* style */
 .sidemenu::-webkit-scrollbar {
-  width: 5px;
+  width: 0;
+  background: transparent;
 }
-.sidemenu::-webkit-scrollbar-thumb {
-  background: rgba(255, 204, 0, 0.3);
-  border-radius: 10px;
+.sidemenu {
+  scrollbar-width: none;
 }
 
   /* style */
