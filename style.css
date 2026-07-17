@@ -2168,23 +2168,6 @@
   100% { box-shadow: 0 0 0 0 rgba(245,197,24,0), 0 8px 32px rgba(245,197,24,0.4); }
 }
 
-.ai-dot {
-  position: absolute;
-  top: 2px;
-  right: 2px;
-  width: 15px;
-  height: 15px;
-  background: #ff2d2d;
-  border-radius: 50%;
-  border: 2.5px solid #fff;
-  z-index: 100000;
-}
-
-@keyframes ai-blink {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50%       { opacity: 0.15; transform: scale(0.6); }
-}
-
 
 
 /* -- Chat Box -- */
@@ -2266,15 +2249,6 @@
   display: flex;
   align-items: center;
   gap: 8px;
-}
-
-.header-dot {
-  display: inline-block;
-  width: 8px;
-  height: 8px;
-  background: #ff2d2d;
-  border-radius: 50%;
-  box-shadow: 0 0 6px #ff2d2d;
 }
 
 .chat-header button {
