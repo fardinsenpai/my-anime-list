@@ -4627,25 +4627,33 @@ body.perf-no-heading-anim .header h1::after { animation: none !important; }
 /* Hide native */
 html::-webkit-scrollbar { width: 0; background: transparent; }
 html { scrollbar-width: none; }
-/* Sharingan scrollbar */
+/* Unique animated scrollbar */
+@keyframes sbPulse {
+  0%, 100% { box-shadow: -1px 0 8px rgba(255,51,51,0.3); }
+  50% { box-shadow: -2px 0 20px rgba(255,51,51,0.6), 0 0 30px rgba(255,51,51,0.2); }
+}
+@keyframes sbShimmer {
+  0% { background-position: 0% 0%; }
+  50% { background-position: 0% 100%; }
+  100% { background-position: 0% 0%; }
+}
 #scrollBar {
   position: fixed; right: 0; top: 0; bottom: 0;
-  width: 42px; z-index: 999999;
-  background: linear-gradient(90deg, transparent 30%, rgba(139,0,0,0.06) 100%);
-  border-left: 1px solid rgba(139,0,0,0.1);
+  width: 28px; z-index: 999999;
+  background: linear-gradient(90deg, transparent 30%, rgba(255,51,51,0.05) 100%);
+  border-left: 1px solid rgba(255,51,51,0.08);
   cursor: pointer;
 }
-#scrollBar-thumb {
-  position: absolute; left: 50%; top: 0;
-  width: 36px; height: 36px;
-  transform: translateX(-50%);
-  cursor: grab;
-  z-index: 1;
-  transition: filter 0.3s;
-  filter: drop-shadow(0 0 6px rgba(204,0,0,0.4));
+#scrollBar-fill {
+  position: absolute; left: 3px; right: 3px; bottom: 0;
+  height: 0;
+  background: linear-gradient(0deg, #ff3333, #ff6b9d, #ffb3d0);
+  background-size: 100% 200%;
+  animation: sbShimmer 4s ease infinite, sbPulse 3s ease infinite;
+  border-radius: 10px 10px 0 0;
+  transition: height 0.05s linear;
 }
-#scrollBar-thumb:hover {
-  filter: drop-shadow(0 0 14px rgba(204,0,0,0.8));
+@media (pointer: coarse) {
+  #scrollBar { width: 36px; }
+  #scrollBar-fill { left: 4px; right: 4px; border-radius: 14px 14px 0 0; }
 }
-#scrollBar-thumb:active { cursor: grabbing; }
-#scrollBar-thumb svg { display: block; width: 100%; height: 100%; }
