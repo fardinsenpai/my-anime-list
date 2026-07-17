@@ -3307,6 +3307,57 @@ document.addEventListener('click', function(e) {
 
   /* ============ NEW STYLE FEATURES ============ */
 
+  // 0. Custom scrollbar
+  !function(){
+    var sc = document.getElementById('customScrollbar')
+    var st = document.getElementById('customScrollbar-thumb')
+    if (!sc || !st) return
+    var dragging = false, startY, startTop
+    function update(){
+      var sh = document.documentElement.scrollHeight
+      var ch = window.innerHeight
+      if (sh <= ch) { st.style.display = 'none'; return }
+      st.style.display = ''
+      var maxScroll = sh - ch
+      var scrollY = window.scrollY
+      var trackH = sc.clientHeight - 8
+      var thumbH = Math.max(30, trackH * ch / sh)
+      st.style.height = thumbH + 'px'
+      st.style.top = ((trackH - thumbH) * (scrollY / maxScroll)) + 'px'
+    }
+    window.addEventListener('scroll', update)
+    window.addEventListener('resize', update)
+    update()
+    st.addEventListener('mousedown', function(e){
+      dragging = true; startY = e.clientY; startTop = parseFloat(st.style.top) || 0
+      e.preventDefault()
+    })
+    document.addEventListener('mousemove', function(e){
+      if (!dragging) return
+      var trackH = sc.clientHeight - 8
+      var thumbH = st.clientHeight
+      var sh = document.documentElement.scrollHeight
+      var ch = window.innerHeight
+      var maxScroll = sh - ch
+      var dy = e.clientY - startY
+      var ratio = (startTop + dy) / (trackH - thumbH)
+      window.scrollTo(0, Math.max(0, Math.min(1, ratio)) * maxScroll)
+    })
+    document.addEventListener('mouseup', function(){ dragging = false })
+    sc.addEventListener('click', function(e){
+      if (e.target === st) return
+      var rect = sc.getBoundingClientRect()
+      var y = e.clientY - rect.top - 4
+      var trackH = sc.clientHeight - 8
+      var thumbH = st.clientHeight
+      var sh = document.documentElement.scrollHeight
+      var ch = window.innerHeight
+      var maxScroll = sh - ch
+      var ratio = y / trackH
+      window.scrollTo(0, Math.max(0, Math.min(1, ratio)) * maxScroll)
+    })
+  }()
+
   // 1. Scroll progress bar
   var progressBar = document.getElementById('scrollProgress');
   if (progressBar) {
