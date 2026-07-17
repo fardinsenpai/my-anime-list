@@ -3707,30 +3707,55 @@ document.addEventListener('click', function(e) {
   });
 });
 
-/* ---- Custom scrollbar ---- */
+/* ---- Sharingan scrollbar ---- */
 (function(){
-  var fill = document.getElementById('scrollBar-fill');
-  if (!fill) return;
+  var track = document.getElementById('scrollBar');
+  var thumb = document.getElementById('scrollBar-thumb');
+  if (!track || !thumb) return;
+  var dragging = false, startY, startTop;
   function update(){
     var sh = document.documentElement.scrollHeight;
     var ch = window.innerHeight;
     var maxScroll = sh - ch;
-    if (maxScroll <= 0) { fill.style.height = '0'; return; }
-    var pct = Math.min(100, (window.scrollY / maxScroll) * 100);
-    fill.style.height = pct + '%';
+    if (maxScroll <= 0) { thumb.style.display = 'none'; return; }
+    thumb.style.display = '';
+    var trackH = track.offsetHeight;
+    var thumbH = thumb.offsetHeight;
+    var maxTop = trackH - thumbH;
+    thumb.style.top = maxTop > 0 ? (window.scrollY / maxScroll) * maxTop + 'px' : '0px';
   }
   window.addEventListener('scroll', update);
+  window.addEventListener('resize', update);
   window.addEventListener('load', update);
   update();
-  var bar = fill.parentElement;
-  bar.addEventListener('click', function(e){
-    if (e.target === fill) return;
-    var rect = this.getBoundingClientRect();
+  thumb.addEventListener('mousedown', function(e){
+    dragging = true; startY = e.clientY; startTop = parseFloat(thumb.style.top) || 0;
+    e.preventDefault();
+  });
+  document.addEventListener('mousemove', function(e){
+    if (!dragging) return;
+    var trackH = track.offsetHeight;
+    var thumbH = thumb.offsetHeight;
+    var maxTop = trackH - thumbH;
+    if (maxTop <= 0) return;
+    var dy = e.clientY - startY;
+    var top = Math.max(0, Math.min(maxTop, startTop + dy));
     var sh = document.documentElement.scrollHeight;
     var ch = window.innerHeight;
-    var maxScroll = sh - ch;
-    if (maxScroll <= 0) return;
-    var y = e.clientY - rect.top;
-    window.scrollTo(0, (y / rect.height) * maxScroll);
+    window.scrollTo(0, (top / maxTop) * (sh - ch));
   });
-})(););
+  document.addEventListener('mouseup', function(){ dragging = false; });
+  track.addEventListener('click', function(e){
+    if (e.target === thumb || thumb.contains(e.target)) return;
+    var rect = track.getBoundingClientRect();
+    var y = e.clientY - rect.top;
+    var trackH = track.offsetHeight;
+    var thumbH = thumb.offsetHeight;
+    var maxTop = trackH - thumbH;
+    if (maxTop <= 0) return;
+    var pct = Math.max(0, Math.min(1, (y - thumbH/2) / trackH));
+    var sh = document.documentElement.scrollHeight;
+    var ch = window.innerHeight;
+    window.scrollTo(0, pct * (sh - ch));
+  });
+})();
