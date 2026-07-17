@@ -191,6 +191,7 @@ function openWaifus(){
   history.pushState(null, '', 'waifus');
 
   document.body.style.overflow = 'hidden';
+  document.documentElement.style.overflow = 'hidden';
 
   grid.innerHTML = "";
 
@@ -253,6 +254,7 @@ function closeWaifus(){
   if (ov && ov.style.display === "block") history.replaceState(null, '', '.');
   if (ov) ov.style.display = "none";
   document.body.style.overflow = '';
+  document.documentElement.style.overflow = '';
 }
 
 function filterWaifus(val) {
