@@ -4628,25 +4628,25 @@ html {
   overflow-y: scroll;
   scrollbar-gutter: stable;
   scrollbar-width: auto;
-  scrollbar-color: #00ff88 #0a0a1a;
+  scrollbar-color: #ff3333 #0d0d20;
 }
-html::-webkit-scrollbar { width: 24px; background: #0a0a1a; }
+html::-webkit-scrollbar { width: 20px; background: #0d0d20; }
 html::-webkit-scrollbar-track {
-  background: #0a0a1a;
+  background: #0d0d20;
   border-left: 2px solid #1a1a3a;
 }
 html::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, #00ff88, #00cc66);
-  border: 4px solid #0a0a1a;
-  border-radius: 12px;
+  background: linear-gradient(180deg, #ff6b9d, #ff3333);
+  border: 4px solid #0d0d20;
+  border-radius: 10px;
   min-height: 50px;
-  box-shadow: 0 0 15px rgba(0,255,136,0.3);
+  box-shadow: 0 0 12px rgba(255,51,51,0.4);
 }
 html::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, #33ff99, #00dd77);
-  box-shadow: 0 0 25px rgba(0,255,136,0.6);
+  background: linear-gradient(180deg, #ff85af, #ff5555);
+  box-shadow: 0 0 20px rgba(255,51,51,0.7);
 }
 @media (pointer: coarse) {
-  html::-webkit-scrollbar { width: 28px; }
-  html::-webkit-scrollbar-thumb { border: 5px solid #0a0a1a; border-radius: 14px; }
+  html::-webkit-scrollbar { width: 24px; }
+  html::-webkit-scrollbar-thumb { border: 5px solid #0d0d20; border-radius: 12px; }
 }
