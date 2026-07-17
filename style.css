@@ -4624,28 +4624,24 @@ body.perf-no-heading-anim .header h1::after { animation: none !important; }
 }
 
 /* === CUSTOM SCROLLBAR === */
-::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar { width: 12px; }
 ::-webkit-scrollbar-track { 
-  background: transparent;
-  border-left: 1px solid rgba(255,255,255,0.03);
+  background: rgba(255,51,51,0.08);
+  border-left: 1px solid rgba(255,51,51,0.15);
 }
 ::-webkit-scrollbar-thumb {
   background: linear-gradient(180deg, #ff6b9d 0%, #ff3333 50%, #ff6b9d 100%);
-  border-radius: 0;
+  border: 2px solid rgba(255,255,255,0.05);
   box-shadow: 
+    inset 0 0 6px rgba(255,51,51,0.1),
     -2px 0 8px rgba(255,51,51,0.5),
     2px 0 8px rgba(255,51,51,0.3);
-  transition: box-shadow 0.3s;
 }
 ::-webkit-scrollbar-thumb:hover {
   box-shadow: 
+    inset 0 0 10px rgba(255,51,51,0.2),
     -2px 0 14px rgba(255,51,51,0.8),
     2px 0 14px rgba(255,51,51,0.5);
 }
-@media (pointer: coarse) {
-  ::-webkit-scrollbar { width: 10px; }
-  ::-webkit-scrollbar-thumb { border-radius: 5px; }
-  * { scrollbar-width: auto; }
-}
 /* Firefox */
-* { scrollbar-width: thin; scrollbar-color: #ff3333 transparent; }
+* { scrollbar-width: auto; scrollbar-color: #ff3333 rgba(255,51,51,0.08); }
