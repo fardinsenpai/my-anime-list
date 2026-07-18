@@ -4582,16 +4582,12 @@ body.perf-no-heading-anim .header h1::after { animation: none !important; }
   height: 1.3em;
   stroke-width: 3;
   stroke: var(--ink-black);
-  fill: none;
   stroke-linecap: round;
   stroke-linejoin: round;
   display: block;
 }
 .action-button:hover .action-button-icon {
   stroke: var(--paper-white);
-}
-.like-button:hover .action-button-icon {
-  fill: var(--paper-white);
 }
 
 /* === CUSTOM SCROLLBAR === */
