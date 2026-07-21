@@ -3848,7 +3848,6 @@ function openAdmin() {
   if (o) { o.classList.add('open'); document.getElementById('adminPinInput').value = ''; document.getElementById('adminPinError').style.display = 'none'; document.getElementById('adminPinScreen').style.display = 'block'; document.getElementById('adminDashboard').style.display = 'none'; }
   var pat = getPat();
   if (pat) document.getElementById('adminPatInput').value = pat;
-  document.getElementById('adminPatStatus').textContent = pat ? '✓ PAT saved (persists across tabs)' : '';
   loadTop5Form();
   loadCurrentValues();
 }
@@ -3856,16 +3855,6 @@ function openAdmin() {
 function closeAdmin() {
   var o = document.getElementById('adminOverlay');
   if (o) o.classList.remove('open');
-}
-
-function copyPatFromField() {
-  var pat = document.getElementById('adminPatInput').value.trim();
-  if (!pat) { alert('Paste your PAT in the field above first'); return; }
-  navigator.clipboard.writeText(pat).then(function() {
-    var el = document.getElementById('adminPatStatus');
-    if (el) el.textContent = '✓ Copied!';
-    setTimeout(function() { if (el && getPat()) el.textContent = '✓ PAT saved (persists across tabs)'; else if (el) el.textContent = ''; }, 2000);
-  });
 }
 
 function checkAdminPin() {
