@@ -1343,6 +1343,7 @@
       <div class="admin-tab-content active" id="tabDate">
         <div class="admin-field-label">Last Updated Date</div>
         <input type="text" id="adminDateInput" class="admin-input" value="6/28/2026">
+        <div style="font-size:11px;color:#889;margin-bottom:8px;cursor:pointer;" onclick="document.getElementById('adminDateInput').value=new Date().toLocaleDateString('en-US',{month:'numeric',day:'numeric',year:'numeric'})">📅 Click here to set today's date</div>
         <button class="admin-btn" onclick="commitDate()">Save & Commit</button>
       </div>
 
