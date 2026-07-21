@@ -3860,6 +3860,15 @@ function closeAdmin() {
   if (o) o.classList.remove('open');
 }
 
+function copyPatHint() {
+  var pat = document.getElementById('adminPatInput').value;
+  if (!pat) { alert('Paste your PAT in the field above first'); return; }
+  navigator.clipboard.writeText(pat).then(function() {
+    var el = document.querySelector('.admin-pat-hint');
+    if (el) { el.textContent = '✓ Copied!'; setTimeout(function() { el.textContent = '📋 Click to copy PAT'; }, 2000); }
+  });
+}
+
 function checkAdminPin() {
   var pin = document.getElementById('adminPinInput').value;
   if (pin === ADMIN_PIN) {
