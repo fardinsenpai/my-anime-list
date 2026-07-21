@@ -1357,9 +1357,12 @@
             <div class="admin-watch-preview-info">
               <div id="adminWatchPreviewTitle">No anime selected</div>
               <div id="adminWatchPreviewId"></div>
-            </div>
-          </div>
-        </div>
+    </div>
+  </div>
+  <div id="adminLoading" style="display:none;position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);z-index:10;align-items:center;justify-content:center;border-radius:8px;">
+    <div style="color:#FFD700;font-size:16px;font-weight:600;">⏳ Submitting, please wait...</div>
+  </div>
+</div>
         <div class="admin-field-label">Episode (e.g. 10 / 24)</div>
         <input type="text" id="adminWatchEps" class="admin-input" value="Episode 10 / 24">
         <div class="admin-field-label">Progress % (e.g. 45)</div>

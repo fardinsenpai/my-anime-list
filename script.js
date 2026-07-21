@@ -3797,8 +3797,10 @@ function savePat() {
   var pat = document.getElementById('adminPatInput').value.trim();
   if (!pat) return;
   localStorage.setItem('gh_pat', pat);
-  document.getElementById('adminPatStatus').textContent = '✓ PAT saved (persists across tabs)';
 }
+
+function showLoading() { var el = document.getElementById('adminLoading'); if (el) el.style.display = 'flex'; }
+function hideLoading() { var el = document.getElementById('adminLoading'); if (el) el.style.display = 'none'; }
 
 async function githubFetch(path) {
   var pat = getPat();
@@ -4026,9 +4028,10 @@ function selectWatchCard(id) {
 }
 
 async function commitWatching() {
+  showLoading();
   var eps = document.getElementById('adminWatchEps').value.trim();
   var progress = parseInt(document.getElementById('adminWatchProgress').value) || 0;
-  if (!_selectedWatchId) { alert('Select an anime first'); return; }
+  if (!_selectedWatchId) { hideLoading(); alert('Select an anime first'); return; }
   var allCards = document.querySelectorAll('#grid .card');
   var foundCard = null;
   for (var i = 0; i < allCards.length; i++) {
@@ -4036,16 +4039,16 @@ async function commitWatching() {
     var nid = numEl ? parseInt(numEl.textContent.replace(/\D/g, '')) : 0;
     if (nid === _selectedWatchId) { foundCard = allCards[i]; break; }
   }
-  if (!foundCard) { alert('Card not found in grid'); return; }
+  if (!foundCard) { hideLoading(); alert('Card not found in grid'); return; }
   var title = foundCard.querySelector('.title').textContent;
   var img = foundCard.querySelector('.poster-wrap img').src;
   var seasonEl = foundCard.querySelector('.back-season');
   var season = seasonEl ? seasonEl.textContent.replace(/[🌸📺]/g,'').trim() : 'Season-1';
   var data = await githubFetch('index.html');
-  if (!data) { alert('Failed to fetch index.html from GitHub. Check your PAT.'); return; }
+  if (!data) { hideLoading(); alert('Failed to fetch. Check your PAT.'); return; }
   var content = decodeURIComponent(escape(atob(data.content)));
   var watchBlock = content.match(/<div class="stats-bar-card">[\s\S]*?<\/div>\s*<\/div>\s*<\/div>/);
-  if (!watchBlock) { alert('Could not find Currently Watching block'); return; }
+  if (!watchBlock) { hideLoading(); alert('Could not find Currently Watching block'); return; }
   var oldHtml = watchBlock[0];
   var newHtml = '<div class="stats-bar-card">' +
     '<div class="stats-bar-label">🎬 Currently Watching</div>' +
@@ -4060,7 +4063,8 @@ async function commitWatching() {
     '</div></div>';
   content = content.replace(oldHtml, newHtml);
   var ok = await githubCommit('index.html', content, 'admin: update currently watching to ' + title);
-  if (ok) { alert('Committed! Refresh to see changes.'); }
+  hideLoading();
+  if (ok) { alert('Committed!'); }
 }
 
 function loadTop5Form() {
@@ -4082,17 +4086,20 @@ function loadTop5Form() {
 // === COMMIT FUNCTIONS ===
 
 async function commitDate() {
+  showLoading();
   var newDate = document.getElementById('adminDateInput').value.trim();
-  if (!newDate) return;
+  if (!newDate) { hideLoading(); return; }
   var data = await githubFetch('index.html');
-  if (!data) { alert('Failed to fetch index.html from GitHub. Check your PAT.'); return; }
+  if (!data) { hideLoading(); alert('Failed to fetch. Check your PAT.'); return; }
   var content = decodeURIComponent(escape(atob(data.content)));
   content = content.replace(/(<span id="lastUpdatedDate">)(.*?)(<\/span>)/, '$1' + newDate + '$3');
   var ok = await githubCommit('index.html', content, 'admin: update last updated date to ' + newDate);
-  if (ok) { alert('Committed! Refresh to see changes.'); var el = document.getElementById('lastUpdatedDate'); if (el) el.textContent = newDate; }
+  hideLoading();
+  if (ok) { alert('Committed!'); var el = document.getElementById('lastUpdatedDate'); if (el) el.textContent = newDate; }
 }
 
 async function commitTop5() {
+  showLoading();
   var inputs = document.querySelectorAll('.admin-top5-id');
   var newData = {};
   inputs.forEach(function(inp) {
@@ -4102,15 +4109,17 @@ async function commitTop5() {
     newData[g][idx] = parseInt(inp.value) || 0;
   });
   var data = await githubFetch('script.js');
-  if (!data) { alert('Failed to fetch script.js from GitHub. Check your PAT.'); return; }
+  if (!data) { hideLoading(); alert('Failed to fetch. Check your PAT.'); return; }
   var content = decodeURIComponent(escape(atob(data.content)));
   var jsonStr = JSON.stringify(newData, null, 2).split('\n').map(function(l, i) { return i === 0 ? l : '  ' + l; }).join('\n');
   content = content.replace(/const TOP_5_DATA\s*=\s*\{[\s\S]*?\};/, 'const TOP_5_DATA = ' + jsonStr + ';');
   var ok = await githubCommit('script.js', content, 'admin: update Top 5 picks');
-  if (ok) { alert('Committed! Refresh to see changes.'); Object.assign(TOP_5_DATA, newData); }
+  hideLoading();
+  if (ok) { alert('Committed!'); Object.assign(TOP_5_DATA, newData); }
 }
 
 async function commitAddAnime() {
+  showLoading();
   var title = document.getElementById('adminAddTitle').value.trim();
   var img = document.getElementById('adminAddImg').value.trim();
   var season = document.getElementById('adminAddSeason').value.trim();
@@ -4120,12 +4129,12 @@ async function commitAddAnime() {
   var studio = _selectedStudio.join(', ');
   var genre = _selectedGenre.join(', ');
   var seasonLabel = document.getElementById('adminAddSeasonLabel').value.trim() || 'Season-1';
-  if (!title || !img) { alert('Title and Image URL are required'); return; }
+  if (!title || !img) { hideLoading(); alert('Title and Image URL are required'); return; }
 
   // Fetch current files
   var indexData = await githubFetch('index.html');
   var scriptData = await githubFetch('script.js');
-  if (!indexData || !scriptData) { alert('Failed to fetch files from GitHub. Check your PAT.'); return; }
+  if (!indexData || !scriptData) { hideLoading(); alert('Failed to fetch files. Check your PAT.'); return; }
 
   var indexContent = decodeURIComponent(escape(atob(indexData.content)));
   var scriptContent = decodeURIComponent(escape(atob(scriptData.content)));
@@ -4225,5 +4234,6 @@ async function commitAddAnime() {
 
   var ok1 = await githubCommit('index.html', indexContent, 'admin: add anime #' + nextId + ' - ' + title);
   var ok2 = await githubCommit('script.js', scriptContent, 'admin: add data for anime #' + nextId + ' - ' + title);
-  if (ok1 && ok2) { alert('Committed! Anime #' + nextId + ' added. Refresh to see changes.'); }
+  hideLoading();
+  if (ok1 && ok2) { alert('Committed! Anime #' + nextId + ' added.'); }
 }
