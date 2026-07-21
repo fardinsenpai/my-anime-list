@@ -3720,12 +3720,12 @@ const GITHUB_OWNER = 'fardinsenpai';
 const GITHUB_REPO = 'my-anime-list';
 const GITHUB_BRANCH = 'main';
 
-function getPat() { return sessionStorage.getItem('gh_pat'); }
+function getPat() { return localStorage.getItem('gh_pat'); }
 function savePat() {
   var pat = document.getElementById('adminPatInput').value.trim();
   if (!pat) return;
-  sessionStorage.setItem('gh_pat', pat);
-  document.getElementById('adminPatStatus').textContent = '✓ PAT saved for this session';
+  localStorage.setItem('gh_pat', pat);
+  document.getElementById('adminPatStatus').textContent = '✓ PAT saved (persists across tabs)';
 }
 
 async function githubFetch(path) {
@@ -3778,6 +3778,7 @@ function openAdmin() {
   if (o) { o.classList.add('open'); document.getElementById('adminPinInput').value = ''; document.getElementById('adminPinError').style.display = 'none'; document.getElementById('adminPinScreen').style.display = 'block'; document.getElementById('adminDashboard').style.display = 'none'; }
   var pat = getPat();
   if (pat) document.getElementById('adminPatInput').value = pat;
+  document.getElementById('adminPatStatus').textContent = pat ? '✓ PAT saved (persists across tabs)' : '';
   loadTop5Form();
   loadCurrentValues();
 }
