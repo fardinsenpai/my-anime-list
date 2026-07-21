@@ -1390,13 +1390,7 @@
         <div class="admin-field-label">Studio</div>
         <div class="admin-pill-container" id="adminStudioPills"><input type="text" class="admin-pill-search" id="adminStudioSearch" placeholder="Search Studio..." oninput="filterPills(this, 'studio')"><div class="admin-pill-list" id="adminStudioList"></div></div>
         <div class="admin-field-label">Genre Tags</div>
-        <div class="admin-pill-container" id="adminGenrePills">
-          <div style="display:flex;gap:4px;">
-            <input type="text" class="admin-pill-search" id="adminGenreSearch" placeholder="Type genre & press Enter" style="flex:1;" onkeydown="if(event.key==='Enter')addGenreTag()">
-            <button class="admin-btn admin-btn-sm" onclick="addGenreTag()" style="margin:0;">+</button>
-          </div>
-          <div class="admin-selected-pills" id="adminGenreTags" style="margin-top:6px;"></div>
-        </div>
+        <div class="admin-pill-container" id="adminGenrePills"><input type="text" class="admin-pill-search" id="adminGenreSearch" placeholder="Search Genre..." oninput="filterPills(this, 'genre')"><div class="admin-pill-list" id="adminGenreList"></div></div>
         <div class="admin-selected-pills" id="adminSelectedPills"></div>
         <div class="admin-field-label">Season Label (e.g. Season-1)</div>
         <input type="text" id="adminAddSeasonLabel" class="admin-input" placeholder="Season-1">

@@ -3892,36 +3892,6 @@ document.addEventListener('click', function(e) {
 
 var _selectedOtt = [], _selectedStudio = [], _selectedGenre = [];
 
-function addGenreTag() {
-  var input = document.getElementById('adminGenreSearch');
-  if (!input) return;
-  var val = input.value.trim();
-  if (!val) return;
-  if (_selectedGenre.indexOf(val) === -1) _selectedGenre.push(val);
-  input.value = '';
-  renderGenreTags();
-  renderSelectedPills();
-}
-
-function removeGenreTag(val) {
-  var idx = _selectedGenre.indexOf(val);
-  if (idx !== -1) _selectedGenre.splice(idx, 1);
-  renderGenreTags();
-  renderSelectedPills();
-}
-
-function renderGenreTags() {
-  var container = document.getElementById('adminGenreTags');
-  if (!container) return;
-  container.innerHTML = '';
-  _selectedGenre.forEach(function(g) {
-    var span = document.createElement('span');
-    span.className = 'admin-selected-pill';
-    span.innerHTML = g + ' <span onclick="removeGenreTag(\'' + g.replace(/'/g,"\\'") + '\')">✕</span>';
-    container.appendChild(span);
-  });
-}
-
 function getUniqueOtt(all) {
   var freq = {};
   if (typeof OTT_DATA === 'object') Object.keys(OTT_DATA).forEach(function(k) { (OTT_DATA[k]||[]).forEach(function(v) { freq[v] = (freq[v]||0) + 1; }); });
@@ -3937,7 +3907,12 @@ function getUniqueStudios(all) {
 }
 
 function getUniqueGenres() {
-  return [];
+  var set = {};
+  document.querySelectorAll('#grid .card .back-genre').forEach(function(el) {
+    (el.textContent||'').split(',').forEach(function(g) { var t = g.trim(); if (t) set[t] = 1; });
+  });
+  if (typeof TOP_5_DATA === 'object') Object.keys(TOP_5_DATA).forEach(function(g) { if (g) set[g] = 1; });
+  return Object.keys(set).sort();
 }
 
 function renderPills(type, filter) {
@@ -3973,13 +3948,14 @@ function renderSelectedPills() {
   var all = [];
   _selectedOtt.forEach(function(v) { all.push({ type: 'ott', v: v }); });
   _selectedStudio.forEach(function(v) { all.push({ type: 'studio', v: v }); });
+  _selectedGenre.forEach(function(v) { all.push({ type: 'genre', v: v }); });
   if (all.length === 0) { container.style.display = 'none'; return; }
   container.style.display = 'flex';
   all.forEach(function(item) {
     var span = document.createElement('span');
     span.className = 'admin-selected-pill';
-    var label = (item.type === 'ott' ? '📺 ' : '🎬 ') + item.v;
-    span.innerHTML = label + ' <span onclick="togglePill(\'' + item.type + '\',\'' + item.v.replace(/'/g,"\\'") + '\')">✕</span>';
+    var label = item.type === 'ott' ? '📺 ' : item.type === 'studio' ? '🎬 ' : '🏷️ ';
+    span.innerHTML = label + item.v + ' <span onclick="togglePill(\'' + item.type + '\',\'' + item.v.replace(/'/g,"\\'") + '\')">✕</span>';
     container.appendChild(span);
   });
 }
@@ -3991,7 +3967,7 @@ function filterPills(input, type) {
 // Init pills when add tab opens
 document.addEventListener('click', function(e) {
   var tab = e.target.closest('.admin-tab[data-tab="add"]');
-  if (tab) { renderPills('ott', ''); renderPills('studio', ''); }
+  if (tab) { renderPills('ott', ''); renderPills('studio', ''); renderPills('genre', ''); }
 });
 
 function loadCurrentValues() {
