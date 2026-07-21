@@ -1343,7 +1343,7 @@
       <div class="admin-tab-content active" id="tabDate">
         <div class="admin-field-label">Last Updated Date</div>
         <input type="text" id="adminDateInput" class="admin-input" value="6/28/2026">
-        <div style="font-size:11px;color:#889;margin-bottom:8px;cursor:pointer;" onclick="var d=new Date();document.getElementById('adminDateInput').value=[('0'+d.getDate()).slice(-2),('0'+(d.getMonth()+1)).slice(-2),String(d.getFullYear()).slice(-2)].join('/')">📅 Click here to set today's date</div>
+        <div style="font-size:11px;color:#889;margin-bottom:8px;cursor:pointer;" onclick="var d=new Date();document.getElementById('adminDateInput').value=[('0'+d.getDate()).slice(-2),('0'+(d.getMonth()+1)).slice(-2),d.getFullYear()].join('/')">📅 Click here to set today's date</div>
         <button class="admin-btn" onclick="commitDate()">Save & Commit</button>
       </div>
 
