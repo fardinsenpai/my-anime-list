@@ -3892,16 +3892,18 @@ document.addEventListener('click', function(e) {
 
 var _selectedOtt = [], _selectedStudio = [], _selectedGenre = [];
 
-function getUniqueOtt() {
-  var set = {};
-  if (typeof OTT_DATA === 'object') Object.keys(OTT_DATA).forEach(function(k) { (OTT_DATA[k]||[]).forEach(function(v) { set[v] = 1; }); });
-  return Object.keys(set).sort();
+function getUniqueOtt(all) {
+  var freq = {};
+  if (typeof OTT_DATA === 'object') Object.keys(OTT_DATA).forEach(function(k) { (OTT_DATA[k]||[]).forEach(function(v) { freq[v] = (freq[v]||0) + 1; }); });
+  var sorted = Object.keys(freq).sort(function(a,b) { return (freq[b]||0) - (freq[a]||0); });
+  return all ? sorted : sorted.slice(0, 10);
 }
 
-function getUniqueStudios() {
-  var set = {};
-  if (typeof STUDIO_DATA === 'object') Object.keys(STUDIO_DATA).forEach(function(k) { (STUDIO_DATA[k]||[]).forEach(function(v) { set[v] = 1; }); });
-  return Object.keys(set).sort();
+function getUniqueStudios(all) {
+  var freq = {};
+  if (typeof STUDIO_DATA === 'object') Object.keys(STUDIO_DATA).forEach(function(k) { (STUDIO_DATA[k]||[]).forEach(function(v) { freq[v] = (freq[v]||0) + 1; }); });
+  var sorted = Object.keys(freq).sort(function(a,b) { return (freq[b]||0) - (freq[a]||0); });
+  return all ? sorted : sorted.slice(0, 10);
 }
 
 function getUniqueGenres() {
@@ -3916,7 +3918,8 @@ function getUniqueGenres() {
 function renderPills(type, filter) {
   var list = document.getElementById('admin' + type.charAt(0).toUpperCase() + type.slice(1) + 'List');
   if (!list) return;
-  var data = type === 'ott' ? getUniqueOtt() : type === 'studio' ? getUniqueStudios() : getUniqueGenres();
+  var hasFilter = filter && filter.trim().length > 0;
+  var data = type === 'ott' ? getUniqueOtt(hasFilter) : type === 'studio' ? getUniqueStudios(hasFilter) : getUniqueGenres();
   var selected = type === 'ott' ? _selectedOtt : type === 'studio' ? _selectedStudio : _selectedGenre;
   var q = (filter || '').toLowerCase();
   list.innerHTML = '';
