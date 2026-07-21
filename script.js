@@ -3890,108 +3890,40 @@ document.addEventListener('click', function(e) {
   if (content) content.classList.add('active');
 });
 
-var _selectedOtt = [], _selectedStudio = [], _selectedGenre = [];
-
-function addGenreTag() {
-  var input = document.getElementById('adminGenreSearch');
-  if (!input) return;
-  var val = input.value.trim();
-  if (!val) return;
-  if (_selectedGenre.indexOf(val) === -1) _selectedGenre.push(val);
-  input.value = '';
-  renderGenreTags();
-  renderSelectedPills();
-}
-
-function removeGenreTag(val) {
-  var idx = _selectedGenre.indexOf(val);
-  if (idx !== -1) _selectedGenre.splice(idx, 1);
-  renderGenreTags();
-  renderSelectedPills();
-}
-
-function renderGenreTags() {
-  var container = document.getElementById('adminGenreTags');
-  if (!container) return;
-  container.innerHTML = '';
-  _selectedGenre.forEach(function(g) {
-    var span = document.createElement('span');
-    span.className = 'admin-selected-pill';
-    span.innerHTML = g + ' <span onclick="removeGenreTag(\'' + g.replace(/'/g,"\\'") + '\')">✕</span>';
-    container.appendChild(span);
-  });
-}
-
-function getUniqueOtt(all) {
+function getUniqueItems(dataObj, all) {
   var freq = {};
-  if (typeof OTT_DATA === 'object') Object.keys(OTT_DATA).forEach(function(k) { (OTT_DATA[k]||[]).forEach(function(v) { freq[v] = (freq[v]||0) + 1; }); });
+  if (typeof dataObj === 'object') Object.keys(dataObj).forEach(function(k) { (dataObj[k]||[]).forEach(function(v) { if (v) freq[v] = (freq[v]||0) + 1; }); });
   var sorted = Object.keys(freq).sort(function(a,b) { return (freq[b]||0) - (freq[a]||0); });
-  return all ? sorted : sorted.slice(0, 10);
-}
-
-function getUniqueStudios(all) {
-  var freq = {};
-  if (typeof STUDIO_DATA === 'object') Object.keys(STUDIO_DATA).forEach(function(k) { (STUDIO_DATA[k]||[]).forEach(function(v) { freq[v] = (freq[v]||0) + 1; }); });
-  var sorted = Object.keys(freq).sort(function(a,b) { return (freq[b]||0) - (freq[a]||0); });
-  return all ? sorted : sorted.slice(0, 10);
+  return all ? sorted : sorted.slice(0, 50);
 }
 
 function getUniqueGenres() {
-  return [];
+  var set = {};
+  document.querySelectorAll('#grid .card .back-genre').forEach(function(el) {
+    (el.textContent||'').split(',').forEach(function(g) { var t = g.trim(); if (t) set[t] = 1; });
+  });
+  return Object.keys(set).sort();
 }
 
-function renderPills(type, filter) {
-  var list = document.getElementById('admin' + type.charAt(0).toUpperCase() + type.slice(1) + 'List');
-  if (!list) return;
-  var hasFilter = filter && filter.trim().length > 0;
-  var data = type === 'ott' ? getUniqueOtt(hasFilter) : type === 'studio' ? getUniqueStudios(hasFilter) : getUniqueGenres();
-  var selected = type === 'ott' ? _selectedOtt : type === 'studio' ? _selectedStudio : _selectedGenre;
-  var q = (filter || '').toLowerCase();
-  list.innerHTML = '';
-  data.forEach(function(v) {
-    if (q && !v.toLowerCase().includes(q)) return;
-    var div = document.createElement('div');
-    div.className = 'admin-pill' + (selected.indexOf(v) !== -1 ? ' selected' : '');
-    div.textContent = v;
-    div.onclick = function() { togglePill(type, v); };
-    list.appendChild(div);
+function populateSelect(id, items) {
+  var sel = document.getElementById(id);
+  if (!sel) return;
+  sel.innerHTML = '';
+  items.forEach(function(v) {
+    var opt = document.createElement('option');
+    opt.value = v;
+    opt.textContent = v;
+    sel.appendChild(opt);
   });
 }
 
-function togglePill(type, value) {
-  var arr = type === 'ott' ? _selectedOtt : type === 'studio' ? _selectedStudio : _selectedGenre;
-  var idx = arr.indexOf(value);
-  if (idx !== -1) arr.splice(idx, 1); else arr.push(value);
-  renderPills(type, document.getElementById('admin' + type.charAt(0).toUpperCase() + type.slice(1) + 'Search').value);
-  renderSelectedPills();
-}
-
-function renderSelectedPills() {
-  var container = document.getElementById('adminSelectedPills');
-  if (!container) return;
-  container.innerHTML = '';
-  var all = [];
-  _selectedOtt.forEach(function(v) { all.push({ type: 'ott', v: v }); });
-  _selectedStudio.forEach(function(v) { all.push({ type: 'studio', v: v }); });
-  if (all.length === 0) { container.style.display = 'none'; return; }
-  container.style.display = 'flex';
-  all.forEach(function(item) {
-    var span = document.createElement('span');
-    span.className = 'admin-selected-pill';
-    var label = (item.type === 'ott' ? '📺 ' : '🎬 ') + item.v;
-    span.innerHTML = label + ' <span onclick="togglePill(\'' + item.type + '\',\'' + item.v.replace(/'/g,"\\'") + '\')">✕</span>';
-    container.appendChild(span);
-  });
-}
-
-function filterPills(input, type) {
-  renderPills(type, input.value);
-}
-
-// Init pills when add tab opens
 document.addEventListener('click', function(e) {
   var tab = e.target.closest('.admin-tab[data-tab="add"]');
-  if (tab) { renderPills('ott', ''); renderPills('studio', ''); }
+  if (tab) {
+    populateSelect('adminAddOtt', getUniqueItems(window.OTT_DATA, true));
+    populateSelect('adminAddStudio', getUniqueItems(window.STUDIO_DATA, true));
+    populateSelect('adminAddGenre', getUniqueGenres());
+  }
 });
 
 function loadCurrentValues() {
@@ -4147,9 +4079,9 @@ async function commitAddAnime() {
   var season = document.getElementById('adminAddSeason').value.trim();
   var eps = parseInt(document.getElementById('adminAddEps').value) || 0;
   var rating = parseInt(document.getElementById('adminAddRating').value) || null;
-  var ott = _selectedOtt.join(', ');
-  var studio = _selectedStudio.join(', ');
-  var genre = _selectedGenre.join(', ');
+  var ott = Array.from(document.getElementById('adminAddOtt').selectedOptions).map(function(o) { return o.value; }).join(', ');
+  var studio = Array.from(document.getElementById('adminAddStudio').selectedOptions).map(function(o) { return o.value; }).join(', ');
+  var genre = Array.from(document.getElementById('adminAddGenre').selectedOptions).map(function(o) { return o.value; }).join(', ');
   var seasonLabel = document.getElementById('adminAddSeasonLabel').value.trim() || 'Season-1';
   if (!title || !img) { alert('Title and Image URL are required'); return; }
 

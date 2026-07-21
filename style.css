@@ -4828,35 +4828,8 @@ body.perf-no-heading-anim .header h1::after { animation: none !important; }
 .admin-watch-preview-info { flex: 1; }
 .admin-watch-preview-info div:first-child { font-size: 13px; font-weight: 600; color: #FFD700; }
 .admin-watch-preview-info div:last-child { font-size: 11px; color: #889; margin-top: 2px; }
-.admin-pill-container { margin-bottom: 10px; }
-.admin-pill-search {
-  width: 100%; padding: 8px 10px; margin-bottom: 6px;
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 6px; color: #fff; font-size: 12px; outline: none;
-}
-.admin-pill-search:focus { border-color: #FFD700; }
-.admin-pill-list {
-  display: flex; flex-wrap: wrap; gap: 4px;
-  max-height: 100px; overflow-y: auto; padding: 4px;
-}
-.admin-pill {
-  padding: 3px 10px; font-size: 11px; border-radius: 12px;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.08);
-  color: #889; cursor: pointer; transition: all 0.15s;
-  user-select: none;
-}
-.admin-pill:hover { background: rgba(255,215,0,0.08); border-color: rgba(255,215,0,0.2); color: #aab; }
-.admin-pill.selected { background: rgba(255,215,0,0.15); border-color: #FFD700; color: #FFD700; }
-.admin-selected-pills {
-  display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 10px; min-height: 24px;
-}
-.admin-selected-pill {
-  display: inline-flex; align-items: center; gap: 4px;
-  padding: 2px 8px; font-size: 11px; border-radius: 10px;
-  background: rgba(255,215,0,0.1); border: 1px solid rgba(255,215,0,0.2);
-  color: #FFD700;
-}
-.admin-selected-pill span { cursor: pointer; font-size: 13px; line-height: 1; opacity: 0.7; }
-.admin-selected-pill span:hover { opacity: 1; }
+#tabAdd select.admin-input { width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); border-radius: 6px; color: #fff; font-size: 12px; padding: 6px; outline: none; margin-bottom: 10px; }
+#tabAdd select.admin-input:focus { border-color: #FFD700; }
+#tabAdd select.admin-input option { background: #1a1a2e; color: #ccd; padding: 4px; }
+#tabAdd select.admin-input option:checked { background: rgba(255,215,0,0.2); color: #FFD700; }
+#tabAdd select.admin-input[size] { min-height: 100px; }
