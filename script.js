@@ -3831,12 +3831,12 @@ async function githubCommit(path, content, message) {
   } catch(e) { alert('Commit error: ' + e.message); return false; }
 }
 
-// Trigger: triple-click logo
+// Trigger: double-click settings gear
 var _adminClick = 0, _adminTimer = null;
 document.addEventListener('click', function(e) {
-  if (!e.target.closest('.topbar-logo')) return;
+  if (!e.target.closest('#perfToggle')) return;
   _adminClick++;
-  if (_adminClick === 3) {
+  if (_adminClick === 2) {
     _adminClick = 0; clearTimeout(_adminTimer);
     openAdmin();
   } else {
