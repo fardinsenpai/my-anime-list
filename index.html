@@ -1347,12 +1347,18 @@
 
       <!-- Tab: Currently Watching -->
       <div class="admin-tab-content" id="tabWatching">
-        <div class="admin-field-label">Poster Image URL</div>
-        <input type="text" id="adminWatchImg" class="admin-input" value="https://media.kitsu.app/anime/poster_images/41024/large.jpg">
-        <div class="admin-field-label">Title</div>
-        <input type="text" id="adminWatchTitle" class="admin-input" value="Tensura (That Time I Got Reincarnated as a Slime)">
-        <div class="admin-field-label">Season</div>
-        <input type="text" id="adminWatchSeason" class="admin-input" value="Season 4">
+        <div class="admin-field-label">Search & select an anime</div>
+        <input type="text" id="adminWatchSearch" class="admin-input" placeholder="Type to search anime..." oninput="searchWatchCard(this.value)">
+        <div class="admin-watch-results" id="adminWatchResults"></div>
+        <div class="admin-watch-preview" id="adminWatchPreview">
+          <div class="admin-watch-preview-inner">
+            <img id="adminWatchPreviewImg" src="" alt="">
+            <div class="admin-watch-preview-info">
+              <div id="adminWatchPreviewTitle">No anime selected</div>
+              <div id="adminWatchPreviewId"></div>
+            </div>
+          </div>
+        </div>
         <div class="admin-field-label">Episode (e.g. 10 / 24)</div>
         <input type="text" id="adminWatchEps" class="admin-input" value="Episode 10 / 24">
         <div class="admin-field-label">Progress % (e.g. 45)</div>

@@ -3881,19 +3881,106 @@ document.addEventListener('click', function(e) {
   if (content) content.classList.add('active');
 });
 
+var _selectedWatchId = null;
+
 function loadCurrentValues() {
   var dateEl = document.getElementById('lastUpdatedDate');
   if (dateEl) document.getElementById('adminDateInput').value = dateEl.textContent;
-  var wImg = document.querySelector('.stats-bar-poster img');
-  var wTitle = document.querySelector('.stats-bar-title');
-  var wMeta = document.querySelector('.stats-bar-meta');
   var wEps = document.querySelector('.stats-bar-eps');
   var wFill = document.querySelector('.stats-bar-fill');
-  if (wImg) document.getElementById('adminWatchImg').value = wImg.src;
-  if (wTitle) document.getElementById('adminWatchTitle').value = wTitle.textContent;
-  if (wMeta) document.getElementById('adminWatchSeason').value = wMeta.textContent;
   if (wEps) document.getElementById('adminWatchEps').value = wEps.textContent;
   if (wFill) document.getElementById('adminWatchProgress').value = parseInt(wFill.style.width) || 0;
+}
+
+function searchWatchCard(query) {
+  var container = document.getElementById('adminWatchResults');
+  if (!container) return;
+  container.innerHTML = '';
+  if (!query || query.length < 1) return;
+  var q = query.toLowerCase();
+  var cards = document.querySelectorAll('#grid .card');
+  var found = 0;
+  cards.forEach(function(card) {
+    var titleEl = card.querySelector('.title');
+    var idEl = card.querySelector('.number');
+    var imgEl = card.querySelector('.poster-wrap img');
+    var title = titleEl ? titleEl.textContent : '';
+    var id = idEl ? parseInt(idEl.textContent.replace(/\D/g, '')) : 0;
+    if (!title.toLowerCase().includes(q)) return;
+    if (found >= 18) return;
+    found++;
+    var imgSrc = imgEl ? imgEl.src : '';
+    var div = document.createElement('div');
+    div.className = 'admin-watch-card' + (_selectedWatchId === id ? ' selected' : '');
+    div.innerHTML = '<img src="' + imgSrc + '" alt="" loading="lazy"><div>' + title + '</div>';
+    div.onclick = function() { selectWatchCard(id); };
+    container.appendChild(div);
+  });
+}
+
+function selectWatchCard(id) {
+  _selectedWatchId = id;
+  var allGridCards = document.querySelectorAll('#grid .card');
+  for (var i = 0; i < allGridCards.length; i++) {
+    var numEl = allGridCards[i].querySelector('.number');
+    var nid = numEl ? parseInt(numEl.textContent.replace(/\D/g, '')) : 0;
+    if (nid === id) {
+      var title = allGridCards[i].querySelector('.title');
+      var img = allGridCards[i].querySelector('.poster-wrap img');
+      var seasonEl = allGridCards[i].querySelector('.back-season');
+      var preview = document.getElementById('adminWatchPreview');
+      var previewImg = document.getElementById('adminWatchPreviewImg');
+      var previewTitle = document.getElementById('adminWatchPreviewTitle');
+      var previewId = document.getElementById('adminWatchPreviewId');
+      if (preview) preview.classList.add('show');
+      if (previewImg && img) previewImg.src = img.src;
+      if (previewTitle && title) previewTitle.textContent = title.textContent;
+      if (previewId) previewId.textContent = '#' + id + ' | ' + (seasonEl ? seasonEl.textContent.replace(/[🌸📺]/g,'').trim() : '');
+      document.querySelectorAll('.admin-watch-card').forEach(function(c) {
+        c.classList.remove('selected');
+        if (c.textContent.trim().startsWith(title.textContent.slice(0, 15).trim())) c.classList.add('selected');
+      });
+      break;
+    }
+  }
+}
+
+async function commitWatching() {
+  var eps = document.getElementById('adminWatchEps').value.trim();
+  var progress = parseInt(document.getElementById('adminWatchProgress').value) || 0;
+  if (!_selectedWatchId) { alert('Select an anime first'); return; }
+  var allCards = document.querySelectorAll('#grid .card');
+  var foundCard = null;
+  for (var i = 0; i < allCards.length; i++) {
+    var numEl = allCards[i].querySelector('.number');
+    var nid = numEl ? parseInt(numEl.textContent.replace(/\D/g, '')) : 0;
+    if (nid === _selectedWatchId) { foundCard = allCards[i]; break; }
+  }
+  if (!foundCard) { alert('Card not found in grid'); return; }
+  var title = foundCard.querySelector('.title').textContent;
+  var img = foundCard.querySelector('.poster-wrap img').src;
+  var seasonEl = foundCard.querySelector('.back-season');
+  var season = seasonEl ? seasonEl.textContent.replace(/[🌸📺]/g,'').trim() : 'Season-1';
+  var data = await githubFetch('index.html');
+  if (!data) { alert('Failed to fetch index.html from GitHub. Check your PAT.'); return; }
+  var content = decodeURIComponent(escape(atob(data.content)));
+  var watchBlock = content.match(/<div class="stats-bar-card">[\s\S]*?<\/div>\s*<\/div>\s*<\/div>/);
+  if (!watchBlock) { alert('Could not find Currently Watching block'); return; }
+  var oldHtml = watchBlock[0];
+  var newHtml = '<div class="stats-bar-card">' +
+    '<div class="stats-bar-label">🎬 Currently Watching</div>' +
+    '<div class="stats-bar-inner">' +
+      '<div class="stats-bar-poster"><img src="' + img.replace(/"/g,'&quot;') + '" alt="' + title.replace(/"/g,'&quot;') + '"></div>' +
+      '<div class="stats-bar-info">' +
+        '<div class="stats-bar-title">' + title + '</div>' +
+        '<div class="stats-bar-meta">' + season + '</div>' +
+        '<div class="stats-bar-track"><div class="stats-bar-fill" style="width: ' + progress + '%;"></div></div>' +
+        '<div class="stats-bar-eps">' + eps + '</div>' +
+      '</div>' +
+    '</div></div>';
+  content = content.replace(oldHtml, newHtml);
+  var ok = await githubCommit('index.html', content, 'admin: update currently watching to ' + title);
+  if (ok) { alert('Committed! Refresh to see changes.'); }
 }
 
 function loadTop5Form() {
@@ -3923,35 +4010,6 @@ async function commitDate() {
   content = content.replace(/(<span id="lastUpdatedDate">)(.*?)(<\/span>)/, '$1' + newDate + '$3');
   var ok = await githubCommit('index.html', content, 'admin: update last updated date to ' + newDate);
   if (ok) { alert('Committed! Refresh to see changes.'); var el = document.getElementById('lastUpdatedDate'); if (el) el.textContent = newDate; }
-}
-
-async function commitWatching() {
-  var img = document.getElementById('adminWatchImg').value.trim();
-  var title = document.getElementById('adminWatchTitle').value.trim();
-  var season = document.getElementById('adminWatchSeason').value.trim();
-  var eps = document.getElementById('adminWatchEps').value.trim();
-  var progress = parseInt(document.getElementById('adminWatchProgress').value) || 0;
-  if (!title) return;
-  var data = await githubFetch('index.html');
-  if (!data) { alert('Failed to fetch index.html from GitHub. Check your PAT.'); return; }
-  var content = decodeURIComponent(escape(atob(data.content)));
-  var watchBlock = content.match(/<div class="stats-bar-card">[\s\S]*?<\/div>\s*<\/div>\s*<\/div>/);
-  if (!watchBlock) { alert('Could not find Currently Watching block'); return; }
-  var oldHtml = watchBlock[0];
-  var newHtml = '<div class="stats-bar-card">' +
-    '<div class="stats-bar-label">🎬 Currently Watching</div>' +
-    '<div class="stats-bar-inner">' +
-      '<div class="stats-bar-poster"><img src="' + img + '" alt="' + title.replace(/"/g,'&quot;') + '"></div>' +
-      '<div class="stats-bar-info">' +
-        '<div class="stats-bar-title">' + title + '</div>' +
-        '<div class="stats-bar-meta">' + season + '</div>' +
-        '<div class="stats-bar-track"><div class="stats-bar-fill" style="width: ' + progress + '%;"></div></div>' +
-        '<div class="stats-bar-eps">' + eps + '</div>' +
-      '</div>' +
-    '</div></div>';
-  content = content.replace(oldHtml, newHtml);
-  var ok = await githubCommit('index.html', content, 'admin: update currently watching');
-  if (ok) { alert('Committed! Refresh to see changes.'); }
 }
 
 async function commitTop5() {
