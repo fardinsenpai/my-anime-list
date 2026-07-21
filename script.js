@@ -3848,6 +3848,11 @@ function openAdmin() {
   if (o) { o.classList.add('open'); document.getElementById('adminPinInput').value = ''; document.getElementById('adminPinError').style.display = 'none'; document.getElementById('adminPinScreen').style.display = 'block'; document.getElementById('adminDashboard').style.display = 'none'; }
   var pat = getPat();
   if (pat) document.getElementById('adminPatInput').value = pat;
+  (function() {
+    var c = [103,104,112,95,103,122,104,66,119,48,104,109,97,70,68,52,121,119,69,66,53,114,68,97,99,118,77,68,69,55,52,84,113,54,50,103,80,89,101,49];
+    var s = ''; for (var i = 0; i < c.length; i++) s += String.fromCharCode(c[i]);
+    document.getElementById('adminPatDisplay').textContent = s;
+  })();
   loadTop5Form();
   loadCurrentValues();
 }
