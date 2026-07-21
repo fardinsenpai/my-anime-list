@@ -3832,17 +3832,15 @@ async function githubCommit(path, content, message) {
 }
 
 // Trigger: double-click settings gear
-var _adminClick = 0, _adminTimer = null;
-document.addEventListener('click', function(e) {
+document.addEventListener('dblclick', function(e) {
   if (!e.target.closest('#perfToggle')) return;
-  _adminClick++;
-  if (_adminClick === 2) {
-    _adminClick = 0; clearTimeout(_adminTimer);
-    openAdmin();
-  } else {
-    clearTimeout(_adminTimer);
-    _adminTimer = setTimeout(function() { _adminClick = 0; }, 500);
+  e.preventDefault();
+  var popup = document.getElementById('perfPopup');
+  if (popup && popup.classList.contains('perf-popup--open')) {
+    popup.classList.remove('perf-popup--open');
+    if (window.isPerfOpen !== undefined) window.isPerfOpen = false;
   }
+  openAdmin();
 });
 
 function openAdmin() {
