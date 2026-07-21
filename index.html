@@ -1306,5 +1306,90 @@
   <script src="duel-system.js"></script>
   <script src="tournament.js"></script>
   <script src="script.js"></script>
+
+<!-- === ADMIN PANEL === -->
+<div class="admin-overlay" id="adminOverlay">
+  <div class="admin-modal" id="adminModal">
+    <button class="admin-close" onclick="closeAdmin()">✕</button>
+
+    <!-- PIN Screen -->
+    <div id="adminPinScreen">
+      <div class="admin-lock-icon">🔑</div>
+      <div class="admin-title">Admin Access</div>
+      <div class="admin-sub">Enter PIN to continue</div>
+      <input type="password" id="adminPinInput" class="admin-input" maxlength="6" placeholder="••••••" autocomplete="off">
+      <div class="admin-error" id="adminPinError">Wrong PIN</div>
+      <button class="admin-btn" onclick="checkAdminPin()">Unlock</button>
+    </div>
+
+    <!-- Dashboard -->
+    <div id="adminDashboard" style="display:none;">
+      <div class="admin-title">⚙️ Admin Panel</div>
+      <div class="admin-pat-row">
+        <input type="password" id="adminPatInput" class="admin-input" placeholder="GitHub PAT (repo scope)" style="flex:1;">
+        <button class="admin-btn admin-btn-sm" onclick="savePat()">Save</button>
+      </div>
+      <div class="admin-pat-status" id="adminPatStatus"></div>
+
+      <div class="admin-tabs">
+        <button class="admin-tab active" data-tab="date">📅 Date</button>
+        <button class="admin-tab" data-tab="watching">🎬 Watching</button>
+        <button class="admin-tab" data-tab="top5">🏆 Top 5</button>
+        <button class="admin-tab" data-tab="add">➕ Add</button>
+      </div>
+
+      <!-- Tab: Date -->
+      <div class="admin-tab-content active" id="tabDate">
+        <div class="admin-field-label">Last Updated Date</div>
+        <input type="text" id="adminDateInput" class="admin-input" value="6/28/2026">
+        <button class="admin-btn" onclick="commitDate()">Save & Commit</button>
+      </div>
+
+      <!-- Tab: Currently Watching -->
+      <div class="admin-tab-content" id="tabWatching">
+        <div class="admin-field-label">Poster Image URL</div>
+        <input type="text" id="adminWatchImg" class="admin-input" value="https://media.kitsu.app/anime/poster_images/41024/large.jpg">
+        <div class="admin-field-label">Title</div>
+        <input type="text" id="adminWatchTitle" class="admin-input" value="Tensura (That Time I Got Reincarnated as a Slime)">
+        <div class="admin-field-label">Season</div>
+        <input type="text" id="adminWatchSeason" class="admin-input" value="Season 4">
+        <div class="admin-field-label">Episode (e.g. 10 / 24)</div>
+        <input type="text" id="adminWatchEps" class="admin-input" value="Episode 10 / 24">
+        <div class="admin-field-label">Progress % (e.g. 45)</div>
+        <input type="number" id="adminWatchProgress" class="admin-input" value="45" min="0" max="100">
+        <button class="admin-btn" onclick="commitWatching()">Save & Commit</button>
+      </div>
+
+      <!-- Tab: Top 5 -->
+      <div class="admin-tab-content" id="tabTop5">
+        <div class="admin-scroll-form" id="adminTop5Form"></div>
+        <button class="admin-btn" onclick="commitTop5()">Save & Commit</button>
+      </div>
+
+      <!-- Tab: Add Anime -->
+      <div class="admin-tab-content" id="tabAdd">
+        <div class="admin-field-label">Title</div>
+        <input type="text" id="adminAddTitle" class="admin-input" placeholder="My New Anime">
+        <div class="admin-field-label">Image URL</div>
+        <input type="text" id="adminAddImg" class="admin-input" placeholder="https://...">
+        <div class="admin-field-label">Season (e.g. Spring 2024)</div>
+        <input type="text" id="adminAddSeason" class="admin-input" placeholder="Spring 2024">
+        <div class="admin-field-label">Total Episodes</div>
+        <input type="number" id="adminAddEps" class="admin-input" placeholder="12">
+        <div class="admin-field-label">Rating (0-100)</div>
+        <input type="number" id="adminAddRating" class="admin-input" placeholder="80">
+        <div class="admin-field-label">OTT Platforms (comma separated)</div>
+        <input type="text" id="adminAddOtt" class="admin-input" placeholder="Crunchyroll, Netflix">
+        <div class="admin-field-label">Studio</div>
+        <input type="text" id="adminAddStudio" class="admin-input" placeholder="MAPPA">
+        <div class="admin-field-label">Genre Tags</div>
+        <input type="text" id="adminAddGenre" class="admin-input" placeholder="Action, Fantasy">
+        <div class="admin-field-label">Season Label (e.g. Season-1)</div>
+        <input type="text" id="adminAddSeasonLabel" class="admin-input" placeholder="Season-1">
+        <button class="admin-btn" onclick="commitAddAnime()">Save & Commit</button>
+      </div>
+    </div>
+  </div>
+</div>
 </body>
 </html>
