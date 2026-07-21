@@ -3858,12 +3858,13 @@ function closeAdmin() {
   if (o) o.classList.remove('open');
 }
 
-function copyPatHint() {
-  var pat = document.getElementById('adminPatInput').value;
+function copyPatFromField() {
+  var pat = document.getElementById('adminPatInput').value.trim();
   if (!pat) { alert('Paste your PAT in the field above first'); return; }
   navigator.clipboard.writeText(pat).then(function() {
-    var el = document.querySelector('.admin-pat-hint');
-    if (el) { el.textContent = '✓ Copied!'; setTimeout(function() { el.textContent = '📋 Click to copy PAT'; }, 2000); }
+    var el = document.getElementById('adminPatStatus');
+    if (el) el.textContent = '✓ Copied!';
+    setTimeout(function() { if (el && getPat()) el.textContent = '✓ PAT saved (persists across tabs)'; else if (el) el.textContent = ''; }, 2000);
   });
 }
 
