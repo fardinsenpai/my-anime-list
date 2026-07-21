@@ -323,6 +323,7 @@ function showAllAwardWinners() {
   closeWaifus();
   hideAllSections();
   const grid = document.getElementById('grid');
+  if (grid) grid.style.display = 'grid';
   const cards = Array.from(document.querySelectorAll('.card'));
 
   cards.forEach(card => {
