@@ -3890,7 +3890,79 @@ document.addEventListener('click', function(e) {
   if (content) content.classList.add('active');
 });
 
-var _selectedWatchId = null;
+var _selectedOtt = [], _selectedStudio = [], _selectedGenre = [];
+
+function getUniqueOtt() {
+  var set = {};
+  if (typeof OTT_DATA === 'object') Object.keys(OTT_DATA).forEach(function(k) { (OTT_DATA[k]||[]).forEach(function(v) { set[v] = 1; }); });
+  return Object.keys(set).sort();
+}
+
+function getUniqueStudios() {
+  var set = {};
+  if (typeof STUDIO_DATA === 'object') Object.keys(STUDIO_DATA).forEach(function(k) { (STUDIO_DATA[k]||[]).forEach(function(v) { set[v] = 1; }); });
+  return Object.keys(set).sort();
+}
+
+function getUniqueGenres() {
+  var set = {};
+  if (typeof TOP_5_DATA === 'object') Object.keys(TOP_5_DATA).forEach(function(g) { set[g] = 1; });
+  document.querySelectorAll('#grid .card .back-genre').forEach(function(el) {
+    (el.textContent||'').split(',').forEach(function(g) { var t = g.trim(); if (t) set[t] = 1; });
+  });
+  return Object.keys(set).sort();
+}
+
+function renderPills(type, filter) {
+  var list = document.getElementById('admin' + type.charAt(0).toUpperCase() + type.slice(1) + 'List');
+  if (!list) return;
+  var data = type === 'ott' ? getUniqueOtt() : type === 'studio' ? getUniqueStudios() : getUniqueGenres();
+  var selected = type === 'ott' ? _selectedOtt : type === 'studio' ? _selectedStudio : _selectedGenre;
+  var q = (filter || '').toLowerCase();
+  list.innerHTML = '';
+  data.forEach(function(v) {
+    if (q && !v.toLowerCase().includes(q)) return;
+    var div = document.createElement('div');
+    div.className = 'admin-pill' + (selected.indexOf(v) !== -1 ? ' selected' : '');
+    div.textContent = v;
+    div.onclick = function() { togglePill(type, v); };
+    list.appendChild(div);
+  });
+}
+
+function togglePill(type, value) {
+  var arr = type === 'ott' ? _selectedOtt : type === 'studio' ? _selectedStudio : _selectedGenre;
+  var idx = arr.indexOf(value);
+  if (idx !== -1) arr.splice(idx, 1); else arr.push(value);
+  renderPills(type, document.getElementById('admin' + type.charAt(0).toUpperCase() + type.slice(1) + 'Search').value);
+  renderSelectedPills();
+}
+
+function renderSelectedPills() {
+  var container = document.getElementById('adminSelectedPills');
+  if (!container) return;
+  container.innerHTML = '';
+  var all = [];
+  _selectedOtt.forEach(function(v) { all.push({ type: 'ott', v: v }); });
+  _selectedStudio.forEach(function(v) { all.push({ type: 'studio', v: v }); });
+  _selectedGenre.forEach(function(v) { all.push({ type: 'genre', v: v }); });
+  all.forEach(function(item) {
+    var span = document.createElement('span');
+    span.className = 'admin-selected-pill';
+    span.innerHTML = item.v + ' <span onclick="togglePill(\'' + item.type + '\',\'' + item.v.replace(/'/g,"\\'") + '\')">✕</span>';
+    container.appendChild(span);
+  });
+}
+
+function filterPills(input, type) {
+  renderPills(type, input.value);
+}
+
+// Init pills when add tab opens
+document.addEventListener('click', function(e) {
+  var tab = e.target.closest('.admin-tab[data-tab="add"]');
+  if (tab) { renderPills('ott', ''); renderPills('studio', ''); renderPills('genre', ''); }
+});
 
 function loadCurrentValues() {
   var dateEl = document.getElementById('lastUpdatedDate');
@@ -4045,9 +4117,9 @@ async function commitAddAnime() {
   var season = document.getElementById('adminAddSeason').value.trim();
   var eps = parseInt(document.getElementById('adminAddEps').value) || 0;
   var rating = parseInt(document.getElementById('adminAddRating').value) || null;
-  var ott = document.getElementById('adminAddOtt').value.trim();
-  var studio = document.getElementById('adminAddStudio').value.trim();
-  var genre = document.getElementById('adminAddGenre').value.trim();
+  var ott = _selectedOtt.join(', ');
+  var studio = _selectedStudio.join(', ');
+  var genre = _selectedGenre.join(', ');
   var seasonLabel = document.getElementById('adminAddSeasonLabel').value.trim() || 'Season-1';
   if (!title || !img) { alert('Title and Image URL are required'); return; }
 
