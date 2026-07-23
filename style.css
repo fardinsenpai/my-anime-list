@@ -5039,8 +5039,9 @@ body.perf-no-heading-anim .header h1::after { animation: none !important; }
 #questReview .qr-item .qr-w { color:#ff4444; }
 
 /* === Certificate Templates === */
+@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&display=swap');
 .qc-frame {
-  width: 600px; height: 420px; margin: 0 auto 8px; position: relative;
+  width: 600px; height: 460px; margin: 0 auto 8px; position: relative;
   border-radius: 12px; overflow: hidden;
   font-family: 'Georgia', serif;
   transition: all 0.3s;
@@ -5053,7 +5054,7 @@ body.perf-no-heading-anim .header h1::after { animation: none !important; }
   position: relative;
 }
 .qc-photo-area {
-  width: 110px; height: 110px; border-radius: 50%;
+  width: 90px; height: 120px; border-radius: 6px;
   border: 3px dashed rgba(255,255,255,0.2);
   display: flex; align-items: center; justify-content: center;
   overflow: hidden; margin-bottom: 14px;
@@ -5081,13 +5082,14 @@ body.perf-no-heading-anim .header h1::after { animation: none !important; }
   justify-content: space-between; align-items: flex-end;
 }
 .qc-bottom-left .qc-logo {
-  width: 55px; height: 55px; object-fit: contain;
+  width: 90px; height: 90px; object-fit: contain;
   filter: drop-shadow(0 0 5px rgba(245,197,24,0.5));
 }
 .qc-bottom-right { text-align: right; }
 .qc-rank {
-  font-size: 32px; font-weight: 900; line-height: 1;
-  letter-spacing: 2px;
+  font-size: 40px; font-weight: 700; line-height: 1;
+  font-family: 'Caveat', cursive;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
 }
 .qc-diff {
   font-size: 13px; font-family: monospace;
