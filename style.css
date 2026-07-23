@@ -5040,7 +5040,7 @@ body.perf-no-heading-anim .header h1::after { animation: none !important; }
 
 /* === Certificate Templates === */
 .qc-frame {
-  width: 500px; height: 667px; margin: 0 auto 8px; position: relative;
+  width: 380px; height: 480px; margin: 0 auto 8px; position: relative;
   border-radius: 12px; overflow: hidden;
   transition: all 0.3s;
 }
@@ -5057,8 +5057,8 @@ body.perf-no-heading-anim .header h1::after { animation: none !important; }
 }
 .qc-overlay {
   position: absolute; bottom: 0; left: 0; right: 0;
-  height: 60%;
-  background: linear-gradient(transparent 20%, rgba(0,0,0,0.85));
+  height: 55%;
+  background: linear-gradient(transparent 15%, rgba(0,0,0,0.85));
   pointer-events: none;
 }
 .qc-photo-placeholder {
@@ -5075,16 +5075,16 @@ body.perf-no-heading-anim .header h1::after { animation: none !important; }
   justify-content: space-between; align-items: flex-end;
 }
 .qc-bottom-left .qc-logo {
-  width: 160px; height: 160px; object-fit: contain;
+  width: 120px; height: 120px; object-fit: contain;
   filter: drop-shadow(0 0 12px rgba(0,0,0,0.8)) drop-shadow(0 0 4px rgba(245,197,24,0.3));
 }
 .qc-bottom-right {
   text-align: right;
 }
 .qc-rank {
-  font-size: 72px; font-weight: 900; line-height: 1;
-  font-family: 'Orbitron', monospace;
-  letter-spacing: 4px;
+  font-size: 60px; font-weight: 700; line-height: 1;
+  font-family: 'Bangers', 'Orbitron', sans-serif;
+  letter-spacing: 3px;
   text-shadow: 0 0 20px currentColor, 0 0 40px currentColor, 2px 2px 8px rgba(0,0,0,0.7);
   transform: rotate(-15deg);
   display: inline-block;
