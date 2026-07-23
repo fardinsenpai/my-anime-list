@@ -2773,8 +2773,8 @@ document.addEventListener('click', function(e) {
     tourBtn.addEventListener('click', function (e) { e.preventDefault(); goHome(); setTimeout(startTour, 300); });
   }
 
-  var p = window.location.pathname;
-  if (!localStorage.getItem('fardin_tour_done') && (p.endsWith('/home') || p.endsWith('/my-anime-list') || p === '/' || p === '')) {
+  var p = window.location.pathname.replace(/\/+$/, '');
+  if (!localStorage.getItem('fardin_tour_done') && (p.endsWith('/home') || p.endsWith('/my-anime-list') || p === '' || p === '/')) {
     localStorage.setItem('fardin_tour_done', '1');
     setTimeout(startTour, 1000);
   }
