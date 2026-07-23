@@ -494,21 +494,23 @@
   <div class="analysis-heading"><span class="heading-icon">🎮</span><span class="heading-text">Anime Quest</span></div>
   <div id="questContent">
     <div id="questSelectPhase">
-      <p style="color:#889;font-size:13px;margin-bottom:12px;">Select anime for your quiz, then click <b>Start Quest</b>.</p>
+      <p style="color:#889;font-size:13px;margin-bottom:12px;">Select anime and difficulty, then click <b>Start Quest</b>.</p>
       <div id="questAnimeList" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;margin-bottom:12px;"></div>
-      <div style="text-align:center;">
+      <div style="text-align:center;margin-bottom:10px;">
         <span id="questSelectedCount" style="font-size:12px;color:#FFD700;">Selected: 0</span>
         <br>
         <button id="questStartBtn" class="admin-btn" style="display:none;" onclick="startQuest()">▶ Start Quest</button>
         <button id="questResetSelectBtn" class="admin-btn" style="display:none;background:#800;" onclick="resetQuestSelection()">✖ Clear All</button>
       </div>
+      <div style="text-align:center;border-top:1px solid rgba(0,255,65,0.08);padding-top:10px;">
+        <div style="font-size:11px;color:#889;margin-bottom:6px;">Difficulty</div>
+        <div id="questDiffSelector" style="display:flex;gap:6px;justify-content:center;"></div>
+      </div>
     </div>
     <div id="questQuizPhase" style="display:none;">
       <div id="questProgress" style="font-size:11px;color:#889;margin-bottom:4px;"></div>
-      <div id="questDiffBadge" style="font-size:10px;margin-bottom:8px;"></div>
       <div id="questQuestion" style="font-size:16px;color:#fff;font-weight:600;margin-bottom:16px;min-height:40px;"></div>
       <div id="questOptions" style="display:grid;gap:8px;"></div>
-      <div id="questFeedback" style="font-size:13px;margin-top:12px;min-height:26px;"></div>
     </div>
     <div id="questResultsPhase" style="display:none;text-align:center;">
       <div id="questScore" style="font-size:24px;color:#FFD700;margin-bottom:4px;"></div>

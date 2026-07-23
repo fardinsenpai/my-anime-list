@@ -4706,6 +4706,8 @@ var _questQuestions = [];
 var _questIndex = 0;
 var _questScore = 0;
 var _questAnswers = [];
+var _questDifficulty = 'mixed';
+var QUEST_DIFFICULTIES = ['easy','normal','hard','mixed'];
 
 function shuffleArray(arr) {
   for (var i = arr.length - 1; i > 0; i--) {
@@ -4721,6 +4723,7 @@ function initQuest() {
   _questIndex = 0;
   _questScore = 0;
   _questAnswers = [];
+  _questDifficulty = 'mixed';
   document.getElementById('questSelectPhase').style.display = 'block';
   document.getElementById('questQuizPhase').style.display = 'none';
   document.getElementById('questResultsPhase').style.display = 'none';
@@ -4737,6 +4740,21 @@ function initQuest() {
   document.getElementById('questStartBtn').style.display = 'none';
   document.getElementById('questResetSelectBtn').style.display = 'none';
   document.getElementById('questSelectedCount').textContent = 'Selected: 0';
+  var diffSel = document.getElementById('questDiffSelector');
+  diffSel.innerHTML = '';
+  QUEST_DIFFICULTIES.forEach(function(d) {
+    var pill = document.createElement('span');
+    pill.className = 'admin-g-pill' + (d === 'mixed' ? ' selected' : '');
+    pill.textContent = d.charAt(0).toUpperCase() + d.slice(1);
+    pill.onclick = function() { selectQuestDifficulty(d); };
+    diffSel.appendChild(pill);
+  });
+}
+
+function selectQuestDifficulty(d) {
+  _questDifficulty = d;
+  var pills = document.querySelectorAll('#questDiffSelector .admin-g-pill');
+  pills.forEach(function(p) { p.classList.toggle('selected', p.textContent.toLowerCase() === d); });
 }
 
 function toggleQuestAnime(id) {
@@ -4763,23 +4781,13 @@ function resetQuestSelection() {
 function startQuest() {
   if (_questSelected.length === 0) return;
   var pool = QUEST_BANK.filter(function(q) { return _questSelected.indexOf(q.anime) !== -1; });
+  if (_questDifficulty !== 'mixed') pool = pool.filter(function(q) { return q.difficulty === _questDifficulty; });
   if (pool.length < 10) {
-    msgFail('Need at least 10 questions available. Select more anime.');
+    msgFail('Not enough ' + _questDifficulty + ' questions. Select more anime or change difficulty.');
     return;
   }
   shuffleArray(pool);
-  var easy = pool.filter(function(q) { return q.difficulty === 'easy'; });
-  var normal = pool.filter(function(q) { return q.difficulty === 'normal'; });
-  var hard = pool.filter(function(q) { return q.difficulty === 'hard'; });
-  _questQuestions = [];
-  _questQuestions = _questQuestions.concat(easy.slice(0, 4));
-  _questQuestions = _questQuestions.concat(normal.slice(0, 3));
-  _questQuestions = _questQuestions.concat(hard.slice(0, 3));
-  while (_questQuestions.length < 10) {
-    var extra = pool.filter(function(q) { return _questQuestions.indexOf(q) === -1; });
-    if (extra.length === 0) break;
-    _questQuestions.push(extra[0]);
-  }
+  _questQuestions = pool.slice(0, 10);
   shuffleArray(_questQuestions);
   _questIndex = 0;
   _questScore = 0;
@@ -4794,11 +4802,9 @@ function showQuestQuestion() {
   if (_questIndex >= _questQuestions.length) { showQuestResults(); return; }
   var q = _questQuestions[_questIndex];
   document.getElementById('questProgress').textContent = 'Question ' + (_questIndex + 1) + ' / ' + _questQuestions.length;
-  document.getElementById('questDiffBadge').innerHTML = '<span class="diff-badge ' + q.difficulty + '">' + q.difficulty.toUpperCase() + '</span>';
   document.getElementById('questQuestion').textContent = (_questIndex + 1) + '. ' + q.question;
   var opts = document.getElementById('questOptions');
   opts.innerHTML = '';
-  document.getElementById('questFeedback').innerHTML = '';
   var indices = [0, 1, 2, 3];
   shuffleArray(indices);
   var displayedOptions = indices.map(function(i) { return q.options[i]; });
@@ -4813,22 +4819,12 @@ function showQuestQuestion() {
 }
 
 function answerQuest(selected, correct) {
-  var btns = document.querySelectorAll('#questOptions .qo-btn');
-  var correctText = correct;
-  var isCorrect = selected === correctText;
+  var isCorrect = selected === correct;
   if (isCorrect) _questScore++;
-  _questAnswers.push({ question: _questQuestions[_questIndex].question, correct: correctText, userAnswer: selected, isCorrect: isCorrect, anime: _questQuestions[_questIndex].anime, difficulty: _questQuestions[_questIndex].difficulty });
-  btns.forEach(function(b) {
-    b.onclick = null;
-    b.classList.add('disabled');
-    if (b.textContent === correctText) b.classList.add('correct');
-    if (b.textContent === selected && selected !== correctText) b.classList.add('wrong');
-  });
-  var fb = document.getElementById('questFeedback');
-  if (isCorrect) fb.innerHTML = '<span style="color:#00ff41;">✓ Correct!</span>';
-  else fb.innerHTML = '<span style="color:#ff4444;">✗ Incorrect. Answer: ' + correctText + '</span>';
+  _questAnswers.push({ question: _questQuestions[_questIndex].question, correct: correct, userAnswer: selected, isCorrect: isCorrect, anime: _questQuestions[_questIndex].anime, difficulty: _questQuestions[_questIndex].difficulty });
+  document.querySelectorAll('#questOptions .qo-btn').forEach(function(b) { b.onclick = null; });
   _questIndex++;
-  setTimeout(showQuestQuestion, 1200);
+  showQuestQuestion();
 }
 
 function showQuestResults() {
