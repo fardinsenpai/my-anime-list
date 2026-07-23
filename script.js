@@ -4675,14 +4675,9 @@ function showQuestResults() {
   document.getElementById('qcRank').textContent = gradeEl.textContent;
   var diffMap = { easy:'Easy', normal:'Normal', hard:'Hard', mixed:'Mixed' };
   document.getElementById('qcDiff').textContent = diffMap[_questDifficulty] || 'Mixed';
-  var animeNames = [];
-  _questQuestions.forEach(function(q) {
-    if (animeNames.indexOf(q.anime) === -1) animeNames.push(q.anime);
-  });
-  document.getElementById('qcSubtitle').textContent = 'Anime Quest - ' + animeNames.join(', ');
   // Reset photo
   document.getElementById('qcUserPhoto').style.display = 'none';
-  document.getElementById('qcPhotoPlaceholder').style.display = 'block';
+  document.getElementById('qcUserPhoto').src = '';
   var review = document.getElementById('questReview');
   review.innerHTML = '';
   _questAnswers.forEach(function(a) {
