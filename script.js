@@ -3833,45 +3833,21 @@ async function githubCommit(path, content, message) {
   } catch(e) { alert('Commit error: ' + e.message); return false; }
 }
 
-// === ADMIN ACCESS: hold logo for 1.5s ===
+// === ADMIN ACCESS: click All Genre 3 times ===
 (function() {
-  var logo = document.querySelector('.topbar-logo');
-  if (!logo) return;
-  var timer = null;
-  var ring = null;
-
-  function createRing() {
-    ring = document.createElement('div');
-    ring.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;border-radius:50%;border:3px solid transparent;border-top-color:#FFD700;border-right-color:#FFD700;box-sizing:border-box;pointer-events:none;z-index:10;transition:none;';
-    ring.style.animation = 'none';
-    logo.style.position = 'relative';
-    logo.appendChild(ring);
-  }
-
-  function startHold(e) {
-    if (e.button && e.button !== 0) return;
-    if (timer) return;
-    if (!ring) createRing();
-    ring.style.animation = 'adminSpin 1.5s linear forwards';
-    ring.style.display = 'block';
-    timer = setTimeout(function() {
-      ring.style.display = 'none';
-      timer = null;
+  var count = 0, timer = null;
+  document.addEventListener('click', function(e) {
+    var pill = e.target.closest('.pill[data-genre="All"]');
+    if (!pill) { count = 0; return; }
+    count++;
+    if (count === 3) {
+      count = 0; clearTimeout(timer);
       openAdmin();
-    }, 1500);
-  }
-
-  function cancelHold() {
-    if (timer) { clearTimeout(timer); timer = null; }
-    if (ring) { ring.style.display = 'none'; ring.style.animation = 'none'; }
-  }
-
-  logo.addEventListener('mousedown', startHold);
-  logo.addEventListener('mouseup', cancelHold);
-  logo.addEventListener('mouseleave', cancelHold);
-  logo.addEventListener('touchstart', function(e) { startHold(e); }, { passive: true });
-  logo.addEventListener('touchend', cancelHold);
-  logo.addEventListener('touchcancel', cancelHold);
+    } else {
+      clearTimeout(timer);
+      timer = setTimeout(function() { count = 0; }, 800);
+    }
+  });
 })();
 
 function openAdmin() {
