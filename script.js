@@ -4240,73 +4240,80 @@ async function commitAddAnime() {
 
 // === TOUR GUIDE ===
 (function() {
-  if (localStorage.getItem('tourSeen')) return;
-  var steps = [
-    { el: '#searchBox', text: 'Search for any anime by name right here.', title: '🔍 Search' },
-    { el: '#menuBtn', text: 'Open the sidebar to explore Top 5 Picks, Anime Duel, Crown Conquest, and more.', title: '📂 Menu' },
-    { el: '.counter-container', text: 'Track total anime, seasons, and episodes watched.', title: '📊 Stats' },
-    { el: '#grid', text: 'Browse through all anime cards. Click a card to flip it for details like season, episodes, and genre.', title: '🎴 Anime Cards' },
-    { el: '#perfToggle', text: 'If the site feels laggy, adjust graphics mode here or double-click to open the admin panel.', title: '⚙️ Settings' }
-  ];
-  var current = 0;
-  var overlay = document.getElementById('tourOverlay');
-  var box = document.getElementById('tourBox');
-  var stepEl = document.getElementById('tourStep');
-  var textEl = document.getElementById('tourText');
-  var counterEl = document.getElementById('tourCounter');
-  var prevBtn = document.getElementById('tourPrevBtn');
-  var nextBtn = document.getElementById('tourNextBtn');
-  var doneBtn = document.getElementById('tourDoneBtn');
-  if (!overlay || !box) return;
+  function initTour() {
+    if (localStorage.getItem('tourSeen')) return;
+    var steps = [
+      { el: '#searchBox', text: 'Search for any anime by name right here.', title: '🔍 Search' },
+      { el: '#menuBtn', text: 'Open the sidebar to explore Top 5 Picks, Anime Duel, Crown Conquest, and more.', title: '📂 Menu' },
+      { el: '.counter-container', text: 'Track total anime, seasons, and episodes watched.', title: '📊 Stats' },
+      { el: '#grid', text: 'Browse through all anime cards. Click a card to flip it for details like season, episodes, and genre.', title: '🎴 Anime Cards' },
+      { el: '#perfToggle', text: 'If the site feels laggy, adjust graphics mode here or double-click to open the admin panel.', title: '⚙️ Settings' }
+    ];
+    var current = 0;
+    var overlay = document.getElementById('tourOverlay');
+    var box = document.getElementById('tourBox');
+    var stepEl = document.getElementById('tourStep');
+    var textEl = document.getElementById('tourText');
+    var counterEl = document.getElementById('tourCounter');
+    var prevBtn = document.getElementById('tourPrevBtn');
+    var nextBtn = document.getElementById('tourNextBtn');
+    var doneBtn = document.getElementById('tourDoneBtn');
+    if (!overlay || !box) return;
 
-  function highlight(el) {
-    document.querySelectorAll('.tour-highlight').forEach(function(h) { h.classList.remove('tour-highlight'); });
-    if (!el) return;
-    el.classList.add('tour-highlight');
-    var rect = el.getBoundingClientRect();
-    var bw = box.offsetWidth, bh = box.offsetHeight;
-    var top, left;
-    if (rect.top > bh + 20) {
-      top = rect.top - bh - 15;
-      left = Math.max(10, Math.min(window.innerWidth - bw - 10, rect.left + rect.width / 2 - bw / 2));
-    } else {
-      top = rect.bottom + 15;
-      left = Math.max(10, Math.min(window.innerWidth - bw - 10, rect.left + rect.width / 2 - bw / 2));
+    function highlight(el) {
+      document.querySelectorAll('.tour-highlight').forEach(function(h) { h.classList.remove('tour-highlight'); });
+      if (!el) return;
+      el.classList.add('tour-highlight');
+      var rect = el.getBoundingClientRect();
+      var bw = box.offsetWidth, bh = box.offsetHeight;
+      var top, left;
+      if (rect.top > bh + 20) {
+        top = rect.top - bh - 15;
+        left = Math.max(10, Math.min(window.innerWidth - bw - 10, rect.left + rect.width / 2 - bw / 2));
+      } else {
+        top = rect.bottom + 15;
+        left = Math.max(10, Math.min(window.innerWidth - bw - 10, rect.left + rect.width / 2 - bw / 2));
+      }
+      if (top + bh > window.innerHeight) top = window.innerHeight - bh - 10;
+      if (top < 10) top = 10;
+      box.style.top = top + 'px';
+      box.style.left = left + 'px';
     }
-    if (top + bh > window.innerHeight) top = window.innerHeight - bh - 10;
-    if (top < 10) top = 10;
-    box.style.top = top + 'px';
-    box.style.left = left + 'px';
-  }
 
-  function showStep(idx) {
-    var s = steps[idx];
-    var el = document.querySelector(s.el);
-    stepEl.textContent = s.title;
-    textEl.textContent = s.text;
-    counterEl.textContent = (idx + 1) + ' / ' + steps.length;
-    prevBtn.style.display = idx === 0 ? 'none' : '';
-    nextBtn.style.display = idx < steps.length - 1 ? '' : 'none';
-    doneBtn.style.display = idx === steps.length - 1 ? '' : 'none';
-    highlight(el);
-  }
+    function showStep(idx) {
+      var s = steps[idx];
+      var el = document.querySelector(s.el);
+      stepEl.textContent = s.title;
+      textEl.textContent = s.text;
+      counterEl.textContent = (idx + 1) + ' / ' + steps.length;
+      prevBtn.style.display = idx === 0 ? 'none' : '';
+      nextBtn.style.display = idx < steps.length - 1 ? '' : 'none';
+      doneBtn.style.display = idx === steps.length - 1 ? '' : 'none';
+      highlight(el);
+    }
 
-  overlay.style.display = 'block';
-  showStep(0);
+    overlay.style.display = 'block';
+    showStep(0);
 
-  prevBtn.onclick = function() { if (current > 0) { current--; showStep(current); } };
-  nextBtn.onclick = function() { if (current < steps.length - 1) { current++; showStep(current); } };
-  doneBtn.onclick = function() {
-    localStorage.setItem('tourSeen', '1');
-    overlay.style.display = 'none';
-    document.querySelectorAll('.tour-highlight').forEach(function(h) { h.classList.remove('tour-highlight'); });
-  };
-
-  overlay.addEventListener('click', function(e) {
-    if (e.target === overlay) {
+    prevBtn.onclick = function() { if (current > 0) { current--; showStep(current); } };
+    nextBtn.onclick = function() { if (current < steps.length - 1) { current++; showStep(current); } };
+    doneBtn.onclick = function() {
       localStorage.setItem('tourSeen', '1');
       overlay.style.display = 'none';
       document.querySelectorAll('.tour-highlight').forEach(function(h) { h.classList.remove('tour-highlight'); });
-    }
-  });
+    };
+
+    overlay.addEventListener('click', function(e) {
+      if (e.target === overlay) {
+        localStorage.setItem('tourSeen', '1');
+        overlay.style.display = 'none';
+        document.querySelectorAll('.tour-highlight').forEach(function(h) { h.classList.remove('tour-highlight'); });
+      }
+    });
+  }
+  if (document.readyState === 'complete' || document.readyState === 'interactive') {
+    initTour();
+  } else {
+    document.addEventListener('DOMContentLoaded', initTour);
+  }
 })();
