@@ -5039,7 +5039,6 @@ body.perf-no-heading-anim .header h1::after { animation: none !important; }
 #questReview .qr-item .qr-w { color:#ff4444; }
 
 /* === Certificate Templates === */
-@import url('https://fonts.googleapis.com/css2?family=Yuji+Syuku&display=swap');
 .qc-frame {
   width: 390px; height: 520px; margin: 0 auto 8px; position: relative;
   border-radius: 12px; overflow: hidden;
@@ -5059,8 +5058,8 @@ body.perf-no-heading-anim .header h1::after { animation: none !important; }
 }
 .qc-overlay {
   position: absolute; bottom: 0; left: 0; right: 0;
-  height: 50%;
-  background: linear-gradient(transparent, rgba(0,0,0,0.7));
+  height: 55%;
+  background: linear-gradient(transparent, rgba(0,0,0,0.75));
   pointer-events: none;
 }
 .qc-photo-placeholder {
@@ -5077,22 +5076,22 @@ body.perf-no-heading-anim .header h1::after { animation: none !important; }
   justify-content: space-between; align-items: flex-end;
 }
 .qc-bottom-left .qc-logo {
-  width: 110px; height: 110px; object-fit: contain;
+  width: 130px; height: 130px; object-fit: contain;
   filter: drop-shadow(0 0 5px rgba(245,197,24,0.5));
 }
 .qc-bottom-right {
   text-align: right;
 }
 .qc-rank {
-  font-size: 40px; font-weight: 400; line-height: 1;
+  font-size: 60px; font-weight: 400; line-height: 1;
   font-family: 'Yuji Syuku', serif;
   text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
   transform: rotate(-15deg);
   display: inline-block;
 }
 .qc-diff {
-  font-size: 13px; font-family: monospace;
-  letter-spacing: 1px; margin-top: 4px;
+  font-size: 15px; font-family: monospace;
+  letter-spacing: 1px; margin-top: 6px;
 }
 /* Rank themes */
 .qc-sss .qc-inner {
