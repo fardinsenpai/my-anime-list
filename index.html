@@ -1321,80 +1321,130 @@
 
     <!-- Dashboard -->
     <div id="adminDashboard" style="display:none;">
-      <div class="admin-title">⚙️ Admin Panel</div>
-      <div class="admin-pat-row">
-        <input type="text" id="adminPatInput" class="admin-input" placeholder="GitHub PAT (repo scope)" style="flex:1;">
-        <button class="admin-btn admin-btn-sm" onclick="savePat()">Save</button>
-      </div>
-      <div id="adminPatDisplay" style="font-size:11px;color:#889;margin-top:4px;word-break:break-all;"></div>
-
-      <div class="admin-tabs">
-        <button class="admin-tab active" data-tab="date">📅 Date</button>
-        <button class="admin-tab" data-tab="watching">🎬 Watching</button>
-        <button class="admin-tab" data-tab="top5">🏆 Top 5</button>
-        <button class="admin-tab" data-tab="add">➕ Add</button>
+      <div style="text-align:center;margin-bottom:12px;">
+        <div style="font-size:13px;font-weight:700;font-family:monospace;color:#00ff41;text-shadow:0 0 8px rgba(0,255,65,0.3);letter-spacing:2px;">ROOT@FARDIN ~ ADMIN v3.0</div>
+        <div style="font-size:9px;color:rgba(0,255,65,0.5);font-family:monospace;letter-spacing:4px;">[ HACK THE MAINFRAME ]</div>
       </div>
 
-      <!-- Tab: Date -->
-      <div class="admin-tab-content active" id="tabDate">
-        <div class="admin-field-label">Last Updated Date</div>
-        <input type="text" id="adminDateInput" class="admin-input" value="6/28/2026">
-        <div style="font-size:11px;color:#889;margin-bottom:8px;cursor:pointer;" onclick="var d=new Date();document.getElementById('adminDateInput').value=[('0'+d.getDate()).slice(-2),('0'+(d.getMonth()+1)).slice(-2),d.getFullYear()].join('/')">📅 Click here to set today's date</div>
-        <button class="admin-btn" onclick="commitDate()">Save & Commit</button>
+      <!-- PAT row -->
+      <div style="display:flex;gap:4px;margin-bottom:8px;align-items:center;">
+        <input type="text" id="adminPatInput" class="admin-g-input" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" style="flex:1;margin:0;font-size:10px;padding:5px 8px;">
+        <button class="admin-g-btn" onclick="savePat()" style="width:auto;padding:5px 10px;font-size:10px;flex-shrink:0;">SAVE</button>
       </div>
 
-      <!-- Tab: Currently Watching -->
-      <div class="admin-tab-content" id="tabWatching">
-        <div class="admin-field-label">Search & select an anime</div>
-        <input type="text" id="adminWatchSearch" class="admin-input" placeholder="Type to search anime..." oninput="searchWatchCard(this.value)">
-        <div class="admin-watch-results" id="adminWatchResults"></div>
-        <div class="admin-watch-preview" id="adminWatchPreview">
-          <div class="admin-watch-preview-inner">
-            <img id="adminWatchPreviewImg" src="" alt="">
-            <div class="admin-watch-preview-info">
-              <div id="adminWatchPreviewTitle">No anime selected</div>
-              <div id="adminWatchPreviewId"></div>
-    </div>
-  </div>
-  <div id="adminLoading" style="display:none;position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);z-index:10;align-items:center;justify-content:center;border-radius:8px;">
-    <div style="color:#FFD700;font-size:16px;font-weight:600;">⏳ Submitting, please wait...</div>
-  </div>
-</div>
-        <div class="admin-field-label">Episode (e.g. 10 / 24)</div>
-        <input type="text" id="adminWatchEps" class="admin-input" value="Episode 10 / 24">
-        <div class="admin-field-label">Progress % (e.g. 45)</div>
-        <input type="number" id="adminWatchProgress" class="admin-input" value="45" min="0" max="100">
-        <button class="admin-btn" onclick="commitWatching()">Save & Commit</button>
+      <!-- Tabs -->
+      <div style="display:flex;gap:2px;margin-bottom:10px;border-bottom:1px solid rgba(0,255,65,0.1);padding-bottom:6px;">
+        <button class="admin-g-tab active" data-tab="reading" onclick="switchAdminTab('reading')">📖 READ</button>
+        <button class="admin-g-tab" data-tab="watch" onclick="switchAdminTab('watch')">🎬 WATCH</button>
+        <button class="admin-g-tab" data-tab="top5" onclick="switchAdminTab('top5')">🏆 TOP5</button>
+        <button class="admin-g-tab" data-tab="awards" onclick="switchAdminTab('awards')">🏅 AWARDS</button>
+        <button class="admin-g-tab" data-tab="date" onclick="switchAdminTab('date')">📅 DATE</button>
+        <button class="admin-g-tab" data-tab="add" onclick="switchAdminTab('add')">➕ ADD</button>
       </div>
 
-      <!-- Tab: Top 5 -->
-      <div class="admin-tab-content" id="tabTop5">
-        <div class="admin-scroll-form" id="adminTop5Form"></div>
-        <button class="admin-btn" onclick="commitTop5()">Save & Commit</button>
+      <!-- TAB: Reading -->
+      <div class="admin-g-content active" id="tabReading">
+        <div style="font-size:10px;color:rgba(0,255,65,0.7);font-family:monospace;margin-bottom:6px;">// UPDATE CURRENTLY READING //</div>
+        <input type="text" id="adminReadTitle" class="admin-g-input" placeholder="Manga Title">
+        <input type="text" id="adminReadImg" class="admin-g-input" placeholder="Image URL">
+        <div style="display:flex;gap:6px;">
+          <input type="text" id="adminReadChapter" class="admin-g-input" placeholder="Chapter 305 / ∞" style="flex:1;">
+          <input type="number" id="adminReadProgress" class="admin-g-input" placeholder="60" style="width:60px;">
+        </div>
+        <button class="admin-g-btn" onclick="commitReading()">▶ COMMIT</button>
       </div>
 
-      <!-- Tab: Add Anime -->
-      <div class="admin-tab-content" id="tabAdd">
-        <div class="admin-field-label">Title</div>
-        <input type="text" id="adminAddTitle" class="admin-input" placeholder="My New Anime">
-        <div class="admin-field-label">Image URL</div>
-        <input type="text" id="adminAddImg" class="admin-input" placeholder="https://...">
-        <div class="admin-field-label">Season (e.g. Spring 2024)</div>
-        <input type="text" id="adminAddSeason" class="admin-input" placeholder="Spring 2024">
-        <div class="admin-field-label">Total Episodes</div>
-        <input type="number" id="adminAddEps" class="admin-input" placeholder="12">
-        <div class="admin-field-label">Rating (0-100)</div>
-        <input type="number" id="adminAddRating" class="admin-input" placeholder="80">
-        <div class="admin-field-label">OTT Platforms</div>
-        <div class="admin-pill-container" id="adminOttPills"><input type="text" class="admin-pill-search" id="adminOttSearch" placeholder="Search OTT..." oninput="filterPills(this, 'ott')"><div class="admin-pill-list" id="adminOttList"></div></div>
-        <div class="admin-field-label">Studio</div>
-        <div class="admin-pill-container" id="adminStudioPills"><input type="text" class="admin-pill-search" id="adminStudioSearch" placeholder="Search Studio..." oninput="filterPills(this, 'studio')"><div class="admin-pill-list" id="adminStudioList"></div></div>
-        <div class="admin-field-label">Genre Tags</div>
-        <div class="admin-pill-container" id="adminGenrePills"><input type="text" class="admin-pill-search" id="adminGenreSearch" placeholder="Search Genre..." oninput="filterPills(this, 'genre')"><div class="admin-pill-list" id="adminGenreList"></div></div>
-        <div class="admin-selected-pills" id="adminSelectedPills"></div>
-        <div class="admin-field-label">Season Label (e.g. Season-1)</div>
-        <input type="text" id="adminAddSeasonLabel" class="admin-input" placeholder="Season-1">
-        <button class="admin-btn" onclick="commitAddAnime()">Save & Commit</button>
+      <!-- TAB: Watch -->
+      <div class="admin-g-content" id="tabWatch">
+        <div style="font-size:10px;color:rgba(0,255,65,0.7);font-family:monospace;margin-bottom:6px;">// UPDATE CURRENTLY WATCHING //</div>
+        <input type="text" id="adminWatchSearch" class="admin-g-input" placeholder="1. Search anime..." oninput="searchWatch(this.value)">
+        <div id="adminWatchResults" style="display:grid;grid-template-columns:repeat(2,1fr);gap:3px;max-height:120px;overflow-y:auto;margin-bottom:6px;padding:2px;"></div>
+        <div id="adminWatchPreview" style="display:none;margin-bottom:6px;">
+          <div style="display:flex;align-items:center;gap:8px;padding:6px;background:rgba(0,255,65,0.03);border:1px solid rgba(0,255,65,0.1);border-radius:4px;">
+            <img id="adminWatchPreviewImg" src="" style="width:36px;height:50px;object-fit:cover;border-radius:3px;">
+            <div style="flex:1;">
+              <div id="adminWatchPreviewTitle" style="font-size:11px;color:#00ff41;font-family:monospace;"></div>
+              <div id="adminWatchPreviewId" style="font-size:9px;color:rgba(0,255,65,0.4);font-family:monospace;"></div>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;gap:6px;">
+          <input type="number" id="adminWatchCurEps" class="admin-g-input" placeholder="2. Current ep" style="flex:1;">
+          <input type="number" id="adminWatchTotalEps" class="admin-g-input" placeholder="3. Total ep" style="flex:1;">
+        </div>
+        <div style="display:flex;gap:6px;">
+          <input type="text" id="adminWatchSeason" class="admin-g-input" placeholder="4. Season (Season 4)" style="flex:1;">
+          <input type="number" id="adminWatchProgress" class="admin-g-input" placeholder="5. Progress %" style="width:80px;">
+        </div>
+        <button class="admin-g-btn" onclick="commitWatching()">▶ COMMIT</button>
+      </div>
+
+      <!-- TAB: Top 5 -->
+      <div class="admin-g-content" id="tabTop5">
+        <div style="font-size:10px;color:rgba(0,255,65,0.7);font-family:monospace;margin-bottom:6px;">// EDIT TOP 5 PICKS //</div>
+        <div id="adminTop5Form" style="max-height:260px;overflow-y:auto;padding-right:4px;"></div>
+        <button class="admin-g-btn" onclick="commitTop5()">▶ COMMIT TOP 5</button>
+      </div>
+
+      <!-- TAB: Award Winners -->
+      <div class="admin-g-content" id="tabAwards">
+        <div style="font-size:10px;color:rgba(0,255,65,0.7);font-family:monospace;margin-bottom:6px;">// EDIT AWARD WINNERS //</div>
+        <div id="adminAwardsForm" style="max-height:260px;overflow-y:auto;padding-right:4px;"></div>
+        <button class="admin-g-btn" onclick="commitAwardWinners()">▶ COMMIT AWARDS</button>
+      </div>
+
+      <!-- TAB: Date -->
+      <div class="admin-g-content" id="tabDate">
+        <div style="font-size:10px;color:rgba(0,255,65,0.7);font-family:monospace;margin-bottom:6px;">// UPDATE LAST UPDATED DATE //</div>
+        <div style="display:flex;gap:6px;">
+          <input type="text" id="adminDateInput" class="admin-g-input" placeholder="DD/MM/YYYY" style="flex:1;">
+          <button class="admin-g-btn" onclick="commitDate(document.getElementById('adminDateInput').value)" style="width:auto;padding:8px 14px;flex-shrink:0;">▶ SET</button>
+        </div>
+        <div style="margin-top:4px;font-size:10px;color:rgba(0,255,65,0.45);font-family:monospace;cursor:pointer;" onclick="document.getElementById('adminDateInput').value=new Date().toLocaleDateString('en-GB').replace(/\//g,'/')">[ click to fill today ]</div>
+      </div>
+
+      <!-- TAB: Add Anime -->
+      <div class="admin-g-content" id="tabAdd">
+        <div style="font-size:10px;color:rgba(0,255,65,0.7);font-family:monospace;margin-bottom:6px;">// ADD NEW ANIME //</div>
+        <input type="text" id="adminAddTitle" class="admin-g-input" placeholder="Anime Title">
+        <input type="text" id="adminAddImg" class="admin-g-input" placeholder="Image URL">
+        <div style="display:flex;gap:6px;">
+          <input type="text" id="adminAddSeason" class="admin-g-input" placeholder="Spring 2024" style="flex:1;">
+          <input type="number" id="adminAddEps" class="admin-g-input" placeholder="Eps" style="width:60px;">
+          <input type="number" id="adminAddRating" class="admin-g-input" placeholder="Rating" style="width:60px;">
+        </div>
+        <input type="text" id="adminAddSeasonLabel" class="admin-g-input" placeholder="Season Label (Season-1)">
+
+        <!-- OTT pills -->
+        <div class="admin-g-label">OTT Platforms</div>
+        <div class="admin-pill-container">
+          <input type="text" class="admin-g-input" id="adminOttSearch" placeholder="Search OTT..." oninput="filterPills(this,'ott')" style="margin-bottom:4px;padding:6px 8px;font-size:11px;">
+          <div class="admin-pill-list" id="adminOttList"></div>
+        </div>
+        <!-- Studio pills -->
+        <div class="admin-g-label">Studios</div>
+        <div class="admin-pill-container">
+          <input type="text" class="admin-g-input" id="adminStudioSearch" placeholder="Search Studio..." oninput="filterPills(this,'studio')" style="margin-bottom:4px;padding:6px 8px;font-size:11px;">
+          <div class="admin-pill-list" id="adminStudioList"></div>
+        </div>
+        <!-- Genre pills -->
+        <div class="admin-g-label">Genres</div>
+        <div class="admin-pill-container">
+          <input type="text" class="admin-g-input" id="adminGenreSearch" placeholder="Search Genre..." oninput="filterPills(this,'genre')" style="margin-bottom:4px;padding:6px 8px;font-size:11px;">
+          <div class="admin-pill-list" id="adminGenreList"></div>
+        </div>
+        <!-- Selected pills display -->
+        <div class="admin-selected-pills" id="adminSelectedPills" style="display:none;"></div>
+
+        <button class="admin-g-btn" onclick="commitAddAnime()" style="margin-top:4px;">▶ COMMIT ADD</button>
+      </div>
+
+      <!-- PAT display -->
+      <div id="adminPatDisplay" style="font-size:9px;color:rgba(0,255,65,0.45);margin-top:8px;word-break:break-all;font-family:monospace;text-align:center;"></div>
+
+      <!-- Loading overlay -->
+      <div id="adminLoading" style="display:none;position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.85);z-index:10;align-items:center;justify-content:center;border-radius:4px;">
+        <div style="color:#00ff41;font-family:monospace;font-size:14px;">⏳ EXECUTING...</div>
       </div>
     </div>
   </div>

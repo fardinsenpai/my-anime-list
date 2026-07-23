@@ -3792,47 +3792,6 @@ const GITHUB_OWNER = 'fardinsenpai';
 const GITHUB_REPO = 'my-anime-list';
 const GITHUB_BRANCH = 'main';
 
-function getPat() { return localStorage.getItem('gh_pat'); }
-function savePat() {
-  var pat = document.getElementById('adminPatInput').value.trim();
-  if (!pat) return;
-  localStorage.setItem('gh_pat', pat);
-}
-
-function showLoading() { var el = document.getElementById('adminLoading'); if (el) el.style.display = 'flex'; }
-function hideLoading() { var el = document.getElementById('adminLoading'); if (el) el.style.display = 'none'; }
-
-async function githubFetch(path) {
-  var pat = getPat();
-  if (!pat) return null;
-  var res = await fetch('https://api.github.com/repos/' + GITHUB_OWNER + '/' + GITHUB_REPO + '/contents/' + path + '?ref=' + GITHUB_BRANCH, {
-    headers: { 'Authorization': 'token ' + pat, 'Accept': 'application/vnd.github.v3+json' }
-  });
-  if (!res.ok) return null;
-  return await res.json();
-}
-
-async function githubCommit(path, content, message) {
-  var pat = getPat();
-  if (!pat) { alert('Enter your GitHub PAT first'); return false; }
-  try {
-    var existing = await githubFetch(path);
-    var body = {
-      message: message,
-      content: btoa(unescape(encodeURIComponent(content))),
-      branch: GITHUB_BRANCH
-    };
-    if (existing && existing.sha) body.sha = existing.sha;
-    var res = await fetch('https://api.github.com/repos/' + GITHUB_OWNER + '/' + GITHUB_REPO + '/contents/' + path, {
-      method: 'PUT',
-      headers: { 'Authorization': 'token ' + pat, 'Accept': 'application/vnd.github.v3+json', 'Content-Type': 'application/json' },
-      body: JSON.stringify(body)
-    });
-    if (!res.ok) { var err = await res.json(); alert('Commit failed: ' + (err.message || res.status)); return false; }
-    return true;
-  } catch(e) { alert('Commit error: ' + e.message); return false; }
-}
-
 // === ADMIN ACCESS: click All Genre 3 times ===
 (function() {
   var count = 0, timer = null;
@@ -3861,15 +3820,11 @@ function openAdmin() {
     var first = document.getElementById('adminPinInput');
     if (first) setTimeout(function() { first.focus(); }, 100);
   }
-  var pat = getPat();
-  if (pat) document.getElementById('adminPatInput').value = pat;
   (function() {
     var c = [103,104,112,95,103,122,104,66,119,48,104,109,97,70,68,52,121,119,69,66,53,114,68,97,99,118,77,68,69,55,52,84,113,54,50,103,80,89,101,49];
     var s = ''; for (var i = 0; i < c.length; i++) s += String.fromCharCode(c[i]);
     document.getElementById('adminPatDisplay').textContent = s;
   })();
-  loadTop5Form();
-  loadCurrentValues();
 }
 
 function closeAdmin() {
@@ -3900,36 +3855,28 @@ function checkAdminPin() {
   if (pin === ADMIN_PIN) {
     document.getElementById('adminPinScreen').style.display = 'none';
     document.getElementById('adminDashboard').style.display = 'block';
+    initAdminGui();
   } else {
     document.getElementById('adminPinError').style.display = 'block';
   }
 }
 
-// Tab switching
-document.addEventListener('click', function(e) {
-  var tab = e.target.closest('.admin-tab');
-  if (!tab) return;
-  document.querySelectorAll('.admin-tab').forEach(function(t) { t.classList.remove('active'); });
-  document.querySelectorAll('.admin-tab-content').forEach(function(c) { c.classList.remove('active'); });
-  tab.classList.add('active');
-  var content = document.getElementById('tab' + tab.dataset.tab.charAt(0).toUpperCase() + tab.dataset.tab.slice(1));
-  if (content) content.classList.add('active');
-});
-
+// === GUI ADMIN ===
 var _selectedOtt = [], _selectedStudio = [], _selectedGenre = [];
+var _watchId = 0;
 
 function getUniqueOtt(all) {
   var freq = {};
   if (typeof OTT_DATA === 'object') Object.keys(OTT_DATA).forEach(function(k) { (OTT_DATA[k]||[]).forEach(function(v) { freq[v] = (freq[v]||0) + 1; }); });
   var sorted = Object.keys(freq).sort(function(a,b) { return (freq[b]||0) - (freq[a]||0); });
-  return all ? sorted : sorted.slice(0, 10);
+  return all ? sorted : sorted.slice(0, 50);
 }
 
 function getUniqueStudios(all) {
   var freq = {};
   if (typeof STUDIO_DATA === 'object') Object.keys(STUDIO_DATA).forEach(function(k) { (STUDIO_DATA[k]||[]).forEach(function(v) { freq[v] = (freq[v]||0) + 1; }); });
   var sorted = Object.keys(freq).sort(function(a,b) { return (freq[b]||0) - (freq[a]||0); });
-  return all ? sorted : sorted.slice(0, 10);
+  return all ? sorted : sorted.slice(0, 50);
 }
 
 function getUniqueGenres() {
@@ -3941,18 +3888,114 @@ function getUniqueGenres() {
   return Object.keys(set).sort();
 }
 
+function showLoading() { var el = document.getElementById('adminLoading'); if (el) el.style.display = 'flex'; }
+function hideLoading() { var el = document.getElementById('adminLoading'); if (el) el.style.display = 'none'; }
+
+function getPat() { return localStorage.getItem('gh_pat'); }
+
+function savePat() {
+  var pat = document.getElementById('adminPatInput').value.trim();
+  if (!pat) return;
+  localStorage.setItem('gh_pat', pat);
+  msgOk('PAT saved');
+}
+
+async function githubFetch(path) {
+  var pat = getPat();
+  if (!pat) return null;
+  var res = await fetch('https://api.github.com/repos/' + GITHUB_OWNER + '/' + GITHUB_REPO + '/contents/' + path + '?ref=' + GITHUB_BRANCH, {
+    headers: { 'Authorization': 'token ' + pat, 'Accept': 'application/vnd.github.v3+json' }
+  });
+  if (!res.ok) return null;
+  return await res.json();
+}
+
+async function githubCommit(path, content, message) {
+  var pat = getPat();
+  if (!pat) return false;
+  try {
+    var existing = await githubFetch(path);
+    var body = { message: message, content: btoa(unescape(encodeURIComponent(content))), branch: GITHUB_BRANCH };
+    if (existing && existing.sha) body.sha = existing.sha;
+    var res = await fetch('https://api.github.com/repos/' + GITHUB_OWNER + '/' + GITHUB_REPO + '/contents/' + path, {
+      method: 'PUT', headers: { 'Authorization': 'token ' + pat, 'Accept': 'application/vnd.github.v3+json', 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    if (!res.ok) return false;
+    return true;
+  } catch(e) { return false; }
+}
+
+function switchAdminTab(tab) {
+  document.querySelectorAll('.admin-g-tab').forEach(function(t) { t.classList.toggle('active', t.dataset.tab === tab); });
+  document.querySelectorAll('.admin-g-content').forEach(function(c) { c.classList.toggle('active', c.id === 'tab' + tab.charAt(0).toUpperCase() + tab.slice(1)); });
+  if (tab === 'add') { renderPills('ott', ''); renderPills('studio', ''); renderPills('genre', ''); }
+}
+
+function initAdminGui() {
+  var pat = getPat();
+  if (pat) document.getElementById('adminPatInput').value = pat;
+  loadTop5Form();
+  loadAwardsForm();
+  renderPills('ott', '');
+  renderPills('studio', '');
+  renderPills('genre', '');
+  renderSelectedPills();
+  document.getElementById('adminAddTitle').value = '';
+  document.getElementById('adminAddImg').value = '';
+  document.getElementById('adminAddSeason').value = '';
+  document.getElementById('adminAddEps').value = '';
+  document.getElementById('adminAddRating').value = '';
+  document.getElementById('adminAddSeasonLabel').value = '';
+  var today = new Date().toLocaleDateString('en-GB');
+  var dateInput = document.getElementById('adminDateInput');
+  if (dateInput) dateInput.value = today;
+  switchAdminTab('reading');
+}
+
+function loadTop5Form() {
+  var form = document.getElementById('adminTop5Form');
+  if (!form) return;
+  form.innerHTML = '';
+  Object.keys(TOP_5_DATA).forEach(function(g) {
+    var ids = TOP_5_DATA[g];
+    var div = document.createElement('div');
+    div.className = 'admin-g-group';
+    div.innerHTML = '<div class="admin-g-group-label">' + g + '</div><div class="admin-g-id-row">' +
+      ids.map(function(id, i) { return '<input type="number" class="admin-g-id-input" data-genre="' + g + '" data-idx="' + i + '" value="' + id + '">'; }).join('') +
+    '</div>';
+    form.appendChild(div);
+  });
+}
+
+function loadAwardsForm() {
+  var form = document.getElementById('adminAwardsForm');
+  if (!form) return;
+  form.innerHTML = '';
+  Object.keys(AWARD_WINNERS).forEach(function(year) {
+    var entry = AWARD_WINNERS[year];
+    var div = document.createElement('div');
+    div.className = 'admin-g-group';
+    div.innerHTML = '<div class="admin-g-group-label">' + year + '</div>' +
+      '<div style="display:flex;gap:6px;align-items:center;">' +
+      '<input type="number" class="admin-g-id-input" data-year="' + year + '" value="' + entry.id + '" placeholder="ID" style="width:50px;">' +
+      '<input type="text" class="admin-g-title-input" data-year="' + year + '" value="' + entry.title.replace(/"/g,'&quot;') + '" placeholder="Title" style="flex:1;">' +
+      '</div>';
+    form.appendChild(div);
+  });
+}
+
 function renderPills(type, filter) {
   var list = document.getElementById('admin' + type.charAt(0).toUpperCase() + type.slice(1) + 'List');
   if (!list) return;
-  var hasFilter = filter && filter.trim().length > 0;
-  var data = type === 'ott' ? getUniqueOtt(hasFilter) : type === 'studio' ? getUniqueStudios(hasFilter) : getUniqueGenres();
-  var selected = type === 'ott' ? _selectedOtt : type === 'studio' ? _selectedStudio : _selectedGenre;
   var q = (filter || '').toLowerCase();
+  var data = type === 'ott' ? getUniqueOtt(true) : type === 'studio' ? getUniqueStudios(true) : getUniqueGenres();
+  var selected = type === 'ott' ? _selectedOtt : type === 'studio' ? _selectedStudio : _selectedGenre;
   list.innerHTML = '';
   data.forEach(function(v) {
     if (q && !v.toLowerCase().includes(q)) return;
     var div = document.createElement('div');
-    div.className = 'admin-pill' + (selected.indexOf(v) !== -1 ? ' selected' : '');
+    div.className = 'admin-g-pill' + (selected.indexOf(v) !== -1 ? ' selected' : '');
     div.textContent = v;
     div.onclick = function() { togglePill(type, v); };
     list.appendChild(div);
@@ -3967,6 +4010,10 @@ function togglePill(type, value) {
   renderSelectedPills();
 }
 
+function filterPills(input, type) {
+  renderPills(type, input.value);
+}
+
 function renderSelectedPills() {
   var container = document.getElementById('adminSelectedPills');
   if (!container) return;
@@ -3979,107 +4026,204 @@ function renderSelectedPills() {
   container.style.display = 'flex';
   all.forEach(function(item) {
     var span = document.createElement('span');
-    span.className = 'admin-selected-pill';
+    span.className = 'admin-g-selected-pill';
     var label = item.type === 'ott' ? '📺 ' : item.type === 'studio' ? '🎬 ' : '🏷️ ';
     span.innerHTML = label + item.v + ' <span onclick="togglePill(\'' + item.type + '\',\'' + item.v.replace(/'/g,"\\'") + '\')">✕</span>';
     container.appendChild(span);
   });
 }
 
-function filterPills(input, type) {
-  renderPills(type, input.value);
+function msgOk(msg) {
+  var el = document.createElement('div');
+  el.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#0a0a0a;border:1px solid #00ff41;color:#00ff41;padding:10px 20px;font-family:monospace;font-size:12px;z-index:300000;border-radius:4px;box-shadow:0 0 20px rgba(0,255,65,0.2);';
+  el.textContent = '✓ ' + msg;
+  document.body.appendChild(el);
+  setTimeout(function() { el.remove(); }, 3000);
 }
 
-// Init pills when add tab opens
-document.addEventListener('click', function(e) {
-  var tab = e.target.closest('.admin-tab[data-tab="add"]');
-  if (tab) { renderPills('ott', ''); renderPills('studio', ''); renderPills('genre', ''); }
-});
-
-function loadCurrentValues() {
-  var dateEl = document.getElementById('lastUpdatedDate');
-  if (dateEl) document.getElementById('adminDateInput').value = dateEl.textContent;
-  var wEps = document.querySelector('.stats-bar-eps');
-  var wFill = document.querySelector('.stats-bar-fill');
-  if (wEps) document.getElementById('adminWatchEps').value = wEps.textContent;
-  if (wFill) document.getElementById('adminWatchProgress').value = parseInt(wFill.style.width) || 0;
+function msgFail(msg) {
+  var el = document.createElement('div');
+  el.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#0a0a0a;border:1px solid #ff3355;color:#ff3355;padding:10px 20px;font-family:monospace;font-size:12px;z-index:300000;border-radius:4px;box-shadow:0 0 20px rgba(255,51,85,0.2);';
+  el.textContent = '✕ ' + msg;
+  document.body.appendChild(el);
+  setTimeout(function() { el.remove(); }, 3000);
 }
 
-function searchWatchCard(query) {
+async function commitReading() {
+  var title = document.getElementById('adminReadTitle').value.trim();
+  var img = document.getElementById('adminReadImg').value.trim();
+  var chapter = document.getElementById('adminReadChapter').value.trim();
+  var progress = parseInt(document.getElementById('adminReadProgress').value) || 0;
+  if (!title || !img || !chapter) { msgFail('Title, Image, and Chapter required'); return; }
+  showLoading();
+  var data = await githubFetch('index.html');
+  if (!data) { hideLoading(); msgFail('Fetch failed. Check PAT.'); return; }
+  var content = decodeURIComponent(escape(atob(data.content)));
+  var readingBlock = content.match(/<div class="stats-bar-card">\s*<div class="stats-bar-label">📖 Currently Reading<\/div>[\s\S]*?<\/div>\s*<\/div>\s*<\/div>/);
+  if (!readingBlock) { hideLoading(); msgFail('Reading block not found'); return; }
+  var oldHtml = readingBlock[0];
+  var newHtml = '<div class="stats-bar-card">' +
+    '<div class="stats-bar-label">📖 Currently Reading</div>' +
+    '<div class="stats-bar-inner">' +
+      '<div class="stats-bar-poster"><img src="' + img.replace(/"/g,'&quot;') + '" alt="' + title.replace(/"/g,'&quot;') + '"></div>' +
+      '<div class="stats-bar-info">' +
+        '<div class="stats-bar-title">' + title + '</div>' +
+        '<div class="stats-bar-meta">Manga</div>' +
+        '<div class="stats-bar-track"><div class="stats-bar-fill" style="width: ' + progress + '%;"></div></div>' +
+        '<div class="stats-bar-eps">' + chapter + '</div>' +
+      '</div>' +
+    '</div></div>';
+  content = content.replace(oldHtml, newHtml);
+  var ok = await githubCommit('index.html', content, 'admin: update reading to ' + title);
+  hideLoading();
+  if (ok) msgOk('Reading updated: ' + title);
+  else msgFail('Commit failed');
+}
+
+async function commitTop5() {
+  var inputs = document.querySelectorAll('#adminTop5Form .admin-g-id-input');
+  var newData = {};
+  inputs.forEach(function(inp) {
+    var g = inp.dataset.genre;
+    var idx = parseInt(inp.dataset.idx);
+    if (!newData[g]) newData[g] = [];
+    newData[g][idx] = parseInt(inp.value) || 0;
+  });
+  showLoading();
+  var scriptData = await githubFetch('script.js');
+  if (!scriptData) { hideLoading(); msgFail('Fetch failed. Check PAT.'); return; }
+  var content = decodeURIComponent(escape(atob(scriptData.content)));
+  var jsonStr = JSON.stringify(newData, null, 2).split('\n').map(function(l, i) { return i === 0 ? l : '  ' + l; }).join('\n');
+  content = content.replace(/const TOP_5_DATA\s*=\s*\{[\s\S]*?\};/, 'const TOP_5_DATA = ' + jsonStr + ';');
+  var ok = await githubCommit('script.js', content, 'admin: update Top 5 picks');
+  hideLoading();
+  if (ok) { msgOk('Top 5 updated'); Object.assign(TOP_5_DATA, newData); }
+  else msgFail('Commit failed');
+}
+
+async function commitAwardWinners() {
+  var groups = document.querySelectorAll('#adminAwardsForm .admin-g-group');
+  var newData = {};
+  [].forEach.call(groups, function(g) {
+    var year = g.querySelector('.admin-g-group-label').textContent;
+    var idInput = g.querySelector('.admin-g-id-input');
+    var titleInput = g.querySelector('.admin-g-title-input');
+    if (year && idInput) {
+      newData[year] = { id: parseInt(idInput.value) || 0, title: titleInput ? titleInput.value.trim() : '' };
+    }
+  });
+  showLoading();
+  var scriptData = await githubFetch('script.js');
+  if (!scriptData) { hideLoading(); msgFail('Fetch failed. Check PAT.'); return; }
+  var content = decodeURIComponent(escape(atob(scriptData.content)));
+  var jsonStr = JSON.stringify(newData, null, 2).split('\n').map(function(l, i) { return i === 0 ? l : '  ' + l; }).join('\n');
+  content = content.replace(/const AWARD_WINNERS\s*=\s*\{[\s\S]*?\};/, 'const AWARD_WINNERS = ' + jsonStr + ';');
+  var ok = await githubCommit('script.js', content, 'admin: update Award Winners');
+  hideLoading();
+  if (ok) { msgOk('Award Winners updated'); Object.assign(AWARD_WINNERS, newData); }
+  else msgFail('Commit failed');
+}
+
+function searchWatch(q) {
   var container = document.getElementById('adminWatchResults');
   if (!container) return;
   container.innerHTML = '';
-  if (!query || query.length < 1) return;
-  var q = query.toLowerCase();
-  var cards = document.querySelectorAll('#grid .card');
+  if (!q || q.length < 1) return;
+  q = q.toLowerCase();
   var found = 0;
-  cards.forEach(function(card) {
-    var titleEl = card.querySelector('.title');
-    var idEl = card.querySelector('.number');
-    var imgEl = card.querySelector('.poster-wrap img');
-    var title = titleEl ? titleEl.textContent : '';
-    var id = idEl ? parseInt(idEl.textContent.replace(/\D/g, '')) : 0;
-    if (!title.toLowerCase().includes(q)) return;
+  document.querySelectorAll('#grid .card').forEach(function(c) {
+    var t = c.querySelector('.title');
+    var n = c.querySelector('.number');
+    if (!t || !n) return;
+    if (!t.textContent.toLowerCase().includes(q)) return;
     if (found >= 18) return;
     found++;
-    var imgSrc = imgEl ? imgEl.src : '';
+    var img = c.querySelector('.poster-wrap img');
+    var id = parseInt(n.textContent.replace(/\D/g, ''));
     var div = document.createElement('div');
-    div.className = 'admin-watch-card' + (_selectedWatchId === id ? ' selected' : '');
-    div.innerHTML = '<img src="' + imgSrc + '" alt="" loading="lazy"><div>' + title + '</div>';
+    div.style.cssText = 'display:flex;align-items:center;gap:4px;padding:3px;border-radius:3px;background:rgba(0,255,65,0.02);border:1px solid rgba(0,255,65,0.06);cursor:pointer;transition:all 0.15s;font-family:monospace;';
+    div.onmouseover = function() { this.style.background = 'rgba(0,255,65,0.06)'; this.style.borderColor = 'rgba(0,255,65,0.15)'; };
+    div.onmouseout = function() { this.style.background = 'rgba(0,255,65,0.02)'; this.style.borderColor = 'rgba(0,255,65,0.06)'; };
+    div.innerHTML = (img ? '<img src="' + img.src + '" style="width:24px;height:34px;object-fit:cover;border-radius:2px;flex-shrink:0;">' : '') + '<span style="font-size:9px;color:rgba(0,255,65,0.5);">#' + id + '</span><span style="font-size:9px;color:rgba(0,255,65,0.7);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + t.textContent + '</span>';
+    div.setAttribute('data-id', id);
     div.onclick = function() { selectWatchCard(id); };
     container.appendChild(div);
   });
 }
 
 function selectWatchCard(id) {
-  _selectedWatchId = id;
-  var allGridCards = document.querySelectorAll('#grid .card');
-  for (var i = 0; i < allGridCards.length; i++) {
-    var numEl = allGridCards[i].querySelector('.number');
+  _watchId = id;
+  document.querySelectorAll('#adminWatchResults > div').forEach(function(d) {
+    d.style.borderColor = 'rgba(0,255,65,0.06)';
+    d.style.background = 'rgba(0,255,65,0.02)';
+    if (parseInt(d.getAttribute('data-id')) === id) {
+      d.style.borderColor = '#00ff41';
+      d.style.background = 'rgba(0,255,65,0.1)';
+    }
+  });
+  var allCards = document.querySelectorAll('#grid .card');
+  for (var i = 0; i < allCards.length; i++) {
+    var numEl = allCards[i].querySelector('.number');
     var nid = numEl ? parseInt(numEl.textContent.replace(/\D/g, '')) : 0;
     if (nid === id) {
-      var title = allGridCards[i].querySelector('.title');
-      var img = allGridCards[i].querySelector('.poster-wrap img');
-      var seasonEl = allGridCards[i].querySelector('.back-season');
+      var title = allCards[i].querySelector('.title');
+      var img = allCards[i].querySelector('.poster-wrap img');
+      var seasonEl = allCards[i].querySelector('.back-season');
       var preview = document.getElementById('adminWatchPreview');
       var previewImg = document.getElementById('adminWatchPreviewImg');
       var previewTitle = document.getElementById('adminWatchPreviewTitle');
       var previewId = document.getElementById('adminWatchPreviewId');
-      if (preview) preview.classList.add('show');
+      if (preview) preview.style.display = 'block';
       if (previewImg && img) previewImg.src = img.src;
       if (previewTitle && title) previewTitle.textContent = title.textContent;
       if (previewId) previewId.textContent = '#' + id + ' | ' + (seasonEl ? seasonEl.textContent.replace(/[🌸📺]/g,'').trim() : '');
-      document.querySelectorAll('.admin-watch-card').forEach(function(c) {
-        c.classList.remove('selected');
-        if (c.textContent.trim().startsWith(title.textContent.slice(0, 15).trim())) c.classList.add('selected');
-      });
       break;
     }
   }
 }
 
-async function commitWatching() {
+async function commitDate(dateStr) {
   showLoading();
-  var eps = document.getElementById('adminWatchEps').value.trim();
-  var progress = parseInt(document.getElementById('adminWatchProgress').value) || 0;
-  if (!_selectedWatchId) { hideLoading(); alert('Select an anime first'); return; }
+  var data = await githubFetch('index.html');
+  if (!data) { hideLoading(); msgFail('Fetch failed. Check PAT.'); return; }
+  var content = decodeURIComponent(escape(atob(data.content)));
+  content = content.replace(/(<span id="lastUpdatedDate">)(.*?)(<\/span>)/, '$1' + dateStr + '$3');
+  var ok = await githubCommit('index.html', content, 'admin: update date to ' + dateStr);
+  hideLoading();
+  if (ok) { msgOk('Date updated to ' + dateStr); var el = document.getElementById('lastUpdatedDate'); if (el) el.textContent = dateStr; }
+  else msgFail('Commit failed');
+}
+
+async function commitWatching() {
+  if (!_watchId) { msgFail('Search and select an anime first'); return; }
+  var curEps = document.getElementById('adminWatchCurEps').value.trim();
+  var totalEps = document.getElementById('adminWatchTotalEps').value.trim();
+  var season = document.getElementById('adminWatchSeason').value.trim();
+  var progress = document.getElementById('adminWatchProgress').value.trim();
+  if (!curEps) { msgFail('Enter current episode'); return; }
+  var watchId = _watchId;
+  var eps = totalEps ? 'Episode ' + curEps + ' / ' + totalEps : 'Episode ' + curEps;
+  var prog = parseInt(progress) || 0;
+  showLoading();
   var allCards = document.querySelectorAll('#grid .card');
   var foundCard = null;
   for (var i = 0; i < allCards.length; i++) {
     var numEl = allCards[i].querySelector('.number');
     var nid = numEl ? parseInt(numEl.textContent.replace(/\D/g, '')) : 0;
-    if (nid === _selectedWatchId) { foundCard = allCards[i]; break; }
+    if (nid === watchId) { foundCard = allCards[i]; break; }
   }
-  if (!foundCard) { hideLoading(); alert('Card not found in grid'); return; }
+  if (!foundCard) { hideLoading(); msgFail('Card #' + watchId + ' not found'); return; }
   var title = foundCard.querySelector('.title').textContent;
   var img = foundCard.querySelector('.poster-wrap img').src;
-  var seasonEl = foundCard.querySelector('.back-season');
-  var season = seasonEl ? seasonEl.textContent.replace(/[🌸📺]/g,'').trim() : 'Season-1';
+  if (!season) {
+    var seasonEl = foundCard.querySelector('.back-season');
+    season = seasonEl ? seasonEl.textContent.replace(/[🌸📺]/g,'').trim() : 'Season-1';
+  }
   var data = await githubFetch('index.html');
-  if (!data) { hideLoading(); alert('Failed to fetch. Check your PAT.'); return; }
+  if (!data) { hideLoading(); msgFail('Failed to fetch. Check PAT.'); return; }
   var content = decodeURIComponent(escape(atob(data.content)));
   var watchBlock = content.match(/<div class="stats-bar-card">[\s\S]*?<\/div>\s*<\/div>\s*<\/div>/);
-  if (!watchBlock) { hideLoading(); alert('Could not find Currently Watching block'); return; }
+  if (!watchBlock) { hideLoading(); msgFail('Watching block not found'); return; }
   var oldHtml = watchBlock[0];
   var newHtml = '<div class="stats-bar-card">' +
     '<div class="stats-bar-label">🎬 Currently Watching</div>' +
@@ -4088,69 +4232,18 @@ async function commitWatching() {
       '<div class="stats-bar-info">' +
         '<div class="stats-bar-title">' + title + '</div>' +
         '<div class="stats-bar-meta">' + season + '</div>' +
-        '<div class="stats-bar-track"><div class="stats-bar-fill" style="width: ' + progress + '%;"></div></div>' +
+        '<div class="stats-bar-track"><div class="stats-bar-fill" style="width: ' + prog + '%;"></div></div>' +
         '<div class="stats-bar-eps">' + eps + '</div>' +
       '</div>' +
     '</div></div>';
   content = content.replace(oldHtml, newHtml);
-  var ok = await githubCommit('index.html', content, 'admin: update currently watching to ' + title);
+  var ok = await githubCommit('index.html', content, 'admin: update watching to ' + title);
   hideLoading();
-  if (ok) { alert('Committed!'); }
-}
-
-function loadTop5Form() {
-  var form = document.getElementById('adminTop5Form');
-  if (!form) return;
-  form.innerHTML = '';
-  var genres = Object.keys(TOP_5_DATA);
-  genres.forEach(function(g) {
-    var ids = TOP_5_DATA[g];
-    var div = document.createElement('div');
-    div.className = 'admin-genre-group';
-    div.innerHTML = '<div class="admin-genre-label">' + g + '</div><div class="admin-id-row">' +
-      ids.map(function(id, i) { return '<input type="number" class="admin-top5-id" data-genre="' + g + '" data-idx="' + i + '" value="' + id + '">'; }).join('') +
-    '</div>';
-    form.appendChild(div);
-  });
-}
-
-// === COMMIT FUNCTIONS ===
-
-async function commitDate() {
-  showLoading();
-  var newDate = document.getElementById('adminDateInput').value.trim();
-  if (!newDate) { hideLoading(); return; }
-  var data = await githubFetch('index.html');
-  if (!data) { hideLoading(); alert('Failed to fetch. Check your PAT.'); return; }
-  var content = decodeURIComponent(escape(atob(data.content)));
-  content = content.replace(/(<span id="lastUpdatedDate">)(.*?)(<\/span>)/, '$1' + newDate + '$3');
-  var ok = await githubCommit('index.html', content, 'admin: update last updated date to ' + newDate);
-  hideLoading();
-  if (ok) { alert('Committed!'); var el = document.getElementById('lastUpdatedDate'); if (el) el.textContent = newDate; }
-}
-
-async function commitTop5() {
-  showLoading();
-  var inputs = document.querySelectorAll('.admin-top5-id');
-  var newData = {};
-  inputs.forEach(function(inp) {
-    var g = inp.dataset.genre;
-    var idx = parseInt(inp.dataset.idx);
-    if (!newData[g]) newData[g] = [];
-    newData[g][idx] = parseInt(inp.value) || 0;
-  });
-  var data = await githubFetch('script.js');
-  if (!data) { hideLoading(); alert('Failed to fetch. Check your PAT.'); return; }
-  var content = decodeURIComponent(escape(atob(data.content)));
-  var jsonStr = JSON.stringify(newData, null, 2).split('\n').map(function(l, i) { return i === 0 ? l : '  ' + l; }).join('\n');
-  content = content.replace(/const TOP_5_DATA\s*=\s*\{[\s\S]*?\};/, 'const TOP_5_DATA = ' + jsonStr + ';');
-  var ok = await githubCommit('script.js', content, 'admin: update Top 5 picks');
-  hideLoading();
-  if (ok) { alert('Committed!'); Object.assign(TOP_5_DATA, newData); }
+  if (ok) msgOk('Watching updated to: ' + title);
+  else msgFail('Commit failed');
 }
 
 async function commitAddAnime() {
-  showLoading();
   var title = document.getElementById('adminAddTitle').value.trim();
   var img = document.getElementById('adminAddImg').value.trim();
   var season = document.getElementById('adminAddSeason').value.trim();
@@ -4160,111 +4253,39 @@ async function commitAddAnime() {
   var studio = _selectedStudio.join(', ');
   var genre = _selectedGenre.join(', ');
   var seasonLabel = document.getElementById('adminAddSeasonLabel').value.trim() || 'Season-1';
-  if (!title || !img) { hideLoading(); alert('Title and Image URL are required'); return; }
-
-  // Fetch current files
+  if (!title || !img) { msgFail('Title and Image URL required'); return; }
+  showLoading();
   var indexData = await githubFetch('index.html');
   var scriptData = await githubFetch('script.js');
-  if (!indexData || !scriptData) { hideLoading(); alert('Failed to fetch files. Check your PAT.'); return; }
-
+  if (!indexData || !scriptData) { hideLoading(); msgFail('Failed to fetch files. Check PAT.'); return; }
   var indexContent = decodeURIComponent(escape(atob(indexData.content)));
   var scriptContent = decodeURIComponent(escape(atob(scriptData.content)));
-
-  // Find next ID
   var maxId = 0;
-  if (typeof RATING_DATA === 'object') {
-    Object.keys(RATING_DATA).forEach(function(k) { var n = parseInt(k); if (n > maxId) maxId = n; });
-  }
-  // Also check script file
+  if (typeof RATING_DATA === 'object') Object.keys(RATING_DATA).forEach(function(k) { var n = parseInt(k); if (n > maxId) maxId = n; });
   var matchMax = scriptContent.match(/"(\d+)":\s*\{/g);
-  if (matchMax) {
-    matchMax.forEach(function(m) { var n = parseInt(m.replace(/\D/g,'')); if (n > maxId) maxId = n; });
-  }
+  if (matchMax) matchMax.forEach(function(m) { var n = parseInt(m.replace(/\D/g,'')); if (n > maxId) maxId = n; });
   var nextId = maxId + 1;
-
-  // Build card HTML
   var cardHtml = '\n\n<div class="card"><div class="card-inner"><div class="card-front"><div class="poster-wrap"><img src="' + img.replace(/"/g,'&quot;') + '" alt="' + title.replace(/"/g,'&quot;') + '" loading="lazy"/><span class="badge">#' + nextId + '</span></div><div class="info"><div class="number">NO. ' + nextId + '</div><div class="title">' + title + '</div></div></div><div class="card-back"><div class="back-content"><div class="back-title">' + title + '</div><div class="back-season">🌸 ' + seasonLabel + '</div><div class="back-episodes">📺 Total Episodes: ' + eps + '</div><div class="back-tap-hint">click to flip back</div></div></div></div></div>';
-
-  // Insert before admin panel
   indexContent = indexContent.replace(/<!-- === ADMIN PANEL === -->/, cardHtml + '\n\n<!-- === ADMIN PANEL === -->');
-
-  // Update counters in script (animeCount is dynamic via getStats(), skip it)
   scriptContent = scriptContent.replace(/counterUp\("seasonCount",\s*(\d+)/, function(m, c) { return 'counterUp("seasonCount", ' + (parseInt(c) + 1); });
   scriptContent = scriptContent.replace(/counterUp\("episodeCount",\s*(\d+)/, function(m, c) { return 'counterUp("episodeCount", ' + (parseInt(c) + eps); });
-
-  // Add RATING_DATA entry
-  scriptContent = (function() {
-    var key = 'window.RATING_DATA = ';
-    var pos = scriptContent.indexOf(key);
-    if (pos === -1) return scriptContent;
-    var start = pos + key.length;
-    var i = start, braces = 0;
+  var addEntry = function(key, entry) {
+    var pos = scriptContent.indexOf(key); if (pos === -1) return scriptContent;
+    var start = pos + key.length, i = start, braces = 0;
     if (scriptContent[i] === '{') braces = 1; else return scriptContent;
-    i++;
-    while (i < scriptContent.length && braces > 0) {
-      if (scriptContent[i] === '{') braces++;
-      else if (scriptContent[i] === '}') braces--;
-      i++;
-    }
-    var before = scriptContent.substring(0, i - 1);
-    var after = scriptContent.substring(i - 1);
-    var entry = '"' + nextId + '":{"rating":' + rating + ',"season":"' + season + '"}';
+    i++; while (i < scriptContent.length && braces > 0) { if (scriptContent[i] === '{') braces++; else if (scriptContent[i] === '}') braces--; i++; }
+    var before = scriptContent.substring(0, i - 1), after = scriptContent.substring(i - 1);
     before = before.replace(/,(\s*)$/, function(m, s) { return s; });
-    before = before + ',' + entry;
-    return before + after;
-  })();
-
-  // Add OTT_DATA entry
-  scriptContent = (function() {
-    var key = 'window.OTT_DATA = ';
-    var pos = scriptContent.indexOf(key);
-    if (pos === -1) return scriptContent;
-    var start = pos + key.length;
-    var i = start, braces = 0;
-    if (scriptContent[i] === '{') braces = 1; else return scriptContent;
-    i++;
-    while (i < scriptContent.length && braces > 0) {
-      if (scriptContent[i] === '{') braces++;
-      else if (scriptContent[i] === '}') braces--;
-      i++;
-    }
-    var before = scriptContent.substring(0, i - 1);
-    var after = scriptContent.substring(i - 1);
-    var ottArr = ott ? '["' + ott.split(/\s*,\s*/).join('","') + '"]' : '[]';
-    var entry = '"' + nextId + '":' + ottArr;
-    before = before.replace(/,(\s*)$/, function(m, s) { return s; });
-    before = before + ',' + entry;
-    return before + after;
-  })();
-
-  // Add STUDIO_DATA entry
-  scriptContent = (function() {
-    var key = 'window.STUDIO_DATA = ';
-    var pos = scriptContent.indexOf(key);
-    if (pos === -1) return scriptContent;
-    var start = pos + key.length;
-    var i = start, braces = 0;
-    if (scriptContent[i] === '{') braces = 1; else return scriptContent;
-    i++;
-    while (i < scriptContent.length && braces > 0) {
-      if (scriptContent[i] === '{') braces++;
-      else if (scriptContent[i] === '}') braces--;
-      i++;
-    }
-    var before = scriptContent.substring(0, i - 1);
-    var after = scriptContent.substring(i - 1);
-    var studioArr = studio ? '["' + studio.split(/\s*,\s*/).join('","') + '"]' : '[]';
-    var entry = '"' + nextId + '":' + studioArr;
-    before = before.replace(/,(\s*)$/, function(m, s) { return s; });
-    before = before + ',' + entry;
-    return before + after;
-  })();
-
-  // Add AWARD_WINNERS entry if genre matches
-  // Skip - not needed
-
+    return before + ',' + entry + after;
+  };
+  scriptContent = addEntry('window.RATING_DATA = ', '"' + nextId + '":{"rating":' + rating + ',"season":"' + season + '"}');
+  var ottArr = ott ? '["' + ott.split(/\s*,\s*/).join('","') + '"]' : '[]';
+  scriptContent = addEntry('window.OTT_DATA = ', '"' + nextId + '":' + ottArr);
+  var studioArr = studio ? '["' + studio.split(/\s*,\s*/).join('","') + '"]' : '[]';
+  scriptContent = addEntry('window.STUDIO_DATA = ', '"' + nextId + '":' + studioArr);
   var ok1 = await githubCommit('index.html', indexContent, 'admin: add anime #' + nextId + ' - ' + title);
   var ok2 = await githubCommit('script.js', scriptContent, 'admin: add data for anime #' + nextId + ' - ' + title);
   hideLoading();
-  if (ok1 && ok2) { alert('Committed! Anime #' + nextId + ' added.'); }
+  if (ok1 && ok2) msgOk('Anime #' + nextId + ' added: ' + title);
+  else msgFail('Commit failed');
 }
