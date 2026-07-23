@@ -5072,11 +5072,14 @@ body.perf-no-heading-anim .header h1::after { animation: none !important; }
 .qc-title { display: none; }
 .qc-subtitle { display: none; }
 .qc-bottom {
-  position: absolute; bottom: 24px; right: 24px;
+  position: absolute; bottom: 24px; left: 24px; right: 24px;
   display: flex;
-  justify-content: flex-end; align-items: flex-end;
+  justify-content: space-between; align-items: flex-end;
 }
-.qc-bottom-left { display: none; }
+.qc-bottom-left .qc-logo {
+  width: 90px; height: 90px; object-fit: contain;
+  filter: drop-shadow(0 0 5px rgba(245,197,24,0.5));
+}
 .qc-bottom-right {
   position: absolute; right: 8px; top: 50%;
   transform: translateY(-50%);
