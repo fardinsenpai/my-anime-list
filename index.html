@@ -481,7 +481,6 @@
 
 <div class="body-stats-bar" id="statsBarContainer" style="display:none;">
   <div class="stats-bar-card"><div class="stats-bar-label">🎬 Currently Watching</div><div class="stats-bar-inner"><div class="stats-bar-poster"><img src="https://media.kitsu.app/anime/poster_images/41024/large.jpg" alt="TENSURA"></div><div class="stats-bar-info"><div class="stats-bar-title">TENSURA</div><div class="stats-bar-meta">Season 4</div><div class="stats-bar-track"><div class="stats-bar-fill" style="width: 65%;"></div></div><div class="stats-bar-eps">Episode 14 / 24</div></div></div></div>
-  </div>
 
   <div class="stats-bar-card">
     <div class="stats-bar-label">📖 Currently Reading</div>
@@ -1340,6 +1339,7 @@
         <button class="admin-g-tab" data-tab="awards" onclick="switchAdminTab('awards')">🏅 AWARDS</button>
         <button class="admin-g-tab" data-tab="edit" onclick="switchAdminTab('edit')">✏️ EDIT</button>
         <button class="admin-g-tab" data-tab="date" onclick="switchAdminTab('date')">📅 DATE</button>
+        <button class="admin-g-tab" data-tab="stats" onclick="switchAdminTab('stats')">📊 STATS</button>
         <button class="admin-g-tab" data-tab="add" onclick="switchAdminTab('add')">➕ ADD</button>
       </div>
 
@@ -1439,6 +1439,7 @@
           </div>
         </div>
         <input type="text" id="adminEditName" class="admin-g-input" placeholder="Anime Name">
+        <input type="text" id="adminEditImg" class="admin-g-input" placeholder="Image URL">
         <input type="text" id="adminEditGenre" class="admin-g-input" placeholder="Genre (comma separated)">
         <div style="display:flex;gap:6px;">
           <input type="text" id="adminEditSeasons" class="admin-g-input" placeholder="Total Seasons (Season-1,2,3)" style="flex:1;">
@@ -1455,6 +1456,15 @@
           <button class="admin-g-btn" onclick="commitDate(document.getElementById('adminDateInput').value)" style="width:auto;padding:8px 14px;flex-shrink:0;">▶ SET</button>
         </div>
         <div style="margin-top:4px;font-size:10px;color:rgba(0,255,65,0.45);font-family:monospace;cursor:pointer;" onclick="document.getElementById('adminDateInput').value=new Date().toLocaleDateString('en-GB').replace(/\//g,'/')">[ click to fill today ]</div>
+      </div>
+
+      <!-- TAB: Stats -->
+      <div class="admin-g-content" id="tabStats">
+        <div style="font-size:10px;color:rgba(0,255,65,0.7);font-family:monospace;margin-bottom:6px;">// EDIT COUNTER VALUES //</div>
+        <input type="number" id="adminStatsAnime" class="admin-g-input" placeholder="Total Anime">
+        <input type="number" id="adminStatsSeasons" class="admin-g-input" placeholder="Total Seasons">
+        <input type="number" id="adminStatsEps" class="admin-g-input" placeholder="Total Episodes">
+        <button class="admin-g-btn" onclick="commitStats()">▶ COMMIT STATS</button>
       </div>
 
       <!-- TAB: Add Anime -->

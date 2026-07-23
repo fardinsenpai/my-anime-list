@@ -3950,6 +3950,10 @@ function initAdminGui() {
   var today = new Date().toLocaleDateString('en-GB');
   var dateInput = document.getElementById('adminDateInput');
   if (dateInput) dateInput.value = today;
+  var ac = document.getElementById('animeCount'), sc = document.getElementById('seasonCount'), ec = document.getElementById('episodeCount');
+  if (document.getElementById('adminStatsAnime')) document.getElementById('adminStatsAnime').value = ac ? ac.textContent : '';
+  if (document.getElementById('adminStatsSeasons')) document.getElementById('adminStatsSeasons').value = sc ? sc.textContent : '';
+  if (document.getElementById('adminStatsEps')) document.getElementById('adminStatsEps').value = ec ? ec.textContent : '';
   switchAdminTab('watch');
 }
 
@@ -4309,6 +4313,7 @@ function selectEditCard(id) {
       if (previewTitle && title) previewTitle.textContent = title.textContent;
       if (previewId) previewId.textContent = '#' + id;
       document.getElementById('adminEditName').value = title ? title.textContent : '';
+      document.getElementById('adminEditImg').value = img ? img.src : '';
       document.getElementById('adminEditGenre').value = genreEl ? genreEl.textContent : '';
       document.getElementById('adminEditSeasons').value = seasonEl ? seasonEl.textContent.replace(/[🌸📺]/g,'').trim() : '';
       document.getElementById('adminEditEps').value = epsEl ? epsEl.textContent.replace(/[📺🎬]/g,'').replace('Total Episodes:','').trim() : '';
@@ -4335,8 +4340,7 @@ async function commitEditAnime() {
     if (lines[i].includes('<span class="badge">#' + _editId + '</span>')) { cardIdx = i; break; }
   }
   if (cardIdx === -1) { hideLoading(); msgFail('Card not found'); return; }
-  var imgMatch = lines[cardIdx].match(/<img src="([^"]+)"/);
-  var img = imgMatch ? imgMatch[1] : '';
+  var img = document.getElementById('adminEditImg').value.trim() || '';
   var seasonText = seasons ? '🌸 ' + seasons : '';
   var epsText = episodes ? '📺 Total Episodes: ' + episodes : '';
   var newCard = '<div class="card"><div class="card-inner"><div class="card-front"><div class="poster-wrap"><img src="' + img.replace(/"/g,'&quot;') + '" alt="' + name.replace(/"/g,'&quot;') + '" loading="lazy"/><span class="badge">#' + _editId + '</span></div><div class="info"><div class="number">NO. ' + _editId + '</div><div class="title">' + name + '</div></div></div><div class="card-back"><div class="back-content"><div class="back-title">' + name + '</div><div class="back-season">' + seasonText + '</div><div class="back-episodes">' + epsText + '</div><div class="back-tap-hint">click to flip back</div></div></div></div></div>';
@@ -4373,6 +4377,24 @@ async function commitDate(dateStr) {
   var ok = await githubCommit('index.html', content, 'admin: update date to ' + dateStr);
   hideLoading();
   if (ok) { msgOk('Date updated to ' + dateStr); var el = document.getElementById('lastUpdatedDate'); if (el) el.textContent = dateStr; }
+  else msgFail('Commit failed');
+}
+
+async function commitStats() {
+  var anime = document.getElementById('adminStatsAnime').value.trim();
+  var seasons = document.getElementById('adminStatsSeasons').value.trim();
+  var eps = document.getElementById('adminStatsEps').value.trim();
+  if (!anime && !seasons && !eps) { msgFail('Enter at least one value'); return; }
+  showLoading();
+  var scriptData = await githubFetch('script.js');
+  if (!scriptData) { hideLoading(); msgFail('Fetch failed'); return; }
+  var content = decodeURIComponent(escape(atob(scriptData.content)));
+  if (anime) content = content.replace(/counterUp\("animeCount",\s*\d+/, 'counterUp("animeCount", ' + anime);
+  if (seasons) content = content.replace(/counterUp\("seasonCount",\s*\d+/, 'counterUp("seasonCount", ' + seasons);
+  if (eps) content = content.replace(/counterUp\("episodeCount",\s*\d+/, 'counterUp("episodeCount", ' + eps);
+  var ok = await githubCommit('script.js', content, 'admin: update counter stats');
+  hideLoading();
+  if (ok) { msgOk('Stats updated'); if (anime) document.getElementById('animeCount').textContent = anime; if (seasons) document.getElementById('seasonCount').textContent = seasons; if (eps) document.getElementById('episodeCount').textContent = eps; }
   else msgFail('Commit failed');
 }
 
