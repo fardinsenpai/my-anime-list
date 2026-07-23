@@ -5041,7 +5041,7 @@ body.perf-no-heading-anim .header h1::after { animation: none !important; }
 /* === Certificate Templates === */
 @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&display=swap');
 .qc-frame {
-  width: 600px; height: 460px; margin: 0 auto 8px; position: relative;
+  width: 390px; height: 520px; margin: 0 auto 8px; position: relative;
   border-radius: 12px; overflow: hidden;
   font-family: 'Georgia', serif;
   transition: all 0.3s;
@@ -5080,15 +5080,21 @@ body.perf-no-heading-anim .header h1::after { animation: none !important; }
   width: 90px; height: 90px; object-fit: contain;
   filter: drop-shadow(0 0 5px rgba(245,197,24,0.5));
 }
-.qc-bottom-right { text-align: right; }
+.qc-bottom-right {
+  position: absolute; right: 8px; top: 50%;
+  transform: translateY(-50%);
+  text-align: center;
+}
 .qc-rank {
-  font-size: 40px; font-weight: 700; line-height: 1;
+  font-size: 22px; font-weight: 700; line-height: 1;
   font-family: 'Caveat', cursive;
   text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
 }
 .qc-diff {
-  font-size: 13px; font-family: monospace;
-  letter-spacing: 1px; margin-top: 2px;
+  font-size: 11px; font-family: monospace;
+  letter-spacing: 1px; margin-top: 4px;
 }
 /* Rank themes */
 .qc-sss .qc-inner {

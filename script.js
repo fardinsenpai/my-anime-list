@@ -4672,7 +4672,8 @@ function showQuestResults() {
   var cert = document.getElementById('questCertificate');
   cert.className = 'qc-frame qc-' + rankKey;
   cert.style.display = 'block';
-  document.getElementById('qcRank').textContent = gradeEl.textContent;
+  var rankLabels = { sss:'SSS', ss:'SS', s:'S', a:'A', b:'B', c:'C', f:'F' };
+  document.getElementById('qcRank').textContent = rankLabels[rankKey] || '';
   var diffMap = { easy:'Easy', normal:'Normal', hard:'Hard', mixed:'Mixed' };
   document.getElementById('qcDiff').textContent = diffMap[_questDifficulty] || 'Mixed';
   // Reset photo
