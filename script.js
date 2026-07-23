@@ -4649,13 +4649,13 @@ function showQuestResults() {
   var gradeEl = document.getElementById('questGrade');
   var s = _questScore;
   if (s === 10) gradeEl.textContent = 'SSS Rank Watcher 👑';
-  else if (s === 9) gradeEl.textContent = 'SS Rank';
-  else if (s === 8) gradeEl.textContent = 'S Rank';
-  else if (s === 7) gradeEl.textContent = 'A Rank';
-  else if (s === 6) gradeEl.textContent = 'B Rank';
-  else if (s === 5) gradeEl.textContent = 'C Rank';
-  else if (s === 4) gradeEl.textContent = 'B Rank';
-  else gradeEl.textContent = 'F Rank';
+  else if (s === 9) gradeEl.textContent = 'SS Rank Watcher';
+  else if (s === 8) gradeEl.textContent = 'S Rank Watcher';
+  else if (s === 7) gradeEl.textContent = 'A Rank Watcher';
+  else if (s === 6) gradeEl.textContent = 'B Rank Watcher';
+  else if (s === 5) gradeEl.textContent = 'C Rank Watcher';
+  else if (s === 4) gradeEl.textContent = 'B Rank Watcher';
+  else gradeEl.textContent = 'F Rank Watcher';
   var review = document.getElementById('questReview');
   review.innerHTML = '';
   _questAnswers.forEach(function(a) {
