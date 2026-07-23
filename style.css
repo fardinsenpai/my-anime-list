@@ -4697,22 +4697,22 @@ body.perf-no-heading-anim .header h1::after { animation: none !important; }
 .admin-overlay {
   position: fixed; inset: 0; z-index: 200000;
   display: flex; align-items: center; justify-content: center;
-  background: rgba(0,0,0,0.8); backdrop-filter: blur(10px);
+  background: rgba(0,0,0,0.92);
   opacity: 0; pointer-events: none;
   transition: opacity 0.35s ease;
 }
 .admin-overlay.open { opacity: 1; pointer-events: auto; }
 .admin-modal {
-  background: linear-gradient(160deg, #0d0d20, #1a0a2e, #0d0d20);
-  border: 1px solid rgba(255,215,0,0.2);
-  border-radius: 16px;
+  background: #0a0a0a;
+  border: 1px solid rgba(0,255,65,0.2);
+  border-radius: 8px;
   padding: 28px;
   width: 420px;
   max-width: 92vw;
   max-height: 85vh;
   overflow-y: auto;
   position: relative;
-  box-shadow: 0 0 40px rgba(255,215,0,0.08), 0 20px 60px rgba(0,0,0,0.6);
+  box-shadow: 0 0 40px rgba(0,255,65,0.05), 0 20px 60px rgba(0,0,0,0.8);
 }
 .admin-close {
   position: absolute; top: 10px; right: 14px;

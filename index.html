@@ -1315,22 +1315,22 @@
     <!-- PIN Screen -->
     <div id="adminPinScreen">
       <div style="text-align:center;margin-bottom:16px;">
-        <div style="font-size:28px;font-weight:900;font-family:Orbitron,sans-serif;background:linear-gradient(90deg,#00E5FF,#FFD700,#FF69B4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:3px;">SECURE</div>
-        <div style="font-size:10px;color:#667;font-family:monospace;letter-spacing:6px;margin-top:2px;">// AUTH REQUIRED //</div>
+        <div style="font-size:28px;font-weight:900;font-family:monospace;color:#00ff41;text-shadow:0 0 10px #00ff41,0 0 20px #00ff41;letter-spacing:3px;">SECURE</div>
+        <div style="font-size:10px;color:#00ff41;font-family:monospace;letter-spacing:6px;margin-top:2px;opacity:0.6;">// AUTH REQUIRED //</div>
       </div>
-      <div style="background:rgba(0,229,255,0.03);border:1px solid rgba(0,229,255,0.1);border-radius:8px;padding:16px;">
+      <div style="background:rgba(0,255,65,0.03);border:1px solid rgba(0,255,65,0.15);border-radius:8px;padding:16px;">
         <div style="display:flex;gap:6px;justify-content:center;margin-bottom:14px;">
-          <input type="password" id="adminPinInput" maxlength="1" style="width:36px;height:44px;background:rgba(0,0,0,0.4);border:2px solid rgba(0,229,255,0.3);border-radius:6px;color:#00E5FF;font-size:20px;text-align:center;font-family:Orbitron,sans-serif;outline:none;caret-color:#FFD700;" oninput="movePin(this,0)" onkeydown="pinKey(this,event,0)" autocomplete="off">
-          <input type="password" maxlength="1" style="width:36px;height:44px;background:rgba(0,0,0,0.4);border:2px solid rgba(0,229,255,0.3);border-radius:6px;color:#00E5FF;font-size:20px;text-align:center;font-family:Orbitron,sans-serif;outline:none;" oninput="movePin(this,1)" onkeydown="pinKey(this,event,1)" autocomplete="off">
-          <input type="password" maxlength="1" style="width:36px;height:44px;background:rgba(0,0,0,0.4);border:2px solid rgba(0,229,255,0.3);border-radius:6px;color:#00E5FF;font-size:20px;text-align:center;font-family:Orbitron,sans-serif;outline:none;" oninput="movePin(this,2)" onkeydown="pinKey(this,event,2)" autocomplete="off">
-          <input type="password" maxlength="1" style="width:36px;height:44px;background:rgba(0,0,0,0.4);border:2px solid rgba(0,229,255,0.3);border-radius:6px;color:#00E5FF;font-size:20px;text-align:center;font-family:Orbitron,sans-serif;outline:none;" oninput="movePin(this,3)" onkeydown="pinKey(this,event,3)" autocomplete="off">
-          <input type="password" maxlength="1" style="width:36px;height:44px;background:rgba(0,0,0,0.4);border:2px solid rgba(0,229,255,0.3);border-radius:6px;color:#00E5FF;font-size:20px;text-align:center;font-family:Orbitron,sans-serif;outline:none;" oninput="movePin(this,4)" onkeydown="pinKey(this,event,4)" autocomplete="off">
-          <input type="password" maxlength="1" style="width:36px;height:44px;background:rgba(0,0,0,0.4);border:2px solid rgba(0,229,255,0.3);border-radius:6px;color:#00E5FF;font-size:20px;text-align:center;font-family:Orbitron,sans-serif;outline:none;" oninput="movePin(this,5)" onkeydown="pinKey(this,event,5)" autocomplete="off">
+          <input type="password" id="adminPinInput" maxlength="1" style="width:36px;height:44px;background:#0a0a0a;border:2px solid rgba(0,255,65,0.3);border-radius:4px;color:#00ff41;font-size:20px;text-align:center;font-family:monospace;outline:none;caret-color:#00ff41;box-shadow:0 0 6px rgba(0,255,65,0.1);" oninput="movePin(this,0)" onkeydown="pinKey(this,event,0)" autocomplete="off">
+          <input type="password" maxlength="1" style="width:36px;height:44px;background:#0a0a0a;border:2px solid rgba(0,255,65,0.3);border-radius:4px;color:#00ff41;font-size:20px;text-align:center;font-family:monospace;outline:none;box-shadow:0 0 6px rgba(0,255,65,0.1);" oninput="movePin(this,1)" onkeydown="pinKey(this,event,1)" autocomplete="off">
+          <input type="password" maxlength="1" style="width:36px;height:44px;background:#0a0a0a;border:2px solid rgba(0,255,65,0.3);border-radius:4px;color:#00ff41;font-size:20px;text-align:center;font-family:monospace;outline:none;box-shadow:0 0 6px rgba(0,255,65,0.1);" oninput="movePin(this,2)" onkeydown="pinKey(this,event,2)" autocomplete="off">
+          <input type="password" maxlength="1" style="width:36px;height:44px;background:#0a0a0a;border:2px solid rgba(0,255,65,0.3);border-radius:4px;color:#00ff41;font-size:20px;text-align:center;font-family:monospace;outline:none;box-shadow:0 0 6px rgba(0,255,65,0.1);" oninput="movePin(this,3)" onkeydown="pinKey(this,event,3)" autocomplete="off">
+          <input type="password" maxlength="1" style="width:36px;height:44px;background:#0a0a0a;border:2px solid rgba(0,255,65,0.3);border-radius:4px;color:#00ff41;font-size:20px;text-align:center;font-family:monospace;outline:none;box-shadow:0 0 6px rgba(0,255,65,0.1);" oninput="movePin(this,4)" onkeydown="pinKey(this,event,4)" autocomplete="off">
+          <input type="password" maxlength="1" style="width:36px;height:44px;background:#0a0a0a;border:2px solid rgba(0,255,65,0.3);border-radius:4px;color:#00ff41;font-size:20px;text-align:center;font-family:monospace;outline:none;box-shadow:0 0 6px rgba(0,255,65,0.1);" oninput="movePin(this,5)" onkeydown="pinKey(this,event,5)" autocomplete="off">
         </div>
-        <div class="admin-error" id="adminPinError" style="text-align:center;margin-bottom:10px;">✕ ACCESS DENIED</div>
-        <button class="admin-btn" onclick="checkAdminPin()" style="width:100%;">▶ VERIFY</button>
+        <div class="admin-error" id="adminPinError" style="text-align:center;margin-bottom:10px;color:#ff0040;font-family:monospace;">✕ ACCESS DENIED</div>
+        <button class="admin-btn" onclick="checkAdminPin()" style="width:100%;background:transparent;border:1px solid #00ff41;color:#00ff41;font-family:monospace;font-weight:400;">▶ VERIFY</button>
       </div>
-      <div style="margin-top:10px;font-size:9px;color:#445;text-align:center;font-family:monospace;">[ SYSTEM v2.4.1 // ENCRYPTED ]</div>
+      <div style="margin-top:10px;font-size:9px;color:rgba(0,255,65,0.3);text-align:center;font-family:monospace;">[ ROOT@FARDIN ~ ]# _</div>
     </div>
 
     <!-- Dashboard -->
