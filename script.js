@@ -369,7 +369,7 @@ function showToast(title, msg, type) {
 }
 
 function hideAllSections() {
-  var ids = ['scrollProgress', 'topFiveDropdown', 'analysisContainer', 'statsBarContainer', 'topSecretsContainer', 'hotTakesContainer', 'chatBubble', 'grid'];
+  var ids = ['scrollProgress', 'topFiveDropdown', 'analysisContainer', 'statsBarContainer', 'topSecretsContainer', 'hotTakesContainer', 'chatBubble', 'grid', 'animeQuestContainer'];
   ids.forEach(function(id) {
     var el = document.getElementById(id);
     if (el) el.style.display = 'none';
@@ -641,6 +641,26 @@ window.addEventListener('popstate', function () {
       if (backToTopBtn) backToTopBtn.style.display = 'none';
       if (typeof closeMenu === 'function') closeMenu();
       window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+  }
+
+  const animeQuestBtn = document.getElementById('animeQuestBtn');
+  const animeQuestContainer = document.getElementById('animeQuestContainer');
+  if (animeQuestBtn && animeQuestContainer) {
+    animeQuestBtn.onclick = function(e) {
+      e.preventDefault();
+      history.pushState(null, '', 'anime-quest');
+      closeWaifus();
+      hideAllSections();
+      animeQuestContainer.style.display = 'block';
+      const mainTitle = document.querySelector('.header h1');
+      if (mainTitle) {
+        mainTitle.textContent = '🎮 Anime Quest';
+        mainTitle.setAttribute('data-text', '🎮 Anime Quest');
+      }
+      if (typeof closeMenu === 'function') closeMenu();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      initQuest();
     };
   }
 
@@ -4492,4 +4512,359 @@ async function commitAddAnime() {
   hideLoading();
   if (ok1 && ok2) msgOk('Anime #' + nextId + ' added: ' + title);
   else msgFail('Commit failed');
+}
+
+// ===================== ANIME QUEST =====================
+var QUEST_ANIME_LIST = [
+  { id:"Naruto", icon:"https://m.media-amazon.com/images/M/MV5BZTNjOWI0ZTAtOGY1OS00ZGU0LWEyOWYtMjhkYjdlYmVjMDk2XkEyXkFqcGc@._V1_.jpg" },
+  { id:"Naruto Shippuden", icon:"https://media.kitsu.app/anime/poster_images/1555/large.jpg" },
+  { id:"One Piece", icon:"https://media.kitsu.app/anime/poster_images/12/large.jpg" },
+  { id:"Bleach", icon:"https://media.kitsu.app/anime/poster_images/244/large.jpg" },
+  { id:"Fairy Tail", icon:"https://media.kitsu.app/anime/poster_images/13658/large.jpg" },
+  { id:"My Hero Academia", icon:"https://media.kitsu.app/anime/poster_images/11469/large.jpg" },
+  { id:"Attack on Titan", icon:"https://media.kitsu.app/anime/poster_images/7442/large.jpg" },
+  { id:"Demon Slayer: Kimetsu no Yaiba", icon:"https://media.kitsu.app/anime/poster_images/41370/large.jpg" },
+  { id:"Jujutsu Kaisen", icon:"https://media.kitsu.app/anime/42765/poster_image/large-5ce19551c1a6cf995b378205b9149b5c.jpeg" },
+  { id:"Death Note", icon:"https://media.kitsu.app/anime/poster_images/1376/large.jpg" },
+  { id:"Fullmetal Alchemist Brotherhood", icon:"https://media.kitsu.app/anime/poster_images/3936/large.jpg" },
+  { id:"Hunter X Hunter", icon:"https://media.kitsu.app/anime/poster_images/6448/large.jpg" },
+  { id:"Tokyo Ghoul", icon:"https://media.kitsu.app/anime/poster_images/8271/large.jpg" },
+  { id:"Code Geass", icon:"https://media.kitsu.app/anime/poster_images/1415/large.jpg" },
+  { id:"Sword Art Online", icon:"https://media.kitsu.app/anime/poster_images/6589/large.jpg" },
+  { id:"Solo Leveling", icon:"https://media.kitsu.app/anime/46231/poster_image/large-cdadff31f42490b9f48a035939a01a92.jpeg" },
+  { id:"Chainsaw Man", icon:"https://media.kitsu.app/anime/43806/poster_image/large-815d6008fb3b56f4291b9f0ffa05cd8f.jpeg" },
+  { id:"Vinland Saga", icon:"https://media.kitsu.app/anime/poster_images/41084/large.jpg" },
+  { id:"Mob Psycho 100", icon:"https://media.kitsu.app/anime/11578/poster_image/large-e969f8a688549dd8e02ffd59f49122e9.jpeg" },
+  { id:"Haikyuu!!", icon:"https://media.kitsu.app/anime/poster_images/8133/large.jpg" }
+];
+
+var QUEST_BANK = [
+  // ===== NARUTO =====
+  { anime:"Naruto", difficulty:"easy", question:"Who is the First Hokage of the Hidden Leaf Village?", options:["Hashirama Senju","Tobirama Senju","Hiruzen Sarutobi","Minato Namikaze"], correct:0 },
+  { anime:"Naruto", difficulty:"easy", question:"What is Naruto's full name?", options:["Naruto Uzumaki","Naruto Namikaze","Naruto Haruno","Naruto Hatake"], correct:0 },
+  { anime:"Naruto", difficulty:"easy", question:"Who is Naruto's mother?", options:["Kushina Uzumaki","Hinata Hyuga","Tsunade Senju","Mikoto Uchiha"], correct:0 },
+  { anime:"Naruto", difficulty:"easy", question:"Who is Naruto's father?", options:["Minato Namikaze","Hashirama Senju","Kakashi Hatake","Jiraiya"], correct:0 },
+  { anime:"Naruto", difficulty:"easy", question:"Which tailed beast is sealed inside Naruto?", options:["Kurama","Shukaku","Matatabi","Gyuki"], correct:0 },
+  { anime:"Naruto", difficulty:"normal", question:"Who taught Naruto the Rasengan?", options:["Jiraiya","Kakashi","Tsunade","Iruka"], correct:0 },
+  { anime:"Naruto", difficulty:"normal", question:"What is Sasuke's clan name?", options:["Uchiha","Senju","Hyuga","Nara"], correct:0 },
+  { anime:"Naruto", difficulty:"normal", question:"Who killed Itachi Uchiha?", options:["Sasuke Uchiha","Naruto Uzumaki","Kakashi Hatake","Madara Uchiha"], correct:0 },
+  { anime:"Naruto", difficulty:"normal", question:"Which village is Naruto from?", options:["Konohagakure","Sunagakure","Kirigakure","Iwagakure"], correct:0 },
+  { anime:"Naruto", difficulty:"normal", question:"What is Kakashi's famous copied technique?", options:["Chidori","Rasengan","Shadow Clone","Fireball Jutsu"], correct:0 },
+  { anime:"Naruto", difficulty:"hard", question:"Who was the leader of the Akatsuki before Pain?", options:["Yahiko","Nagato","Obito","Madara"], correct:0 },
+  { anime:"Naruto", difficulty:"hard", question:"What is the reanimation jutsu used by Kabuto called?", options:["Edo Tensei","Kuchiyose","Shinra Tensei","Amenotejikara"], correct:0 },
+  { anime:"Naruto", difficulty:"hard", question:"What is the real name of the masked man Tobi?", options:["Obito Uchiha","Madara Uchiha","Shisui Uchiha","Izuna Uchiha"], correct:0 },
+  { anime:"Naruto", difficulty:"hard", question:"Which chakra nature does Naruto NOT have?", options:["Water","Wind","Fire","Earth"], correct:0 },
+  // ===== NARUTO SHIPPUDEN =====
+  { anime:"Naruto Shippuden", difficulty:"easy", question:"Who does Naruto marry at the end?", options:["Hinata Hyuga","Sakura Haruno","Ino Yamanaka","Kushina Uzumaki"], correct:0 },
+  { anime:"Naruto Shippuden", difficulty:"easy", question:"What is Naruto's son's name?", options:["Boruto Uzumaki","Kawaki","Mitsuki","Sarada"], correct:0 },
+  { anime:"Naruto Shippuden", difficulty:"normal", question:"What mode does Naruto achieve after befriending Kurama?", options:["Six Paths Sage Mode","Sage Mode","Kyuubi Chakra Mode","Baryon Mode"], correct:0 },
+  { anime:"Naruto Shippuden", difficulty:"normal", question:"Who was the strongest Kage during the 4th Great Ninja War?", options:["Onoki","A","Mei","Gaara"], correct:0 },
+  { anime:"Naruto Shippuden", difficulty:"hard", question:"What is Madara's ultimate technique against the Allied Forces?", options:["Shinra Tensei","Deep Forest Emergence","Meteor Drop (Tengai Shinsei)","C0"], correct:2 },
+  // ===== ONE PIECE =====
+  { anime:"One Piece", difficulty:"easy", question:"What is Luffy's pirate crew called?", options:["Straw Hat Pirates","Red Hair Pirates","Whitebeard Pirates","Heart Pirates"], correct:0 },
+  { anime:"One Piece", difficulty:"easy", question:"What ability did Luffy get from his Devil Fruit?", options:["Rubber Body","Fire Body","Iron Body","Shadow Body"], correct:0 },
+  { anime:"One Piece", difficulty:"easy", question:"Who is the first mate of the Straw Hats?", options:["Roronoa Zoro","Sanji","Nami","Jinbe"], correct:0 },
+  { anime:"One Piece", difficulty:"easy", question:"Who was the Pirate King before the story?", options:["Gol D. Roger","Shanks","Whitebeard","Buggy"], correct:0 },
+  { anime:"One Piece", difficulty:"normal", question:"What is Luffy's brother's name?", options:["Ace","Sabo","Both Ace and Sabo","Law"], correct:2 },
+  { anime:"One Piece", difficulty:"normal", question:"Which sea did Luffy grow up in?", options:["East Blue","West Blue","North Blue","South Blue"], correct:0 },
+  { anime:"One Piece", difficulty:"normal", question:"What is Zoro's signature sword style?", options:["Three Sword Style","Two Sword Style","One Sword Style","No Sword Style"], correct:0 },
+  { anime:"One Piece", difficulty:"normal", question:"Who led the Marines at Marineford?", options:["Sengoku","Akainu","Garp","Kizaru"], correct:0 },
+  { anime:"One Piece", difficulty:"hard", question:"What Devil Fruit did Blackbeard eat first?", options:["Yami Yami no Mi","Gura Gura no Mi","Mera Mera no Mi","Yuki Yuki no Mi"], correct:0 },
+  { anime:"One Piece", difficulty:"hard", question:"What ancient weapon is Shirahoshi?", options:["Poseidon","Pluton","Uranus","Noah"], correct:0 },
+  // ===== BLEACH =====
+  { anime:"Bleach", difficulty:"easy", question:"Who is the main protagonist of Bleach?", options:["Ichigo Kurosaki","Renji Abarai","Byakuya Kuchiki","Toshiro Hitsugaya"], correct:0 },
+  { anime:"Bleach", difficulty:"easy", question:"What is Ichigo's Zanpakuto called?", options:["Zangetsu","Hyorinmaru","Senbonzakura","Zabimaru"], correct:0 },
+  { anime:"Bleach", difficulty:"easy", question:"What color is Ichigo's hair?", options:["Orange","Black","Blue","White"], correct:0 },
+  { anime:"Bleach", difficulty:"normal", question:"Who captains the 6th Division of the Gotei 13?", options:["Byakuya Kuchiki","Kenpachi Zaraki","Shunsui Kyoraku","Mayuri Kurotsuchi"], correct:0 },
+  { anime:"Bleach", difficulty:"normal", question:"What is the Soul Reaper organization called?", options:["Gotei 13","Espada","Quincy","Vizard"], correct:0 },
+  { anime:"Bleach", difficulty:"normal", question:"What is Rukia's Zanpakuto called?", options:["Sode no Shirayuki","Zangetsu","Hyorinmaru","Tobiume"], correct:0 },
+  { anime:"Bleach", difficulty:"hard", question:"What is Kenpachi Zaraki's Bankai?", options:["Nozarashi","Minazuki","Katen Kyokotsu","Ryumon Hozukimaru"], correct:0 },
+  { anime:"Bleach", difficulty:"hard", question:"Who is the main villain of the Thousand-Year Blood War?", options:["Yhwach","Aizen","Ginjo","Ulquiorra"], correct:0 },
+  // ===== FAIRY TAIL =====
+  { anime:"Fairy Tail", difficulty:"easy", question:"Who is the main protagonist of Fairy Tail?", options:["Natsu Dragneel","Gray Fullbuster","Erza Scarlet","Happy"], correct:0 },
+  { anime:"Fairy Tail", difficulty:"easy", question:"What color is Natsu's hair?", options:["Pink","Red","Orange","Blue"], correct:0 },
+  { anime:"Fairy Tail", difficulty:"easy", question:"What is the guild name in Fairy Tail?", options:["Fairy Tail","Sabertooth","Lamia Scale","Blue Pegasus"], correct:0 },
+  { anime:"Fairy Tail", difficulty:"normal", question:"What magic does Natsu use?", options:["Fire Dragon Slayer","Ice Make","Requip","Sky Dragon Slayer"], correct:0 },
+  { anime:"Fairy Tail", difficulty:"normal", question:"Who is the master of Fairy Tail?", options:["Makarov Dreyar","Gildarts Clive","Laxus Dreyar","Jose Porla"], correct:0 },
+  { anime:"Fairy Tail", difficulty:"normal", question:"What is Erza's ability called?", options:["Requip","Take Over","Holder Magic","Transformation"], correct:0 },
+  { anime:"Fairy Tail", difficulty:"hard", question:"What is Zeref's book called?", options:["Book of E.N.D.","Book of Zeref","Grimoire Heart","Lumen Histoire"], correct:0 },
+  { anime:"Fairy Tail", difficulty:"hard", question:"Who holds the Celestial Spirit King's key?", options:["Lucy Heartfilia","Yukino Agria","Both","None"], correct:2 },
+  // ===== MY HERO ACADEMIA =====
+  { anime:"My Hero Academia", difficulty:"easy", question:"Who is the main protagonist of MHA?", options:["Izuku Midoriya","Katsuki Bakugo","Shoto Todoroki","All Might"], correct:0 },
+  { anime:"My Hero Academia", difficulty:"easy", question:"What is Deku's Quirk called?", options:["One For All","All For One","Explosion","Half-Cold Half-Hot"], correct:0 },
+  { anime:"My Hero Academia", difficulty:"easy", question:"Who is the #1 hero at the start?", options:["All Might","Endeavor","Hawks","Best Jeanist"], correct:0 },
+  { anime:"My Hero Academia", difficulty:"normal", question:"What is the hero school called?", options:["U.A. High School","Shiketsu High","Ketsubutsu Academy","Isamu Academy"], correct:0 },
+  { anime:"My Hero Academia", difficulty:"normal", question:"Who is the main villain?", options:["All For One","Shigaraki Tomura","Stain","Dabi"], correct:0 },
+  { anime:"My Hero Academia", difficulty:"normal", question:"What class is Deku in?", options:["Class 1-A","Class 1-B","Class 2-A","Class 3-A"], correct:0 },
+  { anime:"My Hero Academia", difficulty:"hard", question:"What is Shigaraki's real name?", options:["Tenko Shimura","Tomura Shigaraki","Akaguro Chizome","Kai Chisaki"], correct:0 },
+  // ===== ATTACK ON TITAN =====
+  { anime:"Attack on Titan", difficulty:"easy", question:"Who is the main protagonist of AOT?", options:["Eren Yeager","Mikasa Ackerman","Armin Arlert","Levi Ackerman"], correct:0 },
+  { anime:"Attack on Titan", difficulty:"easy", question:"What are the giant creatures called?", options:["Titans","Giants","Colossals","Beasts"], correct:0 },
+  { anime:"Attack on Titan", difficulty:"easy", question:"What Titan does Eren transform into?", options:["The Attack Titan","The Colossal Titan","The Armored Titan","The Beast Titan"], correct:0 },
+  { anime:"Attack on Titan", difficulty:"normal", question:"Who is humanity's strongest soldier?", options:["Levi Ackerman","Erwin Smith","Mikasa Ackerman","Hange Zoe"], correct:0 },
+  { anime:"Attack on Titan", difficulty:"normal", question:"What are the three walls called?", options:["Maria, Rose, and Sina","Paradise","Trost","Shiganshina"], correct:0 },
+  { anime:"Attack on Titan", difficulty:"normal", question:"Who has the Armored Titan?", options:["Reiner Braun","Bertholdt Hoover","Zeke Yeager","Annie Leonhart"], correct:0 },
+  { anime:"Attack on Titan", difficulty:"hard", question:"What is Eren's father's name?", options:["Grisha Yeager","Zeke Yeager","Keith Shadis","Rod Reiss"], correct:0 },
+  { anime:"Attack on Titan", difficulty:"hard", question:"Who killed Erwin Smith?", options:["Zeke Yeager","Reiner Braun","Bertholdt Hoover","Colossal Titan"], correct:0 },
+  // ===== DEMON SLAYER =====
+  { anime:"Demon Slayer: Kimetsu no Yaiba", difficulty:"easy", question:"Who is the main protagonist?", options:["Tanjiro Kamado","Zenitsu Agatsuma","Inosuke Hashibira","Giyu Tomioka"], correct:0 },
+  { anime:"Demon Slayer: Kimetsu no Yaiba", difficulty:"easy", question:"What is Tanjiro's sister's name?", options:["Nezuko Kamado","Shinobu Kocho","Mitsuri Kanroji","Kanao Tsuyuri"], correct:0 },
+  { anime:"Demon Slayer: Kimetsu no Yaiba", difficulty:"easy", question:"What breathing style does Tanjiro use?", options:["Water Breathing","Flame Breathing","Thunder Breathing","Wind Breathing"], correct:0 },
+  { anime:"Demon Slayer: Kimetsu no Yaiba", difficulty:"normal", question:"Who leads the Demon Slayer Corps?", options:["Kagaya Ubuyashiki","Giyu Tomioka","Muzan Kibutsuji","Tanjiro Kamado"], correct:0 },
+  { anime:"Demon Slayer: Kimetsu no Yaiba", difficulty:"normal", question:"Who is the King of Demons?", options:["Muzan Kibutsuji","Rui","Akaza","Kokushibo"], correct:0 },
+  { anime:"Demon Slayer: Kimetsu no Yaiba", difficulty:"normal", question:"What breathing does Zenitsu use?", options:["Thunder Breathing","Water Breathing","Flame Breathing","Beast Breathing"], correct:0 },
+  { anime:"Demon Slayer: Kimetsu no Yaiba", difficulty:"hard", question:"Who is Upper Moon 3?", options:["Akaza","Kokushibo","Hantengu","Gyokko"], correct:0 },
+  { anime:"Demon Slayer: Kimetsu no Yaiba", difficulty:"hard", question:"Which Hashira uses Serpent Breathing?", options:["Obanai Iguro","Mitsuri Kanroji","Tengen Uzui","Muichiro Tokito"], correct:0 },
+  // ===== JUJUTSU KAISEN =====
+  { anime:"Jujutsu Kaisen", difficulty:"easy", question:"Who is the main protagonist of JJK?", options:["Yuji Itadori","Megumi Fushiguro","Gojo Satoru","Nobara Kugisaki"], correct:0 },
+  { anime:"Jujutsu Kaisen", difficulty:"easy", question:"Who is the King of Curses?", options:["Ryomen Sukuna","Mahito","Hanami","Jogo"], correct:0 },
+  { anime:"Jujutsu Kaisen", difficulty:"easy", question:"What school does the main cast attend?", options:["Tokyo Jujutsu High","Kyoto Jujutsu High","Osaka Jujutsu High","Jujutsu Academy"], correct:0 },
+  { anime:"Jujutsu Kaisen", difficulty:"normal", question:"Who is the strongest sorcerer?", options:["Gojo Satoru","Sukuna","Geto Suguru","Kenjaku"], correct:0 },
+  { anime:"Jujutsu Kaisen", difficulty:"normal", question:"What technique does Gojo have?", options:["Limitless","Ten Shadows","Cursed Speech","Boogie Woogie"], correct:0 },
+  { anime:"Jujutsu Kaisen", difficulty:"normal", question:"What is Megumi's technique?", options:["Ten Shadows","Limitless","Cursed Speech","Blood Manipulation"], correct:0 },
+  { anime:"Jujutsu Kaisen", difficulty:"hard", question:"What form does Sukuna have originally?", options:["4 arms, 2 faces","2 arms, 1 face","6 arms, 3 faces","2 arms, 2 faces"], correct:0 },
+  { anime:"Jujutsu Kaisen", difficulty:"hard", question:"What is Gojo's Domain Expansion?", options:["Unlimited Void","Malevolent Shrine","Self-Embodiment of Perfection","Time Cell Moon Palace"], correct:0 },
+  // ===== DEATH NOTE =====
+  { anime:"Death Note", difficulty:"easy", question:"Who picks up the Death Note first?", options:["Light Yagami","L","Near","Mello"], correct:0 },
+  { anime:"Death Note", difficulty:"easy", question:"What Shinigami drops the Death Note?", options:["Ryuk","Rem","Sidoh","Gelus"], correct:0 },
+  { anime:"Death Note", difficulty:"easy", question:"What does writing a name in the Death Note do?", options:["Kills the person","Puts them to sleep","Curses them","Makes them confess"], correct:0 },
+  { anime:"Death Note", difficulty:"normal", question:"Who is the world's greatest detective?", options:["L","Near","Mello","Misa"], correct:0 },
+  { anime:"Death Note", difficulty:"normal", question:"What alias does Light use?", options:["Kira","L","God","Justice"], correct:0 },
+  { anime:"Death Note", difficulty:"hard", question:"How many Death Notes exist in the human world?", options:["2","3","4","5"], correct:2 },
+  { anime:"Death Note", difficulty:"hard", question:"Who kills L?", options:["Rem (via Light's plan)","Light Yagami","Misa Amane","Near"], correct:0 },
+  // ===== FULLMETAL ALCHEMIST BROTHERHOOD =====
+  { anime:"Fullmetal Alchemist Brotherhood", difficulty:"easy", question:"What are the Elric brothers' names?", options:["Edward and Alphonse","Alphonse and Winry","Edward and Roy","Alphonse and Van"], correct:0 },
+  { anime:"Fullmetal Alchemist Brotherhood", difficulty:"easy", question:"What principle do alchemists follow?", options:["Equivalent Exchange","For Every Action a Reaction","Law of Conservation","Rule of Three"], correct:0 },
+  { anime:"Fullmetal Alchemist Brotherhood", difficulty:"easy", question:"What metal is Edward's automail?", options:["Steel","Silver","Iron","Carbon Fiber"], correct:2 },
+  { anime:"Fullmetal Alchemist Brotherhood", difficulty:"normal", question:"Which Homunculus is King Bradley?", options:["Wrath","Pride","Greed","Lust"], correct:0 },
+  { anime:"Fullmetal Alchemist Brotherhood", difficulty:"normal", question:"What is the Philosopher's Stone made of?", options:["Human souls","Gold","Mercury","Pure alchemy"], correct:0 },
+  { anime:"Fullmetal Alchemist Brotherhood", difficulty:"hard", question:"Who is the true villain behind everything?", options:["Father","King Bradley","Dante","Scar"], correct:0 },
+  // ===== HUNTER X HUNTER =====
+  { anime:"Hunter X Hunter", difficulty:"easy", question:"Who is the main protagonist?", options:["Gon Freecss","Killua Zoldyck","Kurapika","Leorio"], correct:0 },
+  { anime:"Hunter X Hunter", difficulty:"easy", question:"What is Gon's father's name?", options:["Ging Freecss","Kite","Silva Zoldyck","Hisoka"], correct:0 },
+  { anime:"Hunter X Hunter", difficulty:"easy", question:"What exam do hunters take?", options:["Hunter Exam","Hunter Test","Hunter Challenge","Hunter Selection"], correct:0 },
+  { anime:"Hunter X Hunter", difficulty:"normal", question:"What is Killua's family profession?", options:["Assassins","Hunters","Thieves","Merchants"], correct:0 },
+  { anime:"Hunter X Hunter", difficulty:"normal", question:"What Nen type does Gon use?", options:["Enhancement","Transmutation","Conjuration","Manipulation"], correct:0 },
+  { anime:"Hunter X Hunter", difficulty:"hard", question:"What is the spider troupe called?", options:["Phantom Troupe","Red Spider","Shadow Thieves","Dark Web"], correct:0 },
+  { anime:"Hunter X Hunter", difficulty:"hard", question:"What ability steals powers?", options:["Skill Hunter","Bandit's Secret","Nen Thief","Thief's Domain"], correct:0 },
+  // ===== TOKYO GHOUL =====
+  { anime:"Tokyo Ghoul", difficulty:"easy", question:"Who is the main protagonist?", options:["Ken Kaneki","Touka Kirishima","Yoshimura","Hideyoshi"], correct:0 },
+  { anime:"Tokyo Ghoul", difficulty:"easy", question:"What does Kaneki become?", options:["Half-Ghoul","Full Ghoul","Human","Investigator"], correct:0 },
+  { anime:"Tokyo Ghoul", difficulty:"easy", question:"What do ghouls eat?", options:["Human flesh","Normal food","Blood","Souls"], correct:0 },
+  { anime:"Tokyo Ghoul", difficulty:"normal", question:"What is Kaneki's kagune type?", options:["Rinkaku","Ukaku","Koukaku","Bikaku"], correct:0 },
+  { anime:"Tokyo Ghoul", difficulty:"normal", question:"What is the investigator organization?", options:["CCG","CGC","CGD","CCC"], correct:0 },
+  { anime:"Tokyo Ghoul", difficulty:"hard", question:"What is the ghoul organization in Anteiku?", options:["Anteiku","Aogiri Tree","Clowns","V"], correct:0 },
+  // ===== CODE GEASS =====
+  { anime:"Code Geass", difficulty:"easy", question:"Who is the main protagonist?", options:["Lelouch vi Britannia","Suzaku Kururugi","C.C.","Kallen Stadtfeld"], correct:0 },
+  { anime:"Code Geass", difficulty:"easy", question:"What power does Lelouch get?", options:["Geass (absolute obedience)","Geass (mind reading)","Geass (time stop)","Geass (invisibility)"], correct:0 },
+  { anime:"Code Geass", difficulty:"easy", question:"What is Lelouch's alter ego?", options:["Zero","Villain","Liberator","Emperor"], correct:0 },
+  { anime:"Code Geass", difficulty:"normal", question:"Who gives Lelouch his power?", options:["C.C.","V.V.","Marianne","Anya"], correct:0 },
+  { anime:"Code Geass", difficulty:"normal", question:"What country does Lelouch fight?", options:["Britannia","China","Japan","EU"], correct:0 },
+  { anime:"Code Geass", difficulty:"hard", question:"What is Lelouch's Geass final form?", options:["Geass in both eyes affecting everyone","Geass in one eye unlimited uses","Geass that controls time","Geass that reads minds"], correct:0 },
+  // ===== SWORD ART ONLINE =====
+  { anime:"Sword Art Online", difficulty:"easy", question:"Who is the main protagonist?", options:["Kirito (Kirigaya Kazuto)","Asuna Yuuki","Klein","Agil"], correct:0 },
+  { anime:"Sword Art Online", difficulty:"easy", question:"What is the first VRMMORPG?", options:["Sword Art Online","ALfheim Online","Gun Gale Online","Underworld"], correct:0 },
+  { anime:"Sword Art Online", difficulty:"normal", question:"Who created Sword Art Online?", options:["Kayaba Akihiko","Sugou Nobuyuki","Kirito","Heathcliff"], correct:0 },
+  { anime:"Sword Art Online", difficulty:"normal", question:"Who is Kirito's love interest?", options:["Asuna Yuuki","Sinon","Leafa","Yui"], correct:0 },
+  { anime:"Sword Art Online", difficulty:"hard", question:"What floor was the final SAO boss?", options:["Floor 75","Floor 100","Floor 50","Floor 95"], correct:0 },
+  // ===== SOLO LEVELING =====
+  { anime:"Solo Leveling", difficulty:"easy", question:"Who is the main protagonist?", options:["Sung Jinwoo","Yoo Jinho","Chae Hae-in","Go Gunhee"], correct:0 },
+  { anime:"Solo Leveling", difficulty:"easy", question:"What rank was Jinwoo originally?", options:["E-rank","S-rank","A-rank","Healer"], correct:0 },
+  { anime:"Solo Leveling", difficulty:"normal", question:"What system does Jinwoo gain?", options:["The System (Leveling System)","Skill System","Hunter System","Gate System"], correct:0 },
+  { anime:"Solo Leveling", difficulty:"normal", question:"What weapon does Jinwoo famously use?", options:["Demon King's Dagger","Kamish's Wrath","Shadow Daggers","Orc's Axe"], correct:0 },
+  { anime:"Solo Leveling", difficulty:"hard", question:"What is Jinwoo's father's name?", options:["Sung Il-hwan","Sung Jin-hwan","Sung Min-woo","Sung Hong-ki"], correct:0 },
+  // ===== CHAINSAW MAN =====
+  { anime:"Chainsaw Man", difficulty:"easy", question:"Who is the main protagonist?", options:["Denji","Aki Hayakawa","Power","Makima"], correct:0 },
+  { anime:"Chainsaw Man", difficulty:"easy", question:"What happens when Denji pulls his cord?", options:["He transforms into Chainsaw Man","He explodes","He dies","He regenerates"], correct:0 },
+  { anime:"Chainsaw Man", difficulty:"normal", question:"What is Denji's devil called?", options:["Chainsaw Devil","Pochita","Power Devil","Axe Devil"], correct:1 },
+  { anime:"Chainsaw Man", difficulty:"normal", question:"Who is the main antagonist of Part 1?", options:["Makima","Reze","Santa Claus","Yoshida"], correct:0 },
+  { anime:"Chainsaw Man", difficulty:"hard", question:"What is Power's actual race?", options:["Blood Fiend","Fox Devil","Violence Fiend","Shark Fiend"], correct:0 },
+  // ===== VINLAND SAGA =====
+  { anime:"Vinland Saga", difficulty:"easy", question:"Who is the main protagonist?", options:["Thorfinn","Thors","Askelaad","Canute"], correct:0 },
+  { anime:"Vinland Saga", difficulty:"easy", question:"What is Thorfinn's father's name?", options:["Thors","Askelaad","Helga","Leif"], correct:0 },
+  { anime:"Vinland Saga", difficulty:"normal", question:"Who kills Thors?", options:["Askelaad","Canute","Floki","Thorkell"], correct:0 },
+  { anime:"Vinland Saga", difficulty:"normal", question:"What is Thorfinn's goal in Season 1?", options:["To kill Askelaad in a duel","To reach Vinland","To become king","To find his mother"], correct:0 },
+  { anime:"Vinland Saga", difficulty:"hard", question:"What land does Thorfinn seek?", options:["Vinland","Greenland","Iceland","Midgard"], correct:0 },
+  // ===== MOB PSYCHO 100 =====
+  { anime:"Mob Psycho 100", difficulty:"easy", question:"Who is the main protagonist?", options:["Shigeo Kageyama (Mob)","Arataka Reigen","Teruki Hanazawa","Ritsu Kageyama"], correct:0 },
+  { anime:"Mob Psycho 100", difficulty:"easy", question:"What does Mob have an abundance of?", options:["Psychic Powers","Strength","Intelligence","Money"], correct:0 },
+  { anime:"Mob Psycho 100", difficulty:"normal", question:"Who is Mob's mentor?", options:["Arataka Reigen","Teruki Hanazawa","Serizawa","Dimple"], correct:0 },
+  { anime:"Mob Psycho 100", difficulty:"normal", question:"What happens at 100% power?", options:["He goes berserk (???? mode)","He becomes calm","He loses his powers","He faints"], correct:0 },
+  { anime:"Mob Psycho 100", difficulty:"hard", question:"Who is Mob's evil spirit companion?", options:["Dimple","Reigen","Ekubo","Koyama"], correct:2 },
+  { anime:"Mob Psycho 100", difficulty:"hard", question:"What is Mob's brother's name?", options:["Ritsu Kageyama","Reigen Kageyama","Teruki Kageyama","Shoto Kageyama"], correct:0 },
+  // ===== HAIKYUU!! =====
+  { anime:"Haikyuu!!", difficulty:"easy", question:"Who is the main protagonist?", options:["Shoyo Hinata","Tobio Kageyama","Daichi Sawamura","Koshi Sugawara"], correct:0 },
+  { anime:"Haikyuu!!", difficulty:"easy", question:"Who is Hinata's rival setter?", options:["Tobio Kageyama","Ryunosuke Tanaka","Kei Tsukishima","Yu Nishinoya"], correct:0 },
+  { anime:"Haikyuu!!", difficulty:"easy", question:"What school does the main team belong to?", options:["Karasuno High","Nekoma High","Aoba Johsai","Shiratorizawa"], correct:0 },
+  { anime:"Haikyuu!!", difficulty:"normal", question:"What number does Hinata wear?", options:["10","1","5","7"], correct:0 },
+  { anime:"Haikyuu!!", difficulty:"normal", question:"What is Karasuno's nickname?", options:["Crows","Ravens","Eagles","Hawks"], correct:0 },
+  { anime:"Haikyuu!!", difficulty:"hard", question:"What is Kageyama's signature set?", options:["Quick Attack (minus tempo)","High Set","Back Set","Dump Set"], correct:0 }
+];
+
+var _questSelected = [];
+var _questQuestions = [];
+var _questIndex = 0;
+var _questScore = 0;
+var _questAnswers = [];
+
+function shuffleArray(arr) {
+  for (var i = arr.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var tmp = arr[i]; arr[i] = arr[j]; arr[j] = tmp;
+  }
+  return arr;
+}
+
+function initQuest() {
+  _questSelected = [];
+  _questQuestions = [];
+  _questIndex = 0;
+  _questScore = 0;
+  _questAnswers = [];
+  document.getElementById('questSelectPhase').style.display = 'block';
+  document.getElementById('questQuizPhase').style.display = 'none';
+  document.getElementById('questResultsPhase').style.display = 'none';
+  var list = document.getElementById('questAnimeList');
+  list.innerHTML = '';
+  QUEST_ANIME_LIST.forEach(function(a) {
+    var card = document.createElement('div');
+    card.className = 'quest-anime-card';
+    card.dataset.id = a.id;
+    card.innerHTML = '<span class="qac-check">✓</span><img class="qac-icon" src="' + a.icon + '" alt=""><span class="qac-name">' + a.id + '</span>';
+    card.onclick = function() { toggleQuestAnime(a.id); };
+    list.appendChild(card);
+  });
+  document.getElementById('questStartBtn').style.display = 'none';
+  document.getElementById('questResetSelectBtn').style.display = 'none';
+  document.getElementById('questSelectedCount').textContent = 'Selected: 0';
+}
+
+function toggleQuestAnime(id) {
+  var idx = _questSelected.indexOf(id);
+  if (idx !== -1) { _questSelected.splice(idx, 1); }
+  else { _questSelected.push(id); }
+  var cards = document.querySelectorAll('#questAnimeList .quest-anime-card');
+  cards.forEach(function(c) {
+    c.classList.toggle('selected', _questSelected.indexOf(c.dataset.id) !== -1);
+  });
+  document.getElementById('questSelectedCount').textContent = 'Selected: ' + _questSelected.length;
+  document.getElementById('questStartBtn').style.display = _questSelected.length > 0 ? 'inline-block' : 'none';
+  document.getElementById('questResetSelectBtn').style.display = _questSelected.length > 0 ? 'inline-block' : 'none';
+}
+
+function resetQuestSelection() {
+  _questSelected = [];
+  document.querySelectorAll('#questAnimeList .quest-anime-card').forEach(function(c) { c.classList.remove('selected'); });
+  document.getElementById('questSelectedCount').textContent = 'Selected: 0';
+  document.getElementById('questStartBtn').style.display = 'none';
+  document.getElementById('questResetSelectBtn').style.display = 'none';
+}
+
+function startQuest() {
+  if (_questSelected.length === 0) return;
+  var pool = QUEST_BANK.filter(function(q) { return _questSelected.indexOf(q.anime) !== -1; });
+  if (pool.length < 10) {
+    msgFail('Need at least 10 questions available. Select more anime.');
+    return;
+  }
+  shuffleArray(pool);
+  var easy = pool.filter(function(q) { return q.difficulty === 'easy'; });
+  var normal = pool.filter(function(q) { return q.difficulty === 'normal'; });
+  var hard = pool.filter(function(q) { return q.difficulty === 'hard'; });
+  _questQuestions = [];
+  _questQuestions = _questQuestions.concat(easy.slice(0, 4));
+  _questQuestions = _questQuestions.concat(normal.slice(0, 3));
+  _questQuestions = _questQuestions.concat(hard.slice(0, 3));
+  while (_questQuestions.length < 10) {
+    var extra = pool.filter(function(q) { return _questQuestions.indexOf(q) === -1; });
+    if (extra.length === 0) break;
+    _questQuestions.push(extra[0]);
+  }
+  shuffleArray(_questQuestions);
+  _questIndex = 0;
+  _questScore = 0;
+  _questAnswers = [];
+  document.getElementById('questSelectPhase').style.display = 'none';
+  document.getElementById('questQuizPhase').style.display = 'block';
+  document.getElementById('questResultsPhase').style.display = 'none';
+  showQuestQuestion();
+}
+
+function showQuestQuestion() {
+  if (_questIndex >= _questQuestions.length) { showQuestResults(); return; }
+  var q = _questQuestions[_questIndex];
+  document.getElementById('questProgress').textContent = 'Question ' + (_questIndex + 1) + ' / ' + _questQuestions.length;
+  document.getElementById('questDiffBadge').innerHTML = '<span class="diff-badge ' + q.difficulty + '">' + q.difficulty.toUpperCase() + '</span>';
+  document.getElementById('questQuestion').textContent = (_questIndex + 1) + '. ' + q.question;
+  var opts = document.getElementById('questOptions');
+  opts.innerHTML = '';
+  document.getElementById('questFeedback').innerHTML = '';
+  var indices = [0, 1, 2, 3];
+  shuffleArray(indices);
+  var displayedOptions = indices.map(function(i) { return q.options[i]; });
+  var correctText = q.options[q.correct];
+  displayedOptions.forEach(function(text) {
+    var btn = document.createElement('button');
+    btn.className = 'qo-btn';
+    btn.textContent = text;
+    btn.onclick = function() { answerQuest(text, correctText); };
+    opts.appendChild(btn);
+  });
+}
+
+function answerQuest(selected, correct) {
+  var btns = document.querySelectorAll('#questOptions .qo-btn');
+  var correctText = correct;
+  var isCorrect = selected === correctText;
+  if (isCorrect) _questScore++;
+  _questAnswers.push({ question: _questQuestions[_questIndex].question, correct: correctText, userAnswer: selected, isCorrect: isCorrect, anime: _questQuestions[_questIndex].anime, difficulty: _questQuestions[_questIndex].difficulty });
+  btns.forEach(function(b) {
+    b.onclick = null;
+    b.classList.add('disabled');
+    if (b.textContent === correctText) b.classList.add('correct');
+    if (b.textContent === selected && selected !== correctText) b.classList.add('wrong');
+  });
+  var fb = document.getElementById('questFeedback');
+  if (isCorrect) fb.innerHTML = '<span style="color:#00ff41;">✓ Correct!</span>';
+  else fb.innerHTML = '<span style="color:#ff4444;">✗ Incorrect. Answer: ' + correctText + '</span>';
+  _questIndex++;
+  setTimeout(showQuestQuestion, 1200);
+}
+
+function showQuestResults() {
+  document.getElementById('questQuizPhase').style.display = 'none';
+  document.getElementById('questResultsPhase').style.display = 'block';
+  var pct = Math.round((_questScore / _questQuestions.length) * 100);
+  document.getElementById('questScore').textContent = _questScore + ' / ' + _questQuestions.length + ' (' + pct + '%)';
+  var gradeEl = document.getElementById('questGrade');
+  if (pct >= 90) gradeEl.textContent = 'S - True Otaku!';
+  else if (pct >= 80) gradeEl.textContent = 'A - Amazing!';
+  else if (pct >= 70) gradeEl.textContent = 'B - Great job!';
+  else if (pct >= 60) gradeEl.textContent = 'C - Not bad!';
+  else if (pct >= 40) gradeEl.textContent = 'D - Keep watching!';
+  else gradeEl.textContent = 'F - Time to binge!';
+  var review = document.getElementById('questReview');
+  review.innerHTML = '';
+  _questAnswers.forEach(function(a) {
+    var div = document.createElement('div');
+    div.className = 'qr-item ' + (a.isCorrect ? 'qr-correct' : 'qr-wrong');
+    div.innerHTML = '<div class="qr-q">' + a.question + '</div><div class="qr-a">✓ ' + a.correct + '</div>' + (!a.isCorrect ? '<div class="qr-w">✗ You: ' + a.userAnswer + '</div>' : '');
+    review.appendChild(div);
+  });
+}
+
+function resetQuest() {
+  _questQuestions = [];
+  _questIndex = 0;
+  _questScore = 0;
+  _questAnswers = [];
+  document.getElementById('questSelectPhase').style.display = 'block';
+  document.getElementById('questQuizPhase').style.display = 'none';
+  document.getElementById('questResultsPhase').style.display = 'none';
+  document.getElementById('questSelectedCount').textContent = 'Selected: ' + _questSelected.length;
+  document.getElementById('questStartBtn').style.display = _questSelected.length > 0 ? 'inline-block' : 'none';
+}
+
+function backToQuestSelect() {
+  resetQuest();
 }
