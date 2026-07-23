@@ -3833,21 +3833,58 @@ async function githubCommit(path, content, message) {
   } catch(e) { alert('Commit error: ' + e.message); return false; }
 }
 
-// Trigger: double-click settings gear
-document.addEventListener('dblclick', function(e) {
-  if (!e.target.closest('#perfToggle')) return;
-  e.preventDefault();
-  var popup = document.getElementById('perfPopup');
-  if (popup && popup.classList.contains('perf-popup--open')) {
-    popup.classList.remove('perf-popup--open');
-    if (window.isPerfOpen !== undefined) window.isPerfOpen = false;
+// === ADMIN ACCESS: hold logo for 1.5s ===
+(function() {
+  var logo = document.querySelector('.topbar-logo');
+  if (!logo) return;
+  var timer = null;
+  var ring = null;
+
+  function createRing() {
+    ring = document.createElement('div');
+    ring.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;border-radius:50%;border:3px solid transparent;border-top-color:#FFD700;border-right-color:#FFD700;box-sizing:border-box;pointer-events:none;z-index:10;transition:none;';
+    ring.style.animation = 'none';
+    logo.style.position = 'relative';
+    logo.appendChild(ring);
   }
-  openAdmin();
-});
+
+  function startHold(e) {
+    if (e.button && e.button !== 0) return;
+    if (timer) return;
+    if (!ring) createRing();
+    ring.style.animation = 'adminSpin 1.5s linear forwards';
+    ring.style.display = 'block';
+    timer = setTimeout(function() {
+      ring.style.display = 'none';
+      timer = null;
+      openAdmin();
+    }, 1500);
+  }
+
+  function cancelHold() {
+    if (timer) { clearTimeout(timer); timer = null; }
+    if (ring) { ring.style.display = 'none'; ring.style.animation = 'none'; }
+  }
+
+  logo.addEventListener('mousedown', startHold);
+  logo.addEventListener('mouseup', cancelHold);
+  logo.addEventListener('mouseleave', cancelHold);
+  logo.addEventListener('touchstart', function(e) { startHold(e); }, { passive: true });
+  logo.addEventListener('touchend', cancelHold);
+  logo.addEventListener('touchcancel', cancelHold);
+})();
 
 function openAdmin() {
   var o = document.getElementById('adminOverlay');
-  if (o) { o.classList.add('open'); document.getElementById('adminPinInput').value = ''; document.getElementById('adminPinError').style.display = 'none'; document.getElementById('adminPinScreen').style.display = 'block'; document.getElementById('adminDashboard').style.display = 'none'; }
+  if (o) {
+    o.classList.add('open');
+    document.querySelectorAll('#adminPinScreen input').forEach(function(inp) { inp.value = ''; });
+    document.getElementById('adminPinError').style.display = 'none';
+    document.getElementById('adminPinScreen').style.display = 'block';
+    document.getElementById('adminDashboard').style.display = 'none';
+    var first = document.getElementById('adminPinInput');
+    if (first) setTimeout(function() { first.focus(); }, 100);
+  }
   var pat = getPat();
   if (pat) document.getElementById('adminPatInput').value = pat;
   (function() {
@@ -3864,8 +3901,26 @@ function closeAdmin() {
   if (o) o.classList.remove('open');
 }
 
+function movePin(inp, idx) {
+  if (inp.value.length >= 1 && idx < 5) {
+    var next = inp.parentElement.children[idx + 1];
+    if (next) next.focus();
+  }
+  if (idx === 5 && inp.value.length >= 1) {
+    checkAdminPin();
+  }
+}
+
+function pinKey(inp, e, idx) {
+  if (e.key === 'Backspace' && !inp.value && idx > 0) {
+    var prev = inp.parentElement.children[idx - 1];
+    if (prev) { prev.focus(); prev.value = ''; }
+  }
+}
+
 function checkAdminPin() {
-  var pin = document.getElementById('adminPinInput').value;
+  var pin = '';
+  document.querySelectorAll('#adminPinScreen input').forEach(function(inp) { pin += inp.value; });
   if (pin === ADMIN_PIN) {
     document.getElementById('adminPinScreen').style.display = 'none';
     document.getElementById('adminDashboard').style.display = 'block';
