@@ -4641,6 +4641,17 @@ function answerQuest(selected, correct) {
   showQuestQuestion();
 }
 
+function getRankKey(s) {
+  if (s === 10) return 'sss';
+  if (s === 9) return 'ss';
+  if (s === 8) return 's';
+  if (s === 7) return 'a';
+  if (s === 6) return 'b';
+  if (s === 5) return 'c';
+  if (s === 4) return 'b';
+  return 'f';
+}
+
 function showQuestResults() {
   document.getElementById('questQuizPhase').style.display = 'none';
   document.getElementById('questResultsPhase').style.display = 'block';
@@ -4656,6 +4667,22 @@ function showQuestResults() {
   else if (s === 5) gradeEl.textContent = 'C Rank Watcher';
   else if (s === 4) gradeEl.textContent = 'B Rank Watcher';
   else gradeEl.textContent = 'F Rank Watcher';
+  // Certificate setup
+  var rankKey = getRankKey(s);
+  var cert = document.getElementById('questCertificate');
+  cert.className = 'qc-frame qc-' + rankKey;
+  cert.style.display = 'block';
+  document.getElementById('qcRank').textContent = gradeEl.textContent;
+  var diffMap = { easy:'Easy', normal:'Normal', hard:'Hard', mixed:'Mixed' };
+  document.getElementById('qcDiff').textContent = diffMap[_questDifficulty] || 'Mixed';
+  var animeNames = [];
+  _questQuestions.forEach(function(q) {
+    if (animeNames.indexOf(q.anime) === -1) animeNames.push(q.anime);
+  });
+  document.getElementById('qcSubtitle').textContent = 'Anime Quest - ' + animeNames.join(', ');
+  // Reset photo
+  document.getElementById('qcUserPhoto').style.display = 'none';
+  document.getElementById('qcPhotoPlaceholder').style.display = 'block';
   var review = document.getElementById('questReview');
   review.innerHTML = '';
   _questAnswers.forEach(function(a) {
@@ -4663,6 +4690,35 @@ function showQuestResults() {
     div.className = 'qr-item ' + (a.isCorrect ? 'qr-correct' : 'qr-wrong');
     div.innerHTML = '<div class="qr-q">' + a.question + '</div><div class="qr-a">✓ ' + a.correct + '</div>' + (!a.isCorrect ? '<div class="qr-w">✗ You: ' + a.userAnswer + '</div>' : '');
     review.appendChild(div);
+  });
+}
+
+function handleCertPhoto(e) {
+  var file = e.target.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(ev) {
+    var img = document.getElementById('qcUserPhoto');
+    img.src = ev.target.result;
+    img.style.display = 'block';
+    document.getElementById('qcPhotoPlaceholder').style.display = 'none';
+  };
+  reader.readAsDataURL(file);
+}
+
+function downloadCertificate() {
+  var cert = document.getElementById('questCertificate');
+  if (!cert || !html2canvas) return;
+  var btns = document.querySelectorAll('#questResultsPhase .admin-btn');
+  btns.forEach(function(b) { if (b.textContent.indexOf('Download') > -1) b.style.display = 'none'; });
+  html2canvas(cert, { scale: 2, useCORS: true, backgroundColor: null }).then(function(canvas) {
+    btns.forEach(function(b) { if (b.textContent.indexOf('Download') > -1) b.style.display = ''; });
+    var link = document.createElement('a');
+    link.download = 'anime-quest-certificate.png';
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  }).catch(function() {
+    btns.forEach(function(b) { if (b.textContent.indexOf('Download') > -1) b.style.display = ''; });
   });
 }
 
@@ -4674,6 +4730,7 @@ function resetQuest() {
   document.getElementById('questSelectPhase').style.display = 'block';
   document.getElementById('questQuizPhase').style.display = 'none';
   document.getElementById('questResultsPhase').style.display = 'none';
+  document.getElementById('questCertificate').style.display = 'none';
   document.getElementById('questSelectedCount').textContent = 'Selected: ' + _questSelected.length;
   document.getElementById('questStartBtn').style.display = _questSelected.length > 0 ? 'inline-block' : 'none';
 }

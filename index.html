@@ -11,6 +11,7 @@
   <link rel="stylesheet" href="tournament.css">
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600;700&family=Exo+2:wght@400;600;700&display=swap" rel="stylesheet">
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-Q2C92F1GEX"></script>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)};gtag('js',new Date());gtag('config','G-Q2C92F1GEX');</script>
 </head>
 
@@ -515,6 +516,31 @@
     <div id="questResultsPhase" style="display:none;text-align:center;">
       <div id="questScore" style="font-size:24px;color:#FFD700;margin-bottom:4px;"></div>
       <div id="questGrade" style="font-size:14px;color:#889;margin-bottom:16px;"></div>
+      <!-- Certificate -->
+      <div id="questCertificate" class="qc-frame qc-sss" style="display:none;">
+        <div class="qc-inner" id="qcInner">
+          <div class="qc-photo-area">
+            <img id="qcUserPhoto" class="qc-user-photo" src="" alt="Your Photo" style="display:none;">
+            <div class="qc-photo-placeholder" id="qcPhotoPlaceholder">Your Photo</div>
+          </div>
+          <div class="qc-title">Certificate of Completion</div>
+          <div class="qc-subtitle" id="qcSubtitle">Anime Quest</div>
+          <div class="qc-bottom">
+            <div class="qc-bottom-left">
+              <img src="logo.png" class="qc-logo" alt="Logo">
+            </div>
+            <div class="qc-bottom-right">
+              <div class="qc-rank" id="qcRank">SSS</div>
+              <div class="qc-diff" id="qcDiff">Mixed</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="margin:8px 0;display:flex;gap:8px;justify-content:center;flex-wrap:wrap;">
+        <input type="file" id="qcPhotoInput" accept="image/*" style="display:none;" onchange="handleCertPhoto(event)">
+        <button class="admin-btn" onclick="document.getElementById('qcPhotoInput').click()">📷 Upload Photo</button>
+        <button class="admin-btn" onclick="downloadCertificate()">⬇ Download Certificate</button>
+      </div>
       <div id="questReview" style="text-align:left;max-height:320px;overflow-y:auto;margin-bottom:12px;"></div>
       <div style="display:flex;gap:8px;justify-content:center;">
         <button class="admin-btn" onclick="resetQuest()">🔄 Play Again</button>

@@ -5037,3 +5037,115 @@ body.perf-no-heading-anim .header h1::after { animation: none !important; }
 #questReview .qr-item .qr-q { color:#ccc; }
 #questReview .qr-item .qr-a { color:#00ff41; }
 #questReview .qr-item .qr-w { color:#ff4444; }
+
+/* === Certificate Templates === */
+.qc-frame {
+  width: 600px; height: 420px; margin: 0 auto 8px; position: relative;
+  border-radius: 12px; overflow: hidden;
+  font-family: 'Georgia', serif;
+  transition: all 0.3s;
+}
+.qc-inner {
+  width: 100%; height: 100%; padding: 30px;
+  box-sizing: border-box;
+  display: flex; flex-direction: column; align-items: center;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  position: relative;
+}
+.qc-photo-area {
+  width: 110px; height: 110px; border-radius: 50%;
+  border: 3px dashed rgba(255,255,255,0.2);
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden; margin-bottom: 14px;
+  background: rgba(255,255,255,0.03);
+}
+.qc-user-photo {
+  width: 100%; height: 100%; object-fit: cover;
+}
+.qc-photo-placeholder {
+  font-size: 11px; color: rgba(255,255,255,0.2);
+  font-family: monospace; text-align: center;
+}
+.qc-title {
+  font-size: 28px; font-weight: 700; letter-spacing: 3px;
+  color: #fff; text-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  margin-bottom: 4px;
+}
+.qc-subtitle {
+  font-size: 14px; color: rgba(255,255,255,0.5);
+  font-family: monospace; letter-spacing: 1px;
+  margin-bottom: auto;
+}
+.qc-bottom {
+  width: 100%; display: flex;
+  justify-content: space-between; align-items: flex-end;
+}
+.qc-bottom-left .qc-logo {
+  width: 55px; height: 55px; object-fit: contain;
+  filter: drop-shadow(0 0 5px rgba(245,197,24,0.5));
+}
+.qc-bottom-right { text-align: right; }
+.qc-rank {
+  font-size: 32px; font-weight: 900; line-height: 1;
+  letter-spacing: 2px;
+}
+.qc-diff {
+  font-size: 13px; font-family: monospace;
+  letter-spacing: 1px; margin-top: 2px;
+}
+/* Rank themes */
+.qc-sss .qc-inner {
+  background: linear-gradient(135deg, #1a1a2e 0%, #2d1f00 100%);
+  border: 3px solid #FFD700;
+  box-shadow: inset 0 0 60px rgba(255,215,0,0.05), 0 0 30px rgba(255,215,0,0.15);
+}
+.qc-sss .qc-rank { color: #FFD700; text-shadow: 0 0 20px rgba(255,215,0,0.4); }
+.qc-sss .qc-diff { color: rgba(255,215,0,0.6); }
+
+.qc-ss .qc-inner {
+  background: linear-gradient(135deg, #1a1a2e 0%, #1e2a3a 100%);
+  border: 3px solid #C0C0C0;
+  box-shadow: inset 0 0 60px rgba(192,192,192,0.03), 0 0 20px rgba(192,192,192,0.1);
+}
+.qc-ss .qc-rank { color: #C0C0C0; text-shadow: 0 0 15px rgba(192,192,192,0.3); }
+.qc-ss .qc-diff { color: rgba(192,192,192,0.5); }
+
+.qc-s .qc-inner {
+  background: linear-gradient(135deg, #1a1a2e 0%, #2e1414 100%);
+  border: 3px solid #FF4444;
+  box-shadow: inset 0 0 60px rgba(255,68,68,0.04), 0 0 20px rgba(255,68,68,0.1);
+}
+.qc-s .qc-rank { color: #FF4444; text-shadow: 0 0 15px rgba(255,68,68,0.3); }
+.qc-s .qc-diff { color: rgba(255,68,68,0.5); }
+
+.qc-a .qc-inner {
+  background: linear-gradient(135deg, #1a1a2e 0%, #142e14 100%);
+  border: 3px solid #44FF44;
+  box-shadow: inset 0 0 60px rgba(68,255,68,0.03), 0 0 20px rgba(68,255,68,0.08);
+}
+.qc-a .qc-rank { color: #44FF44; text-shadow: 0 0 15px rgba(68,255,68,0.3); }
+.qc-a .qc-diff { color: rgba(68,255,68,0.5); }
+
+.qc-b .qc-inner {
+  background: linear-gradient(135deg, #1a1a2e 0%, #142e2e 100%);
+  border: 3px solid #00CED1;
+  box-shadow: inset 0 0 60px rgba(0,206,209,0.03), 0 0 20px rgba(0,206,209,0.08);
+}
+.qc-b .qc-rank { color: #00CED1; text-shadow: 0 0 15px rgba(0,206,209,0.3); }
+.qc-b .qc-diff { color: rgba(0,206,209,0.5); }
+
+.qc-c .qc-inner {
+  background: linear-gradient(135deg, #1a1a2e 0%, #222 100%);
+  border: 3px solid #888;
+  box-shadow: inset 0 0 60px rgba(136,136,136,0.03), 0 0 20px rgba(136,136,136,0.06);
+}
+.qc-c .qc-rank { color: #888; text-shadow: 0 0 10px rgba(136,136,136,0.2); }
+.qc-c .qc-diff { color: rgba(136,136,136,0.5); }
+
+.qc-f .qc-inner {
+  background: linear-gradient(135deg, #1a1a2e 0%, #2e1414 100%);
+  border: 3px solid #8B0000;
+  box-shadow: inset 0 0 60px rgba(139,0,0,0.05), 0 0 15px rgba(139,0,0,0.1);
+}
+.qc-f .qc-rank { color: #8B0000; text-shadow: 0 0 10px rgba(139,0,0,0.3); }
+.qc-f .qc-diff { color: rgba(139,0,0,0.5); }
