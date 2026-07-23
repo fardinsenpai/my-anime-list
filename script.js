@@ -4679,6 +4679,7 @@ function showQuestResults() {
   // Reset photo
   document.getElementById('qcUserPhoto').style.display = 'none';
   document.getElementById('qcUserPhoto').src = '';
+  setupCertDrop();
   var review = document.getElementById('questReview');
   review.innerHTML = '';
   _questAnswers.forEach(function(a) {
@@ -4689,17 +4690,37 @@ function showQuestResults() {
   });
 }
 
-function handleCertPhoto(e) {
-  var file = e.target.files[0];
+function loadCertPhoto(file) {
   if (!file) return;
   var reader = new FileReader();
   reader.onload = function(ev) {
     var img = document.getElementById('qcUserPhoto');
     img.src = ev.target.result;
     img.style.display = 'block';
-    document.getElementById('qcPhotoPlaceholder').style.display = 'none';
   };
   reader.readAsDataURL(file);
+}
+
+function handleCertPhoto(e) {
+  loadCertPhoto(e.target.files[0]);
+}
+
+function setupCertDrop() {
+  var cert = document.getElementById('questCertificate');
+  var inner = document.getElementById('qcInner');
+  ['dragenter','dragover','dragleave','drop'].forEach(function(evt) {
+    inner.addEventListener(evt, function(e) { e.preventDefault(); e.stopPropagation(); }, false);
+  });
+  inner.addEventListener('dragenter', function() { inner.classList.add('qc-dragover'); });
+  inner.addEventListener('dragover', function() { inner.classList.add('qc-dragover'); });
+  inner.addEventListener('dragleave', function(e) {
+    if (!inner.contains(e.relatedTarget)) inner.classList.remove('qc-dragover');
+  });
+  inner.addEventListener('drop', function(e) {
+    inner.classList.remove('qc-dragover');
+    var files = e.dataTransfer.files;
+    if (files.length && files[0].type.startsWith('image/')) loadCertPhoto(files[0]);
+  });
 }
 
 function downloadCertificate() {

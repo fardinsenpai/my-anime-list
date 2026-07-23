@@ -5066,6 +5066,22 @@ body.perf-no-heading-anim .header h1::after { animation: none !important; }
   transform: translate(-50%,-50%);
   font-size: 13px; color: rgba(255,255,255,0.15);
   font-family: monospace;
+  pointer-events: none;
+}
+.qc-inner.qc-dragover {
+  outline: 3px dashed #FFD700;
+  outline-offset: -6px;
+}
+.qc-inner.qc-dragover::after {
+  content: 'DROP IMAGE HERE';
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%,-50%);
+  font-family: 'Bangers', sans-serif;
+  font-size: 28px; color: #FFD700;
+  text-shadow: 0 0 20px rgba(255,215,0,0.6);
+  letter-spacing: 3px;
+  z-index: 10;
+  pointer-events: none;
 }
 .qc-title { display: none; }
 .qc-subtitle { display: none; }
