@@ -3863,7 +3863,7 @@ function checkAdminPin() {
 
 // === GUI ADMIN ===
 var _selectedOtt = [], _selectedStudio = [], _selectedGenre = [];
-var _watchId = 0;
+var _watchId = 0, _readId = 0, _editId = 0;
 
 function getUniqueOtt(all) {
   var freq = {};
@@ -3950,7 +3950,7 @@ function initAdminGui() {
   var today = new Date().toLocaleDateString('en-GB');
   var dateInput = document.getElementById('adminDateInput');
   if (dateInput) dateInput.value = today;
-  switchAdminTab('reading');
+  switchAdminTab('watch');
 }
 
 function loadTop5Form() {
@@ -4047,37 +4047,6 @@ function msgFail(msg) {
   el.textContent = '✕ ' + msg;
   document.body.appendChild(el);
   setTimeout(function() { el.remove(); }, 3000);
-}
-
-async function commitReading() {
-  var title = document.getElementById('adminReadTitle').value.trim();
-  var img = document.getElementById('adminReadImg').value.trim();
-  var chapter = document.getElementById('adminReadChapter').value.trim();
-  var progress = parseInt(document.getElementById('adminReadProgress').value) || 0;
-  if (!title || !img || !chapter) { msgFail('Title, Image, and Chapter required'); return; }
-  showLoading();
-  var data = await githubFetch('index.html');
-  if (!data) { hideLoading(); msgFail('Fetch failed. Check PAT.'); return; }
-  var content = decodeURIComponent(escape(atob(data.content)));
-  var readingBlock = content.match(/<div class="stats-bar-card">\s*<div class="stats-bar-label">📖 Currently Reading<\/div>[\s\S]*?<\/div>\s*<\/div>\s*<\/div>/);
-  if (!readingBlock) { hideLoading(); msgFail('Reading block not found'); return; }
-  var oldHtml = readingBlock[0];
-  var newHtml = '<div class="stats-bar-card">' +
-    '<div class="stats-bar-label">📖 Currently Reading</div>' +
-    '<div class="stats-bar-inner">' +
-      '<div class="stats-bar-poster"><img src="' + img.replace(/"/g,'&quot;') + '" alt="' + title.replace(/"/g,'&quot;') + '"></div>' +
-      '<div class="stats-bar-info">' +
-        '<div class="stats-bar-title">' + title + '</div>' +
-        '<div class="stats-bar-meta">Manga</div>' +
-        '<div class="stats-bar-track"><div class="stats-bar-fill" style="width: ' + progress + '%;"></div></div>' +
-        '<div class="stats-bar-eps">' + chapter + '</div>' +
-      '</div>' +
-    '</div></div>';
-  content = content.replace(oldHtml, newHtml);
-  var ok = await githubCommit('index.html', content, 'admin: update reading to ' + title);
-  hideLoading();
-  if (ok) msgOk('Reading updated: ' + title);
-  else msgFail('Commit failed');
 }
 
 async function commitTop5() {
@@ -4180,6 +4149,219 @@ function selectWatchCard(id) {
       break;
     }
   }
+}
+
+function searchRead(q) {
+  var container = document.getElementById('adminReadResults');
+  if (!container) return;
+  container.innerHTML = '';
+  if (!q || q.length < 1) return;
+  q = q.toLowerCase();
+  var found = 0;
+  document.querySelectorAll('#grid .card').forEach(function(c) {
+    var t = c.querySelector('.title');
+    var n = c.querySelector('.number');
+    if (!t || !n) return;
+    if (!t.textContent.toLowerCase().includes(q)) return;
+    if (found >= 18) return;
+    found++;
+    var img = c.querySelector('.poster-wrap img');
+    var id = parseInt(n.textContent.replace(/\D/g, ''));
+    var div = document.createElement('div');
+    div.style.cssText = 'display:flex;align-items:center;gap:4px;padding:3px;border-radius:3px;background:rgba(0,255,65,0.02);border:1px solid rgba(0,255,65,0.06);cursor:pointer;transition:all 0.15s;font-family:monospace;';
+    div.onmouseover = function() { this.style.background = 'rgba(0,255,65,0.06)'; this.style.borderColor = 'rgba(0,255,65,0.15)'; };
+    div.onmouseout = function() { this.style.background = 'rgba(0,255,65,0.02)'; this.style.borderColor = 'rgba(0,255,65,0.06)'; };
+    div.innerHTML = (img ? '<img src="' + img.src + '" style="width:24px;height:34px;object-fit:cover;border-radius:2px;flex-shrink:0;">' : '') + '<span style="font-size:9px;color:rgba(0,255,65,0.5);">#' + id + '</span><span style="font-size:9px;color:rgba(0,255,65,0.7);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + t.textContent + '</span>';
+    div.setAttribute('data-id', id);
+    div.onclick = function() { selectReadCard(id); };
+    container.appendChild(div);
+  });
+}
+
+function selectReadCard(id) {
+  _readId = id;
+  document.querySelectorAll('#adminReadResults > div').forEach(function(d) {
+    d.style.borderColor = 'rgba(0,255,65,0.06)';
+    d.style.background = 'rgba(0,255,65,0.02)';
+    if (parseInt(d.getAttribute('data-id')) === id) {
+      d.style.borderColor = '#00ff41';
+      d.style.background = 'rgba(0,255,65,0.1)';
+    }
+  });
+  var allCards = document.querySelectorAll('#grid .card');
+  for (var i = 0; i < allCards.length; i++) {
+    var numEl = allCards[i].querySelector('.number');
+    var nid = numEl ? parseInt(numEl.textContent.replace(/\D/g, '')) : 0;
+    if (nid === id) {
+      var title = allCards[i].querySelector('.title');
+      var img = allCards[i].querySelector('.poster-wrap img');
+      var preview = document.getElementById('adminReadPreview');
+      var previewImg = document.getElementById('adminReadPreviewImg');
+      var previewTitle = document.getElementById('adminReadPreviewTitle');
+      var previewId = document.getElementById('adminReadPreviewId');
+      if (preview) preview.style.display = 'block';
+      if (previewImg && img) previewImg.src = img.src;
+      if (previewTitle && title) previewTitle.textContent = title.textContent;
+      if (previewId) previewId.textContent = '#' + id + ' | Manga';
+      break;
+    }
+  }
+}
+
+async function commitMangaReading() {
+  if (!_readId) { msgFail('Search and select a manga first'); return; }
+  var curChapter = document.getElementById('adminReadCurChapter').value.trim();
+  var totalChapter = document.getElementById('adminReadTotalChapter').value.trim();
+  var meta = document.getElementById('adminReadMeta').value.trim();
+  var progress = document.getElementById('adminReadProgress').value.trim();
+  if (!curChapter) { msgFail('Enter current chapter'); return; }
+  var prog = parseInt(progress) || 0;
+  showLoading();
+  var allCards = document.querySelectorAll('#grid .card');
+  var foundCard = null;
+  for (var i = 0; i < allCards.length; i++) {
+    var numEl = allCards[i].querySelector('.number');
+    var nid = numEl ? parseInt(numEl.textContent.replace(/\D/g, '')) : 0;
+    if (nid === _readId) { foundCard = allCards[i]; break; }
+  }
+  if (!foundCard) { hideLoading(); msgFail('Card #' + _readId + ' not found'); return; }
+  var title = foundCard.querySelector('.title').textContent;
+  var img = foundCard.querySelector('.poster-wrap img').src;
+  if (!meta) meta = 'Manga';
+  var chapterDisplay = totalChapter ? 'Chapter ' + curChapter + ' / ' + totalChapter : 'Chapter ' + curChapter;
+  var data = await githubFetch('index.html');
+  if (!data) { hideLoading(); msgFail('Failed to fetch. Check PAT.'); return; }
+  var content = decodeURIComponent(escape(atob(data.content)));
+  var readBlock = content.match(/<div class="stats-bar-card">\s*<div class="stats-bar-label">📖 Currently Reading<\/div>[\s\S]*?<\/div>\s*<\/div>\s*<\/div>/);
+  if (!readBlock) { hideLoading(); msgFail('Reading block not found'); return; }
+  var oldHtml = readBlock[0];
+  var newHtml = '<div class="stats-bar-card">' +
+    '<div class="stats-bar-label">📖 Currently Reading</div>' +
+    '<div class="stats-bar-inner">' +
+      '<div class="stats-bar-poster"><img src="' + img.replace(/"/g,'&quot;') + '" alt="' + title.replace(/"/g,'&quot;') + '"></div>' +
+      '<div class="stats-bar-info">' +
+        '<div class="stats-bar-title">' + title + '</div>' +
+        '<div class="stats-bar-meta">' + meta + '</div>' +
+        '<div class="stats-bar-track"><div class="stats-bar-fill" style="width: ' + prog + '%;"></div></div>' +
+        '<div class="stats-bar-eps">' + chapterDisplay + '</div>' +
+      '</div>' +
+    '</div></div>';
+  content = content.replace(oldHtml, newHtml);
+  var ok = await githubCommit('index.html', content, 'admin: update reading to ' + title);
+  hideLoading();
+  if (ok) msgOk('Reading updated: ' + title);
+  else msgFail('Commit failed');
+}
+
+function searchEdit(q) {
+  var container = document.getElementById('adminEditResults');
+  if (!container) return;
+  container.innerHTML = '';
+  if (!q || q.length < 1) return;
+  q = q.toLowerCase();
+  var found = 0;
+  document.querySelectorAll('#grid .card').forEach(function(c) {
+    var t = c.querySelector('.title');
+    var n = c.querySelector('.number');
+    if (!t || !n) return;
+    if (!t.textContent.toLowerCase().includes(q)) return;
+    if (found >= 18) return;
+    found++;
+    var img = c.querySelector('.poster-wrap img');
+    var id = parseInt(n.textContent.replace(/\D/g, ''));
+    var div = document.createElement('div');
+    div.style.cssText = 'display:flex;align-items:center;gap:4px;padding:3px;border-radius:3px;background:rgba(0,255,65,0.02);border:1px solid rgba(0,255,65,0.06);cursor:pointer;transition:all 0.15s;font-family:monospace;';
+    div.onmouseover = function() { this.style.background = 'rgba(0,255,65,0.06)'; this.style.borderColor = 'rgba(0,255,65,0.15)'; };
+    div.onmouseout = function() { this.style.background = 'rgba(0,255,65,0.02)'; this.style.borderColor = 'rgba(0,255,65,0.06)'; };
+    div.innerHTML = (img ? '<img src="' + img.src + '" style="width:24px;height:34px;object-fit:cover;border-radius:2px;flex-shrink:0;">' : '') + '<span style="font-size:9px;color:rgba(0,255,65,0.5);">#' + id + '</span><span style="font-size:9px;color:rgba(0,255,65,0.7);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + t.textContent + '</span>';
+    div.setAttribute('data-id', id);
+    div.onclick = function() { selectEditCard(id); };
+    container.appendChild(div);
+  });
+}
+
+function selectEditCard(id) {
+  _editId = id;
+  document.querySelectorAll('#adminEditResults > div').forEach(function(d) {
+    d.style.borderColor = 'rgba(0,255,65,0.06)';
+    d.style.background = 'rgba(0,255,65,0.02)';
+    if (parseInt(d.getAttribute('data-id')) === id) {
+      d.style.borderColor = '#00ff41';
+      d.style.background = 'rgba(0,255,65,0.1)';
+    }
+  });
+  var allCards = document.querySelectorAll('#grid .card');
+  for (var i = 0; i < allCards.length; i++) {
+    var numEl = allCards[i].querySelector('.number');
+    var nid = numEl ? parseInt(numEl.textContent.replace(/\D/g, '')) : 0;
+    if (nid === id) {
+      var title = allCards[i].querySelector('.title');
+      var img = allCards[i].querySelector('.poster-wrap img');
+      var seasonEl = allCards[i].querySelector('.back-season');
+      var epsEl = allCards[i].querySelector('.back-episodes');
+      var genreEl = allCards[i].querySelector('.back-genre');
+      var preview = document.getElementById('adminEditPreview');
+      var previewImg = document.getElementById('adminEditPreviewImg');
+      var previewTitle = document.getElementById('adminEditPreviewTitle');
+      var previewId = document.getElementById('adminEditPreviewId');
+      if (preview) preview.style.display = 'block';
+      if (previewImg && img) previewImg.src = img.src;
+      if (previewTitle && title) previewTitle.textContent = title.textContent;
+      if (previewId) previewId.textContent = '#' + id;
+      document.getElementById('adminEditName').value = title ? title.textContent : '';
+      document.getElementById('adminEditGenre').value = genreEl ? genreEl.textContent : '';
+      document.getElementById('adminEditSeasons').value = seasonEl ? seasonEl.textContent.replace(/[🌸📺]/g,'').trim() : '';
+      document.getElementById('adminEditEps').value = epsEl ? epsEl.textContent.replace(/[📺🎬]/g,'').replace('Total Episodes:','').trim() : '';
+      break;
+    }
+  }
+}
+
+async function commitEditAnime() {
+  var name = document.getElementById('adminEditName').value.trim();
+  var genre = document.getElementById('adminEditGenre').value.trim();
+  var seasons = document.getElementById('adminEditSeasons').value.trim();
+  var episodes = document.getElementById('adminEditEps').value.trim();
+  if (!_editId || !name) { msgFail('Select anime and enter name'); return; }
+  showLoading();
+  var indexData = await githubFetch('index.html');
+  var scriptData = await githubFetch('script.js');
+  if (!indexData || !scriptData) { hideLoading(); msgFail('Failed to fetch files'); return; }
+  var indexContent = decodeURIComponent(escape(atob(indexData.content)));
+  var scriptContent = decodeURIComponent(escape(atob(scriptData.content)));
+  var lines = indexContent.split('\n');
+  var cardIdx = -1;
+  for (var i = 0; i < lines.length; i++) {
+    if (lines[i].includes('<span class="badge">#' + _editId + '</span>')) { cardIdx = i; break; }
+  }
+  if (cardIdx === -1) { hideLoading(); msgFail('Card not found'); return; }
+  var imgMatch = lines[cardIdx].match(/<img src="([^"]+)"/);
+  var img = imgMatch ? imgMatch[1] : '';
+  var seasonText = seasons ? '🌸 ' + seasons : '';
+  var epsText = episodes ? '📺 Total Episodes: ' + episodes : '';
+  var newCard = '<div class="card"><div class="card-inner"><div class="card-front"><div class="poster-wrap"><img src="' + img.replace(/"/g,'&quot;') + '" alt="' + name.replace(/"/g,'&quot;') + '" loading="lazy"/><span class="badge">#' + _editId + '</span></div><div class="info"><div class="number">NO. ' + _editId + '</div><div class="title">' + name + '</div></div></div><div class="card-back"><div class="back-content"><div class="back-title">' + name + '</div><div class="back-season">' + seasonText + '</div><div class="back-episodes">' + epsText + '</div><div class="back-tap-hint">click to flip back</div></div></div></div></div>';
+  lines[cardIdx] = newCard;
+  indexContent = lines.join('\n');
+  if (genre) {
+    var newGenres = genre.split(/[,·]/).map(function(g) { return g.trim(); }).filter(Boolean);
+    scriptContent = scriptContent.replace(/"([\w\s/]+)":\s*\{[^}]*?nums:\s*new\s*Set\(\[([\d,]*)\]\)\s*\}/g, function(match, genreName, numsStr) {
+      var nums = numsStr ? numsStr.split(',').map(function(n) { return parseInt(n.trim()); }).filter(function(n) { return !isNaN(n); }) : [];
+      if (newGenres.indexOf(genreName) !== -1) {
+        if (nums.indexOf(_editId) === -1) { nums.push(_editId); nums.sort(function(a,b) { return a-b; }); }
+      } else {
+        var idx = nums.indexOf(_editId);
+        if (idx !== -1) nums.splice(idx, 1);
+      }
+      var iconMatch = match.match(/icon:\s*"([^"]+)"/);
+      var icon = iconMatch ? iconMatch[1] : '✦';
+      return '"' + genreName + '":        { icon: "' + icon + '", nums: new Set([' + nums.join(',') + ']) }';
+    });
+  }
+  var ok1 = await githubCommit('index.html', indexContent, 'admin: edit anime #' + _editId + ' - ' + name);
+  var ok2 = await githubCommit('script.js', scriptContent, 'admin: edit genres for #' + _editId);
+  hideLoading();
+  if (ok1 && ok2) { msgOk('Anime #' + _editId + ' updated'); }
+  else msgFail('Commit failed');
 }
 
 async function commitDate(dateStr) {

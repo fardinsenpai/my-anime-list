@@ -482,23 +482,6 @@
 <div class="body-stats-bar" id="statsBarContainer" style="display:none;">
   <div class="stats-bar-card"><div class="stats-bar-label">🎬 Currently Watching</div><div class="stats-bar-inner"><div class="stats-bar-poster"><img src="https://media.kitsu.app/anime/poster_images/41024/large.jpg" alt="TENSURA"></div><div class="stats-bar-info"><div class="stats-bar-title">TENSURA</div><div class="stats-bar-meta">Season 4</div><div class="stats-bar-track"><div class="stats-bar-fill" style="width: 65%;"></div></div><div class="stats-bar-eps">Episode 14 / 24</div></div></div></div>
   </div>
-
-  <div class="stats-bar-card">
-    <div class="stats-bar-label">📖 Currently Reading</div>
-    <div class="stats-bar-inner">
-      <div class="stats-bar-poster">
-        <img src="https://media.kitsu.app/anime/44973/poster_image/large-ca235304c71f4233e60f6efb3967654d.jpeg" alt="Blue Lock">
-      </div>
-      <div class="stats-bar-info">
-        <div class="stats-bar-title">Blue Lock</div>
-        <div class="stats-bar-meta">Manga</div>
-        <div class="stats-bar-track">
-          <div class="stats-bar-fill" style="width: 60%;"></div>
-        </div>
-        <div class="stats-bar-eps">Chapter 305 / ∞</div>
-      </div>
-    </div>
-  </div>
 </div>
 
   <div class="grid" id="grid">
@@ -1334,28 +1317,17 @@
 
       <!-- Tabs -->
       <div style="display:flex;gap:2px;margin-bottom:10px;border-bottom:1px solid rgba(0,255,65,0.1);padding-bottom:6px;">
-        <button class="admin-g-tab active" data-tab="reading" onclick="switchAdminTab('reading')">📖 READ</button>
-        <button class="admin-g-tab" data-tab="watch" onclick="switchAdminTab('watch')">🎬 WATCH</button>
+        <button class="admin-g-tab active" data-tab="watch" onclick="switchAdminTab('watch')">🎬 WATCH</button>
+        <button class="admin-g-tab" data-tab="read" onclick="switchAdminTab('read')">📖 READ</button>
         <button class="admin-g-tab" data-tab="top5" onclick="switchAdminTab('top5')">🏆 TOP5</button>
         <button class="admin-g-tab" data-tab="awards" onclick="switchAdminTab('awards')">🏅 AWARDS</button>
+        <button class="admin-g-tab" data-tab="edit" onclick="switchAdminTab('edit')">✏️ EDIT</button>
         <button class="admin-g-tab" data-tab="date" onclick="switchAdminTab('date')">📅 DATE</button>
         <button class="admin-g-tab" data-tab="add" onclick="switchAdminTab('add')">➕ ADD</button>
       </div>
 
-      <!-- TAB: Reading -->
-      <div class="admin-g-content active" id="tabReading">
-        <div style="font-size:10px;color:rgba(0,255,65,0.7);font-family:monospace;margin-bottom:6px;">// UPDATE CURRENTLY READING //</div>
-        <input type="text" id="adminReadTitle" class="admin-g-input" placeholder="Manga Title">
-        <input type="text" id="adminReadImg" class="admin-g-input" placeholder="Image URL">
-        <div style="display:flex;gap:6px;">
-          <input type="text" id="adminReadChapter" class="admin-g-input" placeholder="Chapter 305 / ∞" style="flex:1;">
-          <input type="number" id="adminReadProgress" class="admin-g-input" placeholder="60" style="width:60px;">
-        </div>
-        <button class="admin-g-btn" onclick="commitReading()">▶ COMMIT</button>
-      </div>
-
       <!-- TAB: Watch -->
-      <div class="admin-g-content" id="tabWatch">
+      <div class="admin-g-content active" id="tabWatch">
         <div style="font-size:10px;color:rgba(0,255,65,0.7);font-family:monospace;margin-bottom:6px;">// UPDATE CURRENTLY WATCHING //</div>
         <input type="text" id="adminWatchSearch" class="admin-g-input" placeholder="1. Search anime..." oninput="searchWatch(this.value)">
         <div id="adminWatchResults" style="display:grid;grid-template-columns:repeat(2,1fr);gap:3px;max-height:120px;overflow-y:auto;margin-bottom:6px;padding:2px;"></div>
@@ -1365,8 +1337,25 @@
             <div style="flex:1;">
               <div id="adminWatchPreviewTitle" style="font-size:11px;color:#00ff41;font-family:monospace;"></div>
               <div id="adminWatchPreviewId" style="font-size:9px;color:rgba(0,255,65,0.4);font-family:monospace;"></div>
-            </div>
-          </div>
+  </div>
+
+  <div class="stats-bar-card">
+    <div class="stats-bar-label">📖 Currently Reading</div>
+    <div class="stats-bar-inner">
+      <div class="stats-bar-poster">
+        <img src="https://media.kitsu.app/anime/44973/poster_image/large-ca235304c71f4233e60f6efb3967654d.jpeg" alt="Blue Lock">
+      </div>
+      <div class="stats-bar-info">
+        <div class="stats-bar-title">Blue Lock</div>
+        <div class="stats-bar-meta">Manga</div>
+        <div class="stats-bar-track">
+          <div class="stats-bar-fill" style="width: 60%;"></div>
+        </div>
+        <div class="stats-bar-eps">Chapter 305 / ∞</div>
+      </div>
+    </div>
+  </div>
+</div>
         </div>
         <div style="display:flex;gap:6px;">
           <input type="number" id="adminWatchCurEps" class="admin-g-input" placeholder="2. Current ep" style="flex:1;">
@@ -1377,6 +1366,31 @@
           <input type="number" id="adminWatchProgress" class="admin-g-input" placeholder="5. Progress %" style="width:80px;">
         </div>
         <button class="admin-g-btn" onclick="commitWatching()">▶ COMMIT</button>
+      </div>
+
+      <!-- TAB: Read -->
+      <div class="admin-g-content" id="tabRead">
+        <div style="font-size:10px;color:rgba(0,255,65,0.7);font-family:monospace;margin-bottom:6px;">// UPDATE CURRENTLY READING //</div>
+        <input type="text" id="adminReadSearch" class="admin-g-input" placeholder="1. Search manga..." oninput="searchRead(this.value)">
+        <div id="adminReadResults" style="display:grid;grid-template-columns:repeat(2,1fr);gap:3px;max-height:120px;overflow-y:auto;margin-bottom:6px;padding:2px;"></div>
+        <div id="adminReadPreview" style="display:none;margin-bottom:6px;">
+          <div style="display:flex;align-items:center;gap:8px;padding:6px;background:rgba(0,255,65,0.03);border:1px solid rgba(0,255,65,0.1);border-radius:4px;">
+            <img id="adminReadPreviewImg" src="" style="width:36px;height:50px;object-fit:cover;border-radius:3px;">
+            <div style="flex:1;">
+              <div id="adminReadPreviewTitle" style="font-size:11px;color:#00ff41;font-family:monospace;"></div>
+              <div id="adminReadPreviewId" style="font-size:9px;color:rgba(0,255,65,0.4);font-family:monospace;"></div>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;gap:6px;">
+          <input type="number" id="adminReadCurChapter" class="admin-g-input" placeholder="2. Current chapter" style="flex:1;">
+          <input type="text" id="adminReadTotalChapter" class="admin-g-input" placeholder="3. Total (or ∞)" style="flex:1;">
+        </div>
+        <div style="display:flex;gap:6px;">
+          <input type="text" id="adminReadMeta" class="admin-g-input" placeholder="4. Label (Manga / Volume 1)" style="flex:1;">
+          <input type="number" id="adminReadProgress" class="admin-g-input" placeholder="5. Progress %" style="width:80px;">
+        </div>
+        <button class="admin-g-btn" onclick="commitMangaReading()">▶ COMMIT</button>
       </div>
 
       <!-- TAB: Top 5 -->
@@ -1391,6 +1405,29 @@
         <div style="font-size:10px;color:rgba(0,255,65,0.7);font-family:monospace;margin-bottom:6px;">// EDIT AWARD WINNERS //</div>
         <div id="adminAwardsForm" style="max-height:260px;overflow-y:auto;padding-right:4px;"></div>
         <button class="admin-g-btn" onclick="commitAwardWinners()">▶ COMMIT AWARDS</button>
+      </div>
+
+      <!-- TAB: Edit Info -->
+      <div class="admin-g-content" id="tabEdit">
+        <div style="font-size:10px;color:rgba(0,255,65,0.7);font-family:monospace;margin-bottom:6px;">// EDIT ANIME INFO //</div>
+        <input type="text" id="adminEditSearch" class="admin-g-input" placeholder="Search anime..." oninput="searchEdit(this.value)">
+        <div id="adminEditResults" style="display:grid;grid-template-columns:repeat(2,1fr);gap:3px;max-height:120px;overflow-y:auto;margin-bottom:6px;padding:2px;"></div>
+        <div id="adminEditPreview" style="display:none;margin-bottom:6px;">
+          <div style="display:flex;align-items:center;gap:8px;padding:6px;background:rgba(0,255,65,0.03);border:1px solid rgba(0,255,65,0.1);border-radius:4px;">
+            <img id="adminEditPreviewImg" src="" style="width:36px;height:50px;object-fit:cover;border-radius:3px;">
+            <div style="flex:1;">
+              <div id="adminEditPreviewTitle" style="font-size:11px;color:#00ff41;font-family:monospace;"></div>
+              <div id="adminEditPreviewId" style="font-size:9px;color:rgba(0,255,65,0.4);font-family:monospace;"></div>
+            </div>
+          </div>
+        </div>
+        <input type="text" id="adminEditName" class="admin-g-input" placeholder="Anime Name">
+        <input type="text" id="adminEditGenre" class="admin-g-input" placeholder="Genre (comma separated)">
+        <div style="display:flex;gap:6px;">
+          <input type="text" id="adminEditSeasons" class="admin-g-input" placeholder="Total Seasons (Season-1,2,3)" style="flex:1;">
+          <input type="text" id="adminEditEps" class="admin-g-input" placeholder="Total Episodes (190)" style="flex:1;">
+        </div>
+        <button class="admin-g-btn" onclick="commitEditAnime()">▶ COMMIT EDIT</button>
       </div>
 
       <!-- TAB: Date -->
