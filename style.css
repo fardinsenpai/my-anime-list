@@ -4941,6 +4941,45 @@ body.perf-no-heading-anim .header h1::after { animation: none !important; }
 .admin-g-selected-pill span { cursor: pointer; font-size: 13px; line-height: 1; opacity: 0.5; }
 .admin-g-selected-pill span:hover { opacity: 1; }
 
+/* --- Difficulty Pills --- */
+.qd-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px 14px; border-radius: 8px;
+  border: 1.5px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.04);
+  color: rgba(255,255,255,0.6);
+  cursor: pointer; transition: all 0.2s;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  font-size: 12px; font-weight: 500;
+  user-select: none; -webkit-user-select: none;
+  outline: none;
+}
+.qd-pill:hover {
+  background: rgba(255,255,255,0.08);
+  border-color: rgba(255,255,255,0.2);
+  color: #fff;
+}
+.qd-pill.selected {
+  background: rgba(255,255,255,0.1);
+  color: #fff;
+}
+.qd-pill .qd-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  display: inline-block; flex-shrink: 0;
+}
+.qd-pill .qd-dot.qd-easy { background: #4ade80; }
+.qd-pill .qd-dot.qd-normal { background: #facc15; }
+.qd-pill .qd-dot.qd-hard { background: #f87171; }
+.qd-pill .qd-dot.qd-mixed {
+  background: linear-gradient(135deg, #4ade80, #facc15, #f87171);
+}
+.qd-pill.selected .qd-dot.qd-easy { box-shadow: 0 0 8px #4ade80; }
+.qd-pill.selected .qd-dot.qd-normal { box-shadow: 0 0 8px #facc15; }
+.qd-pill.selected .qd-dot.qd-hard { box-shadow: 0 0 8px #f87171; }
+.qd-pill.selected .qd-dot.qd-mixed { box-shadow: 0 0 8px #a78bfa; }
+.qd-pill .qd-label { font-size: 12px; letter-spacing: 0.3px; }
+.qd-pill .qd-bars { font-size: 10px; opacity: 0.5; letter-spacing: 1px; }
+
 /* --- Anime Quest styles --- */
 .body-anime-quest {
   max-width:700px; margin:0 auto; padding:20px;

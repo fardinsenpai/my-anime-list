@@ -4590,9 +4590,12 @@ function initQuest() {
   var diffSel = document.getElementById('questDiffSelector');
   diffSel.innerHTML = '';
   QUEST_DIFFICULTIES.forEach(function(d) {
-    var pill = document.createElement('span');
-    pill.className = 'admin-g-pill' + (d === 'mixed' ? ' selected' : '');
-    pill.textContent = d.charAt(0).toUpperCase() + d.slice(1);
+    var pill = document.createElement('button');
+    pill.className = 'qd-pill qd-' + d + (d === 'mixed' ? ' selected' : '');
+    pill.dataset.diff = d;
+    var labels = { easy:'Easy', normal:'Normal', hard:'Hard', mixed:'Mixed' };
+    var bars = { easy:'▬', normal:'▬▬', hard:'▬▬▬', mixed:'▬▬▬▬' };
+    pill.innerHTML = '<span class="qd-dot qd-' + d + '"></span><span class="qd-label">' + labels[d] + '</span><span class="qd-bars">' + bars[d] + '</span>';
     pill.onclick = function() { selectQuestDifficulty(d); };
     diffSel.appendChild(pill);
   });
@@ -4600,8 +4603,8 @@ function initQuest() {
 
 function selectQuestDifficulty(d) {
   _questDifficulty = d;
-  var pills = document.querySelectorAll('#questDiffSelector .admin-g-pill');
-  pills.forEach(function(p) { p.classList.toggle('selected', p.textContent.toLowerCase() === d); });
+  var pills = document.querySelectorAll('#questDiffSelector .qd-pill');
+  pills.forEach(function(p) { p.classList.toggle('selected', p.dataset.diff === d); });
 }
 
 function toggleQuestAnime(id) {
