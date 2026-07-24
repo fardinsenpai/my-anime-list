@@ -2738,6 +2738,10 @@ document.addEventListener('click', function(e) {
         popover: { title: '🏆 Crown Conquest', description: 'Enter the tournament arena! Pick a genre, draft your roster, and auto-simulate a bracket to crown a champion. Full power-based matchups!', side: 'right' }
       },
       {
+        element: '#animeQuestBtn',
+        popover: { title: '\uD83C\uDFAE Anime Quest', description: 'Test your anime knowledge! Pick your favorite series, choose a difficulty, and answer 10 trivia questions. Earn ranks from F to SSS and download your certificate!', side: 'right' }
+      },
+      {
         element: 'nav.side-nav a[onclick*="showAllAwardWinners"]',
         popover: { title: '\uD83C\uDFC5 Anime of the Year', description: 'See Crunchyroll\'s Anime of the Year winners from 2017 to 2026, filtered from Fardin\'s list.', side: 'right' }
       },
@@ -2769,10 +2773,6 @@ document.addEventListener('click', function(e) {
       {
         element: '#topSecretsBtn',
         popover: { title: '\uD83D\uDD10 Top Secrets', description: 'Hidden resource guide! Get download sites, streaming platforms, and pro tips for watching anime.', side: 'right' }
-      },
-      {
-        element: '#animeQuestBtn',
-        popover: { title: '\uD83C\uDFAE Anime Quest', description: 'Test your anime knowledge! Pick your favorite series, choose a difficulty, and answer 10 trivia questions. Earn ranks from F to SSS and download your certificate!', side: 'right' }
       },
       {
         element: '#installAppBtn',
