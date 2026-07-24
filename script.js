@@ -4778,8 +4778,15 @@ function downloadCertificate() {
   if (!cert || !html2canvas) return;
   var btns = document.querySelectorAll('#questResultsPhase .admin-btn');
   btns.forEach(function(b) { if (b.textContent.indexOf('Download') > -1) b.style.display = 'none'; });
-  var w = cert.offsetWidth, h = cert.offsetHeight;
-  html2canvas(cert, { scale: 2, useCORS: true, allowTaint: true, backgroundColor: null, logging: false, width: w, height: h, windowWidth: cert.scrollWidth, windowHeight: cert.scrollHeight }).then(function(canvas) {
+  var clone = cert.cloneNode(true);
+  clone.style.width = '400px';
+  clone.style.height = '500px';
+  clone.style.position = 'fixed';
+  clone.style.top = '-9999px';
+  clone.style.left = '-9999px';
+  document.body.appendChild(clone);
+  html2canvas(clone, { scale: 3, useCORS: true, width: 400, height: 500 }).then(function(canvas) {
+    document.body.removeChild(clone);
     btns.forEach(function(b) { if (b.textContent.indexOf('Download') > -1) b.style.display = ''; });
     var link = document.createElement('a');
     var names = [];
@@ -4790,6 +4797,7 @@ function downloadCertificate() {
     link.href = canvas.toDataURL('image/png');
     link.click();
   }).catch(function() {
+    if (clone.parentNode) document.body.removeChild(clone);
     btns.forEach(function(b) { if (b.textContent.indexOf('Download') > -1) b.style.display = ''; });
   });
 }
