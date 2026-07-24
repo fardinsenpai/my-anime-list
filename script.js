@@ -4710,8 +4710,7 @@ function showQuestResults() {
   cert.style.display = 'block';
   var rankLabels = { sss:'SSS', ss:'SS', s:'S', a:'A', b:'B', c:'C', f:'F' };
   document.getElementById('qcRank').textContent = rankLabels[rankKey] || '';
-  var diffMap = { easy:'Easy', normal:'Normal', hard:'Hard', mixed:'Mixed' };
-  document.getElementById('qcDiff').textContent = diffMap[_questDifficulty] || 'Mixed';
+  document.getElementById('qcDiff').style.display = 'none';
   // Anime name(s) in center
   var names = [];
   _questQuestions.forEach(function(q) {
