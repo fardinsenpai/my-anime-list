@@ -4737,7 +4737,11 @@ function downloadCertificate() {
   html2canvas(cert, { scale: 2, useCORS: true, backgroundColor: null }).then(function(canvas) {
     btns.forEach(function(b) { if (b.textContent.indexOf('Download') > -1) b.style.display = ''; });
     var link = document.createElement('a');
-    link.download = 'anime-quest-certificate.png';
+    var names = [];
+    _questQuestions.forEach(function(q) {
+      if (names.indexOf(q.anime) === -1) names.push(q.anime);
+    });
+    link.download = 'anime-quest-certificate-of-' + names.join('-').replace(/\s+/g, '_') + '.png';
     link.href = canvas.toDataURL('image/png');
     link.click();
   }).catch(function() {
