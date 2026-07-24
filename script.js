@@ -4681,9 +4681,7 @@ function showQuestResults() {
   _questQuestions.forEach(function(q) {
     if (names.indexOf(q.anime) === -1) names.push(q.anime);
   });
-  var animeText = names[0] || '';
-  if (names.length === 2) animeText += ' + ' + names[1];
-  else if (names.length > 2) animeText += ' + ' + names[1] + ' & ' + (names.length - 2) + ' others';
+  var animeText = names.length > 1 ? 'Combined' : (names[0] || '');
   document.getElementById('qcAnimeName').textContent = animeText;
   // Reset photo
   document.getElementById('qcUserPhoto').style.display = 'none';
