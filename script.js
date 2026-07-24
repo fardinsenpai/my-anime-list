@@ -4796,6 +4796,9 @@ function downloadCertificate() {
   if (inner) { inner.style.borderRadius = '0'; inner.style.overflow = 'visible'; inner.style.transition = 'none'; inner.style.boxShadow = 'none'; inner.style.border = 'none'; }
   var innerBorder = clone.querySelector('.qc-inner-border');
   if (innerBorder) innerBorder.style.display = 'none';
+  clone.querySelectorAll('.qc-rank, .qc-anime-name, .qc-diff-stars, .qc-logo').forEach(function(el) {
+    if (el) { el.style.filter = 'none'; el.style.boxShadow = 'none'; }
+  });
   var overlay = clone.querySelector('.qc-overlay');
   if (overlay) overlay.style.background = 'linear-gradient(rgba(0,0,0,0) 0%, rgba(0,0,0,0.85) 100%)';
   document.body.appendChild(clone);
