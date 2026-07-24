@@ -5212,4 +5212,8 @@ body.perf-no-heading-anim .header h1::after { animation: none !important; }
   #questAnimeList { grid-template-columns:repeat(auto-fill,minmax(110px,1fr)) !important; gap:6px; }
   #questResultsPhase { overflow-x: auto; }
   .qc-frame { width: 380px; height: 480px; }
+  .qd-pill { padding: 5px 10px; font-size: 11px; gap: 4px; }
+  .qd-pill .qd-dot { width: 6px; height: 6px; }
+  .qd-pill .qd-label { font-size: 11px; }
+  .qd-pill .qd-stars { font-size: 11px; }
 }
