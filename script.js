@@ -4778,7 +4778,7 @@ function downloadCertificate() {
   if (!cert || !html2canvas) return;
   var btns = document.querySelectorAll('#questResultsPhase .admin-btn');
   btns.forEach(function(b) { if (b.textContent.indexOf('Download') > -1) b.style.display = 'none'; });
-  html2canvas(cert, { scale: 2, useCORS: true, backgroundColor: null }).then(function(canvas) {
+  html2canvas(cert, { scale: 2, useCORS: true, allowTaint: true, backgroundColor: null, logging: false }).then(function(canvas) {
     btns.forEach(function(b) { if (b.textContent.indexOf('Download') > -1) b.style.display = ''; });
     var link = document.createElement('a');
     var names = [];
