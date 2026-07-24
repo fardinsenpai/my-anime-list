@@ -4539,6 +4539,28 @@ function shuffleArray(arr) {
   return arr;
 }
 
+function wrapQuestName(name) {
+  var words = name.split(' ');
+  var lines = [];
+  var current = '';
+  for (var i = 0; i < words.length; i++) {
+    if (current && (current + ' ' + words[i]).length > 12) {
+      lines.push(current);
+      current = words[i];
+    } else {
+      current = current ? current + ' ' + words[i] : words[i];
+    }
+  }
+  if (current) lines.push(current);
+  if (lines.length === 1 && lines[0].length > 14) {
+    var mid = Math.ceil(lines[0].length / 2);
+    var space = lines[0].indexOf(' ', mid);
+    if (space > -1) lines = [lines[0].substring(0, space), lines[0].substring(space+1)];
+    else lines = [lines[0].substring(0, mid), lines[0].substring(mid)];
+  }
+  return lines.join('<br>');
+}
+
 function initQuest() {
   _questSelected = [];
   _questQuestions = [];
@@ -4555,10 +4577,10 @@ function initQuest() {
     var card = document.createElement('div');
     card.className = 'quest-anime-card';
     card.dataset.id = a.id;
-    card.innerHTML = '<span class="qac-check">✓</span><img class="qac-icon" src="' + a.icon + '" alt=""><span class="qac-name">' + a.id + '</span>';
-    if (a.id.length > 26) card.querySelector('.qac-name').style.fontSize = '8px';
-    else if (a.id.length > 20) card.querySelector('.qac-name').style.fontSize = '9px';
-    else if (a.id.length > 14) card.querySelector('.qac-name').style.fontSize = '10px';
+    card.innerHTML = '<span class="qac-check">✓</span><img class="qac-icon" src="' + a.icon + '" alt=""><span class="qac-name">' + wrapQuestName(a.id) + '</span>';
+    if (a.id.length > 26) card.querySelector('.qac-name').style.fontSize = '7px';
+    else if (a.id.length > 20) card.querySelector('.qac-name').style.fontSize = '8px';
+    else if (a.id.length > 14) card.querySelector('.qac-name').style.fontSize = '9px';
     card.onclick = function() { toggleQuestAnime(a.id); };
     list.appendChild(card);
   });
