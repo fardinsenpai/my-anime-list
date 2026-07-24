@@ -4556,7 +4556,8 @@ function initQuest() {
     card.className = 'quest-anime-card';
     card.dataset.id = a.id;
     card.innerHTML = '<span class="qac-check">✓</span><img class="qac-icon" src="' + a.icon + '" alt=""><span class="qac-name">' + a.id + '</span>';
-    if (a.id.length > 18) card.querySelector('.qac-name').style.fontSize = '10px';
+    if (a.id.length > 24) card.querySelector('.qac-name').style.fontSize = '9px';
+    else if (a.id.length > 18) card.querySelector('.qac-name').style.fontSize = '10px';
     else if (a.id.length > 14) card.querySelector('.qac-name').style.fontSize = '11px';
     card.onclick = function() { toggleQuestAnime(a.id); };
     list.appendChild(card);
