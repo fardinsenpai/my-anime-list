@@ -5110,7 +5110,7 @@ body.perf-no-heading-anim .header h1::after { animation: none !important; }
   white-space: nowrap;
 }
 .qc-anime-name {
-  font-size: 16px; font-family: 'Bangers', 'Orbitron', sans-serif;
+  font-size: 16px; font-family: 'Rajdhani', 'Orbitron', sans-serif;
   font-weight: 700; letter-spacing: 3px;
   text-transform: uppercase;
   filter: drop-shadow(0 0 10px currentColor) drop-shadow(0 0 20px currentColor);
