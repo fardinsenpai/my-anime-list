@@ -4778,7 +4778,8 @@ function downloadCertificate() {
   if (!cert || !html2canvas) return;
   var btns = document.querySelectorAll('#questResultsPhase .admin-btn');
   btns.forEach(function(b) { if (b.textContent.indexOf('Download') > -1) b.style.display = 'none'; });
-  html2canvas(cert, { scale: 2, useCORS: true, allowTaint: true, backgroundColor: null, logging: false }).then(function(canvas) {
+  var w = cert.offsetWidth, h = cert.offsetHeight;
+  html2canvas(cert, { scale: 2, useCORS: true, allowTaint: true, backgroundColor: null, logging: false, width: w, height: h, windowWidth: cert.scrollWidth, windowHeight: cert.scrollHeight }).then(function(canvas) {
     btns.forEach(function(b) { if (b.textContent.indexOf('Download') > -1) b.style.display = ''; });
     var link = document.createElement('a');
     var names = [];
