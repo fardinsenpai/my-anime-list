@@ -5104,17 +5104,18 @@ body.perf-no-heading-anim .header h1::after { animation: none !important; }
 }
 .qc-bottom-right { position: absolute; right: 0; bottom: 0; text-align: right; }
 .qc-bottom-center {
-  position: absolute; left: 50%; bottom: 0;
+  position: absolute; left: 50%; bottom: 42px;
   transform: translateX(-50%);
   text-align: center;
   white-space: nowrap;
 }
 .qc-anime-name {
-  font-size: 13px; font-family: 'Poppins', 'Orbitron', sans-serif;
-  font-weight: 700; letter-spacing: 2px;
+  font-size: 16px; font-family: 'Bangers', 'Orbitron', sans-serif;
+  font-weight: 700; letter-spacing: 3px;
   text-transform: uppercase;
-  color: rgba(255,255,255,0.6);
-  text-shadow: 0 0 10px rgba(0,0,0,0.8);
+  filter: drop-shadow(0 0 10px currentColor) drop-shadow(0 0 20px currentColor);
+  -webkit-text-stroke: 1px rgba(0,0,0,0.4);
+  text-stroke: 1px rgba(0,0,0,0.4);
 }
 .qc-rank {
   font-size: 64px; font-weight: 700; line-height: 1;
@@ -5144,27 +5145,34 @@ body.perf-no-heading-anim .header h1::after { animation: none !important; }
   text-stroke: 2px rgba(0,0,0,0.5);
 }
 .qc-sss .qc-diff { color: #FFD700; }
+.qc-sss .qc-anime-name { color: #FFD700; }
 
 .qc-ss .qc-inner { border: 3px solid #C0C0C0; box-shadow: 0 0 20px rgba(192,192,192,0.1); }
 .qc-ss .qc-rank { color: #E8E8E8; -webkit-text-stroke: 2px rgba(0,0,0,0.5); text-stroke: 2px rgba(0,0,0,0.5); }
 .qc-ss .qc-diff { color: #C0C0C0; }
+.qc-ss .qc-anime-name { color: #E8E8E8; }
 
 .qc-s .qc-inner { border: 3px solid #FF4444; box-shadow: 0 0 20px rgba(255,68,68,0.1); }
 .qc-s .qc-rank { color: #FF4444; -webkit-text-stroke: 2px rgba(0,0,0,0.5); text-stroke: 2px rgba(0,0,0,0.5); }
 .qc-s .qc-diff { color: #FF4444; }
+.qc-s .qc-anime-name { color: #FF4444; }
 
 .qc-a .qc-inner { border: 3px solid #44FF44; box-shadow: 0 0 20px rgba(68,255,68,0.08); }
 .qc-a .qc-rank { color: #44FF44; -webkit-text-stroke: 2px rgba(0,0,0,0.5); text-stroke: 2px rgba(0,0,0,0.5); }
 .qc-a .qc-diff { color: #44FF44; }
+.qc-a .qc-anime-name { color: #44FF44; }
 
 .qc-b .qc-inner { border: 3px solid #00CED1; box-shadow: 0 0 20px rgba(0,206,209,0.08); }
 .qc-b .qc-rank { color: #00CED1; -webkit-text-stroke: 2px rgba(0,0,0,0.5); text-stroke: 2px rgba(0,0,0,0.5); }
 .qc-b .qc-diff { color: #00CED1; }
+.qc-b .qc-anime-name { color: #00CED1; }
 
 .qc-c .qc-inner { border: 3px solid #888; box-shadow: 0 0 20px rgba(136,136,136,0.06); }
 .qc-c .qc-rank { color: #ccc; -webkit-text-stroke: 2px rgba(0,0,0,0.5); text-stroke: 2px rgba(0,0,0,0.5); }
 .qc-c .qc-diff { color: #aaa; }
+.qc-c .qc-anime-name { color: #ccc; }
 
 .qc-f .qc-inner { border: 3px solid #8B0000; box-shadow: 0 0 15px rgba(139,0,0,0.1); }
 .qc-f .qc-rank { color: #ff6666; -webkit-text-stroke: 2px rgba(0,0,0,0.5); text-stroke: 2px rgba(0,0,0,0.5); }
 .qc-f .qc-diff { color: #ff6666; }
+.qc-f .qc-anime-name { color: #ff6666; }
