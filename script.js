@@ -4785,7 +4785,7 @@ function downloadCertificate() {
   clone.style.top = '-9999px';
   clone.style.left = '-9999px';
   document.body.appendChild(clone);
-  html2canvas(clone, { scale: 3, useCORS: true, width: 400, height: 500 }).then(function(canvas) {
+  html2canvas(clone, { scale: 3, useCORS: true, width: 400, height: 500, windowWidth: 400, windowHeight: 500 }).then(function(canvas) {
     document.body.removeChild(clone);
     btns.forEach(function(b) { if (b.textContent.indexOf('Download') > -1) b.style.display = ''; });
     var link = document.createElement('a');
