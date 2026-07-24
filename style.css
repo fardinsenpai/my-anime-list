@@ -1681,6 +1681,7 @@
 
   animation: titleFloat 4s ease-in-out infinite, glitch-main 6s infinite;
 }
+.header h1 .h1-emoji { background: none !important; -webkit-text-fill-color: initial; }
 
 .header h1::before,
 .header h1::after {

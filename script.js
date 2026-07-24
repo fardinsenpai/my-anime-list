@@ -655,7 +655,7 @@ window.addEventListener('popstate', function () {
       animeQuestContainer.style.display = 'block';
       const mainTitle = document.querySelector('.header h1');
       if (mainTitle) {
-        mainTitle.textContent = '🎮 Anime Quest';
+        mainTitle.innerHTML = '<span class="h1-emoji">🎮</span> Anime Quest';
         mainTitle.setAttribute('data-text', '🎮 Anime Quest');
       }
       if (typeof closeMenu === 'function') closeMenu();
