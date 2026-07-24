@@ -5110,8 +5110,8 @@ body.perf-no-heading-anim .header h1::after { animation: none !important; }
   white-space: nowrap;
 }
 .qc-anime-name {
-  font-size: 16px; font-family: 'Cinzel', 'Orbitron', serif;
-  font-weight: 700; letter-spacing: 4px;
+  font-size: 16px; font-family: monospace;
+  font-weight: 700; letter-spacing: 3px;
   text-transform: uppercase;
   filter: drop-shadow(0 0 10px currentColor) drop-shadow(0 0 20px currentColor);
   -webkit-text-stroke: 1px rgba(0,0,0,0.4);
