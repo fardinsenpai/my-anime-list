@@ -4714,8 +4714,13 @@ function showQuestResults() {
   _questQuestions.forEach(function(q) {
     if (names.indexOf(q.anime) === -1) names.push(q.anime);
   });
-  var animeText = names.length > 1 ? 'Combined<br>' + names.length + ' Anime' : (names[0] || '');
-  document.getElementById('qcAnimeName').innerHTML = animeText;
+  var qcNameEl = document.getElementById('qcAnimeName');
+  var singleName = names[0] || '';
+  var animeText = names.length > 1 ? 'Combined<br>' + names.length + ' Anime' : (singleName.length > 14 ? wrapQuestName(singleName) : singleName);
+  qcNameEl.innerHTML = animeText;
+  if (singleName.length > 20) qcNameEl.style.fontSize = '14px';
+  else if (singleName.length > 14) qcNameEl.style.fontSize = '16px';
+  else qcNameEl.style.fontSize = '';
   // Reset photo
   document.getElementById('qcUserPhoto').style.display = 'none';
   document.getElementById('qcUserPhoto').src = '';
@@ -4793,6 +4798,7 @@ function resetQuest() {
   document.getElementById('questResultsPhase').style.display = 'none';
   document.getElementById('questCertificate').style.display = 'none';
   document.getElementById('qcAnimeName').textContent = '';
+  document.getElementById('qcAnimeName').style.fontSize = '';
   document.getElementById('questSelectedCount').textContent = 'Selected: ' + _questSelected.length;
   document.getElementById('questStartBtn').style.display = _questSelected.length > 0 ? 'inline-block' : 'none';
 }
