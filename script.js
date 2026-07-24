@@ -4802,7 +4802,8 @@ function downloadCertificate() {
   var overlay = clone.querySelector('.qc-overlay');
   if (overlay) { overlay.style.background = 'linear-gradient(rgba(0,0,0,0.02) 0%, rgba(0,0,0,0.85) 100%)'; overlay.style.top = '-1px'; overlay.style.bottom = '-1px'; overlay.style.height = 'auto'; }
   document.body.appendChild(clone);
-  html2canvas(clone, { scale: 3, useCORS: true, width: 400, height: 500, windowWidth: 400, windowHeight: 500, backgroundColor: null, scrollX: 0, scrollY: 0 }).then(function(canvas) {
+  setTimeout(function() {
+    html2canvas(clone, { scale: 3, useCORS: true, width: 400, height: 500, windowWidth: 400, windowHeight: 500, backgroundColor: null, scrollX: 0, scrollY: 0 }).then(function(canvas) {
     document.body.removeChild(clone);
     var p = document.getElementById('qcDownloadPopup');
     if (p) document.body.removeChild(p);
@@ -4821,6 +4822,7 @@ function downloadCertificate() {
     if (p) document.body.removeChild(p);
     btns.forEach(function(b) { if (b.textContent.indexOf('Download') > -1) b.style.display = ''; });
     msgFail('Download failed. Try again.');
+    });
   });
 }
 
