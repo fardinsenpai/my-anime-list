@@ -4676,6 +4676,12 @@ function showQuestResults() {
   document.getElementById('qcRank').textContent = rankLabels[rankKey] || '';
   var diffMap = { easy:'Easy', normal:'Normal', hard:'Hard', mixed:'Mixed' };
   document.getElementById('qcDiff').textContent = diffMap[_questDifficulty] || 'Mixed';
+  // Anime name(s) in center
+  var names = [];
+  _questQuestions.forEach(function(q) {
+    if (names.indexOf(q.anime) === -1) names.push(q.anime);
+  });
+  document.getElementById('qcAnimeName').textContent = names.join(' + ');
   // Reset photo
   document.getElementById('qcUserPhoto').style.display = 'none';
   document.getElementById('qcUserPhoto').src = '';
@@ -4748,6 +4754,7 @@ function resetQuest() {
   document.getElementById('questQuizPhase').style.display = 'none';
   document.getElementById('questResultsPhase').style.display = 'none';
   document.getElementById('questCertificate').style.display = 'none';
+  document.getElementById('qcAnimeName').textContent = '';
   document.getElementById('questSelectedCount').textContent = 'Selected: ' + _questSelected.length;
   document.getElementById('questStartBtn').style.display = _questSelected.length > 0 ? 'inline-block' : 'none';
 }
