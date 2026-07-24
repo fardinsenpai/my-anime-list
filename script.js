@@ -4794,8 +4794,6 @@ function downloadCertificate() {
   clone.style.transition = 'none';
   var inner = clone.querySelector('.qc-inner');
   if (inner) { inner.style.borderRadius = '0'; inner.style.overflow = 'visible'; inner.style.transition = 'none'; }
-  var overlay = clone.querySelector('.qc-overlay');
-  if (overlay) overlay.style.background = 'rgba(0,0,0,0.7)';
   document.body.appendChild(clone);
   html2canvas(clone, { scale: 3, useCORS: true, width: 400, height: 500, windowWidth: 400, windowHeight: 500 }).then(function(canvas) {
     document.body.removeChild(clone);
