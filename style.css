@@ -5041,7 +5041,7 @@ body.perf-no-heading-anim .header h1::after { animation: none !important; }
 /* === Certificate Templates === */
 .qc-frame {
   width: 380px; height: 480px; margin: 0 auto 8px; position: relative;
-  border-radius: 12px; overflow: hidden;
+  border-radius: 16px; overflow: hidden;
   transition: all 0.3s;
 }
 .qc-inner {
@@ -5049,7 +5049,7 @@ body.perf-no-heading-anim .header h1::after { animation: none !important; }
   box-sizing: border-box;
   position: relative;
   overflow: hidden;
-  border-radius: 9px;
+  border-radius: 13px;
 }
 .qc-bg-photo {
   position: absolute; top: 0; left: 0;
@@ -5057,9 +5057,16 @@ body.perf-no-heading-anim .header h1::after { animation: none !important; }
 }
 .qc-overlay {
   position: absolute; bottom: 0; left: 0; right: 0;
-  height: 55%;
-  background: linear-gradient(transparent 15%, rgba(0,0,0,0.85));
+  height: 60%;
+  background: linear-gradient(transparent 10%, rgba(0,0,0,0.88));
   pointer-events: none;
+}
+.qc-inner-border {
+  position: absolute; top: 6px; left: 6px; right: 6px; bottom: 6px;
+  border: 1.5px solid rgba(255,255,255,0.08);
+  border-radius: 10px;
+  pointer-events: none;
+  z-index: 2;
 }
 .qc-photo-placeholder {
   position: absolute; top: 50%; left: 50%;
@@ -5086,75 +5093,77 @@ body.perf-no-heading-anim .header h1::after { animation: none !important; }
 .qc-title { display: none; }
 .qc-subtitle { display: none; }
 .qc-bottom {
-  position: absolute; bottom: 24px; left: 24px; right: 24px;
+  position: absolute; bottom: 20px; left: 20px; right: 20px;
   display: flex;
   justify-content: space-between; align-items: flex-end;
+  z-index: 3;
 }
-.qc-bottom-left .qc-logo {
-  width: 120px; height: 120px; object-fit: contain;
-  filter: drop-shadow(0 0 12px rgba(0,0,0,0.8)) drop-shadow(0 0 4px rgba(245,197,24,0.3));
+.qc-bottom-left .qc-logo-wrap {
+  width: 140px; height: 140px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.qc-bottom-left .qc-logo-wrap .qc-logo {
+  max-width: 100%; max-height: 100%;
+  width: auto; height: auto;
+  filter: drop-shadow(0 0 14px rgba(0,0,0,0.9)) drop-shadow(0 0 6px rgba(245,197,24,0.25));
 }
 .qc-bottom-right {
   text-align: right;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
 }
 .qc-rank {
-  font-size: 60px; font-weight: 700; line-height: 1;
+  font-size: 64px; font-weight: 700; line-height: 1;
   font-family: 'Bangers', 'Orbitron', sans-serif;
-  letter-spacing: 3px;
-  text-shadow: 0 0 20px currentColor, 0 0 40px currentColor, 2px 2px 8px rgba(0,0,0,0.7);
+  letter-spacing: 2px;
   transform: rotate(-15deg);
   display: inline-block;
+  -webkit-text-stroke: 2px rgba(0,0,0,0.6);
+  text-stroke: 2px rgba(0,0,0,0.6);
+  filter: drop-shadow(0 0 12px currentColor) drop-shadow(0 0 24px currentColor);
 }
 .qc-diff {
-  font-size: 15px; font-family: monospace;
-  letter-spacing: 1px; margin-top: 6px;
+  font-size: 14px; font-family: 'Poppins', 'Orbitron', sans-serif;
+  font-weight: 700; letter-spacing: 3px;
+  text-transform: uppercase;
+  margin-top: 6px;
+  text-shadow: 0 0 10px currentColor;
 }
 /* Rank themes */
-.qc-sss .qc-inner {
-  border: 3px solid #FFD700;
-  box-shadow: 0 0 30px rgba(255,215,0,0.15);
+.qc-sss .qc-inner { border: 3px solid #FFD700; box-shadow: 0 0 30px rgba(255,215,0,0.15); }
+.qc-sss .qc-rank {
+  color: transparent;
+  background: linear-gradient(135deg, #ffe600, #ff9900);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-stroke: 2px rgba(0,0,0,0.5);
+  text-stroke: 2px rgba(0,0,0,0.5);
 }
-.qc-sss .qc-rank { color: #FFD700; }
-.qc-sss .qc-diff { color: #FFD700; text-shadow: 0 0 10px rgba(255,215,0,0.5); }
+.qc-sss .qc-diff { color: #FFD700; }
 
-.qc-ss .qc-inner {
-  border: 3px solid #C0C0C0;
-  box-shadow: 0 0 20px rgba(192,192,192,0.1);
-}
-.qc-ss .qc-rank { color: #E8E8E8; }
-.qc-ss .qc-diff { color: #C0C0C0; text-shadow: 0 0 8px rgba(192,192,192,0.4); }
+.qc-ss .qc-inner { border: 3px solid #C0C0C0; box-shadow: 0 0 20px rgba(192,192,192,0.1); }
+.qc-ss .qc-rank { color: #E8E8E8; -webkit-text-stroke: 2px rgba(0,0,0,0.5); text-stroke: 2px rgba(0,0,0,0.5); }
+.qc-ss .qc-diff { color: #C0C0C0; }
 
-.qc-s .qc-inner {
-  border: 3px solid #FF4444;
-  box-shadow: 0 0 20px rgba(255,68,68,0.1);
-}
-.qc-s .qc-rank { color: #FF4444; }
-.qc-s .qc-diff { color: #FF4444; text-shadow: 0 0 8px rgba(255,68,68,0.4); }
+.qc-s .qc-inner { border: 3px solid #FF4444; box-shadow: 0 0 20px rgba(255,68,68,0.1); }
+.qc-s .qc-rank { color: #FF4444; -webkit-text-stroke: 2px rgba(0,0,0,0.5); text-stroke: 2px rgba(0,0,0,0.5); }
+.qc-s .qc-diff { color: #FF4444; }
 
-.qc-a .qc-inner {
-  border: 3px solid #44FF44;
-  box-shadow: 0 0 20px rgba(68,255,68,0.08);
-}
-.qc-a .qc-rank { color: #44FF44; }
-.qc-a .qc-diff { color: #44FF44; text-shadow: 0 0 8px rgba(68,255,68,0.4); }
+.qc-a .qc-inner { border: 3px solid #44FF44; box-shadow: 0 0 20px rgba(68,255,68,0.08); }
+.qc-a .qc-rank { color: #44FF44; -webkit-text-stroke: 2px rgba(0,0,0,0.5); text-stroke: 2px rgba(0,0,0,0.5); }
+.qc-a .qc-diff { color: #44FF44; }
 
-.qc-b .qc-inner {
-  border: 3px solid #00CED1;
-  box-shadow: 0 0 20px rgba(0,206,209,0.08);
-}
-.qc-b .qc-rank { color: #00CED1; }
-.qc-b .qc-diff { color: #00CED1; text-shadow: 0 0 8px rgba(0,206,209,0.4); }
+.qc-b .qc-inner { border: 3px solid #00CED1; box-shadow: 0 0 20px rgba(0,206,209,0.08); }
+.qc-b .qc-rank { color: #00CED1; -webkit-text-stroke: 2px rgba(0,0,0,0.5); text-stroke: 2px rgba(0,0,0,0.5); }
+.qc-b .qc-diff { color: #00CED1; }
 
-.qc-c .qc-inner {
-  border: 3px solid #888;
-  box-shadow: 0 0 20px rgba(136,136,136,0.06);
-}
-.qc-c .qc-rank { color: #ccc; }
-.qc-c .qc-diff { color: #aaa; text-shadow: 0 0 6px rgba(136,136,136,0.3); }
+.qc-c .qc-inner { border: 3px solid #888; box-shadow: 0 0 20px rgba(136,136,136,0.06); }
+.qc-c .qc-rank { color: #ccc; -webkit-text-stroke: 2px rgba(0,0,0,0.5); text-stroke: 2px rgba(0,0,0,0.5); }
+.qc-c .qc-diff { color: #aaa; }
 
-.qc-f .qc-inner {
-  border: 3px solid #8B0000;
-  box-shadow: 0 0 15px rgba(139,0,0,0.1);
-}
-.qc-f .qc-rank { color: #ff6666; }
-.qc-f .qc-diff { color: #ff6666; text-shadow: 0 0 6px rgba(139,0,0,0.3); }
+.qc-f .qc-inner { border: 3px solid #8B0000; box-shadow: 0 0 15px rgba(139,0,0,0.1); }
+.qc-f .qc-rank { color: #ff6666; -webkit-text-stroke: 2px rgba(0,0,0,0.5); text-stroke: 2px rgba(0,0,0,0.5); }
+.qc-f .qc-diff { color: #ff6666; }
