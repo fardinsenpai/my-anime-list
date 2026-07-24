@@ -2771,6 +2771,14 @@ document.addEventListener('click', function(e) {
         popover: { title: '\uD83D\uDD10 Top Secrets', description: 'Hidden resource guide! Get download sites, streaming platforms, and pro tips for watching anime.', side: 'right' }
       },
       {
+        element: '#animeQuestBtn',
+        popover: { title: '\uD83C\uDFAE Anime Quest', description: 'Test your anime knowledge! Pick your favorite series, choose a difficulty, and answer 10 trivia questions. Earn ranks from F to SSS and download your certificate!', side: 'right' }
+      },
+      {
+        element: '#installAppBtn',
+        popover: { title: '\u2B07 Install App', description: 'Install Fardin\'s Anime Hub as a standalone app on your device for quick access anytime! Works like a native app.', side: 'right' }
+      },
+      {
         element: '#chatBubble',
         popover: { title: '\uD83E\uDD16 AI Chat', description: 'Chat with Fardin\'s personal AI assistant! Ask about any anime, get recommendations, or just have fun.', side: 'left' },
         onHighlightStarted: function () { closeMenu(); }
