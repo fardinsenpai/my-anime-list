@@ -4594,8 +4594,8 @@ function initQuest() {
     pill.className = 'qd-pill qd-' + d + (d === 'mixed' ? ' selected' : '');
     pill.dataset.diff = d;
     var labels = { easy:'Easy', normal:'Normal', hard:'Hard', mixed:'Mixed' };
-    var bars = { easy:'▬', normal:'▬▬', hard:'▬▬▬', mixed:'▬▬▬▬' };
-    pill.innerHTML = '<span class="qd-dot qd-' + d + '"></span><span class="qd-label">' + labels[d] + '</span><span class="qd-bars">' + bars[d] + '</span>';
+    var stars = { easy:'★', normal:'★★', hard:'★★★', mixed:'★★★★★' };
+    pill.innerHTML = '<span class="qd-dot qd-' + d + '"></span><span class="qd-label">' + labels[d] + '</span> <span class="qd-stars">' + stars[d] + '</span>';
     pill.onclick = function() { selectQuestDifficulty(d); };
     diffSel.appendChild(pill);
   });

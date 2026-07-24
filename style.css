@@ -4978,7 +4978,7 @@ body.perf-no-heading-anim .header h1::after { animation: none !important; }
 .qd-pill.selected .qd-dot.qd-hard { box-shadow: 0 0 8px #f87171; }
 .qd-pill.selected .qd-dot.qd-mixed { box-shadow: 0 0 8px #a78bfa; }
 .qd-pill .qd-label { font-size: 12px; letter-spacing: 0.3px; }
-.qd-pill .qd-bars { font-size: 10px; opacity: 0.5; letter-spacing: 1px; }
+.qd-pill .qd-stars { font-size: 13px; letter-spacing: 1px; color: #facc15; }
 
 /* --- Anime Quest styles --- */
 .body-anime-quest {
