@@ -4800,9 +4800,9 @@ function downloadCertificate() {
     if (el) { el.style.filter = 'none'; el.style.boxShadow = 'none'; el.style.webkitTextStroke = 'none'; el.style.transform = 'none'; }
   });
   var overlay = clone.querySelector('.qc-overlay');
-  if (overlay) overlay.style.display = 'none';
+  if (overlay) overlay.style.background = 'linear-gradient(rgba(0,0,0,0.02) 0%, rgba(0,0,0,0.85) 100%)';
   document.body.appendChild(clone);
-  html2canvas(clone, { scale: 2, useCORS: true, backgroundColor: null }).then(function(canvas) {
+  html2canvas(clone, { scale: 3, useCORS: true, width: 400, height: 500, windowWidth: 400, windowHeight: 500, backgroundColor: null }).then(function(canvas) {
     document.body.removeChild(clone);
     var p = document.getElementById('qcDownloadPopup');
     if (p) document.body.removeChild(p);
