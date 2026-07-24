@@ -5173,7 +5173,16 @@ body.perf-no-heading-anim .header h1::after { animation: none !important; }
   text-transform: uppercase;
   margin-top: 6px;
   text-shadow: 0 0 10px currentColor;
+  display: inline-flex; align-items: center; gap: 6px;
 }
+.qc-diff .qc-diff-dot {
+  width: 7px; height: 7px; border-radius: 50%; display: inline-block;
+}
+.qc-diff .qc-diff-dot.qcd-easy { background: #4ade80; }
+.qc-diff .qc-diff-dot.qcd-normal { background: #facc15; }
+.qc-diff .qc-diff-dot.qcd-hard { background: #f87171; }
+.qc-diff .qc-diff-dot.qcd-mixed { background: linear-gradient(135deg, #4ade80, #facc15, #f87171); }
+.qc-diff .qc-diff-bars { font-size: 10px; opacity: 0.6; letter-spacing: 1px; }
 /* Rank themes */
 .qc-sss .qc-inner { border: 3px solid #FFD700; box-shadow: 0 0 30px rgba(255,215,0,0.15); }
 .qc-sss .qc-rank {

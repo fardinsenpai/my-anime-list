@@ -4711,7 +4711,9 @@ function showQuestResults() {
   var rankLabels = { sss:'SSS', ss:'SS', s:'S', a:'A', b:'B', c:'C', f:'F' };
   document.getElementById('qcRank').textContent = rankLabels[rankKey] || '';
   var diffMap = { easy:'Easy', normal:'Normal', hard:'Hard', mixed:'Mixed' };
-  document.getElementById('qcDiff').textContent = diffMap[_questDifficulty] || 'Mixed';
+  var diffBars = { easy:'▬', normal:'▬▬', hard:'▬▬▬', mixed:'▬▬▬▬' };
+  var diffKey = _questDifficulty || 'mixed';
+  document.getElementById('qcDiff').innerHTML = '<span class="qc-diff-dot qcd-' + diffKey + '"></span>' + (diffMap[diffKey] || 'Mixed') + ' <span class="qc-diff-bars">' + (diffBars[diffKey] || '') + '</span>';
   // Anime name(s) in center
   var names = [];
   _questQuestions.forEach(function(q) {
