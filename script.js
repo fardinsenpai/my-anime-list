@@ -4793,7 +4793,9 @@ function downloadCertificate() {
   clone.style.overflow = 'visible';
   clone.style.transition = 'none';
   var inner = clone.querySelector('.qc-inner');
-  if (inner) { inner.style.borderRadius = '0'; inner.style.overflow = 'visible'; inner.style.transition = 'none'; }
+  if (inner) { inner.style.borderRadius = '0'; inner.style.overflow = 'visible'; inner.style.transition = 'none'; inner.style.boxShadow = 'none'; inner.style.border = 'none'; }
+  var innerBorder = clone.querySelector('.qc-inner-border');
+  if (innerBorder) innerBorder.style.display = 'none';
   var overlay = clone.querySelector('.qc-overlay');
   if (overlay) overlay.style.background = 'linear-gradient(rgba(0,0,0,0) 0%, rgba(0,0,0,0.85) 100%)';
   document.body.appendChild(clone);
