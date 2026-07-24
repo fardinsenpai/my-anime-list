@@ -5138,7 +5138,7 @@ body.perf-no-heading-anim .header h1::after { animation: none !important; }
   z-index: 3;
 }
 .qc-bottom-left { position: absolute; left: -39px; bottom: -10px; }
-.qc-bottom-left .qc-logo { width: 140px; height: 93px; display: block; background-size: contain; background-position: center; background-repeat: no-repeat; }
+.qc-bottom-left .qc-logo { display: block; }
 .qc-bottom-right { position: absolute; right: 0; bottom: 0; text-align: right; }
 .qc-bottom-center {
   position: absolute; left: 50%; bottom: 36px;
