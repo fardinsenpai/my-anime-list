@@ -860,13 +860,6 @@
   background-clip: text;
 }
 .aq-head-icon { width:28px; height:28px; flex-shrink:0; color:#00f2fe; fill:#00f2fe; }
-.aq-side-text {
-  background: linear-gradient(135deg, #00f2fe 0%, #4facfe 50%, #f093fb 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  font-weight: 700;
-}
 
 .analysis-wrapper {
   display: flex;
