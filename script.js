@@ -4778,6 +4778,11 @@ function downloadCertificate() {
   if (!cert || !html2canvas) return;
   var btns = document.querySelectorAll('#questResultsPhase .admin-btn');
   btns.forEach(function(b) { if (b.textContent.indexOf('Download') > -1) b.style.display = 'none'; });
+  var popup = document.createElement('div');
+  popup.id = 'qcDownloadPopup';
+  popup.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;z-index:99999;font-family:monospace;';
+  popup.innerHTML = '<div style="background:#0a0a0a;border:1px solid #00ff41;border-radius:12px;padding:30px 40px;text-align:center;box-shadow:0 0 30px rgba(0,255,65,0.1);"><div style="font-size:16px;color:#00ff41;margin-bottom:10px;">⏳ Preparing your photo to download...</div><div style="font-size:13px;color:#889;">Please wait</div></div>';
+  document.body.appendChild(popup);
   var clone = cert.cloneNode(true);
   clone.style.width = '400px';
   clone.style.height = '500px';
@@ -4794,6 +4799,8 @@ function downloadCertificate() {
   document.body.appendChild(clone);
   html2canvas(clone, { scale: 3, useCORS: true, width: 400, height: 500, windowWidth: 400, windowHeight: 500 }).then(function(canvas) {
     document.body.removeChild(clone);
+    var p = document.getElementById('qcDownloadPopup');
+    if (p) document.body.removeChild(p);
     btns.forEach(function(b) { if (b.textContent.indexOf('Download') > -1) b.style.display = ''; });
     var link = document.createElement('a');
     var names = [];
@@ -4805,7 +4812,10 @@ function downloadCertificate() {
     link.click();
   }).catch(function() {
     if (clone.parentNode) document.body.removeChild(clone);
+    var p = document.getElementById('qcDownloadPopup');
+    if (p) document.body.removeChild(p);
     btns.forEach(function(b) { if (b.textContent.indexOf('Download') > -1) b.style.display = ''; });
+    msgFail('Download failed. Try again.');
   });
 }
 
