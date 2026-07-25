@@ -4655,17 +4655,50 @@ function showQuestQuestion() {
   document.getElementById('questQuestion').textContent = (_questIndex + 1) + '. ' + q.question;
   var opts = document.getElementById('questOptions');
   opts.innerHTML = '';
-  var indices = [0, 1, 2, 3];
-  shuffleArray(indices);
-  var displayedOptions = indices.map(function(i) { return q.options[i]; });
-  var correctText = q.options[q.correct];
-  displayedOptions.forEach(function(text) {
-    var btn = document.createElement('button');
-    btn.className = 'qo-btn';
-    btn.textContent = text;
-    btn.onclick = function() { answerQuest(text, correctText); };
-    opts.appendChild(btn);
-  });
+  if (typeof q.options === 'undefined') {
+    var wrapper = document.createElement('div');
+    wrapper.className = 'qo-num-wrapper';
+    var inp = document.createElement('input');
+    inp.type = 'number';
+    inp.className = 'qo-num-input';
+    inp.placeholder = 'Enter your answer...';
+    var submitBtn = document.createElement('button');
+    submitBtn.className = 'qo-num-submit';
+    submitBtn.textContent = 'Submit';
+    submitBtn.onclick = function() { answerNum(inp.value, q.correct); };
+    var skipBtn = document.createElement('button');
+    skipBtn.className = 'qo-num-skip';
+    skipBtn.textContent = 'Skip';
+    skipBtn.onclick = function() { answerNum(null, q.correct); };
+    wrapper.appendChild(inp);
+    wrapper.appendChild(submitBtn);
+    wrapper.appendChild(skipBtn);
+    opts.appendChild(wrapper);
+    inp.addEventListener('keydown', function(e) { if (e.key === 'Enter') { e.preventDefault(); submitBtn.click(); } });
+    inp.focus();
+  } else {
+    var indices = [0, 1, 2, 3];
+    shuffleArray(indices);
+    var displayedOptions = indices.map(function(i) { return q.options[i]; });
+    var correctText = q.options[q.correct];
+    displayedOptions.forEach(function(text) {
+      var btn = document.createElement('button');
+      btn.className = 'qo-btn';
+      btn.textContent = text;
+      btn.onclick = function() { answerQuest(text, correctText); };
+      opts.appendChild(btn);
+    });
+  }
+}
+
+function answerNum(value, correctNum) {
+  var selected = value === null || value === '' ? 'Skipped' : value;
+  var isCorrect = value !== null && value !== '' && Number(value) === correctNum;
+  if (isCorrect) _questScore++;
+  _questAnswers.push({ question: _questQuestions[_questIndex].question, correct: correctNum, userAnswer: selected, isCorrect: isCorrect, anime: _questQuestions[_questIndex].anime, difficulty: _questQuestions[_questIndex].difficulty });
+  document.querySelectorAll('#questOptions .qo-btn, #questOptions .qo-num-submit, #questOptions .qo-num-skip').forEach(function(b) { b.onclick = null; });
+  _questIndex++;
+  showQuestQuestion();
 }
 
 function answerQuest(selected, correct) {
