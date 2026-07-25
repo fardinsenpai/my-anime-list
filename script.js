@@ -4641,7 +4641,15 @@ function startQuest() {
   if (numericalPool.length > 0) {
     shuffleArray(numericalPool);
     shuffleArray(regularPool);
-    _questQuestions = [numericalPool[0]].concat(regularPool.slice(0, 9));
+    var regCount = Math.min(9, regularPool.length);
+    _questQuestions = regularPool.slice(0, regCount);
+    var insertAt = Math.min(5 + Math.floor(Math.random() * Math.min(4, _questQuestions.length - 5)), _questQuestions.length);
+    _questQuestions.splice(insertAt, 0, numericalPool[0]);
+    if (_questQuestions.length < 10) {
+      var remainder = pool.filter(function(q) { return _questQuestions.indexOf(q) === -1; });
+      shuffleArray(remainder);
+      _questQuestions = _questQuestions.concat(remainder.slice(0, 10 - _questQuestions.length));
+    }
   } else {
     shuffleArray(pool);
     _questQuestions = pool.slice(0, 10);
