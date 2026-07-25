@@ -4677,20 +4677,14 @@ function showQuestQuestion() {
     var inp = document.createElement('input');
     inp.type = 'number';
     inp.className = 'qo-num-input';
-    inp.placeholder = 'Enter your answer...';
-    var submitBtn = document.createElement('button');
-    submitBtn.className = 'qo-num-submit';
-    submitBtn.textContent = 'Submit';
-    submitBtn.onclick = function() { answerNum(inp.value, q.correct); };
     var skipBtn = document.createElement('button');
     skipBtn.className = 'qo-num-skip';
     skipBtn.textContent = 'Skip';
     skipBtn.onclick = function() { answerNum(null, q.correct); };
     wrapper.appendChild(inp);
-    wrapper.appendChild(submitBtn);
     wrapper.appendChild(skipBtn);
     opts.appendChild(wrapper);
-    inp.addEventListener('keydown', function(e) { if (e.key === 'Enter') { e.preventDefault(); submitBtn.click(); } });
+    inp.addEventListener('keydown', function(e) { if (e.key === 'Enter') { e.preventDefault(); answerNum(inp.value, q.correct); } });
     inp.focus();
   } else {
     var indices = [0, 1, 2, 3];
