@@ -4636,8 +4636,16 @@ function startQuest() {
     msgFail('Not enough ' + _questDifficulty + ' questions. Select more anime or change difficulty.');
     return;
   }
-  shuffleArray(pool);
-  _questQuestions = pool.slice(0, 10);
+  var numericalPool = pool.filter(function(q) { return typeof q.options === 'undefined'; });
+  var regularPool = pool.filter(function(q) { return typeof q.options !== 'undefined'; });
+  if (numericalPool.length > 0) {
+    shuffleArray(numericalPool);
+    shuffleArray(regularPool);
+    _questQuestions = [numericalPool[0]].concat(regularPool.slice(0, 9));
+  } else {
+    shuffleArray(pool);
+    _questQuestions = pool.slice(0, 10);
+  }
   shuffleArray(_questQuestions);
   _questIndex = 0;
   _questScore = 0;
