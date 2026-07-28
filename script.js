@@ -4823,18 +4823,36 @@ function downloadCertificate() {
   popup.innerHTML = '<div style="background:#0a0a0a;border:1px solid #00ff41;border-radius:12px;padding:30px 40px;text-align:center;box-shadow:0 0 30px rgba(0,255,65,0.1);"><div style="font-size:16px;color:#00ff41;margin-bottom:10px;">⏳ Preparing your photo to download...</div><div style="font-size:13px;color:#889;">Please wait</div></div>';
   document.body.appendChild(popup);
   var clone = cert.cloneNode(true);
-  clone.style.width = '400px';
-  clone.style.height = '500px';
-  clone.style.position = 'fixed';
-  clone.style.top = '-9999px';
-  clone.style.left = '-9999px';
-  clone.style.borderRadius = '0';
-  clone.style.overflow = 'visible';
-  clone.style.transition = 'none';
+  clone.style.cssText = 'width:400px;height:500px;position:fixed;top:-9999px;left:-9999px;border-radius:0;overflow:visible;transition:none;background:linear-gradient(135deg,#0a0a0a,#1a1a1a);';
+  clone.querySelectorAll('*').forEach(function(el) {
+    if (!el || !el.style) return;
+    el.style.cssText = '';
+    el.style.transition = 'none';
+    el.style.animation = 'none';
+    el.style.filter = 'none';
+    el.style.boxShadow = 'none';
+    el.style.textShadow = 'none';
+    el.style.webkitTextStroke = 'none';
+    el.style.transform = 'none';
+    el.style.backdropFilter = 'none';
+    el.style.background = '';
+  });
   var inner = clone.querySelector('.qc-inner');
-  if (inner) { inner.style.transition = 'none'; }
-  clone.querySelectorAll('.qc-rank, .qc-anime-name, .qc-site-title, .qc-corner').forEach(function(el) {
-    if (el) { el.style.filter = 'none'; el.style.boxShadow = 'none'; el.style.webkitTextStroke = 'none'; el.style.transform = 'none'; }
+  if (inner) { inner.style.cssText = 'position:absolute;top:0;left:0;right:0;bottom:0;overflow:hidden;background:none;border-radius:0;box-shadow:none;'; }
+  var bar = clone.querySelector('.qc-bottom-bar');
+  if (bar) { bar.style.cssText = 'position:absolute;left:0;right:0;bottom:0;height:58px;z-index:6;background:rgba(0,0,0,0.8);border-top:2px solid currentColor;display:flex;align-items:center;padding:0 14px;box-sizing:border-box;'; }
+  var photo = clone.querySelector('.qc-bg-photo');
+  if (photo) { photo.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;display:block;'; }
+  var rank = clone.querySelector('.qc-rank');
+  if (rank) { rank.style.cssText = 'font-size:32px;font-weight:700;line-height:1;letter-spacing:1px;color:var(--rank-color, #FFD700);'; }
+  var name = clone.querySelector('.qc-anime-name');
+  if (name) { name.style.cssText = 'font-size:15px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;word-break:break-word;line-height:1.2;'; }
+  var title = clone.querySelector('.qc-site-title');
+  if (title) { title.style.cssText = 'font-size:9px;line-height:1.15;letter-spacing:1px;font-weight:700;'; }
+  var logo = clone.querySelector('.qc-logo');
+  if (logo) { logo.style.cssText = 'display:block;width:42px;height:28px;object-fit:contain;'; }
+  clone.querySelectorAll('.qc-corner').forEach(function(el) {
+    if (el) { el.style.cssText = 'position:absolute;z-index:5;pointer-events:none;'; }
   });
   document.body.appendChild(clone);
   setTimeout(function() {
