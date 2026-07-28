@@ -4843,7 +4843,7 @@ function downloadCertificate() {
     if (el) { el.style.filter = 'none'; el.style.boxShadow = 'none'; el.style.webkitTextStroke = 'none'; el.style.transform = 'none'; }
   });
   var overlay = clone.querySelector('.qc-overlay');
-  if (overlay) { overlay.style.background = 'rgba(0,0,0,0.85)'; overlay.style.top = '-1px'; overlay.style.bottom = '-1px'; overlay.style.height = 'auto'; }
+  if (overlay) { overlay.style.background = ''; overlay.style.height = '72px'; overlay.style.top = ''; overlay.style.bottom = '0'; }
   document.body.appendChild(clone);
   setTimeout(function() {
     html2canvas(clone, { scale: 3, useCORS: true, width: 380, height: 480, windowWidth: 380, windowHeight: 480, backgroundColor: null, scrollX: 0, scrollY: 0 }).then(function(canvas) {
