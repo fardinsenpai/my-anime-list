@@ -5197,11 +5197,12 @@ body.perf-no-heading-anim .header h1::after { animation: none !important; }
 .qc-bottom-left .qc-logo { display: block; width: 120px; height: 120px; object-fit: contain; }
 .qc-bottom-right {
   flex: 0 0 auto; text-align: right;
+  margin-right: -8px;
 }
 .qc-bottom-center {
   flex: 1; text-align: center;
   overflow: hidden; padding: 0 6px;
-  margin-left: -20px;
+  margin-left: -28px;
 }
 .qc-anime-name {
   font-size: 14px; font-family: 'Cinzel Decorative', cursive;
