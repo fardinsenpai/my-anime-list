@@ -5150,8 +5150,8 @@ body.perf-no-heading-anim .header h1::after { animation: none !important; }
 }
 .qc-overlay {
   position: absolute; bottom: 0; left: 0; right: 0;
-  height: 60%;
-  background: linear-gradient(transparent 10%, rgba(0,0,0,0.88));
+  height: 72px;
+  background: rgba(0,0,0,0.85);
   pointer-events: none;
 }
 .qc-inner-border {
@@ -5186,38 +5186,48 @@ body.perf-no-heading-anim .header h1::after { animation: none !important; }
 .qc-title { display: none; }
 .qc-subtitle { display: none; }
 .qc-bottom {
-  position: absolute; left: 24px; right: 24px; bottom: 12px;
-  z-index: 3;
+  position: absolute; left: 12px; right: 12px; bottom: 0;
+  height: 72px; z-index: 4;
+  display: flex; align-items: center;
+  pointer-events: none;
 }
-.qc-bottom-left { position: absolute; left: -39px; bottom: -10px; }
-.qc-bottom-left .qc-logo { display: block; }
-.qc-bottom-right { position: absolute; right: 0; bottom: 0; text-align: right; }
+.qc-bottom-left {
+  flex: 0 0 auto; display: flex; align-items: center; gap: 6px;
+}
+.qc-bottom-left .qc-logo { display: block; width: 42px; height: 28px; object-fit: contain; }
+.qc-site-title {
+  display: inline-block;
+  font-family: 'Cinzel Decorative', serif;
+  font-size: 9px; line-height: 1.15;
+  color: var(--qc-color, #FFD700);
+  letter-spacing: 1px; font-weight: 700;
+  text-shadow: 0 0 8px currentColor;
+}
+.qc-bottom-right {
+  flex: 0 0 auto; text-align: right;
+}
 .qc-bottom-center {
-  position: absolute; left: 50%; bottom: 36px;
-  transform: translateX(-50%);
-  text-align: center;
-  max-width: 80%;
+  flex: 1; text-align: center;
+  overflow: hidden; padding: 0 6px;
 }
 .qc-anime-name {
-  font-size: 20px; font-family: 'Cinzel Decorative', cursive;
-  font-weight: 700; letter-spacing: 2px;
+  font-size: 14px; font-family: 'Cinzel Decorative', cursive;
+  font-weight: 700; letter-spacing: 1.5px;
   text-transform: uppercase;
   line-height: 1.2;
   filter: drop-shadow(0 0 10px currentColor) drop-shadow(0 0 20px currentColor);
-  -webkit-text-stroke: 1px rgba(0,0,0,0.4);
+  -webkit-text-stroke: 0.5px rgba(0,0,0,0.4);
   word-break: break-word;
 }
 .qc-rank {
-  font-size: 64px; font-weight: 700; line-height: 1;
+  font-size: 28px; font-weight: 700; line-height: 1;
   font-family: 'Bangers', 'Orbitron', sans-serif;
-  letter-spacing: 2px;
-  transform: rotate(-15deg);
+  letter-spacing: 1px;
   display: inline-block;
-  -webkit-text-stroke: 2px rgba(0,0,0,0.6);
+  -webkit-text-stroke: 1px rgba(0,0,0,0.6);
   text-shadow: 0 0 12px currentColor, 0 0 24px currentColor;
 }
-.qc-diff { margin-top: 4px; }
-.qc-diff .qc-diff-stars { font-size: 16px; letter-spacing: 2px; color: #facc15; filter: drop-shadow(0 0 6px rgba(250,204,21,0.3)); display:inline-block; }
+.qc-diff { display: none; }
 /* Rank themes */
 .qc-sss .qc-inner { border: 3px solid #FFD700; box-shadow: 0 0 30px rgba(255,215,0,0.15); }
 .qc-sss .qc-rank {
@@ -5263,7 +5273,13 @@ body.perf-no-heading-anim .header h1::after { animation: none !important; }
   .body-anime-quest { padding: 12px; }
   #questAnimeList { grid-template-columns:repeat(auto-fill,minmax(110px,1fr)) !important; gap:6px; }
   #questResultsPhase { overflow-x: auto; }
-  .qc-frame { width: 380px; height: 480px; }
+  .qc-frame { width: 340px; height: 440px; }
+  .qc-overlay { height: 62px; }
+  .qc-bottom { height: 62px; }
+  .qc-rank { font-size: 22px; }
+  .qc-anime-name { font-size: 12px; }
+  .qc-site-title { font-size: 8px; }
+  .qc-bottom-left .qc-logo { width: 32px; height: 22px; }
   .qd-pill { padding: 5px 10px; font-size: 11px; gap: 4px; }
   .qd-pill .qd-dot { width: 6px; height: 6px; }
   .qd-pill .qd-label { font-size: 11px; }

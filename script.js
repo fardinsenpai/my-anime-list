@@ -4753,10 +4753,6 @@ function showQuestResults() {
   cert.style.display = 'block';
   var rankLabels = { sss:'SSS', ss:'SS', s:'S', a:'A', b:'B', c:'C', f:'F' };
   document.getElementById('qcRank').textContent = rankLabels[rankKey] || '';
-  var diffStars = { easy:'★', normal:'★★', hard:'★★★', mixed:'★★★★★' };
-  var diffKey = _questDifficulty || 'mixed';
-  document.getElementById('qcDiff').innerHTML = '<span class="qc-diff-stars">' + (diffStars[diffKey] || '') + '</span>';
-  document.getElementById('qcDiff').style.display = '';
   // Anime name(s) in center
   var names = [];
   _questQuestions.forEach(function(q) {
@@ -4766,8 +4762,8 @@ function showQuestResults() {
   var singleName = names[0] || '';
   var animeText = names.length > 1 ? 'Combined<br>' + names.length + ' Anime' : (singleName.length > 14 ? wrapQuestName(singleName) : singleName);
   qcNameEl.innerHTML = animeText;
-  if (singleName.length > 20) qcNameEl.style.fontSize = '14px';
-  else if (singleName.length > 14) qcNameEl.style.fontSize = '16px';
+  if (singleName.length > 20) qcNameEl.style.fontSize = '12px';
+  else if (singleName.length > 14) qcNameEl.style.fontSize = '13px';
   else qcNameEl.style.fontSize = '';
   // Reset photo
   document.getElementById('qcUserPhoto').style.display = 'none';
@@ -4827,8 +4823,8 @@ function downloadCertificate() {
   popup.innerHTML = '<div style="background:#0a0a0a;border:1px solid #00ff41;border-radius:12px;padding:30px 40px;text-align:center;box-shadow:0 0 30px rgba(0,255,65,0.1);max-width:90vw;margin:0 auto;"><div style="font-size:16px;color:#00ff41;margin-bottom:10px;">⏳ Preparing your photo to download...</div><div style="font-size:13px;color:#889;">Please wait</div></div>';
   document.body.appendChild(popup);
   var clone = cert.cloneNode(true);
-  clone.style.width = '400px';
-  clone.style.height = '500px';
+  clone.style.width = '380px';
+  clone.style.height = '480px';
   clone.style.position = 'fixed';
   clone.style.top = '-9999px';
   clone.style.left = '-9999px';
@@ -4839,14 +4835,14 @@ function downloadCertificate() {
   if (inner) { inner.style.borderRadius = '0'; inner.style.overflow = 'visible'; inner.style.transition = 'none'; inner.style.boxShadow = 'none'; inner.style.border = 'none'; }
   var innerBorder = clone.querySelector('.qc-inner-border');
   if (innerBorder) innerBorder.style.display = 'none';
-  clone.querySelectorAll('.qc-rank, .qc-anime-name, .qc-diff-stars, .qc-logo').forEach(function(el) {
+  clone.querySelectorAll('.qc-rank, .qc-anime-name, .qc-site-title, .qc-logo').forEach(function(el) {
     if (el) { el.style.filter = 'none'; el.style.boxShadow = 'none'; el.style.webkitTextStroke = 'none'; el.style.transform = 'none'; }
   });
   var overlay = clone.querySelector('.qc-overlay');
-  if (overlay) { overlay.style.background = 'linear-gradient(rgba(0,0,0,0.02) 0%, rgba(0,0,0,0.85) 100%)'; overlay.style.top = '-1px'; overlay.style.bottom = '-1px'; overlay.style.height = 'auto'; }
+  if (overlay) { overlay.style.background = 'rgba(0,0,0,0.85)'; overlay.style.top = '-1px'; overlay.style.bottom = '-1px'; overlay.style.height = 'auto'; }
   document.body.appendChild(clone);
   setTimeout(function() {
-    html2canvas(clone, { scale: 3, useCORS: true, width: 400, height: 500, windowWidth: 400, windowHeight: 500, backgroundColor: null, scrollX: 0, scrollY: 0 }).then(function(canvas) {
+    html2canvas(clone, { scale: 3, useCORS: true, width: 380, height: 480, windowWidth: 380, windowHeight: 480, backgroundColor: null, scrollX: 0, scrollY: 0 }).then(function(canvas) {
     document.body.removeChild(clone);
     var p = document.getElementById('qcDownloadPopup');
     if (p) document.body.removeChild(p);
