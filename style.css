@@ -5150,7 +5150,8 @@ body.perf-no-heading-anim .header h1::after { animation: none !important; }
 }
 .qc-overlay {
   position: absolute; bottom: 0; left: 0; right: 0;
-  height: 72px;
+  height: 60%;
+  background: linear-gradient(transparent 10%, rgba(0,0,0,0.88));
   pointer-events: none;
 }
 .qc-inner-border {
@@ -5185,49 +5186,40 @@ body.perf-no-heading-anim .header h1::after { animation: none !important; }
 .qc-title { display: none; }
 .qc-subtitle { display: none; }
 .qc-bottom {
-  position: absolute; left: 12px; right: 12px; bottom: 0;
-  height: 72px; z-index: 4;
-  display: flex; align-items: center;
-  pointer-events: none;
+  position: absolute; left: 24px; right: 24px; bottom: 12px;
+  z-index: 3;
 }
-.qc-bottom-left {
-  flex: 0 0 auto; display: flex; align-items: center; gap: 6px;
-  margin-left: -8px;
-}
-.qc-bottom-left .qc-logo { display: block; max-height: 52px; max-width: 80px; width: auto; height: auto; object-fit: contain; }
-.qc-bottom-right {
-  flex: 0 0 auto; text-align: center;
-  margin-right: -4px;
-  display: flex; flex-direction: column; align-items: center; gap: 2px;
-}
-.qc-rank-wrap { display: block; }
-.qc-diff-wrap { display: block; margin-top: 5px; }
+.qc-bottom-left { position: absolute; left: -39px; bottom: -10px; }
+.qc-bottom-left .qc-logo { display: block; }
+.qc-bottom-right { position: absolute; right: 0; bottom: 0; text-align: right; }
 .qc-bottom-center {
-  flex: 1; text-align: center;  overflow: hidden; padding: 0 6px;
-  margin-left: -28px;
+  position: absolute; left: 50%; bottom: 36px;
+  transform: translateX(-50%);
+  text-align: center;
+  max-width: 80%;
 }
 .qc-anime-name {
-  font-size: 14px; font-family: 'Cinzel Decorative', cursive;
-  font-weight: 700; letter-spacing: 1.5px;
+  font-size: 20px; font-family: 'Cinzel Decorative', cursive;
+  font-weight: 700; letter-spacing: 2px;
   text-transform: uppercase;
   line-height: 1.2;
   filter: drop-shadow(0 0 10px currentColor) drop-shadow(0 0 20px currentColor);
-  -webkit-text-stroke: 0.5px rgba(0,0,0,0.4);
+  -webkit-text-stroke: 1px rgba(0,0,0,0.4);
   word-break: break-word;
 }
 .qc-rank {
-  font-size: 40px; font-weight: 700; line-height: 1;
+  font-size: 64px; font-weight: 700; line-height: 1;
   font-family: 'Bangers', 'Orbitron', sans-serif;
-  letter-spacing: 1px;
+  letter-spacing: 2px;
+  transform: rotate(-15deg);
   display: inline-block;
-  -webkit-text-stroke: 1px rgba(0,0,0,0.6);
+  -webkit-text-stroke: 2px rgba(0,0,0,0.6);
   text-shadow: 0 0 12px currentColor, 0 0 24px currentColor;
 }
-.qc-diff { margin:0 0 2px; }
-.qc-diff .qc-diff-stars { font-size: 14px; letter-spacing: 2px; color: #facc15; filter: drop-shadow(0 0 6px rgba(250,204,21,0.3)); display:inline-block; }
+.qc-diff { margin-top: 4px; }
+.qc-diff .qc-diff-stars { font-size: 16px; letter-spacing: 2px; color: #facc15; filter: drop-shadow(0 0 6px rgba(250,204,21,0.3)); display:inline-block; }
 /* Rank themes */
 .qc-sss .qc-inner { border: 3px solid #FFD700; box-shadow: 0 0 30px rgba(255,215,0,0.15); }
-.qc-sss .qc-overlay { background: #FFD700; }
 .qc-sss .qc-rank {
   color: #FFD700;
   text-shadow: 0 0 10px rgba(255,215,0,0.6), 0 0 20px rgba(255,215,0,0.3);
@@ -5237,37 +5229,31 @@ body.perf-no-heading-anim .header h1::after { animation: none !important; }
 .qc-sss .qc-anime-name { color: #FFD700; }
 
 .qc-ss .qc-inner { border: 3px solid #C0C0C0; box-shadow: 0 0 20px rgba(192,192,192,0.1); }
-.qc-ss .qc-overlay { background: #C0C0C0; }
 .qc-ss .qc-rank { color: #E8E8E8; -webkit-text-stroke: 2px rgba(0,0,0,0.5); }
 .qc-ss .qc-diff { color: #C0C0C0; }
 .qc-ss .qc-anime-name { color: #E8E8E8; }
 
 .qc-s .qc-inner { border: 3px solid #FF4444; box-shadow: 0 0 20px rgba(255,68,68,0.1); }
-.qc-s .qc-overlay { background: #FF4444; }
 .qc-s .qc-rank { color: #FF4444; -webkit-text-stroke: 2px rgba(0,0,0,0.5); }
 .qc-s .qc-diff { color: #FF4444; }
 .qc-s .qc-anime-name { color: #FF4444; }
 
 .qc-a .qc-inner { border: 3px solid #44FF44; box-shadow: 0 0 20px rgba(68,255,68,0.08); }
-.qc-a .qc-overlay { background: #44FF44; }
 .qc-a .qc-rank { color: #44FF44; -webkit-text-stroke: 2px rgba(0,0,0,0.5); }
 .qc-a .qc-diff { color: #44FF44; }
 .qc-a .qc-anime-name { color: #44FF44; }
 
 .qc-b .qc-inner { border: 3px solid #00CED1; box-shadow: 0 0 20px rgba(0,206,209,0.08); }
-.qc-b .qc-overlay { background: #00CED1; }
 .qc-b .qc-rank { color: #00CED1; -webkit-text-stroke: 2px rgba(0,0,0,0.5); }
 .qc-b .qc-diff { color: #00CED1; }
 .qc-b .qc-anime-name { color: #00CED1; }
 
 .qc-c .qc-inner { border: 3px solid #888; box-shadow: 0 0 20px rgba(136,136,136,0.06); }
-.qc-c .qc-overlay { background: #888; }
 .qc-c .qc-rank { color: #ccc; -webkit-text-stroke: 2px rgba(0,0,0,0.5); }
 .qc-c .qc-diff { color: #aaa; }
 .qc-c .qc-anime-name { color: #ccc; }
 
 .qc-f .qc-inner { border: 3px solid #8B0000; box-shadow: 0 0 15px rgba(139,0,0,0.1); }
-.qc-f .qc-overlay { background: #8B0000; }
 .qc-f .qc-rank { color: #ff6666; -webkit-text-stroke: 2px rgba(0,0,0,0.5); }
 .qc-f .qc-diff { color: #ff6666; }
 .qc-f .qc-anime-name { color: #ff6666; }
@@ -5277,13 +5263,7 @@ body.perf-no-heading-anim .header h1::after { animation: none !important; }
   .body-anime-quest { padding: 12px; }
   #questAnimeList { grid-template-columns:repeat(auto-fill,minmax(110px,1fr)) !important; gap:6px; }
   #questResultsPhase { overflow-x: auto; }
-  .qc-frame { width: 340px; height: 440px; }
-  .qc-overlay { height: 62px; }
-  .qc-bottom { height: 62px; }
-  .qc-rank { font-size: 32px; }
-  .qc-anime-name { font-size: 12px; }
-  .qc-bottom-left .qc-logo { width: 120px; height: 120px; }
-  .qc-diff .qc-diff-stars { font-size: 11px; }
+  .qc-frame { width: 380px; height: 480px; }
   .qd-pill { padding: 5px 10px; font-size: 11px; gap: 4px; }
   .qd-pill .qd-dot { width: 6px; height: 6px; }
   .qd-pill .qd-label { font-size: 11px; }
