@@ -5139,11 +5139,11 @@ body.perf-no-heading-anim .header h1::after { animation: none !important; }
   --glow-color: rgba(255,215,0,0.4);
   --corner-deco: '⚜️';
   --corner-color: #FFD700;
-  --bar-bg: rgba(0,0,0,0.85);
+  --bar-bg: rgba(0,0,0,0.75);
 }
 .qc-inner {
-  position: absolute; top: 18px; left: 18px; right: 18px; bottom: 64px;
-  overflow: hidden; border-radius: 8px;
+  position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+  overflow: hidden;
   background: #000;
   box-shadow: inset 0 0 0 2px var(--rank-color), 0 0 20px var(--glow-color);
 }
@@ -5190,6 +5190,7 @@ body.perf-no-heading-anim .header h1::after { animation: none !important; }
   position: absolute; left: 0; right: 0; bottom: 0;
   height: 58px; z-index: 6;
   background: var(--bar-bg);
+  backdrop-filter: blur(4px);
   border-top: 2px solid var(--rank-color);
   box-shadow: 0 -4px 16px var(--glow-color);
   display: flex; align-items: center;
