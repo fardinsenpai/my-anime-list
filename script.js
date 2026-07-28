@@ -4753,6 +4753,10 @@ function showQuestResults() {
   cert.style.display = 'block';
   var rankLabels = { sss:'SSS', ss:'SS', s:'S', a:'A', b:'B', c:'C', f:'F' };
   document.getElementById('qcRank').textContent = rankLabels[rankKey] || '';
+  var diffStars = { easy:'★', normal:'★★', hard:'★★★', mixed:'★★★★★' };
+  var diffKey = _questDifficulty || 'mixed';
+  document.getElementById('qcDiff').innerHTML = '<span class="qc-diff-stars">' + (diffStars[diffKey] || '') + '</span>';
+  document.getElementById('qcDiff').style.display = '';
   // Anime name(s) in center
   var names = [];
   _questQuestions.forEach(function(q) {
@@ -4835,7 +4839,7 @@ function downloadCertificate() {
   if (inner) { inner.style.borderRadius = '0'; inner.style.overflow = 'visible'; inner.style.transition = 'none'; inner.style.boxShadow = 'none'; inner.style.border = 'none'; }
   var innerBorder = clone.querySelector('.qc-inner-border');
   if (innerBorder) innerBorder.style.display = 'none';
-  clone.querySelectorAll('.qc-rank, .qc-anime-name, .qc-site-title, .qc-logo').forEach(function(el) {
+  clone.querySelectorAll('.qc-rank, .qc-anime-name, .qc-diff-stars, .qc-logo').forEach(function(el) {
     if (el) { el.style.filter = 'none'; el.style.boxShadow = 'none'; el.style.webkitTextStroke = 'none'; el.style.transform = 'none'; }
   });
   var overlay = clone.querySelector('.qc-overlay');

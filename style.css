@@ -5194,15 +5194,7 @@ body.perf-no-heading-anim .header h1::after { animation: none !important; }
 .qc-bottom-left {
   flex: 0 0 auto; display: flex; align-items: center; gap: 6px;
 }
-.qc-bottom-left .qc-logo { display: block; width: 42px; height: 28px; object-fit: contain; }
-.qc-site-title {
-  display: inline-block;
-  font-family: 'Cinzel Decorative', serif;
-  font-size: 9px; line-height: 1.15;
-  color: var(--qc-color, #FFD700);
-  letter-spacing: 1px; font-weight: 700;
-  text-shadow: 0 0 8px currentColor;
-}
+.qc-bottom-left .qc-logo { display: block; width: 56px; height: 38px; object-fit: contain; }
 .qc-bottom-right {
   flex: 0 0 auto; text-align: right;
 }
@@ -5227,7 +5219,8 @@ body.perf-no-heading-anim .header h1::after { animation: none !important; }
   -webkit-text-stroke: 1px rgba(0,0,0,0.6);
   text-shadow: 0 0 12px currentColor, 0 0 24px currentColor;
 }
-.qc-diff { display: none; }
+.qc-diff { margin:0 0 2px; }
+.qc-diff .qc-diff-stars { font-size: 14px; letter-spacing: 2px; color: #facc15; filter: drop-shadow(0 0 6px rgba(250,204,21,0.3)); display:inline-block; }
 /* Rank themes */
 .qc-sss .qc-inner { border: 3px solid #FFD700; box-shadow: 0 0 30px rgba(255,215,0,0.15); }
 .qc-sss .qc-rank {
@@ -5278,8 +5271,8 @@ body.perf-no-heading-anim .header h1::after { animation: none !important; }
   .qc-bottom { height: 62px; }
   .qc-rank { font-size: 22px; }
   .qc-anime-name { font-size: 12px; }
-  .qc-site-title { font-size: 8px; }
-  .qc-bottom-left .qc-logo { width: 32px; height: 22px; }
+  .qc-bottom-left .qc-logo { width: 40px; height: 28px; }
+  .qc-diff .qc-diff-stars { font-size: 11px; }
   .qd-pill { padding: 5px 10px; font-size: 11px; gap: 4px; }
   .qd-pill .qd-dot { width: 6px; height: 6px; }
   .qd-pill .qd-label { font-size: 11px; }
