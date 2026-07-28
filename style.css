@@ -5193,7 +5193,7 @@ body.perf-no-heading-anim .header h1::after { animation: none !important; }
 .qc-bottom-left {
   flex: 0 0 auto; display: flex; align-items: center; gap: 6px;
 }
-.qc-bottom-left .qc-logo { display: block; width: 80px; height: 54px; object-fit: contain; }
+.qc-bottom-left .qc-logo { display: block; width: 120px; height: 120px; object-fit: contain; }
 .qc-bottom-right {
   flex: 0 0 auto; text-align: right;
 }
@@ -5277,7 +5277,7 @@ body.perf-no-heading-anim .header h1::after { animation: none !important; }
   .qc-bottom { height: 62px; }
   .qc-rank { font-size: 22px; }
   .qc-anime-name { font-size: 12px; }
-  .qc-bottom-left .qc-logo { width: 56px; height: 38px; }
+  .qc-bottom-left .qc-logo { width: 120px; height: 120px; }
   .qc-diff .qc-diff-stars { font-size: 11px; }
   .qd-pill { padding: 5px 10px; font-size: 11px; gap: 4px; }
   .qd-pill .qd-dot { width: 6px; height: 6px; }
