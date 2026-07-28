@@ -5201,7 +5201,7 @@ body.perf-no-heading-anim .header h1::after { animation: none !important; }
   display: flex; flex-direction: column; align-items: center; gap: 2px;
 }
 .qc-rank-wrap { display: block; }
-.qc-diff-wrap { display: block; margin-top: 4px; }
+.qc-diff-wrap { display: block; margin-top: 5px; }
 .qc-bottom-center {
   flex: 1; text-align: center;
   overflow: hidden; padding: 0 6px;
@@ -5217,7 +5217,7 @@ body.perf-no-heading-anim .header h1::after { animation: none !important; }
   word-break: break-word;
 }
 .qc-rank {
-  font-size: 28px; font-weight: 700; line-height: 1;
+  font-size: 40px; font-weight: 700; line-height: 1;
   font-family: 'Bangers', 'Orbitron', sans-serif;
   letter-spacing: 1px;
   display: inline-block;
@@ -5281,7 +5281,7 @@ body.perf-no-heading-anim .header h1::after { animation: none !important; }
   .qc-frame { width: 340px; height: 440px; }
   .qc-overlay { height: 62px; }
   .qc-bottom { height: 62px; }
-  .qc-rank { font-size: 22px; }
+  .qc-rank { font-size: 32px; }
   .qc-anime-name { font-size: 12px; }
   .qc-bottom-left .qc-logo { width: 120px; height: 120px; }
   .qc-diff .qc-diff-stars { font-size: 11px; }
