@@ -5194,7 +5194,7 @@ body.perf-no-heading-anim .header h1::after { animation: none !important; }
 }
 .qc-anime-name {
   font-size: 20px; font-family: 'Cinzel Decorative', cursive;
-  font-weight: 700; letter-spacing: 2px;
+  font-weight: 900; letter-spacing: 2px;
   text-transform: uppercase;
   line-height: 1.2;
   filter: drop-shadow(0 0 10px currentColor) drop-shadow(0 0 20px currentColor);
