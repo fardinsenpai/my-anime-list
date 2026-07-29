@@ -4742,7 +4742,7 @@ function showQuestResults() {
   var elapsed = Math.round((Date.now() - _questStartTime) / 1000);
   var mins = Math.floor(elapsed / 60);
   var secs = elapsed % 60;
-  document.getElementById('questTime').textContent = '⏱ ' + mins + 'm ' + (secs < 10 ? '0' : '') + secs + 's';
+  document.getElementById('questTime').textContent = 'Taken Time ⏱ ' + mins + 'm ' + (secs < 10 ? '0' : '') + secs + 's';
   var s = _questScore;
   if (s === 10) gradeEl.textContent = 'SSS Rank Watcher 👑';
   else if (s === 9) gradeEl.textContent = 'SS Rank Watcher';
