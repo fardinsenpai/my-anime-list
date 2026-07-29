@@ -5210,7 +5210,7 @@ body.perf-no-heading-anim .header h1::after { animation: none !important; }
   text-shadow: 0 0 12px currentColor, 0 0 24px currentColor;
 }
 .qc-diff { margin-top: 4px; }
-.qc-diff .qc-diff-stars { font-size: 16px; letter-spacing: 2px; color: #facc15; filter: drop-shadow(0 0 6px rgba(250,204,21,0.3)); display:inline-block; }
+.qc-diff .qc-diff-stars { font-size: 16px; letter-spacing: 2px; color: #facc15; filter: drop-shadow(0 0 8px rgba(250,204,21,0.6)) drop-shadow(0 0 16px rgba(250,204,21,0.3)); display:inline-block; text-shadow: 0 0 10px rgba(250,204,21,0.5); }
 /* Rank themes */
 .qc-sss .qc-inner { border: 5px solid #FFD700; box-shadow: 0 0 30px rgba(255,215,0,0.15); }
 .qc-sss .qc-rank {
