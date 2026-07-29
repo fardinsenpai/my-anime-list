@@ -4528,6 +4528,7 @@ var _questQuestions = [];
 var _questIndex = 0;
 var _questScore = 0;
 var _questAnswers = [];
+var _questStartTime = 0;
 var _questDifficulty = 'mixed';
 var QUEST_DIFFICULTIES = ['easy','normal','hard','mixed'];
 
@@ -4658,6 +4659,7 @@ function startQuest() {
   _questIndex = 0;
   _questScore = 0;
   _questAnswers = [];
+  _questStartTime = Date.now();
   document.getElementById('questSelectPhase').style.display = 'none';
   document.getElementById('questQuizPhase').style.display = 'block';
   document.getElementById('questResultsPhase').style.display = 'none';
@@ -4737,6 +4739,10 @@ function showQuestResults() {
   var pct = Math.round((_questScore / _questQuestions.length) * 100);
   document.getElementById('questScore').textContent = _questScore + ' / ' + _questQuestions.length + ' (' + pct + '%)';
   var gradeEl = document.getElementById('questGrade');
+  var elapsed = Math.round((Date.now() - _questStartTime) / 1000);
+  var mins = Math.floor(elapsed / 60);
+  var secs = elapsed % 60;
+  document.getElementById('questTime').textContent = '⏱ ' + mins + 'm ' + (secs < 10 ? '0' : '') + secs + 's';
   var s = _questScore;
   if (s === 10) gradeEl.textContent = 'SSS Rank Watcher 👑';
   else if (s === 9) gradeEl.textContent = 'SS Rank Watcher';
@@ -4879,6 +4885,7 @@ function resetQuest() {
   _questIndex = 0;
   _questScore = 0;
   _questAnswers = [];
+  _questStartTime = 0;
   document.getElementById('questSelectPhase').style.display = 'block';
   document.getElementById('questQuizPhase').style.display = 'none';
   document.getElementById('questResultsPhase').style.display = 'none';
