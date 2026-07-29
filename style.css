@@ -5207,6 +5207,12 @@ body.perf-no-heading-anim .header h1::after { animation: none !important; }
   text-shadow: 0 0 4px #000, 0 0 8px #000, 0 0 12px #000, 0 0 20px #000, 0 0 30px #000;
   word-break: break-word;
 }
+.qc-time {
+  font-size: 11px; font-family: 'Orbitron', monospace;
+  color: rgba(255,255,255,0.5); margin-top: 4px;
+  letter-spacing: 1px;
+  text-shadow: 0 0 4px #000, 0 0 8px #000;
+}
 .qc-rank {
   font-size: 64px; font-weight: 700; line-height: 1;
   font-family: 'Bangers', 'Orbitron', sans-serif;

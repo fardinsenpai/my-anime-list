@@ -4743,6 +4743,7 @@ function showQuestResults() {
   var mins = Math.floor(elapsed / 60);
   var secs = elapsed % 60;
   document.getElementById('questTime').textContent = 'Taken Time ⏱ ' + mins + 'm ' + (secs < 10 ? '0' : '') + secs + 's';
+  document.getElementById('qcTime').textContent = '⏱ ' + mins + 'm ' + (secs < 10 ? '0' : '') + secs + 's';
   var s = _questScore;
   if (s === 10) gradeEl.textContent = 'SSS Rank Watcher 👑';
   else if (s === 9) gradeEl.textContent = 'SS Rank Watcher';
@@ -4892,6 +4893,7 @@ function resetQuest() {
   document.getElementById('questCertificate').style.display = 'none';
   document.getElementById('qcAnimeName').textContent = '';
   document.getElementById('qcAnimeName').style.fontSize = '';
+  document.getElementById('qcTime').textContent = '';
   document.getElementById('questSelectedCount').textContent = 'Selected: ' + _questSelected.length;
   document.getElementById('questStartBtn').style.display = _questSelected.length > 0 ? 'inline-block' : 'none';
 }
