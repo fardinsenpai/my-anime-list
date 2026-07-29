@@ -4851,7 +4851,7 @@ function downloadCertificate() {
   });
   document.body.appendChild(clone);
   setTimeout(function() {
-    html2canvas(clone, { scale: 3, useCORS: true, width: 380, height: 480, windowWidth: 380, windowHeight: 480, backgroundColor: null, scrollX: 0, scrollY: 0 }).then(function(canvas) {
+    html2canvas(clone, { scale: 2, useCORS: true, width: 380, height: 480, windowWidth: 380, windowHeight: 480, backgroundColor: null, scrollX: 0, scrollY: 0 }).then(function(canvas) {
     document.body.removeChild(clone);
     var p = document.getElementById('qcDownloadPopup');
     if (p) document.body.removeChild(p);
