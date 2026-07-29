@@ -5151,7 +5151,7 @@ body.perf-no-heading-anim .header h1::after { animation: none !important; }
 .qc-overlay {
   position: absolute; bottom: 0; left: 0; right: 0;
   height: 60%;
-  background: linear-gradient(transparent 10%, rgba(0,0,0,0.88));
+  background: linear-gradient(transparent 10%, rgba(0,0,0,0.25));
   pointer-events: none;
 }
 .qc-inner-border {
