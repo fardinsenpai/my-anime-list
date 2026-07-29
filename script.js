@@ -4836,7 +4836,7 @@ function downloadCertificate() {
   clone.style.overflow = 'visible';
   clone.style.transition = 'none';
   var inner = clone.querySelector('.qc-inner');
-  if (inner) { inner.style.borderRadius = '0'; inner.style.overflow = 'visible'; inner.style.transition = 'none'; inner.style.boxShadow = 'none'; }
+  if (inner) { inner.style.overflow = 'visible'; inner.style.transition = 'none'; inner.style.boxShadow = 'none'; }
   var innerBorder = clone.querySelector('.qc-inner-border');
   if (innerBorder) innerBorder.style.display = 'none';
   clone.querySelectorAll('.qc-rank, .qc-anime-name, .qc-diff-stars, .qc-logo').forEach(function(el) {
