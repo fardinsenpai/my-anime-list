@@ -4827,8 +4827,8 @@ function downloadCertificate() {
   popup.innerHTML = '<div style="background:#0a0a0a;border:1px solid #00ff41;border-radius:12px;padding:30px 40px;text-align:center;box-shadow:0 0 30px rgba(0,255,65,0.1);"><div style="font-size:16px;color:#00ff41;margin-bottom:10px;">⏳ Preparing your photo to download...</div><div style="font-size:13px;color:#889;">Please wait</div></div>';
   document.body.appendChild(popup);
   var clone = cert.cloneNode(true);
-  clone.style.width = '400px';
-  clone.style.height = '500px';
+  clone.style.width = '380px';
+  clone.style.height = '480px';
   clone.style.position = 'fixed';
   clone.style.top = '-9999px';
   clone.style.left = '-9999px';
@@ -4842,11 +4842,9 @@ function downloadCertificate() {
   clone.querySelectorAll('.qc-rank, .qc-anime-name, .qc-diff-stars, .qc-logo').forEach(function(el) {
     if (el) { el.style.filter = 'none'; el.style.boxShadow = 'none'; el.style.webkitTextStroke = 'none'; el.style.transform = 'none'; }
   });
-  var overlay = clone.querySelector('.qc-overlay');
-  if (overlay) { overlay.style.background = 'linear-gradient(rgba(0,0,0,0.02) 0%, rgba(0,0,0,0.85) 100%)'; overlay.style.top = '-1px'; overlay.style.bottom = '-1px'; overlay.style.height = 'auto'; }
   document.body.appendChild(clone);
   setTimeout(function() {
-    html2canvas(clone, { scale: 3, useCORS: true, width: 400, height: 500, windowWidth: 400, windowHeight: 500, backgroundColor: null, scrollX: 0, scrollY: 0 }).then(function(canvas) {
+    html2canvas(clone, { scale: 3, useCORS: true, width: 380, height: 480, windowWidth: 380, windowHeight: 480, backgroundColor: null, scrollX: 0, scrollY: 0 }).then(function(canvas) {
     document.body.removeChild(clone);
     var p = document.getElementById('qcDownloadPopup');
     if (p) document.body.removeChild(p);
