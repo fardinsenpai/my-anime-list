@@ -5041,9 +5041,9 @@ body.perf-no-heading-anim .header h1::after { animation: none !important; }
 #questOptions .qo-btn {
   display:block; width:100%; padding:10px 14px;
   text-align:left; cursor:pointer;
-  border:1px solid rgba(0,255,65,0.1);
-  border-radius:6px; background:rgba(0,255,65,0.03);
-  color:rgba(0,255,65,0.75);
+  border:1px solid rgba(0,255,65,0.2);
+  border-radius:6px; background:rgba(0,255,65,0.06);
+  color:rgba(0,255,65,0.9);
   font-family:monospace; font-size:13px;
   transition:all 0.15s; user-select:none;
 }
@@ -5066,8 +5066,8 @@ body.perf-no-heading-anim .header h1::after { animation: none !important; }
   cursor:default; opacity:0.5;
 }
 #questOptions .qo-btn.disabled:hover {
-  background:rgba(0,255,65,0.03); border-color:rgba(0,255,65,0.1);
-  color:rgba(0,255,65,0.5);
+  background:rgba(0,255,65,0.06); border-color:rgba(0,255,65,0.2);
+  color:rgba(0,255,65,0.7);
 }
 #questOptions .qo-btn.reveal-correct {
   background:rgba(0,255,65,0.1);
