@@ -4819,6 +4819,11 @@ function setupCertDrop() {
 function downloadCertificate() {
   var cert = document.getElementById('questCertificate');
   if (!cert || !html2canvas) return;
+  var photoImg = document.getElementById('qcUserPhoto');
+  if (!photoImg || !photoImg.src || photoImg.style.display === 'none' || photoImg.src === window.location.href || photoImg.src === '') {
+    msgFail('Please upload a photo first before downloading the certificate.');
+    return;
+  }
   var btns = document.querySelectorAll('#questResultsPhase .admin-btn');
   btns.forEach(function(b) { if (b.textContent.indexOf('Download') > -1) b.style.display = 'none'; });
   var popup = document.createElement('div');
