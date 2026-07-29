@@ -4840,7 +4840,7 @@ function downloadCertificate() {
   var innerBorder = clone.querySelector('.qc-inner-border');
   if (innerBorder) innerBorder.style.display = 'none';
   clone.querySelectorAll('.qc-rank, .qc-anime-name, .qc-diff-stars, .qc-logo').forEach(function(el) {
-    if (el) { el.style.filter = 'none'; el.style.boxShadow = 'none'; el.style.webkitTextStroke = 'none'; el.style.transform = 'none'; }
+    if (el) { el.style.filter = 'none'; el.style.boxShadow = 'none'; el.style.webkitTextStroke = 'none'; }
   });
   document.body.appendChild(clone);
   setTimeout(function() {
