@@ -5128,6 +5128,13 @@ body.perf-no-heading-anim .header h1::after { animation: none !important; }
 #questReview .qr-item .qr-a { color:#00ff41; }
 #questReview .qr-item .qr-w { color:#ff4444; }
 
+.quest-time {
+  font-size: 14px; color: #facc15; margin-bottom: 4px;
+  font-family: 'Orbitron', monospace;
+  text-shadow: 0 0 8px rgba(250,204,21,0.3);
+  letter-spacing: 1px;
+}
+
 /* === Certificate Templates === */
 .qc-frame {
   width: 380px; height: 480px; margin: 0 auto 8px; position: relative;
