@@ -3115,41 +3115,6 @@ document.addEventListener('click', function(e) {
   }
 });
 
-// === Easter Eggs ===
-// Konami Code
-(function() {
-  var keys = [];
-  var konami = [38,38,40,40,37,39,37,39,66,65];
-  document.addEventListener('keydown', function(e) {
-    keys.push(e.keyCode);
-    if (keys.length > konami.length) keys.shift();
-    if (keys.length === konami.length && keys.every(function(k,i) { return k === konami[i]; })) {
-      triggerKonami();
-    }
-  });
-})();
-
-function triggerKonami() {
-  // Confetti burst
-  var colors = ['#00ff41','#FFD700','#FF69B4','#00E5FF','#facc15','#ff4444'];
-  for (var i = 0; i < 80; i++) {
-    var el = document.createElement('div');
-    el.style.cssText = 'position:fixed;width:' + (4+Math.random()*8) + 'px;height:' + (4+Math.random()*8) + 'px;background:' + colors[Math.floor(Math.random()*colors.length)] + ';border-radius:2px;z-index:100000;pointer-events:none;top:-10px;left:' + (Math.random()*100) + 'vw;';
-    document.body.appendChild(el);
-    var dur = 2000 + Math.random() * 2000;
-    var start = Date.now();
-    (function animate() {
-      var t = (Date.now() - start) / dur;
-      if (t >= 1) { if (el.parentNode) el.parentNode.removeChild(el); return; }
-      el.style.top = (t * 100) + 'vh';
-      el.style.left = (parseFloat(el.style.left) + Math.sin(t * 20) * 0.3) + 'vw';
-      el.style.transform = 'rotate(' + (t * 720) + 'deg)';
-      el.style.opacity = 1 - t;
-      requestAnimationFrame(animate);
-    })();
-  }
-  msgOk('🎮 Konami Code activated!');
-}
       })(replyDelBtns[rd]);
     }
 
@@ -5021,4 +4986,37 @@ function renderCursorOptions() {
 
 function backToQuestSelect() {
   resetQuest();
+}
+
+// === Easter Eggs ===
+(function() {
+  var keys = [];
+  var konami = [38,38,40,40,37,39,37,39,66,65];
+  document.addEventListener('keydown', function(e) {
+    keys.push(e.keyCode);
+    if (keys.length > konami.length) keys.shift();
+    if (keys.length === konami.length && keys.every(function(k,i) { return k === konami[i]; })) {
+      triggerKonami();
+    }
+  });
+})();
+function triggerKonami() {
+  var colors = ['#00ff41','#FFD700','#FF69B4','#00E5FF','#facc15','#ff4444'];
+  for (var i = 0; i < 80; i++) {
+    var el = document.createElement('div');
+    el.style.cssText = 'position:fixed;width:' + (4+Math.random()*8) + 'px;height:' + (4+Math.random()*8) + 'px;background:' + colors[Math.floor(Math.random()*colors.length)] + ';border-radius:2px;z-index:100000;pointer-events:none;top:-10px;left:' + (Math.random()*100) + 'vw;';
+    document.body.appendChild(el);
+    var dur = 2000 + Math.random() * 2000;
+    var start = Date.now();
+    (function animate() {
+      var t = (Date.now() - start) / dur;
+      if (t >= 1) { if (el.parentNode) el.parentNode.removeChild(el); return; }
+      el.style.top = (t * 100) + 'vh';
+      el.style.left = (parseFloat(el.style.left) + Math.sin(t * 20) * 0.3) + 'vw';
+      el.style.transform = 'rotate(' + (t * 720) + 'deg)';
+      el.style.opacity = 1 - t;
+      requestAnimationFrame(animate);
+    })();
+  }
+  msgOk('🎮 Konami Code activated!');
 }
