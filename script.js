@@ -4902,6 +4902,38 @@ function resetQuest() {
   document.getElementById('questStartBtn').style.display = _questSelected.length > 0 ? 'inline-block' : 'none';
 }
 
+// === Anime Cursor ===
+(function initAnimeCursor() {
+  var body = document.body;
+  body.style.cursor = 'none';
+  var ring = document.createElement('div');
+  ring.className = 'anime-cursor';
+  var dot = document.createElement('div');
+  dot.className = 'anime-cursor-dot';
+  body.appendChild(ring);
+  body.appendChild(dot);
+  var mx = 0, my = 0;
+  document.addEventListener('mousemove', function(e) {
+    mx = e.clientX; my = e.clientY;
+    dot.style.left = mx + 'px';
+    dot.style.top = my + 'px';
+    ring.style.left = mx + 'px';
+    ring.style.top = my + 'px';
+  });
+  document.querySelectorAll('a, button, .admin-btn, .quest-anime-card, .qo-btn, .qd-pill, input, textarea, select').forEach(function(el) {
+    el.addEventListener('mouseenter', function() {
+      ring.style.width = '36px'; ring.style.height = '36px';
+      ring.style.borderColor = '#facc15';
+      ring.style.borderWidth = '3px';
+    });
+    el.addEventListener('mouseleave', function() {
+      ring.style.width = '24px'; ring.style.height = '24px';
+      ring.style.borderColor = '#00ff41';
+      ring.style.borderWidth = '2px';
+    });
+  });
+})();
+
 function backToQuestSelect() {
   resetQuest();
 }
