@@ -5077,6 +5077,18 @@ body.perf-no-heading-anim .header h1::after { animation: none !important; }
 #questOptions .qo-num-wrapper {
   display:flex; gap:8px; align-items:center; flex-wrap:wrap;
 }
+.qo-surprise {
+  text-align: center; font-size: 18px; font-weight: 700;
+  color: #facc15; margin-bottom: 10px;
+  font-family: 'Orbitron', monospace; letter-spacing: 3px;
+  text-shadow: 0 0 10px rgba(250,204,21,0.5), 0 0 20px rgba(250,204,21,0.3);
+  animation: surprisePop 0.6s ease-out;
+}
+@keyframes surprisePop {
+  0% { transform: scale(0.3); opacity: 0; }
+  50% { transform: scale(1.15); }
+  100% { transform: scale(1); opacity: 1; }
+}
 #questOptions .qo-num-input {
   flex:1; min-width:120px; padding:10px 14px;
   border:1px solid rgba(0,255,65,0.2);

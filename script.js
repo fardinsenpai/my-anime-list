@@ -4674,6 +4674,10 @@ function showQuestQuestion() {
   var opts = document.getElementById('questOptions');
   opts.innerHTML = '';
   if (typeof q.options === 'undefined') {
+    var surprise = document.createElement('div');
+    surprise.className = 'qo-surprise';
+    surprise.textContent = '✨ SURPRISE! ✨';
+    opts.appendChild(surprise);
     var wrapper = document.createElement('div');
     wrapper.className = 'qo-num-wrapper';
     var inp = document.createElement('input');
