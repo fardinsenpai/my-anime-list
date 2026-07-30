@@ -4903,36 +4903,85 @@ function resetQuest() {
 }
 
 // === Anime Cursor ===
+var _cursorStyle = localStorage.getItem('animeCursor') || 'neon';
+var _cursorRing = null, _cursorDot = null;
+
+var CURSOR_STYLES = {
+  neon: { ring:'2px solid #00ff41', dotBg:'#00ff41', dotShadow:'0 0 8px #00ff41, 0 0 16px #00ff41', ringSize:24, mixBlend:'difference' },
+  gold: { ring:'2px solid #FFD700', dotBg:'#FFD700', dotShadow:'0 0 8px #FFD700, 0 0 16px #FFD700', ringSize:24, mixBlend:'difference' },
+  pink: { ring:'2px solid #FF69B4', dotBg:'#FF69B4', dotShadow:'0 0 8px #FF69B4, 0 0 16px #FF69B4', ringSize:24, mixBlend:'difference' },
+  cyan: { ring:'2px solid #00E5FF', dotBg:'#00E5FF', dotShadow:'0 0 8px #00E5FF, 0 0 16px #00E5FF', ringSize:24, mixBlend:'difference' },
+  crosshair: { ring:'none', dotBg:'#00ff41', dotShadow:'0 0 6px #00ff41', ringSize:0, mixBlend:'normal' },
+  none: { ring:'none', dotBg:'transparent', dotShadow:'none', ringSize:0, mixBlend:'normal' },
+};
+
+function applyCursorStyle(style) {
+  _cursorStyle = style;
+  localStorage.setItem('animeCursor', style);
+  var s = CURSOR_STYLES[style] || CURSOR_STYLES.neon;
+  if (style === 'none') {
+    document.body.style.cursor = 'auto';
+    if (_cursorRing) _cursorRing.style.display = 'none';
+    if (_cursorDot) _cursorDot.style.display = 'none';
+    return;
+  }
+  document.body.style.cursor = 'none';
+  if (_cursorRing) { _cursorRing.style.display = ''; _cursorRing.style.border = s.ring; _cursorRing.style.width = s.ringSize + 'px'; _cursorRing.style.height = s.ringSize + 'px'; _cursorRing.style.mixBlendMode = s.mixBlend; }
+  if (_cursorDot) { _cursorDot.style.display = ''; _cursorDot.style.background = s.dotBg; _cursorDot.style.boxShadow = s.dotShadow; }
+}
+
 (function initAnimeCursor() {
-  var body = document.body;
-  body.style.cursor = 'none';
-  var ring = document.createElement('div');
-  ring.className = 'anime-cursor';
-  var dot = document.createElement('div');
-  dot.className = 'anime-cursor-dot';
-  body.appendChild(ring);
-  body.appendChild(dot);
-  var mx = 0, my = 0;
+  _cursorRing = document.createElement('div');
+  _cursorRing.className = 'anime-cursor';
+  _cursorDot = document.createElement('div');
+  _cursorDot.className = 'anime-cursor-dot';
+  document.body.appendChild(_cursorRing);
+  document.body.appendChild(_cursorDot);
+  applyCursorStyle(_cursorStyle);
   document.addEventListener('mousemove', function(e) {
-    mx = e.clientX; my = e.clientY;
-    dot.style.left = mx + 'px';
-    dot.style.top = my + 'px';
-    ring.style.left = mx + 'px';
-    ring.style.top = my + 'px';
+    _cursorDot.style.left = e.clientX + 'px';
+    _cursorDot.style.top = e.clientY + 'px';
+    _cursorRing.style.left = e.clientX + 'px';
+    _cursorRing.style.top = e.clientY + 'px';
   });
   document.querySelectorAll('a, button, .admin-btn, .quest-anime-card, .qo-btn, .qd-pill, input, textarea, select').forEach(function(el) {
     el.addEventListener('mouseenter', function() {
-      ring.style.width = '36px'; ring.style.height = '36px';
-      ring.style.borderColor = '#facc15';
-      ring.style.borderWidth = '3px';
+      if (_cursorStyle === 'none') return;
+      _cursorRing.style.width = '36px'; _cursorRing.style.height = '36px';
+      _cursorRing.style.borderColor = '#facc15'; _cursorRing.style.borderWidth = '3px';
     });
     el.addEventListener('mouseleave', function() {
-      ring.style.width = '24px'; ring.style.height = '24px';
-      ring.style.borderColor = '#00ff41';
-      ring.style.borderWidth = '2px';
+      if (_cursorStyle === 'none') return;
+      var s = CURSOR_STYLES[_cursorStyle] || CURSOR_STYLES.neon;
+      _cursorRing.style.width = s.ringSize + 'px'; _cursorRing.style.height = s.ringSize + 'px';
+      _cursorRing.style.border = s.ring;
     });
   });
+  // Cursor panel
+  document.getElementById('cursorMenuBtn').addEventListener('click', function() {
+    document.getElementById('cursorPanel').style.display = 'flex';
+    renderCursorOptions();
+  });
 })();
+
+function renderCursorOptions() {
+  var container = document.getElementById('cursorOptions');
+  container.innerHTML = '';
+  var labels = { neon:'Neon Green', gold:'Royal Gold', pink:'Sakura Pink', cyan:'Cyber Cyan', crosshair:'Crosshair', none:'None (Default)' };
+  Object.keys(CURSOR_STYLES).forEach(function(key) {
+    var btn = document.createElement('button');
+    btn.className = 'admin-btn' + (key === _cursorStyle ? ' active' : '');
+    var col = CURSOR_STYLES[key].dotBg;
+    if (key === 'none') col = '#666';
+    btn.innerHTML = '<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:' + col + ';margin-right:8px;box-shadow:0 0 6px ' + col + ';"></span>' + (labels[key] || key);
+    btn.style.cssText = 'display:flex;align-items:center;justify-content:center;' + (key === _cursorStyle ? 'border-color:#facc15;color:#facc15;' : '');
+    btn.onclick = function() {
+      applyCursorStyle(key);
+      renderCursorOptions();
+    };
+    container.appendChild(btn);
+  });
+}
 
 function backToQuestSelect() {
   resetQuest();
