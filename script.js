@@ -4903,7 +4903,7 @@ function resetQuest() {
 }
 
 // === Anime Cursor ===
-var _cursorStyle = localStorage.getItem('animeCursor') || 'neon';
+var _cursorStyle = localStorage.getItem('animeCursor') || 'none';
 var _cursorRing = null, _cursorDot = null;
 
 var CURSOR_STYLES = {
