@@ -1976,6 +1976,13 @@ if (canvas) {
 }
 
 // ── Back to Top Button ──
+function isScrollButtonSection() {
+  var p = window.location.pathname;
+  if (p.endsWith('/home') || p === '/' || p === '' || p.endsWith('/index.html') || p.endsWith('/my-anime-list')) return true;
+  if (p.endsWith('/anime-duel')) return true;
+  if (p.endsWith('/waifus')) return true;
+  return false;
+}
 (function () {
   const btn = document.createElement('button');
   btn.id = 'backToTop';
@@ -1984,6 +1991,7 @@ if (canvas) {
   document.body.appendChild(btn);
 
   window.addEventListener('scroll', () => {
+    if (!isScrollButtonSection()) { btn.classList.remove('visible'); return; }
 if (window.scrollY > document.body.scrollHeight / 3) {
   
   btn.classList.add('visible');
@@ -5003,6 +5011,7 @@ function backToQuestSelect() {
     lastY = y; lastT = t;
     var maxScroll = document.documentElement.scrollHeight - window.innerHeight;
     var nearBottom = y > maxScroll - 80;
+    if (!isScrollButtonSection()) { btn.style.display = 'none'; return; }
     if (delta > 0 && speed > 1.5 && !nearBottom) {
       btn.style.display = 'inline-block';
       clearTimeout(hideTimer);
