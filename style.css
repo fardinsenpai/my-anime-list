@@ -5280,19 +5280,27 @@ body.perf-no-heading-anim .header h1::after { animation: none !important; }
 #fastScrollBtn {
   position: fixed; bottom: 105px; left: 28px;
   z-index: 9999; display: none;
-  padding: 12px 18px; border-radius: 30px;
-  background: rgba(0,255,65,0.15);
-  border: 2px solid #00ff41;
-  color: #00ff41; font-family: 'Orbitron', monospace;
-  font-size: 13px; letter-spacing: 1px; cursor: pointer;
-  box-shadow: 0 0 20px rgba(0,255,65,0.2);
+  padding: 13px 20px; border-radius: 30px;
+  border: 2px solid transparent;
+  color: #fff; font-family: 'Orbitron', monospace;
+  font-size: 13px; font-weight: 700; letter-spacing: 2px; cursor: pointer;
+  background: linear-gradient(135deg, #ff6b9d, #a855f7, #00E5FF, #ff6b9d);
+  background-size: 300% 300%;
+  animation: fsbGrad 3s ease infinite;
+  box-shadow: 0 0 20px rgba(168,85,247,0.5), 0 4px 15px rgba(0,0,0,0.4);
   backdrop-filter: blur(4px);
-  animation: fsbIn 0.3s ease-out;
 }
-#fastScrollBtn:hover { background: rgba(0,255,65,0.3); box-shadow: 0 0 30px rgba(0,255,65,0.4); }
-@keyframes fsbIn {
-  from { opacity: 0; transform: translateY(20px) scale(0.8); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
+#fastScrollBtn::before {
+  content: '⏬'; margin-right: 6px; font-size: 15px;
+}
+@keyframes fsbGrad {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+#fastScrollBtn:hover {
+  transform: scale(1.08);
+  box-shadow: 0 0 30px rgba(168,85,247,0.8), 0 0 60px rgba(78,205,196,0.4);
 }
 @media (max-width: 500px) {
   #fastScrollBtn { bottom: 95px; left: 20px; padding: 10px 14px; font-size: 12px; }
