@@ -4999,10 +4999,11 @@ function backToQuestSelect() {
     var y = window.scrollY || document.documentElement.scrollTop;
     var t = Date.now();
     var speed = Math.abs(y - lastY) / Math.max(t - lastT, 1);
+    var delta = y - lastY;
     lastY = y; lastT = t;
     var maxScroll = document.documentElement.scrollHeight - window.innerHeight;
     var nearBottom = y > maxScroll - 80;
-    if (speed > 1.5 && !nearBottom) {
+    if (delta > 0 && speed > 1.5 && !nearBottom) {
       btn.style.display = 'inline-block';
       clearTimeout(hideTimer);
       hideTimer = setTimeout(function() { btn.style.display = 'none'; }, 4000);
