@@ -3900,7 +3900,7 @@ function checkAdminPin() {
 
 // === GUI ADMIN ===
 var _selectedOtt = [], _selectedStudio = [], _selectedGenre = [];
-var _watchId = 0, _readId = 0, _editId = 0;
+var _watchId = 0, _readId = 0, _editId = 0, _awardId = 0;
 
 function getUniqueOtt(all) {
   var freq = {};
@@ -4026,26 +4026,86 @@ function loadAwardsForm() {
   });
 }
 
-function addAwardRow() {
-  var input = document.getElementById('newAwardYear');
-  var year = (input.value || '').trim();
-  if (!year) { msgFail('Enter a year first'); return; }
+function searchAwardAnime(q) {
+  var container = document.getElementById('adminAwardResults');
+  if (!container) return;
+  container.innerHTML = '';
+  if (!q || q.length < 1) return;
+  q = q.toLowerCase();
+  var found = 0;
+  document.querySelectorAll('#grid .card').forEach(function(c) {
+    var t = c.querySelector('.title');
+    var n = c.querySelector('.number');
+    if (!t || !n) return;
+    if (!t.textContent.toLowerCase().includes(q)) return;
+    if (found >= 18) return;
+    found++;
+    var img = c.querySelector('.poster-wrap img');
+    var id = parseInt(n.textContent.replace(/\D/g, ''));
+    var div = document.createElement('div');
+    div.style.cssText = 'display:flex;align-items:center;gap:4px;padding:3px;border-radius:3px;background:rgba(0,255,65,0.02);border:1px solid rgba(0,255,65,0.06);cursor:pointer;transition:all 0.15s;font-family:monospace;';
+    div.onmouseover = function() { this.style.background = 'rgba(0,255,65,0.06)'; this.style.borderColor = 'rgba(0,255,65,0.15)'; };
+    div.onmouseout = function() { this.style.background = 'rgba(0,255,65,0.02)'; this.style.borderColor = 'rgba(0,255,65,0.06)'; };
+    div.innerHTML = (img ? '<img src="' + img.src + '" style="width:24px;height:34px;object-fit:cover;border-radius:2px;flex-shrink:0;">' : '') + '<span style="font-size:9px;color:rgba(0,255,65,0.5);">#' + id + '</span><span style="font-size:9px;color:rgba(0,255,65,0.7);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + t.textContent + '</span>';
+    div.setAttribute('data-id', id);
+    div.onclick = function() { selectAwardAnime(parseInt(this.getAttribute('data-id'))); };
+    container.appendChild(div);
+  });
+}
+
+function selectAwardAnime(id) {
+  _awardId = id;
+  document.querySelectorAll('#adminAwardResults > div').forEach(function(d) {
+    d.style.borderColor = 'rgba(0,255,65,0.06)';
+    d.style.background = 'rgba(0,255,65,0.02)';
+    if (parseInt(d.getAttribute('data-id')) === id) {
+      d.style.borderColor = '#00ff41';
+      d.style.background = 'rgba(0,255,65,0.1)';
+    }
+  });
+  document.querySelectorAll('#grid .card').forEach(function(c) {
+    var numEl = c.querySelector('.number');
+    var nid = numEl ? parseInt(numEl.textContent.replace(/\D/g, '')) : 0;
+    if (nid === id) {
+      var title = c.querySelector('.title');
+      var img = c.querySelector('.poster-wrap img');
+      var preview = document.getElementById('adminAwardPreview');
+      var previewImg = document.getElementById('adminAwardPreviewImg');
+      var previewTitle = document.getElementById('adminAwardPreviewTitle');
+      var previewId = document.getElementById('adminAwardPreviewId');
+      if (preview) preview.style.display = 'block';
+      if (previewImg && img) previewImg.src = img.src;
+      if (previewTitle && title) previewTitle.textContent = title.textContent;
+      if (previewId) previewId.textContent = '#' + id;
+    }
+  });
+}
+
+function addAwardFromSelection() {
+  var year = (document.getElementById('adminAwardYear').value || '').trim();
+  if (!_awardId) { msgFail('Select an anime first'); return; }
+  if (!year) { msgFail('Enter a year'); return; }
   var form = document.getElementById('adminAwardsForm');
   var existing = form.querySelectorAll('.admin-g-group .admin-g-group-label');
   var dup = false;
   [].forEach.call(existing, function(l) { if (l.textContent === year) dup = true; });
-  if (dup) { msgFail('Year already exists'); return; }
+  if (dup) { msgFail('Year ' + year + ' already exists in list'); return; }
+  var title = document.getElementById('adminAwardPreviewTitle').textContent || '';
   var div = document.createElement('div');
   div.className = 'admin-g-group';
   div.innerHTML = '<div class="admin-g-group-label">' + year + '</div>' +
     '<div style="display:flex;gap:6px;align-items:center;">' +
-    '<input type="number" class="admin-g-id-input" data-year="' + year + '" value="" placeholder="ID" style="width:50px;">' +
-    '<input type="text" class="admin-g-title-input" data-year="' + year + '" value="" placeholder="Title" style="flex:1;">' +
+    '<input type="number" class="admin-g-id-input" value="' + _awardId + '" placeholder="ID" style="width:50px;">' +
+    '<input type="text" class="admin-g-title-input" value="' + title.replace(/"/g,'&quot;') + '" placeholder="Title" style="flex:1;">' +
     '<button class="admin-g-btn" onclick="this.closest(\'.admin-g-group\').remove()" style="flex-shrink:0;padding:6px 8px;">✕</button>' +
     '</div>';
   form.appendChild(div);
-  input.value = '';
-  msgOk('Year added. Fill ID + Title.');
+  document.getElementById('adminAwardYear').value = '';
+  document.getElementById('adminAwardSearch').value = '';
+  document.getElementById('adminAwardResults').innerHTML = '';
+  document.getElementById('adminAwardPreview').style.display = 'none';
+  _awardId = 0;
+  msgOk('Award added to list. Commit when done.');
 }
 
 function renderPills(type, filter) {

@@ -1502,11 +1502,22 @@
       <!-- TAB: Award Winners -->
       <div class="admin-g-content" id="tabAwards">
         <div style="font-size:10px;color:rgba(0,255,65,0.7);font-family:monospace;margin-bottom:6px;">// EDIT AWARD WINNERS //</div>
-        <div id="adminAwardsForm" style="max-height:260px;overflow-y:auto;padding-right:4px;"></div>
-        <div style="display:flex;gap:6px;align-items:center;margin:8px 0;">
-          <input type="text" id="newAwardYear" placeholder="New Year (e.g. 2021)" style="flex:1;background:#0a0a0a;border:1px solid rgba(0,255,65,0.3);color:#00ff41;font-family:monospace;font-size:11px;padding:8px;border-radius:4px;outline:none;">
-          <button class="admin-g-btn" onclick="addAwardRow()" style="flex-shrink:0;">+ ADD YEAR</button>
+        <input type="text" id="adminAwardSearch" class="admin-g-input" placeholder="1. Search anime..." oninput="searchAwardAnime(this.value)">
+        <div id="adminAwardResults" style="display:grid;grid-template-columns:repeat(2,1fr);gap:3px;max-height:120px;overflow-y:auto;margin-bottom:6px;padding:2px;"></div>
+        <div id="adminAwardPreview" style="display:none;margin-bottom:6px;">
+          <div style="display:flex;align-items:center;gap:8px;padding:6px;background:rgba(0,255,65,0.03);border:1px solid rgba(0,255,65,0.1);border-radius:4px;">
+            <img id="adminAwardPreviewImg" src="" style="width:36px;height:50px;object-fit:cover;border-radius:3px;">
+            <div style="flex:1;">
+              <div id="adminAwardPreviewTitle" style="font-size:11px;color:#00ff41;font-family:monospace;"></div>
+              <div id="adminAwardPreviewId" style="font-size:9px;color:rgba(0,255,65,0.4);font-family:monospace;"></div>
+            </div>
+          </div>
         </div>
+        <div style="display:flex;gap:6px;align-items:center;margin-bottom:8px;">
+          <input type="text" id="adminAwardYear" class="admin-g-input" placeholder="2. Year (e.g. 2021)" style="flex:1;">
+          <button class="admin-g-btn" onclick="addAwardFromSelection()" style="flex-shrink:0;">+ ADD</button>
+        </div>
+        <div id="adminAwardsForm" style="max-height:220px;overflow-y:auto;padding-right:4px;"></div>
         <button class="admin-g-btn" onclick="commitAwardWinners()">▶ COMMIT AWARDS</button>
       </div>
 
