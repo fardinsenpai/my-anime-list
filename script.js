@@ -4987,3 +4987,30 @@ function renderCursorOptions() {
 function backToQuestSelect() {
   resetQuest();
 }
+
+// === Fast Scroll Float Button ===
+(function() {
+  var btn = document.getElementById('fastScrollBtn');
+  if (!btn) return;
+  var lastY = window.scrollY || document.documentElement.scrollTop;
+  var lastT = Date.now();
+  var hideTimer = null;
+  window.addEventListener('scroll', function() {
+    var y = window.scrollY || document.documentElement.scrollTop;
+    var t = Date.now();
+    var speed = Math.abs(y - lastY) / Math.max(t - lastT, 1);
+    lastY = y; lastT = t;
+    var maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+    var nearBottom = y > maxScroll - 80;
+    if (speed > 1.5 && !nearBottom) {
+      btn.style.display = 'inline-block';
+      clearTimeout(hideTimer);
+      hideTimer = setTimeout(function() { btn.style.display = 'none'; }, 4000);
+    }
+    if (nearBottom) btn.style.display = 'none';
+  });
+})();
+function fastScrollToBottom() {
+  window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' });
+  setTimeout(function() { document.getElementById('fastScrollBtn').style.display = 'none'; }, 100);
+}

@@ -5276,6 +5276,27 @@ body.perf-no-heading-anim .header h1::after { animation: none !important; }
 .qc-f .qc-diff { color: #ff6666; }
 .qc-f .qc-anime-name { color: #ff6666; }
 
+/* === Fast Scroll Float Button === */
+#fastScrollBtn {
+  position: fixed; bottom: 24px; right: 24px;
+  z-index: 9999; display: none;
+  padding: 12px 18px; border-radius: 30px;
+  background: rgba(0,255,65,0.15);
+  border: 2px solid #00ff41;
+  color: #00ff41; font-family: 'Orbitron', monospace;
+  font-size: 13px; letter-spacing: 1px; cursor: pointer;
+  box-shadow: 0 0 20px rgba(0,255,65,0.2);
+  backdrop-filter: blur(4px);
+  animation: fsbIn 0.3s ease-out;
+}
+#fastScrollBtn:hover { background: rgba(0,255,65,0.3); box-shadow: 0 0 30px rgba(0,255,65,0.4); }
+@keyframes fsbIn {
+  from { opacity: 0; transform: translateY(20px) scale(0.8); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+@media (max-width: 500px) {
+  #fastScrollBtn { bottom: 16px; right: 16px; padding: 10px 14px; font-size: 12px; }
+}
 /* === Anime Cursor === */
 .anime-cursor {
   width: 24px; height: 24px;
