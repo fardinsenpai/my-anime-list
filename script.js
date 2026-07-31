@@ -4026,6 +4026,28 @@ function loadAwardsForm() {
   });
 }
 
+function addAwardRow() {
+  var input = document.getElementById('newAwardYear');
+  var year = (input.value || '').trim();
+  if (!year) { msgFail('Enter a year first'); return; }
+  var form = document.getElementById('adminAwardsForm');
+  var existing = form.querySelectorAll('.admin-g-group .admin-g-group-label');
+  var dup = false;
+  [].forEach.call(existing, function(l) { if (l.textContent === year) dup = true; });
+  if (dup) { msgFail('Year already exists'); return; }
+  var div = document.createElement('div');
+  div.className = 'admin-g-group';
+  div.innerHTML = '<div class="admin-g-group-label">' + year + '</div>' +
+    '<div style="display:flex;gap:6px;align-items:center;">' +
+    '<input type="number" class="admin-g-id-input" data-year="' + year + '" value="" placeholder="ID" style="width:50px;">' +
+    '<input type="text" class="admin-g-title-input" data-year="' + year + '" value="" placeholder="Title" style="flex:1;">' +
+    '<button class="admin-g-btn" onclick="this.closest(\'.admin-g-group\').remove()" style="flex-shrink:0;padding:6px 8px;">✕</button>' +
+    '</div>';
+  form.appendChild(div);
+  input.value = '';
+  msgOk('Year added. Fill ID + Title.');
+}
+
 function renderPills(type, filter) {
   var list = document.getElementById('admin' + type.charAt(0).toUpperCase() + type.slice(1) + 'List');
   if (!list) return;

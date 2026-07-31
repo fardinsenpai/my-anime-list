@@ -1503,6 +1503,10 @@
       <div class="admin-g-content" id="tabAwards">
         <div style="font-size:10px;color:rgba(0,255,65,0.7);font-family:monospace;margin-bottom:6px;">// EDIT AWARD WINNERS //</div>
         <div id="adminAwardsForm" style="max-height:260px;overflow-y:auto;padding-right:4px;"></div>
+        <div style="display:flex;gap:6px;align-items:center;margin:8px 0;">
+          <input type="text" id="newAwardYear" placeholder="New Year (e.g. 2021)" style="flex:1;background:#0a0a0a;border:1px solid rgba(0,255,65,0.3);color:#00ff41;font-family:monospace;font-size:11px;padding:8px;border-radius:4px;outline:none;">
+          <button class="admin-g-btn" onclick="addAwardRow()" style="flex-shrink:0;">+ ADD YEAR</button>
+        </div>
         <button class="admin-g-btn" onclick="commitAwardWinners()">▶ COMMIT AWARDS</button>
       </div>
 
