@@ -5278,7 +5278,7 @@ body.perf-no-heading-anim .header h1::after { animation: none !important; }
 
 /* === Fast Scroll Float Button === */
 #fastScrollBtn {
-  position: fixed; bottom: 24px; right: 24px;
+  position: fixed; bottom: 28px; left: 28px;
   z-index: 9999; display: none;
   padding: 12px 18px; border-radius: 30px;
   background: rgba(0,255,65,0.15);
@@ -5295,7 +5295,7 @@ body.perf-no-heading-anim .header h1::after { animation: none !important; }
   to { opacity: 1; transform: translateY(0) scale(1); }
 }
 @media (max-width: 500px) {
-  #fastScrollBtn { bottom: 16px; right: 16px; padding: 10px 14px; font-size: 12px; }
+  #fastScrollBtn { bottom: 20px; left: 20px; padding: 10px 14px; font-size: 12px; }
 }
 /* === Anime Cursor === */
 .anime-cursor {
