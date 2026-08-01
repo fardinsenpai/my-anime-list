@@ -4920,6 +4920,23 @@ body.perf-no-heading-anim .header h1::after { animation: none !important; }
   margin-bottom: 3px; font-family: monospace;
   letter-spacing: 0.5px;
 }
+.admin-g-stat-row {
+  padding: 8px; margin-bottom: 6px;
+  background: rgba(0,255,65,0.03);
+  border: 1px solid rgba(0,255,65,0.12);
+  border-radius: 4px;
+}
+.admin-g-stat-label {
+  font-size: 11px; font-weight: 700; color: #00ff41;
+  font-family: monospace; margin-bottom: 2px;
+}
+.admin-g-stat-current {
+  font-size: 10px; color: rgba(0,255,65,0.6);
+  font-family: monospace; margin-bottom: 4px;
+}
+.admin-g-stat-current b {
+  color: #facc15;
+}
 .admin-g-id-row {
   display: flex; gap: 4px; align-items: center;
 }

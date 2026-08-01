@@ -3988,9 +3988,12 @@ function initAdminGui() {
   var dateInput = document.getElementById('adminDateInput');
   if (dateInput) dateInput.value = today;
   var ac = document.getElementById('animeCount'), sc = document.getElementById('seasonCount'), ec = document.getElementById('episodeCount');
-  if (document.getElementById('adminStatsAnime')) document.getElementById('adminStatsAnime').value = ac ? ac.textContent : '';
-  if (document.getElementById('adminStatsSeasons')) document.getElementById('adminStatsSeasons').value = sc ? sc.textContent : '';
-  if (document.getElementById('adminStatsEps')) document.getElementById('adminStatsEps').value = ec ? ec.textContent : '';
+  if (document.getElementById('adminStatsAnimeCur')) document.getElementById('adminStatsAnimeCur').textContent = ac ? ac.textContent : '0';
+  if (document.getElementById('adminStatsSeasonsCur')) document.getElementById('adminStatsSeasonsCur').textContent = sc ? sc.textContent : '0';
+  if (document.getElementById('adminStatsEpsCur')) document.getElementById('adminStatsEpsCur').textContent = ec ? ec.textContent : '0';
+  if (document.getElementById('adminStatsAnime')) document.getElementById('adminStatsAnime').value = '';
+  if (document.getElementById('adminStatsSeasons')) document.getElementById('adminStatsSeasons').value = '';
+  if (document.getElementById('adminStatsEps')) document.getElementById('adminStatsEps').value = '';
   switchAdminTab('watch');
 }
 
@@ -4503,17 +4506,38 @@ async function commitStats() {
   var anime = document.getElementById('adminStatsAnime').value.trim();
   var seasons = document.getElementById('adminStatsSeasons').value.trim();
   var eps = document.getElementById('adminStatsEps').value.trim();
-  if (!anime && !seasons && !eps) { msgFail('Enter at least one value'); return; }
+  if (!anime && !seasons && !eps) { msgFail('Enter at least one increase'); return; }
   showLoading();
   var scriptData = await githubFetch('script.js');
   if (!scriptData) { hideLoading(); msgFail('Fetch failed'); return; }
   var content = decodeURIComponent(escape(atob(scriptData.content)));
-  if (anime) content = content.replace(/counterUp\("animeCount",\s*\d+/, 'counterUp("animeCount", ' + anime);
-  if (seasons) content = content.replace(/counterUp\("seasonCount",\s*\d+/, 'counterUp("seasonCount", ' + seasons);
-  if (eps) content = content.replace(/counterUp\("episodeCount",\s*\d+/, 'counterUp("episodeCount", ' + eps);
-  var ok = await githubCommit('script.js', content, 'admin: update counter stats');
+  var newAnime = null, newSeasons = null, newEps = null;
+  if (anime) {
+    var cur = parseInt(document.getElementById('adminStatsAnimeCur').textContent) || 0;
+    newAnime = cur + parseInt(anime);
+    content = content.replace(/counterUp\("animeCount",\s*\d+/, 'counterUp("animeCount", ' + newAnime);
+  }
+  if (seasons) {
+    var curS = parseInt(document.getElementById('adminStatsSeasonsCur').textContent) || 0;
+    newSeasons = curS + parseInt(seasons);
+    content = content.replace(/counterUp\("seasonCount",\s*\d+/, 'counterUp("seasonCount", ' + newSeasons);
+  }
+  if (eps) {
+    var curE = parseInt(document.getElementById('adminStatsEpsCur').textContent) || 0;
+    newEps = curE + parseInt(eps);
+    content = content.replace(/counterUp\("episodeCount",\s*\d+/, 'counterUp("episodeCount", ' + newEps);
+  }
+  var ok = await githubCommit('script.js', content, 'admin: increase counter stats');
   hideLoading();
-  if (ok) { msgOk('Stats updated'); if (anime) document.getElementById('animeCount').textContent = anime; if (seasons) document.getElementById('seasonCount').textContent = seasons; if (eps) document.getElementById('episodeCount').textContent = eps; }
+  if (ok) {
+    msgOk('Stats increased');
+    if (newAnime !== null) document.getElementById('animeCount').textContent = newAnime;
+    if (newSeasons !== null) document.getElementById('seasonCount').textContent = newSeasons;
+    if (newEps !== null) document.getElementById('episodeCount').textContent = newEps;
+    document.getElementById('adminStatsAnime').value = '';
+    document.getElementById('adminStatsSeasons').value = '';
+    document.getElementById('adminStatsEps').value = '';
+  }
   else msgFail('Commit failed');
 }
 

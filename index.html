@@ -1557,11 +1557,23 @@
 
       <!-- TAB: Stats -->
       <div class="admin-g-content" id="tabStats">
-        <div style="font-size:10px;color:rgba(0,255,65,0.7);font-family:monospace;margin-bottom:6px;">// EDIT COUNTER VALUES //</div>
-        <input type="number" id="adminStatsAnime" class="admin-g-input" placeholder="Total Anime">
-        <input type="number" id="adminStatsSeasons" class="admin-g-input" placeholder="Total Seasons">
-        <input type="number" id="adminStatsEps" class="admin-g-input" placeholder="Total Episodes">
-        <button class="admin-g-btn" onclick="commitStats()">▶ COMMIT STATS</button>
+        <div style="font-size:10px;color:rgba(0,255,65,0.7);font-family:monospace;margin-bottom:6px;">// INCREASE COUNTER VALUES //</div>
+        <div class="admin-g-stat-row">
+          <div class="admin-g-stat-label">📺 Anime Count</div>
+          <div class="admin-g-stat-current">Current: <b id="adminStatsAnimeCur">0</b></div>
+          <input type="number" id="adminStatsAnime" class="admin-g-input" placeholder="Increase by (optional)">
+        </div>
+        <div class="admin-g-stat-row">
+          <div class="admin-g-stat-label">🌸 Season Count</div>
+          <div class="admin-g-stat-current">Current: <b id="adminStatsSeasonsCur">0</b></div>
+          <input type="number" id="adminStatsSeasons" class="admin-g-input" placeholder="Increase by (optional)">
+        </div>
+        <div class="admin-g-stat-row">
+          <div class="admin-g-stat-label">📺 Episode Count</div>
+          <div class="admin-g-stat-current">Current: <b id="adminStatsEpsCur">0</b></div>
+          <input type="number" id="adminStatsEps" class="admin-g-input" placeholder="Increase by (optional)">
+        </div>
+        <button class="admin-g-btn" onclick="commitStats()">▶ INCREASE STATS</button>
       </div>
 
       <!-- TAB: Add Anime -->
