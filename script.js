@@ -3988,9 +3988,10 @@ function initAdminGui() {
   var dateInput = document.getElementById('adminDateInput');
   if (dateInput) dateInput.value = today;
   var ac = document.getElementById('animeCount'), sc = document.getElementById('seasonCount'), ec = document.getElementById('episodeCount');
-  if (document.getElementById('adminStatsAnimeCur')) document.getElementById('adminStatsAnimeCur').textContent = ac ? ac.textContent : '0';
-  if (document.getElementById('adminStatsSeasonsCur')) document.getElementById('adminStatsSeasonsCur').textContent = sc ? sc.textContent : '0';
-  if (document.getElementById('adminStatsEpsCur')) document.getElementById('adminStatsEpsCur').textContent = ec ? ec.textContent : '0';
+  var acv = ac ? ac.textContent : '0', scv = sc ? sc.textContent : '0', ecv = ec ? ec.textContent : '0';
+  if (document.getElementById('adminStatsAnime')) document.getElementById('adminStatsAnime').placeholder = 'Current: ' + acv;
+  if (document.getElementById('adminStatsSeasons')) document.getElementById('adminStatsSeasons').placeholder = 'Current: ' + scv;
+  if (document.getElementById('adminStatsEps')) document.getElementById('adminStatsEps').placeholder = 'Current: ' + ecv;
   if (document.getElementById('adminStatsAnime')) document.getElementById('adminStatsAnime').value = '';
   if (document.getElementById('adminStatsSeasons')) document.getElementById('adminStatsSeasons').value = '';
   if (document.getElementById('adminStatsEps')) document.getElementById('adminStatsEps').value = '';
@@ -4503,9 +4504,12 @@ async function commitDate(dateStr) {
 }
 
 async function commitStats() {
-  var anime = document.getElementById('adminStatsAnime').value.trim();
-  var seasons = document.getElementById('adminStatsSeasons').value.trim();
-  var eps = document.getElementById('adminStatsEps').value.trim();
+  var animeInp = document.getElementById('adminStatsAnime');
+  var seasonsInp = document.getElementById('adminStatsSeasons');
+  var epsInp = document.getElementById('adminStatsEps');
+  var anime = animeInp.value.trim();
+  var seasons = seasonsInp.value.trim();
+  var eps = epsInp.value.trim();
   if (!anime && !seasons && !eps) { msgFail('Enter at least one increase'); return; }
   showLoading();
   var scriptData = await githubFetch('script.js');
@@ -4513,17 +4517,17 @@ async function commitStats() {
   var content = decodeURIComponent(escape(atob(scriptData.content)));
   var newAnime = null, newSeasons = null, newEps = null;
   if (anime) {
-    var cur = parseInt(document.getElementById('adminStatsAnimeCur').textContent) || 0;
+    var cur = parseInt((animeInp.placeholder.match(/\d+/) || ['0'])[0]) || 0;
     newAnime = cur + parseInt(anime);
     content = content.replace(/counterUp\("animeCount",\s*\d+/, 'counterUp("animeCount", ' + newAnime);
   }
   if (seasons) {
-    var curS = parseInt(document.getElementById('adminStatsSeasonsCur').textContent) || 0;
+    var curS = parseInt((seasonsInp.placeholder.match(/\d+/) || ['0'])[0]) || 0;
     newSeasons = curS + parseInt(seasons);
     content = content.replace(/counterUp\("seasonCount",\s*\d+/, 'counterUp("seasonCount", ' + newSeasons);
   }
   if (eps) {
-    var curE = parseInt(document.getElementById('adminStatsEpsCur').textContent) || 0;
+    var curE = parseInt((epsInp.placeholder.match(/\d+/) || ['0'])[0]) || 0;
     newEps = curE + parseInt(eps);
     content = content.replace(/counterUp\("episodeCount",\s*\d+/, 'counterUp("episodeCount", ' + newEps);
   }
@@ -4531,12 +4535,10 @@ async function commitStats() {
   hideLoading();
   if (ok) {
     msgOk('Stats increased');
-    if (newAnime !== null) document.getElementById('animeCount').textContent = newAnime;
-    if (newSeasons !== null) document.getElementById('seasonCount').textContent = newSeasons;
-    if (newEps !== null) document.getElementById('episodeCount').textContent = newEps;
-    document.getElementById('adminStatsAnime').value = '';
-    document.getElementById('adminStatsSeasons').value = '';
-    document.getElementById('adminStatsEps').value = '';
+    if (newAnime !== null) { document.getElementById('animeCount').textContent = newAnime; animeInp.placeholder = 'Current: ' + newAnime; }
+    if (newSeasons !== null) { document.getElementById('seasonCount').textContent = newSeasons; seasonsInp.placeholder = 'Current: ' + newSeasons; }
+    if (newEps !== null) { document.getElementById('episodeCount').textContent = newEps; epsInp.placeholder = 'Current: ' + newEps; }
+    animeInp.value = ''; seasonsInp.value = ''; epsInp.value = '';
   }
   else msgFail('Commit failed');
 }
