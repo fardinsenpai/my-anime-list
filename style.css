@@ -4931,11 +4931,13 @@ body.perf-no-heading-anim .header h1::after { animation: none !important; }
   font-family: monospace; margin-bottom: 2px;
 }
 .admin-g-stat-current {
-  font-size: 10px; color: rgba(0,255,65,0.6);
-  font-family: monospace; margin-bottom: 4px;
+  font-size: 9px; color: rgba(0,255,65,0.3);
+  font-family: monospace; margin-left: 6px;
+  font-weight: 400; letter-spacing: 0.5px;
 }
 .admin-g-stat-current b {
-  color: #facc15;
+  color: rgba(0,255,65,0.35);
+  font-weight: 400;
 }
 .admin-g-id-row {
   display: flex; gap: 4px; align-items: center;
