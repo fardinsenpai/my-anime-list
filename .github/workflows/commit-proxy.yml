@@ -1,0 +1,24 @@
+name: Admin Commit Proxy
+on:
+  schedule:
+    - cron: '*/2 * * * *'   # poll Supabase queue every 2 minutes
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  process-queue:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Process pending commits
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          GH_PAT: ${{ secrets.GH_PAT }}
+          OWNER: ${{ github.repository_owner }}
+          REPO: ${{ github.event.repository.name }}
+        run: node .github/workflows/commit-proxy.mjs
