@@ -2223,7 +2223,7 @@ async function sendMessage() {
     let messagesToSend = [...chatHistory];
 
     const response = await fetchWithFallback({
-      model: 'llama-3.1-8b-instant',
+      model: 'groq/compound-mini',
       messages: messagesToSend,
       temperature: 0.8,
       max_tokens: 400,
