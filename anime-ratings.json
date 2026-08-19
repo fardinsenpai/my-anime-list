@@ -2329,5 +2329,23 @@
         "anilist": 69,
         "title": "Magic Maker: How to Make Magic in Another World",
         "storyRating": 7.0
+    },
+    "260": {
+        "malScore": 7.5,
+        "characters": 7.5,
+        "animRating": 7.5,
+        "animePlanet": 3.9,
+        "anilist": 74,
+        "title": "Farming Life in Another World",
+        "storyRating": 7.5
+    },
+    "261": {
+        "malScore": 6.2,
+        "characters": 6,
+        "animRating": 6.5,
+        "animePlanet": 3.3,
+        "anilist": 61,
+        "title": "The Strongest Sage With the Weakest Crest",
+        "storyRating": 6
     }
 }
