@@ -2028,6 +2028,32 @@ let currentKeyIndex = 0;
 const GROQ_MODELS = ['openai/gpt-oss-120b', 'qwen/qwen3.8-27b', 'openai/gpt-oss-20b'];
 let currentModelIndex = 0;
 
+// ===== Admin-panel model override (stored in Supabase site_config) =====
+const CHAT_MODEL_CONFIG_KEY = 'chatbot_model';
+const CHAT_MODEL_LS_KEY = 'fardin_chat_model';
+let activeChatModel = '';
+try { activeChatModel = localStorage.getItem(CHAT_MODEL_LS_KEY) || ''; } catch (e) {}
+
+function getModelChain() {
+  if (!activeChatModel) return GROQ_MODELS;
+  return [activeChatModel].concat(GROQ_MODELS.filter(m => m !== activeChatModel));
+}
+
+function loadChatModelConfig() {
+  if (typeof SUPABASE_URL === 'undefined' || typeof SUPABASE_KEY === 'undefined') return;
+  fetch(SUPABASE_URL + '/rest/v1/site_config?key=eq.' + CHAT_MODEL_CONFIG_KEY + '&select=value', {
+    headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
+  }).then(function (r) {
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    return r.json();
+  }).then(function (rows) {
+    var v = (rows && rows[0] && rows[0].value) ? rows[0].value : '';
+    activeChatModel = v;
+    try { localStorage.setItem(CHAT_MODEL_LS_KEY, v); } catch (e) {}
+  }).catch(function () { /* keep cached choice / defaults */ });
+}
+window.addEventListener('load', loadChatModelConfig);
+
 function getNextKeyIndex() {
   currentKeyIndex = (currentKeyIndex + 1) % GROQ_API_KEYS.length;
   return currentKeyIndex;
@@ -2036,11 +2062,12 @@ function getNextKeyIndex() {
 async function fetchWithFallback(body) {
   let lastError = null;
   let attempts = 0;
-  const maxAttempts = GROQ_API_KEYS.length * GROQ_MODELS.length;
+  const chain = getModelChain();
+  const maxAttempts = GROQ_API_KEYS.length * chain.length;
 
   while (attempts < maxAttempts) {
     const key = GROQ_API_KEYS[currentKeyIndex];
-    const model = GROQ_MODELS[currentModelIndex];
+    const model = chain[currentModelIndex % chain.length];
     try {
       const res = await fetch(apiUrl, {
         method: 'POST',
@@ -2053,7 +2080,7 @@ async function fetchWithFallback(body) {
       if (res.ok) return res;
       if (res.status === 404) {
         // Model retired/unknown — try the next model in the chain
-        currentModelIndex = (currentModelIndex + 1) % GROQ_MODELS.length;
+        currentModelIndex = (currentModelIndex + 1) % chain.length;
         attempts++;
         continue;
       }
@@ -3984,6 +4011,74 @@ function switchAdminTab(tab) {
   document.querySelectorAll('.admin-g-tab').forEach(function(t) { t.classList.toggle('active', t.dataset.tab === tab); });
   document.querySelectorAll('.admin-g-content').forEach(function(c) { c.classList.toggle('active', c.id === 'tab' + tab.charAt(0).toUpperCase() + tab.slice(1)); });
   if (tab === 'add') { renderPills('ott', ''); renderPills('studio', ''); renderPills('genre', ''); }
+  if (tab === 'ai') { updateAiStatus(); refreshAiModels(); }
+}
+
+// ===== AI CHATBOT MODEL PICKER (admin) =====
+function updateAiStatus() {
+  var el = document.getElementById('aiModelStatus');
+  if (el) el.textContent = 'active: ' + (activeChatModel || 'default chain');
+}
+
+async function refreshAiModels() {
+  var sel = document.getElementById('aiModelSelect');
+  var status = document.getElementById('aiModelListStatus');
+  if (!sel || !status) return;
+  status.textContent = 'fetching Groq model list...';
+  try {
+    var res = await fetch('https://api.groq.com/openai/v1/models', { headers: { 'Authorization': 'Bearer ' + GROQ_API_KEYS[0] } });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    var data = await res.json();
+    var deny = /prompt-guard|safeguard|whisper|orpheus|tts|embed|stable-diffusion/i;
+    var list = (data.data || []).filter(function(m) {
+      if (m.active === false) return false;
+      var input = m.input_modalities || ['text'];
+      var output = m.output_modalities || ['text'];
+      if (input.indexOf('text') === -1 || output.indexOf('text') === -1) return false;
+      return !deny.test(m.id);
+    }).sort(function(a, b) { return (b.created || 0) - (a.created || 0); });
+    sel.innerHTML = list.map(function(m) {
+      var d = m.created ? new Date(m.created * 1000).toISOString().slice(0, 10) : '';
+      return '<option value="' + m.id.replace(/"/g, '&quot;') + '">' + m.id + (d ? '  ·  added ' + d : '') + '</option>';
+    }).join('');
+    if (activeChatModel) sel.value = activeChatModel;
+    status.textContent = list.length + ' chat models found (newest first)';
+  } catch (e) {
+    status.textContent = 'Could not load list: ' + e.message;
+  }
+}
+
+function saveAiModel() {
+  var sel = document.getElementById('aiModelSelect');
+  if (!sel || !sel.value) { msgFail('No model selected — press REFRESH LIST first'); return; }
+  saveChatModelSetting(sel.value);
+}
+
+function resetAiModel() {
+  saveChatModelSetting('');
+}
+
+function saveChatModelSetting(value) {
+  if (typeof SUPABASE_URL === 'undefined' || typeof SUPABASE_KEY === 'undefined') { msgFail('Supabase not loaded'); return; }
+  fetch(SUPABASE_URL + '/rest/v1/site_config', {
+    method: 'POST',
+    headers: {
+      'apikey': SUPABASE_KEY,
+      'Authorization': 'Bearer ' + SUPABASE_KEY,
+      'Content-Type': 'application/json',
+      'Prefer': 'resolution=merge-duplicates'
+    },
+    body: JSON.stringify({ key: CHAT_MODEL_CONFIG_KEY, value: value, updatedAt: new Date().toISOString() })
+  }).then(function(r) {
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    activeChatModel = value;
+    try { localStorage.setItem(CHAT_MODEL_LS_KEY, value); } catch (e) {}
+    updateAiStatus();
+    if (value) msgOk('Chatbot model set: ' + value);
+    else msgOk('Back to default model chain');
+  }).catch(function(e) {
+    msgFail('Save failed (' + e.message + ') — run the site_config SQL first');
+  });
 }
 
 function initAdminGui() {
