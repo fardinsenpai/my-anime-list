@@ -556,11 +556,23 @@
 
 <button id="fastScrollBtn" onclick="fastScrollToBottom()">End</button>
 
+<!-- Cursor Settings Panel -->
+<div id="cursorPanel" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);z-index:99998;align-items:center;justify-content:center;font-family:monospace;">
+  <div style="background:#0a0a0a;border:1px solid #00ff41;border-radius:12px;padding:24px;max-width:400px;width:90%;box-shadow:0 0 30px rgba(0,255,65,0.1);">
+    <div style="font-size:18px;color:#00ff41;margin-bottom:16px;text-align:center;letter-spacing:2px;">🎯 Cursor Style</div>
+    <div id="cursorOptions" style="display:flex;flex-direction:column;gap:8px;"></div>
+    <div style="margin-top:16px;text-align:center;">
+      <button class="admin-btn" onclick="document.getElementById('cursorPanel').style.display='none'">Close</button>
+    </div>
+  </div>
+</div>
+
 <div class="body-stats-bar" id="statsBarContainer" style="display:none;">
   <div class="stats-bar-card"><div class="stats-bar-label">🎬 Currently Watching</div><div class="stats-bar-inner"><div class="stats-bar-poster"><img src="https://media.kitsu.app/anime/poster_images/41024/large.jpg" alt="TENSURA"></div><div class="stats-bar-info"><div class="stats-bar-title">TENSURA</div><div class="stats-bar-meta">Season 4</div><div class="stats-bar-track"><div class="stats-bar-fill" style="width: 65%;"></div></div><div class="stats-bar-eps">Episode 14 / 24</div></div></div></div>
 
   <div class="stats-bar-card"><div class="stats-bar-label">📖 Currently Reading</div><div class="stats-bar-inner"><div class="stats-bar-poster"><img src="https://media.kitsu.app/anime/44973/poster_image/large-ca235304c71f4233e60f6efb3967654d.jpeg" alt="Blue Lock"></div><div class="stats-bar-info"><div class="stats-bar-title">Blue Lock</div><div class="stats-bar-meta">38</div><div class="stats-bar-track"><div class="stats-bar-fill" style="width: 86%;"></div></div><div class="stats-bar-eps">Chapter 355 / Ongoing</div></div></div></div>
   </div>
+</div>
 
   <div class="grid" id="grid">
 
@@ -1415,7 +1427,7 @@
         <div id="adminWatchResults" style="display:grid;grid-template-columns:repeat(2,1fr);gap:3px;max-height:120px;overflow-y:auto;margin-bottom:6px;padding:2px;"></div>
         <div id="adminWatchPreview" style="display:none;margin-bottom:6px;">
           <div style="display:flex;align-items:center;gap:8px;padding:6px;background:rgba(0,255,65,0.03);border:1px solid rgba(0,255,65,0.1);border-radius:4px;">
-            <img id="adminWatchPreviewImg" alt="" src="" style="width:36px;height:50px;object-fit:cover;border-radius:3px;">
+            <img id="adminWatchPreviewImg" src="" style="width:36px;height:50px;object-fit:cover;border-radius:3px;">
             <div style="flex:1;">
               <div id="adminWatchPreviewTitle" style="font-size:11px;color:#00ff41;font-family:monospace;"></div>
               <div id="adminWatchPreviewId" style="font-size:9px;color:rgba(0,255,65,0.4);font-family:monospace;"></div>
@@ -1457,7 +1469,7 @@
         <div id="adminReadResults" style="display:grid;grid-template-columns:repeat(2,1fr);gap:3px;max-height:120px;overflow-y:auto;margin-bottom:6px;padding:2px;"></div>
         <div id="adminReadPreview" style="display:none;margin-bottom:6px;">
           <div style="display:flex;align-items:center;gap:8px;padding:6px;background:rgba(0,255,65,0.03);border:1px solid rgba(0,255,65,0.1);border-radius:4px;">
-            <img id="adminReadPreviewImg" alt="" src="" style="width:36px;height:50px;object-fit:cover;border-radius:3px;">
+            <img id="adminReadPreviewImg" src="" style="width:36px;height:50px;object-fit:cover;border-radius:3px;">
             <div style="flex:1;">
               <div id="adminReadPreviewTitle" style="font-size:11px;color:#00ff41;font-family:monospace;"></div>
               <div id="adminReadPreviewId" style="font-size:9px;color:rgba(0,255,65,0.4);font-family:monospace;"></div>
@@ -1489,7 +1501,7 @@
         <div id="adminAwardResults" style="display:grid;grid-template-columns:repeat(2,1fr);gap:3px;max-height:120px;overflow-y:auto;margin-bottom:6px;padding:2px;"></div>
         <div id="adminAwardPreview" style="display:none;margin-bottom:6px;">
           <div style="display:flex;align-items:center;gap:8px;padding:6px;background:rgba(0,255,65,0.03);border:1px solid rgba(0,255,65,0.1);border-radius:4px;">
-            <img id="adminAwardPreviewImg" alt="" src="" style="width:36px;height:50px;object-fit:cover;border-radius:3px;">
+            <img id="adminAwardPreviewImg" src="" style="width:36px;height:50px;object-fit:cover;border-radius:3px;">
             <div style="flex:1;">
               <div id="adminAwardPreviewTitle" style="font-size:11px;color:#00ff41;font-family:monospace;"></div>
               <div id="adminAwardPreviewId" style="font-size:9px;color:rgba(0,255,65,0.4);font-family:monospace;"></div>
@@ -1511,7 +1523,7 @@
         <div id="adminEditResults" style="display:grid;grid-template-columns:repeat(2,1fr);gap:3px;max-height:120px;overflow-y:auto;margin-bottom:6px;padding:2px;"></div>
         <div id="adminEditPreview" style="display:none;margin-bottom:6px;">
           <div style="display:flex;align-items:center;gap:8px;padding:6px;background:rgba(0,255,65,0.03);border:1px solid rgba(0,255,65,0.1);border-radius:4px;">
-            <img id="adminEditPreviewImg" alt="" src="" style="width:36px;height:50px;object-fit:cover;border-radius:3px;">
+            <img id="adminEditPreviewImg" src="" style="width:36px;height:50px;object-fit:cover;border-radius:3px;">
             <div style="flex:1;">
               <div id="adminEditPreviewTitle" style="font-size:11px;color:#00ff41;font-family:monospace;"></div>
               <div id="adminEditPreviewId" style="font-size:9px;color:rgba(0,255,65,0.4);font-family:monospace;"></div>
