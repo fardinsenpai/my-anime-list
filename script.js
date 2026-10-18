@@ -6795,7 +6795,9 @@ async function lgDoSubmit(ev) {
   try {
     if (up) {
       var meta = { first_name: first, last_name: last, full_name: (first + ' ' + last).trim() };
-      if (loginIsPhone(ident)) meta.phone = loginPhoneDigits(ident);
+      // keep the number as the person wrote it (just tidied) so their card shows something
+      // familiar; the internal login id always uses the normalised digits
+      if (loginIsPhone(ident)) meta.phone = String(ident).replace(/[\s\-().]/g, '');
       var res = await c.auth.signUp({ email: email, password: pass, options: { data: meta } });
       if (res && res.error) { lgSetMsg(loginErrText(res.error.message), 'bad'); lgBusy(false); return; }
       if (!(res && res.data && res.data.session)) {
