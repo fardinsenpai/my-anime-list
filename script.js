@@ -2461,15 +2461,15 @@ const AVATAR_PRESETS = {
   },
   sakura: {
     label: 'Sakura',
-    bg: 'radial-gradient(circle at 32% 28%, #ffd1e8, #ff5f9e 78%)',
-    border: 'rgba(255,224,240,0.9)',
+    bg: 'radial-gradient(circle at 32% 28%, #ffe9f4, #ff8fb8 80%)',
+    border: 'rgba(255,143,184,0.95)',
     glow: '0 0 10px rgba(255,95,158,0.5)',
     svg: '<svg viewBox="0 0 24 24"><g transform="translate(12 12)" fill="#be185d"><ellipse cx="0" cy="-5" rx="3.1" ry="5"></ellipse><ellipse cx="0" cy="-5" rx="3.1" ry="5" transform="rotate(72)"></ellipse><ellipse cx="0" cy="-5" rx="3.1" ry="5" transform="rotate(144)"></ellipse><ellipse cx="0" cy="-5" rx="3.1" ry="5" transform="rotate(216)"></ellipse><ellipse cx="0" cy="-5" rx="3.1" ry="5" transform="rotate(288)"></ellipse></g><circle cx="12" cy="12" r="1.9" fill="#ffe4ef"></circle></svg>'
   },
   samurai: {
     label: 'Samurai',
-    bg: 'radial-gradient(circle at 32% 28%, #93c5fd, #1e3a8a 80%)',
-    border: 'rgba(191,219,254,0.75)',
+    bg: 'radial-gradient(circle at 32% 28%, #60a5fa, #1e3a8a 80%)',
+    border: 'rgba(191,219,254,0.85)',
     glow: '0 0 10px rgba(37,99,235,0.5)',
     svg: '<svg viewBox="0 0 24 24"><path d="M12 2.6c-5 0-8.6 3.7-8.6 8.6 0 1.9 0.5 3.4 1.3 4.6h14.6c0.8-1.2 1.3-2.7 1.3-4.6 0-4.9-3.6-8.6-8.6-8.6z" fill="#f8faff"></path><path d="M12 2.6c-1.3 0-2.5 0.2-3.6 0.7L12 9.4l3.6-6.1c-1.1-0.5-2.3-0.7-3.6-0.7z" fill="#a5b4fc"></path><path d="M4.7 15.8h14.6l-1.9 4.2a1 1 0 0 1-0.9 0.6H7.5a1 1 0 0 1-0.9-0.6z" fill="#4f46e5"></path><rect x="10.7" y="15.8" width="2.6" height="4.8" rx="0.7" fill="#eef2ff"></rect></svg>'
   },
@@ -2478,7 +2478,7 @@ const AVATAR_PRESETS = {
     bg: 'radial-gradient(circle at 32% 28%, #fde68a, #d97706 80%)',
     border: 'rgba(253,230,138,0.85)',
     glow: '0 0 10px rgba(217,119,6,0.45)',
-    svg: '<svg viewBox="0 0 24 24"><path d="M3 11.2h18c0 5.1-4 8.8-9 8.8s-9-3.7-9-8.8z" fill="#fde68a"></path><path d="M4.6 12.6h14.8c-0.4 3.6-3.5 6-7.4 6s-7-2.4-7.4-6z" fill="#b45309"></path><path d="M8.2 9c1-1.3 1-2.4 0-3.7M12 8.4c1.2-1.5 1.2-2.9 0-4.4M15.8 9c1-1.3 1-2.4 0-3.7" stroke="#fff7ed" stroke-width="1.4" fill="none" stroke-linecap="round"></path></svg>'
+    svg: '<svg viewBox="0 0 24 24"><path d="M3 11.2h18c0 5.1-4 8.8-9 8.8s-9-3.7-9-8.8z" fill="#fde68a"></path><path d="M4.6 12.6h14.8c-0.4 3.6-3.5 6-7.4 6s-7-2.4-7.4-6z" fill="#7c2d12"></path><path d="M8.2 9c1-1.3 1-2.4 0-3.7M12 8.4c1.2-1.5 1.2-2.9 0-4.4M15.8 9c1-1.3 1-2.4 0-3.7" stroke="#fff7ed" stroke-width="1.4" fill="none" stroke-linecap="round"></path></svg>'
   },
   chibi: {
     label: 'Chibi',
