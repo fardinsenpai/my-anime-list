@@ -563,6 +563,7 @@ window.addEventListener('popstate', function () {
   if (topFiveBtn && topFiveContainer) {
     topFiveBtn.onclick = function(e) {
       e.preventDefault();
+      history.pushState(null, '', 'top-5');
       closeWaifus();
       hideAllSections();
       topFiveContainer.style.display = 'block';
@@ -3772,6 +3773,9 @@ document.addEventListener('click', function(e) {
       if (btn) btn.click();
     } else if (p.endsWith('/analysis')) {
       var btn = document.getElementById('analysisSideBtn');
+      if (btn) btn.click();
+    } else if (p.endsWith('/top-5')) {
+      var btn = document.getElementById('topFiveSideBtn');
       if (btn) btn.click();
     } else if (p.endsWith('/top-secrets')) {
       var btn = document.getElementById('topSecretsBtn');
