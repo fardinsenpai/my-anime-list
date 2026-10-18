@@ -4463,7 +4463,7 @@ body.perf-no-heading-anim .header h1::after { animation: none !important; }
 /* exactly 3 avatars visible at a time; scroll or use ◀ ▶ for the next 3 */
 .av-strip {
   display: flex; gap: 6px; flex: 1;
-  overflow-x: auto; scroll-snap-type: x mandatory; scroll-behavior: smooth;
+  overflow-x: auto; scroll-snap-type: x mandatory;
   padding: 2px; scrollbar-width: none;
 }
 .av-strip::-webkit-scrollbar { display: none; }
