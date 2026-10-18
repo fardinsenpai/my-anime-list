@@ -173,23 +173,82 @@
   }
 
   /* ============================================================
-     PERSISTENCE  (Hall of Champions — local only)
+     PERSISTENCE  (Hall of Champions — Supabase + local fallback)
      ============================================================ */
+  var SB_URL = 'https://ldzlefdklcgvqcbqibtt.supabase.co';
+  var SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxkemxlZmRrbGNndnFjYnFpYnR0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwMzk1OTAsImV4cCI6MjA5NjYxNTU5MH0.X3TGuLIpjrnPXMgCv4ZKIIjB6pItPgkdebf4JPdhuYs';
+  var DEVICE_ID_KEY = 'fardin_uid';
+
+  function deviceId() {
+    var id = null;
+    try { id = localStorage.getItem(DEVICE_ID_KEY); } catch (e) {}
+    if (!id) {
+      id = 'u' + Math.random().toString(36).substr(2, 9);
+      try { localStorage.setItem(DEVICE_ID_KEY, id); } catch (e) {}
+    }
+    return id;
+  }
+
+  function hallHeaders(extra) {
+    var h = {
+      'apikey': SB_KEY,
+      'Authorization': 'Bearer ' + SB_KEY,
+      'Content-Type': 'application/json',
+      'X-Device-Id': deviceId()
+    };
+    if (extra) { for (var k in extra) h[k] = extra[k]; }
+    return h;
+  }
+
+  function normRank(r) {
+    return (r === undefined || r === null || r === '') ? null : String(r);
+  }
+
+  function champRow(c) {
+    return { title: c.title, rank: normRank(c.rank), genre: c.genre, size: c.size, date: c.date, _userId: deviceId() };
+  }
+
+  function champKey(c) {
+    return [c.title, c.genre, c.size, c.date, normRank(c.rank)].join('|');
+  }
+
   function getChampions() {
     try { return JSON.parse(localStorage.getItem(CHAMP_KEY)) || []; }
     catch (e) { return []; }
   }
+
+  function fetchChampions(cb) {
+    fetch(SB_URL + '/rest/v1/hall_of_champions?select=*&order=id.desc&limit=50', { headers: hallHeaders() })
+      .then(function (r) { if (!r.ok) throw new Error('status ' + r.status); return r.json(); })
+      .then(function (rows) { cb(rows || []); })
+      .catch(function () { cb(null); });
+  }
+
   function saveChampion(anime, genre, size) {
-    var list = getChampions();
-    list.unshift({
-      title: anime.title, rank: anime.rank, genre: genre, size: size,
+    var entry = {
+      title: anime.title, rank: normRank(anime.rank), genre: genre, size: size,
       date: new Date().toLocaleDateString()
-    });
+    };
+    var list = getChampions();
+    list.unshift(entry);
     if (list.length > 50) list = list.slice(0, 50);
     try { localStorage.setItem(CHAMP_KEY, JSON.stringify(list)); } catch (e) {}
+    fetch(SB_URL + '/rest/v1/hall_of_champions', {
+      method: 'POST',
+      headers: hallHeaders({ 'Prefer': 'return=minimal' }),
+      body: JSON.stringify(champRow(entry))
+    }).catch(function () {});
   }
-  function clearChampions() {
-    try { localStorage.removeItem(CHAMP_KEY); } catch (e) {}
+
+  function clearChampions(cb) {
+    fetch(SB_URL + '/rest/v1/hall_of_champions?_userId=eq.' + encodeURIComponent(deviceId()), {
+      method: 'DELETE',
+      headers: hallHeaders()
+    }).then(function (r) {
+      if (!r.ok) throw new Error('status ' + r.status);
+      try { localStorage.removeItem(CHAMP_KEY); } catch (e) {}
+      if (cb) cb(true);
+    }).catch(function () { if (cb) cb(false); });
   }
 
   /* ============================================================
@@ -458,8 +517,7 @@
            visualHtml + '</button>';
   }
 
-  function renderHall(box) {
-    var list = getChampions();
+  function drawHall(box, list) {
     if (!list.length) {
       box.innerHTML = '<div class="tourney-hall__title">🏆 Hall of Champions</div>' +
                       '<div class="tourney-hall__empty">No champions yet — crown your first!</div>';
@@ -468,7 +526,7 @@
     var items = list.map(function (c) {
       return '<li class="tourney-hall__item">' +
                '<span>👑 ' + esc(c.title) + '</span>' +
-               '<span>' + esc(c.genre) + ' · ' + c.size + ' · ' + esc(c.date) + '</span>' +
+               '<span>' + esc(c.genre || '') + ' · ' + (c.size || '?') + ' · ' + esc(c.date || '') + '</span>' +
              '</li>';
     }).join("");
     box.innerHTML =
@@ -477,7 +535,34 @@
       '<button class="tourney-hall__clear" id="tourneyHallClear">Clear history</button>';
     var clr = box.querySelector("#tourneyHallClear");
     if (clr) clr.addEventListener("click", function () {
-      clearChampions(); renderHall(box); toast("Cleared", "Champion history removed.", "success");
+      clearChampions(function (ok) {
+        renderHall(box);
+        if (ok) toast("Cleared", "Your champion history removed.", "success");
+        else toast("Clear failed", "Couldn't reach the cloud — nothing was removed.", "error");
+      });
+    });
+  }
+
+  function renderHall(box) {
+    var local = getChampions();
+    drawHall(box, local);
+    fetchChampions(function (cloud) {
+      if (cloud === null) return; // offline — keep the local view
+      var have = {};
+      cloud.forEach(function (c) { have[champKey(c)] = true; });
+      var missing = local.filter(function (c) { return !have[champKey(c)]; });
+      if (!missing.length) {
+        if (cloud.length) drawHall(box, cloud);
+        return;
+      }
+      // One-time migration: push local-only champions up to the shared hall
+      fetch(SB_URL + '/rest/v1/hall_of_champions', {
+        method: 'POST',
+        headers: hallHeaders({ 'Prefer': 'return=minimal' }),
+        body: JSON.stringify(missing.slice().reverse().map(champRow))
+      }).then(function () {
+        fetchChampions(function (cloud2) { if (cloud2 && cloud2.length) drawHall(box, cloud2); });
+      }).catch(function () {});
     });
   }
 
