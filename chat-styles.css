@@ -193,17 +193,15 @@
 }
 .chat-messages .msg-act:nth-child(2) { animation-delay: 1.7s; }
 
-/* step 1: only the 3-dot shows. step 2: hover it (desktop) or tap it (mobile). */
+/* step 1: only the 3-dot shows. step 2: click/tap it to reveal copy & share.
+   (no hover reveal — the user asked for click on PC) */
 .chat-messages .msg-act[data-act="copy"],
 .chat-messages .msg-act[data-act="share"] { display: none; }
-.chat-messages .msg-actions:hover .msg-act[data-act="copy"],
-.chat-messages .msg-actions:hover .msg-act[data-act="share"],
 .chat-messages .msg-actions.open .msg-act[data-act="copy"],
 .chat-messages .msg-actions.open .msg-act[data-act="share"] {
   display: flex;
   animation: act-pop .24s cubic-bezier(.34,1.56,.64,1), petal-glow 3.4s ease-in-out infinite;
 }
-.chat-messages .msg-actions:hover .msg-act[data-act="share"],
 .chat-messages .msg-actions.open .msg-act[data-act="share"] {
   animation: act-pop .24s cubic-bezier(.34,1.56,.64,1), petal-glow 3.4s ease-in-out 1.7s infinite;
 }
