@@ -6,7 +6,8 @@
   <link rel="manifest" href="manifest.json">
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Fardin's Anime Hub</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css?v=20261019">
+  <link rel="stylesheet" href="chat-styles.css?v=20261019">
   <link rel="stylesheet" href="duel-system.css">
   <link rel="stylesheet" href="tournament.css">
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600;700&family=Exo+2:wght@400;600;700&family=Yuji+Syuku&family=Bangers&family=Poppins:wght@400;700&family=Cinzel+Decorative:wght@400;700&display=swap" rel="stylesheet">
@@ -1211,49 +1212,70 @@
   </div>
 </div>
 
-<!-- AI Chatbot Widget -->
-<div class="chat-bubble" id="chatBubble" onclick="toggleChat()">
-  <svg width="35" height="35" viewBox="0 0 100 100">
-  <!-- Outer circle -->
-  <circle cx="50" cy="50" r="45" fill="#8b0000" stroke="#ff2200" stroke-width="3"/>
-  <!-- Pupil -->
-  <circle cx="50" cy="50" r="15" fill="#1a0000"/>
-  <!-- Tomoe 1 -->
-  <circle cx="50" cy="28" r="7" fill="#1a0000"/>
-  <!-- Tomoe 2 -->
-  <circle cx="69" cy="61" r="7" fill="#1a0000"/>
-  <!-- Tomoe 3 -->
-  <circle cx="31" cy="61" r="7" fill="#1a0000"/>
-  <!-- Center dot -->
-  <circle cx="50" cy="50" r="6" fill="#ff2200"/>
-</svg>
-</div>
+  <!-- AI Chatbot Widget -->
+  <div class="chat-bubble" id="chatBubble" onclick="toggleChat()">
+    <svg width="35" height="35" viewBox="0 0 100 100">
+      <!-- Outer circle -->
+      <circle cx="50" cy="50" r="45" fill="#8b0000" stroke="#ff2200" stroke-width="3"/>
+      <!-- Pupil -->
+      <circle cx="50" cy="50" r="15" fill="#1a0000"/>
+      <!-- Tomoe 1 -->
+      <circle cx="50" cy="28" r="7" fill="#1a0000"/>
+      <!-- Tomoe 2 -->
+      <circle cx="69" cy="61" r="7" fill="#1a0000"/>
+      <!-- Tomoe 3 -->
+      <circle cx="31" cy="61" r="7" fill="#1a0000"/>
+      <!-- Center dot -->
+      <circle cx="50" cy="50" r="6" fill="#ff2200"/>
+    </svg>
+    <span class="fab-status"></span>
+    <span class="fab-sparkle">✨</span>
+  </div>
 
-<div class="chat-box" id="chatBox">
-  <div class="chat-header">
-    <span>🤖 AI As Your Assistant</span>
-    <button class="chat-close" onclick="toggleChat()">✕</button>
+  <div class="chat-backdrop" id="chatBackdrop" onclick="toggleChat()"></div>
+
+  <div class="chat-sidebar" id="chatBox">
+    <div class="sb-header">
+      <span class="petal">🌸</span><span class="petal">🌸</span><span class="petal">🌸</span><span class="petal">🌸</span>
+      <div class="sb-avatar">
+        <svg viewBox="0 0 100 100">
+          <circle cx="50" cy="50" r="45" fill="#8b0000" stroke="#ff2200" stroke-width="3"/>
+          <circle cx="50" cy="50" r="15" fill="#1a0000"/>
+          <circle cx="50" cy="28" r="7" fill="#1a0000"/>
+          <circle cx="69" cy="61" r="7" fill="#1a0000"/>
+          <circle cx="31" cy="61" r="7" fill="#1a0000"/>
+          <circle cx="50" cy="50" r="6" fill="#ff2200"/>
+        </svg>
+      </div>
+      <div class="sb-id">
+        <div class="sb-name">Senpai Assistant <span class="jp">先輩</span></div>
+        <div class="sb-sub"><span class="sb-dot"></span> online · ready to recommend</div>
+      </div>
+      <button class="chat-close" onclick="toggleChat()">✕</button>
+    </div>
+
+    <div class="sb-chips">
+      <button onclick="quickAction('Recommend me an isekai anime')">🎯 Isekai</button>
+      <button onclick="quickAction('Suggest a random anime')">🎲 Random</button>
+      <button onclick="quickAction('What\'s the highest rated anime?')">⭐ Top Rated</button>
+      <button onclick="quickAction('Recommend a romance anime')">💕 Romance</button>
+      <button onclick="quickAction('Suggest a comedy anime')">😂 Comedy</button>
+      <button onclick="quickAction('Recommend an action anime')">⚔ Action</button>
+      <button onclick="quickAction('When was this site last updated?')">📅 Last Updated</button>
+      <button onclick="quickAction('What should I watch tonight?')">🌙 Tonight</button>
+      <button onclick="quickAction('Tell me about Fardin')">👤 Fardin</button>
+    </div>
+
+    <div class="chat-messages" id="chatMessages">
+      <div class="msg bot">🤖 Konnichiwa! Welcome to Fardin's Anime Hub! I'm your Senpai Assistant — ask me anything about episodes, seasons, random picks, or recommendations!</div>
+    </div>
+
+    <div class="chat-input-area">
+      <button onclick="clearChatHistory()" class="clear-btn" title="Clear chat">🗑️</button>
+      <input type="text" id="chatInput" placeholder="Ask Senpai anything..." onkeydown="if(event.key==='Enter') sendMessage()" />
+      <button onclick="sendMessage()">➤</button>
+    </div>
   </div>
-  <div class="chat-messages" id="chatMessages">
-    <div class="msg bot">🤖 Hello! Welcome to Fardin's Anime Hub! I'm Fardin's personal anime assistant. Ask me anything about episodes, seasons, random picks, or genre recommendations!</div>
-  </div>
-  <div class="chat-input-area">
-    <input type="text" id="chatInput" placeholder="Type a message..." onkeydown="if(event.key==='Enter') sendMessage()" />
-    <button onclick="sendMessage()">Send</button>
-    <button onclick="clearChatHistory()" class="clear-btn" title="Clear chat">🗑️</button>
-  </div>
-  <div class="chat-quick-actions">
-    <button onclick="quickAction('Recommend me an isekai anime')">🎯 Isekai</button>
-    <button onclick="quickAction('Suggest a random anime')">🎲 Random</button>
-    <button onclick="quickAction('What\'s the highest rated anime?')">⭐ Top Rated</button>
-    <button onclick="quickAction('Recommend a romance anime')">💕 Romance</button>
-    <button onclick="quickAction('Suggest a comedy anime')">😂 Comedy</button>
-    <button onclick="quickAction('Recommend an action anime')">⚔ Action</button>
-    <button onclick="quickAction('When was this site last updated?')">📅 Last Updated</button>
-    <button onclick="quickAction('What should I watch tonight?')">🌙 Tonight</button>
-    <button onclick="quickAction('Tell me about Fardin')">👤 Fardin</button>
-  </div>
-</div>
 
 
   <!-- Performance Settings Popup -->
@@ -1355,7 +1377,7 @@
   <script src="duel-system.js"></script>
   <script src="tournament.js?v=20261018"></script>
   <script src="quest-data.js"></script>
-  <script src="script.js?v=20261018"></script>
+  <script src="script.js?v=20261019"></script>
 
 <!-- === ADMIN PANEL === -->
 <div class="admin-overlay" id="adminOverlay">
