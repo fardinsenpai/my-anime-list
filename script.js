@@ -6114,10 +6114,11 @@ var AUTH_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsIn
 // would throw a temporal-dead-zone error and break the rest of the file.
 var AUTH_USER = null;        // { id, email, name, first, avatar } or null
 var authClientRef = null;
-// A phone number used as a login name is stored internally as "<digits>@phone.example.com"
+// A phone number used as a login name is stored internally as "<digits>@phone.fardinanimehub.com"
 // so it can work exactly like an email address with a password — no SMS provider needed.
-// example.com is a reserved domain (RFC 2606), so no real mailbox can ever collide with it.
-var PHONE_SUFFIX = '@phone.example.com';
+// NB: this domain must NOT be a reserved one (example.com, .local, .invalid …) — Supabase
+// refuses those at sign-up. It is only ever an internal login name; no mail is ever sent to it.
+var PHONE_SUFFIX = '@phone.fardinanimehub.com';
 
 function authEsc(s) {
   return String(s == null ? '' : s).replace(/[&<>"']/g, function(c) {
@@ -6670,7 +6671,7 @@ async function welcomeAvatarFile(input) {
    🔐 LOGIN PAGE — email/phone + password, or Google.
    • Create account: First name, Surname, Email (or phone), Password.
    • A phone number works as the login name too: it is stored internally as
-     8801712345678@phone.example.com, so it behaves exactly like an email
+     8801712345678@phone.fardinanimehub.com, so it behaves exactly like an email
      address + password. No SMS is ever sent (that would need a paid provider).
    • Nothing is verified, so there is nothing to wait for — create it and
      you are straight in. The account lives in Supabase → Authentication → Users.
@@ -6687,7 +6688,7 @@ function loginPhoneDigits(raw) {
   return d;
 }
 
-// an email stays as it is; a phone number becomes <digits>@phone.example.com
+// an email stays as it is; a phone number becomes <digits>@phone.fardinanimehub.com
 function loginIdToEmail(ident) {
   var s = String(ident || '').trim();
   if (!s) return '';
@@ -6709,6 +6710,7 @@ function loginErrText(msg) {
   if (m.indexOf('at least 6') > -1 || m.indexOf('password should be') > -1) return 'Password must be at least 6 characters.';
   if (m.indexOf('email not confirmed') > -1) return 'This account still needs its email confirmed. In Supabase, turn OFF "Confirm email" so people can log in instantly.';
   if (m.indexOf('signups not allowed') > -1 || m.indexOf('signup is disabled') > -1 || m.indexOf('disabled') > -1) return 'New sign-ups are switched off in Supabase (Authentication > Sign In / Providers > Email > Enable email signups).';
+  if (m.indexOf('email rate limit') > -1) return 'Supabase\'s email limit was reached (confirmation emails are switched on). Please try again in a few minutes.';
   if (m.indexOf('rate limit') > -1 || m.indexOf('too many') > -1 || m.indexOf('for security purposes') > -1) return 'Too many attempts just now - wait a minute and try again.';
   if (m.indexOf('unable to validate email') > -1 || m.indexOf('invalid email') > -1) return 'That email address looks invalid.';
   if (m.indexOf('weak') > -1) return 'That password is too easy - mix letters and numbers.';
