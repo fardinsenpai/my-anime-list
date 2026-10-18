@@ -4996,12 +4996,20 @@ body.perf-no-heading-anim .header h1::after { animation: none !important; }
   width: 24px;
   height: 24px;
   border-radius: 50%;
-  object-fit: cover;
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  flex: 0 0 auto;
   border: 1px solid rgba(255,255,255,0.45);
   background: rgba(255,255,255,0.1);
 }
 .account-av[hidden] { display: none; }
+.account-av img, .account-pop-av img {
+  width: 100%; height: 100%; object-fit: cover; object-position: 50% 10%;
+  border-radius: 50%; display: block;
+}
+.account-av svg { width: 15px; height: 15px; }
 .account-txt { max-width: 108px; overflow: hidden; text-overflow: ellipsis; }
 
 .account-flash { animation: accFlash 0.55s ease 3; }
@@ -5261,10 +5269,14 @@ body.perf-no-heading-anim .header h1::after { animation: none !important; }
 
 .account-pop-head { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
 .account-pop-av {
-  width: 40px; height: 40px; border-radius: 50%; object-fit: cover;
-  border: 1px solid rgba(255,255,255,0.4); flex: 0 0 auto;
+  width: 40px; height: 40px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden; flex: 0 0 auto;
+  border: 1px solid rgba(255,255,255,0.4);
+  background: rgba(255,255,255,0.08);
 }
 .account-pop-av[hidden] { display: none; }
+.account-pop-av svg { width: 25px; height: 25px; }
 .account-pop-name { font-family: 'Orbitron', monospace; font-size: 0.8rem; font-weight: 700; color: #f5c518; }
 .account-pop-mail { font-size: 0.78rem; color: #b9b9d0; word-break: break-all; }
 

@@ -2932,6 +2932,7 @@ function applyMyAvatarChange() {
   refreshChatAvatarSelection();
   updateMyAvatarPreview();
   renderCharGrids();
+  try { renderAccountUI(); } catch (e) {}   // the topbar chip + card follow the new avatar
 }
 
 function chooseMyAvatar(value) {
@@ -6168,10 +6169,37 @@ function authUserFrom(session) {
     id: u.id || '',
     email: u.email || '',
     phone: phone,
-    name: full || first || '',
-    first: first || '',
+    // names are always shown in CAPITALS, whoever they signed in with
+    name: String(full || first || '').toUpperCase(),
+    first: String(first || '').toUpperCase(),
     avatar: authPhoto(m.avatar_url || m.picture || '')
   };
+}
+
+// Show — in the topbar chip and in the account card — the avatar the person is using
+// right now: their own pick, their Google photo, or the site default. Picture or character.
+function paintAccountAvatar(el) {
+  if (!el) return;
+  if (!AUTH_USER) { el.hidden = true; el.innerHTML = ''; return; }
+  var spec = avatarSpec('user');
+  if (spec.kind === 'img') {
+    el.innerHTML = '';
+    el.style.background = 'rgba(255,255,255,0.08)';
+    el.style.borderColor = 'rgba(255,255,255,0.35)';
+    el.style.boxShadow = 'none';
+    var im = document.createElement('img');
+    im.alt = '';
+    im.onerror = function() { paintAvatarFallback(el, 'user'); };   // never show a broken-image icon
+    im.src = spec.src;
+    el.appendChild(im);
+  } else {
+    var p = AVATAR_PRESETS[spec.id];
+    el.style.background = p.bg;
+    el.style.borderColor = p.border;
+    el.style.boxShadow = p.glow;
+    el.innerHTML = p.svg;
+  }
+  el.hidden = false;
 }
 
 // The visitor's Google photo, used as their own chat avatar until they pick one in ⚙️
@@ -6208,29 +6236,20 @@ function renderAccountUI() {
 
   if (AUTH_USER) {
     btn.setAttribute('title', 'Signed in as ' + (AUTH_USER.first || AUTH_USER.email) + ' — click for options');
-    if (av) {
-      if (AUTH_USER.avatar) {
-        av.onerror = function() { av.hidden = true; };   // never show a broken-image icon
-        av.src = AUTH_USER.avatar; av.hidden = false;
-      } else { av.hidden = true; av.removeAttribute('src'); }
-    }
+    paintAccountAvatar(av);            // their CURRENT avatar first…
     if (gIc) gIc.hidden = true;
     if (txt) txt.textContent = AUTH_USER.first || 'Signed in';
-    if (popName) popName.textContent = AUTH_USER.name || AUTH_USER.first || 'Signed in';
+    if (popName) popName.textContent = AUTH_USER.name || AUTH_USER.first || 'Signed in';   // …then the name, in capitals
     if (popMail) {
       var mailTxt = AUTH_USER.phone || AUTH_USER.email || '';
       if (String(mailTxt).indexOf(PHONE_SUFFIX) > -1) mailTxt = String(mailTxt).replace(PHONE_SUFFIX, '');   // show the number, not the internal id
       popMail.textContent = mailTxt;
     }
-    if (popAv) {
-      if (AUTH_USER.avatar) {
-        popAv.onerror = function() { popAv.hidden = true; };   // ditto for the card's photo
-        popAv.src = AUTH_USER.avatar; popAv.hidden = false;
-      } else { popAv.hidden = true; popAv.removeAttribute('src'); }
-    }
+    paintAccountAvatar(popAv);
   } else {
     btn.setAttribute('title', 'Sign in with Google');
-    if (av) { av.hidden = true; av.removeAttribute('src'); }
+    paintAccountAvatar(av);
+    paintAccountAvatar(popAv);
     if (gIc) gIc.hidden = false;
     if (txt) txt.textContent = 'Sign in';
     if (pop) { pop.hidden = true; btn.setAttribute('aria-expanded', 'false'); }
@@ -6628,6 +6647,7 @@ function useGooglePhotoForAvatar() {
   refreshWelcomeSelection();
   updateWelcomePreview();
   renderCharGrids();
+  try { renderAccountUI(); } catch (e) {}   // keep the topbar chip + card in step
   chatToast('Your Google photo is now your avatar ✨');
 }
 
