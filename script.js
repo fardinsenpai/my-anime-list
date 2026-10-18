@@ -6114,6 +6114,10 @@ var AUTH_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsIn
 // would throw a temporal-dead-zone error and break the rest of the file.
 var AUTH_USER = null;        // { id, email, name, first, avatar } or null
 var authClientRef = null;
+// A phone number used as a login name is stored internally as "<digits>@phone.example.com"
+// so it can work exactly like an email address with a password — no SMS provider needed.
+// example.com is a reserved domain (RFC 2606), so no real mailbox can ever collide with it.
+var PHONE_SUFFIX = '@phone.example.com';
 
 function authEsc(s) {
   return String(s == null ? '' : s).replace(/[&<>"']/g, function(c) {
@@ -6150,13 +6154,19 @@ function authUserFrom(session) {
   var u = session && session.user;
   if (!u) return null;
   var m = u.user_metadata || {};
-  var full = String(m.full_name || m.name || '').trim();
-  var first = String(m.given_name || '').trim() ||
+  var fn = String(m.first_name || '').trim();
+  var ln = String(m.last_name || '').trim();
+  var full = String(m.full_name || m.name || ((fn || ln) ? (fn + ' ' + ln).trim() : '')).trim();
+  var phone = String(m.phone || '').trim();
+  var isPhoneAccount = u.email ? String(u.email).indexOf(PHONE_SUFFIX) > -1 : false;
+  var first = String(m.given_name || fn).trim() ||
               (full ? full.split(/\s+/)[0] : '') ||
-              (u.email ? String(u.email).split('@')[0] : '');
+              (isPhoneAccount ? '' : (u.email ? String(u.email).split('@')[0] : '')) ||
+              phone;
   return {
     id: u.id || '',
     email: u.email || '',
+    phone: phone,
     name: full || first || '',
     first: first || '',
     avatar: authPhoto(m.avatar_url || m.picture || '')
@@ -6206,7 +6216,11 @@ function renderAccountUI() {
     if (gIc) gIc.hidden = true;
     if (txt) txt.textContent = AUTH_USER.first || 'Signed in';
     if (popName) popName.textContent = AUTH_USER.name || AUTH_USER.first || 'Signed in';
-    if (popMail) popMail.textContent = AUTH_USER.email || '';
+    if (popMail) {
+      var mailTxt = AUTH_USER.phone || AUTH_USER.email || '';
+      if (String(mailTxt).indexOf(PHONE_SUFFIX) > -1) mailTxt = String(mailTxt).replace(PHONE_SUFFIX, '');   // show the number, not the internal id
+      popMail.textContent = mailTxt;
+    }
     if (popAv) {
       if (AUTH_USER.avatar) {
         popAv.onerror = function() { popAv.hidden = true; };   // ditto for the card's photo
@@ -6237,6 +6251,7 @@ function setAuthUser(session, opts) {
   renderAccountUI();
   if (idChanged) {
     applyAuthToChat();
+    if (next) closeLoginPage();   // hide the login page the moment they're in
     // keep the chat's stored system message in step with who is signed in
     // (this is the message that carries the "call them by name" rule)
     try {
@@ -6314,7 +6329,7 @@ function initGoogleAuth() {
   if (btn) btn.addEventListener('click', function(e) {
     e.preventDefault();
     if (AUTH_USER) toggleAccountPop();
-    else startGoogleSignIn();
+    else openLoginPage('in');   // the full login page: Google, or email/phone + password
   });
 
   if (popBtn) popBtn.addEventListener('click', function(e) {
@@ -6331,6 +6346,8 @@ function initGoogleAuth() {
       ? path.indexOf(area) > -1
       : (!!area && e.target instanceof Element && area.contains(e.target));
     if (inside) return;
+    // the login page's Google button opens the small Google popover in this same click
+    if (e.target && e.target.closest && e.target.closest('#lgGoogleBtn')) return;
     var pop = document.getElementById('accountPop');
     if (pop && !pop.hidden) toggleAccountPop(false);
     gsiClosePop();
@@ -6644,6 +6661,201 @@ async function welcomeAvatarFile(input) {
     if (grid) grid.addEventListener('click', function() {
       window.setTimeout(function() { refreshWelcomeSelection(); updateWelcomePreview(); }, 0);
     });
+  }
+  if (document.readyState === 'complete' || document.readyState === 'interactive') wire();
+  else document.addEventListener('DOMContentLoaded', wire);
+})();
+
+/* ══════════════════════════════════════════════════════════════════════
+   🔐 LOGIN PAGE — email/phone + password, or Google.
+   • Create account: First name, Surname, Email (or phone), Password.
+   • A phone number works as the login name too: it is stored internally as
+     8801712345678@phone.example.com, so it behaves exactly like an email
+     address + password. No SMS is ever sent (that would need a paid provider).
+   • Nothing is verified, so there is nothing to wait for — create it and
+     you are straight in. The account lives in Supabase → Authentication → Users.
+   • Purely additive: Google sign-in and every existing feature are untouched.
+   ══════════════════════════════════════════════════════════════════════ */
+
+var LG_MODE = 'in';   // 'in' = log in · 'up' = create account
+
+// 01712 345678 · +880 1712-345678 and 8801712345678 must all be the same person
+function loginPhoneDigits(raw) {
+  var d = String(raw || '').replace(/[^0-9]/g, '');
+  if (d.length === 11 && d.charAt(0) === '0') return '880' + d.slice(1);   // 01… (Bangladesh)
+  if (d.length === 14 && d.indexOf('8800') === 0) return '880' + d.slice(4);
+  return d;
+}
+
+// an email stays as it is; a phone number becomes <digits>@phone.example.com
+function loginIdToEmail(ident) {
+  var s = String(ident || '').trim();
+  if (!s) return '';
+  if (s.indexOf('@') > -1) return s.toLowerCase();
+  var d = loginPhoneDigits(s);
+  return d.length >= 8 ? d + PHONE_SUFFIX : '';
+}
+
+function loginIsPhone(ident) {
+  var s = String(ident || '').trim();
+  return s.indexOf('@') === -1 && loginPhoneDigits(s).length >= 8;
+}
+
+// Turn Supabase's technical errors into something a visitor can act on
+function loginErrText(msg) {
+  var m = String(msg || '').toLowerCase();
+  if (m.indexOf('invalid login credentials') > -1) return 'Wrong email/phone or password. Please try again.';
+  if (m.indexOf('already registered') > -1) return 'That email or phone already has an account - switch to "Log in".';
+  if (m.indexOf('at least 6') > -1 || m.indexOf('password should be') > -1) return 'Password must be at least 6 characters.';
+  if (m.indexOf('email not confirmed') > -1) return 'This account still needs its email confirmed. In Supabase, turn OFF "Confirm email" so people can log in instantly.';
+  if (m.indexOf('signups not allowed') > -1 || m.indexOf('signup is disabled') > -1 || m.indexOf('disabled') > -1) return 'New sign-ups are switched off in Supabase (Authentication > Sign In / Providers > Email > Enable email signups).';
+  if (m.indexOf('rate limit') > -1 || m.indexOf('too many') > -1 || m.indexOf('for security purposes') > -1) return 'Too many attempts just now - wait a minute and try again.';
+  if (m.indexOf('unable to validate email') > -1 || m.indexOf('invalid email') > -1) return 'That email address looks invalid.';
+  if (m.indexOf('weak') > -1) return 'That password is too easy - mix letters and numbers.';
+  return msg ? String(msg) : 'Something went wrong. Please try again.';
+}
+
+function lgSetMsg(text, kind) {
+  var el = document.getElementById('lgMsg');
+  if (!el) return;
+  el.hidden = !text;
+  el.textContent = text || '';
+  el.className = 'lg-msg' + (kind ? ' ' + kind : '');
+}
+
+function lgBusy(on) {
+  var b = document.getElementById('lgSubmit');
+  if (!b) return;
+  b.disabled = !!on;
+  b.textContent = on ? 'Working...' : (LG_MODE === 'up' ? 'Create account' : 'Log in');
+}
+
+function setLoginMode(mode) {
+  LG_MODE = mode === 'up' ? 'up' : 'in';
+  var up = LG_MODE === 'up';
+  var row = document.getElementById('lgNameRow');
+  if (row) row.hidden = !up;
+  var t = document.getElementById('lgTitle');
+  if (t) t.textContent = up ? 'Create your account' : 'Log in';
+  var s = document.getElementById('lgSub');
+  if (s) s.textContent = up
+    ? 'Your first name, an email or phone number, and a password. Nothing to confirm.'
+    : 'Use your email or phone number with your password.';
+  var tabIn = document.getElementById('lgTabIn'), tabUp = document.getElementById('lgTabUp');
+  if (tabIn) tabIn.classList.toggle('on', !up);
+  if (tabUp) tabUp.classList.toggle('on', up);
+  var pass = document.getElementById('lgPass');
+  if (pass) pass.setAttribute('autocomplete', up ? 'new-password' : 'current-password');
+  lgSetMsg('');
+  lgBusy(false);
+}
+
+function openLoginPage(mode) {
+  var ov = document.getElementById('loginPage');
+  if (!ov) return;
+  setLoginMode(mode);
+  ov.hidden = false;
+  var up = LG_MODE === 'up';
+  window.setTimeout(function() {
+    var f = document.getElementById(up ? 'lgFirst' : 'lgIdent');
+    if (f) { try { f.focus(); } catch (e) {} }
+  }, 80);
+}
+
+function closeLoginPage() {
+  var ov = document.getElementById('loginPage');
+  if (ov && !ov.hidden) ov.hidden = true;
+  if (String(location.hash || '').toLowerCase().indexOf('login') > -1) {
+    try { history.replaceState(null, '', location.pathname + location.search); } catch (e) {}
+  }
+}
+
+async function lgDoSubmit(ev) {
+  if (ev && ev.preventDefault) ev.preventDefault();
+  var c = authClient();
+  if (!c) { lgSetMsg('Sign-in is not available right now — check your connection.', 'bad'); return; }
+
+  var up = LG_MODE === 'up';
+  var first = String((document.getElementById('lgFirst') || {}).value || '').trim();
+  var last = String((document.getElementById('lgLast') || {}).value || '').trim();
+  var ident = String((document.getElementById('lgIdent') || {}).value || '').trim();
+  var pass = String((document.getElementById('lgPass') || {}).value || '');
+
+  if (up && !first) { lgSetMsg('Please write your first name.', 'bad'); return; }
+  if (!ident) { lgSetMsg('Please write your email or your phone number.', 'bad'); return; }
+  var email = loginIdToEmail(ident);
+  if (!email) { lgSetMsg('That does not look like an email or a phone number.', 'bad'); return; }
+  if (!pass) { lgSetMsg('Please write a password.', 'bad'); return; }
+  if (up && pass.length < 6) { lgSetMsg('Password must be at least 6 characters.', 'bad'); return; }
+
+  lgBusy(true);
+  lgSetMsg('');
+  try {
+    if (up) {
+      var meta = { first_name: first, last_name: last, full_name: (first + ' ' + last).trim() };
+      if (loginIsPhone(ident)) meta.phone = loginPhoneDigits(ident);
+      var res = await c.auth.signUp({ email: email, password: pass, options: { data: meta } });
+      if (res && res.error) { lgSetMsg(loginErrText(res.error.message), 'bad'); lgBusy(false); return; }
+      if (!(res && res.data && res.data.session)) {
+        // only happens if "Confirm email" is still ON in Supabase
+        lgSetMsg('Account created - now log in with the same email/phone and password.', 'good');
+        setLoginMode('in');
+        var idf = document.getElementById('lgIdent');
+        if (idf) idf.value = ident;
+      }
+      // signed in: setAuthUser() closes this page and the avatar popup takes over
+    } else {
+      var r2 = await c.auth.signInWithPassword({ email: email, password: pass });
+      if (r2 && r2.error) { lgSetMsg(loginErrText(r2.error.message), 'bad'); lgBusy(false); return; }
+    }
+  } catch (e) {
+    lgSetMsg('Something went wrong. Check your internet and try again.', 'bad');
+    lgBusy(false);
+    return;
+  }
+  lgBusy(false);
+}
+
+(function loginPageWire() {
+  function wire() {
+    var ov = document.getElementById('loginPage');
+    if (!ov) return;
+
+    var form = document.getElementById('lgForm');
+    if (form) form.addEventListener('submit', lgDoSubmit);
+
+    var x = document.getElementById('lgClose');
+    if (x) x.addEventListener('click', closeLoginPage);
+    ov.addEventListener('click', function(e) { if (e.target === ov) closeLoginPage(); });
+
+    var tIn = document.getElementById('lgTabIn');
+    if (tIn) tIn.addEventListener('click', function() { setLoginMode('in'); });
+    var tUp = document.getElementById('lgTabUp');
+    if (tUp) tUp.addEventListener('click', function() { setLoginMode('up'); });
+
+    var eye = document.getElementById('lgEye');
+    if (eye) eye.addEventListener('click', function() {
+      var p = document.getElementById('lgPass');
+      if (!p) return;
+      var show = p.type === 'password';
+      p.type = show ? 'text' : 'password';
+      eye.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
+    });
+
+    var g = document.getElementById('lgGoogleBtn');
+    if (g) g.addEventListener('click', function(e) {
+      e.preventDefault();
+      startGoogleSignIn();   // the small Google popover, raised above this page
+    });
+
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && !ov.hidden) closeLoginPage();
+    });
+
+    // /#login opens it straight away, so the page can be linked to
+    if (String(location.hash || '').toLowerCase().indexOf('login') > -1) {
+      window.setTimeout(function() { openLoginPage('in'); }, 300);
+    }
   }
   if (document.readyState === 'complete' || document.readyState === 'interactive') wire();
   else document.addEventListener('DOMContentLoaded', wire);

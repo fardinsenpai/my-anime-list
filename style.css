@@ -5069,6 +5069,118 @@ body.perf-no-heading-anim .header h1::after { animation: none !important; }
 }
 .gsi-basic:hover { border-color: rgba(245,197,24,0.7); color: #F5C518; }
 
+/* === 🔐 LOGIN / CREATE ACCOUNT PAGE === */
+.lg-overlay {
+  position: fixed; inset: 0; z-index: 10040;
+  display: flex; align-items: center; justify-content: center; padding: 16px;
+  background: rgba(2,2,8,0.86);
+  -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px);
+  overflow-y: auto;
+}
+.lg-overlay[hidden] { display: none; }
+.lg-card {
+  position: relative;
+  width: min(400px, 100%);
+  margin: auto;
+  padding: 22px 20px 18px;
+  border-radius: 18px;
+  border: 1px solid rgba(245,197,24,0.28);
+  background: radial-gradient(circle at 20% 0%, rgba(245,197,24,0.10), transparent 55%), linear-gradient(180deg, #16162a, #0b0b14);
+  box-shadow: 0 26px 70px rgba(0,0,0,0.75);
+  animation: lgIn 0.2s ease;
+}
+@keyframes lgIn { from { opacity: 0; transform: translateY(14px) scale(0.985); } to { opacity: 1; transform: none; } }
+.lg-x {
+  position: absolute; top: 10px; right: 10px;
+  width: 30px; height: 30px; border-radius: 9px;
+  background: rgba(255,255,255,0.05); border: 1px solid rgba(245,197,24,0.25);
+  color: #d9c27a; font-size: 13px; cursor: pointer; transition: all 0.18s;
+}
+.lg-x:hover { background: rgba(245,197,24,0.14); color: #F5C518; }
+.lg-brand {
+  font-family: 'Orbitron','Segoe UI',sans-serif;
+  font-size: 0.6rem; letter-spacing: 1.8px; color: #F5C518; opacity: 0.85;
+  margin-bottom: 10px;
+}
+.lg-title {
+  font-family: 'Orbitron','Segoe UI',sans-serif;
+  font-size: 1.22rem; font-weight: 900; color: #fff; margin-bottom: 5px;
+}
+.lg-sub { font-family: 'Rajdhani','Segoe UI',sans-serif; font-size: 0.84rem; line-height: 1.45; color: #a9a9c2; margin-bottom: 14px; }
+.lg-tabs {
+  display: flex; gap: 6px; margin-bottom: 14px; padding: 4px;
+  border-radius: 11px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07);
+}
+.lg-tab {
+  flex: 1; padding: 8px 6px; border-radius: 8px; cursor: pointer;
+  background: none; border: 1px solid transparent; color: #b9b9cf;
+  font-family: 'Rajdhani','Segoe UI',sans-serif; font-weight: 700; font-size: 0.84rem; letter-spacing: 0.5px;
+}
+.lg-tab:hover { color: #fff; }
+.lg-tab.on { background: rgba(245,197,24,0.16); border-color: rgba(245,197,24,0.45); color: #F5C518; }
+.lg-row2 { display: flex; gap: 8px; }
+.lg-row2[hidden] { display: none; }
+.lg-row2 .lg-field { flex: 1; min-width: 0; }
+.lg-field { display: block; margin-bottom: 10px; }
+.lg-lab {
+  display: block; font-family: 'Rajdhani','Segoe UI',sans-serif;
+  font-size: 0.7rem; letter-spacing: 1px; color: #8f8fa6;
+  margin-bottom: 5px; text-transform: uppercase;
+}
+.lg-field input {
+  width: 100%; box-sizing: border-box;
+  background: rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 10px; padding: 11px 12px; color: #fff;
+  font-family: 'Rajdhani','Segoe UI',sans-serif; font-size: 0.95rem;
+}
+.lg-field input::placeholder { color: #6e6e88; }
+.lg-field input:focus { outline: none; border-color: rgba(245,197,24,0.65); box-shadow: 0 0 0 3px rgba(245,197,24,0.12); }
+.lg-passwrap { position: relative; display: block; }
+.lg-eye {
+  position: absolute; right: 5px; top: 50%; transform: translateY(-50%);
+  background: none; border: none; color: #8f8fa6; font-size: 15px; cursor: pointer; padding: 4px 7px;
+}
+.lg-eye:hover { color: #F5C518; }
+.lg-submit {
+  width: 100%; margin-top: 4px; padding: 12px; border-radius: 11px; cursor: pointer;
+  border: 1px solid rgba(245,197,24,0.55);
+  background: linear-gradient(180deg, rgba(245,197,24,0.30), rgba(245,197,24,0.16));
+  color: #fff; font-family: 'Rajdhani','Segoe UI',sans-serif;
+  font-weight: 700; font-size: 0.95rem; letter-spacing: 1px; transition: all 0.18s;
+}
+.lg-submit:hover { background: rgba(245,197,24,0.38); }
+.lg-submit:disabled { opacity: 0.55; cursor: default; }
+.lg-msg {
+  margin-top: 10px; padding: 9px 11px; border-radius: 9px;
+  background: rgba(255,255,255,0.05); color: #d7d7e6;
+  font-family: 'Rajdhani','Segoe UI',sans-serif; font-size: 0.84rem; line-height: 1.45;
+}
+.lg-msg[hidden] { display: none; }
+.lg-msg.bad { background: rgba(255,70,70,0.14); border: 1px solid rgba(255,70,70,0.4); color: #ffb3b3; }
+.lg-msg.good { background: rgba(60,220,130,0.12); border: 1px solid rgba(60,220,130,0.4); color: #a9f0c6; }
+.lg-or {
+  display: flex; align-items: center; gap: 10px; margin: 16px 0 12px;
+  color: #6e6e88; font-family: 'Rajdhani','Segoe UI',sans-serif; font-size: 0.7rem; letter-spacing: 1.6px;
+}
+.lg-or::before, .lg-or::after { content: ''; flex: 1; height: 1px; background: rgba(255,255,255,0.1); }
+.lg-google {
+  width: 100%; display: inline-flex; align-items: center; justify-content: center; gap: 9px;
+  padding: 11px; border-radius: 11px; cursor: pointer;
+  background: #ffffff; border: 1px solid #dadce0; color: #3c4043;
+  font-family: 'Rajdhani','Segoe UI',sans-serif; font-weight: 700; font-size: 0.92rem;
+}
+.lg-google:hover { background: #f4f4f5; }
+.lg-note {
+  margin-top: 12px; font-family: 'Rajdhani','Segoe UI',sans-serif;
+  font-size: 0.7rem; line-height: 1.5; color: #6e6e88;
+}
+/* the small Google popover must float ABOVE the login page */
+.gsi-pop { z-index: 10080; }
+@media (max-width: 420px) {
+  .lg-row2 { display: block; }
+  .lg-card { padding: 20px 14px 16px; }
+}
+
 /* === 🎴 "CHOOSE YOUR AVATAR" — the popup shown right after signing in.
    Same 9 presets + same live AniList gallery as the chat's ⚙️ picker.
    The .av-* base classes in this file are the green admin theme, so the
