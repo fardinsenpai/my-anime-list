@@ -2309,18 +2309,25 @@ function addMessage(text, type, shouldSave = true) {
 
   // USER MESSAGE → instant
   if (type === 'user') {
+    const bubble = document.createElement('div');
+    bubble.className = 'msg-bubble';
     const userSpan = document.createElement('span');
     userSpan.textContent = text;
-    msgDiv.appendChild(userSpan);
+    bubble.appendChild(userSpan);
+    msgDiv.appendChild(bubble);
     addMessageActions(msgDiv);
   }
 
   // BOT MESSAGE → animated typing effect
   else if (type === 'bot') {
 
+    const bubble = document.createElement('div');
+    bubble.className = 'msg-bubble';
+
     // Create span for animated text
     const textSpan = document.createElement('span');
-    msgDiv.appendChild(textSpan);
+    bubble.appendChild(textSpan);
+    msgDiv.appendChild(bubble);
 
     // Copy/share are available right away — they always use the full text (dataset.raw)
     addMessageActions(msgDiv);
@@ -2365,10 +2372,12 @@ function addMessage(text, type, shouldSave = true) {
   // TYPING INDICATOR
   else if (type.includes('typing')) {
     msgDiv.innerHTML = `
-      <div class="typing-animation">
-        <span></span>
-        <span></span>
-        <span></span>
+      <div class="msg-bubble">
+        <div class="typing-animation">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
       </div>
     `;
   }
