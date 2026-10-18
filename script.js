@@ -6748,6 +6748,12 @@ function setLoginMode(mode) {
   if (tabUp) tabUp.classList.toggle('on', up);
   var pass = document.getElementById('lgPass');
   if (pass) pass.setAttribute('autocomplete', up ? 'new-password' : 'current-password');
+  var f2 = document.getElementById('lgPass2Field');
+  if (f2) f2.hidden = !up;                 // the "confirm password" box only exists when creating
+  if (!up) {
+    var p2 = document.getElementById('lgPass2');
+    if (p2) p2.value = '';
+  }
   lgSetMsg('');
   lgBusy(false);
 }
@@ -6782,6 +6788,9 @@ async function lgDoSubmit(ev) {
   var last = String((document.getElementById('lgLast') || {}).value || '').trim();
   var ident = String((document.getElementById('lgIdent') || {}).value || '').trim();
   var pass = String((document.getElementById('lgPass') || {}).value || '');
+  var pass2 = String((document.getElementById('lgPass2') || {}).value || '');
+  first = first.toUpperCase();                     // names are always kept in capital letters
+  last = last.toUpperCase();
 
   if (up && !first) { lgSetMsg('Please write your first name.', 'bad'); return; }
   if (!ident) { lgSetMsg('Please write your email or your phone number.', 'bad'); return; }
@@ -6789,6 +6798,12 @@ async function lgDoSubmit(ev) {
   if (!email) { lgSetMsg('That does not look like an email or a phone number.', 'bad'); return; }
   if (!pass) { lgSetMsg('Please write a password.', 'bad'); return; }
   if (up && pass.length < 6) { lgSetMsg('Password must be at least 6 characters.', 'bad'); return; }
+  if (up && pass2 !== pass) {
+    lgSetMsg('The two passwords do not match — please type the same password twice.', 'bad');
+    var p2f = document.getElementById('lgPass2');
+    if (p2f) { try { p2f.focus(); } catch (e) {} }
+    return;
+  }
 
   lgBusy(true);
   lgSetMsg('');

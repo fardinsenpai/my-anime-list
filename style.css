@@ -5122,6 +5122,9 @@ body.perf-no-heading-anim .header h1::after { animation: none !important; }
 .lg-row2[hidden] { display: none; }
 .lg-row2 .lg-field { flex: 1; min-width: 0; }
 .lg-field { display: block; margin-bottom: 10px; }
+.lg-field[hidden] { display: none; }
+/* the person's name is always stored and shown in capital letters */
+#lgFirst, #lgLast { text-transform: uppercase; letter-spacing: 0.6px; }
 .lg-lab {
   display: block; font-family: 'Rajdhani','Segoe UI',sans-serif;
   font-size: 0.7rem; letter-spacing: 1px; color: #8f8fa6;
