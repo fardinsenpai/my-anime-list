@@ -1596,16 +1596,16 @@
       <!-- TAB: AI Chatbot Model -->
       <div class="admin-g-content" id="tabAi">
         <div style="font-size:10px;color:rgba(0,255,65,0.7);font-family:monospace;margin-bottom:6px;">// CHATBOT MODEL //</div>
-        <div id="aiModelStatus" style="font-size:11px;color:#00ff41;font-family:monospace;margin-bottom:8px;">active: default chain</div>
+        <div id="aiModelStatus" style="font-size:11px;color:#00ff41;font-family:monospace;margin-bottom:8px;">current: …</div>
         <div class="admin-g-label">Groq chat models (live list, newest first)</div>
         <select id="aiModelSelect" class="admin-g-input" style="width:100%;padding:6px 8px;font-size:11px;">
           <option value="">— press REFRESH LIST —</option>
         </select>
         <div id="aiModelListStatus" style="font-size:9px;color:rgba(0,255,65,0.6);font-family:monospace;margin:6px 0;"></div>
         <button class="admin-g-btn" onclick="refreshAiModels()">⟳ REFRESH LIST</button>
-        <button class="admin-g-btn" onclick="saveAiModel()">▶ SAVE FOR EVERYONE</button>
+        <button class="admin-g-btn" onclick="saveAiModel()">⬆ UPDATE ON GITHUB</button>
         <button class="admin-g-btn" onclick="resetAiModel()" style="background:transparent;border:1px solid rgba(255,51,85,0.6);color:#ff3355;">↺ DEFAULT CHAIN</button>
-        <div style="font-size:9px;color:rgba(0,255,65,0.5);font-family:monospace;margin-top:8px;line-height:1.6;">Saved model = first choice for every visitor (stored in Supabase).<br>If it ever dies, the chatbot auto-falls to the default chain.</div>
+        <div style="font-size:9px;color:rgba(0,255,65,0.5);font-family:monospace;margin-top:8px;line-height:1.6;">UPDATE ON GITHUB = rewrites the GROQ_MODELS line in script.js<br>(selected model becomes first choice, older ones stay as fallbacks).<br>Needs your PAT. Live for everyone in ~1 minute.</div>
       </div>
 
       <!-- PAT display -->

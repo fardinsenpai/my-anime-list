@@ -2025,34 +2025,8 @@ let currentKeyIndex = 0;
 
 // Groq retires models occasionally — keep a fallback chain so the bot
 // never dies on "model_not_found" (404) again.
-const GROQ_MODELS = ['openai/gpt-oss-120b', 'qwen/qwen3.8-27b', 'openai/gpt-oss-20b'];
+let GROQ_MODELS = ['openai/gpt-oss-120b', 'qwen/qwen3.8-27b', 'openai/gpt-oss-20b'];
 let currentModelIndex = 0;
-
-// ===== Admin-panel model override (stored in Supabase site_config) =====
-const CHAT_MODEL_CONFIG_KEY = 'chatbot_model';
-const CHAT_MODEL_LS_KEY = 'fardin_chat_model';
-let activeChatModel = '';
-try { activeChatModel = localStorage.getItem(CHAT_MODEL_LS_KEY) || ''; } catch (e) {}
-
-function getModelChain() {
-  if (!activeChatModel) return GROQ_MODELS;
-  return [activeChatModel].concat(GROQ_MODELS.filter(m => m !== activeChatModel));
-}
-
-function loadChatModelConfig() {
-  if (typeof SUPABASE_URL === 'undefined' || typeof SUPABASE_KEY === 'undefined') return;
-  fetch(SUPABASE_URL + '/rest/v1/site_config?key=eq.' + CHAT_MODEL_CONFIG_KEY + '&select=value', {
-    headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
-  }).then(function (r) {
-    if (!r.ok) throw new Error('HTTP ' + r.status);
-    return r.json();
-  }).then(function (rows) {
-    var v = (rows && rows[0] && rows[0].value) ? rows[0].value : '';
-    activeChatModel = v;
-    try { localStorage.setItem(CHAT_MODEL_LS_KEY, v); } catch (e) {}
-  }).catch(function () { /* keep cached choice / defaults */ });
-}
-window.addEventListener('load', loadChatModelConfig);
 
 function getNextKeyIndex() {
   currentKeyIndex = (currentKeyIndex + 1) % GROQ_API_KEYS.length;
@@ -2062,12 +2036,11 @@ function getNextKeyIndex() {
 async function fetchWithFallback(body) {
   let lastError = null;
   let attempts = 0;
-  const chain = getModelChain();
-  const maxAttempts = GROQ_API_KEYS.length * chain.length;
+  const maxAttempts = GROQ_API_KEYS.length * GROQ_MODELS.length;
 
   while (attempts < maxAttempts) {
     const key = GROQ_API_KEYS[currentKeyIndex];
-    const model = chain[currentModelIndex % chain.length];
+    const model = GROQ_MODELS[currentModelIndex % GROQ_MODELS.length];
     try {
       const res = await fetch(apiUrl, {
         method: 'POST',
@@ -2080,7 +2053,7 @@ async function fetchWithFallback(body) {
       if (res.ok) return res;
       if (res.status === 404) {
         // Model retired/unknown — try the next model in the chain
-        currentModelIndex = (currentModelIndex + 1) % chain.length;
+        currentModelIndex = (currentModelIndex + 1) % GROQ_MODELS.length;
         attempts++;
         continue;
       }
@@ -4014,10 +3987,12 @@ function switchAdminTab(tab) {
   if (tab === 'ai') { updateAiStatus(); refreshAiModels(); }
 }
 
-// ===== AI CHATBOT MODEL PICKER (admin) =====
+// ===== AI CHATBOT MODEL PICKER (admin — rewrites GROQ_MODELS in script.js on GitHub) =====
+var GROQ_MODELS_DEFAULT = ['openai/gpt-oss-120b', 'qwen/qwen3.8-27b', 'openai/gpt-oss-20b'];
+
 function updateAiStatus() {
   var el = document.getElementById('aiModelStatus');
-  if (el) el.textContent = 'active: ' + (activeChatModel || 'default chain');
+  if (el) el.textContent = 'current in script.js: ' + GROQ_MODELS[0] + '  (+ ' + (GROQ_MODELS.length - 1) + ' fallbacks)';
 }
 
 async function refreshAiModels() {
@@ -4041,7 +4016,6 @@ async function refreshAiModels() {
       var d = m.created ? new Date(m.created * 1000).toISOString().slice(0, 10) : '';
       return '<option value="' + m.id.replace(/"/g, '&quot;') + '">' + m.id + (d ? '  ·  added ' + d : '') + '</option>';
     }).join('');
-    if (activeChatModel) sel.value = activeChatModel;
     status.textContent = list.length + ' chat models found (newest first)';
   } catch (e) {
     status.textContent = 'Could not load list: ' + e.message;
@@ -4051,34 +4025,32 @@ async function refreshAiModels() {
 function saveAiModel() {
   var sel = document.getElementById('aiModelSelect');
   if (!sel || !sel.value) { msgFail('No model selected — press REFRESH LIST first'); return; }
-  saveChatModelSetting(sel.value);
+  var chain = [sel.value].concat(GROQ_MODELS.filter(function(m) { return m !== sel.value; })).slice(0, 5);
+  updateModelOnGithub(chain, 'set primary model to ' + sel.value);
 }
 
 function resetAiModel() {
-  saveChatModelSetting('');
+  updateModelOnGithub(GROQ_MODELS_DEFAULT.slice(), 'restore default model chain');
 }
 
-function saveChatModelSetting(value) {
-  if (typeof SUPABASE_URL === 'undefined' || typeof SUPABASE_KEY === 'undefined') { msgFail('Supabase not loaded'); return; }
-  fetch(SUPABASE_URL + '/rest/v1/site_config', {
-    method: 'POST',
-    headers: {
-      'apikey': SUPABASE_KEY,
-      'Authorization': 'Bearer ' + SUPABASE_KEY,
-      'Content-Type': 'application/json',
-      'Prefer': 'resolution=merge-duplicates'
-    },
-    body: JSON.stringify({ key: CHAT_MODEL_CONFIG_KEY, value: value, updatedAt: new Date().toISOString() })
-  }).then(function(r) {
-    if (!r.ok) throw new Error('HTTP ' + r.status);
-    activeChatModel = value;
-    try { localStorage.setItem(CHAT_MODEL_LS_KEY, value); } catch (e) {}
+async function updateModelOnGithub(chain, why) {
+  if (!getPat()) { msgFail('Save your PAT first (field at the top of the panel)'); return; }
+  var file = await githubFetch('script.js');
+  if (!file || !file.content) { msgFail('Could not fetch script.js from GitHub — check PAT'); return; }
+  var text;
+  try { text = decodeURIComponent(escape(atob(file.content))); } catch (e) { msgFail('Could not decode script.js'); return; }
+  if (!/const GROQ_MODELS = \[[^\]]*\];/.test(text)) { msgFail('GROQ_MODELS line not found in script.js'); return; }
+  var newLine = 'const GROQ_MODELS = [' + chain.map(function(m) { return "'" + m + "'"; }).join(', ') + '];';
+  var updated = text.replace(/const GROQ_MODELS = \[[^\]]*\];/, newLine);
+  if (updated === text) { msgFail('Model line unchanged — nothing to commit'); return; }
+  var ok = await githubCommit('script.js', updated, 'feat(chatbot): admin ' + why);
+  if (ok) {
+    GROQ_MODELS = chain;
     updateAiStatus();
-    if (value) msgOk('Chatbot model set: ' + value);
-    else msgOk('Back to default model chain');
-  }).catch(function(e) {
-    msgFail('Save failed (' + e.message + ') — run the site_config SQL first');
-  });
+    msgOk('Committed to GitHub ✓ — chatbot uses it in ~1 min');
+  } else {
+    msgFail('GitHub commit failed — check PAT and try again');
+  }
 }
 
 function initAdminGui() {
