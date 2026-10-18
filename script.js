@@ -2504,7 +2504,8 @@ let MY_AVATAR = '';
 
 function loadMyAvatar() {
   try { MY_AVATAR = localStorage.getItem(MY_AVATAR_KEY) || ''; } catch (e) { MY_AVATAR = ''; }
-  if (!/^(preset:[a-z0-9-]+|img:data:image\/[a-z+]+;base64,[A-Za-z0-9+/=]+)$/.test(MY_AVATAR)) MY_AVATAR = '';
+  // preset · an uploaded picture (data URL) · an anime character (AniList URL)
+  if (!/^(preset:[a-z0-9-]+|img:(data:image\/[a-z+]+;base64,[A-Za-z0-9+/=]+|https?:\/\/[^\s'"]+))$/.test(MY_AVATAR)) MY_AVATAR = '';
 }
 
 function saveMyAvatar(value) {
@@ -2525,6 +2526,12 @@ function avatarValue(side) {
   return typeof v === 'string' ? v : '';
 }
 
+// What the site publishes for everyone (ignores this browser's own pick) — used by the admin panel
+function publishedAvatar(side) {
+  var v = CHAT_AVATARS ? CHAT_AVATARS[side] : '';
+  return typeof v === 'string' ? v : '';
+}
+
 // 'preset:neko' → that preset · 'img:avatars/ai-avatar.webp?v=1' → your own picture
 function avatarSpec(side) {
   var v = avatarValue(side);
@@ -2533,6 +2540,24 @@ function avatarSpec(side) {
   var pre = /^preset:([a-z0-9-]+)$/.exec(v);
   if (pre && AVATAR_PRESETS[pre[1]]) return { kind: 'preset', id: pre[1] };
   return { kind: 'preset', id: side === 'user' ? 'person' : 'sharingan' };
+}
+
+// Human label for whatever value is set ('Neko', 'uploaded picture', 'anime character')
+function avatarValueLabel(value) {
+  var img = /^img:(.+)$/.exec(value || '');
+  if (img) return /^https?:/i.test(img[1]) ? 'anime character' : 'uploaded picture';
+  var pre = /^preset:([a-z0-9-]+)$/.exec(value || '');
+  if (pre && AVATAR_PRESETS[pre[1]]) return AVATAR_PRESETS[pre[1]].label;
+  return 'default';
+}
+
+// If a picture/anime character can't be loaded (offline, dead link), show the preset instead
+function paintAvatarFallback(el, side) {
+  var p = AVATAR_PRESETS[side === 'user' ? 'person' : 'sharingan'];
+  el.style.background = p.bg;
+  el.style.borderColor = p.border;
+  el.style.boxShadow = p.glow;
+  el.innerHTML = p.svg;
 }
 
 function paintAvatar(el, type) {
@@ -2544,7 +2569,13 @@ function paintAvatar(el, type) {
     el.style.background = 'rgba(255,255,255,0.08)';
     el.style.borderColor = 'rgba(255,255,255,0.35)';
     el.style.boxShadow = 'none';
-    el.innerHTML = '<img class="msg-avatar-img" alt="" src="' + spec.src.replace(/"/g, '&quot;') + '">';
+    el.innerHTML = '';
+    var im = document.createElement('img');
+    im.className = 'msg-avatar-img';
+    im.alt = '';
+    im.onerror = function() { paintAvatarFallback(el, side); };
+    im.src = spec.src;
+    el.appendChild(im);
     return;
   }
   var p = AVATAR_PRESETS[spec.id];
@@ -2583,6 +2614,150 @@ function pageAvatarStrip(strip, dir) {
 }
 
 /* ══════════════════════════════════════
+   🎴 ANIME CHARACTER AVATARS (live from AniList)
+   Shared by the chat ⚙️ sheet (own avatar) and the admin picker (published).
+   Character art © its respective owners — displayed from the AniList database.
+══════════════════════════════════════ */
+
+const ANILIST_API = 'https://graphql.anilist.co';
+const CHAR_PER_PAGE = 30;
+let CHAR_STATE = { query: '', page: 1, hasNext: true, list: [], busy: false, error: '' };
+
+// top-30 most popular characters, or a name search — 30 per call
+async function fetchCharacters(query, page) {
+  var body = {
+    query: 'query($p:Int,$q:String){Page(page:$p,perPage:' + CHAR_PER_PAGE + '){pageInfo{hasNextPage}' +
+           ' characters(search:$q, sort:FAVOURITES_DESC){id name{full} image{medium large}}}}',
+    variables: { p: page, q: query || null }
+  };
+  var res = await fetch(ANILIST_API, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+    body: JSON.stringify(body)
+  });
+  if (!res.ok) throw new Error('AniList ' + res.status);
+  var j = await res.json();
+  if (j.errors && j.errors.length) throw new Error('AniList rejected the search');
+  var pg = j.data && j.data.Page;
+  if (!pg) throw new Error('AniList returned nothing');
+  return { list: pg.characters || [], hasNext: !!(pg.pageInfo && pg.pageInfo.hasNextPage) };
+}
+
+async function loadCharacters(replace) {
+  if (CHAR_STATE.busy) return;
+  CHAR_STATE.busy = true;
+  CHAR_STATE.error = '';
+  renderCharGrids();                                     // shows the loading note
+  var wanted = CHAR_STATE.page;
+  try {
+    var r = await fetchCharacters(CHAR_STATE.query, wanted);
+    CHAR_STATE.list = replace ? r.list : CHAR_STATE.list.concat(r.list);
+    CHAR_STATE.hasNext = r.hasNext;
+  } catch (e) {
+    CHAR_STATE.error = (e && e.message) || 'connection failed';
+    if (!replace) CHAR_STATE.page -= 1;
+  } finally {
+    CHAR_STATE.busy = false;
+    renderCharGrids();
+  }
+}
+
+async function searchCharacters(inputId) {
+  var el = inputId ? document.getElementById(inputId) : null;
+  CHAR_STATE.query = el ? (el.value || '').trim() : '';
+  CHAR_STATE.page = 1;
+  await loadCharacters(true);
+}
+
+async function resetCharSearch(inputId) {
+  var el = inputId ? document.getElementById(inputId) : null;
+  if (el) el.value = '';
+  CHAR_STATE.query = '';
+  CHAR_STATE.page = 1;
+  await loadCharacters(true);
+}
+
+async function loadMoreCharacters() {
+  if (!CHAR_STATE.hasNext) return;
+  CHAR_STATE.page += 1;
+  await loadCharacters(false);
+}
+
+// loads the gallery the first time the admin panel's collapsed section is opened
+function charSectionToggled(el) {
+  if (el && el.open && !CHAR_STATE.list.length && !CHAR_STATE.busy) loadCharacters(true);
+}
+
+// Every mounted gallery ([data-char-target="my|ai|user"]) shows the same results
+function renderCharGrids() {
+  var grids = document.querySelectorAll('[data-char-target]');
+  if (!grids.length) return;
+  var html;
+  if (CHAR_STATE.error) {
+    html = '<div class="av-note av-note-err">⚠ ' + CHAR_STATE.error.replace(/[<>]/g, '') +
+           '<br><button class="av-mini" onclick="loadCharacters(true)">↻ RETRY</button></div>';
+  } else if (CHAR_STATE.busy && !CHAR_STATE.list.length) {
+    html = '<div class="av-note">Loading anime characters…</div>';
+  } else if (!CHAR_STATE.list.length) {
+    html = '<div class="av-note">No characters found — try another name.</div>';
+  } else {
+    html = CHAR_STATE.list.map(function(c) {
+      var src = (c.image && (c.image.medium || c.image.large)) || '';
+      var name = ((c.name && c.name.full) || '?').replace(/"/g, '');
+      return '<button class="av-item av-char" data-av="img:' + src + '" onclick="pickCharacter(this,\'' + c.id + '\')" title="' + name + '">' +
+        '<span class="av-thumb av-char-thumb"><img alt="" src="' + src + '"></span>' +
+        '<span class="av-name">' + name + '</span>' +
+      '</button>';
+    }).join('') +
+    (CHAR_STATE.busy ? '<div class="av-note">Loading more…</div>'
+                     : (!CHAR_STATE.hasNext ? '<div class="av-note">— end of list —</div>' : ''));
+  }
+  grids.forEach(function(g) {
+    g.innerHTML = html;
+    // a dead thumbnail just hides itself instead of showing a broken image
+    g.querySelectorAll('.av-char-thumb img').forEach(function(im) {
+      im.loading = 'lazy';
+      im.decoding = 'async';
+      im.onerror = function() { var tile = im.closest('.av-char'); if (tile) tile.style.display = 'none'; };
+    });
+    if (CHAR_STATE.error || (CHAR_STATE.busy && !CHAR_STATE.list.length) || !CHAR_STATE.list.length) return;
+    var target = g.getAttribute('data-char-target');
+    var cur = target === 'my' ? avatarValue('user') : publishedAvatar(target);
+    g.querySelectorAll('.av-char').forEach(function(b) {
+      b.classList.toggle('sel', !!cur && b.getAttribute('data-av') === cur);
+    });
+  });
+}
+
+// 'my' = this visitor's own avatar (kept in the browser) · 'ai'/'user' = admin publish
+async function pickCharacter(btn, id) {
+  var ch = null;
+  for (var i = 0; i < CHAR_STATE.list.length; i++) {
+    if (String(CHAR_STATE.list[i].id) === String(id)) { ch = CHAR_STATE.list[i]; break; }
+  }
+  if (!ch) return;
+  var url = (ch.image && (ch.image.large || ch.image.medium)) || '';
+  if (!url) return;
+  var name = (ch.name && ch.name.full) || 'Character';
+  var wrap = btn && btn.closest ? btn.closest('[data-char-target]') : null;
+  var target = wrap ? wrap.getAttribute('data-char-target') : 'my';
+  var value = 'img:' + url;
+
+  if (target === 'my') {
+    if (!saveMyAvatar(value)) { chatToast('Could not save that avatar 😢'); return; }
+    repaintAllAvatars();
+    refreshChatAvatarSelection();
+    updateMyAvatarPreview();
+    renderCharGrids();
+    chatToast(name + ' is now your avatar 🎴');
+    return;
+  }
+  if (!getPat()) { msgFail('Save your PAT first (field at the top of the panel)'); return; }
+  await setChatAvatar(target, value, 'anime character avatar: ' + name);
+  renderCharGrids();
+}
+
+/* ══════════════════════════════════════
    ⚙️ VISITOR AVATAR SETTINGS (gear in the chat header)
    Lets anyone pick their own avatar — kept in this browser only.
 ══════════════════════════════════════ */
@@ -2614,15 +2789,28 @@ function renderChatSettings() {
         '<button class="cs-mini" onclick="resetMyAvatar()">↺  USE SITE DEFAULT</button>' +
       '</div>' +
     '</div>' +
+    '<div class="cs-sec">🎨 Presets <span class="cs-src">3 at a time</span></div>' +
     '<div class="av-rail">' +
       '<button class="av-nav" onclick="scrollChatAvatarStrip(-1)" aria-label="previous 3">◀</button>' +
       '<div class="av-strip" id="csStrip"></div>' +
       '<button class="av-nav" onclick="scrollChatAvatarStrip(1)" aria-label="next 3">▶</button>' +
     '</div>' +
+    '<div class="cs-sec">🎴 Anime characters <span class="cs-src">AniList</span></div>' +
+    '<div class="cs-search">' +
+      '<input type="text" id="csCharQuery" placeholder="Search a character — naruto, levi, goku…" onkeydown="if(event.key===\'Enter\'){event.preventDefault();searchCharacters(\'csCharQuery\');}">' +
+      '<button onclick="searchCharacters(\'csCharQuery\')" aria-label="Search characters">🔎</button>' +
+    '</div>' +
+    '<div class="av-grid" data-char-target="my" id="csCharGrid"></div>' +
+    '<div class="cs-actions">' +
+      '<button class="cs-mini" onclick="resetCharSearch(\'csCharQuery\')">🔥  TOP 30</button>' +
+      '<button class="cs-mini" onclick="loadMoreCharacters()">⤓  30 MORE</button>' +
+    '</div>' +
     '<input type="file" accept="image/*" id="csFile" style="display:none" onchange="onMyAvatarFile(this)">' +
-    '<div class="cs-note">◀ ▶ moves 3 avatars at a time · 9 presets in total.</div>';
+    '<div class="cs-note">Character art © their respective owners · shown from the AniList database.</div>';
   fillChatAvatarStrip();
   updateMyAvatarPreview();
+  renderCharGrids();
+  if (!CHAR_STATE.list.length && !CHAR_STATE.busy && !CHAR_STATE.error) loadCharacters(true);
 }
 
 function fillChatAvatarStrip() {
@@ -2665,7 +2853,7 @@ function updateMyAvatarPreview() {
   }
   var nameEl = document.getElementById('csPreviewName');
   if (nameEl) {
-    nameEl.textContent = (spec.kind === 'preset' ? AVATAR_PRESETS[spec.id].label : 'Your picture') +
+    nameEl.textContent = avatarValueLabel(avatarValue('user')) +
       (MY_AVATAR ? '  ·  yours ✨' : '  ·  site default');
   }
 }
@@ -4587,12 +4775,25 @@ function renderAvatarPicker() {
           '<button class="av-nav" onclick="scrollAvatarStrip(\'' + side + '\',1)" aria-label="next 3">▶</button>' +
         '</div>' +
         '<div class="av-current" id="avCurrent-' + side + '">current: …</div>' +
+        '<details class="av-chars" ontoggle="charSectionToggled(this)">' +
+          '<summary>🎴 ANIME CHARACTERS <span class="av-src">AniList</span></summary>' +
+          '<div class="av-search">' +
+            '<input type="text" id="avCharQuery-' + side + '" placeholder="search a character…" onkeydown="if(event.key===\'Enter\'){event.preventDefault();searchCharacters(\'avCharQuery-' + side + '\');}">' +
+            '<button onclick="searchCharacters(\'avCharQuery-' + side + '\')" aria-label="Search characters">🔎</button>' +
+          '</div>' +
+          '<div class="av-grid" data-char-target="' + side + '" id="avCharGrid-' + side + '"></div>' +
+          '<div class="av-characts">' +
+            '<button class="av-mini" onclick="resetCharSearch(\'avCharQuery-' + side + '\')">🔥 TOP 30</button>' +
+            '<button class="av-mini" onclick="loadMoreCharacters()">⤓ 30 MORE</button>' +
+          '</div>' +
+        '</details>' +
         '<input type="file" accept="image/*" id="avFile-' + side + '" style="display:none" onchange="onAvatarFile(\'' + side + '\', this)">' +
       '</div>';
   }).join('');
   fillAvatarStrip('ai');
   fillAvatarStrip('user');
   updateAvatarCurrentLabels();
+  renderCharGrids();
 }
 
 function fillAvatarStrip(side) {
@@ -4611,7 +4812,7 @@ function fillAvatarStrip(side) {
 function refreshAvatarSelection(side) {
   var strip = document.getElementById('avStrip-' + side);
   if (!strip) return;
-  var cur = avatarValue(side);
+  var cur = publishedAvatar(side);   // the admin edits what everyone sees
   strip.querySelectorAll('.av-item').forEach(function(b) {
     b.classList.toggle('sel', b.getAttribute('data-av') === cur);
   });
@@ -4621,8 +4822,7 @@ function updateAvatarCurrentLabels() {
   ['ai', 'user'].forEach(function(side) {
     var el = document.getElementById('avCurrent-' + side);
     if (!el) return;
-    var spec = avatarSpec(side);
-    el.textContent = 'current: ' + (spec.kind === 'preset' ? AVATAR_PRESETS[spec.id].label : 'your uploaded picture');
+    el.textContent = 'current: ' + avatarValueLabel(publishedAvatar(side));
   });
 }
 
@@ -4709,7 +4909,7 @@ async function commitBase64(path, base64, message) {
 
 async function setChatAvatar(side, value, why) {
   if (!getPat()) { msgFail('Save your PAT first (field at the top of the panel)'); return; }
-  if (!/^(preset:[a-z0-9-]+|img:[A-Za-z0-9._\-\/]+(\?v=[0-9]+)?)$/.test(value)) { msgFail('Unsupported avatar value'); return; }
+  if (!/^(preset:[a-z0-9-]+|img:[A-Za-z0-9._\-\/]+(\?v=[0-9]+)?|img:https?:\/\/[^\s'"\\]+)$/.test(value)) { msgFail('Unsupported avatar value'); return; }
   showLoading();
   try {
     var file = await githubFetch('script.js');
@@ -4717,7 +4917,15 @@ async function setChatAvatar(side, value, why) {
     var text;
     try { text = decodeURIComponent(escape(atob(file.content))); } catch (e) { msgFail('Could not decode script.js'); return; }
     if (!/(?:const|let|var) CHAT_AVATARS = \{[^}]*\};/.test(text)) { msgFail('CHAT_AVATARS line not found in script.js'); return; }
-    var next = { ai: avatarValue('ai') || 'preset:sharingan', user: avatarValue('user') || 'preset:person' };
+    // the OTHER side's value comes from the file on GitHub — never from this browser's own pick
+    var m = /(?:const|let|var) CHAT_AVATARS = \{([^}]*)\};/.exec(text);
+    var next = { ai: 'preset:sharingan', user: 'preset:person' };
+    if (m) {
+      var aiMatch = /ai:\s*'([^']*)'/.exec(m[1]);
+      var userMatch = /user:\s*'([^']*)'/.exec(m[1]);
+      if (aiMatch) next.ai = aiMatch[1];
+      if (userMatch) next.user = userMatch[1];
+    }
     next[side] = value;
     var newLine = "let CHAT_AVATARS = { ai: '" + next.ai.replace(/['\\]/g, '') + "', user: '" + next.user.replace(/['\\]/g, '') + "' };";
     var updated = text.replace(/(?:const|let|var) CHAT_AVATARS = \{[^}]*\};/, newLine);

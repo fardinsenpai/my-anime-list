@@ -154,7 +154,7 @@
   border: 2px solid #ffd6e8;
 }
 .cs-preview-avatar svg { width: 32px; height: 32px; }
-.cs-preview-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.cs-preview-avatar img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 10%; display: block; }
 .cs-preview-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 7px; }
 .cs-preview-name {
   font-family: 'Rajdhani', monospace; font-size: 14px; font-weight: 700;
@@ -186,6 +186,33 @@
 .chat-settings .av-thumb { width: 42px; height: 42px; }
 .chat-settings .av-thumb svg { width: 24px; height: 24px; }
 .chat-settings .av-name { font-family: 'Poppins', sans-serif; font-size: 9px; color: #cbb8ee; }
+
+/* anime character gallery inside the ⚙️ sheet */
+.chat-settings .av-grid { max-height: 246px; gap: 6px; }
+.chat-settings .av-char-thumb { border-color: rgba(255,214,232,.45); }
+.chat-settings .av-note { color: #a99cd6; font-family: 'Poppins', sans-serif; font-size: 10px; }
+.chat-settings .av-note-err { color: #ff8fa3; }
+.cs-sec {
+  display: flex; align-items: center; gap: 6px; margin: 16px 0 8px;
+  font-family: 'Rajdhani', monospace; font-weight: 700; font-size: 12px;
+  letter-spacing: 1.2px; color: #ffe3ee;
+}
+.cs-src { font-size: 9px; font-weight: 400; letter-spacing: .5px; color: #8b7ec0; }
+.cs-search { display: flex; gap: 6px; margin-bottom: 8px; }
+.cs-search input {
+  flex: 1; min-width: 0; background: rgba(0,0,0,.35);
+  border: 1px solid rgba(255,95,158,.3); border-radius: 8px;
+  color: #ffe3ee; font-family: 'Poppins', sans-serif; font-size: 11px; padding: 7px 9px;
+}
+.cs-search input::placeholder { color: #6f639e; }
+.cs-search input:focus { outline: none; border-color: #ff5f9e; box-shadow: 0 0 0 3px rgba(255,95,158,.14); }
+.cs-search button {
+  background: rgba(255,45,85,.14); border: 1px solid rgba(255,95,158,.45);
+  color: #ffc9dd; border-radius: 8px; cursor: pointer; padding: 0 10px; font-size: 12px;
+}
+.cs-search button:hover { background: rgba(255,45,85,.3); color: #fff; }
+.cs-actions { display: flex; gap: 6px; margin-top: 8px; }
+.cs-actions .cs-mini { flex: 1; text-align: center; }
 
 .petal {
   position: absolute; top: 8px; font-size: 12px; opacity: .8;
@@ -261,7 +288,7 @@
   align-self: center; overflow: hidden;
 }
 .chat-messages .msg-avatar svg { width: 18px; height: 18px; }
-.chat-messages .msg-avatar-img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; display: block; }
+.chat-messages .msg-avatar-img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 10%; border-radius: 50%; display: block; }
 .chat-messages .msg-avatar-ai {
   background: radial-gradient(circle at 32% 28%, #ff8fb8, #ff2d55 75%);
   border: 1.5px solid rgba(255,214,232,.75);
