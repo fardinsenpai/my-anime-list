@@ -2620,7 +2620,7 @@ function renderChatSettings() {
       '<button class="av-nav" onclick="scrollChatAvatarStrip(1)" aria-label="next 3">▶</button>' +
     '</div>' +
     '<input type="file" accept="image/*" id="csFile" style="display:none" onchange="onMyAvatarFile(this)">' +
-    '<div class="cs-note">◀ ▶ moves 3 avatars at a time · 9 presets in total.<br>Senpai\'s own avatar is set by the site owner in the admin panel.</div>';
+    '<div class="cs-note">◀ ▶ moves 3 avatars at a time · 9 presets in total.</div>';
   fillChatAvatarStrip();
   updateMyAvatarPreview();
 }
