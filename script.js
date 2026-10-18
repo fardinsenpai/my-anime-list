@@ -2429,7 +2429,7 @@ function addMessage(text, type, shouldSave = true) {
    Keep this line on ONE line, the admin picker rewrites it by regex.
 ══════════════════════════════════════ */
 
-let CHAT_AVATARS = { ai: 'preset:sharingan', user: 'preset:person' };
+let CHAT_AVATARS = { ai: 'preset:sharingan', user: 'preset:ramen' };
 
 // Ready-made avatars (drawn as SVG so they stay crisp at any size)
 const AVATAR_PRESETS = {
