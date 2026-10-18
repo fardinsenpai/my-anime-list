@@ -4025,8 +4025,9 @@ async function refreshAiModels() {
 function saveAiModel() {
   var sel = document.getElementById('aiModelSelect');
   if (!sel || !sel.value) { msgFail('No model selected — press REFRESH LIST first'); return; }
-  var chain = [sel.value].concat(GROQ_MODELS.filter(function(m) { return m !== sel.value; })).slice(0, 5);
-  updateModelOnGithub(chain, 'set primary model to ' + sel.value);
+  var picked = sel.value.replace(/['"\\\[\]\s;]/g, ''); // model ids are [a-z0-9/.-_]; strip anything code-like
+  var chain = [picked].concat(GROQ_MODELS.filter(function(m) { return m !== picked; })).slice(0, 5);
+  updateModelOnGithub(chain, 'set primary model to ' + picked);
 }
 
 function resetAiModel() {
@@ -4039,9 +4040,9 @@ async function updateModelOnGithub(chain, why) {
   if (!file || !file.content) { msgFail('Could not fetch script.js from GitHub — check PAT'); return; }
   var text;
   try { text = decodeURIComponent(escape(atob(file.content))); } catch (e) { msgFail('Could not decode script.js'); return; }
-  if (!/const GROQ_MODELS = \[[^\]]*\];/.test(text)) { msgFail('GROQ_MODELS line not found in script.js'); return; }
-  var newLine = 'const GROQ_MODELS = [' + chain.map(function(m) { return "'" + m + "'"; }).join(', ') + '];';
-  var updated = text.replace(/const GROQ_MODELS = \[[^\]]*\];/, newLine);
+  if (!/(?:const|let|var) GROQ_MODELS = \[[^\]]*\];/.test(text)) { msgFail('GROQ_MODELS line not found in script.js'); return; }
+  var newLine = 'let GROQ_MODELS = [' + chain.map(function(m) { return "'" + m + "'"; }).join(', ') + '];';
+  var updated = text.replace(/(?:const|let|var) GROQ_MODELS = \[[^\]]*\];/, newLine);
   if (updated === text) { msgFail('Model line unchanged — nothing to commit'); return; }
   var ok = await githubCommit('script.js', updated, 'feat(chatbot): admin ' + why);
   if (ok) {
