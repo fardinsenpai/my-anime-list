@@ -6253,6 +6253,7 @@ function setAuthUser(session, opts) {
   if (idChanged) {
     applyAuthToChat();
     if (next) closeLoginPage();   // hide the login page the moment they're in
+    lgWipePasswords();            // and never leave a typed password behind
     // keep the chat's stored system message in step with who is signed in
     // (this is the message that carries the "call them by name" rule)
     try {
@@ -6730,6 +6731,14 @@ function lgBusy(on) {
   if (!b) return;
   b.disabled = !!on;
   b.textContent = on ? 'Working...' : (LG_MODE === 'up' ? 'Create account' : 'Log in');
+}
+
+// never leave a typed password sitting in the box once the person is in (or out)
+function lgWipePasswords() {
+  var a = document.getElementById('lgPass');
+  if (a) a.value = '';
+  var b = document.getElementById('lgPass2');
+  if (b) b.value = '';
 }
 
 function setLoginMode(mode) {
