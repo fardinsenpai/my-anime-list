@@ -2292,6 +2292,15 @@ async function sendMessage() {
   chatInput.focus();
 }
 
+// Messages still animating — if the tab gets hidden, we finish them instantly
+// (browsers throttle timers in background tabs, so a long answer would crawl)
+const pendingTypers = new Set();
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden) return;
+  pendingTypers.forEach((finish) => { try { finish(); } catch (e) {} });
+  pendingTypers.clear();
+});
+
 // ===== ADD MESSAGE TO UI - PREMIUM ANIMATION VERSION =====
 function addMessage(text, type, shouldSave = true) {
   const msgDiv = document.createElement('div');
@@ -2313,33 +2322,44 @@ function addMessage(text, type, shouldSave = true) {
     const textSpan = document.createElement('span');
     msgDiv.appendChild(textSpan);
 
+    // Copy/share are available right away — they always use the full text (dataset.raw)
+    addMessageActions(msgDiv);
+
     let index = 0;
-    let actionsAdded = false;
+    let timer = null;
+    let done = false;
 
-    function finishMessage() {
-      if (actionsAdded) return;
-      actionsAdded = true;
-      addMessageActions(msgDiv);
+    function finish() {
+      if (done) return;
+      done = true;
+      if (timer) clearTimeout(timer);
+      textSpan.textContent = text;
+      pendingTypers.delete(finish);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
     }
 
-    // Typewriter effect
-    function typeWriter() {
-      if (index < text.length) {
-        textSpan.textContent += text.charAt(index);
-        index++;
+    // Type in small chunks: same typing feel, far less layout thrash
+    const CHUNK = 4;
+    function typeChunk() {
+      if (done) return;
+      index = Math.min(index + CHUNK, text.length);
+      textSpan.textContent = text.slice(0, index);
 
-        // Auto scroll while typing
-        chatMessages.scrollTop = chatMessages.scrollHeight;
+      // Auto scroll while typing
+      chatMessages.scrollTop = chatMessages.scrollHeight;
 
-        setTimeout(typeWriter, 1); // typing speed
-      } else {
-        finishMessage(); // reveal copy/share once the answer is fully written
-      }
+      if (index < text.length) timer = setTimeout(typeChunk, 6);
+      else finish();
     }
 
-    // Small delay before bot starts typing
-    if (text.length) setTimeout(() => { typeWriter(); }, 250);
-    else finishMessage();
+    if (!text.length) {
+      finish();
+    } else if (document.hidden) {
+      finish(); // created while this tab is in the background — no point animating
+    } else {
+      pendingTypers.add(finish); // reveal the full answer at once if the tab gets hidden
+      timer = setTimeout(typeChunk, 250);
+    }
   }
 
   // TYPING INDICATOR
