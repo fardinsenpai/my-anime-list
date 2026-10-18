@@ -2200,6 +2200,7 @@ function restoreChatFromStorage() {
 // Call restore on page load
 document.addEventListener('DOMContentLoaded', () => {
   restoreChatFromStorage();
+  enhanceExistingChatMessages(); // add copy/share to the welcome message
 });
 
 // ===== TOGGLE CHAT =====
@@ -2295,10 +2296,14 @@ async function sendMessage() {
 function addMessage(text, type, shouldSave = true) {
   const msgDiv = document.createElement('div');
   msgDiv.className = `msg ${type}`;
+  msgDiv.dataset.raw = text; // full text, used by copy/share
 
   // USER MESSAGE → instant
   if (type === 'user') {
-    msgDiv.textContent = text;
+    const userSpan = document.createElement('span');
+    userSpan.textContent = text;
+    msgDiv.appendChild(userSpan);
+    addMessageActions(msgDiv);
   }
 
   // BOT MESSAGE → animated typing effect
@@ -2309,6 +2314,13 @@ function addMessage(text, type, shouldSave = true) {
     msgDiv.appendChild(textSpan);
 
     let index = 0;
+    let actionsAdded = false;
+
+    function finishMessage() {
+      if (actionsAdded) return;
+      actionsAdded = true;
+      addMessageActions(msgDiv);
+    }
 
     // Typewriter effect
     function typeWriter() {
@@ -2320,13 +2332,14 @@ function addMessage(text, type, shouldSave = true) {
         chatMessages.scrollTop = chatMessages.scrollHeight;
 
         setTimeout(typeWriter, 1); // typing speed
+      } else {
+        finishMessage(); // reveal copy/share once the answer is fully written
       }
     }
 
     // Small delay before bot starts typing
-    setTimeout(() => {
-      typeWriter();
-    }, 250);
+    if (text.length) setTimeout(() => { typeWriter(); }, 250);
+    else finishMessage();
   }
 
   // TYPING INDICATOR
@@ -2362,6 +2375,121 @@ function addMessage(text, type, shouldSave = true) {
   }
 
   return msgDiv;
+}
+
+/* ══════════════════════════════════════
+   📋 COPY / 📤 SHARE FOR EVERY MESSAGE
+══════════════════════════════════════ */
+
+// Adds the copy + share buttons to a message bubble (safe to call twice)
+function addMessageActions(msgDiv) {
+  if (!msgDiv || msgDiv.classList.contains('typing')) return;
+  if (msgDiv.querySelector('.msg-actions')) return;
+
+  const bar = document.createElement('div');
+  bar.className = 'msg-actions';
+  bar.innerHTML =
+    '<button type="button" class="msg-act" data-act="copy" title="Copy message" aria-label="Copy message">' +
+      '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"></rect><path d="M5 15V5a2 2 0 0 1 2-2h10"></path></svg>' +
+    '</button>' +
+    '<button type="button" class="msg-act" data-act="share" title="Share message" aria-label="Share message">' +
+      '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4"></path><path d="M7 9l5-5 5 5"></path><path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"></path></svg>' +
+    '</button>';
+
+  msgDiv.appendChild(bar);
+}
+
+// Small feedback pill inside the chat panel (stays above the chat, unlike the page toasts)
+function chatToast(message) {
+  const box = document.getElementById('chatBox') || document.body;
+  const old = document.getElementById('chatToast');
+  if (old) old.remove();
+
+  const t = document.createElement('div');
+  t.id = 'chatToast';
+  t.textContent = message;
+  box.appendChild(t);
+  requestAnimationFrame(() => t.classList.add('show'));
+  setTimeout(() => {
+    t.classList.remove('show');
+    setTimeout(() => t.remove(), 320);
+  }, 2100);
+}
+
+async function copyChatText(text) {
+  try {
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(text);
+      return true;
+    }
+  } catch (e) { /* fall through to legacy copy */ }
+
+  try {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.setAttribute('readonly', '');
+    ta.style.position = 'fixed';
+    ta.style.top = '-1000px';
+    document.body.appendChild(ta);
+    ta.select();
+    ta.setSelectionRange(0, ta.value.length);
+    const ok = document.execCommand('copy');
+    document.body.removeChild(ta);
+    return ok;
+  } catch (e) {
+    return false;
+  }
+}
+
+// Resolves to 'shared' | 'copied' | 'cancelled' | 'failed'
+async function shareChatText(text) {
+  const data = { title: "Fardin's Anime Hub — Senpai Assistant", text: text };
+
+  if (navigator.share) {
+    try {
+      await navigator.share(data);
+      return 'shared';
+    } catch (e) {
+      if (e && (e.name === 'AbortError' || e.name === 'NotAllowedError')) {
+        // user dismissed (or blocked) — fall back to copying below on block
+        if (e.name === 'AbortError') return 'cancelled';
+      }
+    }
+  }
+
+  return (await copyChatText(text)) ? 'copied' : 'failed';
+}
+
+// One delegated listener handles every message's buttons
+chatMessages.addEventListener('click', async (e) => {
+  const btn = e.target.closest('.msg-act');
+  if (!btn) return;
+
+  const msgEl = btn.closest('.msg');
+  const text = (msgEl && msgEl.dataset.raw) ? msgEl.dataset.raw : '';
+  if (!text.trim()) return;
+
+  if (btn.dataset.act === 'copy') {
+    const ok = await copyChatText(text);
+    chatToast(ok ? '📋 Copied to clipboard!' : '⚠️ Could not copy');
+    if (ok) {
+      btn.classList.add('done');
+      setTimeout(() => btn.classList.remove('done'), 900);
+    }
+  } else if (btn.dataset.act === 'share') {
+    const result = await shareChatText(text);
+    if (result === 'shared') chatToast('✅ Shared!');
+    else if (result === 'copied') chatToast('📋 Copied — paste it anywhere to share');
+    else if (result === 'failed') chatToast('⚠️ Could not share');
+  }
+});
+
+// Give the same buttons to messages that are already in the DOM (the welcome line)
+function enhanceExistingChatMessages() {
+  document.querySelectorAll('#chatMessages .msg').forEach((m) => {
+    if (!m.dataset.raw) m.dataset.raw = (m.textContent || '').trim();
+    addMessageActions(m);
+  });
 }
 
 
