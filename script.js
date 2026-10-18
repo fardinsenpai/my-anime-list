@@ -6242,7 +6242,11 @@ function setAuthUser(session, opts) {
     } catch (e) {}
     if (next && !(opts && opts.silent)) {
       authNameFresh = true;   // -> the assistant's very next reply greets them by name
-      window.setTimeout(function() { openAvatarWelcome(); }, 600);   // let the toast land first
+      // "Choose your avatar" is a one-time welcome, exactly like the tour guide: it
+      // shows the first time you sign in in this browser, and never again after that.
+      var awSeen = false;
+      try { awSeen = !!localStorage.getItem('fardin_avatar_welcome_done'); } catch (e) {}
+      if (!awSeen) window.setTimeout(function() { openAvatarWelcome(); }, 600);   // let the toast land first
       authNotify('Signed in as ' + (next.first || next.email) + ' ✨');
     }
   }
@@ -6503,6 +6507,9 @@ function startGoogleSignIn() {
 function openAvatarWelcome() {
   var ov = document.getElementById('avatarWelcome');
   if (!ov) return;
+
+  // one-time only, like the tour guide — mark it as shown straight away
+  try { localStorage.setItem('fardin_avatar_welcome_done', '1'); } catch (e) {}
 
   CS_SIDE = 'user';   // this popup always edits the VISITOR's own avatar
 
