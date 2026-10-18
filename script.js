@@ -2443,7 +2443,7 @@ const AVATAR_PRESETS = {
     bg: 'radial-gradient(circle at 32% 28%, #c4b5fd, #5b21b6 78%)',
     border: 'rgba(221,214,254,0.8)',
     glow: '0 0 10px rgba(124,58,237,0.5)',
-    svg: '<svg viewBox="0 0 100 100" fill="none" stroke="#ede9fe" stroke-width="4"><circle cx="50" cy="50" r="42"></circle><circle cx="50" cy="50" r="30"></circle><circle cx="50" cy="50" r="18"></circle><circle cx="50" cy="50" r="6" fill="#ede9fe" stroke="none"></circle></svg>'
+    svg: '<svg viewBox="0 0 100 100" fill="none" stroke="#ede9fe" stroke-width="6"><circle cx="50" cy="50" r="40"></circle><circle cx="50" cy="50" r="24"></circle><circle cx="50" cy="50" r="9" fill="#ede9fe" stroke="none"></circle></svg>'
   },
   kitsune: {
     label: 'Kitsune',
@@ -2464,28 +2464,28 @@ const AVATAR_PRESETS = {
     bg: 'radial-gradient(circle at 32% 28%, #ffd1e8, #ff5f9e 78%)',
     border: 'rgba(255,224,240,0.9)',
     glow: '0 0 10px rgba(255,95,158,0.5)',
-    svg: '<svg viewBox="0 0 24 24"><g transform="translate(12 12)" fill="#ffd9e8"><ellipse cx="0" cy="-5" rx="3.1" ry="5"></ellipse><ellipse cx="0" cy="-5" rx="3.1" ry="5" transform="rotate(72)"></ellipse><ellipse cx="0" cy="-5" rx="3.1" ry="5" transform="rotate(144)"></ellipse><ellipse cx="0" cy="-5" rx="3.1" ry="5" transform="rotate(216)"></ellipse><ellipse cx="0" cy="-5" rx="3.1" ry="5" transform="rotate(288)"></ellipse></g><circle cx="12" cy="12" r="1.9" fill="#ff2d55"></circle></svg>'
+    svg: '<svg viewBox="0 0 24 24"><g transform="translate(12 12)" fill="#be185d"><ellipse cx="0" cy="-5" rx="3.1" ry="5"></ellipse><ellipse cx="0" cy="-5" rx="3.1" ry="5" transform="rotate(72)"></ellipse><ellipse cx="0" cy="-5" rx="3.1" ry="5" transform="rotate(144)"></ellipse><ellipse cx="0" cy="-5" rx="3.1" ry="5" transform="rotate(216)"></ellipse><ellipse cx="0" cy="-5" rx="3.1" ry="5" transform="rotate(288)"></ellipse></g><circle cx="12" cy="12" r="1.9" fill="#ffe4ef"></circle></svg>'
   },
   samurai: {
     label: 'Samurai',
     bg: 'radial-gradient(circle at 32% 28%, #93c5fd, #1e3a8a 80%)',
     border: 'rgba(191,219,254,0.75)',
     glow: '0 0 10px rgba(37,99,235,0.5)',
-    svg: '<svg viewBox="0 0 24 24"><path d="M12 2.6c-5 0-8.6 3.7-8.6 8.6 0 1.9 0.5 3.4 1.3 4.6h14.6c0.8-1.2 1.3-2.7 1.3-4.6 0-4.9-3.6-8.6-8.6-8.6z" fill="#c7d2fe"></path><path d="M12 2.6c-1.3 0-2.5 0.2-3.6 0.7L12 9.4l3.6-6.1c-1.1-0.5-2.3-0.7-3.6-0.7z" fill="#818cf8"></path><path d="M4.7 15.8h14.6l-1.9 4.2a1 1 0 0 1-0.9 0.6H7.5a1 1 0 0 1-0.9-0.6z" fill="#6366f1"></path><rect x="10.7" y="15.8" width="2.6" height="4.8" rx="0.7" fill="#e0e7ff"></rect></svg>'
+    svg: '<svg viewBox="0 0 24 24"><path d="M12 2.6c-5 0-8.6 3.7-8.6 8.6 0 1.9 0.5 3.4 1.3 4.6h14.6c0.8-1.2 1.3-2.7 1.3-4.6 0-4.9-3.6-8.6-8.6-8.6z" fill="#f8faff"></path><path d="M12 2.6c-1.3 0-2.5 0.2-3.6 0.7L12 9.4l3.6-6.1c-1.1-0.5-2.3-0.7-3.6-0.7z" fill="#a5b4fc"></path><path d="M4.7 15.8h14.6l-1.9 4.2a1 1 0 0 1-0.9 0.6H7.5a1 1 0 0 1-0.9-0.6z" fill="#4f46e5"></path><rect x="10.7" y="15.8" width="2.6" height="4.8" rx="0.7" fill="#eef2ff"></rect></svg>'
   },
   ramen: {
     label: 'Ramen',
     bg: 'radial-gradient(circle at 32% 28%, #fde68a, #d97706 80%)',
     border: 'rgba(253,230,138,0.85)',
     glow: '0 0 10px rgba(217,119,6,0.45)',
-    svg: '<svg viewBox="0 0 24 24"><path d="M3 11.2h18c0 5.1-4 8.8-9 8.8s-9-3.7-9-8.8z" fill="#fde68a"></path><path d="M4.6 12.6h14.8c-0.4 3.6-3.5 6-7.4 6s-7-2.4-7.4-6z" fill="#b45309"></path><path d="M8.2 9c1-1.3 1-2.4 0-3.7M12 8.4c1.2-1.5 1.2-2.9 0-4.4M15.8 9c1-1.3 1-2.4 0-3.7" stroke="#fca5a5" stroke-width="1.3" fill="none" stroke-linecap="round"></path></svg>'
+    svg: '<svg viewBox="0 0 24 24"><path d="M3 11.2h18c0 5.1-4 8.8-9 8.8s-9-3.7-9-8.8z" fill="#fde68a"></path><path d="M4.6 12.6h14.8c-0.4 3.6-3.5 6-7.4 6s-7-2.4-7.4-6z" fill="#b45309"></path><path d="M8.2 9c1-1.3 1-2.4 0-3.7M12 8.4c1.2-1.5 1.2-2.9 0-4.4M15.8 9c1-1.3 1-2.4 0-3.7" stroke="#fff7ed" stroke-width="1.4" fill="none" stroke-linecap="round"></path></svg>'
   },
   chibi: {
     label: 'Chibi',
     bg: 'radial-gradient(circle at 32% 28%, #fbcfe8, #be185d 82%)',
     border: 'rgba(252,231,243,0.85)',
     glow: '0 0 10px rgba(190,24,93,0.45)',
-    svg: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.6" fill="#f472b6"></circle><circle cx="12" cy="13.8" r="6.6" fill="#ffe9f2"></circle><path d="M5 11.5C5.6 8.6 8.4 6.9 12 6.9s6.4 1.7 7 4.6c-1.2 1.2-2.4 1.4-3.4 0.6-0.9-0.7-1.2-1.6-2.1-2.2-1.1 0.7-1.6 1.6-2.6 2.2-1 0.6-2.2 0.4-3.5-0.6z" fill="#be185d"></path><circle cx="9.5" cy="14.6" r="1.2" fill="#7f1d1d"></circle><circle cx="14.5" cy="14.6" r="1.2" fill="#7f1d1d"></circle><path d="M10.9 17.2c0.8 0.7 1.4 0.7 2.2 0" stroke="#7f1d1d" stroke-width="1" fill="none" stroke-linecap="round"></path></svg>'
+    svg: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.6" fill="#9d174d"></circle><circle cx="12" cy="13.8" r="6.6" fill="#ffe9f2"></circle><path d="M5 11.5C5.6 8.6 8.4 6.9 12 6.9s6.4 1.7 7 4.6c-1.2 1.2-2.4 1.4-3.4 0.6-0.9-0.7-1.2-1.6-2.1-2.2-1.1 0.7-1.6 1.6-2.6 2.2-1 0.6-2.2 0.4-3.5-0.6z" fill="#7f1d4d"></path><circle cx="9.5" cy="14.6" r="1.2" fill="#4a044e"></circle><circle cx="14.5" cy="14.6" r="1.2" fill="#4a044e"></circle><path d="M10.9 17.2c0.8 0.7 1.4 0.7 2.2 0" stroke="#4a044e" stroke-width="1" fill="none" stroke-linecap="round"></path></svg>'
   },
   person: {
     label: 'You',
