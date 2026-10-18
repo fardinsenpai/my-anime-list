@@ -2025,7 +2025,7 @@ let currentKeyIndex = 0;
 
 // Groq retires models occasionally — keep a fallback chain so the bot
 // never dies on "model_not_found" (404) again.
-let GROQ_MODELS = ['openai/gpt-oss-120b', 'qwen/qwen3.8-27b', 'openai/gpt-oss-20b'];
+let GROQ_MODELS = ['qwen/qwen3.8-27b', 'openai/gpt-oss-120b', 'openai/gpt-oss-20b'];
 let currentModelIndex = 0;
 
 function getNextKeyIndex() {
