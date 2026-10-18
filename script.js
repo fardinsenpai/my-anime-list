@@ -2207,6 +2207,7 @@ function restoreChatFromStorage() {
 // Call restore on page load
 document.addEventListener('DOMContentLoaded', () => {
   restoreChatFromStorage();
+  repaintAllAvatars(); // the welcome line's avatar follows the published CHAT_AVATARS
 });
 
 // ===== TOGGLE CHAT =====
@@ -2422,32 +2423,125 @@ function addMessage(text, type, shouldSave = true) {
 
 /* ══════════════════════════════════════
    🖼️ MESSAGE AVATARS (Senpai + user)
+   Value = 'preset:<id>' or 'img:<path>' — published from the admin panel.
+   Keep this line on ONE line, the admin picker rewrites it by regex.
 ══════════════════════════════════════ */
 
-// Senpai = the Sharingan eye (same identity as the chat header avatar)
-const AI_AVATAR_SVG =
-  '<svg viewBox="0 0 100 100">' +
-    '<circle cx="50" cy="50" r="45" fill="#8b0000" stroke="#ff2200" stroke-width="3"></circle>' +
-    '<circle cx="50" cy="50" r="15" fill="#1a0000"></circle>' +
-    '<circle cx="50" cy="28" r="7" fill="#1a0000"></circle>' +
-    '<circle cx="69" cy="61" r="7" fill="#1a0000"></circle>' +
-    '<circle cx="31" cy="61" r="7" fill="#1a0000"></circle>' +
-    '<circle cx="50" cy="50" r="6" fill="#ff2200"></circle>' +
-  '</svg>';
+let CHAT_AVATARS = { ai: 'preset:sharingan', user: 'preset:person' };
 
-// The visitor = simple person glyph
-const USER_AVATAR_SVG =
-  '<svg viewBox="0 0 24 24" fill="currentColor">' +
-    '<circle cx="12" cy="8" r="4.2"></circle>' +
-    '<path d="M3.8 21a8.2 8.2 0 0 1 16.4 0z"></path>' +
-  '</svg>';
+// Ready-made avatars (drawn as SVG so they stay crisp at any size)
+const AVATAR_PRESETS = {
+  sharingan: {
+    label: 'Sharingan',
+    bg: 'radial-gradient(circle at 32% 28%, #ff8fb8, #ff2d55 75%)',
+    border: 'rgba(255,214,232,0.75)',
+    glow: '0 0 10px rgba(255,45,85,0.45)',
+    svg: '<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="#8b0000" stroke="#ff2200" stroke-width="3"></circle><circle cx="50" cy="50" r="15" fill="#1a0000"></circle><circle cx="50" cy="28" r="7" fill="#1a0000"></circle><circle cx="69" cy="61" r="7" fill="#1a0000"></circle><circle cx="31" cy="61" r="7" fill="#1a0000"></circle><circle cx="50" cy="50" r="6" fill="#ff2200"></circle></svg>'
+  },
+  rinnegan: {
+    label: 'Rinnegan',
+    bg: 'radial-gradient(circle at 32% 28%, #c4b5fd, #5b21b6 78%)',
+    border: 'rgba(221,214,254,0.8)',
+    glow: '0 0 10px rgba(124,58,237,0.5)',
+    svg: '<svg viewBox="0 0 100 100" fill="none" stroke="#ede9fe" stroke-width="4"><circle cx="50" cy="50" r="42"></circle><circle cx="50" cy="50" r="30"></circle><circle cx="50" cy="50" r="18"></circle><circle cx="50" cy="50" r="6" fill="#ede9fe" stroke="none"></circle></svg>'
+  },
+  kitsune: {
+    label: 'Kitsune',
+    bg: 'radial-gradient(circle at 32% 28%, #fdba74, #ea580c 78%)',
+    border: 'rgba(254,215,170,0.85)',
+    glow: '0 0 10px rgba(249,115,22,0.45)',
+    svg: '<svg viewBox="0 0 24 24"><path d="M4 3 L8.2 6.2 L15.8 6.2 L20 3 L19.5 10.2 C19.5 15.4 16.1 19.5 12 19.5 C7.9 19.5 4.5 15.4 4.5 10.2 Z" fill="#fff7ed"></path><circle cx="9.2" cy="11.2" r="1.3" fill="#7c2d12"></circle><circle cx="14.8" cy="11.2" r="1.3" fill="#7c2d12"></circle><path d="M12 14.4l-1.4 1.5h2.8z" fill="#7c2d12"></path></svg>'
+  },
+  neko: {
+    label: 'Neko',
+    bg: 'radial-gradient(circle at 32% 28%, #fbcfe8, #db2777 80%)',
+    border: 'rgba(251,207,232,0.85)',
+    glow: '0 0 10px rgba(219,39,119,0.45)',
+    svg: '<svg viewBox="0 0 24 24"><path d="M5.2 7.2 L4.4 2.6 L8.7 4.7 Z" fill="#fff0f6"></path><path d="M18.8 7.2 L19.6 2.6 L15.3 4.7 Z" fill="#fff0f6"></path><circle cx="12" cy="12.6" r="7.6" fill="#fff0f6"></circle><circle cx="9.3" cy="11.6" r="1.2" fill="#831843"></circle><circle cx="14.7" cy="11.6" r="1.2" fill="#831843"></circle><path d="M12 14.6l-1.2 1.3h2.4z" fill="#831843"></path></svg>'
+  },
+  sakura: {
+    label: 'Sakura',
+    bg: 'radial-gradient(circle at 32% 28%, #ffd1e8, #ff5f9e 78%)',
+    border: 'rgba(255,224,240,0.9)',
+    glow: '0 0 10px rgba(255,95,158,0.5)',
+    svg: '<svg viewBox="0 0 24 24"><g transform="translate(12 12)" fill="#ffd9e8"><ellipse cx="0" cy="-5" rx="3.1" ry="5"></ellipse><ellipse cx="0" cy="-5" rx="3.1" ry="5" transform="rotate(72)"></ellipse><ellipse cx="0" cy="-5" rx="3.1" ry="5" transform="rotate(144)"></ellipse><ellipse cx="0" cy="-5" rx="3.1" ry="5" transform="rotate(216)"></ellipse><ellipse cx="0" cy="-5" rx="3.1" ry="5" transform="rotate(288)"></ellipse></g><circle cx="12" cy="12" r="1.9" fill="#ff2d55"></circle></svg>'
+  },
+  samurai: {
+    label: 'Samurai',
+    bg: 'radial-gradient(circle at 32% 28%, #93c5fd, #1e3a8a 80%)',
+    border: 'rgba(191,219,254,0.75)',
+    glow: '0 0 10px rgba(37,99,235,0.5)',
+    svg: '<svg viewBox="0 0 24 24"><path d="M12 2.6c-5 0-8.6 3.7-8.6 8.6 0 1.9 0.5 3.4 1.3 4.6h14.6c0.8-1.2 1.3-2.7 1.3-4.6 0-4.9-3.6-8.6-8.6-8.6z" fill="#c7d2fe"></path><path d="M12 2.6c-1.3 0-2.5 0.2-3.6 0.7L12 9.4l3.6-6.1c-1.1-0.5-2.3-0.7-3.6-0.7z" fill="#818cf8"></path><path d="M4.7 15.8h14.6l-1.9 4.2a1 1 0 0 1-0.9 0.6H7.5a1 1 0 0 1-0.9-0.6z" fill="#6366f1"></path><rect x="10.7" y="15.8" width="2.6" height="4.8" rx="0.7" fill="#e0e7ff"></rect></svg>'
+  },
+  ramen: {
+    label: 'Ramen',
+    bg: 'radial-gradient(circle at 32% 28%, #fde68a, #d97706 80%)',
+    border: 'rgba(253,230,138,0.85)',
+    glow: '0 0 10px rgba(217,119,6,0.45)',
+    svg: '<svg viewBox="0 0 24 24"><path d="M3 11.2h18c0 5.1-4 8.8-9 8.8s-9-3.7-9-8.8z" fill="#fde68a"></path><path d="M4.6 12.6h14.8c-0.4 3.6-3.5 6-7.4 6s-7-2.4-7.4-6z" fill="#b45309"></path><path d="M8.2 9c1-1.3 1-2.4 0-3.7M12 8.4c1.2-1.5 1.2-2.9 0-4.4M15.8 9c1-1.3 1-2.4 0-3.7" stroke="#fca5a5" stroke-width="1.3" fill="none" stroke-linecap="round"></path></svg>'
+  },
+  chibi: {
+    label: 'Chibi',
+    bg: 'radial-gradient(circle at 32% 28%, #fbcfe8, #be185d 82%)',
+    border: 'rgba(252,231,243,0.85)',
+    glow: '0 0 10px rgba(190,24,93,0.45)',
+    svg: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.6" fill="#f472b6"></circle><circle cx="12" cy="13.8" r="6.6" fill="#ffe9f2"></circle><path d="M5 11.5C5.6 8.6 8.4 6.9 12 6.9s6.4 1.7 7 4.6c-1.2 1.2-2.4 1.4-3.4 0.6-0.9-0.7-1.2-1.6-2.1-2.2-1.1 0.7-1.6 1.6-2.6 2.2-1 0.6-2.2 0.4-3.5-0.6z" fill="#be185d"></path><circle cx="9.5" cy="14.6" r="1.2" fill="#7f1d1d"></circle><circle cx="14.5" cy="14.6" r="1.2" fill="#7f1d1d"></circle><path d="M10.9 17.2c0.8 0.7 1.4 0.7 2.2 0" stroke="#7f1d1d" stroke-width="1" fill="none" stroke-linecap="round"></path></svg>'
+  },
+  person: {
+    label: 'You',
+    bg: 'radial-gradient(circle at 32% 28%, #a78bfa, #6d28d9 80%)',
+    border: 'rgba(196,181,253,0.7)',
+    glow: '0 0 10px rgba(139,92,246,0.4)',
+    svg: '<svg viewBox="0 0 24 24" fill="#f3e8ff"><circle cx="12" cy="8" r="4.2"></circle><path d="M3.8 21a8.2 8.2 0 0 1 16.4 0z"></path></svg>'
+  }
+};
+
+function avatarValue(side) {
+  var v = CHAT_AVATARS ? CHAT_AVATARS[side] : '';
+  return typeof v === 'string' ? v : '';
+}
+
+// 'preset:neko' → that preset · 'img:avatars/ai-avatar.webp?v=1' → your own picture
+function avatarSpec(side) {
+  var v = avatarValue(side);
+  var img = /^img:(.+)$/.exec(v);
+  if (img) return { kind: 'img', src: img[1] };
+  var pre = /^preset:([a-z0-9-]+)$/.exec(v);
+  if (pre && AVATAR_PRESETS[pre[1]]) return { kind: 'preset', id: pre[1] };
+  return { kind: 'preset', id: side === 'user' ? 'person' : 'sharingan' };
+}
+
+function paintAvatar(el, type) {
+  var side = type === 'user' ? 'user' : 'ai';
+  el.className = 'msg-avatar msg-avatar-' + side;
+  el.setAttribute('aria-hidden', 'true');
+  var spec = avatarSpec(side);
+  if (spec.kind === 'img') {
+    el.style.background = 'rgba(255,255,255,0.08)';
+    el.style.borderColor = 'rgba(255,255,255,0.35)';
+    el.style.boxShadow = 'none';
+    el.innerHTML = '<img class="msg-avatar-img" alt="" src="' + spec.src.replace(/"/g, '&quot;') + '">';
+    return;
+  }
+  var p = AVATAR_PRESETS[spec.id];
+  el.style.background = p.bg;
+  el.style.borderColor = p.border;
+  el.style.boxShadow = p.glow;
+  el.innerHTML = p.svg;
+}
 
 function createMsgAvatar(type) {
-  const avatar = document.createElement('div');
-  avatar.className = 'msg-avatar ' + (type === 'user' ? 'msg-avatar-user' : 'msg-avatar-ai');
-  avatar.setAttribute('aria-hidden', 'true');
-  avatar.innerHTML = type === 'user' ? USER_AVATAR_SVG : AI_AVATAR_SVG;
+  var avatar = document.createElement('div');
+  paintAvatar(avatar, type);
   return avatar;
+}
+
+// Repaint every avatar already on screen (welcome line + restored history)
+function repaintAllAvatars() {
+  document.querySelectorAll('#chatMessages .msg').forEach(function(m) {
+    var av = m.querySelector('.msg-avatar');
+    if (av) paintAvatar(av, m.classList.contains('user') ? 'user' : 'ai');
+  });
 }
 
 /* ══════════════════════════════════════
@@ -4233,7 +4327,7 @@ function switchAdminTab(tab) {
   document.querySelectorAll('.admin-g-tab').forEach(function(t) { t.classList.toggle('active', t.dataset.tab === tab); });
   document.querySelectorAll('.admin-g-content').forEach(function(c) { c.classList.toggle('active', c.id === 'tab' + tab.charAt(0).toUpperCase() + tab.slice(1)); });
   if (tab === 'add') { renderPills('ott', ''); renderPills('studio', ''); renderPills('genre', ''); }
-  if (tab === 'ai') { updateAiStatus(); refreshAiModels(); }
+  if (tab === 'ai') { updateAiStatus(); refreshAiModels(); renderAvatarPicker(); }
 }
 
 // ===== AI CHATBOT MODEL PICKER (admin — rewrites GROQ_MODELS in script.js on GitHub) =====
@@ -4300,6 +4394,176 @@ async function updateModelOnGithub(chain, why) {
     msgOk('Committed to GitHub ✓ — chatbot uses it in ~1 min');
   } else {
     msgFail('GitHub commit failed — check PAT and try again');
+  }
+}
+
+// ===== AVATAR PICKER (admin) — publishes the CHAT_AVATARS line in script.js on GitHub =====
+const AVATAR_STRIP_ORDER = ['sharingan', 'rinnegan', 'kitsune', 'neko', 'sakura', 'samurai', 'ramen', 'chibi', 'person'];
+
+function renderAvatarPicker() {
+  var body = document.getElementById('avatarPickerBody');
+  if (!body) return;
+  body.innerHTML = ['ai', 'user'].map(function(side) {
+    var title = side === 'ai' ? '🤖 SENPAI (AI)' : '👤 YOU (CHAT VISITOR)';
+    return '' +
+      '<div class="av-group" data-side="' + side + '">' +
+        '<div class="av-head">' +
+          '<span class="av-title">' + title + '</span>' +
+          '<button class="av-mini" onclick="pickAvatarImage(\'' + side + '\')">📷 UPLOAD</button>' +
+          '<button class="av-mini" onclick="resetAvatar(\'' + side + '\')">↺ RESET</button>' +
+        '</div>' +
+        '<div class="av-rail">' +
+          '<button class="av-nav" onclick="scrollAvatarStrip(\'' + side + '\',-1)" aria-label="previous 3">◀</button>' +
+          '<div class="av-strip" id="avStrip-' + side + '"></div>' +
+          '<button class="av-nav" onclick="scrollAvatarStrip(\'' + side + '\',1)" aria-label="next 3">▶</button>' +
+        '</div>' +
+        '<div class="av-current" id="avCurrent-' + side + '">current: …</div>' +
+        '<input type="file" accept="image/*" id="avFile-' + side + '" style="display:none" onchange="onAvatarFile(\'' + side + '\', this)">' +
+      '</div>';
+  }).join('');
+  fillAvatarStrip('ai');
+  fillAvatarStrip('user');
+  updateAvatarCurrentLabels();
+}
+
+function fillAvatarStrip(side) {
+  var strip = document.getElementById('avStrip-' + side);
+  if (!strip) return;
+  strip.innerHTML = AVATAR_STRIP_ORDER.map(function(id) {
+    var p = AVATAR_PRESETS[id];
+    return '<button class="av-item" data-side="' + side + '" data-av="preset:' + id + '" onclick="choosePreset(\'' + side + '\',\'' + id + '\')" title="' + p.label + '">' +
+      '<span class="av-thumb" style="background:' + p.bg + ';border-color:' + p.border + ';box-shadow:' + p.glow + ';">' + p.svg + '</span>' +
+      '<span class="av-name">' + p.label + '</span>' +
+    '</button>';
+  }).join('');
+  refreshAvatarSelection(side);
+}
+
+function refreshAvatarSelection(side) {
+  var strip = document.getElementById('avStrip-' + side);
+  if (!strip) return;
+  var cur = avatarValue(side);
+  strip.querySelectorAll('.av-item').forEach(function(b) {
+    b.classList.toggle('sel', b.getAttribute('data-av') === cur);
+  });
+}
+
+function updateAvatarCurrentLabels() {
+  ['ai', 'user'].forEach(function(side) {
+    var el = document.getElementById('avCurrent-' + side);
+    if (!el) return;
+    var spec = avatarSpec(side);
+    el.textContent = 'current: ' + (spec.kind === 'preset' ? AVATAR_PRESETS[spec.id].label : 'your uploaded picture');
+  });
+}
+
+// one page = exactly 3 avatars
+function scrollAvatarStrip(side, dir) {
+  var strip = document.getElementById('avStrip-' + side);
+  if (!strip) return;
+  strip.scrollBy({ left: dir * strip.clientWidth, behavior: 'smooth' });
+}
+
+function choosePreset(side, id) {
+  setChatAvatar(side, 'preset:' + id, id + ' for the ' + side + ' avatar');
+}
+
+function resetAvatar(side) {
+  setChatAvatar(side, side === 'user' ? 'preset:person' : 'preset:sharingan', 'reset the ' + side + ' avatar');
+}
+
+function pickAvatarImage(side) {
+  var input = document.getElementById('avFile-' + side);
+  if (input) input.click();
+}
+
+// Reads the chosen picture, square-crops it to 256x256 and commits it to avatars/ in the repo
+async function onAvatarFile(side, input) {
+  var file = input && input.files && input.files[0];
+  if (!file) return;
+  if (!getPat()) { msgFail('Save your PAT first (field at the top of the panel)'); input.value = ''; return; }
+  showLoading();
+  try {
+    var dataUrl = await resizeAvatarImage(file, 256);
+    var mime = dataUrl.slice(5, dataUrl.indexOf(';'));
+    var ext = mime.indexOf('webp') > -1 ? 'webp' : (mime.indexOf('png') > -1 ? 'png' : 'jpg');
+    var path = 'avatars/' + (side === 'user' ? 'user' : 'ai') + '-avatar.' + ext;
+    var ok = await commitBase64(path, dataUrl.slice(dataUrl.indexOf(',') + 1), 'feat(chat): upload the ' + side + ' avatar picture');
+    if (!ok) { msgFail('Picture upload failed — check the PAT'); return; }
+    await setChatAvatar(side, 'img:' + path + '?v=' + Date.now(), 'picture for the ' + side + ' avatar');
+  } catch (e) {
+    msgFail('Could not read that picture');
+  } finally {
+    hideLoading();
+    input.value = '';
+  }
+}
+
+function resizeAvatarImage(file, size) {
+  return new Promise(function(resolve, reject) {
+    var reader = new FileReader();
+    reader.onerror = function() { reject(new Error('read failed')); };
+    reader.onload = function() {
+      var img = new Image();
+      img.onerror = function() { reject(new Error('decode failed')); };
+      img.onload = function() {
+        var c = document.createElement('canvas');
+        c.width = size; c.height = size;
+        var ctx = c.getContext('2d');
+        var s = Math.min(img.width, img.height) || size;
+        ctx.drawImage(img, (img.width - s) / 2, (img.height - s) / 2, s, s, 0, 0, size, size);
+        var out = '';
+        try { out = c.toDataURL('image/webp', 0.9); } catch (e) { out = ''; }
+        if (out.indexOf('data:image/webp') !== 0) out = c.toDataURL('image/png');
+        resolve(out);
+      };
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+// Same as githubCommit, but the content is already base64 (used for pictures)
+async function commitBase64(path, base64, message) {
+  var pat = getPat();
+  if (!pat) return false;
+  try {
+    var existing = await githubFetch(path);
+    var body = { message: message, content: base64, branch: GITHUB_BRANCH };
+    if (existing && existing.sha) body.sha = existing.sha;
+    var res = await fetch('https://api.github.com/repos/' + GITHUB_OWNER + '/' + GITHUB_REPO + '/contents/' + path, {
+      method: 'PUT',
+      headers: { 'Authorization': 'token ' + pat, 'Accept': 'application/vnd.github.v3+json', 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    return res.ok;
+  } catch (e) { return false; }
+}
+
+async function setChatAvatar(side, value, why) {
+  if (!getPat()) { msgFail('Save your PAT first (field at the top of the panel)'); return; }
+  if (!/^(preset:[a-z0-9-]+|img:[A-Za-z0-9._\-\/]+(\?v=[0-9]+)?)$/.test(value)) { msgFail('Unsupported avatar value'); return; }
+  showLoading();
+  try {
+    var file = await githubFetch('script.js');
+    if (!file || !file.content) { msgFail('Could not fetch script.js from GitHub — check the PAT'); return; }
+    var text;
+    try { text = decodeURIComponent(escape(atob(file.content))); } catch (e) { msgFail('Could not decode script.js'); return; }
+    if (!/(?:const|let|var) CHAT_AVATARS = \{[^}]*\};/.test(text)) { msgFail('CHAT_AVATARS line not found in script.js'); return; }
+    var next = { ai: avatarValue('ai') || 'preset:sharingan', user: avatarValue('user') || 'preset:person' };
+    next[side] = value;
+    var newLine = "let CHAT_AVATARS = { ai: '" + next.ai.replace(/['\\]/g, '') + "', user: '" + next.user.replace(/['\\]/g, '') + "' };";
+    var updated = text.replace(/(?:const|let|var) CHAT_AVATARS = \{[^}]*\};/, newLine);
+    if (updated === text) { msgOk('That avatar is already published'); return; }
+    var ok = await githubCommit('script.js', updated, 'feat(chat): ' + why);
+    if (!ok) { msgFail('Publish failed — check the PAT'); return; }
+    CHAT_AVATARS = next;
+    repaintAllAvatars();
+    refreshAvatarSelection(side);
+    updateAvatarCurrentLabels();
+    msgOk('Avatar published ✓ — live for everyone in ~1-10 min');
+  } finally {
+    hideLoading();
   }
 }
 

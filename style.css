@@ -4432,6 +4432,66 @@ body.perf-no-heading-anim .header h1::after { animation: none !important; }
 }
 .admin-g-btn:hover { background: rgba(0,255,65,0.08); box-shadow: 0 0 12px rgba(0,255,65,0.15); }
 .admin-g-btn:active { transform: scale(0.98); }
+
+/* === ADMIN: CHAT AVATAR PICKER === */
+.av-group {
+  border: 1px solid rgba(0,255,65,0.12);
+  border-radius: 6px;
+  padding: 8px;
+  margin-bottom: 10px;
+  background: rgba(0,255,65,0.02);
+}
+.av-head { display: flex; align-items: center; gap: 5px; margin-bottom: 7px; }
+.av-title {
+  flex: 1; font-family: monospace; font-size: 10px; letter-spacing: 1px;
+  color: #00ff41; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.av-mini {
+  background: transparent; border: 1px solid rgba(0,255,65,0.35);
+  color: rgba(0,255,65,0.85); font-family: monospace; font-size: 9px;
+  padding: 3px 7px; border-radius: 3px; cursor: pointer; letter-spacing: 1px;
+  flex: 0 0 auto; transition: all 0.2s;
+}
+.av-mini:hover { background: rgba(0,255,65,0.08); border-color: #00ff41; color: #00ff41; }
+.av-rail { display: flex; align-items: center; gap: 4px; }
+.av-nav {
+  background: transparent; border: 1px solid rgba(0,255,65,0.2);
+  color: rgba(0,255,65,0.7); width: 20px; height: 62px; border-radius: 3px;
+  cursor: pointer; font-size: 10px; flex: 0 0 auto; transition: all 0.2s;
+}
+.av-nav:hover { border-color: #00ff41; color: #00ff41; background: rgba(0,255,65,0.06); }
+/* exactly 3 avatars visible at a time; scroll or use ◀ ▶ for the next 3 */
+.av-strip {
+  display: flex; gap: 6px; flex: 1;
+  overflow-x: auto; scroll-snap-type: x mandatory; scroll-behavior: smooth;
+  padding: 2px; scrollbar-width: none;
+}
+.av-strip::-webkit-scrollbar { display: none; }
+.av-item {
+  flex: 0 0 calc((100% - 12px) / 3);
+  scroll-snap-align: start;
+  background: transparent; border: 1px solid transparent; border-radius: 5px;
+  padding: 4px 2px; cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  transition: background 0.2s, border-color 0.2s;
+}
+.av-item:hover { background: rgba(0,255,65,0.05); }
+.av-item.sel {
+  border-color: #00ff41; background: rgba(0,255,65,0.08);
+  box-shadow: 0 0 8px rgba(0,255,65,0.15);
+}
+.av-thumb {
+  width: 38px; height: 38px; border-radius: 50%;
+  border: 1.5px solid rgba(255,255,255,0.2);
+  display: flex; align-items: center; justify-content: center; overflow: hidden;
+}
+.av-thumb svg { width: 22px; height: 22px; }
+.av-name {
+  font-family: monospace; font-size: 8px; letter-spacing: 0.5px;
+  color: rgba(0,255,65,0.65);
+  max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.av-current { font-family: monospace; font-size: 9px; color: rgba(0,255,65,0.5); margin-top: 5px; }
 .admin-g-group {
   background: rgba(0,255,65,0.02);
   border: 1px solid rgba(0,255,65,0.08);

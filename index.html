@@ -6,8 +6,8 @@
   <link rel="manifest" href="manifest.json">
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Fardin's Anime Hub</title>
-  <link rel="stylesheet" href="style.css?v=20261019">
-  <link rel="stylesheet" href="chat-styles.css?v=20261019m">
+  <link rel="stylesheet" href="style.css?v=20261020a">
+  <link rel="stylesheet" href="chat-styles.css?v=20261020a">
   <link rel="stylesheet" href="duel-system.css">
   <link rel="stylesheet" href="tournament.css">
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600;700&family=Exo+2:wght@400;600;700&family=Yuji+Syuku&family=Bangers&family=Poppins:wght@400;700&family=Cinzel+Decorative:wght@400;700&display=swap" rel="stylesheet">
@@ -1387,7 +1387,7 @@
   <script src="duel-system.js"></script>
   <script src="tournament.js?v=20261018"></script>
   <script src="quest-data.js"></script>
-  <script src="script.js?v=20261019m"></script>
+  <script src="script.js?v=20261020a"></script>
 
 <!-- === ADMIN PANEL === -->
 <div class="admin-overlay" id="adminOverlay">
@@ -1638,6 +1638,12 @@
         <button class="admin-g-btn" onclick="saveAiModel()">⬆ UPDATE ON GITHUB</button>
         <button class="admin-g-btn" onclick="resetAiModel()" style="background:transparent;border:1px solid rgba(255,51,85,0.6);color:#ff3355;">↺ DEFAULT CHAIN</button>
         <div style="font-size:9px;color:rgba(0,255,65,0.5);font-family:monospace;margin-top:8px;line-height:1.6;">UPDATE ON GITHUB = rewrites the GROQ_MODELS line in script.js<br>(selected model becomes first choice, older ones stay as fallbacks).<br>Needs your PAT. Live for everyone in ~1 minute.</div>
+
+        <div style="border-top:1px dashed rgba(0,255,65,0.15);margin:14px 0 10px;"></div>
+
+        <div style="font-size:10px;color:rgba(0,255,65,0.7);font-family:monospace;margin-bottom:8px;">// CHAT AVATARS //</div>
+        <div id="avatarPickerBody"></div>
+        <div style="font-size:9px;color:rgba(0,255,65,0.5);font-family:monospace;margin-top:8px;line-height:1.6;">◀ ▶ = next 3 avatars · click one to publish it for <b>everyone</b>.<br>📷 UPLOAD = your own picture (auto-cropped square, saved in the repo's<br>avatars/ folder). Needs your PAT. Live in ~1-10 min.</div>
       </div>
 
       <!-- PAT display -->
