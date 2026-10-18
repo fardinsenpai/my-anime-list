@@ -2798,12 +2798,13 @@ function renderChatSettings() {
         '<button class="cs-mini" onclick="resetMyAvatar()">↺  USE SITE DEFAULT</button>' +
       '</div>' +
     '</div>' +
-    '<div class="cs-sec">🎨 Presets <span class="cs-src">3 at a time</span></div>' +
+    '<div class="cs-sec">🎨 Presets</div>' +
     '<div class="av-rail">' +
       '<button class="av-nav" onclick="scrollChatAvatarStrip(-1)" aria-label="previous 3">◀</button>' +
       '<div class="av-strip" id="csStrip"></div>' +
       '<button class="av-nav" onclick="scrollChatAvatarStrip(1)" aria-label="next 3">▶</button>' +
     '</div>' +
+    '<div class="cs-note">◀ ▶ moves 3 avatars at a time · 9 presets in total.</div>' +
     '<div class="cs-sec">🎴 Anime characters <span class="cs-src">AniList</span></div>' +
     '<div class="cs-search">' +
       '<input type="text" id="csCharQuery" placeholder="Search a character — naruto, levi, goku…" onkeydown="if(event.key===\'Enter\'){event.preventDefault();searchCharacters(\'csCharQuery\');}">' +
