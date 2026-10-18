@@ -68,6 +68,25 @@
     return t.toLowerCase().replace(/[^a-z0-9]/g, '');
   }
 
+  /* ── PAGE GATE — Duel শুধু Home page-তে চলবে ───────── */
+  // Allowed: /my-anime-list/ , /my-anime-list/home , duel-এর নিজের URL
+  // (/anime-duel refresh restore-এর জন্য) + local file/server preview.
+  function isDuelPathAllowed() {
+    var p = (window.location.pathname || '').replace(/\/+$/, '');
+
+    // Local preview: file:///E:/Text/index.html — 404.html বাদ
+    if (window.location.protocol === 'file:') {
+      return /\/index\.html$/i.test(p) || p === '' || p === '/';
+    }
+
+    return p === '' || p === '/' ||
+           /\/index\.html$/i.test(p) ||             // localhost/index.html
+           p.endsWith('/my-anime-list') ||          // https://fardinsenpai.github.io/my-anime-list/
+           p.endsWith('/my-anime-list/home') ||     // https://fardinsenpai.github.io/my-anime-list/home
+           p.endsWith('/home') ||                   // dev hosts
+           p.endsWith('/anime-duel');               // duel-এর নিজের URL state
+  }
+
   function injectDuelSidebarLink() {
     // ─── Already exists check ───────────────────────────
     // HTML-এ manually আছে কিনা দেখো
@@ -144,8 +163,17 @@ if (counterContainer) counterContainer.style.display = 'none';
   function toggleDuelMode() {
   // ⬇️ Sidebar auto-close করো
   closeSidebar();
-  
-  DuelState.isActive ? deactivateDuelMode() : activateDuelMode();
+
+  // Turn OFF সব page-তে চলবে
+  if (DuelState.isActive) { deactivateDuelMode(); return; }
+
+  // ⛔ শুধু Home page-তে turn ON হবে — অন্য কোনো page-তে না
+  if (!isDuelPathAllowed()) {
+    showDuelToast('⛔ Anime Duel শুধু Home পেজে চলবে!', 'Home পেজে গিয়ে চালু করো।', 'warning');
+    return;
+  }
+
+  activateDuelMode();
 }
 
 /**
@@ -188,7 +216,7 @@ function closeSidebar() {
   console.log('🚪 Sidebar closed');
 }
 
-  function deactivateDuelMode() {
+  function deactivateDuelMode(skipUrlReset) {
     DuelState.isActive = false;
     document.body.classList.remove('duel-mode-active');
 
@@ -209,20 +237,38 @@ if (counterContainer) counterContainer.style.display = '';
     hideDuelModeIndicator();
     showDuelToast('🔕 Duel Mode বন্ধ।', '', 'warning');
     // URL back — use replaceState so one back press = exit duel
-    history.replaceState(null, '', '.');
+    // (skip হলে না — অন্য section-এর URL মিলিয়ে ফেলবে না)
+    if (!skipUrlReset) history.replaceState(null, '', '.');
   }
 
   // Back/forward navigation — exit duel mode if URL doesn't match
   window.addEventListener('popstate', function () {
     if (DuelState.isActive && !location.pathname.endsWith('/anime-duel')) {
-      DuelState.isActive = false;
-      deactivateDuelMode();
+      deactivateDuelMode(true);
     }
+  });
+
+  // SPA section navigation (pushState/replaceState) — duel শুধু Home
+  // page-তে কাজ করবে। অন্য section-এ গেলে সাথে সাথেই বন্ধ হয়ে যাবে,
+  // আর সেই section-এর URL বদলাবে না।
+  ['pushState', 'replaceState'].forEach(function (m) {
+    var orig = history[m];
+    if (typeof orig !== 'function') return;
+    history[m] = function () {
+      var r = orig.apply(this, arguments);
+      try {
+        if (DuelState.isActive && !isDuelPathAllowed()) deactivateDuelMode(true);
+      } catch (err) {}
+      return r;
+    };
   });
 
   /* ── CARD INTERCEPTION ─────────────────────────────── */
   function handleCardClick(e) {
     if (!DuelState.isActive) return;
+
+    // Safety net — path কোথাও অন্য জায়গায় গেলে card select বন্ধ
+    if (!isDuelPathAllowed()) { deactivateDuelMode(true); return; }
 
     const card = e.target.closest('.card');
     if (!card) return;
