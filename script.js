@@ -563,6 +563,7 @@ window.addEventListener('popstate', function () {
   if (topFiveBtn && topFiveContainer) {
     topFiveBtn.onclick = function(e) {
       e.preventDefault();
+      history.pushState(null, '', 'top-5');
       closeWaifus();
       hideAllSections();
       topFiveContainer.style.display = 'block';
@@ -1817,7 +1818,9 @@ searchBox.addEventListener('input', function () {
 });
 
 function searchAnime() {
-    let input = document.getElementById('search-input').value.toLowerCase();
+    const _inp = document.getElementById('search-input');
+    if (!_inp) return;
+    let input = _inp.value.toLowerCase();
     let cards = document.querySelectorAll('.card');
     let noResults = document.getElementById('no-results');
     let visibleCount = 0;
@@ -3771,6 +3774,9 @@ document.addEventListener('click', function(e) {
     } else if (p.endsWith('/analysis')) {
       var btn = document.getElementById('analysisSideBtn');
       if (btn) btn.click();
+    } else if (p.endsWith('/top-5')) {
+      var btn = document.getElementById('topFiveSideBtn');
+      if (btn) btn.click();
     } else if (p.endsWith('/top-secrets')) {
       var btn = document.getElementById('topSecretsBtn');
       if (btn) btn.click();
@@ -4680,6 +4686,7 @@ function wrapQuestName(name) {
 }
 
 function initQuest() {
+  if (typeof QUEST_ANIME_LIST === 'undefined') return;
   _questSelected = [];
   _questQuestions = [];
   _questIndex = 0;
@@ -4747,6 +4754,7 @@ function resetQuestSelection() {
 }
 
 function startQuest() {
+  if (typeof QUEST_BANK === 'undefined') return;
   if (_questSelected.length === 0) return;
   var pool = QUEST_BANK.filter(function(q) { return _questSelected.indexOf(q.anime) !== -1; });
   if (_questDifficulty !== 'mixed') pool = pool.filter(function(q) { return q.difficulty === _questDifficulty; });
@@ -5017,4 +5025,29 @@ function resetQuest() {
   document.getElementById('qcTime').textContent = '';
   document.getElementById('questSelectedCount').textContent = 'Selected: ' + _questSelected.length;
   document.getElementById('questStartBtn').style.display = _questSelected.length > 0 ? 'inline-block' : 'none';
+}
+
+function backToQuestSelect() {
+  resetQuest();
+}
+
+// === Fast Scroll Float Button ===
+(function() {
+  var btn = document.getElementById('fastScrollBtn');
+  if (!btn) return;
+  window.addEventListener('scroll', function() {
+    if (!isScrollButtonSection()) { btn.style.display = 'none'; return; }
+    var y = window.scrollY || document.documentElement.scrollTop;
+    var maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+    var nearBottom = y > maxScroll - 80;
+    if (y > document.body.scrollHeight / 3 && !nearBottom) {
+      btn.style.display = 'inline-block';
+    } else {
+      btn.style.display = 'none';
+    }
+  });
+})();
+function fastScrollToBottom() {
+  window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' });
+  setTimeout(function() { document.getElementById('fastScrollBtn').style.display = 'none'; }, 100);
 }
