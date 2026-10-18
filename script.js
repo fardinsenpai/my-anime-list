@@ -2036,6 +2036,7 @@ function getNextKeyIndex() {
 async function fetchWithFallback(body) {
   let lastError = null;
   let attempts = 0;
+  let rateLimitHits = 0;
   const maxAttempts = GROQ_API_KEYS.length * GROQ_MODELS.length;
 
   while (attempts < maxAttempts) {
@@ -2059,6 +2060,12 @@ async function fetchWithFallback(body) {
       }
       if (res.status === 429 || res.status === 401 || res.status >= 500) {
         lastError = new Error('Groq API error: ' + res.status);
+        // Rate limited: keys share a free-tier quota, so hammering the next key
+        // instantly just burns it too. Wait a moment before the next attempt.
+        if (res.status === 429) {
+          rateLimitHits++;
+          await new Promise((resolve) => setTimeout(resolve, Math.min(1200 * rateLimitHits, 4000)));
+        }
         getNextKeyIndex();
         attempts++;
         continue;
@@ -2280,9 +2287,12 @@ async function sendMessage() {
     }
   } catch (error) {
     if (typingDiv) typingDiv.remove();
-    const msg = (error.message || '').includes('401') || (error.message || '').includes('429')
-      ? 'The AI service is currently unavailable. Please try again later! ✨'
-      : 'I worked Too Much Today, Try Again After a While! Till then, Enjoy many features from SideBar! ✨';
+    const errText = error.message || '';
+    const msg = errText.includes('429')
+      ? 'Too many requests right now, Senpai! 🥺 Give me a few seconds and ask me again.'
+      : (errText.includes('401')
+        ? 'The AI service is currently unavailable. Please try again later! ✨'
+        : 'I worked Too Much Today, Try Again After a While! Till then, Enjoy many features from SideBar! ✨');
     addMessage(msg, 'bot');
     console.error('Chat Error:', error);
   }
