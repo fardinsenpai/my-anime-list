@@ -1817,7 +1817,9 @@ searchBox.addEventListener('input', function () {
 });
 
 function searchAnime() {
-    let input = document.getElementById('search-input').value.toLowerCase();
+    const _inp = document.getElementById('search-input');
+    if (!_inp) return;
+    let input = _inp.value.toLowerCase();
     let cards = document.querySelectorAll('.card');
     let noResults = document.getElementById('no-results');
     let visibleCount = 0;
@@ -4680,6 +4682,7 @@ function wrapQuestName(name) {
 }
 
 function initQuest() {
+  if (typeof QUEST_ANIME_LIST === 'undefined') return;
   _questSelected = [];
   _questQuestions = [];
   _questIndex = 0;
@@ -4747,6 +4750,7 @@ function resetQuestSelection() {
 }
 
 function startQuest() {
+  if (typeof QUEST_BANK === 'undefined') return;
   if (_questSelected.length === 0) return;
   var pool = QUEST_BANK.filter(function(q) { return _questSelected.indexOf(q.anime) !== -1; });
   if (_questDifficulty !== 'mixed') pool = pool.filter(function(q) { return q.difficulty === _questDifficulty; });
