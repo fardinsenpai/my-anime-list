@@ -2280,7 +2280,7 @@ async function sendMessage() {
     const response = await fetchWithFallback({
       messages: messagesToSend,
       temperature: 0.8,
-      max_tokens: 400,
+      max_tokens: 1600,
       stream: false
     });
 
@@ -2289,7 +2289,12 @@ async function sendMessage() {
     if (data.choices && data.choices[0]) {
       if (typingDiv) typingDiv.remove();
 
-      const botReply = data.choices[0].message.content;
+      // The model is a REASONING model: it can burn the whole token budget on internal
+      // thinking and come back with nothing, so never show an empty bubble.
+      let botReply = data.choices[0].message.content;
+      if (!botReply || !String(botReply).trim()) {
+        botReply = 'Sorry, my brain glitched for a second 😅 Ask me that again?';
+      }
 
       chatHistory.push({
         role: 'assistant',
