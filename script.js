@@ -6198,16 +6198,20 @@ function renderAccountUI() {
   if (AUTH_USER) {
     btn.setAttribute('title', 'Signed in as ' + (AUTH_USER.first || AUTH_USER.email) + ' — click for options');
     if (av) {
-      if (AUTH_USER.avatar) { av.src = AUTH_USER.avatar; av.hidden = false; }
-      else { av.hidden = true; av.removeAttribute('src'); }
+      if (AUTH_USER.avatar) {
+        av.onerror = function() { av.hidden = true; };   // never show a broken-image icon
+        av.src = AUTH_USER.avatar; av.hidden = false;
+      } else { av.hidden = true; av.removeAttribute('src'); }
     }
     if (gIc) gIc.hidden = true;
     if (txt) txt.textContent = AUTH_USER.first || 'Signed in';
     if (popName) popName.textContent = AUTH_USER.name || AUTH_USER.first || 'Signed in';
     if (popMail) popMail.textContent = AUTH_USER.email || '';
     if (popAv) {
-      if (AUTH_USER.avatar) { popAv.src = AUTH_USER.avatar; popAv.hidden = false; }
-      else { popAv.hidden = true; popAv.removeAttribute('src'); }
+      if (AUTH_USER.avatar) {
+        popAv.onerror = function() { popAv.hidden = true; };   // ditto for the card's photo
+        popAv.src = AUTH_USER.avatar; popAv.hidden = false;
+      } else { popAv.hidden = true; popAv.removeAttribute('src'); }
     }
   } else {
     btn.setAttribute('title', 'Sign in with Google');

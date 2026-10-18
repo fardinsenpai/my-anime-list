@@ -5167,6 +5167,10 @@ body.perf-no-heading-anim .header h1::after { animation: none !important; }
   transition: background 0.2s ease;
 }
 .account-pop-btn:hover { background: rgba(255,70,70,0.24); }
+/* the power glyph is drawn (inline SVG), never a rare Unicode character that
+   can show up as an empty box on Windows */
+.account-pop-btn { display: inline-flex; align-items: center; justify-content: center; gap: 7px; }
+.account-pop-ic { flex: 0 0 auto; display: block; }
 
 @media (max-width: 560px) {
   .topbar-right { gap: 8px !important; }
