@@ -2498,30 +2498,46 @@ const AVATAR_PRESETS = {
   }
 };
 
-// The visitor's own choice (chat ⚙️ sheet) wins for the user side; '' = use the site default
-const MY_AVATAR_KEY = 'fardin_chat_my_avatar';
-let MY_AVATAR = '';
+// The visitor's own choices (chat ⚙️ sheet) win per side; '' = use the site default for that side
+const MY_AVATAR_KEYS = { user: 'fardin_chat_my_avatar', ai: 'fardin_chat_my_avatar_ai' };
+let MY_AVATAR = { user: '', ai: '' };
+let CS_SIDE = 'user';   // which avatar the ⚙️ sheet is editing ('user' | 'ai')
 
-function loadMyAvatar() {
-  try { MY_AVATAR = localStorage.getItem(MY_AVATAR_KEY) || ''; } catch (e) { MY_AVATAR = ''; }
-  // preset · an uploaded picture (data URL) · an anime character (AniList URL)
-  if (!/^(preset:[a-z0-9-]+|img:(data:image\/[a-z+]+;base64,[A-Za-z0-9+/=]+|https?:\/\/[^\s'"]+))$/.test(MY_AVATAR)) MY_AVATAR = '';
+// preset:<id> · an uploaded picture (data URL) · an anime character (AniList URL)
+function validAvatarValue(v) {
+  return /^(preset:[a-z0-9-]+|img:(data:image\/[a-z+]+;base64,[A-Za-z0-9+/=]+|https?:\/\/[^\s'"]+))$/.test(v || '');
 }
 
-function saveMyAvatar(value) {
-  MY_AVATAR = value || '';
+function loadMyAvatar() {
+  ['user', 'ai'].forEach(function(side) {
+    var v = '';
+    try { v = localStorage.getItem(MY_AVATAR_KEYS[side]) || ''; } catch (e) { v = ''; }
+    MY_AVATAR[side] = validAvatarValue(v) ? v : '';
+  });
+}
+
+function saveMyAvatar(side, value) {
+  side = side === 'ai' ? 'ai' : 'user';
+  var prev = MY_AVATAR[side];
+  MY_AVATAR[side] = value || '';
   try {
-    if (MY_AVATAR) localStorage.setItem(MY_AVATAR_KEY, MY_AVATAR);
-    else localStorage.removeItem(MY_AVATAR_KEY);
+    if (MY_AVATAR[side]) localStorage.setItem(MY_AVATAR_KEYS[side], MY_AVATAR[side]);
+    else localStorage.removeItem(MY_AVATAR_KEYS[side]);
     return true;
   } catch (e) {
-    loadMyAvatar();
-    return false; // localStorage full (a very big picture)
+    // localStorage full (a very big picture) — put the previous one back
+    MY_AVATAR[side] = prev;
+    try {
+      if (prev) localStorage.setItem(MY_AVATAR_KEYS[side], prev);
+      else localStorage.removeItem(MY_AVATAR_KEYS[side]);
+    } catch (e2) {}
+    return false;
   }
 }
 
 function avatarValue(side) {
-  if (side === 'user' && MY_AVATAR) return MY_AVATAR;
+  side = side === 'ai' ? 'ai' : 'user';
+  if (MY_AVATAR[side]) return MY_AVATAR[side];
   var v = CHAT_AVATARS ? CHAT_AVATARS[side] : '';
   return typeof v === 'string' ? v : '';
 }
@@ -2723,7 +2739,7 @@ function renderCharGrids() {
     });
     if (CHAR_STATE.error || (CHAR_STATE.busy && !CHAR_STATE.list.length) || !CHAR_STATE.list.length) return;
     var target = g.getAttribute('data-char-target');
-    var cur = target === 'my' ? avatarValue('user') : publishedAvatar(target);
+    var cur = target === 'my' ? avatarValue(CS_SIDE) : publishedAvatar(target);
     g.querySelectorAll('.av-char').forEach(function(b) {
       b.classList.toggle('sel', !!cur && (b.getAttribute('data-av') === cur || charIsCurrent(b.getAttribute('data-char'), cur)));
     });
@@ -2753,12 +2769,9 @@ async function pickCharacter(btn, id) {
   var value = 'img:' + url;
 
   if (target === 'my') {
-    if (!saveMyAvatar(value)) { chatToast('Could not save that avatar 😢'); return; }
-    repaintAllAvatars();
-    refreshChatAvatarSelection();
-    updateMyAvatarPreview();
-    renderCharGrids();
-    chatToast(name + ' is now your avatar 🎴');
+    if (!saveMyAvatar(CS_SIDE, value)) { chatToast('Could not save that avatar 😢'); return; }
+    applyMyAvatarChange();
+    chatToast(CS_SIDE === 'ai' ? name + ' is now Senpai 🎴' : name + ' is now your avatar 🎴');
     return;
   }
   if (!getPat()) { msgFail('Save your PAT first (field at the top of the panel)'); return; }
@@ -2767,8 +2780,8 @@ async function pickCharacter(btn, id) {
 }
 
 /* ══════════════════════════════════════
-   ⚙️ VISITOR AVATAR SETTINGS (gear in the chat header)
-   Lets anyone pick their own avatar — kept in this browser only.
+   ⚙️ CHAT AVATAR SETTINGS (gear in the chat header)
+   Lets anyone restyle BOTH avatars — Senpai's and their own — kept in this browser only.
 ══════════════════════════════════════ */
 
 function toggleChatSettings(force) {
@@ -2785,16 +2798,30 @@ function toggleChatSettings(force) {
   }
 }
 
+function setChatAvatarTab(side) {
+  CS_SIDE = side === 'ai' ? 'ai' : 'user';
+  renderChatSettings();
+  var body = document.getElementById('chatSettingsBody');
+  if (body) body.scrollTop = 0;
+}
+
 function renderChatSettings() {
   var body = document.getElementById('chatSettingsBody');
   if (!body) return;
+  var isAi = CS_SIDE === 'ai';
   body.innerHTML =
-    '<div class="cs-label">Choose your own avatar — it changes only how <b>your</b> messages look, and it is remembered in this browser. No account needed.</div>' +
+    '<div class="cs-tabs">' +
+      '<button class="cs-tab' + (isAi ? '' : ' on') + '" onclick="setChatAvatarTab(\'user\')">👤 Your avatar</button>' +
+      '<button class="cs-tab' + (isAi ? ' on' : '') + '" onclick="setChatAvatarTab(\'ai\')">🤖 Senpai\'s avatar</button>' +
+    '</div>' +
+    '<div class="cs-label">' + (isAi
+      ? 'Change how <b>Senpai</b> looks — only on your screen. It is saved in this browser, so everyone else still sees the site\'s own Senpai avatar.'
+      : 'Choose your own avatar — it changes only how <b>your</b> messages look, and it is remembered in this browser. No account needed.') + '</div>' +
     '<div class="cs-preview-row">' +
       '<div class="cs-preview-avatar" id="csPreview"></div>' +
       '<div class="cs-preview-info">' +
         '<div class="cs-preview-name" id="csPreviewName">…</div>' +
-        '<button class="cs-mini" onclick="pickMyAvatarImage()">📷  UPLOAD MY PICTURE</button>' +
+        '<button class="cs-mini" onclick="pickMyAvatarImage()">📷  ' + (isAi ? 'UPLOAD A PICTURE' : 'UPLOAD MY PICTURE') + '</button>' +
         '<button class="cs-mini" onclick="resetMyAvatar()">↺  USE SITE DEFAULT</button>' +
       '</div>' +
     '</div>' +
@@ -2807,7 +2834,7 @@ function renderChatSettings() {
     '<div class="cs-note">◀ ▶ moves 3 avatars at a time · 9 presets in total.</div>' +
     '<div class="cs-sec">🎴 Anime characters <span class="cs-src">AniList</span></div>' +
     '<div class="cs-search">' +
-      '<input type="text" id="csCharQuery" placeholder="Search a character — naruto, levi, goku…" onkeydown="if(event.key===\'Enter\'){event.preventDefault();searchCharacters(\'csCharQuery\');}">' +
+      '<input type="text" id="csCharQuery" value="' + (CHAR_STATE.query || '').replace(/"/g, '&quot;') + '" placeholder="Search a character — naruto, levi, goku…" onkeydown="if(event.key===\'Enter\'){event.preventDefault();searchCharacters(\'csCharQuery\');}">' +
       '<button onclick="searchCharacters(\'csCharQuery\')" aria-label="Search characters">🔎</button>' +
     '</div>' +
     '<div class="av-grid" data-char-target="my" id="csCharGrid"></div>' +
@@ -2839,7 +2866,7 @@ function fillChatAvatarStrip() {
 function refreshChatAvatarSelection() {
   var strip = document.getElementById('csStrip');
   if (!strip) return;
-  var cur = avatarValue('user');
+  var cur = avatarValue(CS_SIDE);
   strip.querySelectorAll('.av-item').forEach(function(b) {
     b.classList.toggle('sel', b.getAttribute('data-av') === cur);
   });
@@ -2848,12 +2875,17 @@ function refreshChatAvatarSelection() {
 function updateMyAvatarPreview() {
   var prev = document.getElementById('csPreview');
   if (!prev) return;
-  var spec = avatarSpec('user');
+  var spec = avatarSpec(CS_SIDE);
   if (spec.kind === 'img') {
     prev.style.background = 'rgba(255,255,255,0.08)';
     prev.style.borderColor = 'rgba(255,255,255,0.35)';
     prev.style.boxShadow = 'none';
-    prev.innerHTML = '<img alt="" src="' + spec.src.replace(/"/g, '&quot;') + '">';
+    prev.innerHTML = '';
+    var im = document.createElement('img');
+    im.alt = '';
+    im.onerror = function() { paintAvatarFallback(prev, CS_SIDE); };
+    im.src = spec.src;
+    prev.appendChild(im);
   } else {
     var p = AVATAR_PRESETS[spec.id];
     prev.style.background = p.bg;
@@ -2863,8 +2895,8 @@ function updateMyAvatarPreview() {
   }
   var nameEl = document.getElementById('csPreviewName');
   if (nameEl) {
-    nameEl.textContent = avatarValueLabel(avatarValue('user')) +
-      (MY_AVATAR ? '  ·  yours ✨' : '  ·  site default');
+    nameEl.textContent = avatarValueLabel(avatarValue(CS_SIDE)) +
+      (MY_AVATAR[CS_SIDE] ? '  ·  yours ✨' : '  ·  site default');
   }
 }
 
@@ -2872,21 +2904,25 @@ function scrollChatAvatarStrip(dir) {
   pageAvatarStrip(document.getElementById('csStrip'), dir);
 }
 
-function chooseMyAvatar(value) {
-  if (!/^preset:[a-z0-9-]+$/.test(value)) return;
-  if (!saveMyAvatar(value)) { chatToast('Could not save your avatar 😢'); return; }
+// repaint the chat + this sheet after either side changed
+function applyMyAvatarChange() {
   repaintAllAvatars();
   refreshChatAvatarSelection();
   updateMyAvatarPreview();
-  chatToast('Avatar updated ✨');
+  renderCharGrids();
+}
+
+function chooseMyAvatar(value) {
+  if (!/^preset:[a-z0-9-]+$/.test(value)) return;
+  if (!saveMyAvatar(CS_SIDE, value)) { chatToast('Could not save that avatar 😢'); return; }
+  applyMyAvatarChange();
+  chatToast(CS_SIDE === 'ai' ? 'Senpai\'s avatar updated ✨' : 'Avatar updated ✨');
 }
 
 function resetMyAvatar() {
-  saveMyAvatar('');
-  repaintAllAvatars();
-  refreshChatAvatarSelection();
-  updateMyAvatarPreview();
-  chatToast('Back to the site default 👌');
+  saveMyAvatar(CS_SIDE, '');
+  applyMyAvatarChange();
+  chatToast(CS_SIDE === 'ai' ? 'Senpai is back to the site avatar 👌' : 'Back to the site default 👌');
 }
 
 function pickMyAvatarImage() {
@@ -2899,11 +2935,9 @@ async function onMyAvatarFile(input) {
   if (!file) return;
   try {
     var dataUrl = await resizeAvatarImage(file, 128); // kept small — it lives in localStorage
-    if (!saveMyAvatar('img:' + dataUrl)) { chatToast('That picture is too big to save 😢'); return; }
-    repaintAllAvatars();
-    refreshChatAvatarSelection();
-    updateMyAvatarPreview();
-    chatToast('Your picture is now your avatar ✨');
+    if (!saveMyAvatar(CS_SIDE, 'img:' + dataUrl)) { chatToast('That picture is too big to save 😢'); return; }
+    applyMyAvatarChange();
+    chatToast(CS_SIDE === 'ai' ? 'Senpai has a new face ✨' : 'Your picture is now your avatar ✨');
   } catch (e) {
     chatToast('Could not read that picture 😢');
   } finally {
@@ -4785,7 +4819,7 @@ function renderAvatarPicker() {
           '<button class="av-nav" onclick="scrollAvatarStrip(\'' + side + '\',1)" aria-label="next 3">▶</button>' +
         '</div>' +
         '<div class="av-current" id="avCurrent-' + side + '">current: …</div>' +
-        '<details class="av-chars" ontoggle="charSectionToggled(this)">' +
+        '<details class="av-chars" ontoggle="charSectionToggled(this)" open>' +
           '<summary>🎴 ANIME CHARACTERS <span class="av-src">AniList</span></summary>' +
           '<div class="av-search">' +
             '<input type="text" id="avCharQuery-' + side + '" placeholder="search a character…" onkeydown="if(event.key===\'Enter\'){event.preventDefault();searchCharacters(\'avCharQuery-' + side + '\');}">' +
@@ -4804,6 +4838,7 @@ function renderAvatarPicker() {
   fillAvatarStrip('user');
   updateAvatarCurrentLabels();
   renderCharGrids();
+  if (!CHAR_STATE.list.length && !CHAR_STATE.busy && !CHAR_STATE.error) loadCharacters(true);
 }
 
 function fillAvatarStrip(side) {

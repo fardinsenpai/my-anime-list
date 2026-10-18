@@ -197,6 +197,18 @@
   font-family: 'Rajdhani', monospace; font-weight: 700; font-size: 12px;
   letter-spacing: 1.2px; color: #ffe3ee;
 }
+/* 👤 you / 🤖 senpai switch */
+.cs-tabs { display: flex; gap: 6px; margin-bottom: 12px; }
+.cs-tab {
+  flex: 1; background: rgba(255,255,255,.04); border: 1px solid rgba(255,95,158,.25);
+  color: #b9aee6; font-family: 'Poppins', sans-serif; font-size: 10px; font-weight: 700;
+  letter-spacing: .4px; padding: 8px 6px; border-radius: 9px; cursor: pointer; transition: all .18s;
+}
+.cs-tab:hover { background: rgba(255,45,85,.12); color: #ffe3ee; }
+.cs-tab.on {
+  background: rgba(255,45,85,.22); border-color: #ff5f9e; color: #fff;
+  box-shadow: 0 0 12px rgba(255,45,85,.3);
+}
 .cs-src { font-size: 9px; font-weight: 400; letter-spacing: .5px; color: #8b7ec0; }
 .cs-search { display: flex; gap: 6px; margin-bottom: 8px; }
 .cs-search input {
