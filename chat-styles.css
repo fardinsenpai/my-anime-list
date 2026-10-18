@@ -1,33 +1,60 @@
 /* -- Chatbot UI: mobile fullscreen, pc panel -- */
+
+/* chat bubble — ORIGINAL Sharingan eye icon (restored) */
 .chat-bubble {
   position: fixed !important;
   bottom: 28px !important;
   right: 28px !important;
-  width: 68px;
-  height: 68px;
-  background: radial-gradient(circle at 30% 25%, #ff8fb8, #ff2d55 70%);
+  width: 65px;
+  height: 65px;
+  background: radial-gradient(circle at 35% 35%, #1a0000, #8b0000, #ff2200);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   z-index: 99999 !important;
-  border: 2px solid #ffd6e8;
-  box-shadow: 0 0 22px rgba(255,45,85,.55), 0 10px 30px rgba(0,0,0,.6);
-  transition: transform .25s ease;
+  border: 2px solid rgba(255, 50, 0, 0.7);
+  box-shadow:
+    0 0 15px rgba(255, 50, 0, 0.8),
+    0 0 40px rgba(200, 30, 0, 0.5),
+    0 0 80px rgba(150, 20, 0, 0.3),
+    inset 0 0 20px rgba(255, 80, 0, 0.15);
+  animation:
+    sharingan-aura 2s ease-in-out infinite,
+    bubble-float 3s ease-in-out infinite;
+  transition: transform 0.2s ease;
 }
-.chat-bubble:hover { transform: scale(1.1); }
-.chat-bubble svg { width: 35px; height: 35px; }
-.fab-status {
-  position: absolute; bottom: 2px; right: 2px; width: 14px; height: 14px;
-  background: #3dff8b; border: 2px solid #0a0a14; border-radius: 50%;
-  box-shadow: 0 0 8px #3dff8b;
+.chat-bubble:hover {
+  transform: scale(1.15);
+  box-shadow:
+    0 0 25px rgba(255, 50, 0, 1),
+    0 0 60px rgba(255, 50, 0, 0.6);
+  animation: sharingan-spin 1s linear infinite, bubble-float 3s ease-in-out infinite;
 }
-.fab-sparkle {
-  position: absolute; top: -8px; left: -6px; font-size: 17px;
-  animation: twinkle 1.6s ease-in-out infinite;
+.chat-bubble svg { width: 35px; height: 35px; animation: sharingan-spin 3s linear infinite; }
+.chat-bubble:hover svg { animation: sharingan-spin 0.5s linear infinite; }
+
+@keyframes sharingan-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
 }
-@keyframes twinkle { 0%,100% { transform: scale(1) rotate(0deg); opacity: 1; } 50% { transform: scale(1.35) rotate(20deg); opacity: .6; } }
+@keyframes bubble-float {
+  0%, 100% { transform: translateY(0px); }
+  50%      { transform: translateY(-7px); }
+}
+@keyframes sharingan-aura {
+  0%, 100% { box-shadow: 0 0 15px rgba(255,50,0,0.8), 0 0 40px rgba(200,30,0,0.5), 0 0 80px rgba(150,20,0,0.3); }
+  50%      { box-shadow: 0 0 25px rgba(255,50,0,1), 0 0 70px rgba(200,30,0,0.8), 0 0 120px rgba(150,20,0,0.5); }
+}
+
+/* original mobile sizing for the bubble */
+@media (max-width: 768px) {
+  .chat-bubble { bottom: 15px !important; right: 15px !important; width: 58px; height: 58px; }
+}
+@media (max-width: 380px) {
+  .chat-bubble { bottom: 12px !important; right: 12px !important; width: 52px; height: 52px; }
+}
 
 .chat-backdrop {
   position: fixed; inset: 0; z-index: 99997;
