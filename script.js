@@ -2137,12 +2137,12 @@ var authNameFresh = false;
 
 function getSystemPrompt() {
   const stats = getStats();
-  // If the visitor signed in with Google, let the assistant call them by name.
+  // If the visitor is signed in (Google, email or phone), let the assistant call them by name.
   const who = signedInName();
   const justIn = !!(who && authNameFresh);   // true for one reply only
   authNameFresh = false;
   const whoRule = who
-    ? '\n\nWHO YOU ARE TALKING TO (most important): this visitor is signed in with Google and their name is "' + who + '". Use their name — that is exactly what it is for. Open your reply with it when you greet, hype or answer them (for example: "' + who + ', that is peak fiction ⚡" or "Nice pick, ' + who + '!"). Then use it naturally now and then. At most ONCE per reply — never twice — and do not force it into every sentence. Never invent, guess or use a different name, never say that a name was given to you, and never ask them for their name: you already know it.'
+    ? '\n\nWHO YOU ARE TALKING TO (most important): this visitor is signed in and their name is "' + who + '". Use their name — that is exactly what it is for. Open your reply with it when you greet, hype or answer them (for example: "' + who + ', that is peak fiction ⚡" or "Nice pick, ' + who + '!"). Then use it naturally now and then. At most ONCE per reply — never twice — and do not force it into every sentence. Never invent, guess or use a different name, never say that a name was given to you, and never ask them for their name: you already know it.'
       + (justIn ? ' RIGHT NOW they have just signed in, so your very next reply MUST greet them by their name "' + who + '" in its first sentence.' : '')
     : '';
 
