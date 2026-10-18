@@ -169,7 +169,7 @@ if (counterContainer) counterContainer.style.display = 'none';
 
   // ⛔ শুধু Home page-তে turn ON হবে — অন্য কোনো page-তে না
   if (!isDuelPathAllowed()) {
-    showDuelToast('⛔ Anime Duel শুধু Home পেজে চলবে!', 'Home পেজে গিয়ে চালু করো।', 'warning');
+    showDuelToast('Please go to Home for Anime Duel', 'Home পেজে গিয়ে Anime Duel চালু করো।', 'warning');
     return;
   }
 
