@@ -2207,7 +2207,6 @@ function restoreChatFromStorage() {
 // Call restore on page load
 document.addEventListener('DOMContentLoaded', () => {
   restoreChatFromStorage();
-  enhanceExistingChatMessages(); // add copy/share to the welcome message
 });
 
 // ===== TOGGLE CHAT =====
@@ -2426,6 +2425,7 @@ function addMessage(text, type, shouldSave = true) {
 // Adds the copy + share buttons to a message bubble (safe to call twice)
 function addMessageActions(msgDiv) {
   if (!msgDiv || msgDiv.classList.contains('typing')) return;
+  if (msgDiv.classList.contains('intro')) return; // welcome line: no options menu
   if (msgDiv.querySelector('.msg-actions')) return;
 
   const bar = document.createElement('div');
@@ -2556,13 +2556,7 @@ chatMessages.addEventListener('click', async (e) => {
   }
 });
 
-// Give the same buttons to messages that are already in the DOM (the welcome line)
-function enhanceExistingChatMessages() {
-  document.querySelectorAll('#chatMessages .msg').forEach((m) => {
-    if (!m.dataset.raw) m.dataset.raw = (m.textContent || '').trim();
-    addMessageActions(m);
-  });
-}
+// Note: the welcome/intro line intentionally gets no options menu (see addMessageActions).
 
 
 // ===== QUICK ACTION BUTTONS =====
