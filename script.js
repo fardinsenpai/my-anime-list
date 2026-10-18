@@ -2581,6 +2581,16 @@ chatInput.addEventListener('keydown', (e) => {
 
 // ===== CLOSE CHAT ON OUTSIDE CLICK =====
 document.addEventListener('click', (e) => {
+  // any click outside an options menu dismisses it
+  const insideMenu = e.target instanceof Element && e.target.closest('.msg-actions');
+  if (!insideMenu) {
+    document.querySelectorAll('.msg-actions.open').forEach((el) => {
+      el.classList.remove('open');
+      const more = el.querySelector('.msg-act[data-act="more"]');
+      if (more) more.setAttribute('aria-expanded', 'false');
+    });
+  }
+
   if (!chatBox.contains(e.target) && !chatBubble.contains(e.target)) {
     if (chatBox.classList.contains('open')) setChatOpen(false);
   }
