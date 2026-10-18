@@ -3102,8 +3102,20 @@ chatInput.addEventListener('keydown', (e) => {
 
 // ===== CLOSE CHAT ON OUTSIDE CLICK =====
 document.addEventListener('click', (e) => {
+  // composedPath() is captured when the click is dispatched, so it still works when a
+  // handler rebuilds the DOM mid-click (e.g. the ⚙️ avatar tabs, or picking a character)
+  // and e.target ends up detached from the document.
+  const path = typeof e.composedPath === 'function' ? e.composedPath() : [];
+  const target = e.target;
+  const inPath = (el) => path.indexOf(el) > -1;
+  const insideChat = path.length
+    ? (inPath(chatBox) || inPath(chatBubble))
+    : (target instanceof Element && (chatBox.contains(target) || chatBubble.contains(target)));
+
   // any click outside an options menu dismisses it
-  const insideMenu = e.target instanceof Element && e.target.closest('.msg-actions');
+  const insideMenu = path.length
+    ? path.some((el) => el instanceof Element && el.classList && el.classList.contains('msg-actions'))
+    : (target instanceof Element && !!target.closest('.msg-actions'));
   if (!insideMenu) {
     document.querySelectorAll('.msg-actions.open').forEach((el) => {
       el.classList.remove('open');
@@ -3112,9 +3124,7 @@ document.addEventListener('click', (e) => {
     });
   }
 
-  if (!chatBox.contains(e.target) && !chatBubble.contains(e.target)) {
-    if (chatBox.classList.contains('open')) setChatOpen(false);
-  }
+  if (!insideChat && chatBox.classList.contains('open')) setChatOpen(false);
 });
 
 // ===== AI CONTEXT HELPER - Enhanced context building =====
