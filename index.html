@@ -6,7 +6,7 @@
   <link rel="manifest" href="manifest.json">
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Fardin's Anime Hub</title>
-  <link rel="stylesheet" href="style.css?v=20261021a">
+  <link rel="stylesheet" href="style.css?v=20261021c">
   <link rel="stylesheet" href="chat-styles.css?v=20261021a">
   <link rel="stylesheet" href="duel-system.css">
   <link rel="stylesheet" href="tournament.css">
@@ -54,6 +54,16 @@
           </div>
         </div>
         <button class="account-pop-btn" id="accountPopBtn" type="button">⏻ Sign out</button>
+      </div>
+
+      <!-- Google's own button — so the Google popup shows OUR site, not supabase.co.
+           Purely additive: script.js falls back to the redirect sign-in if this fails. -->
+      <div class="account-pop gsi-pop" id="googlePop" hidden>
+        <div class="gsi-pop-title">Sign in with Google</div>
+        <div class="gsi-pop-sub">Your name and photo are used in the chat, and Senpai can greet you by name. Nothing is posted publicly.</div>
+        <div class="gsi-slot" id="gsiSlot"></div>
+        <div class="gsi-pop-note" id="gsiNote">Loading Google…</div>
+        <button class="gsi-basic" id="gsiBasicBtn" type="button">Trouble? Use basic sign-in</button>
       </div>
     </div>
   </div>
@@ -1420,8 +1430,9 @@
   <script src="duel-system.js"></script>
   <script src="tournament.js?v=20261018"></script>
   <script src="quest-data.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="script.js?v=20261021b"></script>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="script.js?v=20261021c"></script>
 
 <!-- === ADMIN PANEL === -->
 <div class="admin-overlay" id="adminOverlay">

@@ -5027,6 +5027,48 @@ body.perf-no-heading-anim .header h1::after { animation: none !important; }
 .account-pop[hidden] { display: none; }
 @keyframes accPop { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
 
+/* === Google sign-in popover — Google's own button (shows our domain, not supabase.co) === */
+.gsi-pop { min-width: 268px; padding: 14px 14px 12px; }
+.gsi-pop-title {
+  font-family: 'Orbitron','Segoe UI',sans-serif;
+  font-size: 0.8rem;
+  font-weight: 900;
+  letter-spacing: 0.4px;
+  color: #F5C518;
+  margin-bottom: 6px;
+}
+.gsi-pop-sub {
+  font-family: 'Rajdhani','Segoe UI',sans-serif;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: #b9b9cf;
+  margin-bottom: 12px;
+}
+.gsi-slot { display: flex; justify-content: center; min-height: 40px; }
+.gsi-slot > div, .gsi-slot iframe { margin: 0 auto !important; }
+.gsi-pop-note {
+  font-family: 'Rajdhani','Segoe UI',sans-serif;
+  font-size: 0.72rem;
+  color: #8f8fa6;
+  margin-top: 10px;
+  text-align: center;
+}
+.gsi-basic {
+  margin-top: 10px;
+  width: 100%;
+  background: none;
+  border: 1px dashed rgba(245,197,24,0.35);
+  color: #d9c27a;
+  border-radius: 9px;
+  padding: 7px 8px;
+  font-family: 'Rajdhani','Segoe UI',sans-serif;
+  font-weight: 700;
+  font-size: 0.76rem;
+  cursor: pointer;
+  transition: border-color 0.2s ease, color 0.2s ease;
+}
+.gsi-basic:hover { border-color: rgba(245,197,24,0.7); color: #F5C518; }
+
 .account-pop-head { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
 .account-pop-av {
   width: 40px; height: 40px; border-radius: 50%; object-fit: cover;

@@ -6290,7 +6290,7 @@ function initGoogleAuth() {
   if (btn) btn.addEventListener('click', function(e) {
     e.preventDefault();
     if (AUTH_USER) toggleAccountPop();
-    else signInWithGoogle();
+    else startGoogleSignIn();
   });
 
   if (popBtn) popBtn.addEventListener('click', function(e) {
@@ -6308,7 +6308,7 @@ function initGoogleAuth() {
     var inside = path.length
       ? path.indexOf(area) > -1
       : (!!area && e.target instanceof Element && area.contains(e.target));
-    if (!inside) toggleAccountPop(false);
+    if (!inside) { toggleAccountPop(false); gsiClosePop(); }
   });
 
   renderAccountUI();
@@ -6332,3 +6332,144 @@ if (document.readyState === 'complete' || document.readyState === 'interactive')
 } else {
   document.addEventListener('DOMContentLoaded', initGoogleAuth);
 }
+
+/* ══════════════════════════════════════════════════════════════════════
+   🔐 SIGN-IN, STEP 2 — Google's own button.
+   Why: with the redirect flow the Google popup says "…supabase.co".
+   Using Google Identity Services + signInWithIdToken makes it say
+   "…fardinsenpai.github.io" instead. Purely additive: if Google's
+   library is missing, slow, or unhappy, we fall straight back to the
+   redirect sign-in that already worked. Nothing can dead-end.
+   ══════════════════════════════════════════════════════════════════════ */
+var GOOGLE_CLIENT_ID = '578802172526-jhu9lq7f3i6r24s1ruu91a3himfpmg7t.apps.googleusercontent.com';
+var gsiRawNonce = '';
+
+function gsiAvailable() {
+  return !!(window.google && window.google.accounts && window.google.accounts.id);
+}
+
+function gsiPop() { return document.getElementById('googlePop'); }
+
+function gsiClosePop() {
+  var pop = gsiPop();
+  if (pop && !pop.hidden) {
+    pop.hidden = true;
+    var btn = document.getElementById('accountBtn');
+    if (btn && !AUTH_USER) btn.setAttribute('aria-expanded', 'false');
+  }
+}
+
+// A nonce for replay protection: Google gets the SHA-256 hash, Supabase gets the raw value.
+function gsiNonces() {
+  var bytes = crypto.getRandomValues(new Uint8Array(32)), raw = '';
+  for (var i = 0; i < bytes.length; i++) raw += String.fromCharCode(bytes[i]);
+  raw = btoa(raw);
+  return crypto.subtle.digest('SHA-256', new TextEncoder().encode(raw)).then(function(buf) {
+    var arr = new Uint8Array(buf), hex = '';
+    for (var j = 0; j < arr.length; j++) hex += ('0' + arr[j].toString(16)).slice(-2);
+    return { raw: raw, hashed: hex };
+  });
+}
+
+function gsiRender() {
+  var slot = document.getElementById('gsiSlot');
+  var note = document.getElementById('gsiNote');
+  if (!slot || !gsiAvailable()) return;
+  slot.innerHTML = '';
+  gsiNonces().then(function(n) {
+    gsiRawNonce = n.raw;
+    try {
+      google.accounts.id.initialize({
+        client_id: GOOGLE_CLIENT_ID,
+        callback: gsiOnCredential,
+        nonce: n.hashed,
+        ux_mode: 'popup',
+        auto_select: false
+      });
+      google.accounts.id.renderButton(slot, {
+        type: 'standard',
+        shape: 'pill',
+        theme: 'filled_black',
+        text: 'signin_with',
+        size: 'large',
+        logo_alignment: 'left',
+        width: 252
+      });
+      if (note) note.textContent = 'A small Google window opens — you come straight back here.';
+    } catch (e) {
+      if (note) note.textContent = "Google's button wouldn't load — use basic sign-in below.";
+    }
+  }).catch(function() {
+    if (note) note.textContent = "Google's button wouldn't load — use basic sign-in below.";
+  });
+}
+
+async function gsiOnCredential(response) {
+  var note = document.getElementById('gsiNote');
+  var c = authClient();
+  if (!c || !response || !response.credential) {
+    if (note) note.textContent = 'Sign-in is unavailable — use basic sign-in below.';
+    return;
+  }
+  if (note) note.textContent = 'Signing you in…';
+  try {
+    var res = await c.auth.signInWithIdToken({
+      provider: 'google',
+      token: response.credential,
+      nonce: gsiRawNonce
+    });
+    if (res && res.error) {
+      if (note) note.textContent = 'Google sign-in failed — use basic sign-in below.';
+      authNotify('Sign-in failed 😢');
+      return;
+    }
+    gsiRawNonce = '';
+    gsiClosePop();   // the existing onAuthStateChange listener finishes the job
+  } catch (e) {
+    if (note) note.textContent = 'Google sign-in failed — use basic sign-in below.';
+  }
+}
+
+function gsiBasicSignIn() {
+  gsiClosePop();
+  signInWithGoogle();   // the original redirect flow, untouched
+}
+
+// Called from the topbar button while signed out.
+function startGoogleSignIn() {
+  var pop = gsiPop();
+  if (!pop) { signInWithGoogle(); return; }   // no markup? behave exactly as before
+  if (!pop.hidden) { gsiClosePop(); return; } // clicking Sign in again closes it
+  pop.hidden = false;
+  var aBtn = document.getElementById('accountBtn');
+  if (aBtn) aBtn.setAttribute('aria-expanded', 'true');
+  if (gsiAvailable()) { gsiRender(); return; }
+
+  var note = document.getElementById('gsiNote');
+  if (note) note.textContent = 'Loading Google…';
+  var tries = 0;
+  var t = setInterval(function() {
+    if (gsiAvailable()) {
+      clearInterval(t);
+      gsiRender();
+    } else if (++tries > 12) {
+      clearInterval(t);
+      if (note) note.textContent = "Google's button didn't load — use basic sign-in below.";
+    }
+  }, 250);
+}
+
+(function gsiWire() {
+  function wire() {
+    var basic = document.getElementById('gsiBasicBtn');
+    if (basic) basic.addEventListener('click', function(e) {
+      e.preventDefault();
+      gsiBasicSignIn();
+    });
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') gsiClosePop();
+    });
+  }
+  if (document.readyState === 'complete' || document.readyState === 'interactive') wire();
+  else document.addEventListener('DOMContentLoaded', wire);
+})();
