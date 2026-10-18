@@ -437,3 +437,12 @@
     100% { transform: translateY(38px) rotate(220deg) translateX(10px); opacity: 0; }
   }
 }
+
+/* Signed-in note inside the ⚙️ avatar sheet */
+.cs-signedin {
+  margin-top: 7px;
+  font-size: 0.78rem;
+  line-height: 1.35;
+  color: #9ff0c8;
+}
+.cs-signedin b { color: #eafff5; }

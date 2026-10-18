@@ -2133,8 +2133,13 @@ function getAnimeListJSON() {
 // ===== SYSTEM PROMPT - Light Version (No List) =====
 function getSystemPrompt() {
   const stats = getStats();
+  // If the visitor signed in with Google, let the assistant call them by name.
+  const who = signedInName();
+  const whoRule = who
+    ? `\n\nWho you are talking to: this visitor is signed in and their name is "${who}". Use their name naturally — once in your first reply to them, then only occasionally (never more than once in a single reply, and not in every reply). Never invent a different name, and never mention that a name was given to you.`
+    : '';
 
-  return `You are Fardin's personal anime assistant on "Fardin's Anime Hub" website. You are fun, friendly and knowledgeable.
+  return `You are Fardin's personal anime assistant on "Fardin's Anime Hub" website. You are fun, friendly and knowledgeable.${whoRule}
 
 Website Stats:
 - Total Anime: ${stats.animeCount}
@@ -2538,6 +2543,8 @@ function saveMyAvatar(side, value) {
 function avatarValue(side) {
   side = side === 'ai' ? 'ai' : 'user';
   if (MY_AVATAR[side]) return MY_AVATAR[side];
+  // signed in with Google? that photo is the starting avatar until they pick their own
+  if (side === 'user') { var g = googleAvatarValue(); if (g) return g; }
   var v = CHAT_AVATARS ? CHAT_AVATARS[side] : '';
   return typeof v === 'string' ? v : '';
 }
@@ -2560,6 +2567,7 @@ function avatarSpec(side) {
 
 // Human label for whatever value is set ('Neko', 'uploaded picture', 'anime character')
 function avatarValueLabel(value) {
+  if (value && value === googleAvatarValue()) return 'Google photo';
   var img = /^img:(.+)$/.exec(value || '');
   if (img) return /^https?:/i.test(img[1]) ? 'anime character' : 'uploaded picture';
   var pre = /^preset:([a-z0-9-]+)$/.exec(value || '');
@@ -2816,7 +2824,11 @@ function renderChatSettings() {
     '</div>' +
     '<div class="cs-label">' + (isAi
       ? 'Change how <b>Senpai</b> looks — only on your screen. It is saved in this browser, so everyone else still sees the site\'s own Senpai avatar.'
-      : 'Choose your own avatar — it changes only how <b>your</b> messages look, and it is remembered in this browser. No account needed.') + '</div>' +
+      : 'Choose your own avatar — it changes only how <b>your</b> messages look, and it is remembered in this browser. No account needed.') +
+      (!isAi && AUTH_USER
+        ? '<div class="cs-signedin">Signed in as <b>' + authEsc(AUTH_USER.first || AUTH_USER.name) + '</b> — your Google photo is used until you pick something below.</div>'
+        : '') +
+    '</div>' +
     '<div class="cs-preview-row">' +
       '<div class="cs-preview-avatar" id="csPreview"></div>' +
       '<div class="cs-preview-info">' +
@@ -2895,8 +2907,11 @@ function updateMyAvatarPreview() {
   }
   var nameEl = document.getElementById('csPreviewName');
   if (nameEl) {
-    nameEl.textContent = avatarValueLabel(avatarValue(CS_SIDE)) +
-      (MY_AVATAR[CS_SIDE] ? '  ·  yours ✨' : '  ·  site default');
+    var curVal = avatarValue(CS_SIDE);
+    var suffix = MY_AVATAR[CS_SIDE]
+      ? '  ·  yours ✨'
+      : (curVal && curVal === googleAvatarValue() ? '  ·  from Google' : '  ·  site default');
+    nameEl.textContent = avatarValueLabel(curVal) + suffix;
   }
 }
 
@@ -2922,7 +2937,10 @@ function chooseMyAvatar(value) {
 function resetMyAvatar() {
   saveMyAvatar(CS_SIDE, '');
   applyMyAvatarChange();
-  chatToast(CS_SIDE === 'ai' ? 'Senpai is back to the site avatar 👌' : 'Back to the site default 👌');
+  var msg = (CS_SIDE === 'user' && googleAvatarValue())
+    ? 'Back to your Google photo 👌'
+    : (CS_SIDE === 'ai' ? 'Senpai is back to the site avatar 👌' : 'Back to the site default 👌');
+  chatToast(msg);
 }
 
 function pickMyAvatarImage() {
@@ -3210,8 +3228,10 @@ window.fetch = function(...args) {
         }
       }
 
-      if (extraInfo && body.messages[0]?.role === 'system') {
-        body.messages[0].content += extraInfo;
+      // Rebuild the system prompt on every request, so late changes (like the visitor
+      // signing in with Google and giving us their name) are picked up immediately.
+      if (body.messages[0]?.role === 'system') {
+        body.messages[0].content = getSystemPrompt() + (extraInfo || '');
         options.body = JSON.stringify(body);
       }
 
@@ -6072,4 +6092,240 @@ function backToQuestSelect() {
 function fastScrollToBottom() {
   window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' });
   setTimeout(function() { document.getElementById('fastScrollBtn').style.display = 'none'; }, 100);
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   🔐 GOOGLE SIGN-IN (Supabase Auth) — additive & completely optional
+   Visitors can ignore this entirely: nothing runs until they tap the
+   topbar button. No existing feature depends on it.
+   ══════════════════════════════════════════════════════════════════════ */
+const AUTH_URL = 'https://ldzlefdklcgvqcbqibtt.supabase.co';
+const AUTH_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxkemxlZmRrbGNndnFjYnFpYnR0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwMzk1OTAsImV4cCI6MjA5NjYxNTU5MH0.X3TGuLIpjrnPXMgCv4ZKIIjB6pItPgkdebf4JPdhuYs';
+
+let AUTH_USER = null;        // { id, email, name, first, avatar } or null
+let authClientRef = null;
+
+function authEsc(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, function(c) {
+    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+  });
+}
+
+function authClient() {
+  if (authClientRef) return authClientRef;
+  if (!window.supabase || typeof window.supabase.createClient !== 'function') return null;
+  try {
+    authClientRef = window.supabase.createClient(AUTH_URL, AUTH_ANON, {
+      auth: {
+        flowType: 'pkce',
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: true
+      }
+    });
+  } catch (e) {
+    authClientRef = null;
+  }
+  return authClientRef;
+}
+
+// profile photo: only ever an https image link, never anything else
+function authPhoto(u) {
+  u = String(u || '').trim();
+  if (!/^https:\/\/[^\s"'<>]{6,480}$/i.test(u)) return '';
+  return u;
+}
+
+function authUserFrom(session) {
+  var u = session && session.user;
+  if (!u) return null;
+  var m = u.user_metadata || {};
+  var full = String(m.full_name || m.name || '').trim();
+  var first = String(m.given_name || '').trim() ||
+              (full ? full.split(/\s+/)[0] : '') ||
+              (u.email ? String(u.email).split('@')[0] : '');
+  return {
+    id: u.id || '',
+    email: u.email || '',
+    name: full || first || '',
+    first: first || '',
+    avatar: authPhoto(m.avatar_url || m.picture || '')
+  };
+}
+
+// The visitor's Google photo, used as their own chat avatar until they pick one in ⚙️
+function googleAvatarValue() {
+  return (AUTH_USER && AUTH_USER.avatar) ? 'img:' + AUTH_USER.avatar : '';
+}
+
+// The name the assistant should use (first name only), or '' when signed out
+function signedInName() {
+  return AUTH_USER ? AUTH_USER.first : '';
+}
+
+function authNotify(message) {
+  var box = document.getElementById('chatBox');
+  if (box && box.classList.contains('open')) {
+    try { chatToast(message); return; } catch (e) {}
+  }
+  var btn = document.getElementById('accountBtn');
+  if (!btn) return;
+  btn.classList.add('account-flash');
+  setTimeout(function() { btn.classList.remove('account-flash'); }, 1700);
+}
+
+function renderAccountUI() {
+  var btn = document.getElementById('accountBtn');
+  if (!btn) return;
+  var av = document.getElementById('accountAv');
+  var gIc = document.getElementById('accountG');
+  var txt = document.getElementById('accountTxt');
+  var pop = document.getElementById('accountPop');
+  var popName = document.getElementById('accountPopName');
+  var popMail = document.getElementById('accountPopMail');
+  var popAv = document.getElementById('accountPopAv');
+
+  if (AUTH_USER) {
+    btn.setAttribute('title', 'Signed in as ' + (AUTH_USER.first || AUTH_USER.email) + ' — click for options');
+    if (av) {
+      if (AUTH_USER.avatar) { av.src = AUTH_USER.avatar; av.hidden = false; }
+      else { av.hidden = true; av.removeAttribute('src'); }
+    }
+    if (gIc) gIc.hidden = true;
+    if (txt) txt.textContent = AUTH_USER.first || 'Signed in';
+    if (popName) popName.textContent = AUTH_USER.name || AUTH_USER.first || 'Signed in';
+    if (popMail) popMail.textContent = AUTH_USER.email || '';
+    if (popAv) {
+      if (AUTH_USER.avatar) { popAv.src = AUTH_USER.avatar; popAv.hidden = false; }
+      else { popAv.hidden = true; popAv.removeAttribute('src'); }
+    }
+  } else {
+    btn.setAttribute('title', 'Sign in with Google');
+    if (av) { av.hidden = true; av.removeAttribute('src'); }
+    if (gIc) gIc.hidden = false;
+    if (txt) txt.textContent = 'Sign in';
+    if (pop) { pop.hidden = true; btn.setAttribute('aria-expanded', 'false'); }
+  }
+}
+
+function applyAuthToChat() {
+  try { repaintAllAvatars(); } catch (e) {}
+  try {
+    if (document.getElementById('csStrip')) { refreshChatAvatarSelection(); updateMyAvatarPreview(); }
+  } catch (e) {}
+}
+
+function setAuthUser(session, opts) {
+  var next = authUserFrom(session);
+  var was = AUTH_USER;
+  AUTH_USER = next;
+  var idChanged = (was ? was.id : '') !== (next ? next.id : '');
+  renderAccountUI();
+  if (idChanged) {
+    applyAuthToChat();
+    if (next && !(opts && opts.silent)) {
+      authNotify('Signed in as ' + (next.first || next.email) + ' ✨');
+    }
+  }
+}
+
+function toggleAccountPop(force) {
+  var pop = document.getElementById('accountPop');
+  var btn = document.getElementById('accountBtn');
+  if (!pop || !btn) return;
+  var open = typeof force === 'boolean' ? force : pop.hidden;
+  pop.hidden = !open;
+  btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+}
+
+async function signInWithGoogle() {
+  var c = authClient();
+  if (!c) { authNotify('Sign-in is unavailable right now 😢'); return; }
+  var back = window.location.origin + window.location.pathname;
+  try {
+    var res = await c.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: back, queryParams: { prompt: 'select_account' } }
+    });
+    if (res && res.error) authNotify('Could not start sign-in 😢');
+  } catch (e) {
+    authNotify('Could not start sign-in 😢');
+  }
+}
+
+async function signOutOfGoogle() {
+  var c = authClient();
+  try { if (c) await c.auth.signOut(); } catch (e) {}
+  AUTH_USER = null;
+  renderAccountUI();
+  applyAuthToChat();
+  authNotify('Signed out 👋');
+}
+
+// Google sends the visitor back with ?code=… — hide it once it has been exchanged,
+// but keep ?error=… visible so problems can actually be read.
+function authCleanUrl() {
+  var q = String(window.location.search || '');
+  var h = String(window.location.hash || '');
+  if (/error=/.test(q) || /error=/.test(h)) return;
+  if (!/[?&]code=/.test(q) && !/access_token=/.test(h)) return;
+  try { window.history.replaceState({}, document.title, window.location.origin + window.location.pathname); } catch (e) {}
+}
+
+function authReportRedirectError() {
+  var all = String(window.location.search || '') + '&' + String(window.location.hash || '');
+  var m = /[?#&]error_description=([^&]+)/.exec(all);
+  if (!m) return false;
+  authNotify('Sign-in failed: ' + decodeURIComponent(m[1].replace(/\+/g, ' ')));
+  return true;
+}
+
+function initGoogleAuth() {
+  var btn = document.getElementById('accountBtn');
+  var popBtn = document.getElementById('accountPopBtn');
+
+  if (btn) btn.addEventListener('click', function(e) {
+    e.preventDefault();
+    if (AUTH_USER) toggleAccountPop();
+    else signInWithGoogle();
+  });
+
+  if (popBtn) popBtn.addEventListener('click', function(e) {
+    e.preventDefault();
+    toggleAccountPop(false);
+    signOutOfGoogle();
+  });
+
+  // click anywhere else closes the little account menu
+  document.addEventListener('click', function(e) {
+    var pop = document.getElementById('accountPop');
+    if (!pop || pop.hidden) return;
+    var area = document.getElementById('accountArea');
+    var path = typeof e.composedPath === 'function' ? e.composedPath() : [];
+    var inside = path.length
+      ? path.indexOf(area) > -1
+      : (!!area && e.target instanceof Element && area.contains(e.target));
+    if (!inside) toggleAccountPop(false);
+  });
+
+  renderAccountUI();
+  authReportRedirectError();
+
+  var c = authClient();
+  if (!c) return;
+
+  c.auth.getSession().then(function(r) {
+    setAuthUser(r && r.data ? r.data.session : null, { silent: true });
+    authCleanUrl();
+  }).catch(function() { authCleanUrl(); });
+
+  c.auth.onAuthStateChange(function(evt, session) {
+    setAuthUser(session, { silent: evt !== 'SIGNED_IN' });
+  });
+}
+
+if (document.readyState === 'complete' || document.readyState === 'interactive') {
+  initGoogleAuth();
+} else {
+  document.addEventListener('DOMContentLoaded', initGoogleAuth);
 }

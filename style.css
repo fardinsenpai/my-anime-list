@@ -4955,3 +4955,105 @@ body.perf-no-heading-anim .header h1::after { animation: none !important; }
   .qd-pill .qd-label { font-size: 11px; }
   .qd-pill .qd-stars { font-size: 11px; }
 }
+
+/* ============================================================
+   GOOGLE SIGN-IN CHIP (topbar) — additive, sits after the search
+   ============================================================ */
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 12px !important;
+  margin-left: auto;
+}
+.account-area { position: relative; display: flex; align-items: center; }
+
+.account-btn {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  height: 34px;
+  padding: 0 11px 0 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(245,197,24,0.35);
+  background: rgba(245,197,24,0.08);
+  color: #fff;
+  font-family: 'Rajdhani','Segoe UI',sans-serif;
+  font-weight: 700;
+  font-size: 0.82rem;
+  letter-spacing: 0.3px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+.account-btn:hover {
+  background: rgba(245,197,24,0.2);
+  border-color: rgba(245,197,24,0.65);
+  transform: translateY(-1px);
+}
+.account-btn .account-g { display: flex; align-items: center; }
+.account-btn .account-g[hidden] { display: none; }
+.account-av {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+  border: 1px solid rgba(255,255,255,0.45);
+  background: rgba(255,255,255,0.1);
+}
+.account-av[hidden] { display: none; }
+.account-txt { max-width: 108px; overflow: hidden; text-overflow: ellipsis; }
+
+.account-flash { animation: accFlash 0.55s ease 3; }
+@keyframes accFlash {
+  0%, 100% { box-shadow: none; }
+  50% { box-shadow: 0 0 0 3px rgba(245,197,24,0.35), 0 0 14px rgba(245,197,24,0.55); }
+}
+
+.account-pop {
+  position: fixed;
+  top: 54px;
+  right: 12px;
+  min-width: 220px;
+  max-width: 78vw;
+  padding: 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(245,197,24,0.32);
+  background: linear-gradient(160deg, #17172b, #0e0e1a);
+  box-shadow: 0 14px 34px rgba(0,0,0,0.6);
+  z-index: 10002;
+  animation: accPop 0.16s ease;
+}
+.account-pop[hidden] { display: none; }
+@keyframes accPop { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+
+.account-pop-head { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.account-pop-av {
+  width: 40px; height: 40px; border-radius: 50%; object-fit: cover;
+  border: 1px solid rgba(255,255,255,0.4); flex: 0 0 auto;
+}
+.account-pop-av[hidden] { display: none; }
+.account-pop-name { font-family: 'Orbitron', monospace; font-size: 0.8rem; font-weight: 700; color: #f5c518; }
+.account-pop-mail { font-size: 0.78rem; color: #b9b9d0; word-break: break-all; }
+
+.account-pop-btn {
+  width: 100%;
+  padding: 9px 10px;
+  border-radius: 10px;
+  cursor: pointer;
+  border: 1px solid rgba(255,70,70,0.42);
+  background: rgba(255,70,70,0.12);
+  color: #ff9090;
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 700;
+  font-size: 0.85rem;
+  transition: background 0.2s ease;
+}
+.account-pop-btn:hover { background: rgba(255,70,70,0.24); }
+
+@media (max-width: 560px) {
+  .topbar-right { gap: 8px !important; }
+  .account-txt { display: none; }
+  .account-btn { padding: 0 8px; }
+  .account-pop { right: 8px; min-width: 200px; }
+}
