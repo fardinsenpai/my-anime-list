@@ -6099,11 +6099,14 @@ function fastScrollToBottom() {
    Visitors can ignore this entirely: nothing runs until they tap the
    topbar button. No existing feature depends on it.
    ══════════════════════════════════════════════════════════════════════ */
-const AUTH_URL = 'https://ldzlefdklcgvqcbqibtt.supabase.co';
-const AUTH_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxkemxlZmRrbGNndnFjYnFpYnR0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwMzk1OTAsImV4cCI6MjA5NjYxNTU5MH0.X3TGuLIpjrnPXMgCv4ZKIIjB6pItPgkdebf4JPdhuYs';
+var AUTH_URL = 'https://ldzlefdklcgvqcbqibtt.supabase.co';
+var AUTH_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxkemxlZmRrbGNndnFjYnFpYnR0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwMzk1OTAsImV4cCI6MjA5NjYxNTU5MH0.X3TGuLIpjrnPXMgCv4ZKIIjB6pItPgkdebf4JPdhuYs';
 
-let AUTH_USER = null;        // { id, email, name, first, avatar } or null
-let authClientRef = null;
+// NB: kept as var on purpose — getSystemPrompt() and the avatar helpers are called
+// while the page is still loading, i.e. before this line runs, and a let/const here
+// would throw a temporal-dead-zone error and break the rest of the file.
+var AUTH_USER = null;        // { id, email, name, first, avatar } or null
+var authClientRef = null;
 
 function authEsc(s) {
   return String(s == null ? '' : s).replace(/[&<>"']/g, function(c) {
