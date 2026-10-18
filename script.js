@@ -6299,16 +6299,17 @@ function initGoogleAuth() {
     signOutOfGoogle();
   });
 
-  // click anywhere else closes the little account menu
+  // click anywhere else closes the account menu and the Google sign-in popover
   document.addEventListener('click', function(e) {
-    var pop = document.getElementById('accountPop');
-    if (!pop || pop.hidden) return;
     var area = document.getElementById('accountArea');
     var path = typeof e.composedPath === 'function' ? e.composedPath() : [];
     var inside = path.length
       ? path.indexOf(area) > -1
       : (!!area && e.target instanceof Element && area.contains(e.target));
-    if (!inside) { toggleAccountPop(false); gsiClosePop(); }
+    if (inside) return;
+    var pop = document.getElementById('accountPop');
+    if (pop && !pop.hidden) toggleAccountPop(false);
+    gsiClosePop();
   });
 
   renderAccountUI();

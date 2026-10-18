@@ -5028,7 +5028,7 @@ body.perf-no-heading-anim .header h1::after { animation: none !important; }
 @keyframes accPop { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
 
 /* === Google sign-in popover — Google's own button (shows our domain, not supabase.co) === */
-.gsi-pop { min-width: 268px; padding: 14px 14px 12px; }
+.gsi-pop { width: 332px; max-width: calc(100vw - 24px); padding: 14px 14px 12px; }
 .gsi-pop-title {
   font-family: 'Orbitron','Segoe UI',sans-serif;
   font-size: 0.8rem;
