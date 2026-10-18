@@ -2222,6 +2222,9 @@ function setChatOpen(open) {
   if (open) {
     if (!isMobile) chatInput.focus();
     if (typeof closeMenu === 'function') closeMenu();
+  } else {
+    // chat closed — dismiss any open message menus
+    document.querySelectorAll('.msg-actions.open').forEach(function (el) { el.classList.remove('open'); });
   }
 }
 
@@ -2428,6 +2431,9 @@ function addMessageActions(msgDiv) {
   const bar = document.createElement('div');
   bar.className = 'msg-actions';
   bar.innerHTML =
+    '<button type="button" class="msg-act" data-act="more" title="Message options" aria-label="Message options" aria-expanded="false">' +
+      '<svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor"><circle cx="12" cy="5.2" r="1.8"></circle><circle cx="12" cy="12" r="1.8"></circle><circle cx="12" cy="18.8" r="1.8"></circle></svg>' +
+    '</button>' +
     '<button type="button" class="msg-act" data-act="copy" title="Copy message" aria-label="Copy message">' +
       '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"></rect><path d="M5 15V5a2 2 0 0 1 2-2h10"></path></svg>' +
     '</button>' +
@@ -2502,7 +2508,34 @@ async function shareChatText(text) {
 // One delegated listener handles every message's buttons
 chatMessages.addEventListener('click', async (e) => {
   const btn = e.target.closest('.msg-act');
+
+  // clicking/tapping anywhere outside an options menu closes it
+  if (!e.target.closest('.msg-actions')) {
+    document.querySelectorAll('.msg-actions.open').forEach((el) => {
+      el.classList.remove('open');
+      const more = el.querySelector('.msg-act[data-act="more"]');
+      if (more) more.setAttribute('aria-expanded', 'false');
+    });
+  }
+
   if (!btn) return;
+
+  const bar = btn.closest('.msg-actions');
+
+  // the 3-dot: opens the copy/share menu (tap on mobile, hover also works on desktop)
+  if (btn.dataset.act === 'more') {
+    const willOpen = bar && !bar.classList.contains('open');
+    document.querySelectorAll('.msg-actions.open').forEach((el) => {
+      el.classList.remove('open');
+      const m = el.querySelector('.msg-act[data-act="more"]');
+      if (m) m.setAttribute('aria-expanded', 'false');
+    });
+    if (bar && willOpen) {
+      bar.classList.add('open');
+      btn.setAttribute('aria-expanded', 'true');
+    }
+    return;
+  }
 
   const msgEl = btn.closest('.msg');
   const text = (msgEl && msgEl.dataset.raw) ? msgEl.dataset.raw : '';
