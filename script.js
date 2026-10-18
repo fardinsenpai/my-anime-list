@@ -2131,12 +2131,19 @@ function getAnimeListJSON() {
 }
 
 // ===== SYSTEM PROMPT - Light Version (No List) =====
+// Set to true for exactly one reply right after a sign-in, so the assistant
+// greets the visitor by name the first time it speaks to them.
+var authNameFresh = false;
+
 function getSystemPrompt() {
   const stats = getStats();
   // If the visitor signed in with Google, let the assistant call them by name.
   const who = signedInName();
+  const justIn = !!(who && authNameFresh);   // true for one reply only
+  authNameFresh = false;
   const whoRule = who
-    ? `\n\nWho you are talking to: this visitor is signed in and their name is "${who}". Use their name naturally — once in your first reply to them, then only occasionally (never more than once in a single reply, and not in every reply). Never invent a different name, and never mention that a name was given to you.`
+    ? '\n\nWHO YOU ARE TALKING TO (most important): this visitor is signed in with Google and their name is "' + who + '". Use their name — that is exactly what it is for. Open your reply with it when you greet, hype or answer them (for example: "' + who + ', that is peak fiction ⚡" or "Nice pick, ' + who + '!"). Then use it naturally now and then. At most ONCE per reply — never twice — and do not force it into every sentence. Never invent, guess or use a different name, never say that a name was given to you, and never ask them for their name: you already know it.'
+      + (justIn ? ' RIGHT NOW they have just signed in, so your very next reply MUST greet them by their name "' + who + '" in its first sentence.' : '')
     : '';
 
   return `You are Fardin's personal anime assistant on "Fardin's Anime Hub" website. You are fun, friendly and knowledgeable.${whoRule}
@@ -6226,7 +6233,15 @@ function setAuthUser(session, opts) {
   renderAccountUI();
   if (idChanged) {
     applyAuthToChat();
+    // keep the chat's stored system message in step with who is signed in
+    // (this is the message that carries the "call them by name" rule)
+    try {
+      if (Array.isArray(chatHistory) && chatHistory[0] && chatHistory[0].role === 'system') {
+        chatHistory[0].content = getSystemPrompt();
+      }
+    } catch (e) {}
     if (next && !(opts && opts.silent)) {
+      authNameFresh = true;   // -> the assistant's very next reply greets them by name
       window.setTimeout(function() { openAvatarWelcome(); }, 600);   // let the toast land first
       authNotify('Signed in as ' + (next.first || next.email) + ' ✨');
     }
