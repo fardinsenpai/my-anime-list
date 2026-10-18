@@ -2703,8 +2703,9 @@ function renderCharGrids() {
   } else {
     html = CHAR_STATE.list.map(function(c) {
       var src = (c.image && (c.image.medium || c.image.large)) || '';
+      var full = (c.image && (c.image.large || c.image.medium)) || src;   // what gets stored when picked
       var name = ((c.name && c.name.full) || '?').replace(/"/g, '');
-      return '<button class="av-item av-char" data-av="img:' + src + '" onclick="pickCharacter(this,\'' + c.id + '\')" title="' + name + '">' +
+      return '<button class="av-item av-char" data-char="' + c.id + '" data-av="img:' + full + '" onclick="pickCharacter(this,\'' + c.id + '\')" title="' + name + '">' +
         '<span class="av-thumb av-char-thumb"><img alt="" src="' + src + '"></span>' +
         '<span class="av-name">' + name + '</span>' +
       '</button>';
@@ -2724,9 +2725,17 @@ function renderCharGrids() {
     var target = g.getAttribute('data-char-target');
     var cur = target === 'my' ? avatarValue('user') : publishedAvatar(target);
     g.querySelectorAll('.av-char').forEach(function(b) {
-      b.classList.toggle('sel', !!cur && b.getAttribute('data-av') === cur);
+      b.classList.toggle('sel', !!cur && (b.getAttribute('data-av') === cur || charIsCurrent(b.getAttribute('data-char'), cur)));
     });
   });
+}
+
+// AniList image files are named 'b<characterId>-<hash>.<ext>' — that pins down the character
+function charIsCurrent(id, value) {
+  var m = /^img:(.+)$/.exec(value || '');
+  if (!m) return false;
+  var base = (m[1].split('?')[0].split('/').pop() || '');
+  return base.indexOf('b' + id + '-') === 0 || base.indexOf('b' + id + '.') === 0;
 }
 
 // 'my' = this visitor's own avatar (kept in the browser) · 'ai'/'user' = admin publish
