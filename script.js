@@ -2203,24 +2203,27 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ===== TOGGLE CHAT =====
-function toggleChat() {
-  chatBox.classList.toggle('open');
+function setChatOpen(open) {
+  chatBox.classList.toggle('open', open);
   var bd = document.getElementById('chatBackdrop');
-  var isOpen = chatBox.classList.contains('open');
-  if (bd) bd.classList.toggle('open', isOpen);
-  // Mobile: chat is fullscreen -> lock page scroll behind it
-  if (window.matchMedia('(max-width: 768px)').matches) {
-    document.body.style.overflow = isOpen ? 'hidden' : '';
-  }
-  if (isOpen) {
-    if (!window.matchMedia('(max-width: 768px)').matches) chatInput.focus();
+  if (bd) bd.classList.toggle('open', open);
+  // hide the floating bubble while the chat is open (it would overlap the input)
+  chatBubble.style.display = open ? 'none' : 'flex';
+  var isMobile = window.matchMedia('(max-width: 768px)').matches;
+  if (isMobile) document.body.style.overflow = open ? 'hidden' : '';
+  if (open) {
+    if (!isMobile) chatInput.focus();
     if (typeof closeMenu === 'function') closeMenu();
   }
 }
 
+function toggleChat() {
+  setChatOpen(!chatBox.classList.contains('open'));
+}
+
 // ===== CLOSE CHAT ON ESC =====
 document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape' && chatBox.classList.contains('open')) toggleChat();
+  if (e.key === 'Escape' && chatBox.classList.contains('open')) setChatOpen(false);
 });
 
 let isResponding = false;
@@ -2379,9 +2382,7 @@ chatInput.addEventListener('keydown', (e) => {
 // ===== CLOSE CHAT ON OUTSIDE CLICK =====
 document.addEventListener('click', (e) => {
   if (!chatBox.contains(e.target) && !chatBubble.contains(e.target)) {
-    chatBox.classList.remove('open');
-    document.getElementById('chatBackdrop')?.classList.remove('open');
-    document.body.style.overflow = '';
+    if (chatBox.classList.contains('open')) setChatOpen(false);
   }
 });
 
@@ -2515,10 +2516,7 @@ document.addEventListener('click', function(e) {
   
   // Close button click - manual close
   if (e.target.closest('.chat-sidebar .chat-close, .chat-sidebar #chatCloseBtn')) {
-    const box = document.querySelector('.chat-sidebar');
-    if (box) box.classList.remove('open');
-    document.getElementById('chatBackdrop')?.classList.remove('open');
-    document.body.style.overflow = '';
+    setChatOpen(false);
   }
 });
 
