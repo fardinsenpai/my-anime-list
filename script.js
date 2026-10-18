@@ -2432,7 +2432,7 @@ function addMessageActions(msgDiv) {
   bar.className = 'msg-actions';
   bar.innerHTML =
     '<button type="button" class="msg-act" data-act="more" title="Message options" aria-label="Message options" aria-expanded="false">' +
-      '<svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor"><circle cx="12" cy="5.2" r="1.8"></circle><circle cx="12" cy="12" r="1.8"></circle><circle cx="12" cy="18.8" r="1.8"></circle></svg>' +
+      '<svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor"><circle cx="5.2" cy="12" r="1.8"></circle><circle cx="12" cy="12" r="1.8"></circle><circle cx="18.8" cy="12" r="1.8"></circle></svg>' +
     '</button>' +
     '<button type="button" class="msg-act" data-act="copy" title="Copy message" aria-label="Copy message">' +
       '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"></rect><path d="M5 15V5a2 2 0 0 1 2-2h10"></path></svg>' +
