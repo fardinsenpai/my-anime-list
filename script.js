@@ -2429,7 +2429,7 @@ function addMessage(text, type, shouldSave = true) {
    Keep this line on ONE line, the admin picker rewrites it by regex.
 ══════════════════════════════════════ */
 
-let CHAT_AVATARS = { ai: 'preset:sharingan', user: 'preset:ramen' };
+let CHAT_AVATARS = { ai: 'img:https://s4.anilist.co/file/anilistcdn/character/large/b5187-y1OEdRu9sPN2.png', user: 'preset:ramen' };
 
 // Ready-made avatars (drawn as SVG so they stay crisp at any size)
 const AVATAR_PRESETS = {
