@@ -6227,6 +6227,7 @@ function setAuthUser(session, opts) {
   if (idChanged) {
     applyAuthToChat();
     if (next && !(opts && opts.silent)) {
+      window.setTimeout(function() { openAvatarWelcome(); }, 600);   // let the toast land first
       authNotify('Signed in as ' + (next.first || next.email) + ' ✨');
     }
   }
@@ -6469,6 +6470,153 @@ function startGoogleSignIn() {
     });
     document.addEventListener('keydown', function(e) {
       if (e.key === 'Escape') gsiClosePop();
+    });
+  }
+  if (document.readyState === 'complete' || document.readyState === 'interactive') wire();
+  else document.addEventListener('DOMContentLoaded', wire);
+})();
+
+/* ══════════════════════════════════════════════════════════════════════
+   🎴 "CHOOSE YOUR AVATAR" — the welcome popup that opens right after a
+   visitor signs in with Google. It uses the exact same machinery as the
+   chat's ⚙️ picker: the same 9 presets, the same live AniList gallery and
+   the same "use my Google photo" option — so whatever they pick here shows
+   up in the chat instantly, and they can still change it later from ⚙️.
+   Purely additive: nothing here runs unless a popup opens.
+   ══════════════════════════════════════════════════════════════════════ */
+
+function openAvatarWelcome() {
+  var ov = document.getElementById('avatarWelcome');
+  if (!ov) return;
+
+  CS_SIDE = 'user';   // this popup always edits the VISITOR's own avatar
+
+  var sub = document.getElementById('avwSub');
+  if (sub && AUTH_USER) {
+    sub.innerHTML = 'Signed in as <b>' + authEsc(AUTH_USER.first || AUTH_USER.name || 'you') +
+      '</b> — pick how you want to look in the chat. You can change it any time from the ⚙️ button in the chat.';
+  }
+  var gBtn = document.getElementById('awGoogleBtn');
+  if (gBtn) gBtn.hidden = !googleAvatarValue();   // only offer it when they have a Google photo
+
+  fillWelcomeStrip();
+  updateWelcomePreview();
+  ov.hidden = false;
+
+  renderCharGrids();
+  if (!CHAR_STATE.list.length && !CHAR_STATE.busy && !CHAR_STATE.error) loadCharacters(true);
+}
+
+function closeAvatarWelcome() {
+  var ov = document.getElementById('avatarWelcome');
+  if (ov) ov.hidden = true;
+}
+
+function fillWelcomeStrip() {
+  var strip = document.getElementById('awStrip');
+  if (!strip) return;
+  strip.innerHTML = AVATAR_STRIP_ORDER.map(function(id) {
+    var p = AVATAR_PRESETS[id];
+    return '<button class="av-item" data-av="preset:' + id + '" onclick="chooseWelcomeAvatar(\'preset:' + id + '\')" title="' + p.label + '">' +
+      '<span class="av-thumb" style="background:' + p.bg + ';border-color:' + p.border + ';box-shadow:' + p.glow + ';">' + p.svg + '</span>' +
+      '<span class="av-name">' + p.label + '</span>' +
+    '</button>';
+  }).join('');
+  refreshWelcomeSelection();
+}
+
+function refreshWelcomeSelection() {
+  var strip = document.getElementById('awStrip');
+  if (!strip) return;
+  var cur = avatarValue('user');
+  strip.querySelectorAll('.av-item').forEach(function(b) {
+    b.classList.toggle('sel', b.getAttribute('data-av') === cur);
+  });
+}
+
+function updateWelcomePreview() {
+  var prev = document.getElementById('awPreview');
+  if (!prev) return;
+  var spec = avatarSpec('user');
+  if (spec.kind === 'img') {
+    prev.style.background = 'rgba(255,255,255,0.08)';
+    prev.style.borderColor = 'rgba(255,255,255,0.35)';
+    prev.style.boxShadow = 'none';
+    prev.innerHTML = '';
+    var im = document.createElement('img');
+    im.alt = '';
+    im.onerror = function() { paintAvatarFallback(prev, 'user'); };
+    im.src = spec.src;
+    prev.appendChild(im);
+  } else {
+    var p = AVATAR_PRESETS[spec.id];
+    prev.style.background = p.bg;
+    prev.style.borderColor = p.border;
+    prev.style.boxShadow = p.glow;
+    prev.innerHTML = p.svg;
+  }
+  var nameEl = document.getElementById('awPreviewName');
+  if (nameEl) {
+    var curVal = avatarValue('user');
+    var suffix = MY_AVATAR.user
+      ? '  ·  yours ✨'
+      : (curVal && curVal === googleAvatarValue() ? '  ·  from Google' : '  ·  site default');
+    nameEl.textContent = avatarValueLabel(curVal) + suffix;
+  }
+}
+
+function scrollWelcomeStrip(dir) {
+  pageAvatarStrip(document.getElementById('awStrip'), dir);
+}
+
+// Reuses the chat sheet's chooser, then refreshes this popup's own highlight.
+function chooseWelcomeAvatar(value) {
+  chooseMyAvatar(value);          // validates · saves · repaints the chat · toasts
+  refreshWelcomeSelection();
+  updateWelcomePreview();
+}
+
+function useGooglePhotoForAvatar() {
+  if (!googleAvatarValue()) { chatToast('Sign in with Google to use its photo 😊'); return; }
+  saveMyAvatar('user', '');        // '' = fall straight back to the Google photo
+  repaintAllAvatars();
+  refreshWelcomeSelection();
+  updateWelcomePreview();
+  renderCharGrids();
+  chatToast('Your Google photo is now your avatar ✨');
+}
+
+function pickWelcomeImage() {
+  var input = document.getElementById('awFile');
+  if (input) input.click();
+}
+
+async function welcomeAvatarFile(input) {
+  await onMyAvatarFile(input);     // same upload + resize path as the chat sheet
+  refreshWelcomeSelection();
+  updateWelcomePreview();
+}
+
+(function avatarWelcomeWire() {
+  function wire() {
+    var ov = document.getElementById('avatarWelcome');
+    if (!ov) return;
+
+    var x = document.getElementById('avwClose');
+    if (x) x.addEventListener('click', closeAvatarWelcome);
+
+    // clicking the dark backdrop (not the card) closes it
+    ov.addEventListener('click', function(e) { if (e.target === ov) closeAvatarWelcome(); });
+
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && !ov.hidden) closeAvatarWelcome();
+    });
+
+    // a character tapped in this popup also came from renderCharGrids()/pickCharacter(),
+    // which only refreshes the chat sheet — so refresh our strip + preview too
+    var grid = document.getElementById('awCharGrid');
+    if (grid) grid.addEventListener('click', function() {
+      window.setTimeout(function() { refreshWelcomeSelection(); updateWelcomePreview(); }, 0);
     });
   }
   if (document.readyState === 'complete' || document.readyState === 'interactive') wire();

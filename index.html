@@ -6,7 +6,7 @@
   <link rel="manifest" href="manifest.json">
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Fardin's Anime Hub</title>
-  <link rel="stylesheet" href="style.css?v=20261021d">
+  <link rel="stylesheet" href="style.css?v=20261021e">
   <link rel="stylesheet" href="chat-styles.css?v=20261021a">
   <link rel="stylesheet" href="duel-system.css">
   <link rel="stylesheet" href="tournament.css">
@@ -1430,9 +1430,50 @@
   <script src="duel-system.js"></script>
   <script src="tournament.js?v=20261018"></script>
   <script src="quest-data.js"></script>
+    <!-- === 🎴 CHOOSE YOUR AVATAR — pops up right after signing in with Google === -->
+    <div class="avw-overlay" id="avatarWelcome" hidden>
+      <div class="avw-card" role="dialog" aria-modal="true" aria-labelledby="avwTitle">
+        <button class="avw-x" id="avwClose" type="button" aria-label="Close">✕</button>
+        <div class="avw-title" id="avwTitle">🎴 Choose your avatar</div>
+        <div class="avw-sub" id="avwSub">Pick how you want to look in the chat — you can change it any time from the ⚙️ button in the chat.</div>
+
+        <div class="cs-preview-row">
+          <div class="cs-preview-avatar" id="awPreview"></div>
+          <div class="cs-preview-info">
+            <div class="cs-preview-name" id="awPreviewName">…</div>
+            <button class="cs-mini" id="awGoogleBtn" type="button" onclick="useGooglePhotoForAvatar()" hidden>⭐  USE MY GOOGLE PHOTO</button>
+            <button class="cs-mini" type="button" onclick="pickWelcomeImage()">📷  UPLOAD MY PICTURE</button>
+          </div>
+        </div>
+
+        <div class="cs-sec">🎨 Presets</div>
+        <div class="av-rail">
+          <button class="av-nav" type="button" onclick="scrollWelcomeStrip(-1)" aria-label="previous 3">◀</button>
+          <div class="av-strip" id="awStrip"></div>
+          <button class="av-nav" type="button" onclick="scrollWelcomeStrip(1)" aria-label="next 3">▶</button>
+        </div>
+        <div class="cs-note">◀ ▶ moves 3 avatars at a time · 9 presets in total.</div>
+
+        <div class="cs-sec">🎴 Anime characters <span class="cs-src">AniList</span></div>
+        <div class="cs-search">
+          <input type="text" id="awCharQuery" placeholder="Search a character — naruto, levi, goku…" onkeydown="if(event.key==='Enter'){event.preventDefault();searchCharacters('awCharQuery');}">
+          <button type="button" onclick="searchCharacters('awCharQuery')" aria-label="Search characters">🔎</button>
+        </div>
+        <div class="av-grid" data-char-target="my" id="awCharGrid"></div>
+        <div class="cs-actions">
+          <button class="cs-mini" type="button" onclick="resetCharSearch('awCharQuery')">🔥  TOP 30</button>
+          <button class="cs-mini" type="button" onclick="loadMoreCharacters()">⤓  30 MORE</button>
+        </div>
+
+        <button class="avw-done" type="button" onclick="closeAvatarWelcome()">✓  DONE</button>
+        <div class="cs-note">Character art © their respective owners · shown from the AniList database.</div>
+        <input type="file" accept="image/*" id="awFile" style="display:none" onchange="welcomeAvatarFile(this)">
+      </div>
+    </div>
+
   <script src="https://accounts.google.com/gsi/client" async defer></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="script.js?v=20261021d"></script>
+  <script src="script.js?v=20261021e"></script>
 
 <!-- === ADMIN PANEL === -->
 <div class="admin-overlay" id="adminOverlay">
