@@ -2321,6 +2321,7 @@ function addMessage(text, type, shouldSave = true) {
 
   // USER MESSAGE → instant
   if (type === 'user') {
+    msgDiv.appendChild(createMsgAvatar('user'));
     const bubble = document.createElement('div');
     bubble.className = 'msg-bubble';
     const userSpan = document.createElement('span');
@@ -2333,6 +2334,7 @@ function addMessage(text, type, shouldSave = true) {
   // BOT MESSAGE → animated typing effect
   else if (type === 'bot') {
 
+    msgDiv.appendChild(createMsgAvatar('ai'));
     const bubble = document.createElement('div');
     bubble.className = 'msg-bubble';
 
@@ -2416,6 +2418,36 @@ function addMessage(text, type, shouldSave = true) {
   }
 
   return msgDiv;
+}
+
+/* ══════════════════════════════════════
+   🖼️ MESSAGE AVATARS (Senpai + user)
+══════════════════════════════════════ */
+
+// Senpai = the Sharingan eye (same identity as the chat header avatar)
+const AI_AVATAR_SVG =
+  '<svg viewBox="0 0 100 100">' +
+    '<circle cx="50" cy="50" r="45" fill="#8b0000" stroke="#ff2200" stroke-width="3"></circle>' +
+    '<circle cx="50" cy="50" r="15" fill="#1a0000"></circle>' +
+    '<circle cx="50" cy="28" r="7" fill="#1a0000"></circle>' +
+    '<circle cx="69" cy="61" r="7" fill="#1a0000"></circle>' +
+    '<circle cx="31" cy="61" r="7" fill="#1a0000"></circle>' +
+    '<circle cx="50" cy="50" r="6" fill="#ff2200"></circle>' +
+  '</svg>';
+
+// The visitor = simple person glyph
+const USER_AVATAR_SVG =
+  '<svg viewBox="0 0 24 24" fill="currentColor">' +
+    '<circle cx="12" cy="8" r="4.2"></circle>' +
+    '<path d="M3.8 21a8.2 8.2 0 0 1 16.4 0z"></path>' +
+  '</svg>';
+
+function createMsgAvatar(type) {
+  const avatar = document.createElement('div');
+  avatar.className = 'msg-avatar ' + (type === 'user' ? 'msg-avatar-user' : 'msg-avatar-ai');
+  avatar.setAttribute('aria-hidden', 'true');
+  avatar.innerHTML = type === 'user' ? USER_AVATAR_SVG : AI_AVATAR_SVG;
+  return avatar;
 }
 
 /* ══════════════════════════════════════

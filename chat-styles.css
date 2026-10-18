@@ -173,6 +173,29 @@
 .chat-messages .typing-animation span:nth-child(3) { animation-delay: .36s; }
 @keyframes td { 0%,60%,100% { transform: translateY(0); opacity: .4; } 30% { transform: translateY(-5px); opacity: 1; } }
 
+/* --- message avatars --- */
+.chat-messages .msg-avatar {
+  width: 30px; height: 30px; border-radius: 50%; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  align-self: center;
+}
+.chat-messages .msg-avatar svg { width: 18px; height: 18px; }
+.chat-messages .msg-avatar-ai {
+  background: radial-gradient(circle at 32% 28%, #ff8fb8, #ff2d55 75%);
+  border: 1.5px solid rgba(255,214,232,.75);
+  box-shadow: 0 0 10px rgba(255,45,85,.45);
+}
+.chat-messages .msg-avatar-user {
+  background: radial-gradient(circle at 32% 28%, #a78bfa, #6d28d9 80%);
+  border: 1.5px solid rgba(196,181,253,.7);
+  color: #f3e8ff;
+  box-shadow: 0 0 10px rgba(139,92,246,.4);
+}
+@media (max-width: 480px) {
+  .chat-messages .msg-avatar { width: 26px; height: 26px; }
+  .chat-messages .msg-avatar svg { width: 15px; height: 15px; }
+}
+
 /* --- per-message copy / share: floating sakura orbs on the opposite side --- */
 .chat-messages .msg-actions {
   display: flex; flex-direction: row; gap: 6px; flex-shrink: 0;
