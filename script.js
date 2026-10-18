@@ -4457,11 +4457,19 @@ function updateAvatarCurrentLabels() {
   });
 }
 
-// one page = exactly 3 avatars
+// one page = exactly 3 avatars (falls back to an instant jump when the
+// browser throttles smooth scrolling, e.g. in a background tab)
 function scrollAvatarStrip(side, dir) {
   var strip = document.getElementById('avStrip-' + side);
   if (!strip) return;
-  strip.scrollBy({ left: dir * strip.clientWidth, behavior: 'smooth' });
+  var max = strip.scrollWidth - strip.clientWidth;
+  var from = strip.scrollLeft;
+  var target = Math.max(0, Math.min(max, from + dir * strip.clientWidth));
+  if (Math.abs(target - from) < 2) return;
+  strip.scrollTo({ left: target, behavior: 'smooth' });
+  window.setTimeout(function() {
+    if (Math.abs(strip.scrollLeft - from) < 2) strip.scrollLeft = target;
+  }, 380);
 }
 
 function choosePreset(side, id) {
