@@ -2206,8 +2206,9 @@ function restoreChatFromStorage() {
 
 // Call restore on page load
 document.addEventListener('DOMContentLoaded', () => {
+  loadMyAvatar();        // the visitor's own choice (if any) wins for their side
   restoreChatFromStorage();
-  repaintAllAvatars(); // the welcome line's avatar follows the published CHAT_AVATARS
+  repaintAllAvatars();   // the welcome line's avatar follows the published CHAT_AVATARS
 });
 
 // ===== TOGGLE CHAT =====
@@ -2223,8 +2224,9 @@ function setChatOpen(open) {
     if (!isMobile) chatInput.focus();
     if (typeof closeMenu === 'function') closeMenu();
   } else {
-    // chat closed — dismiss any open message menus
+    // chat closed — dismiss any open message menus and the settings sheet
     document.querySelectorAll('.msg-actions.open').forEach(function (el) { el.classList.remove('open'); });
+    toggleChatSettings(false);
   }
 }
 
@@ -2496,7 +2498,29 @@ const AVATAR_PRESETS = {
   }
 };
 
+// The visitor's own choice (chat ⚙️ sheet) wins for the user side; '' = use the site default
+const MY_AVATAR_KEY = 'fardin_chat_my_avatar';
+let MY_AVATAR = '';
+
+function loadMyAvatar() {
+  try { MY_AVATAR = localStorage.getItem(MY_AVATAR_KEY) || ''; } catch (e) { MY_AVATAR = ''; }
+  if (!/^(preset:[a-z0-9-]+|img:data:image\/[a-z+]+;base64,[A-Za-z0-9+/=]+)$/.test(MY_AVATAR)) MY_AVATAR = '';
+}
+
+function saveMyAvatar(value) {
+  MY_AVATAR = value || '';
+  try {
+    if (MY_AVATAR) localStorage.setItem(MY_AVATAR_KEY, MY_AVATAR);
+    else localStorage.removeItem(MY_AVATAR_KEY);
+    return true;
+  } catch (e) {
+    loadMyAvatar();
+    return false; // localStorage full (a very big picture)
+  }
+}
+
 function avatarValue(side) {
+  if (side === 'user' && MY_AVATAR) return MY_AVATAR;
   var v = CHAT_AVATARS ? CHAT_AVATARS[side] : '';
   return typeof v === 'string' ? v : '';
 }
@@ -2542,6 +2566,151 @@ function repaintAllAvatars() {
     var av = m.querySelector('.msg-avatar');
     if (av) paintAvatar(av, m.classList.contains('user') ? 'user' : 'ai');
   });
+}
+
+// Pages a "3 avatars at a time" strip; falls back to an instant jump when the
+// browser throttles smooth scrolling (e.g. in a background tab).
+function pageAvatarStrip(strip, dir) {
+  if (!strip) return;
+  var max = strip.scrollWidth - strip.clientWidth;
+  var from = strip.scrollLeft;
+  var target = Math.max(0, Math.min(max, from + dir * strip.clientWidth));
+  if (Math.abs(target - from) < 2) return;
+  strip.scrollTo({ left: target, behavior: 'smooth' });
+  window.setTimeout(function() {
+    if (Math.abs(strip.scrollLeft - from) < 2) strip.scrollLeft = target;
+  }, 380);
+}
+
+/* ══════════════════════════════════════
+   ⚙️ VISITOR AVATAR SETTINGS (gear in the chat header)
+   Lets anyone pick their own avatar — kept in this browser only.
+══════════════════════════════════════ */
+
+function toggleChatSettings(force) {
+  var sheet = document.getElementById('chatSettings');
+  if (!sheet) return;
+  var open = typeof force === 'boolean' ? force : !sheet.classList.contains('open');
+  if (open) renderChatSettings();
+  sheet.classList.toggle('open', open);
+  var btn = document.getElementById('chatGearBtn');
+  if (btn) btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+  if (open) {
+    // one popup at a time — hide any open message menu
+    document.querySelectorAll('.chat-messages .msg-actions.open').forEach(function(el) { el.classList.remove('open'); });
+  }
+}
+
+function renderChatSettings() {
+  var body = document.getElementById('chatSettingsBody');
+  if (!body) return;
+  body.innerHTML =
+    '<div class="cs-label">Choose your own avatar — it changes only how <b>your</b> messages look, and it is remembered in this browser. No account needed.</div>' +
+    '<div class="cs-preview-row">' +
+      '<div class="cs-preview-avatar" id="csPreview"></div>' +
+      '<div class="cs-preview-info">' +
+        '<div class="cs-preview-name" id="csPreviewName">…</div>' +
+        '<button class="cs-mini" onclick="pickMyAvatarImage()">📷  UPLOAD MY PICTURE</button>' +
+        '<button class="cs-mini" onclick="resetMyAvatar()">↺  USE SITE DEFAULT</button>' +
+      '</div>' +
+    '</div>' +
+    '<div class="av-rail">' +
+      '<button class="av-nav" onclick="scrollChatAvatarStrip(-1)" aria-label="previous 3">◀</button>' +
+      '<div class="av-strip" id="csStrip"></div>' +
+      '<button class="av-nav" onclick="scrollChatAvatarStrip(1)" aria-label="next 3">▶</button>' +
+    '</div>' +
+    '<input type="file" accept="image/*" id="csFile" style="display:none" onchange="onMyAvatarFile(this)">' +
+    '<div class="cs-note">◀ ▶ moves 3 avatars at a time · 9 presets in total.<br>Senpai\'s own avatar is set by the site owner in the admin panel.</div>';
+  fillChatAvatarStrip();
+  updateMyAvatarPreview();
+}
+
+function fillChatAvatarStrip() {
+  var strip = document.getElementById('csStrip');
+  if (!strip) return;
+  strip.innerHTML = AVATAR_STRIP_ORDER.map(function(id) {
+    var p = AVATAR_PRESETS[id];
+    return '<button class="av-item" data-av="preset:' + id + '" onclick="chooseMyAvatar(\'preset:' + id + '\')" title="' + p.label + '">' +
+      '<span class="av-thumb" style="background:' + p.bg + ';border-color:' + p.border + ';box-shadow:' + p.glow + ';">' + p.svg + '</span>' +
+      '<span class="av-name">' + p.label + '</span>' +
+    '</button>';
+  }).join('');
+  refreshChatAvatarSelection();
+}
+
+function refreshChatAvatarSelection() {
+  var strip = document.getElementById('csStrip');
+  if (!strip) return;
+  var cur = avatarValue('user');
+  strip.querySelectorAll('.av-item').forEach(function(b) {
+    b.classList.toggle('sel', b.getAttribute('data-av') === cur);
+  });
+}
+
+function updateMyAvatarPreview() {
+  var prev = document.getElementById('csPreview');
+  if (!prev) return;
+  var spec = avatarSpec('user');
+  if (spec.kind === 'img') {
+    prev.style.background = 'rgba(255,255,255,0.08)';
+    prev.style.borderColor = 'rgba(255,255,255,0.35)';
+    prev.style.boxShadow = 'none';
+    prev.innerHTML = '<img alt="" src="' + spec.src.replace(/"/g, '&quot;') + '">';
+  } else {
+    var p = AVATAR_PRESETS[spec.id];
+    prev.style.background = p.bg;
+    prev.style.borderColor = p.border;
+    prev.style.boxShadow = p.glow;
+    prev.innerHTML = p.svg;
+  }
+  var nameEl = document.getElementById('csPreviewName');
+  if (nameEl) {
+    nameEl.textContent = (spec.kind === 'preset' ? AVATAR_PRESETS[spec.id].label : 'Your picture') +
+      (MY_AVATAR ? '  ·  yours ✨' : '  ·  site default');
+  }
+}
+
+function scrollChatAvatarStrip(dir) {
+  pageAvatarStrip(document.getElementById('csStrip'), dir);
+}
+
+function chooseMyAvatar(value) {
+  if (!/^preset:[a-z0-9-]+$/.test(value)) return;
+  if (!saveMyAvatar(value)) { chatToast('Could not save your avatar 😢'); return; }
+  repaintAllAvatars();
+  refreshChatAvatarSelection();
+  updateMyAvatarPreview();
+  chatToast('Avatar updated ✨');
+}
+
+function resetMyAvatar() {
+  saveMyAvatar('');
+  repaintAllAvatars();
+  refreshChatAvatarSelection();
+  updateMyAvatarPreview();
+  chatToast('Back to the site default 👌');
+}
+
+function pickMyAvatarImage() {
+  var input = document.getElementById('csFile');
+  if (input) input.click();
+}
+
+async function onMyAvatarFile(input) {
+  var file = input && input.files && input.files[0];
+  if (!file) return;
+  try {
+    var dataUrl = await resizeAvatarImage(file, 128); // kept small — it lives in localStorage
+    if (!saveMyAvatar('img:' + dataUrl)) { chatToast('That picture is too big to save 😢'); return; }
+    repaintAllAvatars();
+    refreshChatAvatarSelection();
+    updateMyAvatarPreview();
+    chatToast('Your picture is now your avatar ✨');
+  } catch (e) {
+    chatToast('Could not read that picture 😢');
+  } finally {
+    input.value = '';
+  }
 }
 
 /* ══════════════════════════════════════
@@ -4457,19 +4626,9 @@ function updateAvatarCurrentLabels() {
   });
 }
 
-// one page = exactly 3 avatars (falls back to an instant jump when the
-// browser throttles smooth scrolling, e.g. in a background tab)
+// one page = exactly 3 avatars (shared pager, see pageAvatarStrip)
 function scrollAvatarStrip(side, dir) {
-  var strip = document.getElementById('avStrip-' + side);
-  if (!strip) return;
-  var max = strip.scrollWidth - strip.clientWidth;
-  var from = strip.scrollLeft;
-  var target = Math.max(0, Math.min(max, from + dir * strip.clientWidth));
-  if (Math.abs(target - from) < 2) return;
-  strip.scrollTo({ left: target, behavior: 'smooth' });
-  window.setTimeout(function() {
-    if (Math.abs(strip.scrollLeft - from) < 2) strip.scrollLeft = target;
-  }, 380);
+  pageAvatarStrip(document.getElementById('avStrip-' + side), dir);
 }
 
 function choosePreset(side, id) {
