@@ -2023,6 +2023,11 @@ const GROQ_API_KEYS = [
 ];
 let currentKeyIndex = 0;
 
+// Groq retires models occasionally — keep a fallback chain so the bot
+// never dies on "model_not_found" (404) again.
+const GROQ_MODELS = ['openai/gpt-oss-120b', 'qwen/qwen3.8-27b', 'openai/gpt-oss-20b'];
+let currentModelIndex = 0;
+
 function getNextKeyIndex() {
   currentKeyIndex = (currentKeyIndex + 1) % GROQ_API_KEYS.length;
   return currentKeyIndex;
@@ -2030,11 +2035,12 @@ function getNextKeyIndex() {
 
 async function fetchWithFallback(body) {
   let lastError = null;
-  const startIndex = currentKeyIndex;
   let attempts = 0;
+  const maxAttempts = GROQ_API_KEYS.length * GROQ_MODELS.length;
 
-  do {
+  while (attempts < maxAttempts) {
     const key = GROQ_API_KEYS[currentKeyIndex];
+    const model = GROQ_MODELS[currentModelIndex];
     try {
       const res = await fetch(apiUrl, {
         method: 'POST',
@@ -2042,9 +2048,15 @@ async function fetchWithFallback(body) {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer ' + key
         },
-        body: JSON.stringify(body)
+        body: JSON.stringify({ ...body, model })
       });
       if (res.ok) return res;
+      if (res.status === 404) {
+        // Model retired/unknown — try the next model in the chain
+        currentModelIndex = (currentModelIndex + 1) % GROQ_MODELS.length;
+        attempts++;
+        continue;
+      }
       if (res.status === 429 || res.status === 401 || res.status >= 500) {
         lastError = new Error('Groq API error: ' + res.status);
         getNextKeyIndex();
@@ -2057,9 +2069,9 @@ async function fetchWithFallback(body) {
       getNextKeyIndex();
       attempts++;
     }
-  } while (attempts < GROQ_API_KEYS.length);
+  }
 
-  throw lastError || new Error('All Groq API keys exhausted');
+  throw lastError || new Error('All Groq API keys/models exhausted');
 }
 
 // ===== LOCALSTORAGE CONFIG - NEW =====
@@ -2226,7 +2238,6 @@ async function sendMessage() {
     let messagesToSend = [...chatHistory];
 
     const response = await fetchWithFallback({
-      model: 'groq/compound-mini',
       messages: messagesToSend,
       temperature: 0.8,
       max_tokens: 400,
