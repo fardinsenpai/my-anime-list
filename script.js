@@ -2278,6 +2278,11 @@ function toggleChat() {
 function toggleChatActions(force) {
   if (!chatBox) return;
   const open = (typeof force === 'boolean') ? force : !chatBox.classList.contains('actions-open');
+  const inWrap = chatBox.querySelector('#chatActions .sb-actions-in');
+  if (open && inWrap) {
+    // measure the rows while they are still folded, then unfold to exactly that
+    inWrap.style.setProperty('--panel-h', (inWrap.scrollHeight + 2) + 'px');
+  }
   chatBox.classList.toggle('actions-open', open);
   const btn = document.getElementById('chatBoltBtn');
   if (btn) {

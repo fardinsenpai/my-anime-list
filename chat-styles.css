@@ -254,21 +254,20 @@
 }
 
 /* the action panel: folded away until the ⚡ button asks for it */
-.sb-actions {
-  display: grid; grid-template-rows: 0fr; flex-shrink: 0;
-  transition: grid-template-rows .42s cubic-bezier(.22,1,.36,1);
-}
+.sb-actions { flex-shrink: 0; }
 .sb-actions > .sb-actions-in {
-  overflow: hidden; min-height: 0; opacity: 0; pointer-events: none;
-  transition: opacity .24s ease;
+  overflow: hidden; max-height: 0; opacity: 0; pointer-events: none;
+  transition: max-height .42s cubic-bezier(.22,1,.36,1), opacity .24s ease;
 }
-#chatBox.actions-open .sb-actions { grid-template-rows: 1fr; }
-#chatBox.actions-open .sb-actions > .sb-actions-in { opacity: 1; pointer-events: auto; }
+#chatBox.actions-open .sb-actions > .sb-actions-in {
+  max-height: var(--panel-h, 220px);      /* set from the real content height in JS */
+  opacity: 1; pointer-events: auto;
+}
 #chatBox.actions-open .sb-chips { animation: sb-row-in .36s cubic-bezier(.22,1,.36,1) both; }
 #chatBox.actions-open .sb-chips-genres { animation-delay: .08s; }
 @keyframes sb-row-in { from { opacity: 0; transform: translateY(-7px); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) {
-  .sb-actions { transition: none; }
+  .sb-actions > .sb-actions-in { transition: none; }
   #chatBox.actions-open .sb-chips { animation: none; }
 }
 
