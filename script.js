@@ -4440,11 +4440,11 @@ document.addEventListener('click', function(e) {
   // Supabase without needing a new column. Ownership checks still compare the
   // part before the pipe, so deleting your own take keeps working.
   function htOwnerId(v) { return String(v == null ? '' : v).split('|')[0]; }
-  function htTakeUserId() {
-    var authed = false;
-    try { authed = !!(typeof AUTH_USER !== 'undefined' && AUTH_USER && AUTH_USER.id); } catch (e) {}
-    return myId + (authed ? '|a' : '');
+  // is this browser signed in right now? the tick is stamped when a take is written
+  function htSignedIn() {
+    try { return !!(typeof AUTH_USER !== 'undefined' && AUTH_USER && AUTH_USER.id); } catch (e) { return false; }
   }
+  function htTakeUserId() { return myId + (htSignedIn() ? '|a' : ''); }
   function htIsVerified(c) {
     return String((c && c._userId) || '').split('|').indexOf('a') !== -1;
   }
@@ -5398,11 +5398,42 @@ document.addEventListener('click', function(e) {
   htSyncAccountName();
   document.addEventListener('fardin:auth-changed', function() {
     htSyncAccountName();
+    htPaintAuthHint();
     if (htAvatarColumn) htBuildPicker();
   });
   if (nameInput) nameInput.addEventListener('change', function() {
     try { localStorage.setItem(NAME_KEY, nameInput.value.trim()); } catch(e) {}
   });
+
+  // -- the tick is stamped at post time, so the form has to say whether this
+  //    browser is signed in - otherwise a take comes out unbadged with no hint --
+  var authHint = null;
+  if (submitBtn && submitBtn.parentNode) {
+    authHint = document.createElement('div');
+    authHint.id = 'htAuthHint';
+    authHint.style.cssText = 'font-size:11px;line-height:1.7;letter-spacing:0.3px;color:#8b8b9e;';
+    submitBtn.parentNode.appendChild(authHint);
+  }
+  function htPaintAuthHint() {
+    if (!authHint) return;
+    if (htSignedIn()) {
+      var who = '';
+      try { who = String((AUTH_USER && (AUTH_USER.first || AUTH_USER.name)) || ''); } catch (e) {}
+      authHint.innerHTML = '<span style="color:#1877F2;font-weight:700;">&#10003;</span> Signed in' +
+        (who ? ' as <span style="color:#ffd700;">' + escHtml(who) + '</span>' : '') +
+        ' \u2014 this take gets the blue badge.';
+    } else {
+      authHint.innerHTML = 'Not signed in \u2014 the blue <span style="color:#1877F2;font-weight:700;">&#10003;</span> ' +
+        'badge is only added to takes written while signed in. ' +
+        '<a href="javascript:void(0)" id="htAuthSignIn" style="color:#c77dff;text-decoration:underline;">Sign in</a>';
+      var link = document.getElementById('htAuthSignIn');
+      if (link) link.addEventListener('click', function(e) {
+        e.preventDefault();
+        try { openLoginPage('in'); } catch (err) {}
+      });
+    }
+  }
+  htPaintAuthHint();
 
   // a fresh prompt each day, straight in the empty box - no styling involved
   if (commentInput) {
