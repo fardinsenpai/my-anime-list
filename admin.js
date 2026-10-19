@@ -1972,6 +1972,59 @@ function fillEditExtras() {
 })();
 
 /* ══════════════════════════════════════════════════════════════════════
+   THE PAT VAULT — the sidebar keeps your GitHub token in this browser's
+   localStorage (key 'gh_pat'), masked in a password field and only
+   reachable behind the PIN. Nothing is ever committed.
+
+   Flow that means you never memorise it: paste once → SAVE → then ⧉ COPY
+   wherever you need it. 👁 SHOW reveals it, 🗑 FORGET wipes it.
+   ══════════════════════════════════════════════════════════════════════ */
+function patReveal() {
+  var el = document.getElementById('adminPatInput');
+  var lab = document.getElementById('patRevealLabel');
+  if (!el) return;
+  if (!el.value) {
+    var stored = getPat();
+    if (!stored) { msgFail('No PAT saved yet — paste it and press SAVE'); return; }
+    el.value = stored;
+  }
+  var wasHidden = el.type === 'password';
+  el.type = wasHidden ? 'text' : 'password';
+  if (lab) lab.textContent = wasHidden ? 'HIDE' : 'SHOW';
+}
+function patCopyFallback(v) {
+  var ta = document.createElement('textarea');
+  ta.value = v;
+  ta.style.cssText = 'position:fixed;left:-9999px;top:0;';
+  document.body.appendChild(ta);
+  ta.select();
+  var ok = false;
+  try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
+  document.body.removeChild(ta);
+  if (ok) msgOk('PAT copied to clipboard');
+  else msgFail('Copy blocked — press 👁 SHOW and copy it by hand');
+}
+function patCopy() {
+  var v = (getPat() || '').trim();
+  if (!v) { msgFail('No PAT saved yet — paste it and press SAVE'); return; }
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(v).then(function () { msgOk('PAT copied to clipboard'); }, function () { patCopyFallback(v); });
+  } else {
+    patCopyFallback(v);
+  }
+}
+function patForget() {
+  if (!confirm('Forget the saved GitHub PAT in this browser?')) return;
+  try { localStorage.removeItem('gh_pat'); } catch (e) {}
+  var el = document.getElementById('adminPatInput');
+  if (el) { el.value = ''; el.type = 'password'; }
+  var lab = document.getElementById('patRevealLabel');
+  if (lab) lab.textContent = 'SHOW';
+  paintPatStatus();
+  msgOk('PAT forgotten in this browser');
+}
+
+/* ══════════════════════════════════════════════════════════════════════
    DAY / NIGHT — one switch, remembered in this browser.
 
    admin.css keeps every colour behind variables (--bg, --surface,

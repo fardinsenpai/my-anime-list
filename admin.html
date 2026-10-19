@@ -11,7 +11,7 @@
   /* apply the saved theme before the first paint, so night mode never flashes white */
   try { if (localStorage.getItem('fardin.admin.theme') === 'dark') document.documentElement.setAttribute('data-theme', 'dark'); } catch (e) {}
 </script>
-<link rel="stylesheet" href="admin.css?v=20261023g">
+<link rel="stylesheet" href="admin.css?v=20261023h">
 </head>
 <body>
 
@@ -80,10 +80,18 @@
       <div class="ad-side-block">
         <div class="ad-side-title">// GITHUB PAT //</div>
         <div class="ad-pat-row">
-          <input type="text" id="adminPatInput" class="admin-g-input" placeholder="ghp_xxxxxxxx" autocomplete="off">
+          <input type="password" id="adminPatInput" class="admin-g-input" placeholder="ghp_xxxxxxxx" autocomplete="off" spellcheck="false">
           <button class="admin-g-btn tight" onclick="savePat(); paintPatStatus();">SAVE</button>
         </div>
-        <div class="ad-side-hint">Stored in this browser only.<br>Needed for every commit.</div>
+        <div class="ad-pat-tools">
+          <button class="ad-mini" onclick="patReveal()">👁 <span id="patRevealLabel">SHOW</span></button>
+          <button class="ad-mini" onclick="patCopy()">⧉ COPY</button>
+          <button class="ad-mini danger" onclick="patForget()">🗑 FORGET</button>
+        </div>
+        <div class="ad-side-hint">
+          Kept in <b>this browser only</b>, hidden behind the PIN and never committed anywhere.
+          Paste it once, press SAVE, then just use ⧉ COPY whenever you need it.
+        </div>
       </div>
     </aside>
 
@@ -344,6 +352,6 @@
   </div>
 </div>
 
-<script src="admin.js?v=20261023g"></script>
+<script src="admin.js?v=20261023h"></script>
 </body>
 </html>
