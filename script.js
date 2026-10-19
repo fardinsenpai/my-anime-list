@@ -2597,14 +2597,16 @@ function suggestRowsFor(anime) {
   return rows;
 }
 
-// Draw them under this reply — only the newest answer keeps its suggestions.
+// Draw them under this reply — only the newest answer keeps its suggestions, and they
+// stay tucked away until the visitor asks for them (scrolls down or taps the input box).
 function renderSuggestions(msgDiv, anime) {
   if (!msgDiv || !msgDiv.parentNode) return;
   chatMessages.querySelectorAll('.msg-suggests').forEach(function (el) { el.remove(); });
+  _pendingSuggests = null;
   const rows = suggestRowsFor(anime);
   if (!rows.length) return;
   const box = document.createElement('div');
-  box.className = 'msg-suggests';
+  box.className = 'msg-suggests await';
   rows.forEach(function (r) {
     const b = document.createElement('button');
     b.type = 'button';
@@ -2621,7 +2623,43 @@ function renderSuggestions(msgDiv, anime) {
     box.appendChild(b);
   });
   msgDiv.parentNode.insertBefore(box, msgDiv.nextSibling);
+  _pendingSuggests = box;          // waits for scroll-down / input tap
+}
+
+/* ===== the ↘ rows wait to be asked for ===== */
+let _pendingSuggests = null;
+let _lastProgrammaticScroll = 0;
+let _lastChatScrollTop = 0;
+
+// every auto-scroll goes through here, so the reveal below can tell it apart from a
+// real scroll by the visitor
+function chatAutoScroll() {
+  _lastProgrammaticScroll = Date.now();
   chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+function revealPendingSuggestions() {
+  const box = _pendingSuggests;
+  if (!box) return;
+  _pendingSuggests = null;
+  if (!box.isConnected) return;
+  box.classList.remove('await');
+  chatAutoScroll();                // bring them into view
+}
+
+chatMessages.addEventListener('scroll', function () {
+  const top = chatMessages.scrollTop;
+  const movedDown = top > _lastChatScrollTop + 2;
+  _lastChatScrollTop = top;
+  if (!_pendingSuggests) return;
+  if (Date.now() - _lastProgrammaticScroll < 300) return;   // typing / auto-scroll
+  if (movedDown) revealPendingSuggestions();
+}, { passive: true });
+
+chatInput.addEventListener('focus', revealPendingSuggestions);
+var _chatInputArea = chatInput.closest('.chat-input-area') || chatInput.parentNode;
+if (_chatInputArea && _chatInputArea.addEventListener) {
+  _chatInputArea.addEventListener('click', revealPendingSuggestions);
 }
 
 
@@ -2667,7 +2705,7 @@ function addMessage(text, type, shouldSave = true, onTyped = null) {
       if (timer) clearTimeout(timer);
       textSpan.replaceChildren(richChatText(text));
       pendingTypers.delete(finish);
-      chatMessages.scrollTop = chatMessages.scrollHeight;
+      chatAutoScroll();
       if (typeof onTyped === 'function') onTyped(msgDiv);   // e.g. draw the ↘ suggestions
     }
 
@@ -2679,7 +2717,7 @@ function addMessage(text, type, shouldSave = true, onTyped = null) {
       textSpan.replaceChildren(richChatText(text.slice(0, index)));
 
       // Auto scroll while typing
-      chatMessages.scrollTop = chatMessages.scrollHeight;
+      chatAutoScroll();
 
       if (index < text.length) timer = setTimeout(typeChunk, 6);
       else finish();
