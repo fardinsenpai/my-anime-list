@@ -3799,7 +3799,10 @@ function localQuickAnswer(userMsg) {
           const lines = [];
           const ea = epOf(fa), eb = epOf(fb);
           if (ea || eb) lines.push('📺 Episodes: ' + (ea || '?') + ' vs ' + (eb || '?'));
-          if (fa.seas || fb.seas) lines.push('🌸 ' + fa.title + ': ' + (fa.seas || '—') + '\n🌸 ' + fb.title + ': ' + (fb.seas || '—'));
+          if (fa.seas || fb.seas) {
+            const clean = function (s) { return String(s || '—').replace(/^[^\w]+/, ''); };
+            lines.push('🌸 Seasons — ' + fa.title + ': ' + clean(fa.seas) + '\n🌸 ' + fb.title + ': ' + clean(fb.seas));
+          }
           const sa = scoreOf(fa.title), sb = scoreOf(fb.title);
           if (sa && sb) lines.push('🌟 Overall score: ' + sa.toFixed(2) + ' vs ' + sb.toFixed(2));
           return quickAiReply('⚔️ **' + fa.title + '** vs **' + fb.title + '**\n\n' + lines.join('\n') +
