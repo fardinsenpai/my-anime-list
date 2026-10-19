@@ -2334,6 +2334,27 @@ document.addEventListener('visibilitychange', () => {
 });
 
 // ===== ADD MESSAGE TO UI - PREMIUM ANIMATION VERSION =====
+// The AI writes anime titles (and people's names) as **bold**. Render that as the site's
+// yellow, in bold — and never leave raw asterisks on screen. Built as real DOM nodes, so
+// nothing the model writes can ever inject HTML.
+function richChatText(text) {
+  const frag = document.createDocumentFragment();
+  const src = String(text == null ? '' : text);
+  const re = /\*\*([^*]+)\*\*/g;
+  let last = 0;
+  let m;
+  while ((m = re.exec(src))) {
+    if (m.index > last) frag.appendChild(document.createTextNode(src.slice(last, m.index)));
+    const strong = document.createElement('strong');
+    strong.className = 'msg-strong';
+    strong.textContent = m[1];
+    frag.appendChild(strong);
+    last = m.index + m[0].length;
+  }
+  if (last < src.length) frag.appendChild(document.createTextNode(src.slice(last).replace(/\*\*/g, '')));
+  return frag;
+}
+
 function addMessage(text, type, shouldSave = true) {
   const msgDiv = document.createElement('div');
   msgDiv.className = `msg ${type}`;
@@ -2374,7 +2395,7 @@ function addMessage(text, type, shouldSave = true) {
       if (done) return;
       done = true;
       if (timer) clearTimeout(timer);
-      textSpan.textContent = text;
+      textSpan.replaceChildren(richChatText(text));
       pendingTypers.delete(finish);
       chatMessages.scrollTop = chatMessages.scrollHeight;
     }
@@ -2384,7 +2405,7 @@ function addMessage(text, type, shouldSave = true) {
     function typeChunk() {
       if (done) return;
       index = Math.min(index + CHUNK, text.length);
-      textSpan.textContent = text.slice(0, index);
+      textSpan.replaceChildren(richChatText(text.slice(0, index)));
 
       // Auto scroll while typing
       chatMessages.scrollTop = chatMessages.scrollHeight;
