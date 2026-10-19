@@ -1992,26 +1992,49 @@ function patReveal() {
   el.type = wasHidden ? 'text' : 'password';
   if (lab) lab.textContent = wasHidden ? 'HIDE' : 'SHOW';
 }
-function patCopyFallback(v) {
+/* one clipboard path for every ⧉ button in the panel (PAT, pad, note):
+   modern API first, hidden-textarea fallback for older/insecure contexts. */
+function adCopyFallback(text, what) {
   var ta = document.createElement('textarea');
-  ta.value = v;
+  ta.value = text;
   ta.style.cssText = 'position:fixed;left:-9999px;top:0;';
   document.body.appendChild(ta);
   ta.select();
   var ok = false;
   try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
   document.body.removeChild(ta);
-  if (ok) msgOk('PAT copied to clipboard');
-  else msgFail('Copy blocked — press 👁 SHOW and copy it by hand');
+  if (ok) msgOk(what + ' copied to clipboard');
+  else msgFail('Copy blocked — select the text and copy it by hand');
+}
+function adCopy(text, what) {
+  what = what || 'Text';
+  text = text == null ? '' : String(text);
+  if (!text.trim()) { msgFail('Nothing to copy — it is empty'); return; }
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(text).then(
+      function () { msgOk(what + ' copied to clipboard'); },
+      function () { adCopyFallback(text, what); }
+    );
+  } else {
+    adCopyFallback(text, what);
+  }
 }
 function patCopy() {
   var v = (getPat() || '').trim();
   if (!v) { msgFail('No PAT saved yet — paste it and press SAVE'); return; }
-  if (navigator.clipboard && window.isSecureContext) {
-    navigator.clipboard.writeText(v).then(function () { msgOk('PAT copied to clipboard'); }, function () { patCopyFallback(v); });
-  } else {
-    patCopyFallback(v);
-  }
+  adCopy(v, 'PAT');
+}
+function notesCopyPad() {
+  var el = document.getElementById('notesPad');
+  adCopy(el ? el.value : '', 'Pad');
+}
+function notesCopyNote() {
+  var t = document.getElementById('noteTitle');
+  var b = document.getElementById('noteBody');
+  if (!t || !b) return;
+  if (!NOTES_SEL && !(t.value || '').trim() && !(b.value || '').trim()) { msgFail('No note selected'); return; }
+  var head = (t.value || '').trim();
+  adCopy((head ? head + '\n\n' : '') + (b.value || ''), 'Note');
 }
 function patForget() {
   if (!confirm('Forget the saved GitHub PAT in this browser?')) return;

@@ -11,7 +11,7 @@
   /* apply the saved theme before the first paint, so night mode never flashes white */
   try { if (localStorage.getItem('fardin.admin.theme') === 'dark') document.documentElement.setAttribute('data-theme', 'dark'); } catch (e) {}
 </script>
-<link rel="stylesheet" href="admin.css?v=20261023h">
+<link rel="stylesheet" href="admin.css?v=20261023i">
 </head>
 <body>
 
@@ -296,6 +296,7 @@
           <textarea id="notesPad" class="ad-textarea" placeholder="Scratch pad — autosaves in this browser as you type…" oninput="notesPadInput()"></textarea>
           <div class="ad-row wrap">
             <span class="ad-count" id="notesPadCount">0 chars</span>
+            <button class="admin-g-btn tight" onclick="notesCopyPad()">⧉ COPY PAD</button>
             <button class="admin-g-btn tight danger" onclick="notesClearPad()">🗑 CLEAR PAD</button>
           </div>
         </div>
@@ -313,6 +314,7 @@
               <textarea id="noteBody" class="ad-textarea tall" placeholder="Write here — autosaves in this browser…" oninput="notesEdit()"></textarea>
               <div class="ad-row wrap">
                 <span class="ad-count" id="noteMeta">0 chars</span>
+                <button class="admin-g-btn tight" onclick="notesCopyNote()">⧉ COPY NOTE</button>
                 <button class="admin-g-btn tight danger" onclick="notesDelete()">🗑 DELETE NOTE</button>
               </div>
             </div>
@@ -352,6 +354,6 @@
   </div>
 </div>
 
-<script src="admin.js?v=20261023h"></script>
+<script src="admin.js?v=20261023i"></script>
 </body>
 </html>
