@@ -2059,9 +2059,11 @@ async function fetchWithFallback(body) {
   let attempts = 0;
   let rateLimitHits = 0;
   const maxAttempts = GROQ_API_KEYS.length * GROQ_MODELS.length;
+  const failedKeys = new Set();   // keys that have already refused this request
 
   while (attempts < maxAttempts) {
-    const key = GROQ_API_KEYS[currentKeyIndex];
+    const keyIndex = currentKeyIndex;
+    const key = GROQ_API_KEYS[keyIndex];
     const model = GROQ_MODELS[currentModelIndex % GROQ_MODELS.length];
     try {
       const res = await fetch(apiUrl, {
@@ -2087,6 +2089,10 @@ async function fetchWithFallback(body) {
           rateLimitHits++;
           await new Promise((resolve) => setTimeout(resolve, Math.min(1200 * rateLimitHits, 4000)));
         }
+        failedKeys.add(keyIndex);
+        // Every key has said no once — another lap just keeps the visitor staring
+        // at the typing dots, so hand back the error while they can still retry.
+        if (failedKeys.size >= GROQ_API_KEYS.length) break;
         getNextKeyIndex();
         attempts++;
         continue;
