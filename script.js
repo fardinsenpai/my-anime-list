@@ -638,8 +638,6 @@ window.addEventListener('popstate', function () {
         mainTitle.textContent = ' Hot Takes';
         mainTitle.setAttribute('data-text', ' Hot Takes');
       }
-      var backToTopBtn = document.getElementById('backToTop');
-      if (backToTopBtn) backToTopBtn.style.display = 'none';
       if (typeof closeMenu === 'function') closeMenu();
       window.scrollTo({ top: 0, behavior: 'smooth' });
     };
@@ -2007,26 +2005,138 @@ function isScrollButtonSection() {
   if (p.endsWith('/waifus')) return true;
   return false;
 }
-(function () {
-  const btn = document.createElement('button');
-  btn.id = 'backToTop';
-  btn.innerHTML = '<svg width="26" height="26" viewBox="0 0 64 64" fill="none"><path d="M32 12 L18 32 L26 32 L26 56 L38 56 L38 32 L46 32 Z" fill="white"/><rect x="29" y="6" width="6" height="6" rx="1.5" fill="#FFD700" transform="rotate(45 32 9)"/></svg>';
-  btn.title = 'Back to top';
-  document.body.appendChild(btn);
+// ── Scroll dock: TOP / END + a progress line ─────────────────────────────
+// One floating control for both directions, drawn in the Manga Ink theme.
+// The visibility is always derived from the current route + scroll position,
+// so it can never get stuck hidden the way the old button did.
+function prefersReducedMotion() {
+  try { return window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; }
+}
 
-  window.addEventListener('scroll', () => {
-    if (!isScrollButtonSection()) { btn.classList.remove('visible'); return; }
-if (window.scrollY > document.body.scrollHeight / 3) {
-  
-  btn.classList.add('visible');
-    } else {
-      btn.classList.remove('visible');
-    }
-  });
+function scrollToTop() {
+  window.scrollTo({ top: 0, behavior: prefersReducedMotion() ? 'auto' : 'smooth' });
+}
 
-  btn.addEventListener('click', () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  });
+function scrollToEnd() {
+  var doc = document.documentElement;
+  var body = document.body;
+  var max = Math.max(doc ? doc.scrollHeight : 0, body ? body.scrollHeight : 0) - window.innerHeight;
+  // a smooth ride over tens of thousands of pixels takes seconds and feels
+  // broken, so a long jump is instant and a short one still glides
+  var far = max > window.innerHeight * 3;
+  window.scrollTo({ top: max > 0 ? max : 0, behavior: (far || prefersReducedMotion()) ? 'auto' : 'smooth' });
+}
+
+(function buildScrollDock() {
+  if (document.getElementById('scrollDock')) return;
+
+  var dock = document.createElement('div');
+  dock.id = 'scrollDock';
+  dock.setAttribute('role', 'group');
+  dock.setAttribute('aria-label', 'Scroll controls');
+  dock.style.cssText = 'position:fixed;left:26px;bottom:26px;z-index:9998;' +
+    'display:flex;flex-direction:column;align-items:center;gap:10px;' +
+    'opacity:0;transform:translateY(18px) scale(.92);pointer-events:none;' +
+    'transition:opacity .3s ease, transform .3s ease;';
+
+  function dockButton(id, arrow, label, title, action) {
+    var b = document.createElement('button');
+    b.id = id;
+    b.type = 'button';
+    b.title = title;
+    b.setAttribute('aria-label', title);
+    b.style.cssText = 'width:46px;height:46px;border-radius:15px;cursor:pointer;' +
+      'background:linear-gradient(150deg, rgba(255,255,255,.10), rgba(255,143,190,.16));' +
+      'border:1.5px solid rgba(255,143,190,.45);color:#fff;' +
+      "font-family:'Yuji Syuku',cursive;font-size:15px;line-height:1;" +
+      'display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;' +
+      'backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);' +
+      'box-shadow:0 6px 18px rgba(0,0,0,.45), inset 0 0 12px rgba(255,143,190,.10);' +
+      'transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease, opacity .2s ease;';
+    b.innerHTML = '<span style="text-shadow:0 0 10px rgba(255,143,190,.85);-webkit-text-stroke:.5px rgba(255,60,140,.55);">' + arrow + '</span>' +
+      '<span style="font-size:7.5px;letter-spacing:1.4px;color:rgba(255,215,234,.85);">' + label + '</span>';
+    b.addEventListener('mouseenter', function () {
+      b.style.borderColor = '#ff8fbe';
+      b.style.boxShadow = '0 8px 24px rgba(0,0,0,.5), 0 0 22px rgba(255,143,190,.45)';
+      b.style.transform = 'translateY(-3px)';
+    });
+    b.addEventListener('mouseleave', function () {
+      b.style.borderColor = 'rgba(255,143,190,.45)';
+      b.style.boxShadow = '0 6px 18px rgba(0,0,0,.45), inset 0 0 12px rgba(255,143,190,.10)';
+      b.style.transform = 'translateY(0)';
+    });
+    b.addEventListener('click', action);
+    return b;
+  }
+
+  var topBtn = dockButton('scrollTopBtn', '▲', 'TOP', 'Back to top', scrollToTop);
+  var endBtn = dockButton('scrollEndBtn', '▼', 'END', 'Jump to the end of the page', scrollToEnd);
+
+  var track = document.createElement('div');
+  track.title = 'How far down the page you are';
+  track.style.cssText = 'width:3px;height:54px;border-radius:3px;background:rgba(255,255,255,.12);' +
+    'overflow:hidden;position:relative;box-shadow:inset 0 0 4px rgba(0,0,0,.6);';
+  var fill = document.createElement('div');
+  fill.style.cssText = 'position:absolute;left:0;bottom:0;width:100%;height:0%;' +
+    'background:linear-gradient(180deg,#ffffff,#ff8fbe);border-radius:3px;' +
+    'box-shadow:0 0 8px rgba(255,143,190,.75);transition:height .12s linear;';
+  track.appendChild(fill);
+
+  dock.appendChild(topBtn);
+  dock.appendChild(track);
+  dock.appendChild(endBtn);
+  document.body.appendChild(dock);
+
+  var ticking = false;
+  function paint() {
+    ticking = false;
+    var doc = document.documentElement;
+    var body = document.body;
+    var max = Math.max(doc ? doc.scrollHeight : 0, body ? body.scrollHeight : 0) - window.innerHeight;
+    var y = window.pageYOffset || (doc ? doc.scrollTop : 0) || 0;
+    var p = max > 0 ? Math.min(1, Math.max(0, y / max)) : 0;
+    fill.style.height = (p * 100).toFixed(1) + '%';
+    var show = isScrollButtonSection() && y > 140;
+    dock.style.opacity = show ? '1' : '0';
+    dock.style.transform = show ? 'translateY(0) scale(1)' : 'translateY(18px) scale(.92)';
+    dock.style.pointerEvents = show ? 'auto' : 'none';
+    topBtn.style.opacity = y > 40 ? '1' : '.42';
+    endBtn.style.opacity = p > 0.995 ? '.42' : '1';
+  }
+  function onScroll() {
+    if (ticking) return;
+    ticking = true;
+    // requestAnimationFrame stops in a background tab, so a plain timer
+    // paints as well - otherwise the dock would freeze while the tab is hidden
+    var done = false;
+    var run = function () {
+      if (done) return;
+      done = true;
+      ticking = false;
+      paint();
+    };
+    if (window.requestAnimationFrame) window.requestAnimationFrame(run);
+    window.setTimeout(run, 150);
+  }
+
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', onScroll);
+  window.addEventListener('focus', paint);
+  window.addEventListener('popstate', function () { setTimeout(paint, 80); });
+  document.addEventListener('visibilitychange', function () { if (!document.hidden) paint(); });
+
+  // the site navigates with pushState, so watch that as well
+  try {
+    var push = history.pushState;
+    history.pushState = function () {
+      var r = push.apply(history, arguments);
+      setTimeout(paint, 80);
+      return r;
+    };
+  } catch (e) {}
+
+  document.addEventListener('DOMContentLoaded', paint);
+  paint();
 })();
 
 
@@ -7794,25 +7904,10 @@ function backToQuestSelect() {
   resetQuest();
 }
 
-// === Fast Scroll Float Button ===
-(function() {
-  var btn = document.getElementById('fastScrollBtn');
-  if (!btn) return;
-  window.addEventListener('scroll', function() {
-    if (!isScrollButtonSection()) { btn.style.display = 'none'; return; }
-    var y = window.scrollY || document.documentElement.scrollTop;
-    var maxScroll = document.documentElement.scrollHeight - window.innerHeight;
-    var nearBottom = y > maxScroll - 80;
-    if (y > document.body.scrollHeight / 3 && !nearBottom) {
-      btn.style.display = 'inline-block';
-    } else {
-      btn.style.display = 'none';
-    }
-  });
-})();
+// The old in-page "End" button is gone - the floating scroll dock does both
+// jobs now (TOP and END). Kept as a thin wrapper so old links still work.
 function fastScrollToBottom() {
-  window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' });
-  setTimeout(function() { document.getElementById('fastScrollBtn').style.display = 'none'; }, 100);
+  scrollToEnd();
 }
 
 /* ══════════════════════════════════════════════════════════════════════
