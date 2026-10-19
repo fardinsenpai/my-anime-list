@@ -4660,12 +4660,18 @@ document.addEventListener('click', function(e) {
     }
   }
 
-  // does the table have the avatar column yet? (the picker only shows if it can
-  // actually be saved for everyone - no fake choices)
+  // does the table have the avatar column yet? read one row instead of asking
+  // for a missing column (that used to log a 400 in the console)
   function htProbeAvatarColumn() {
     if (htAvatarColumn !== null) return Promise.resolve(htAvatarColumn);
-    return supabaseFetch('hot_takes?select=id,avatar&limit=1')
-      .then(function (r) { htAvatarColumn = !!r.ok; return htAvatarColumn; })
+    return supabaseFetch('hot_takes?select=*&limit=1')
+      .then(function (r) { return r.json().catch(function () { return null; }); })
+      .then(function (rows) {
+        if (!Array.isArray(rows)) { htAvatarColumn = false; return false; }
+        // empty table: cannot tell yet, and the insert falls back safely
+        htAvatarColumn = rows.length === 0 ? true : Object.prototype.hasOwnProperty.call(rows[0], 'avatar');
+        return htAvatarColumn;
+      })
       .catch(function () { htAvatarColumn = false; return false; });
   }
 
@@ -5276,6 +5282,8 @@ document.addEventListener('click', function(e) {
       var bare = {};
       for (var k in payload) if (k !== 'avatar') bare[k] = payload[k];
       htAvatarColumn = false;
+      var bar = document.getElementById('htAvatarBar');
+      if (bar && bar.parentNode) bar.parentNode.removeChild(bar);
       return insertTake(bare);
     }).then(function(r) {
       return r.json().catch(function() { return null; });
