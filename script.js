@@ -8758,3 +8758,78 @@ async function lgDoSubmit(ev) {
   if (document.readyState === 'complete' || document.readyState === 'interactive') wire();
   else document.addEventListener('DOMContentLoaded', wire);
 })();
+
+// ═══════════════════════════════════════════════════════════════════════
+// TITLE THEME — "MANGA INK"
+// Picked from the title-style preview: Yuji Syuku brush, white→pink
+// gradient, pink ink outline. Injected as a runtime stylesheet so
+// style.css stays exactly as it is.
+// ═══════════════════════════════════════════════════════════════════════
+var TITLE_THEME = {
+  name: 'manga-ink',
+  title: {
+    font: "'Yuji Syuku', cursive",
+    weight: '400',
+    tracking: '1px',
+    grad: 'linear-gradient(100deg, #ffffff, #ffd7ea 55%, #ff8fbe)',
+    stroke: '1px rgba(255,60,140,.55)',
+    sliceTop: 'hue-rotate(350deg)',      // the glitch slice stays a print mis-registration
+    sliceBottom: 'hue-rotate(15deg)',
+    bar: 'linear-gradient(90deg, transparent, #ff8fbe, #ffffff, transparent)',
+    barGlow: '0 0 12px rgba(255,143,190,0.55)'
+  },
+  sub: {
+    font: "'Yuji Syuku', cursive",
+    color: '#ff8fbe',
+    glow: '0 0 20px rgba(255,143,190,.45)',
+    underline: 'linear-gradient(90deg, #ff8fbe, #ffd7ea, transparent)'
+  }
+};
+
+(function applyTitleTheme() {
+  if (!TITLE_THEME) return;
+  var t = TITLE_THEME;
+  var css = [
+    '.header h1 {',
+    '  font-family: ' + t.title.font + ' !important;',
+    '  font-weight: ' + t.title.weight + ' !important;',
+    '  letter-spacing: ' + t.title.tracking + ' !important;',
+    '  background: ' + t.title.grad + ' !important;',
+    '  -webkit-background-clip: text !important;',
+    '  -webkit-text-fill-color: transparent !important;',
+    '  background-clip: text !important;',
+    '  -webkit-text-stroke: ' + t.title.stroke + ';',
+    '}',
+    '.header h1::before {',
+    '  background: ' + t.title.grad + ' !important;',
+    '  -webkit-background-clip: text !important;',
+    '  -webkit-text-fill-color: transparent !important;',
+    '  background-clip: text !important;',
+    '  filter: ' + t.title.sliceTop + ';',
+    '}',
+    '.header h1::after {',
+    '  background: ' + t.title.bar + ' !important;',
+    '  box-shadow: ' + t.title.barGlow + ';',
+    '}',
+    '.hot-takes-heading {',
+    '  font-family: ' + t.sub.font + ' !important;',
+    '  color: ' + t.sub.color + ' !important;',
+    '  text-shadow: ' + t.sub.glow + ' !important;',
+    '}',
+    '.hot-takes-heading::after {',
+    '  background: ' + t.sub.underline + ' !important;',
+    '}',
+    '.topfive-heading {',
+    '  font-family: ' + t.sub.font + ' !important;',
+    '  color: ' + t.sub.color + ' !important;',
+    '  text-shadow: ' + t.sub.glow + ' !important;',
+    '}'
+  ].join('\n');
+
+  var old = document.getElementById('titleThemeStyle');
+  if (old && old.parentNode) old.parentNode.removeChild(old);
+  var st = document.createElement('style');
+  st.id = 'titleThemeStyle';
+  st.textContent = css;
+  (document.head || document.documentElement).appendChild(st);
+})();
