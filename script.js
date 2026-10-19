@@ -4475,14 +4475,167 @@ document.addEventListener('click', function(e) {
     return attempt(maxRetries);
   }
 
+  function tsOf(c) {
+    if (!c) return 0;
+    if (c._ts) return c._ts;
+    var t = c.createdAt ? new Date(c.createdAt).getTime() : 0;
+    return isNaN(t) ? 0 : t;
+  }
+
+  // Always newest-first in storage AND on screen. The old code sorted only for
+  // the render, so the array order and the visible order disagreed - which is
+  // how a like could be written to the take below the one that was clicked.
   function loadComments() {
-    try { return JSON.parse(localStorage.getItem(LS_KEY)) || []; }
-    catch(e) { return []; }
+    var arr;
+    try { arr = JSON.parse(localStorage.getItem(LS_KEY)) || []; }
+    catch(e) { arr = []; }
+    if (!Array.isArray(arr)) arr = [];
+    arr.sort(function(a, b) { return tsOf(b) - tsOf(a); });
+    return arr;
   }
 
   function saveComments(arr) {
-    try { localStorage.setItem(LS_KEY, JSON.stringify(arr)); }
-    catch(e) {}
+    try {
+      if (Array.isArray(arr)) arr.sort(function(a, b) { return tsOf(b) - tsOf(a); });
+      localStorage.setItem(LS_KEY, JSON.stringify(arr));
+    } catch(e) {}
+  }
+
+  function fmtCount(n) {
+    n = Number(n) || 0;
+    if (n < 1000) return String(n);
+    return (n / 1000).toFixed(n < 10000 ? 1 : 0).replace(/\.0$/, '') + 'k';
+  }
+
+  // A take is found by its row id - or, before it ever reached the cloud, by the
+  // fingerprint it was created with. Never by its position in an array.
+  function findComment(all, target) {
+    if (!target || !Array.isArray(all)) return { index: -1, item: null };
+    var i;
+    if (target.id != null) {
+      for (i = 0; i < all.length; i++) {
+        if (all[i] && all[i].id != null && String(all[i].id) === String(target.id)) return { index: i, item: all[i] };
+      }
+      return { index: -1, item: null };
+    }
+    var fp = (target._userId || '') + '|' + (target.createdAt || '');
+    for (i = 0; i < all.length; i++) {
+      if (all[i] && all[i].id == null && ((all[i]._userId || '') + '|' + (all[i].createdAt || '')) === fp) return { index: i, item: all[i] };
+    }
+    return { index: -1, item: null };
+  }
+
+  // comments keep their line breaks (the stylesheet renders them as normal text)
+  function htText(s) {
+    return escHtml(String(s == null ? '' : s)).replace(/\r\n?/g, '\n').replace(/\n/g, '<br>');
+  }
+
+  function htToast(title, msg, type) {
+    if (typeof showToast === 'function') { showToast(escHtml(title), escHtml(msg), type || 'warning'); return; }
+    try { alert(msg); } catch(e) {}
+  }
+
+  var htWarnedReadOnly = false;
+  function htWarnReadOnly() {
+    if (htWarnedReadOnly) return;
+    htWarnedReadOnly = true;
+    htToast('Not saved', 'The takes table is read-only right now, so that change could not be saved.', 'warning');
+  }
+
+  // PATCH one take. Returns false when the row was not actually written - the
+  // table being read-only used to fail silently while the screen still showed
+  // the change, then quietly reverted 15 seconds later.
+  function patchTake(id, body) {
+    return supabaseFetchWithRetry('hot_takes?id=eq.' + id, { method: 'PATCH', body: JSON.stringify(body) }, 1)
+      .then(function(r) { return r.json().catch(function() { return null; }); })
+      .then(function(rows) {
+        if (Array.isArray(rows) && rows.length === 0) { htWarnReadOnly(); return false; }
+        return true;
+      })
+      .catch(function(err) {
+        console.warn('Supabase write error:', err);
+        htWarnReadOnly();
+        return false;
+      });
+  }
+
+  function deleteTake(take) {
+    if (!take || take.id == null) return;
+    supabaseFetchWithRetry('hot_takes?id=eq.' + take.id, { method: 'DELETE' }, 1)
+      .then(function(r) { return r.json().catch(function() { return null; }); })
+      .then(function(rows) {
+        if (Array.isArray(rows) && rows.length === 0) throw new Error('row still there');
+      })
+      .catch(function(err) {
+        console.warn('Supabase delete error:', err);
+        htWarnReadOnly();
+        var back = loadComments();
+        back.push(take);
+        saveComments(back);
+        renderFeed(back);
+      });
+  }
+
+  function toggleVote(target, type) {
+    var likes = target.likes || (target.likes = []);
+    var dislikes = target.dislikes || (target.dislikes = []);
+    var li = likes.indexOf(myId);
+    var di = dislikes.indexOf(myId);
+    if (type === 'like') {
+      if (li !== -1) likes.splice(li, 1);
+      else { if (di !== -1) dislikes.splice(di, 1); likes.push(myId); }
+    } else {
+      if (di !== -1) dislikes.splice(di, 1);
+      else { if (li !== -1) likes.splice(li, 1); dislikes.push(myId); }
+    }
+  }
+
+  var VOTE_UP_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>';
+  var VOTE_DOWN_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3H10zM17 2h3a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-3"/></svg>';
+  var ADMIN_SHIELD_SVG = '<svg width="16" height="16" viewBox="0 0 64 64" fill="none" style="vertical-align:middle;margin-right:3px;"><path d="M32 6L8 18v12c0 18 10 28 24 28s24-10 24-28V18L32 6z" fill="#1a1a2e" stroke="#ffd700" stroke-width="3"/><path d="M22 32l7 7 13-13" stroke="#ffd700" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+  function voteBtnHtml(kind, active, count, replyIdx) {
+    var isUp = kind === 'up';
+    return '<button class="ht-vote ht-vote-' + kind + (active ? ' ht-voted' : '') + '" type="button"' +
+      ' data-type="' + (isUp ? 'like' : 'dislike') + '"' +
+      (replyIdx !== undefined ? ' data-r="' + replyIdx + '"' : '') +
+      ' title="' + (isUp ? 'Like' : 'Dislike') + '"' +
+      ' aria-label="' + (isUp ? 'Like' : 'Dislike') + '"' +
+      ' aria-pressed="' + (active ? 'true' : 'false') + '">' +
+      (isUp ? VOTE_UP_SVG : VOTE_DOWN_SVG) + ' <span class="ht-vote-count">' + fmtCount(count) + '</span></button>';
+  }
+
+  function handleVote(rendered, btn) {
+    var replyIdx = btn.dataset.r !== undefined ? parseInt(btn.dataset.r, 10) : -1;
+    var type = btn.dataset.type;
+    var all = loadComments();
+    var hit = findComment(all, rendered);
+    if (!hit.item) return;
+    var parent = hit.item;
+    var target = replyIdx >= 0 ? (parent.replies || [])[replyIdx] : parent;
+    if (!target) return;
+
+    toggleVote(target, type);
+    saveComments(all);
+    renderFeed(all);
+
+    if (parent.id == null) return;   // never reached the cloud yet - nothing to patch
+    var body = replyIdx >= 0
+      ? { replies: parent.replies }
+      : { likes: parent.likes, dislikes: parent.dislikes };
+
+    patchTake(parent.id, body).then(function(ok) {
+      if (ok) return;
+      // the write never landed - undo it, so the screen tells the truth
+      var all2 = loadComments();
+      var hit2 = findComment(all2, rendered);
+      if (!hit2.item) return;
+      var t2 = replyIdx >= 0 ? (hit2.item.replies || [])[replyIdx] : hit2.item;
+      if (!t2) return;
+      toggleVote(t2, type);
+      saveComments(all2);
+      renderFeed(all2);
+    });
   }
 
   function escHtml(s) {
@@ -4540,23 +4693,25 @@ document.addEventListener('click', function(e) {
     });
   }
 
+  var htLoading = false;
   function renderFeed(comments) {
     if (!FEED) return;
     FEED.innerHTML = '';
     if (!comments || comments.length === 0) {
-      FEED.innerHTML = '<p class="ht-empty">No takes yet. Be the first!</p>';
+      FEED.innerHTML = htLoading
+        ? '<p class="ht-empty">Loading takes\u2026</p>'
+        : '<p class="ht-empty">No takes yet. Be the first!</p>';
       return;
     }
-    comments.sort(function(a, b) { return (b._ts || 0) - (a._ts || 0); });
+    comments.sort(function(a, b) { return tsOf(b) - tsOf(a); });
     for (var i = 0; i < comments.length; i++) {
-      FEED.appendChild(renderCommentEl(comments[i], i));
+      FEED.appendChild(renderCommentEl(comments[i]));
     }
   }
 
-  function renderCommentEl(c, index) {
+  function renderCommentEl(c) {
     var div = document.createElement('div');
     div.className = 'ht-comment';
-    div.dataset.index = index;
 
     var canDelete = adminMode || c._userId === myId;
 
@@ -4566,16 +4721,16 @@ document.addEventListener('click', function(e) {
     var disliked = dislikes.indexOf(myId) !== -1;
 
     var topHtml = '<div class="ht-comment-top">' +
-      '<span class="ht-comment-user">\uD83D\uDC64 ' + escHtml(c.userName) + '</span>' +
+      '<span class="ht-comment-user">\uD83D\uDC64 ' + escHtml(c.userName || 'Anonymous') + '</span>' +
       '<span class="ht-comment-actions">' +
-      (adminMode ? '<button class="ht-reply-btn" data-index="' + index + '">\u21A9 Reply</button>' : '') +
-      (canDelete ? '<button class="ht-del-btn" data-index="' + index + '">\uD83D\uDDD1\uFE0F</button>' : '') +
+      (adminMode ? '<button class="ht-reply-btn" type="button" title="Reply as ' + escHtml(ADMIN_NAME) + '">\u21A9 Reply</button>' : '') +
+      (canDelete ? '<button class="ht-del-btn" type="button" title="Delete this take" aria-label="Delete this take">\uD83D\uDDD1\uFE0F</button>' : '') +
       '</span>' +
     '</div>' +
-    '<div class="ht-comment-text">' + escHtml(c.comment) + '</div>' +
+    '<div class="ht-comment-text">' + htText(c.comment) + '</div>' +
     '<div class="ht-vote-row">' +
-      '<button class="ht-vote ht-vote-up' + (liked ? ' ht-voted' : '') + '" data-index="' + index + '" data-type="like"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg> <span class="ht-vote-count">' + likes.length + '</span></button>' +
-      '<button class="ht-vote ht-vote-down' + (disliked ? ' ht-voted' : '') + '" data-index="' + index + '" data-type="dislike"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3H10zM17 2h3a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-3"/></svg> <span class="ht-vote-count">' + dislikes.length + '</span></button>' +
+      voteBtnHtml('up', liked, likes.length) +
+      voteBtnHtml('down', disliked, dislikes.length) +
     '</div>' +
     (c.createdAt ? '<div class="ht-comment-time">\uD83D\uDD52 ' + formatTime(c.createdAt) + '</div>' : '');
 
@@ -4583,17 +4738,19 @@ document.addEventListener('click', function(e) {
     if (c.replies && c.replies.length > 0) {
       repliesHtml += '<div class="ht-replies">';
       for (var r = 0; r < c.replies.length; r++) {
-        var rep = c.replies[r];
+        var rep = c.replies[r] || {};
         var rLikes = rep.likes || [];
         var rDislikes = rep.dislikes || [];
         var rLiked = rLikes.indexOf(myId) !== -1;
         var rDisliked = rDislikes.indexOf(myId) !== -1;
         repliesHtml += '<div class="ht-reply">' +
-          '<div class="ht-reply-top"><span class="ht-reply-admin"><svg width="16" height="16" viewBox="0 0 64 64" fill="none" style="vertical-align:middle;margin-right:3px;"><path d="M32 6L8 18v12c0 18 10 28 24 28s24-10 24-28V18L32 6z" fill="#1a1a2e" stroke="#ffd700" stroke-width="3"/><path d="M22 32l7 7 13-13" stroke="#ffd700" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>' + escHtml(rep.userName) + '</span>' + (adminMode ? '<button class="ht-reply-del" data-index="' + index + '" data-reply="' + r + '">\uD83D\uDDD1\uFE0F</button>' : '') + '</div>' +
-          '<div class="ht-reply-text">' + escHtml(rep.comment) + '</div>' +
+          '<div class="ht-reply-top"><span class="ht-reply-admin">' + ADMIN_SHIELD_SVG + escHtml(rep.userName || ADMIN_NAME) + '</span>' +
+          (adminMode ? '<button class="ht-reply-del" type="button" data-r="' + r + '" title="Delete this reply" aria-label="Delete this reply">\uD83D\uDDD1\uFE0F</button>' : '') +
+          '</div>' +
+          '<div class="ht-reply-text">' + htText(rep.comment) + '</div>' +
           '<div class="ht-vote-row">' +
-            '<button class="ht-vote ht-vote-up' + (rLiked ? ' ht-voted' : '') + '" data-index="' + index + '" data-reply="' + r + '" data-type="like"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg> <span class="ht-vote-count">' + rLikes.length + '</span></button>' +
-            '<button class="ht-vote ht-vote-down' + (rDisliked ? ' ht-voted' : '') + '" data-index="' + index + '" data-reply="' + r + '" data-type="dislike"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3H10zM17 2h3a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-3"/></svg> <span class="ht-vote-count">' + rDislikes.length + '</span></button>' +
+            voteBtnHtml('up', rLiked, rLikes.length, r) +
+            voteBtnHtml('down', rDisliked, rDislikes.length, r) +
           '</div>' +
           (rep.createdAt ? '<div class="ht-comment-time">' + formatTime(rep.createdAt) + '</div>' : '') +
         '</div>';
@@ -4603,135 +4760,99 @@ document.addEventListener('click', function(e) {
 
     div.innerHTML = topHtml + repliesHtml;
 
-    function voteHandler(e) {
-      var btn = e.currentTarget;
-      var idx = parseInt(btn.dataset.index);
-      var type = btn.dataset.type;
-      var replyIdx = btn.dataset.reply !== undefined ? parseInt(btn.dataset.reply) : -1;
-      var all = loadComments();
-      if (!all[idx]) return;
-      var target = replyIdx >= 0 && all[idx].replies ? all[idx].replies[replyIdx] : all[idx];
-      if (!target) return;
-      if (!target.likes) target.likes = [];
-      if (!target.dislikes) target.dislikes = [];
-
-      var likesArr = target.likes;
-      var dislikesArr = target.dislikes;
-      var likeIdx = likesArr.indexOf(myId);
-      var dislikeIdx = dislikesArr.indexOf(myId);
-
-      if (type === 'like') {
-        if (likeIdx !== -1) { likesArr.splice(likeIdx, 1); }
-        else { if (dislikeIdx !== -1) dislikesArr.splice(dislikeIdx, 1); likesArr.push(myId); }
-      } else {
-        if (dislikeIdx !== -1) { dislikesArr.splice(dislikeIdx, 1); }
-        else { if (likeIdx !== -1) likesArr.splice(likeIdx, 1); dislikesArr.push(myId); }
-      }
-
-      btn.classList.remove('ht-burst');
-      void btn.offsetWidth;
-      btn.classList.add('ht-burst');
-
-      saveComments(all);
-      renderFeed(all);
-
-      if (c.id) {
-        var patchBody = {};
-        if (replyIdx < 0) {
-          patchBody.likes = all[idx].likes;
-          patchBody.dislikes = all[idx].dislikes;
-        } else {
-          patchBody.replies = all[idx].replies;
-        }
-        supabaseFetchWithRetry('hot_takes?id=eq.' + c.id, {
-          method: 'PATCH',
-          body: JSON.stringify(patchBody)
-        }, 1).catch(function(err) { console.warn('Supabase vote error:', err); });
-      }
-    }
-
+    // every button re-finds its take by id in the live list - the old code used
+    // the array position captured at render time, which is how a like could land
+    // on the take below the one you clicked
     var voteBtns = div.querySelectorAll('.ht-vote');
     for (var v = 0; v < voteBtns.length; v++) {
-      voteBtns[v].addEventListener('click', voteHandler);
+      (function (btn) {
+        btn.addEventListener('click', function () { handleVote(c, btn); });
+      })(voteBtns[v]);
     }
 
     var delBtn = div.querySelector('.ht-del-btn');
-    if (delBtn) delBtn.addEventListener('click', function(e) {
+    if (delBtn) delBtn.addEventListener('click', function (e) {
       e.stopPropagation();
-      if (confirm('Delete this comment?')) {
-        var all = loadComments();
-        var deleted = all.splice(index, 1);
-        saveComments(all);
-        renderFeed(all);
-        if (deleted[0] && deleted[0].id) {
-          supabaseFetchWithRetry('hot_takes?id=eq.' + deleted[0].id, { method: 'DELETE' }, 1)
-            .catch(function(err) { console.warn('Supabase delete error:', err); });
-        }
-      }
+      if (!confirm('Delete this take?')) return;
+      var all = loadComments();
+      var hit = findComment(all, c);
+      if (hit.index < 0) return;
+      var removed = all.splice(hit.index, 1)[0];
+      saveComments(all);
+      renderFeed(all);
+      deleteTake(removed);
     });
 
     var replyBtn = div.querySelector('.ht-reply-btn');
-    if (replyBtn) replyBtn.addEventListener('click', function(e) {
+    if (replyBtn) replyBtn.addEventListener('click', function (e) {
       e.stopPropagation();
       var existing = div.querySelector('.ht-reply-form');
       if (existing) { existing.remove(); return; }
       var form = document.createElement('div');
       form.className = 'ht-reply-form';
       form.innerHTML =
-        '<textarea class="ht-reply-input" placeholder="Reply as ' + ADMIN_NAME + '..." maxlength="500"></textarea>' +
-        '<button class="ht-reply-submit">Reply</button>';
+        '<textarea class="ht-reply-input" placeholder="Reply as ' + escHtml(ADMIN_NAME) + '..." maxlength="500"></textarea>' +
+        '<button class="ht-reply-submit" type="button">Reply</button>';
       div.appendChild(form);
       var textarea = form.querySelector('.ht-reply-input');
-      var submitBtn = form.querySelector('.ht-reply-submit');
+      var sendBtn = form.querySelector('.ht-reply-submit');
       textarea.focus();
-      submitBtn.addEventListener('click', function() {
+      sendBtn.addEventListener('click', function () {
         var text = textarea.value.trim();
-        if (!text) return;
+        if (!text) { htToast('Empty reply', 'Write something before sending.', 'warning'); return; }
         var all = loadComments();
-        if (all[index]) {
-          if (!all[index].replies) all[index].replies = [];
-          all[index].replies.push({
-            userName: ADMIN_NAME,
-            comment: text,
-            createdAt: new Date().toISOString(),
-            likes: [],
-            dislikes: []
-          });
-          saveComments(all);
-          renderFeed(all);
-
-          if (c.id) {
-            supabaseFetchWithRetry('hot_takes?id=eq.' + c.id, {
-              method: 'PATCH',
-              body: JSON.stringify({ replies: all[index].replies })
-            }, 1).catch(function(err) { console.warn('Supabase reply error:', err); });
+        var hit = findComment(all, c);
+        if (!hit.item) { syncFromSupabase(true); return; }
+        var parent = hit.item;
+        if (!parent.replies) parent.replies = [];
+        var reply = { userName: ADMIN_NAME, comment: text, createdAt: new Date().toISOString(), likes: [], dislikes: [] };
+        parent.replies.push(reply);
+        saveComments(all);
+        renderFeed(all);
+        if (parent.id == null) return;
+        patchTake(parent.id, { replies: parent.replies }).then(function (ok) {
+          if (ok) return;
+          var all2 = loadComments();
+          var hit2 = findComment(all2, c);
+          if (!hit2.item || !hit2.item.replies) return;
+          for (var i = hit2.item.replies.length - 1; i >= 0; i--) {
+            if (hit2.item.replies[i] && hit2.item.replies[i].createdAt === reply.createdAt) {
+              hit2.item.replies.splice(i, 1);
+              break;
+            }
           }
-        }
+          saveComments(all2);
+          renderFeed(all2);
+        });
       });
     });
 
     var replyDelBtns = div.querySelectorAll('.ht-reply-del');
     for (var rd = 0; rd < replyDelBtns.length; rd++) {
-      (function(rdBtn) {
-        rdBtn.addEventListener('click', function(e) {
+      (function (rdBtn) {
+        rdBtn.addEventListener('click', function (e) {
           e.stopPropagation();
-          if (!confirm('Delete this admin reply?')) return;
-          var idx = parseInt(rdBtn.dataset.index);
-          var repIdx = parseInt(rdBtn.dataset.reply);
+          if (!confirm('Delete this reply?')) return;
+          var ridx = parseInt(rdBtn.dataset.r, 10);
           var all = loadComments();
-          if (all[idx] && all[idx].replies && all[idx].replies[repIdx]) {
-            all[idx].replies.splice(repIdx, 1);
-            saveComments(all);
-            renderFeed(all);
-            if (c.id) {
-              supabaseFetch('hot_takes?id=eq.' + c.id, {
-                method: 'PATCH',
-                body: JSON.stringify({ replies: all[idx].replies })
-              }).catch(function(err) { console.warn('Supabase reply delete error:', err); });
-            }
-  }
-});
-
+          var hit = findComment(all, c);
+          if (!hit.item || !hit.item.replies || !hit.item.replies[ridx]) return;
+          var parent = hit.item;
+          var gone = parent.replies.splice(ridx, 1)[0];
+          saveComments(all);
+          renderFeed(all);
+          if (parent.id == null) return;
+          patchTake(parent.id, { replies: parent.replies }).then(function (ok) {
+            if (ok) return;
+            var all2 = loadComments();
+            var hit2 = findComment(all2, c);
+            if (!hit2.item) return;
+            if (!hit2.item.replies) hit2.item.replies = [];
+            hit2.item.replies.splice(ridx, 0, gone);
+            saveComments(all2);
+            renderFeed(all2);
+          });
+        });
       })(replyDelBtns[rd]);
     }
 
@@ -4740,21 +4861,75 @@ document.addEventListener('click', function(e) {
 
   renderFeed(loadComments());
 
-  function syncFromSupabase() {
-    supabaseFetchWithRetry('hot_takes?order=createdAt.desc', {}, 1).then(function(r) {
-      return r.json();
-    }).then(function(data) {
-      if (data && data.length > 0) {
-        var mapped = data.map(function(row) { row._ts = new Date(row.createdAt).getTime(); return row; });
-        saveComments(mapped);
-        renderFeed(mapped);
-      }
-    }).catch(function(err) {
-      console.warn('Supabase sync error:', err);
-    });
+  function htSig(rows) {
+    return (rows || []).map(function(c) {
+      return [c.id, c.userName, c.comment, c.createdAt, (c.likes || []).length, (c.dislikes || []).length, (c.replies || []).length].join('~');
+    }).join('\u00A7');
   }
-  syncFromSupabase();
-  setInterval(syncFromSupabase, 15000);
+  var htLastSig = htSig(loadComments());
+
+  function htOpen() {
+    var el = document.getElementById('hotTakesContainer');
+    return !!(el && el.style.display !== 'none' && el.offsetParent !== null);
+  }
+
+  function htReplyBusy() {
+    var t = document.querySelector('.ht-reply-input');
+    return !!(t && String(t.value || '').trim());
+  }
+
+  // Only talk to the cloud while the section is actually on screen. This used
+  // to pull the whole table every 15 seconds for every visitor, open or not.
+  function syncFromSupabase(force) {
+    if (!force && (!htOpen() || document.hidden)) return Promise.resolve();
+    return supabaseFetchWithRetry('hot_takes?order=createdAt.desc&select=*', {}, 1)
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (!Array.isArray(data)) return;
+        var mapped = data.map(function(row) {
+          row._ts = row.createdAt ? new Date(row.createdAt).getTime() : 0;
+          return row;
+        });
+        var local = loadComments();
+        // keep takes this browser wrote but the cloud never accepted - and drop
+        // the local copy once the same take is visible in the cloud
+        var pending = local.filter(function(c) {
+          if (!c || c.id != null || c._userId !== myId) return false;
+          for (var k = 0; k < mapped.length; k++) {
+            var row = mapped[k];
+            if (row && row._userId === c._userId && String(row.comment) === String(c.comment) &&
+                Math.abs(tsOf(row) - tsOf(c)) < 60000) return false;
+          }
+          return true;
+        });
+        var merged = mapped.concat(pending);
+        saveComments(merged);
+
+        var sig = htSig(merged);
+        var wasLoading = htLoading;
+        htLoading = false;
+        if (sig === htLastSig && !wasLoading) return;   // nothing new - leave the DOM alone
+        if (htReplyBusy()) return;                      // never wipe a reply being typed
+        htLastSig = sig;
+        renderFeed(merged);
+      })
+      .catch(function(err) {
+        console.warn('Supabase sync error:', err);
+        if (htLoading) { htLoading = false; renderFeed(loadComments()); }
+      });
+  }
+
+  var htOpenBtn = document.getElementById('hotTakesBtn');
+  if (htOpenBtn) htOpenBtn.addEventListener('click', function() {
+    if (loadComments().length === 0) { htLoading = true; renderFeed([]); }
+    syncFromSupabase(true);
+  });
+
+  document.addEventListener('visibilitychange', function() {
+    if (!document.hidden && htOpen()) syncFromSupabase(true);
+  });
+
+  setInterval(function() { syncFromSupabase(); }, 30000);
 
   /* ══════════════════════════════════════
      🎲 RANDOM ANIME PICKER + MOOD PICKER
@@ -4850,17 +5025,45 @@ document.addEventListener('click', function(e) {
     if (e.target === modal) closeRandomPick();
   });
 
+  var NAME_KEY = 'fardin_ht_name';
   var nameInput = document.getElementById('htUserName');
   var commentInput = document.getElementById('htComment');
   var submitBtn = document.getElementById('htSubmitBtn');
 
-  submitBtn.addEventListener('click', function() {
-    var name = nameInput.value.trim();
-    var comment = commentInput.value.trim();
-    if (!name) { alert('Please enter your name.'); nameInput.focus(); return; }
-    if (!comment) { alert('Please write a take.'); commentInput.focus(); return; }
+  // remember the name - nobody wants to type it with every take
+  try {
+    var htSavedName = localStorage.getItem(NAME_KEY);
+    if (htSavedName && nameInput) nameInput.value = htSavedName;
+  } catch(e) {}
+  if (nameInput) nameInput.addEventListener('change', function() {
+    try { localStorage.setItem(NAME_KEY, nameInput.value.trim()); } catch(e) {}
+  });
 
-    var all = loadComments();
+  // a fresh prompt each day, straight in the empty box - no styling involved
+  if (commentInput) {
+    var HT_PROMPTS = [
+      'Naruto > One Piece - fight me',
+      'Solo Leveling is overrated. Change my mind.',
+      'Best anime of 2011, and it is not what you think',
+      'AoT ending was perfect. Come at me.',
+      'Dubbed > subbed. I said what I said.'
+    ];
+    commentInput.placeholder = HT_PROMPTS[Math.floor(Date.now() / 86400000) % HT_PROMPTS.length];
+    commentInput.addEventListener('keydown', function(e) {
+      if ((e.ctrlKey || e.metaKey) && (e.key === 'Enter' || e.keyCode === 13)) {
+        e.preventDefault();
+        if (submitBtn) submitBtn.click();
+      }
+    });
+  }
+
+  function submitTake() {
+    var name = nameInput ? nameInput.value.trim() : '';
+    var comment = commentInput ? commentInput.value.trim() : '';
+    if (!name) { htToast('Add your name', 'Please enter your name first.', 'warning'); if (nameInput) nameInput.focus(); return; }
+    if (!comment) { htToast('Say something', 'Please write a take first.', 'warning'); if (commentInput) commentInput.focus(); return; }
+    try { localStorage.setItem(NAME_KEY, name); } catch(e) {}
+
     var entry = {
       userName: name,
       comment: comment,
@@ -4869,11 +5072,18 @@ document.addEventListener('click', function(e) {
       _userId: myId,
       replies: [],
       likes: [],
-      dislikes: []
+      dislikes: [],
+      _pending: true
     };
+    var all = loadComments();
     all.push(entry);
     saveComments(all);
     renderFeed(all);
+
+    var postedAt = entry.createdAt;
+    if (commentInput) commentInput.value = '';
+    if (nameInput) nameInput.value = name;
+    if (submitBtn) submitBtn.disabled = true;
 
     supabaseFetchWithRetry('hot_takes', {
       method: 'POST',
@@ -4886,14 +5096,26 @@ document.addEventListener('click', function(e) {
         dislikes: []
       })
     }, 2).then(function(r) {
-      if (!r.ok) showToast('⚠️ Sync Warning', 'Comment saved locally but cloud sync failed', 'warning');
+      return r.json().catch(function() { return null; });
+    }).then(function(rows) {
+      var row = Array.isArray(rows) ? rows[0] : null;
+      var fresh = loadComments();
+      for (var i = 0; i < fresh.length; i++) {
+        if (fresh[i] && fresh[i]._pending && fresh[i]._userId === myId && fresh[i].createdAt === postedAt) {
+          if (row && row.id != null) { fresh[i].id = row.id; delete fresh[i]._pending; }
+          break;
+        }
+      }
+      saveComments(fresh);
     }).catch(function(err) {
       console.warn('Supabase write error:', err);
+      htToast('Saved on this device', 'Cloud sync failed - your take is kept here and will show when the connection is back.', 'warning');
+    }).then(function() {
+      if (submitBtn) submitBtn.disabled = false;
     });
+  }
 
-    nameInput.value = '';
-    commentInput.value = '';
-  });
+  if (submitBtn) submitBtn.addEventListener('click', submitTake);
 })();
 
 /* ══════════════════════════════════════
