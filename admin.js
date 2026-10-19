@@ -1581,6 +1581,329 @@ async function commitAddAnime() {
 }
 
 
+/* ══════════════════════════════════════════════════════════════════════
+   NOTES — the admin's private scratch space.
+
+   Two views in one module:
+     📄 QUICK PAD   one big pad for whatever you're doing right now
+     🗂 MY NOTES    many titled notes, with a searchable list on the left
+
+   Everything is written to this browser's localStorage on every keystroke,
+   so it survives reloads and works with no PAT and no network.
+
+   Your repo is PUBLIC, so the optional GitHub backup never leaves the
+   browser in the clear: PBKDF2-SHA256 (150k rounds) turns your passphrase
+   into an AES-GCM-256 key, and only the ciphertext is committed as
+   notes.enc.json. The passphrase is never uploaded — and if you forget it,
+   the backup cannot be recovered by anyone, including you.
+   ══════════════════════════════════════════════════════════════════════ */
+
+var NOTES_FILE = 'notes.enc.json';
+var NOTES_KEY_PAD = 'fardin.admin.pad';
+var NOTES_KEY_LIST = 'fardin.admin.notes';
+var NOTES_KEY_PASS = 'fardin.admin.pass';
+var NOTES_KEY_SEL = 'fardin.admin.sel';
+var NOTES_KEY_VIEW = 'fardin.admin.notesview';
+var NOTES_KEY_META = 'fardin.admin.notesmeta';
+var NOTES_SEL = '';
+var NOTES_LIST_TIMER = null;
+
+/* ── tiny localStorage helpers (never throw at the UI) ── */
+function notesLS(key, def) {
+  try { var v = localStorage.getItem(key); return v === null ? def : v; } catch (e) { return def; }
+}
+function notesSet(key, val) {
+  try { localStorage.setItem(key, val); return true; }
+  catch (e) { msgFail('This browser refused to store that (storage full?)'); return false; }
+}
+function notesLoadList() {
+  try { var a = JSON.parse(notesLS(NOTES_KEY_LIST, '[]')); return Array.isArray(a) ? a : []; } catch (e) { return []; }
+}
+function notesFind(id) {
+  var l = notesLoadList().filter(function (n) { return n.id === id; });
+  return l.length ? l[0] : null;
+}
+function notesMetaGet() { try { return JSON.parse(notesLS(NOTES_KEY_META, '{}')); } catch (e) { return {}; } }
+function notesSetMeta(k, v) { var m = notesMetaGet(); m[k] = v; notesSet(NOTES_KEY_META, JSON.stringify(m)); }
+function notesWhen(iso) {
+  if (!iso) return '';
+  var d = new Date(iso);
+  if (isNaN(d.getTime())) return '';
+  return d.toLocaleString('en-GB', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
+}
+function notesCount(id, text) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  text = text || '';
+  var words = (text.trim().match(/\S+/g) || []).length;
+  el.textContent = text.length + ' chars · ' + words + ' words';
+}
+
+/* ── the two views ── */
+function notesView(which) {
+  which = which === 'list' ? 'list' : 'pad';
+  document.querySelectorAll('.ad-note-tabs .ad-tabbtn').forEach(function (b) {
+    b.classList.toggle('active', b.getAttribute('data-notesview') === which);
+  });
+  var pad = document.getElementById('notesPadView'), list = document.getElementById('notesListView');
+  if (pad) pad.style.display = which === 'pad' ? 'block' : 'none';
+  if (list) list.style.display = which === 'list' ? 'block' : 'none';
+  notesSet(NOTES_KEY_VIEW, which);
+}
+
+/* ── quick pad ── */
+function notesPadInput() {
+  var el = document.getElementById('notesPad');
+  if (!el) return;
+  notesSet(NOTES_KEY_PAD, el.value);
+  notesCount('notesPadCount', el.value);
+}
+function notesClearPad() {
+  var el = document.getElementById('notesPad');
+  if (!el || !el.value) return;
+  if (!confirm('Clear the quick pad? (this browser only — the GitHub backup keeps whatever you last saved)')) return;
+  el.value = '';
+  notesPadInput();
+  msgOk('Pad cleared');
+}
+
+/* ── titled notes ── */
+function notesRenderList() {
+  var box = document.getElementById('notesList');
+  if (!box) return;
+  var q = (document.getElementById('notesSearch').value || '').trim().toLowerCase();
+  var all = notesLoadList();
+  var list = all.filter(function (n) {
+    if (!q) return true;
+    return (n.title || '').toLowerCase().indexOf(q) > -1 || (n.body || '').toLowerCase().indexOf(q) > -1;
+  }).sort(function (a, b) { return String(b.updated || '').localeCompare(String(a.updated || '')); });
+
+  box.innerHTML = '';
+  if (!list.length) {
+    var d = document.createElement('div');
+    d.className = 'ad-notes-empty';
+    d.textContent = all.length ? 'no note matches "' + q + '"' : 'no notes yet — press ＋ NEW NOTE';
+    box.appendChild(d);
+    return;
+  }
+  list.forEach(function (n) {
+    var item = document.createElement('div');
+    item.className = 'ad-note-item' + (n.id === NOTES_SEL ? ' sel' : '');
+    var t = document.createElement('div');
+    t.className = 'ad-note-item-title';
+    t.textContent = (n.title || '').trim() || '(untitled)';
+    var s = document.createElement('div');
+    s.className = 'ad-note-item-snip';
+    s.textContent = (n.body || '').replace(/\s+/g, ' ').trim().slice(0, 60) || 'empty';
+    var w = document.createElement('div');
+    w.className = 'ad-note-item-when';
+    w.textContent = notesWhen(n.updated);
+    item.appendChild(t); item.appendChild(s); item.appendChild(w);
+    item.onclick = function () { notesSelect(n.id); };
+    box.appendChild(item);
+  });
+}
+function notesSaveCurrent() {
+  if (NOTES_SEL) notesEdit(true);
+}
+function notesSelect(id) {
+  notesSaveCurrent();
+  NOTES_SEL = id || '';
+  notesSet(NOTES_KEY_SEL, NOTES_SEL);
+  var n = notesFind(NOTES_SEL);
+  var ti = document.getElementById('noteTitle'), bo = document.getElementById('noteBody');
+  if (ti) ti.value = n ? (n.title || '') : '';
+  if (bo) bo.value = n ? (n.body || '') : '';
+  notesCount('noteMeta', bo ? bo.value : '');
+  notesRenderList();
+}
+function notesEdit(skipSort) {
+  if (!NOTES_SEL) return;
+  var list = notesLoadList();
+  var n = list.filter(function (x) { return x.id === NOTES_SEL; })[0];
+  if (!n) return;
+  var ti = document.getElementById('noteTitle'), bo = document.getElementById('noteBody');
+  n.title = ti ? ti.value : n.title;
+  n.body = bo ? bo.value : n.body;
+  n.updated = new Date().toISOString();
+  notesSet(NOTES_KEY_LIST, JSON.stringify(list));
+  notesCount('noteMeta', n.body);
+  clearTimeout(NOTES_LIST_TIMER);
+  // don't re-sort the list under the cursor while you're still typing
+  NOTES_LIST_TIMER = setTimeout(function () { notesRenderList(); notesCount('noteMeta', n.body); }, skipSort ? 0 : 700);
+}
+function notesNew() {
+  notesSaveCurrent();
+  var list = notesLoadList();
+  var n = { id: 'n' + Date.now() + '-' + Math.floor(Math.random() * 1000), title: '', body: '', updated: new Date().toISOString() };
+  list.push(n);
+  notesSet(NOTES_KEY_LIST, JSON.stringify(list));
+  notesView('list');
+  notesSelect(n.id);
+  var ti = document.getElementById('noteTitle');
+  if (ti) ti.focus();
+  msgOk('New note — give it a title');
+}
+function notesDelete() {
+  if (!NOTES_SEL) { msgFail('No note selected'); return; }
+  var n = notesFind(NOTES_SEL);
+  if (!n) return;
+  if (!confirm('Delete "' + ((n.title || '').trim() || 'untitled') + '"? This cannot be undone.')) return;
+  var list = notesLoadList().filter(function (x) { return x.id !== NOTES_SEL; });
+  notesSet(NOTES_KEY_LIST, JSON.stringify(list));
+  NOTES_SEL = '';
+  notesSet(NOTES_KEY_SEL, '');
+  var ti = document.getElementById('noteTitle'), bo = document.getElementById('noteBody');
+  if (ti) ti.value = '';
+  if (bo) bo.value = '';
+  notesCount('noteMeta', '');
+  notesRenderList();
+  msgOk('Note deleted');
+}
+
+/* ── passphrase handling ── */
+function notesPassValue() {
+  var el = document.getElementById('notesPass');
+  return el ? (el.value || '') : '';
+}
+function notesRememberPass() {
+  var on = document.getElementById('notesRemember');
+  if (on && on.checked) {
+    var v = notesPassValue();
+    if (v) notesSet(NOTES_KEY_PASS, v);
+    msgOk('Passphrase will be remembered in this browser');
+  } else {
+    notesSet(NOTES_KEY_PASS, '');
+    msgOk('Passphrase will not be remembered');
+  }
+}
+function notesForgetPass() {
+  notesSet(NOTES_KEY_PASS, '');
+  var el = document.getElementById('notesPass'), cb = document.getElementById('notesRemember');
+  if (el) el.value = '';
+  if (cb) cb.checked = false;
+  msgOk('Passphrase forgotten');
+}
+
+/* ── base64 + WebCrypto (AES-GCM 256, PBKDF2-SHA256 150k) ── */
+function notesB64(buf) {
+  var b = new Uint8Array(buf), s = '';
+  for (var i = 0; i < b.length; i += 0x8000) s += String.fromCharCode.apply(null, b.subarray(i, i + 0x8000));
+  return btoa(s);
+}
+function notesUnb64(str) {
+  var bin = atob(str), out = new Uint8Array(bin.length);
+  for (var i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+  return out;
+}
+async function notesKey(pass, salt, usage) {
+  var km = await crypto.subtle.importKey('raw', new TextEncoder().encode(pass), 'PBKDF2', false, ['deriveKey']);
+  return crypto.subtle.deriveKey(
+    { name: 'PBKDF2', salt: salt, iterations: 150000, hash: 'SHA-256' },
+    km, { name: 'AES-GCM', length: 256 }, false, [usage]
+  );
+}
+async function notesEncrypt(plain, pass) {
+  var salt = crypto.getRandomValues(new Uint8Array(16));
+  var iv = crypto.getRandomValues(new Uint8Array(12));
+  var key = await notesKey(pass, salt, 'encrypt');
+  var ct = await crypto.subtle.encrypt({ name: 'AES-GCM', iv: iv }, key, new TextEncoder().encode(plain));
+  return { v: 1, alg: 'PBKDF2-SHA256/150000+AES-GCM-256', salt: notesB64(salt), iv: notesB64(iv), data: notesB64(ct) };
+}
+async function notesDecrypt(obj, pass) {
+  var key = await notesKey(pass, notesUnb64(obj.salt), 'decrypt');
+  var pt = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: notesUnb64(obj.iv) }, key, notesUnb64(obj.data));
+  return new TextDecoder().decode(pt);
+}
+
+/* ── GitHub backup (ciphertext only) ── */
+function notesPaintSync() {
+  var el = document.getElementById('notesSyncStatus');
+  if (!el) return;
+  var m = notesMetaGet(), parts = [];
+  if (m.savedAt) parts.push('saved to GitHub ' + notesWhen(m.savedAt) + ' (' + (m.bytes || '?') + ' bytes encrypted)');
+  if (m.loadedAt) parts.push('loaded from GitHub ' + notesWhen(m.loadedAt));
+  if (!parts.length) parts.push('no GitHub backup yet — your notes live in this browser only');
+  el.textContent = '// ' + parts.join(' · ');
+}
+async function notesPush() {
+  var pass = notesPassValue().trim();
+  if (!pass) { msgFail('Type a passphrase first'); var p = document.getElementById('notesPass'); if (p) p.focus(); return; }
+  if (pass.length < 6) { msgFail('Use at least 6 characters for the passphrase'); return; }
+  if (!getPat()) { msgFail('Save your GitHub PAT first (left sidebar)'); return; }
+  notesSaveCurrent();
+  var payload = JSON.stringify({
+    pad: notesLS(NOTES_KEY_PAD, ''),
+    notes: notesLoadList(),
+    savedAt: new Date().toISOString()
+  });
+  showLoading();
+  try {
+    var body = JSON.stringify(await notesEncrypt(payload, pass), null, 2);
+    var ok = await githubCommit(NOTES_FILE, body, 'admin(notes): encrypted notes backup');
+    hideLoading();
+    if (!ok) { msgFail('Commit failed — check your PAT'); return; }
+    if (document.getElementById('notesRemember').checked) notesSet(NOTES_KEY_PASS, pass);
+    notesSetMeta('savedAt', new Date().toISOString());
+    notesSetMeta('bytes', body.length);
+    notesPaintSync();
+    msgOk('Encrypted notes saved to ' + NOTES_FILE);
+  } catch (e) {
+    hideLoading();
+    msgFail('Encryption failed: ' + ((e && e.message) || e));
+  }
+}
+async function notesPull() {
+  var pass = notesPassValue().trim();
+  if (!pass) { msgFail('Type your passphrase first'); return; }
+  if (!getPat()) { msgFail('Save your GitHub PAT first (left sidebar)'); return; }
+  var hasLocal = (notesLS(NOTES_KEY_PAD, '') || '').trim() || notesLoadList().length;
+  if (hasLocal && !confirm('This replaces the notes in this browser with the GitHub copy. Continue?')) return;
+  showLoading();
+  try {
+    var file = await githubFetch(NOTES_FILE);
+    if (!file || !file.content) { hideLoading(); msgFail('No ' + NOTES_FILE + ' in the repo yet'); return; }
+    var obj = JSON.parse(decodeURIComponent(escape(atob(String(file.content).replace(/\s/g, '')))));
+    var plain;
+    try { plain = await notesDecrypt(obj, pass); }
+    catch (e) { hideLoading(); msgFail('Wrong passphrase (or the file is damaged)'); return; }
+    var data = JSON.parse(plain);
+    if (typeof data.pad === 'string') notesSet(NOTES_KEY_PAD, data.pad);
+    if (Array.isArray(data.notes)) notesSet(NOTES_KEY_LIST, JSON.stringify(data.notes));
+    if (document.getElementById('notesRemember').checked) notesSet(NOTES_KEY_PASS, pass);
+    notesSetMeta('loadedAt', new Date().toISOString());
+    hideLoading();
+    notesRestore();
+    msgOk('Decrypted and loaded from GitHub');
+  } catch (e) {
+    hideLoading();
+    msgFail('Could not read the backup: ' + ((e && e.message) || e));
+  }
+}
+
+/* ── render on module open ── */
+function notesRestore() {
+  var pad = document.getElementById('notesPad');
+  if (pad) pad.value = notesLS(NOTES_KEY_PAD, '');
+  notesCount('notesPadCount', pad ? pad.value : '');
+  notesView(notesLS(NOTES_KEY_VIEW, 'pad'));
+
+  var pass = notesLS(NOTES_KEY_PASS, '');
+  var pi = document.getElementById('notesPass'), cb = document.getElementById('notesRemember');
+  if (pi && pass) pi.value = pass;
+  if (cb) cb.checked = !!pass;
+
+  var list = notesLoadList();
+  var want = notesLS(NOTES_KEY_SEL, '');
+  var sel = list.some(function (n) { return n.id === want; }) ? want : (list.length ? list[0].id : '');
+  NOTES_SEL = '';
+  notesSelect(sel);
+  notesPaintSync();
+}
+function renderNotesTab() {
+  notesRestore();
+}
+
 
 /* ── END ADMIN BLOCK ── */
 

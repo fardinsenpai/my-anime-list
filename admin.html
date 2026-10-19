@@ -7,7 +7,7 @@
 <meta name="theme-color" content="#050705">
 <title>ROOT@FARDIN ~ ADMIN</title>
 <link rel="icon" href="logo.png">
-<link rel="stylesheet" href="admin.css?v=20261023e">
+<link rel="stylesheet" href="admin.css?v=20261023f">
 </head>
 <body>
 
@@ -69,6 +69,7 @@
         <button class="admin-g-tab" data-tab="add"    onclick="switchAdminTab('add')"><b>➕</b> ADD<span>new anime</span></button>
         <button class="admin-g-tab" data-tab="ai"      onclick="switchAdminTab('ai')"><b>🤖</b> AI<span>chat model</span></button>
         <button class="admin-g-tab" data-tab="avatars" onclick="switchAdminTab('avatars'); renderAvatarsTab()"><b>🖼️</b> AVATARS<span>chat avatars</span></button>
+        <button class="admin-g-tab" data-tab="notes"   onclick="switchAdminTab('notes'); renderNotesTab()"><b>📝</b> NOTES<span>private pad</span></button>
       </nav>
 
       <div class="ad-side-block">
@@ -268,6 +269,64 @@
           Needs your PAT. Live in ~1-10 min.</div>
       </section>
 
+      <!-- NOTES -->
+      <section class="admin-g-content" id="tabNotes">
+        <h2 class="ad-h">// NOTES — PRIVATE //</h2>
+
+        <div class="ad-note-tabs">
+          <button class="ad-tabbtn active" data-notesview="pad"  onclick="notesView('pad')">📄 QUICK PAD</button>
+          <button class="ad-tabbtn"        data-notesview="list" onclick="notesView('list')">🗂 MY NOTES</button>
+        </div>
+
+        <!-- one big pad -->
+        <div id="notesPadView">
+          <textarea id="notesPad" class="ad-textarea" placeholder="Scratch pad — autosaves in this browser as you type…" oninput="notesPadInput()"></textarea>
+          <div class="ad-row wrap">
+            <span class="ad-count" id="notesPadCount">0 chars</span>
+            <button class="admin-g-btn tight danger" onclick="notesClearPad()">🗑 CLEAR PAD</button>
+          </div>
+        </div>
+
+        <!-- many titled notes -->
+        <div id="notesListView" style="display:none">
+          <div class="ad-row">
+            <button class="admin-g-btn tight" onclick="notesNew()">＋ NEW NOTE</button>
+            <input type="text" id="notesSearch" class="admin-g-input" placeholder="search notes…" oninput="notesRenderList()" style="flex:1;margin:0">
+          </div>
+          <div class="ad-notes-split">
+            <div class="ad-notes-list" id="notesList"></div>
+            <div class="ad-notes-editor">
+              <input type="text" id="noteTitle" class="admin-g-input" placeholder="Title" oninput="notesEdit()">
+              <textarea id="noteBody" class="ad-textarea tall" placeholder="Write here — autosaves in this browser…" oninput="notesEdit()"></textarea>
+              <div class="ad-row wrap">
+                <span class="ad-count" id="noteMeta">0 chars</span>
+                <button class="admin-g-btn tight danger" onclick="notesDelete()">🗑 DELETE NOTE</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="ad-hr"></div>
+
+        <h2 class="ad-h">// ENCRYPTED BACKUP → GITHUB //</h2>
+        <div class="ad-note">
+          Your repo is <b>public</b>, so the backup is <b>encrypted in this browser before it is uploaded</b>:
+          PBKDF2-SHA256 (150,000 rounds) turns your passphrase into an AES-GCM-256 key, and only the ciphertext is
+          committed as <b>notes.enc.json</b>. The passphrase itself never leaves this machine.<br>
+          <b>If you forget the passphrase, the backup cannot be recovered — not even by you.</b>
+        </div>
+        <div class="ad-row">
+          <input type="password" id="notesPass" class="admin-g-input" placeholder="passphrase (min 6 characters)" autocomplete="new-password">
+          <label class="ad-check"><input type="checkbox" id="notesRemember" onchange="notesRememberPass()"> remember</label>
+        </div>
+        <div class="ad-row wrap">
+          <button class="admin-g-btn tight" onclick="notesPush()">⬆ SAVE ENCRYPTED</button>
+          <button class="admin-g-btn tight" onclick="notesPull()">⬇ LOAD &amp; DECRYPT</button>
+          <button class="admin-g-btn tight danger" onclick="notesForgetPass()">⏻ FORGET KEY</button>
+        </div>
+        <div class="ad-status dim" id="notesSyncStatus"></div>
+      </section>
+
     </main>
   </div>
 
@@ -280,6 +339,6 @@
   </div>
 </div>
 
-<script src="admin.js?v=20261023e"></script>
+<script src="admin.js?v=20261023f"></script>
 </body>
 </html>
