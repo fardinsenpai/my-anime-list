@@ -2352,7 +2352,37 @@ function richChatText(text) {
     last = m.index + m[0].length;
   }
   if (last < src.length) frag.appendChild(document.createTextNode(src.slice(last).replace(/\*\*/g, '')));
+  paintNameInFrag(frag);
   return frag;
+}
+
+// Also paint the signed-in visitor's own name in that same yellow, wherever it appears —
+// so their name always shows yellow, whether the model wrapped it in ** or not.
+function paintNameInFrag(frag) {
+  const nm = signedInName();
+  if (!nm) return;
+  const re = new RegExp('\\b' + String(nm).replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'g');
+  Array.from(frag.childNodes).forEach(function (node) {
+    if (node.nodeType !== 3) return;          // skip text that is already painted yellow
+    const txt = node.nodeValue;
+    re.lastIndex = 0;
+    if (!re.test(txt)) return;
+    re.lastIndex = 0;
+    const parts = txt.split(re);
+    const repl = document.createDocumentFragment();
+    parts.forEach(function (part, i) {
+      if (!part) return;
+      if (i % 2 === 1) {
+        const s = document.createElement('strong');
+        s.className = 'msg-strong';
+        s.textContent = part;
+        repl.appendChild(s);
+      } else {
+        repl.appendChild(document.createTextNode(part));
+      }
+    });
+    node.parentNode.replaceChild(repl, node);
+  });
 }
 
 function addMessage(text, type, shouldSave = true) {
