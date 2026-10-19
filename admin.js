@@ -508,7 +508,7 @@ async function pickCharacter(btn, id) {
 }
 
 // === ADMIN PANEL ===
-const ADMIN_PIN = '114477';
+const ADMIN_PIN = '112233';
 const GITHUB_OWNER = 'fardinsenpai';
 const GITHUB_REPO = 'my-anime-list';
 const GITHUB_BRANCH = 'main';

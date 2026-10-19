@@ -4482,6 +4482,14 @@ document.addEventListener('click', function(e) {
     return isNaN(t) ? 0 : t;
   }
 
+  // pinned takes sit on top; everything else stays newest-first
+  function htOrder(a, b) {
+    var pa = a && a.pinned ? 1 : 0;
+    var pb = b && b.pinned ? 1 : 0;
+    if (pa !== pb) return pb - pa;
+    return tsOf(b) - tsOf(a);
+  }
+
   // Always newest-first in storage AND on screen. The old code sorted only for
   // the render, so the array order and the visible order disagreed - which is
   // how a like could be written to the take below the one that was clicked.
@@ -4490,7 +4498,7 @@ document.addEventListener('click', function(e) {
     try { arr = JSON.parse(localStorage.getItem(LS_KEY)) || []; }
     catch(e) { arr = []; }
     if (!Array.isArray(arr)) arr = [];
-    arr.sort(function(a, b) { return tsOf(b) - tsOf(a); });
+    arr.sort(htOrder);
     return arr;
   }
 
@@ -4559,6 +4567,28 @@ document.addEventListener('click', function(e) {
       });
   }
 
+  function togglePin(rendered) {
+    var all = loadComments();
+    var hit = findComment(all, rendered);
+    if (hit.index < 0) return;
+    var item = hit.item;
+    item.pinned = !item.pinned;
+    saveComments(all);
+    renderFeed(all);          // pinned takes jump to the top right away
+    htToast(item.pinned ? 'Pinned \uD83D\uDCCC' : 'Unpinned', item.pinned ? 'This take now sits on top.' : 'Back in date order.', 'info');
+    if (item.id == null) return;   // local-only take: nothing to patch yet
+    patchTake(item.id, { pinned: !!item.pinned }).then(function (ok) {
+      if (!ok) {                  // the write did not land -> put it back
+        var all2 = loadComments();
+        var hit2 = findComment(all2, rendered);
+        if (!hit2.item) return;
+        hit2.item.pinned = !hit2.item.pinned;
+        saveComments(all2);
+        renderFeed(all2);
+      }
+    });
+  }
+
   function deleteTake(take) {
     if (!take || take.id == null) return;
     supabaseFetchWithRetry('hot_takes?id=eq.' + take.id, { method: 'DELETE' }, 1)
@@ -4598,6 +4628,7 @@ document.addEventListener('click', function(e) {
   var htPickedAvatar = '';
   try { htPickedAvatar = localStorage.getItem(HT_AVATAR_KEY) || ''; } catch (e) {}
   var htAvatarColumn = null;   // null = not checked yet, true/false after the probe
+  var htPinnedColumn = null;   // same, for the pin column
 
   function htAttr(s) {
     return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
@@ -4660,19 +4691,21 @@ document.addEventListener('click', function(e) {
     }
   }
 
-  // does the table have the avatar column yet? read one row instead of asking
-  // for a missing column (that used to log a 400 in the console)
-  function htProbeAvatarColumn() {
-    if (htAvatarColumn !== null) return Promise.resolve(htAvatarColumn);
+  // which optional columns exist yet? read one row instead of asking for a
+  // missing column (that used to log a 400 in the console)
+  function htProbeColumns() {
+    if (htAvatarColumn !== null) return Promise.resolve({ avatar: htAvatarColumn, pinned: !!htPinnedColumn });
     return supabaseFetch('hot_takes?select=*&limit=1')
       .then(function (r) { return r.json().catch(function () { return null; }); })
       .then(function (rows) {
-        if (!Array.isArray(rows)) { htAvatarColumn = false; return false; }
-        // empty table: cannot tell yet, and the insert falls back safely
-        htAvatarColumn = rows.length === 0 ? true : Object.prototype.hasOwnProperty.call(rows[0], 'avatar');
-        return htAvatarColumn;
+        if (!Array.isArray(rows)) { htAvatarColumn = false; htPinnedColumn = false; return { avatar: false, pinned: false }; }
+        // empty table: cannot tell yet, and every write falls back safely
+        var has = function (k) { return rows.length > 0 && Object.prototype.hasOwnProperty.call(rows[0], k); };
+        htAvatarColumn = rows.length === 0 ? true : has('avatar');
+        htPinnedColumn = rows.length === 0 ? true : has('pinned');
+        return { avatar: htAvatarColumn, pinned: htPinnedColumn };
       })
-      .catch(function () { htAvatarColumn = false; return false; });
+      .catch(function () { htAvatarColumn = false; htPinnedColumn = false; return { avatar: false, pinned: false }; });
   }
 
   var VOTE_UP_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>';
@@ -4801,7 +4834,7 @@ document.addEventListener('click', function(e) {
         : '<p class="ht-empty">No takes yet. Be the first!</p>';
       return;
     }
-    comments.sort(function(a, b) { return tsOf(b) - tsOf(a); });
+    comments.sort(htOrder);
     for (var i = 0; i < comments.length; i++) {
       FEED.appendChild(renderCommentEl(comments[i]));
     }
@@ -4810,6 +4843,7 @@ document.addEventListener('click', function(e) {
   function renderCommentEl(c) {
     var div = document.createElement('div');
     div.className = 'ht-comment';
+    if (c.pinned) div.style.borderColor = 'rgba(255,215,0,0.3)';
 
     var canDelete = adminMode || c._userId === myId;
 
@@ -4818,9 +4852,13 @@ document.addEventListener('click', function(e) {
     var liked = likes.indexOf(myId) !== -1;
     var disliked = dislikes.indexOf(myId) !== -1;
 
+    var pinned = !!c.pinned;
     var topHtml = '<div class="ht-comment-top">' +
-      '<span class="ht-comment-user">' + htAvatarHtml(c.avatar, c, 26) + escHtml(c.userName || 'Anonymous') + '</span>' +
+      '<span class="ht-comment-user">' + htAvatarHtml(c.avatar, c, 26) + escHtml(c.userName || 'Anonymous') +
+        (pinned ? '<span style="font-size:9px;font-weight:700;letter-spacing:1.2px;color:#ffd700;-webkit-text-fill-color:#ffd700;margin-left:8px;vertical-align:middle;">\uD83D\uDCCC PINNED</span>' : '') +
+      '</span>' +
       '<span class="ht-comment-actions">' +
+      (adminMode && htPinnedColumn ? '<button class="ht-reply-btn ht-pin-btn" type="button" title="' + (pinned ? 'Unpin this take' : 'Pin this take to the top') + '" aria-label="' + (pinned ? 'Unpin this take' : 'Pin this take') + '" aria-pressed="' + (pinned ? 'true' : 'false') + '">' + (pinned ? '\uD83D\uDCCC' : '\uD83D\uDCCD') + '</button>' : '') +
       (adminMode ? '<button class="ht-reply-btn" type="button" title="Reply as ' + escHtml(ADMIN_NAME) + '">\u21A9 Reply</button>' : '') +
       (canDelete ? '<button class="ht-del-btn" type="button" title="Delete this take" aria-label="Delete this take">\uD83D\uDDD1\uFE0F</button>' : '') +
       '</span>' +
@@ -4882,7 +4920,13 @@ document.addEventListener('click', function(e) {
       deleteTake(removed);
     });
 
-    var replyBtn = div.querySelector('.ht-reply-btn');
+    var pinBtn = div.querySelector('.ht-pin-btn');
+    if (pinBtn) pinBtn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      togglePin(c);
+    });
+
+    var replyBtn = div.querySelector('.ht-reply-btn:not(.ht-pin-btn)');
     if (replyBtn) replyBtn.addEventListener('click', function (e) {
       e.stopPropagation();
       var existing = div.querySelector('.ht-reply-form');
@@ -4962,7 +5006,7 @@ document.addEventListener('click', function(e) {
 
   function htSig(rows) {
     return (rows || []).map(function(c) {
-      return [c.id, c.userName, c.comment, c.createdAt, (c.likes || []).length, (c.dislikes || []).length, (c.replies || []).length].join('~');
+      return [c.id, c.userName, c.comment, c.createdAt, (c.likes || []).length, (c.dislikes || []).length, (c.replies || []).length, (c.pinned ? 1 : 0)].join('~');
     }).join('\u00A7');
   }
   var htLastSig = htSig(loadComments());
@@ -5091,7 +5135,10 @@ document.addEventListener('click', function(e) {
   if (htOpenBtn) htOpenBtn.addEventListener('click', function() {
     if (loadComments().length === 0) { htLoading = true; renderFeed([]); }
     syncFromSupabase(true);
-    htProbeAvatarColumn().then(function(has) { if (has) htBuildPicker(); });
+    htProbeColumns().then(function(cols) {
+      if (cols.avatar) htBuildPicker();
+      renderFeed(loadComments());   // pin buttons appear once we know the column exists
+    });
   });
 
   document.addEventListener('visibilitychange', function() {
@@ -5849,7 +5896,7 @@ document.addEventListener('click', function(e) {
 });
 
 // === ADMIN PANEL ===
-const ADMIN_PIN = '114477';
+const ADMIN_PIN = '112233';
 const GITHUB_OWNER = 'fardinsenpai';
 const GITHUB_REPO = 'my-anime-list';
 const GITHUB_BRANCH = 'main';
