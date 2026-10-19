@@ -2049,6 +2049,12 @@ let currentKeyIndex = 0;
 let GROQ_MODELS = ['openai/gpt-oss-120b', 'qwen/qwen3.8-27b', 'openai/gpt-oss-20b'];
 let currentModelIndex = 0;
 
+// Only the gpt-oss family takes reasoning_effort — sending it to a fallback model
+// (qwen, etc.) would be a 400, so the flag is applied per model.
+function isGptOssModel(m) {
+  return /gpt-oss/i.test(String(m || ''));
+}
+
 function getNextKeyIndex() {
   currentKeyIndex = (currentKeyIndex + 1) % GROQ_API_KEYS.length;
   return currentKeyIndex;
@@ -2072,7 +2078,12 @@ async function fetchWithFallback(body) {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer ' + key
         },
-        body: JSON.stringify({ ...body, model })
+        body: JSON.stringify(isGptOssModel(model)
+          // gpt-oss models spend a large slice of the answer budget on internal
+          // "reasoning" tokens. These replies are short and factual, so light reasoning
+          // gives the same answer for far fewer tokens.
+          ? { ...body, model, reasoning_effort: 'low' }
+          : { ...body, model })
       });
       if (res.ok) return res;
       if (res.status === 404) {
@@ -2214,7 +2225,21 @@ function animeListForPrompt() {
   return lines.join('\n');
 }
 
-function getSystemPrompt() {
+// Pure small talk does not need the 260-title roster (~2.5k tokens on every request), so
+// it is left out for greetings and thanks. Anything that could touch anime keeps the list.
+const SMALLTALK_RE = /^(hi+|hey+|hello+|yo+|sup|hola|salam|assalamu?[a-z\s]*|good (morning|afternoon|evening|night)|thanks?( you| a lot)?|thank u|ok(ay)?|k|cool|nice|great|wow|lol|lmao|haha+|bye+|see ya|see you|gn|gm|what'?s up|how are you|how'?s it going|who are you|what can you do)[\s!.,?]*$/i;
+const ANIME_HINT_RE = /\b(anime|manga|watch|watching|watched|episode|episodes|season|seasons|recommend|suggest|suggestion|best|top|worst|list|similar|like|vs|versus|favourite|favorite|rewatch|character|characters|story|plot|genre|genres|studio|dub|sub|arc|movie|opening|ending|otaku|weeb|show|series|ranking|rank|rated|rating|score|duel|mood|ep)\b/i;
+
+function needsAnimeList(msg) {
+  const m = String(msg || '').trim();
+  if (!m) return true;
+  if (ANIME_HINT_RE.test(m)) return true;
+  if (typeof animeMentionedInText === 'function' && animeMentionedInText(m)) return true;
+  if (m.split(/\s+/).length > 7) return true;
+  return !SMALLTALK_RE.test(m);
+}
+
+function getSystemPrompt(visitorMsg) {
   const stats = getStats();
   // If the visitor is signed in (Google, email or phone), let the assistant call them by name.
   const who = signedInName();
@@ -2225,7 +2250,19 @@ function getSystemPrompt() {
       + (justIn ? ' RIGHT NOW they have just signed in, so your very next reply MUST greet them by their name "' + who + '" in its first sentence.' : '')
     : '';
 
-  const roster = animeListForPrompt();
+  // The list is the single biggest block of this prompt, so it is only carried when the
+  // message could actually involve anime.
+  const withList = arguments.length > 0 ? needsAnimeList(visitorMsg) : true;
+  const listBlock = withList
+    ? `FARDIN'S LIST — these are the ONLY anime that exist for you (one per line):
+Action, Adventure and Comedy are common in this list, so they are not repeated below; assume a title may have them.
+Codes: SoL=Slice of Life, HS=High School, DH=Dark / Horror, Psy=Psychological, Hist=Historical — ALWAYS write genres out in full when you talk to a visitor, never the codes.
+${animeListForPrompt()}
+
+THE TWO RULES YOU MUST NEVER BREAK:
+1. You only ever recommend, compare, mention or talk about anime from the list above. NEVER name an anime that is not on it, never invent a title, and never recommend a "similar" show that is not on the list.
+2. When a title is not on that list (the visitor names it, or asks for something the list cannot give): say plainly that it is not in Fardin's list yet, ask them to drop it in the Suggestion Box in the sidebar ("That one isn't in Fardin's list yet — put it in the Suggestion Box in the sidebar and Fardin might watch it! ⚡"), then offer the closest anime FROM THE LIST. For facts (episodes, seasons, plot) about such a title, never guess.`
+    : `FARDIN'S LIST IS NOT LOADED for this message (plain small talk). Do NOT name any specific anime at all here — not one title, not even Fardin's. If the visitor does want a recommendation, tell them to ask you for one and you will pull up the list.`;
 
   return `You are Fardin's personal anime assistant on "Fardin's Anime Hub" website. You are fun, friendly and knowledgeable.${whoRule}
 
@@ -2234,37 +2271,19 @@ Website Stats:
 - Total Seasons: ${stats.seasonCount}
 - Total Episodes: ${stats.episodeCount}
 
-FARDIN'S LIST — these are the ONLY anime that exist for you (one per line):
-Action, Adventure and Comedy are common in this list, so they are not repeated below; assume a title may have them.
-Codes: SoL=Slice of Life, HS=High School, DH=Dark / Horror, Psy=Psychological, Hist=Historical — ALWAYS write genres out in full when you talk to a visitor, never the codes.
-${roster}
-
-THE TWO RULES YOU MUST NEVER BREAK:
-1. You only ever recommend, compare, mention or talk about anime from the list above. NEVER name an anime that is not on it, never invent a title, and never recommend a "similar" show that is not on the list.
-2. When a title is not on that list (the visitor names it, or asks for something the list cannot give): say plainly that it is not in Fardin's list yet, ask them to drop it in the Suggestion Box in the sidebar ("That one isn't in Fardin's list yet — put it in the Suggestion Box in the sidebar and Fardin might watch it! ⚡"), then offer the closest anime FROM THE LIST. For facts (episodes, seasons, plot) about such a title, never guess.
+${listBlock}
 
 Rules:
 1. Reply in the same language the user uses. If user writes Bangla, reply in Bangla. If English, reply in English.
-2. Only answer about anime Fardin has watched — the list above. Don't make up names. If user asks about website features, explain the sidebar: Home (anime grid), Analysis (stats/charts), Top 5 (top anime by genre), Anime of the Year, Anime Duel (vote between two anime), Hot Takes (opinion polls), Currently Watching, Suggestion Box (submit anime suggestions), Random Pick with Mood Picker (pick random anime by genre/mood), AI Chat (you), Duel Leaderboard (rankings), Tour Guide, and Share button.
-3. If user asks for a random/suggest/pick anime, I'll give you one from his list in [DATA] context.
-4. Keep answers short, fun, and engaging.
-5. Use ⚡, ✨ emoji occasionally.
-6. Only say "As-salamu alaykum" on the user's first message. Don't repeat it after that. Always end your first reply with a fun fact about anime or Fardin's taste. For example: "Did you know Fardin loves anime with strong character development? Ask me for a recommendation!".
-7. If user asks about Fardin (the website owner), tell them his full info is in the sidebar under "Owner Info". Keep it fun and positive.
-8. If user wants to hear good things about Fardin and his taste, make it fun. Fardin loves diverse genres — action, comedy, romance, thriller. He appreciates good storytelling and character development.
-9. NEVER guess or make up genres, episode counts, seasons or descriptions. The list at the top of this prompt is the COMPLETE list of Fardin's anime — use ONLY it for any anime-specific answer. General knowledge is fine for casual talk, never for anime facts.
-10. If you see [FORCED] in the system prompt, you MUST obey it exactly. It overrides all other instructions. Do not be creative or funny — just follow the [FORCED] instruction literally.
-11. Encourage users to try Anime Duel from the sidebar — it's the most fun feature.
-12. Do not tell the user about Fardin's total anime or episode count unless they ask. If they ask, give the stats in a fun way then say "Explore the list and find your next watch!".
-13. If user asks how to give feedback or suggest anime, point to the suggestion box in the sidebar.
-14. Never use the 🙏 emoji.
-15. Be passionate and hype — act like an anime-obsessed friend, not a robot. Use words like "absolute banger", "goated", "peak fiction" casually.
-16. Occasionally challenge the user: ask them if they've seen an underrated gem from Fardin's list and tease them to check it out.
-17. End every third reply with a unique signature like "⚡ Stay weeb, stay deadly ⚡" or "✨ Peace out, weeb ✨" or "🔥 Another day, another anime 🔥" — rotate them, don't repeat the same one twice in a row.
-18. If the user seems bored or asks "what to watch", don't just suggest — hype them up first ("Oh you haven't seen THIS yet??") before giving the recommendation.
-19. Do not give Assalamu alaykum on "Recommend a " this type of questions. Only on the very first user message ever. After that, never repeat it.
-
-Don't make up anime. Stick to his list only.`;
+2. Website features (if asked): Home (anime grid), Analysis (stats/charts), Top 5 (top anime by genre), Anime of the Year, Anime Duel (vote between two anime), Hot Takes (opinion polls), Currently Watching, Suggestion Box, Random Pick with Mood Picker, AI Chat (you), Duel Leaderboard, Tour Guide and Share button. Encourage Anime Duel — it's the most fun one.
+3. Keep answers short and punchy, and be hype — an anime-obsessed friend, not a robot ("absolute banger", "goated", "peak fiction"). ⚡ ✨ occasionally, never 🙏.
+4. Say "As-salamu alaykum" only on the very first message ever — never on a "Recommend a …" type question, never again after that. End that first reply with a fun fact about anime or Fardin's taste.
+5. Fardin (the owner): his full info is in the sidebar under "Owner Info". He loves diverse genres — action, comedy, romance, thriller — and rates good storytelling and character development above all. Hype him warmly if asked.
+6. Stats: don't volunteer his totals unless asked. If asked, give them in a fun way, then say "Explore the list and find your next watch!".
+7. NEVER guess or make up genres, episode counts, seasons or descriptions. The list at the top of this prompt is the COMPLETE list of Fardin's anime — use ONLY it for any anime-specific answer. General knowledge is fine for casual talk, never for anime facts.
+8. Turn every third reply into a signature line like "⚡ Stay weeb, stay deadly ⚡" or "🔥 Another day, another anime 🔥" — rotate them, don't repeat one twice in a row.
+9. If the user seems bored or asks what to watch, hype them up first ("Oh you haven't seen THIS yet??") before the recommendation, and now and then tease them with an underrated gem from the list.
+10. If user asks how to give feedback or suggest anime, point to the suggestion box in the sidebar.`;
 }
 
 // ===== CHAT ELEMENTS =====
@@ -3856,7 +3875,8 @@ window.fetch = function(...args) {
       // Rebuild the system prompt on every request, so late changes (like the visitor
       // signing in with Google and giving us their name) are picked up immediately.
       if (body.messages[0]?.role === 'system') {
-        body.messages[0].content = getSystemPrompt() + (extraInfo || '');
+        // pass the visitor's message so plain small talk can skip the 260-title roster
+        body.messages[0].content = getSystemPrompt(userMsg) + (extraInfo || '');
         options.body = JSON.stringify(body);
       }
 
