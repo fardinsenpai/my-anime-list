@@ -4,10 +4,14 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex, nofollow">
-<meta name="theme-color" content="#050705">
+<meta name="theme-color" content="#ffffff">
 <title>ROOT@FARDIN ~ ADMIN</title>
 <link rel="icon" href="logo.png">
-<link rel="stylesheet" href="admin.css?v=20261023f">
+<script>
+  /* apply the saved theme before the first paint, so night mode never flashes white */
+  try { if (localStorage.getItem('fardin.admin.theme') === 'dark') document.documentElement.setAttribute('data-theme', 'dark'); } catch (e) {}
+</script>
+<link rel="stylesheet" href="admin.css?v=20261023g">
 </head>
 <body>
 
@@ -45,6 +49,7 @@
       <span class="ad-brand-sub">~ ADMIN PANEL v3.0 · [ HACK THE MAINFRAME ]</span>
     </div>
     <div class="ad-top-right">
+      <button class="ad-mini" id="themeBtn" onclick="toggleAdminTheme()" title="Switch between day and night mode">🌙 NIGHT MODE</button>
       <span class="ad-clock" id="adClock"></span>
       <span class="ad-pat-status" id="adPatStatus">// PAT: —</span>
       <a class="ad-mini" href="index.html">⬅ SITE</a>
@@ -339,6 +344,6 @@
   </div>
 </div>
 
-<script src="admin.js?v=20261023f"></script>
+<script src="admin.js?v=20261023g"></script>
 </body>
 </html>

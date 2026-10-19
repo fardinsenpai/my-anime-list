@@ -1972,6 +1972,35 @@ function fillEditExtras() {
 })();
 
 /* ══════════════════════════════════════════════════════════════════════
+   DAY / NIGHT — one switch, remembered in this browser.
+
+   admin.css keeps every colour behind variables (--bg, --surface,
+   --g-rgb, …), so flipping data-theme on <html> repaints the whole
+   panel. The tiny inline script in admin.html's head applies it before
+   the first paint, so night mode never flashes white.
+   ══════════════════════════════════════════════════════════════════════ */
+var ADMIN_THEME_KEY = 'fardin.admin.theme';
+
+function adminThemeApply(theme) {
+  var dark = theme === 'dark';
+  document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+  try { localStorage.setItem(ADMIN_THEME_KEY, dark ? 'dark' : 'light'); } catch (e) {}
+  var btn = document.getElementById('themeBtn');
+  if (btn) btn.textContent = dark ? '☀️ DAY MODE' : '🌙 NIGHT MODE';
+  var meta = document.querySelector('meta[name="theme-color"]');
+  if (meta) meta.setAttribute('content', dark ? '#050705' : '#ffffff');
+}
+function adminThemeNow() {
+  return document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+}
+function toggleAdminTheme() {
+  var next = adminThemeNow() === 'dark' ? 'light' : 'dark';
+  adminThemeApply(next);
+  msgOk(next === 'dark' ? 'Night mode on' : 'Day mode on');
+}
+adminThemeApply(localStorage.getItem(ADMIN_THEME_KEY) === 'dark' ? 'dark' : 'light');
+
+/* ══════════════════════════════════════════════════════════════════════
    AVATARS module. The ported switchAdminTab() only knows the original
    tabs, so the sidebar button asks for the picker explicitly instead of
    guessing (see admin.html).
