@@ -4620,6 +4620,166 @@ document.addEventListener('click', function(e) {
       });
   }
 
+  // ── admin: give anybody a different face ────────────────────────────────
+  // The face lives on the row itself (take.avatar / reply.avatar), so a pick
+  // made here is what every visitor sees - not just this browser.
+  function htAvatarChoices() {
+    var list = [
+      { id: 'site:admin', label: 'LOGO' },
+      { id: 'site:photo', label: 'PHOTO' }
+    ];
+    var keys = Object.keys(AVATAR_PRESETS);
+    for (var i = 0; i < keys.length; i++) {
+      var p = AVATAR_PRESETS[keys[i]] || {};
+      list.push({ id: 'preset:' + keys[i], label: String(p.label || keys[i]).toUpperCase() });
+    }
+    return list;
+  }
+
+  function htCloseAvatarPicker() {
+    var old = document.getElementById('htAvatarPicker');
+    if (old && old.parentNode) old.parentNode.removeChild(old);
+  }
+
+  function htOpenAvatarPicker(opt) {
+    opt = opt || {};
+    htCloseAvatarPicker();
+    var ov = document.createElement('div');
+    ov.id = 'htAvatarPicker';
+    ov.style.cssText = 'position:fixed;left:0;top:0;right:0;bottom:0;z-index:2147483000;' +
+      'background:rgba(3,3,8,.8);display:flex;align-items:center;justify-content:center;padding:16px;';
+
+    var tiles = '';
+    var choices = htAvatarChoices();
+    for (var i = 0; i < choices.length; i++) {
+      var o = choices[i];
+      var on = String(opt.current || '') === o.id;
+      tiles += '<button type="button" data-avopt="' + escHtml(o.id) + '" title="' + escHtml(o.label) + '" ' +
+        'style="background:rgba(255,255,255,.04);border:1px solid ' + (on ? '#ffd700' : 'rgba(255,255,255,.16)') + ';' +
+        'border-radius:12px;padding:8px 9px 6px;display:flex;flex-direction:column;align-items:center;gap:6px;' +
+        'cursor:pointer;color:' + (on ? '#ffd700' : '#9a9aab') + ';font-size:9px;letter-spacing:.6px;font-weight:700;">' +
+        htAvatarHtml(o.id, null, 34) +
+        '<span>' + escHtml(o.label) + '</span>' +
+      '</button>';
+    }
+
+    ov.innerHTML = '<div style="width:min(540px,100%);max-height:88vh;overflow:auto;background:#0a0a0f;' +
+      'border:1px solid rgba(255,215,0,.32);border-radius:16px;padding:18px;box-shadow:0 24px 70px rgba(0,0,0,.65);">' +
+      '<div style="font-family:Orbitron,sans-serif;font-size:13px;font-weight:700;color:#ffd700;letter-spacing:1px;">' +
+        '\uD83D\uDDC0 AVATAR \u2014 ' + escHtml(String(opt.name || 'this person')) + '</div>' +
+      '<div style="font-size:10.5px;line-height:1.7;color:#8a8a99;margin:7px 0 14px;">' +
+        'Pick a face for this person. It is written to the takes table, so every visitor sees it \u2014 ' +
+        'not only this browser.</div>' +
+      '<div style="display:flex;flex-wrap:wrap;gap:9px;">' + tiles + '</div>' +
+      '<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:16px;">' +
+        '<button type="button" id="htAvUpload" style="padding:9px 13px;background:transparent;border:1px solid rgba(255,255,255,.2);' +
+          'border-radius:10px;color:#c9c9d6;font-size:11px;letter-spacing:1px;cursor:pointer;">\uD83D\uDCF7 UPLOAD</button>' +
+        '<input type="file" id="htAvFile" accept="image/*" style="display:none;">' +
+        '<button type="button" id="htAvAuto" style="padding:9px 13px;background:transparent;border:1px solid rgba(255,255,255,.2);' +
+          'border-radius:10px;color:#c9c9d6;font-size:11px;letter-spacing:1px;cursor:pointer;">\u21BA AUTO</button>' +
+        '<span style="flex:1;min-width:8px;"></span>' +
+        '<button type="button" id="htAvCancel" style="padding:9px 15px;background:transparent;border:1px solid rgba(255,255,255,.18);' +
+          'border-radius:10px;color:#c9c9d6;font-size:11px;letter-spacing:1px;cursor:pointer;">CANCEL</button>' +
+      '</div>' +
+    '</div>';
+
+    document.body.appendChild(ov);
+
+    ov.addEventListener('click', function (e) { if (e.target === ov) htCloseAvatarPicker(); });
+    var btns = ov.querySelectorAll('[data-avopt]');
+    for (var b = 0; b < btns.length; b++) {
+      btns[b].addEventListener('click', function (e) {
+        e.stopPropagation();
+        var val = this.getAttribute('data-avopt');
+        htCloseAvatarPicker();
+        if (typeof opt.onPick === 'function') opt.onPick(val);
+      });
+    }
+    ov.querySelector('#htAvCancel').addEventListener('click', function () { htCloseAvatarPicker(); });
+    ov.querySelector('#htAvAuto').addEventListener('click', function () {
+      htCloseAvatarPicker();
+      if (typeof opt.onPick === 'function') opt.onPick('');
+    });
+    ov.querySelector('#htAvUpload').addEventListener('click', function () {
+      var f = ov.querySelector('#htAvFile');
+      if (f) f.click();
+    });
+    ov.querySelector('#htAvFile').addEventListener('change', function () {
+      var file = this.files && this.files[0];
+      if (!file) return;
+      if (!/^image\//i.test(file.type)) { htToast('Not an image', 'Pick a picture file.', 'warning'); return; }
+      var reader = new FileReader();
+      reader.onload = function () {
+        var img = new Image();
+        img.onload = function () {
+          var max = 96;
+          var scale = Math.min(1, max / Math.max(img.width || 1, img.height || 1));
+          var w = Math.max(1, Math.round((img.width || 1) * scale));
+          var h = Math.max(1, Math.round((img.height || 1) * scale));
+          var cv = document.createElement('canvas');
+          cv.width = w; cv.height = h;
+          cv.getContext('2d').drawImage(img, 0, 0, w, h);
+          var url = '';
+          try { url = cv.toDataURL('image/jpeg', 0.86); } catch (err) {}
+          htCloseAvatarPicker();
+          if (!url) { htToast('Could not read that', 'Try another picture.', 'warning'); return; }
+          if (typeof opt.onPick === 'function') opt.onPick('img:' + url);
+        };
+        img.onerror = function () { htToast('Could not open that', 'Try another picture.', 'warning'); };
+        img.src = String(reader.result || '');
+      };
+      reader.onerror = function () { htToast('Could not read that file', 'Try another picture.', 'warning'); };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  // write a new face onto a take and push it to the cloud
+  function htSetTakeAvatar(rendered, val) {
+    var all = loadComments();
+    var hit = findComment(all, rendered);
+    if (hit.index < 0) return;
+    var item = hit.item;
+    var before = item.avatar || '';
+    item.avatar = val;
+    saveComments(all);
+    renderFeed(all);
+    htToast('Face changed', val ? 'Everyone sees the new one now.' : 'Back to the automatic face.', 'info');
+    if (item.id == null) return;
+    patchTake(item.id, { avatar: val || null }).then(function (ok) {
+      if (ok) return;
+      var all2 = loadComments();
+      var hit2 = findComment(all2, rendered);
+      if (!hit2.item) return;
+      hit2.item.avatar = before;
+      saveComments(all2);
+      renderFeed(all2);
+    });
+  }
+
+  // same, but for one reply inside a take
+  function htSetReplyAvatar(rendered, idx, val) {
+    var all = loadComments();
+    var hit = findComment(all, rendered);
+    if (hit.index < 0) return;
+    var item = hit.item;
+    if (!item.replies || !item.replies[idx]) return;
+    var before = item.replies[idx].avatar || '';
+    item.replies[idx].avatar = val;
+    saveComments(all);
+    renderFeed(all);
+    htToast('Face changed', val ? 'Everyone sees the new one now.' : 'Back to the automatic face.', 'info');
+    if (item.id == null) return;
+    patchTake(item.id, { replies: item.replies }).then(function (ok) {
+      if (ok) return;
+      var all2 = loadComments();
+      var hit2 = findComment(all2, rendered);
+      if (!hit2.item || !hit2.item.replies || !hit2.item.replies[idx]) return;
+      hit2.item.replies[idx].avatar = before;
+      saveComments(all2);
+      renderFeed(all2);
+    });
+  }
+
   function toggleVote(target, type) {
     var likes = target.likes || (target.likes = []);
     var dislikes = target.dislikes || (target.dislikes = []);
@@ -5042,6 +5202,7 @@ document.addEventListener('click', function(e) {
       '<span class="ht-comment-actions">' +
       (adminMode && htPinnedColumn ? '<button class="ht-reply-btn ht-pin-btn" type="button" title="' + (pinned ? 'Unpin this take' : 'Pin this take to the top') + '" aria-label="' + (pinned ? 'Unpin this take' : 'Pin this take') + '" aria-pressed="' + (pinned ? 'true' : 'false') + '">' + (pinned ? '\uD83D\uDCCC' : '\uD83D\uDCCD') + '</button>' : '') +
       (adminMode ? '<button class="ht-reply-btn" type="button" title="Reply as ' + escHtml(ADMIN_NAME) + '">\u21A9 Reply</button>' : '') +
+      (adminMode ? '<button class="ht-av-btn" type="button" title="Change this avatar" aria-label="Change this avatar" style="background:rgba(199,125,255,.12);border:1.5px solid rgba(199,125,255,.25);border-radius:8px;color:#d0a0ff;font-size:11px;padding:5px 8px;letter-spacing:.5px;cursor:pointer;line-height:1;">\uD83D\uDDC0</button>' : '') +
       (canDelete ? '<button class="ht-del-btn" type="button" title="Delete this take" aria-label="Delete this take">\uD83D\uDDD1\uFE0F</button>' : '') +
       '</span>' +
     '</div>' +
@@ -5063,6 +5224,7 @@ document.addEventListener('click', function(e) {
         var rDisliked = rDislikes.indexOf(myId) !== -1;
         repliesHtml += '<div class="ht-reply">' +
           '<div class="ht-reply-top"><span class="ht-reply-admin">' + htAvatarHtml(htIsAdminReply(rep) ? htAdminReplyAvatar(rep) : rep.avatar, rep, 18) + escHtml(rep.userName || ADMIN_NAME) + (htIsAdminReply(rep) ? '<span title="Admin" aria-label="Admin" style="display:inline-block;vertical-align:middle;margin-left:5px;">' + htAdminReplyBadge(rep) + '</span>' : '') + '</span>' +
+          (adminMode ? '<button class="ht-reply-av" type="button" data-r="' + r + '" title="Change this avatar" aria-label="Change this avatar" style="background:none;border:none;cursor:pointer;font-size:12px;opacity:.55;padding:0 5px;">\uD83D\uDDC0</button>' : '') +
           (adminMode ? '<button class="ht-reply-del" type="button" data-r="' + r + '" title="Delete this reply" aria-label="Delete this reply">\uD83D\uDDD1\uFE0F</button>' : '') +
           '</div>' +
           '<div class="ht-reply-text">' + htText(rep.comment) + '</div>' +
@@ -5106,6 +5268,16 @@ document.addEventListener('click', function(e) {
     if (pinBtn) pinBtn.addEventListener('click', function (e) {
       e.stopPropagation();
       togglePin(c);
+    });
+
+    var avBtn = div.querySelector('.ht-av-btn');
+    if (avBtn) avBtn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      htOpenAvatarPicker({
+        current: c.avatar,
+        name: c.userName || 'this take',
+        onPick: function (val) { htSetTakeAvatar(c, val); }
+      });
     });
 
     var replyBtn = div.querySelector('.ht-reply-btn:not(.ht-pin-btn)');
@@ -5180,6 +5352,24 @@ document.addEventListener('click', function(e) {
           });
         });
       })(replyDelBtns[rd]);
+    }
+
+    var replyAvBtns = div.querySelectorAll('.ht-reply-av');
+    for (var ra = 0; ra < replyAvBtns.length; ra++) {
+      (function (raBtn) {
+        raBtn.addEventListener('mouseenter', function () { raBtn.style.opacity = '1'; });
+        raBtn.addEventListener('mouseleave', function () { raBtn.style.opacity = '.55'; });
+        raBtn.addEventListener('click', function (e) {
+          e.stopPropagation();
+          var ridx = parseInt(raBtn.dataset.r, 10);
+          var rep = (c.replies && c.replies[ridx]) || {};
+          htOpenAvatarPicker({
+            current: rep.avatar,
+            name: rep.userName || 'this reply',
+            onPick: function (val) { htSetReplyAvatar(c, ridx, val); }
+          });
+        });
+      })(replyAvBtns[ra]);
     }
 
     return div;
