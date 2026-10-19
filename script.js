@@ -2732,8 +2732,8 @@ function scheduleSuggestions(msgDiv, anime) {
   }, SUGGEST_DELAY_MS);
 }
 
-// The question the visitor just tapped — never offered again by the answer that follows.
-let lastSuggestText = '';
+// The rows the visitor just tapped through — never offered again by the answer that follows.
+let lastSuggestSet = [];
 
 function makeSuggestRow(r) {
   const b = document.createElement('button');
@@ -2748,11 +2748,19 @@ function makeSuggestRow(r) {
   b.appendChild(arrow);
   b.appendChild(txt);
   b.addEventListener('click', function () {
-    // The block has done its job. Clear it straight away, so once the answer arrives the
-    // visitor never sees the old suggestions sitting above it — or the same one again.
-    lastSuggestText = r.label;
+    // The block has done its job. Clear it straight away, so the answer that follows never
+    // sits under the old suggestions — and remember every row it held, so none of them come
+    // straight back with the new answer.
     const box = b.closest ? b.closest('.msg-suggests') : null;
-    if (box) box.remove();
+    if (box) {
+      // every row this answer offered — including the ones still behind "See more..."
+      lastSuggestSet = box._allLabels ? box._allLabels.slice() : Array.prototype.map.call(box.querySelectorAll('.msg-suggest'), function (el) {
+        return String(el.textContent || '').replace(/^\s*↘\s*/, '').trim();
+      });
+      box.remove();
+    } else {
+      lastSuggestSet = [r.label];
+    }
     r.run();
   });
   return b;
@@ -2772,13 +2780,14 @@ function renderSuggestions(msgDiv, anime) {
   const myToken = ++_suggestsToken;
   chatMessages.querySelectorAll('.msg-suggests').forEach(function (el) { el.remove(); });
   let rows = suggestRowsFor(anime);
-  // one-shot: drop the exact question the visitor tapped a moment ago
-  const justAsked = lastSuggestText;
-  lastSuggestText = '';
-  if (justAsked) rows = rows.filter(function (r) { return r.label !== justAsked; });
+  // one-shot: never repeat a row from the block the visitor just tapped through
+  const used = lastSuggestSet;
+  lastSuggestSet = [];
+  if (used.length) rows = rows.filter(function (r) { return used.indexOf(r.label) === -1; });
   if (!rows.length) return;
   const box = document.createElement('div');
   box.className = 'msg-suggests';
+  box._allLabels = rows.map(function (r) { return r.label; });
   box.appendChild(makeSuggestRow(rows[0]));
   if (rows.length > 1) {
     const more = document.createElement('button');
