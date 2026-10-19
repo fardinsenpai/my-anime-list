@@ -4435,6 +4435,20 @@ document.addEventListener('click', function(e) {
     localStorage.setItem(USER_ID_KEY, myId);
   }
 
+  // A take written while signed in carries "|a" at the end of its id. That is
+  // what draws the blue verified tick, and it survives the round-trip through
+  // Supabase without needing a new column. Ownership checks still compare the
+  // part before the pipe, so deleting your own take keeps working.
+  function htOwnerId(v) { return String(v == null ? '' : v).split('|')[0]; }
+  function htTakeUserId() {
+    var authed = false;
+    try { authed = !!(typeof AUTH_USER !== 'undefined' && AUTH_USER && AUTH_USER.id); } catch (e) {}
+    return myId + (authed ? '|a' : '');
+  }
+  function htIsVerified(c) {
+    return String((c && c._userId) || '').split('|').indexOf('a') !== -1;
+  }
+
   var SUPABASE_URL = 'https://ldzlefdklcgvqcbqibtt.supabase.co';
   var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxkemxlZmRrbGNndnFjYnFpYnR0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwMzk1OTAsImV4cCI6MjA5NjYxNTU5MH0.X3TGuLIpjrnPXMgCv4ZKIIjB6pItPgkdebf4JPdhuYs';
 
@@ -4712,6 +4726,13 @@ document.addEventListener('click', function(e) {
   var VOTE_DOWN_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3H10zM17 2h3a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-3"/></svg>';
   var ADMIN_SHIELD_SVG = '<svg width="16" height="16" viewBox="0 0 64 64" fill="none" style="vertical-align:middle;margin-right:3px;"><path d="M32 6L8 18v12c0 18 10 28 24 28s24-10 24-28V18L32 6z" fill="#1a1a2e" stroke="#ffd700" stroke-width="3"/><path d="M22 32l7 7 13-13" stroke="#ffd700" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 
+  // the blue tick for takes written by a signed-in account
+  var VERIFIED_SVG = '<span title="Verified account" aria-label="Verified" style="display:inline-block;vertical-align:middle;margin-left:5px;line-height:0;">' +
+    '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true">' +
+      '<circle cx="12" cy="12" r="11" fill="#1877F2"></circle>' +
+      '<path d="M6.9 12.4l3.3 3.4 6.9-7.1" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"></path>' +
+    '</svg></span>';
+
   // replies are written from admin mode, so they carry the admin sign
   function htIsAdminReply(rep) {
     try {
@@ -4941,7 +4962,7 @@ document.addEventListener('click', function(e) {
     div.className = 'ht-comment';
     if (c.pinned) div.style.borderColor = 'rgba(255,215,0,0.3)';
 
-    var canDelete = adminMode || c._userId === myId;
+    var canDelete = adminMode || htOwnerId(c._userId) === myId;
 
     var likes = c.likes || [];
     var dislikes = c.dislikes || [];
@@ -4951,6 +4972,7 @@ document.addEventListener('click', function(e) {
     var pinned = !!c.pinned;
     var topHtml = '<div class="ht-comment-top">' +
       '<span class="ht-comment-user">' + htAvatarHtml(c.avatar, c, 26) + escHtml(c.userName || 'Anonymous') +
+        (htIsVerified(c) ? VERIFIED_SVG : '') +
         (pinned ? '<span style="font-size:9px;font-weight:700;letter-spacing:1.2px;color:#ffd700;-webkit-text-fill-color:#ffd700;margin-left:8px;vertical-align:middle;">\uD83D\uDCCC PINNED</span>' : '') +
       '</span>' +
       '<span class="ht-comment-actions">' +
@@ -5133,7 +5155,7 @@ document.addEventListener('click', function(e) {
         // keep takes this browser wrote but the cloud never accepted - and drop
         // the local copy once the same take is visible in the cloud
         var pending = local.filter(function(c) {
-          if (!c || c.id != null || c._userId !== myId) return false;
+          if (!c || c.id != null || htOwnerId(c._userId) !== myId) return false;
           for (var k = 0; k < mapped.length; k++) {
             var row = mapped[k];
             if (row && row._userId === c._userId && String(row.comment) === String(c.comment) &&
@@ -5409,7 +5431,7 @@ document.addEventListener('click', function(e) {
 
     // same take twice in a minute is almost always a double click, not an opinion
     var dupe = loadComments().filter(function(c) {
-      return c._userId === myId && String(c.comment || '').trim() === comment && (Date.now() - tsOf(c)) < 60000;
+      return htOwnerId(c._userId) === myId && String(c.comment || '').trim() === comment && (Date.now() - tsOf(c)) < 60000;
     })[0];
     if (dupe) { htToast('Already posted', 'You posted that exact take a minute ago.', 'warning'); return; }
 
@@ -5419,7 +5441,7 @@ document.addEventListener('click', function(e) {
       comment: comment,
       createdAt: new Date().toISOString(),
       _ts: Date.now(),
-      _userId: myId,
+      _userId: htTakeUserId(),
       avatar: av,
       replies: [],
       likes: [],
@@ -5439,7 +5461,7 @@ document.addEventListener('click', function(e) {
     var payload = {
       userName: name,
       comment: comment,
-      _userId: myId,
+      _userId: htTakeUserId(),
       replies: [],
       likes: [],
       dislikes: []
@@ -5465,7 +5487,7 @@ document.addEventListener('click', function(e) {
       var row = Array.isArray(rows) ? rows[0] : null;
       var fresh = loadComments();
       for (var i = 0; i < fresh.length; i++) {
-        if (fresh[i] && fresh[i]._pending && fresh[i]._userId === myId && fresh[i].createdAt === postedAt) {
+        if (fresh[i] && fresh[i]._pending && htOwnerId(fresh[i]._userId) === myId && fresh[i].createdAt === postedAt) {
           if (row && row.id != null) { fresh[i].id = row.id; delete fresh[i]._pending; }
           break;
         }
