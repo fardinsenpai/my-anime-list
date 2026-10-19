@@ -2454,8 +2454,9 @@ async function sendMessage() {
       });
 
       addMessage(botReply, 'bot', true, function (msgDiv) {
-        // the grey ↘ rows slide in one by one, 3s after the answer finished typing
-        scheduleSuggestions(msgDiv, animeMentionedInText(botReply));
+        // a plain hello deserves a welcome, not anime rows: friendly openers instead
+        const starters = isGreeting(message) ? greetingStarterRows() : null;
+        scheduleSuggestions(msgDiv, animeMentionedInText(botReply), starters);
       });
 
       saveChatToStorage();
@@ -2705,6 +2706,23 @@ function siblingAnime(card, anime) {
   return best ? cardTitleOf(best) : null;
 }
 
+// A first "hi" / "hello" / "assalamu alaikum" is not an anime question, so it gets a
+// welcome instead: friendly openers a brand-new visitor can just tap.
+const GREETING_RE = /^\s*(?:hi+|hey+|hello+|yo+|sup|hola|salam|assalamu?|as-salamu?|assalamualaikum|good (?:morning|afternoon|evening|night))(?:\s+,?\s*[a-z']+){0,3}\s*[!.,?]*(?:\s+(?:bro|bruh|man|dude|mate|fardin|senpai|buddy|bhai|vai|boss))?\s*[!.,?]*$/i;
+
+function isGreeting(text) {
+  return GREETING_RE.test(String(text || '').trim());
+}
+
+function greetingStarterRows() {
+  return [
+    { label: 'Hey Senpai, suggest me a fresh anime', run: function () { quickAction('Hey Senpai, suggest me a fresh anime'); } },
+    { label: 'What should I watch tonight?', run: function () { quickAction('What should I watch tonight?'); } },
+    { label: "What's the highest rated anime in your list?", run: function () { quickAction("What's the highest rated anime in your list?"); } },
+    { label: 'What can you do?', run: function () { quickAction('What can you do?'); } }
+  ];
+}
+
 // The ↘ rows for one reply. Every one of them is built from Fardin's own data,
 // so suggesting them costs no extra AI request.
 function suggestRowsFor(anime) {
@@ -2734,13 +2752,13 @@ function suggestRowsFor(anime) {
 let _suggestsToken = 0;
 const SUGGEST_DELAY_MS = 2000;
 
-function scheduleSuggestions(msgDiv, anime) {
+function scheduleSuggestions(msgDiv, anime, starters) {
   if (!msgDiv) return;
   setTimeout(function () {
     // a newer answer may have arrived in the meantime — only the newest keeps them
     const bots = chatMessages.querySelectorAll('.msg.bot');
     if (!bots.length || bots[bots.length - 1] !== msgDiv) return;
-    renderSuggestions(msgDiv, anime);
+    renderSuggestions(msgDiv, anime, starters);
   }, SUGGEST_DELAY_MS);
 }
 
@@ -2787,11 +2805,11 @@ function scrollChatToSuggestions() {
 }
 
 // One visible row, the rest behind a green "See more..." that unveils them one by one.
-function renderSuggestions(msgDiv, anime) {
+function renderSuggestions(msgDiv, anime, starters) {
   if (!msgDiv || !msgDiv.parentNode) return;
   const myToken = ++_suggestsToken;
   chatMessages.querySelectorAll('.msg-suggests').forEach(function (el) { el.remove(); });
-  let rows = suggestRowsFor(anime);
+  let rows = (starters && starters.length) ? starters.slice() : suggestRowsFor(anime);
   // one-shot: never repeat a row from the block the visitor just tapped through
   const used = lastSuggestSet;
   lastSuggestSet = [];
