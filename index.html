@@ -2,6 +2,30 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8"/>
+  <script>
+    /* ── OAuth return catcher — must stay first ──────────────────────────
+       A redirect login (GitHub now) comes back as ?code=… (PKCE), or as
+       #access_token=… . This page's router rewrites the address bar the
+       moment it boots, which wipes BOTH — the supabase client is created
+       lazily, so it never saw them and the login silently did nothing.
+       Stash the values here, before any other script can run. */
+    (function () {
+      try {
+        var q = String(location.search || '').replace(/^\?/, '');
+        var h = String(location.hash || '').replace(/^#/, '');
+        var all = (q ? q + '&' : '') + h;
+        if (!/code=|access_token=|error_description=/.test(all)) return;
+        var out = {};
+        all.split('&').forEach(function (kv) {
+          if (!kv) return;
+          var i = kv.indexOf('=');
+          if (i < 0) return;
+          out[decodeURIComponent(kv.slice(0, i))] = decodeURIComponent(kv.slice(i + 1).replace(/\+/g, ' '));
+        });
+        window.__AUTH_REDIRECT = out;
+      } catch (e) {}
+    })();
+  </script>
   <link rel="icon" type="image/png" href="logo-2.png">
   <link rel="manifest" href="manifest.json">
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -1548,7 +1572,7 @@
 
   <script src="https://accounts.google.com/gsi/client" async defer></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="script.js?v=20261023tL"></script>
+  <script src="script.js?v=20261023uL"></script>
 
 <!-- === ADMIN PANEL === -->
 <div class="admin-overlay" id="adminOverlay">

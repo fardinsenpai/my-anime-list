@@ -6960,6 +6960,7 @@ function authClient() {
   } catch (e) {
     authClientRef = null;
   }
+  authTakeoverRedirect(authClientRef);
   return authClientRef;
 }
 
@@ -7193,6 +7194,54 @@ function authReportRedirectError() {
   if (!m) return false;
   authNotify('Sign-in failed: ' + decodeURIComponent(m[1].replace(/\+/g, ' ')));
   return true;
+}
+
+/* ── finishing a redirect login ────────────────────────────────────────
+   The router rewrites the address bar on boot (pushState('home')), which
+   throws away both ?code=… (PKCE) and #access_token=… before this client —
+   created lazily — ever looks at the URL. The first inline script in
+   index.html stores them in window.__AUTH_REDIRECT; this hands them to
+   Supabase, so GitHub sign-in actually lands instead of silently doing
+   nothing. Works for a code (PKCE) or for raw tokens in the fragment. */
+var AUTH_REDIRECT_DONE = false;
+
+function authTakeoverRedirect(client) {
+  if (!client || AUTH_REDIRECT_DONE) return;
+  var r = window.__AUTH_REDIRECT;
+  if (!r) return;
+  AUTH_REDIRECT_DONE = true;
+
+  function finish(res) {
+    if (res && res.error) {
+      authNotify('Sign-in could not be completed 😢 — ' + (res.error.message || 'unknown error'));
+      return;
+    }
+    window.__AUTH_REDIRECT = null;
+    authCleanUrl();
+  }
+
+  if (r.error_description || r.error) {
+    authNotify('Sign-in was refused: ' + (r.error_description || r.error));
+    return;
+  }
+
+  client.auth.getSession().then(function (s) {
+    // if detectSessionInUrl got there first, there is nothing left to do
+    if (s && s.data && s.data.session) { finish(null); return; }
+    if (r.code) {
+      client.auth.exchangeCodeForSession(r.code).then(finish).catch(function (e) {
+        authNotify('Sign-in could not be completed 😢 — ' + ((e && e.message) || 'the code was already used or expired'));
+      });
+    } else if (r.access_token) {
+      client.auth.setSession({ access_token: r.access_token, refresh_token: r.refresh_token || '' }).then(finish).catch(function () {
+        authNotify('Sign-in could not be completed 😢');
+      });
+    } else {
+      authNotify('Sign-in could not be completed 😢 — nothing came back from the provider');
+    }
+  }).catch(function () {
+    authNotify('Sign-in could not be completed 😢');
+  });
 }
 
 function initGoogleAuth() {
