@@ -7192,8 +7192,19 @@ function authReportRedirectError() {
   var all = String(window.location.search || '') + '&' + String(window.location.hash || '');
   var m = /[?#&]error_description=([^&]+)/.exec(all);
   if (!m) return false;
-  authNotify('Sign-in failed: ' + decodeURIComponent(m[1].replace(/\+/g, ' ')));
+  authFail('Sign-in failed: ' + decodeURIComponent(m[1].replace(/\+/g, ' ')));
   return true;
+}
+
+/* A sign-in that goes wrong must SAY so — authNotify only flashes the account
+   button for 1.7s, which is far too easy to miss when you are staring at the
+   page wondering why nothing happened. */
+function authFail(msg) {
+  authNotify(msg);
+  var box = document.getElementById('chatBox');
+  var chatOpen = box && box.classList.contains('open');
+  if (chatOpen) return;   // chatToast already showed it
+  try { if (typeof showToast === 'function') showToast('Sign-in problem', authEsc(msg), 'warning'); } catch (e) {}
 }
 
 /* ── finishing a redirect login ────────────────────────────────────────
@@ -7213,7 +7224,7 @@ function authTakeoverRedirect(client) {
 
   function finish(res) {
     if (res && res.error) {
-      authNotify('Sign-in could not be completed 😢 — ' + (res.error.message || 'unknown error'));
+      authFail('Sign-in could not be completed 😢 — ' + (res.error.message || 'unknown error'));
       return;
     }
     window.__AUTH_REDIRECT = null;
@@ -7221,7 +7232,7 @@ function authTakeoverRedirect(client) {
   }
 
   if (r.error_description || r.error) {
-    authNotify('Sign-in was refused: ' + (r.error_description || r.error));
+    authFail('Sign-in was refused: ' + (r.error_description || r.error));
     return;
   }
 
@@ -7230,17 +7241,17 @@ function authTakeoverRedirect(client) {
     if (s && s.data && s.data.session) { finish(null); return; }
     if (r.code) {
       client.auth.exchangeCodeForSession(r.code).then(finish).catch(function (e) {
-        authNotify('Sign-in could not be completed 😢 — ' + ((e && e.message) || 'the code was already used or expired'));
+        authFail('Sign-in could not be completed 😢 — ' + ((e && e.message) || 'the code was already used or expired'));
       });
     } else if (r.access_token) {
       client.auth.setSession({ access_token: r.access_token, refresh_token: r.refresh_token || '' }).then(finish).catch(function () {
-        authNotify('Sign-in could not be completed 😢');
+        authFail('Sign-in could not be completed 😢');
       });
     } else {
-      authNotify('Sign-in could not be completed 😢 — nothing came back from the provider');
+      authFail('Sign-in could not be completed 😢 — nothing came back from the provider');
     }
   }).catch(function () {
-    authNotify('Sign-in could not be completed 😢');
+    authFail('Sign-in could not be completed 😢');
   });
 }
 
