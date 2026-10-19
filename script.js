@@ -4768,10 +4768,12 @@ document.addEventListener('click', function(e) {
     if (isNaN(date)) return '';
     var now = new Date();
     var diff = Math.floor((now - date) / 1000);
-    if (diff < 60) return 'just now';
-    if (diff < 3600) return Math.floor(diff / 60) + 'm ago';
-    if (diff < 86400) return Math.floor(diff / 3600) + 'h ago';
-    if (diff < 172800) return 'yesterday';
+    // the year always rides along, so a take cannot be mistaken for this year's
+    var yr = ' \u00B7 ' + date.getFullYear();
+    if (diff < 60) return 'just now' + yr;
+    if (diff < 3600) return Math.floor(diff / 60) + 'm ago' + yr;
+    if (diff < 86400) return Math.floor(diff / 3600) + 'h ago' + yr;
+    if (diff < 172800) return 'yesterday' + yr;
     var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
     var mon = months[date.getMonth()];
     var day = date.getDate();
@@ -4779,7 +4781,7 @@ document.addEventListener('click', function(e) {
     var m = date.getMinutes();
     var ampm = h >= 12 ? 'PM' : 'AM';
     h = h % 12 || 12;
-    return mon + ' ' + day + ' \u00B7 ' + (h < 10 ? '0' : '') + h + ':' + (m < 10 ? '0' : '') + m + ' ' + ampm;
+    return mon + ' ' + day + ', ' + date.getFullYear() + ' \u00B7 ' + (h < 10 ? '0' : '') + h + ':' + (m < 10 ? '0' : '') + m + ' ' + ampm;
   }
 
   var adminMode = false;
