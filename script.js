@@ -2487,10 +2487,11 @@ function jumpToAnimeCard(title) {
 
   setTimeout(function () {
     card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    clearTimeout(card._jumpFlashTimer);        // a second click restarts the pulse cleanly
     card.classList.remove('card-jump-flash');
-    void card.offsetWidth;                 // let the pulse replay on a second click
+    void card.offsetWidth;                     // let the pulse replay on a second click
     card.classList.add('card-jump-flash');
-    setTimeout(function () { card.classList.remove('card-jump-flash'); }, 2800);
+    card._jumpFlashTimer = setTimeout(function () { card.classList.remove('card-jump-flash'); }, 2800);
   }, leftHome ? 140 : 30);
 }
 
