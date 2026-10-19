@@ -2600,7 +2600,7 @@ function suggestRowsFor(anime) {
 // Draw them under this reply — only the newest answer keeps its suggestions. They slide
 // in one by one, 3s after the answer ended, and the chat scrolls so they can be seen.
 let _suggestsToken = 0;
-const SUGGEST_DELAY_MS = 3000;
+const SUGGEST_DELAY_MS = 6000;
 
 function scheduleSuggestions(msgDiv, anime) {
   if (!msgDiv) return;
