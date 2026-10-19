@@ -2463,7 +2463,12 @@ async function sendMessage() {
 
   isResponding = false;
   chatInput.disabled = false;
-  chatInput.focus();
+  // A message that came from a chip or a suggestion row must not steal focus back —
+  // on mobile that re-opens the keyboard by itself, which is infuriating.
+  const fromButton = sentFromButton;
+  sentFromButton = false;
+  const narrow = window.matchMedia('(max-width: 768px)').matches;
+  if (!fromButton || !narrow) chatInput.focus();
 }
 
 // Messages still animating — if the tab gets hidden, we finish them instantly
@@ -2727,6 +2732,9 @@ function scheduleSuggestions(msgDiv, anime) {
   }, SUGGEST_DELAY_MS);
 }
 
+// The question the visitor just tapped — never offered again by the answer that follows.
+let lastSuggestText = '';
+
 function makeSuggestRow(r) {
   const b = document.createElement('button');
   b.type = 'button';
@@ -2739,7 +2747,14 @@ function makeSuggestRow(r) {
   txt.textContent = r.label;
   b.appendChild(arrow);
   b.appendChild(txt);
-  b.addEventListener('click', r.run);
+  b.addEventListener('click', function () {
+    // The block has done its job. Clear it straight away, so once the answer arrives the
+    // visitor never sees the old suggestions sitting above it — or the same one again.
+    lastSuggestText = r.label;
+    const box = b.closest ? b.closest('.msg-suggests') : null;
+    if (box) box.remove();
+    r.run();
+  });
   return b;
 }
 
@@ -2756,7 +2771,11 @@ function renderSuggestions(msgDiv, anime) {
   if (!msgDiv || !msgDiv.parentNode) return;
   const myToken = ++_suggestsToken;
   chatMessages.querySelectorAll('.msg-suggests').forEach(function (el) { el.remove(); });
-  const rows = suggestRowsFor(anime);
+  let rows = suggestRowsFor(anime);
+  // one-shot: drop the exact question the visitor tapped a moment ago
+  const justAsked = lastSuggestText;
+  lastSuggestText = '';
+  if (justAsked) rows = rows.filter(function (r) { return r.label !== justAsked; });
   if (!rows.length) return;
   const box = document.createElement('div');
   box.className = 'msg-suggests';
@@ -3567,7 +3586,12 @@ chatMessages.addEventListener('click', async (e) => {
 
 
 // ===== QUICK ACTION BUTTONS =====
+// Anything sent from a button (a ⚡ chip or a ↘ row) must not pull focus back into the text
+// box afterwards: on a phone that yanks the on-screen keyboard up for no reason.
+let sentFromButton = false;
+
 function quickAction(text) {
+  sentFromButton = true;
   chatInput.value = text;
   sendMessage();
 }
