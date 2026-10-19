@@ -4908,7 +4908,7 @@ document.addEventListener('click', function(e) {
           for (var k = 0; k < mapped.length; k++) {
             var row = mapped[k];
             if (row && row._userId === c._userId && String(row.comment) === String(c.comment) &&
-                Math.abs(tsOf(row) - tsOf(c)) < 60000) return false;
+                Math.abs(tsOf(row) - tsOf(c)) < 600000) return false;
           }
           return true;
         });
