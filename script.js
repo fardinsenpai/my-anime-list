@@ -3486,8 +3486,9 @@ window.fetch = function(...args) {
           forcedSeas = randomCard.querySelector('.back-season')?.textContent?.trim() || '';
         }
         if (forcedTitle) {
+          const art = /^[aeiou]/i.test(forcedGenre) ? 'an' : 'a';
           const forcedMsg = forcedGenre
-            ? `Here's a ${forcedGenre} anime from Fardin's list:\n\n**${forcedTitle}**\n${forcedEp} • ${forcedSeas}\n\nThis is an absolute banger from Fardin's collection! Want to know more about it? ⚡`
+            ? `Here's ${art} ${forcedGenre} anime from Fardin's list:\n\n**${forcedTitle}**\n${forcedEp} • ${forcedSeas}\n\nThis is an absolute banger from Fardin's collection! Want to know more about it? ⚡`
             : `Here's a random pick from Fardin's list:\n\n**${forcedTitle}**\n${forcedEp} • ${forcedSeas}\n\nGive it a watch if you haven't already! ⚡`;
           // Return fake response — no API call needed
           return Promise.resolve({
