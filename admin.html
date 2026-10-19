@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#050705">
+<title>ROOT@FARDIN ~ ADMIN</title>
+<link rel="icon" href="logo.png">
+<link rel="stylesheet" href="admin.css?v=20261023a">
+</head>
+<body>
+
+<!-- ══ PIN GATE ══════════════════════════════════════════════════════ -->
+<div class="ad-gate" id="pinGate">
+  <div class="ad-gate-box">
+    <div class="ad-gate-logo">SECURE</div>
+    <div class="ad-gate-sub">// PROVE YOU ARE ADMIN //</div>
+
+    <div class="ad-gate-card">
+      <div class="ad-pin-row" id="adminPinScreen" style="display:none">
+        <input type="password" maxlength="1" id="adminPinInput" autocomplete="off" oninput="movePin(this,0)" onkeydown="pinKey(this,event,0)">
+        <input type="password" maxlength="1" autocomplete="off" oninput="movePin(this,1)" onkeydown="pinKey(this,event,1)">
+        <input type="password" maxlength="1" autocomplete="off" oninput="movePin(this,2)" onkeydown="pinKey(this,event,2)">
+        <input type="password" maxlength="1" autocomplete="off" oninput="movePin(this,3)" onkeydown="pinKey(this,event,3)">
+        <input type="password" maxlength="1" autocomplete="off" oninput="movePin(this,4)" onkeydown="pinKey(this,event,4)">
+        <input type="password" maxlength="1" autocomplete="off" oninput="movePin(this,5)" onkeydown="pinKey(this,event,5)">
+      </div>
+      <div class="ad-gate-err" id="adminPinError" style="display:none">✕ ACCESS DENIED</div>
+      <button class="ad-gate-btn" id="adminPinBtn" onclick="checkAdminPin()">▶ VERIFY</button>
+    </div>
+
+    <div class="ad-boot" id="bootLine">// STANDING BY //</div>
+    <button class="ad-mini" id="bootRetry" style="display:none">↻ RETRY DATA LINK</button>
+    <div class="ad-gate-foot">[ ROOT@FARDIN ~ ]# _</div>
+  </div>
+</div>
+
+<!-- ══ PANEL ════════════════════════════════════════════════════════ -->
+<div id="adminDashboard" style="display:none">
+
+  <header class="ad-top">
+    <div class="ad-brand">
+      <span class="ad-brand-main">ROOT@FARDIN</span>
+      <span class="ad-brand-sub">~ ADMIN PANEL v3.0 · [ HACK THE MAINFRAME ]</span>
+    </div>
+    <div class="ad-top-right">
+      <span class="ad-clock" id="adClock"></span>
+      <span class="ad-pat-status" id="adPatStatus">// PAT: —</span>
+      <a class="ad-mini" href="index.html">⬅ SITE</a>
+      <button class="ad-mini" onclick="location.reload()">⇄ RELOAD</button>
+      <button class="ad-mini danger" onclick="location.reload()">⏻ LOCK</button>
+    </div>
+  </header>
+
+  <div class="ad-body">
+
+    <!-- ── every module, permanently visible ── -->
+    <aside class="ad-side">
+      <div class="ad-side-title">// MODULES //</div>
+      <nav class="ad-nav">
+        <button class="admin-g-tab active" data-tab="watch"  onclick="switchAdminTab('watch')"><b>🎬</b> WATCH<span>currently watching</span></button>
+        <button class="admin-g-tab" data-tab="read"   onclick="switchAdminTab('read')"><b>📖</b> READ<span>currently reading</span></button>
+        <button class="admin-g-tab" data-tab="top5"   onclick="switchAdminTab('top5')"><b>🏆</b> TOP 5<span>picks by genre</span></button>
+        <button class="admin-g-tab" data-tab="awards" onclick="switchAdminTab('awards')"><b>🏅</b> AWARDS<span>winners by year</span></button>
+        <button class="admin-g-tab" data-tab="edit"   onclick="switchAdminTab('edit')"><b>✏️</b> EDIT<span>anime info</span></button>
+        <button class="admin-g-tab" data-tab="date"   onclick="switchAdminTab('date')"><b>📅</b> DATE<span>last updated</span></button>
+        <button class="admin-g-tab" data-tab="stats"  onclick="switchAdminTab('stats')"><b>📊</b> STATS<span>counters</span></button>
+        <button class="admin-g-tab" data-tab="add"    onclick="switchAdminTab('add')"><b>➕</b> ADD<span>new anime</span></button>
+        <button class="admin-g-tab" data-tab="ai"     onclick="switchAdminTab('ai')"><b>🤖</b> AI<span>model + avatars</span></button>
+      </nav>
+
+      <div class="ad-side-block">
+        <div class="ad-side-title">// GITHUB PAT //</div>
+        <div class="ad-pat-row">
+          <input type="text" id="adminPatInput" class="admin-g-input" placeholder="ghp_xxxxxxxx" autocomplete="off">
+          <button class="admin-g-btn tight" onclick="savePat(); paintPatStatus();">SAVE</button>
+        </div>
+        <div class="ad-side-hint">Stored in this browser only.<br>Needed for every commit.</div>
+      </div>
+    </aside>
+
+    <!-- ── content ── -->
+    <main class="ad-main">
+
+      <!-- WATCH -->
+      <section class="admin-g-content active" id="tabWatch">
+        <h2 class="ad-h">// UPDATE CURRENTLY WATCHING //</h2>
+        <input type="text" id="adminWatchSearch" class="admin-g-input" placeholder="1. Search anime..." oninput="searchWatch(this.value)">
+        <div class="ad-results" id="adminWatchResults"></div>
+        <div class="ad-preview" id="adminWatchPreview" style="display:none">
+          <img id="adminWatchPreviewImg" alt="">
+          <div>
+            <div class="ad-preview-title" id="adminWatchPreviewTitle"></div>
+            <div class="ad-preview-id" id="adminWatchPreviewId"></div>
+          </div>
+        </div>
+        <div class="ad-row">
+          <input type="number" id="adminWatchCurEps" class="admin-g-input" placeholder="2. Current ep">
+          <input type="number" id="adminWatchTotalEps" class="admin-g-input" placeholder="3. Total ep">
+        </div>
+        <div class="ad-row">
+          <input type="text" id="adminWatchSeason" class="admin-g-input" placeholder="4. Season (Season 4)">
+          <input type="number" id="adminWatchProgress" class="admin-g-input narrow" placeholder="5. Progress %">
+        </div>
+        <button class="admin-g-btn" onclick="commitWatching()">▶ COMMIT WATCHING</button>
+      </section>
+
+      <!-- READ -->
+      <section class="admin-g-content" id="tabRead">
+        <h2 class="ad-h">// UPDATE CURRENTLY READING //</h2>
+        <input type="text" id="adminReadSearch" class="admin-g-input" placeholder="1. Search manga..." oninput="searchRead(this.value)">
+        <div class="ad-results" id="adminReadResults"></div>
+        <div class="ad-preview" id="adminReadPreview" style="display:none">
+          <img id="adminReadPreviewImg" alt="">
+          <div>
+            <div class="ad-preview-title" id="adminReadPreviewTitle"></div>
+            <div class="ad-preview-id" id="adminReadPreviewId"></div>
+          </div>
+        </div>
+        <div class="ad-row">
+          <input type="number" id="adminReadCurChapter" class="admin-g-input" placeholder="2. Current chapter">
+          <input type="text" id="adminReadTotalChapter" class="admin-g-input" placeholder="3. Total (or ∞)">
+        </div>
+        <div class="ad-row">
+          <input type="text" id="adminReadMeta" class="admin-g-input" placeholder="4. Label (Manga / Volume 1)">
+          <input type="number" id="adminReadProgress" class="admin-g-input narrow" placeholder="5. Progress %">
+        </div>
+        <button class="admin-g-btn" onclick="commitMangaReading()">▶ COMMIT READING</button>
+      </section>
+
+      <!-- TOP 5 -->
+      <section class="admin-g-content" id="tabTop5">
+        <h2 class="ad-h">// EDIT TOP 5 PICKS //</h2>
+        <div class="ad-scroll" id="adminTop5Form"></div>
+        <button class="admin-g-btn" onclick="commitTop5()">▶ COMMIT TOP 5</button>
+      </section>
+
+      <!-- AWARDS -->
+      <section class="admin-g-content" id="tabAwards">
+        <h2 class="ad-h">// EDIT AWARD WINNERS //</h2>
+        <input type="text" id="adminAwardSearch" class="admin-g-input" placeholder="1. Search anime..." oninput="searchAwardAnime(this.value)">
+        <div class="ad-results" id="adminAwardResults"></div>
+        <div class="ad-preview" id="adminAwardPreview" style="display:none">
+          <img id="adminAwardPreviewImg" alt="">
+          <div>
+            <div class="ad-preview-title" id="adminAwardPreviewTitle"></div>
+            <div class="ad-preview-id" id="adminAwardPreviewId"></div>
+          </div>
+        </div>
+        <div class="ad-row">
+          <input type="text" id="adminAwardYear" class="admin-g-input" placeholder="2. Year (e.g. 2021)">
+          <button class="admin-g-btn tight" onclick="addAwardFromSelection()">+ ADD</button>
+        </div>
+        <div class="ad-scroll short" id="adminAwardsForm"></div>
+        <button class="admin-g-btn" onclick="commitAwardWinners()">▶ COMMIT AWARDS</button>
+      </section>
+
+      <!-- EDIT -->
+      <section class="admin-g-content" id="tabEdit">
+        <h2 class="ad-h">// EDIT ANIME INFO //</h2>
+        <input type="text" id="adminEditSearch" class="admin-g-input" placeholder="Search anime..." oninput="searchEdit(this.value)">
+        <div class="ad-results" id="adminEditResults"></div>
+        <div class="ad-preview" id="adminEditPreview" style="display:none">
+          <img id="adminEditPreviewImg" alt="">
+          <div>
+            <div class="ad-preview-title" id="adminEditPreviewTitle"></div>
+            <div class="ad-preview-id" id="adminEditPreviewId"></div>
+          </div>
+        </div>
+        <input type="text" id="adminEditName" class="admin-g-input" placeholder="Anime Name">
+        <input type="text" id="adminEditImg" class="admin-g-input" placeholder="Image URL">
+        <input type="text" id="adminEditGenre" class="admin-g-input" placeholder="Genre (comma separated)">
+        <div class="ad-row">
+          <input type="text" id="adminEditSeasons" class="admin-g-input" placeholder="Total Seasons (Season-1,2,3)">
+          <input type="text" id="adminEditEps" class="admin-g-input" placeholder="Total Episodes (190)">
+        </div>
+        <button class="admin-g-btn" onclick="commitEditAnime()">▶ COMMIT EDIT</button>
+        <div class="ad-note">Editing an anime rewrites its card in index.html and its genre list in script.js.</div>
+      </section>
+
+      <!-- DATE -->
+      <section class="admin-g-content" id="tabDate">
+        <h2 class="ad-h">// UPDATE LAST UPDATED DATE //</h2>
+        <div class="ad-row">
+          <input type="text" id="adminDateInput" class="admin-g-input" placeholder="DD/MM/YYYY">
+          <button class="admin-g-btn tight" onclick="commitDate(document.getElementById('adminDateInput').value)">▶ SET</button>
+        </div>
+        <div class="ad-link" onclick="document.getElementById('adminDateInput').value = new Date().toLocaleDateString('en-GB')">[ click to fill today ]</div>
+      </section>
+
+      <!-- STATS -->
+      <section class="admin-g-content" id="tabStats">
+        <h2 class="ad-h">// INCREASE COUNTER VALUES //</h2>
+        <div class="admin-g-stat-row">
+          <div class="admin-g-stat-label">📺 Anime Count</div>
+          <input type="number" id="adminStatsAnime" class="admin-g-input" placeholder="Increase by (optional)">
+        </div>
+        <div class="admin-g-stat-row">
+          <div class="admin-g-stat-label">🌸 Season Count</div>
+          <input type="number" id="adminStatsSeasons" class="admin-g-input" placeholder="Increase by (optional)">
+        </div>
+        <div class="admin-g-stat-row">
+          <div class="admin-g-stat-label">📺 Episode Count</div>
+          <input type="number" id="adminStatsEps" class="admin-g-input" placeholder="Increase by (optional)">
+        </div>
+        <button class="admin-g-btn" onclick="commitStats()">▶ INCREASE STATS</button>
+      </section>
+
+      <!-- ADD -->
+      <section class="admin-g-content" id="tabAdd">
+        <h2 class="ad-h">// ADD NEW ANIME //</h2>
+        <input type="text" id="adminAddTitle" class="admin-g-input" placeholder="Anime Title">
+        <input type="text" id="adminAddImg" class="admin-g-input" placeholder="Image URL">
+        <div class="ad-row">
+          <input type="text" id="adminAddSeason" class="admin-g-input" placeholder="Spring 2024">
+          <input type="number" id="adminAddEps" class="admin-g-input narrow" placeholder="Eps">
+          <input type="number" id="adminAddRating" class="admin-g-input narrow" placeholder="Rating">
+        </div>
+        <input type="text" id="adminAddSeasonLabel" class="admin-g-input" placeholder="Season Label (Season-1)">
+
+        <div class="admin-g-label">OTT Platforms</div>
+        <div class="admin-pill-container">
+          <input type="text" class="admin-g-input" id="adminOttSearch" placeholder="Search OTT..." oninput="filterPills(this,'ott')">
+          <div class="admin-pill-list" id="adminOttList"></div>
+        </div>
+        <div class="admin-g-label">Studios</div>
+        <div class="admin-pill-container">
+          <input type="text" class="admin-g-input" id="adminStudioSearch" placeholder="Search Studio..." oninput="filterPills(this,'studio')">
+          <div class="admin-pill-list" id="adminStudioList"></div>
+        </div>
+        <div class="admin-g-label">Genres</div>
+        <div class="admin-pill-container">
+          <input type="text" class="admin-g-input" id="adminGenreSearch" placeholder="Search Genre..." oninput="filterPills(this,'genre')">
+          <div class="admin-pill-list" id="adminGenreList"></div>
+        </div>
+        <div class="admin-selected-pills" id="adminSelectedPills" style="display:none"></div>
+
+        <button class="admin-g-btn" onclick="commitAddAnime()">▶ COMMIT ADD</button>
+        <div class="ad-note">The card goes to the end of index.html; OTT / studio / genre / rating data goes to script.js.</div>
+      </section>
+
+      <!-- AI -->
+      <section class="admin-g-content" id="tabAi">
+        <h2 class="ad-h">// CHATBOT MODEL //</h2>
+        <div class="ad-status" id="aiModelStatus">current: …</div>
+        <div class="admin-g-label">Groq chat models (live list, newest first)</div>
+        <select id="aiModelSelect" class="admin-g-input">
+          <option value="">— press REFRESH LIST —</option>
+        </select>
+        <div class="ad-status dim" id="aiModelListStatus"></div>
+        <div class="ad-row wrap">
+          <button class="admin-g-btn tight" onclick="refreshAiModels()">⟳ REFRESH LIST</button>
+          <button class="admin-g-btn tight" onclick="saveAiModel()">⬆ UPDATE ON GITHUB</button>
+          <button class="admin-g-btn tight danger" onclick="resetAiModel()">↺ DEFAULT CHAIN</button>
+        </div>
+        <div class="ad-note">UPDATE ON GITHUB rewrites the GROQ_MODELS line in script.js (the picked model first,
+          the older ones stay as fallbacks). Needs your PAT. Live for everyone in ~1 minute.</div>
+
+        <div class="ad-hr"></div>
+
+        <h2 class="ad-h">// CHAT AVATARS //</h2>
+        <div id="avatarPickerBody"></div>
+        <div class="ad-note">◀ ▶ = next 3 avatars · click one to publish it for <b>everyone</b>.<br>
+          📷 UPLOAD = your own picture (auto-cropped square, saved in the repo's avatars/ folder).
+          Needs your PAT. Live in ~1-10 min.</div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- the site's own cards + counters, fetched at boot, never shown -->
+  <div id="adminDataHost" hidden aria-hidden="true"></div>
+
+  <!-- commit overlay -->
+  <div id="adminLoading" class="ad-loading" style="display:none">
+    <div class="ad-loading-inner">⏳ EXECUTING…<span class="ad-bar"></span></div>
+  </div>
+</div>
+
+<script src="admin.js?v=20261023a"></script>
+</body>
+</html>

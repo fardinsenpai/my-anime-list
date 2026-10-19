@@ -5442,6 +5442,8 @@ const GITHUB_REPO = 'my-anime-list';
 const GITHUB_BRANCH = 'main';
 
 // === ADMIN ACCESS: click All Genre 3 times ===
+// Same secret as before — but the panel is its own page now (admin.html), so it opens
+// as a blank tab instead of a pop-up. Pop-up blockers fall back to the old pop-up.
 (function() {
   var count = 0, timer = null;
   document.addEventListener('click', function(e) {
@@ -5450,7 +5452,10 @@ const GITHUB_BRANCH = 'main';
     count++;
     if (count === 3) {
       count = 0; clearTimeout(timer);
-      openAdmin();
+      var w = null;
+      try { w = window.open('admin.html', 'fardinAdmin'); } catch (err) { w = null; }
+      if (w) { try { w.focus(); } catch (err2) {} }
+      else openAdmin();   // blocked? the old pop-up still works
     } else {
       clearTimeout(timer);
       timer = setTimeout(function() { count = 0; }, 800);
