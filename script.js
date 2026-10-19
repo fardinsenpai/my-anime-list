@@ -2630,6 +2630,7 @@ function renderSuggestions(msgDiv, anime) {
 let _pendingSuggests = null;
 let _lastProgrammaticScroll = 0;
 let _lastChatScrollTop = 0;
+let _typingReplies = 0;          // answers still animating right now
 
 // every auto-scroll goes through here, so the reveal below can tell it apart from a
 // real scroll by the visitor
@@ -2652,6 +2653,7 @@ chatMessages.addEventListener('scroll', function () {
   const movedDown = top > _lastChatScrollTop + 2;
   _lastChatScrollTop = top;
   if (!_pendingSuggests) return;
+  if (_typingReplies > 0) return;                           // an answer is typing above — not the visitor
   if (Date.now() - _lastProgrammaticScroll < 300) return;   // typing / auto-scroll
   if (movedDown) revealPendingSuggestions();
 }, { passive: true });
@@ -2698,11 +2700,13 @@ function addMessage(text, type, shouldSave = true, onTyped = null) {
     let index = 0;
     let timer = null;
     let done = false;
+    let counted = false;      // did we add this reply to _typingReplies?
 
     function finish() {
       if (done) return;
       done = true;
       if (timer) clearTimeout(timer);
+      if (counted) { counted = false; if (_typingReplies > 0) _typingReplies--; }
       textSpan.replaceChildren(richChatText(text));
       pendingTypers.delete(finish);
       chatAutoScroll();
@@ -2728,6 +2732,8 @@ function addMessage(text, type, shouldSave = true, onTyped = null) {
     } else if (document.hidden) {
       finish(); // created while this tab is in the background — no point animating
     } else {
+      counted = true;
+      _typingReplies++;
       pendingTypers.add(finish); // reveal the full answer at once if the tab gets hidden
       timer = setTimeout(typeChunk, 250);
     }
