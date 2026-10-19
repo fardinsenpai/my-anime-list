@@ -325,14 +325,14 @@
   font-family: 'Poppins', sans-serif; font-size: 13px; line-height: 1.45;
   color: #9d9db0; padding: 6px 8px; border-radius: 8px;
   transition: color .16s ease, background .16s ease;
-  animation: sugg-row .5s cubic-bezier(.22,1,.36,1) both;
+  animation: sugg-row .9s cubic-bezier(.22,1,.36,1) both;
 }
-.chat-messages .msg-suggest:nth-child(1) { animation-delay: .02s; }
-.chat-messages .msg-suggest:nth-child(2) { animation-delay: .18s; }
-.chat-messages .msg-suggest:nth-child(3) { animation-delay: .34s; }
-.chat-messages .msg-suggest:nth-child(4) { animation-delay: .50s; }
+.chat-messages .msg-suggest:nth-child(1) { animation-delay: .05s; }
+.chat-messages .msg-suggest:nth-child(2) { animation-delay: .40s; }
+.chat-messages .msg-suggest:nth-child(3) { animation-delay: .75s; }
+.chat-messages .msg-suggest:nth-child(4) { animation-delay: 1.10s; }
 @keyframes sugg-row {
-  from { opacity: 0; transform: translateY(12px) scale(.97); filter: blur(4px); }
+  from { opacity: 0; transform: translateY(16px) scale(.97); filter: blur(5px); }
   60%  { filter: blur(0); }
   to   { opacity: 1; transform: none; filter: blur(0); }
 }
