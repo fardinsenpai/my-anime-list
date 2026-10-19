@@ -4796,12 +4796,10 @@ document.addEventListener('click', function(e) {
     renderFeed(loadComments());
   }
 
-  // same PIN as the admin panel (ADMIN_PIN in this file and in admin.js)
+  // Hot Takes has its own PIN; the main admin panel (114477) stays separate
+  var HT_ADMIN_PIN = '112233';
   function htAdminPinCode() {
-    try {
-      if (typeof ADMIN_PIN === 'string' && ADMIN_PIN) return ADMIN_PIN;
-    } catch (e) {}
-    return '112233';
+    return HT_ADMIN_PIN;
   }
 
   // a small PIN pad, styled inline (the Hot Takes stylesheet stays untouched)
@@ -6016,7 +6014,7 @@ document.addEventListener('click', function(e) {
 });
 
 // === ADMIN PANEL ===
-const ADMIN_PIN = '112233';
+const ADMIN_PIN = '114477';
 const GITHUB_OWNER = 'fardinsenpai';
 const GITHUB_REPO = 'my-anime-list';
 const GITHUB_BRANCH = 'main';
