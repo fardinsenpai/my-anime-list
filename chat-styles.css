@@ -118,6 +118,19 @@
   box-shadow: 0 0 12px rgba(255,45,85,.35); transform: rotate(18deg);
 }
 
+/* bolt sits left of the gear — one button that unfolds the quick actions */
+.chat-bolt {
+  background: none; border: 1px solid rgba(245,197,24,.35); color: #f5c518;
+  cursor: pointer; padding: 5px 6px; border-radius: 8px; line-height: 0;
+  display: flex; align-items: center; justify-content: center;
+  transition: background .18s, color .18s, border-color .18s, box-shadow .18s;
+}
+.chat-bolt:hover, .chat-bolt[aria-expanded="true"] {
+  background: rgba(245,197,24,.16); color: #ffe483; border-color: rgba(245,197,24,.75);
+  box-shadow: 0 0 12px rgba(245,197,24,.35);
+}
+.chat-bolt[aria-expanded="true"] svg { filter: drop-shadow(0 0 6px rgba(245,197,24,.85)); }
+
 /* ── visitor avatar settings sheet ── */
 .chat-settings {
   position: absolute; inset: 0; z-index: 6;
@@ -238,6 +251,25 @@
   0%   { transform: translateY(-20px) rotate(0deg); opacity: 0; }
   10%  { opacity: .85; }
   100% { transform: translateY(36px) rotate(220deg) translateX(10px); opacity: 0; }
+}
+
+/* the action panel: folded away until the ⚡ button asks for it */
+.sb-actions {
+  display: grid; grid-template-rows: 0fr; flex-shrink: 0;
+  transition: grid-template-rows .42s cubic-bezier(.22,1,.36,1);
+}
+.sb-actions > .sb-actions-in {
+  overflow: hidden; min-height: 0; opacity: 0; pointer-events: none;
+  transition: opacity .24s ease;
+}
+#chatBox.actions-open .sb-actions { grid-template-rows: 1fr; }
+#chatBox.actions-open .sb-actions > .sb-actions-in { opacity: 1; pointer-events: auto; }
+#chatBox.actions-open .sb-chips { animation: sb-row-in .36s cubic-bezier(.22,1,.36,1) both; }
+#chatBox.actions-open .sb-chips-genres { animation-delay: .08s; }
+@keyframes sb-row-in { from { opacity: 0; transform: translateY(-7px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .sb-actions { transition: none; }
+  #chatBox.actions-open .sb-chips { animation: none; }
 }
 
 /* quick-question + genre chips — one quiet glass pill family, gold on hover */

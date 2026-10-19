@@ -2262,6 +2262,7 @@ function setChatOpen(open) {
   if (open) {
     if (!isMobile) chatInput.focus();
     if (typeof closeMenu === 'function') closeMenu();
+    toggleChatActions(false);        // always open clean, with the panel folded away
   } else {
     // chat closed — dismiss any open message menus and the settings sheet
     document.querySelectorAll('.msg-actions.open').forEach(function (el) { el.classList.remove('open'); });
@@ -2272,6 +2273,30 @@ function setChatOpen(open) {
 function toggleChat() {
   setChatOpen(!chatBox.classList.contains('open'));
 }
+
+// ===== ⚡ QUICK ACTIONS (the two chip rows live behind one header button) =====
+function toggleChatActions(force) {
+  if (!chatBox) return;
+  const open = (typeof force === 'boolean') ? force : !chatBox.classList.contains('actions-open');
+  chatBox.classList.toggle('actions-open', open);
+  const btn = document.getElementById('chatBoltBtn');
+  if (btn) {
+    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    btn.title = open ? 'Hide quick actions' : 'Quick actions';
+  }
+  if (open) {
+    // the message area just got shorter — keep the newest reply in sight
+    requestAnimationFrame(function () {
+      if (chatMessages) chatMessages.scrollTop = chatMessages.scrollHeight;
+    });
+  }
+}
+
+// picking an action folds the panel back down so the conversation keeps the room
+document.addEventListener('click', function (e) {
+  if (!e.target || !e.target.closest) return;
+  if (e.target.closest('#chatActions button')) toggleChatActions(false);
+});
 
 // ===== CLOSE CHAT ON ESC =====
 document.addEventListener('keydown', (e) => {

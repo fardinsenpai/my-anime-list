@@ -7,7 +7,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Fardin's Anime Hub</title>
   <link rel="stylesheet" href="style.css?v=20261022e">
-  <link rel="stylesheet" href="chat-styles.css?v=20261022x">
+  <link rel="stylesheet" href="chat-styles.css?v=20261022y">
   <link rel="stylesheet" href="duel-system.css">
   <link rel="stylesheet" href="tournament.css">
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600;700&family=Exo+2:wght@400;600;700&family=Yuji+Syuku&family=Bangers&family=Poppins:wght@400;700&family=Cinzel+Decorative:wght@400;700&display=swap" rel="stylesheet">
@@ -1280,26 +1280,34 @@
         <div class="sb-name">Senpai Assistant <span class="jp">先輩</span></div>
         <div class="sb-sub"><span class="sb-dot"></span> online · ready to recommend</div>
       </div>
+      <button class="chat-bolt" id="chatBoltBtn" onclick="toggleChatActions()" title="Quick actions" aria-label="Quick actions" aria-expanded="false">
+        <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M13.2 2 4 13.6h5.3L8.8 22l9.2-11.6h-5.3L13.2 2Z" fill="currentColor"/></svg>
+      </button>
       <button class="chat-gear" id="chatGearBtn" onclick="toggleChatSettings()" title="Chat avatars" aria-label="Chat avatars" aria-expanded="false">
         <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
       </button>
       <button class="chat-close" onclick="toggleChat()">✕</button>
     </div>
 
-    <!-- row 1: smart follow-ups (rebuilt after every reply) + the fixed quick questions -->
-    <div class="sb-chips" id="chatChips">
-      <button onclick="quickAction('Suggest a random anime')">🎲 Random</button>
-      <button onclick="quickAction('What should I watch tonight?')">🌙 Tonight</button>
-      <button onclick="quickAction('What\'s the highest rated anime?')">⭐ Top Rated</button>
-      <button onclick="quickAction('When was this site last updated?')">📅 Last Updated</button>
-      <button onclick="quickAction('Tell me about Fardin')">👤 Fardin</button>
-    </div>
-    <!-- row 2: one chip per genre — the four originals stay exactly as they were -->
-    <div class="sb-chips sb-chips-genres" id="chatGenreChips">
-      <button onclick="quickAction('Recommend me an isekai anime')">🎯 Isekai</button>
-      <button onclick="quickAction('Recommend a romance anime')">💕 Romance</button>
-      <button onclick="quickAction('Suggest a comedy anime')">😂 Comedy</button>
-      <button onclick="quickAction('Recommend an action anime')">⚔ Action</button>
+    <!-- hidden until the ⚡ button in the header unfolds it -->
+    <div class="sb-actions" id="chatActions">
+     <div class="sb-actions-in">
+      <!-- row 1: smart follow-ups (rebuilt after every reply) + the fixed quick questions -->
+      <div class="sb-chips" id="chatChips">
+        <button onclick="quickAction('Suggest a random anime')">🎲 Random</button>
+        <button onclick="quickAction('What should I watch tonight?')">🌙 Tonight</button>
+        <button onclick="quickAction('What\'s the highest rated anime?')">⭐ Top Rated</button>
+        <button onclick="quickAction('When was this site last updated?')">📅 Last Updated</button>
+        <button onclick="quickAction('Tell me about Fardin')">👤 Fardin</button>
+      </div>
+      <!-- row 2: one chip per genre — the four originals stay exactly as they were -->
+      <div class="sb-chips sb-chips-genres" id="chatGenreChips">
+        <button onclick="quickAction('Recommend me an isekai anime')">🎯 Isekai</button>
+        <button onclick="quickAction('Recommend a romance anime')">💕 Romance</button>
+        <button onclick="quickAction('Suggest a comedy anime')">😂 Comedy</button>
+        <button onclick="quickAction('Recommend an action anime')">⚔ Action</button>
+      </div>
+     </div>
     </div>
 
     <div class="chat-messages" id="chatMessages">
@@ -1535,7 +1543,7 @@
 
   <script src="https://accounts.google.com/gsi/client" async defer></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="script.js?v=20261022v"></script>
+  <script src="script.js?v=20261022y"></script>
 
 <!-- === ADMIN PANEL === -->
 <div class="admin-overlay" id="adminOverlay">
