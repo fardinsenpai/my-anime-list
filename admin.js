@@ -1648,6 +1648,15 @@ function fillEditExtras() {
   box.addEventListener('click', function () { window.setTimeout(fillEditExtras, 0); }, true);
 })();
 
+/* ══════════════════════════════════════════════════════════════════════
+   AVATARS module. The ported switchAdminTab() only knows the original
+   tabs, so the sidebar button asks for the picker explicitly instead of
+   guessing (see admin.html).
+   ══════════════════════════════════════════════════════════════════════ */
+function renderAvatarsTab() {
+  renderAvatarPicker();
+}
+
 (function adminBoot() {
   var retry = document.getElementById('bootRetry');
 

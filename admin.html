@@ -7,7 +7,7 @@
 <meta name="theme-color" content="#050705">
 <title>ROOT@FARDIN ~ ADMIN</title>
 <link rel="icon" href="logo.png">
-<link rel="stylesheet" href="admin.css?v=20261023d">
+<link rel="stylesheet" href="admin.css?v=20261023e">
 </head>
 <body>
 
@@ -67,7 +67,8 @@
         <button class="admin-g-tab" data-tab="date"   onclick="switchAdminTab('date')"><b>📅</b> DATE<span>last updated</span></button>
         <button class="admin-g-tab" data-tab="stats"  onclick="switchAdminTab('stats')"><b>📊</b> STATS<span>counters</span></button>
         <button class="admin-g-tab" data-tab="add"    onclick="switchAdminTab('add')"><b>➕</b> ADD<span>new anime</span></button>
-        <button class="admin-g-tab" data-tab="ai"     onclick="switchAdminTab('ai')"><b>🤖</b> AI<span>model + avatars</span></button>
+        <button class="admin-g-tab" data-tab="ai"      onclick="switchAdminTab('ai')"><b>🤖</b> AI<span>chat model</span></button>
+        <button class="admin-g-tab" data-tab="avatars" onclick="switchAdminTab('avatars'); renderAvatarsTab()"><b>🖼️</b> AVATARS<span>chat avatars</span></button>
       </nav>
 
       <div class="ad-side-block">
@@ -256,9 +257,10 @@
         </div>
         <div class="ad-note">UPDATE ON GITHUB rewrites the GROQ_MODELS line in script.js (the picked model first,
           the older ones stay as fallbacks). Needs your PAT. Live for everyone in ~1 minute.</div>
+      </section>
 
-        <div class="ad-hr"></div>
-
+      <!-- AVATARS -->
+      <section class="admin-g-content" id="tabAvatars">
         <h2 class="ad-h">// CHAT AVATARS //</h2>
         <div id="avatarPickerBody"></div>
         <div class="ad-note">◀ ▶ = next 3 avatars · click one to publish it for <b>everyone</b>.<br>
@@ -278,6 +280,6 @@
   </div>
 </div>
 
-<script src="admin.js?v=20261023d"></script>
+<script src="admin.js?v=20261023e"></script>
 </body>
 </html>
