@@ -3648,6 +3648,17 @@ function localQuickAnswer(userMsg) {
       'His full info sits in the sidebar under **Owner Info** ⚡');
   }
 
+  // 🔢 "how many episodes and seasons does X have?" — the card already knows
+  if (/how many (episodes|seasons)|episodes and seasons|episode count|season count|how long is/i.test(msg)) {
+    const title = (typeof animeMentionedInText === 'function') ? animeMentionedInText(msg) : null;
+    const f = title && typeof findAnimeCard === 'function' ? cardFacts(findAnimeCard(title)) : null;
+    if (f) {
+      const parts = [f.ep, f.seas].filter(Boolean).join(' • ');
+      return quickAiReply("Straight from Fardin's list — **" + f.title + "**:\n\n" + (parts || 'episode info is on its card') +
+        '\n\nTap the name above to jump to its card ⚡');
+    }
+  }
+
   // 🌙 tonight — a short one, so it fits in an evening
   if (/tonight/i.test(msg)) {
     const cards = localCards();
