@@ -4712,6 +4712,15 @@ document.addEventListener('click', function(e) {
   var VOTE_DOWN_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3H10zM17 2h3a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-3"/></svg>';
   var ADMIN_SHIELD_SVG = '<svg width="16" height="16" viewBox="0 0 64 64" fill="none" style="vertical-align:middle;margin-right:3px;"><path d="M32 6L8 18v12c0 18 10 28 24 28s24-10 24-28V18L32 6z" fill="#1a1a2e" stroke="#ffd700" stroke-width="3"/><path d="M22 32l7 7 13-13" stroke="#ffd700" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 
+  // replies are written from admin mode, so they carry the admin sign
+  function htIsAdminReply(rep) {
+    try {
+      if (rep && rep.admin) return true;
+      var n = String((rep && rep.userName) || '').trim().toLowerCase();
+      return !!n && n === String(ADMIN_NAME).trim().toLowerCase();
+    } catch (e) { return false; }
+  }
+
   function voteBtnHtml(kind, active, count, replyIdx) {
     var isUp = kind === 'up';
     return '<button class="ht-vote ht-vote-' + kind + (active ? ' ht-voted' : '') + '" type="button"' +
@@ -4967,7 +4976,7 @@ document.addEventListener('click', function(e) {
         var rLiked = rLikes.indexOf(myId) !== -1;
         var rDisliked = rDislikes.indexOf(myId) !== -1;
         repliesHtml += '<div class="ht-reply">' +
-          '<div class="ht-reply-top"><span class="ht-reply-admin">' + htAvatarHtml(rep.avatar, rep, 18) + escHtml(rep.userName || ADMIN_NAME) + '</span>' +
+          '<div class="ht-reply-top"><span class="ht-reply-admin">' + htAvatarHtml(rep.avatar, rep, 18) + escHtml(rep.userName || ADMIN_NAME) + (htIsAdminReply(rep) ? '<span title="Admin" aria-label="Admin" style="display:inline-block;vertical-align:middle;margin-left:5px;">' + ADMIN_SHIELD_SVG + '</span>' : '') + '</span>' +
           (adminMode ? '<button class="ht-reply-del" type="button" data-r="' + r + '" title="Delete this reply" aria-label="Delete this reply">\uD83D\uDDD1\uFE0F</button>' : '') +
           '</div>' +
           '<div class="ht-reply-text">' + htText(rep.comment) + '</div>' +
@@ -5035,7 +5044,7 @@ document.addEventListener('click', function(e) {
         if (!hit.item) { syncFromSupabase(true); return; }
         var parent = hit.item;
         if (!parent.replies) parent.replies = [];
-        var reply = { userName: ADMIN_NAME, comment: text, createdAt: new Date().toISOString(), likes: [], dislikes: [], avatar: htMyAvatar() };
+        var reply = { userName: ADMIN_NAME, comment: text, createdAt: new Date().toISOString(), likes: [], dislikes: [], avatar: htMyAvatar(), admin: true };
         parent.replies.push(reply);
         saveComments(all);
         renderFeed(all);
