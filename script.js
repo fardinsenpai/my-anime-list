@@ -2361,7 +2361,8 @@ function richChatText(text) {
 function paintNameInFrag(frag) {
   const nm = signedInName();
   if (!nm) return;
-  const re = new RegExp('\\b' + String(nm).replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'g');
+  // NB: the capture group matters — without it split() drops the matched name entirely
+  const re = new RegExp('\\b(' + String(nm).replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')\\b', 'g');
   Array.from(frag.childNodes).forEach(function (node) {
     if (node.nodeType !== 3) return;          // skip text that is already painted yellow
     const txt = node.nodeValue;
