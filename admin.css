@@ -25,8 +25,26 @@
   --red: #c62828;
   --ink: #14261a;
   --muted: #4f6b58;
-  --mono: ui-monospace, 'Consolas', 'Courier New', monospace;
+  /* ── type ──────────────────────────────────────────────────────────
+     --font-ui is the whole panel (it feeds --mono, which 18 rules use),
+     so the picker in the top bar restyles everything at once.
+     --font-display is only the wordmark / gate logo.
+     The trailing ui-monospace/Consolas keeps the panel readable when
+     the web font is blocked or you are offline. */
+  --font-ui: 'JetBrains Mono';
+  --font-display: 'Chakra Petch';
+  --mono: var(--font-ui), ui-monospace, 'Consolas', 'Courier New', monospace;
 }
+
+/* ── font picks (top-bar ▾) — no attribute = the JetBrains default ── */
+html[data-font="jetbrains"] { --font-ui: 'JetBrains Mono'; }
+html[data-font="spacemono"] { --font-ui: 'Space Mono'; }
+html[data-font="plex"]      { --font-ui: 'IBM Plex Mono'; }
+html[data-font="chakra"]    { --font-ui: 'Chakra Petch'; }
+html[data-font="grotesk"]   { --font-ui: 'Space Grotesk'; }
+/* the futuristic wordmark only really works on a techy body font */
+html[data-font="grotesk"]   { --font-display: 'Space Grotesk'; }
+html[data-font="spacemono"] { --font-display: 'Space Mono'; }
 
 /* ── night: the original black terminal, neon green ── */
 html[data-theme="dark"] {
@@ -84,7 +102,8 @@ a { color: var(--g); text-decoration: none; }
 }
 .ad-gate-box { width: 100%; max-width: 420px; text-align: center; }
 .ad-gate-logo {
-  font-size: 30px; font-weight: 900; letter-spacing: 6px; color: var(--g);
+  font-family: var(--font-display);
+  font-size: 30px; font-weight: 700; letter-spacing: 6px; color: var(--g);
   text-shadow: 0 1px 0 var(--bg), 0 0 20px rgba(var(--g-rgb), .28);
 }
 .ad-gate-sub { font-size: 10px; letter-spacing: 5px; color: var(--g-dim); margin: 4px 0 16px; }
@@ -121,6 +140,16 @@ a { color: var(--g); text-decoration: none; }
 .ad-mini.danger { border-color: rgba(var(--red-rgb), .45); color: var(--red); }
 .ad-mini.danger:hover { background: rgba(var(--red-rgb), .08); border-color: var(--red); }
 
+/* font picker — same skin as .ad-mini, native dropdown arrow kept */
+.ad-fontpick {
+  background: var(--surface); border: 1px solid var(--g-line); color: var(--g-ink);
+  font-family: var(--mono); font-size: 10px; letter-spacing: 1px; padding: 4px 6px;
+  border-radius: 3px; cursor: pointer; transition: .18s; max-width: 140px;
+}
+.ad-fontpick:hover { background: rgba(var(--g-rgb), .09); border-color: var(--g); color: var(--g-deep); }
+.ad-fontpick:focus { outline: none; border-color: var(--g); box-shadow: 0 0 0 3px rgba(var(--g-rgb), .12); }
+.ad-fontpick option { background: var(--surface); color: var(--ink); }
+
 /* ───────────────  TOP BAR  ─────────────── */
 .ad-top {
   position: fixed; top: 0; left: 0; right: 0; z-index: 20; height: 52px;
@@ -130,7 +159,8 @@ a { color: var(--g); text-decoration: none; }
 }
 .ad-brand { display: flex; align-items: baseline; gap: 10px; min-width: 0; }
 .ad-brand-main {
-  font-size: 15px; font-weight: 800; letter-spacing: 2px; color: var(--g);
+  font-family: var(--font-display);
+  font-size: 16px; font-weight: 700; letter-spacing: 2px; color: var(--g);
   text-shadow: 0 1px 0 var(--bg); white-space: nowrap;
 }
 .ad-brand-sub { font-size: 9px; letter-spacing: 3px; color: var(--g-dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }

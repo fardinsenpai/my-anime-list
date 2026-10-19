@@ -2077,6 +2077,50 @@ function toggleAdminTheme() {
 adminThemeApply(localStorage.getItem(ADMIN_THEME_KEY) === 'dark' ? 'dark' : 'light');
 
 /* ══════════════════════════════════════════════════════════════════════
+   PANEL FONT — the ▾ in the top bar. Sets data-font on <html>, which
+   admin.css turns into --font-ui (and --mono, which every panel rule
+   reads), so one pick restyles the whole panel. Remembered per browser.
+   The wordmark uses --font-display instead, so it keeps its own flavour.
+   ══════════════════════════════════════════════════════════════════════ */
+var ADMIN_FONT_KEY = 'fardin.admin.font';
+var ADMIN_FONTS = {
+  jetbrains: 'JetBrains Mono',
+  spacemono: 'Space Mono',
+  plex: 'IBM Plex Mono',
+  chakra: 'Chakra Petch',
+  grotesk: 'Space Grotesk'
+};
+
+function adminFontApply(font) {
+  if (!ADMIN_FONTS[font]) font = 'jetbrains';
+  document.documentElement.setAttribute('data-font', font);
+  try { localStorage.setItem(ADMIN_FONT_KEY, font); } catch (e) {}
+  var pick = document.getElementById('fontPick');
+  if (pick && pick.value !== font) pick.value = font;
+  // make sure the family is actually fetched before we claim it is on
+  if (document.fonts && document.fonts.load) {
+    document.fonts.load('12px "' + ADMIN_FONTS[font] + '"').catch(function () {});
+  }
+  return font;
+}
+function adminFontNow() {
+  var f = document.documentElement.getAttribute('data-font');
+  return ADMIN_FONTS[f] ? f : 'jetbrains';
+}
+function adminFontPick(value) {
+  var font = adminFontApply(value);
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(function () {
+      var loaded = !document.fonts.check || document.fonts.check('12px "' + ADMIN_FONTS[font] + '"');
+      msgOk(loaded ? 'Font: ' + ADMIN_FONTS[font] : 'Font set — webfont blocked, using local fallback');
+    });
+    return;
+  }
+  msgOk('Font: ' + ADMIN_FONTS[font]);
+}
+adminFontApply(adminFontNow());
+
+/* ══════════════════════════════════════════════════════════════════════
    AVATARS module. The ported switchAdminTab() only knows the original
    tabs, so the sidebar button asks for the picker explicitly instead of
    guessing (see admin.html).

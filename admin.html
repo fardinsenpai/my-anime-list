@@ -7,11 +7,19 @@
 <meta name="theme-color" content="#ffffff">
 <title>ROOT@FARDIN ~ ADMIN</title>
 <link rel="icon" href="logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap">
 <script>
-  /* apply the saved theme before the first paint, so night mode never flashes white */
-  try { if (localStorage.getItem('fardin.admin.theme') === 'dark') document.documentElement.setAttribute('data-theme', 'dark'); } catch (e) {}
+  /* apply the saved theme + font before the first paint, so night mode never
+     flashes white and the panel never paints in the fallback font first */
+  try {
+    if (localStorage.getItem('fardin.admin.theme') === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+    var f = localStorage.getItem('fardin.admin.font');
+    if (f) document.documentElement.setAttribute('data-font', f);
+  } catch (e) {}
 </script>
-<link rel="stylesheet" href="admin.css?v=20261023i">
+<link rel="stylesheet" href="admin.css?v=20261023j">
 </head>
 <body>
 
@@ -49,6 +57,13 @@
       <span class="ad-brand-sub">~ ADMIN PANEL v3.0 · [ HACK THE MAINFRAME ]</span>
     </div>
     <div class="ad-top-right">
+      <select class="ad-fontpick" id="fontPick" onchange="adminFontPick(this.value)" title="Panel font">
+        <option value="jetbrains">JETBRAINS MONO</option>
+        <option value="spacemono">SPACE MONO</option>
+        <option value="plex">IBM PLEX MONO</option>
+        <option value="chakra">CHAKRA PETCH</option>
+        <option value="grotesk">SPACE GROTESK</option>
+      </select>
       <button class="ad-mini" id="themeBtn" onclick="toggleAdminTheme()" title="Switch between day and night mode">🌙 NIGHT MODE</button>
       <span class="ad-clock" id="adClock"></span>
       <span class="ad-pat-status" id="adPatStatus">// PAT: —</span>
@@ -354,6 +369,6 @@
   </div>
 </div>
 
-<script src="admin.js?v=20261023i"></script>
+<script src="admin.js?v=20261023j"></script>
 </body>
 </html>
