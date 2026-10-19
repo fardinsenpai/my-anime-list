@@ -2575,10 +2575,7 @@ function siblingAnime(card, anime) {
 function suggestRowsFor(anime) {
   if (!anime) return [];
   const card = findAnimeCard(anime);
-  const rows = [{
-    label: 'Show ' + anime + ' on the page',
-    run: function () { jumpToAnimeCard(anime); }
-  }];
+  const rows = [];
   const sib = siblingAnime(card, anime);
   if (sib) {
     rows.push({
@@ -2612,6 +2609,31 @@ function scheduleSuggestions(msgDiv, anime) {
   }, SUGGEST_DELAY_MS);
 }
 
+function makeSuggestRow(r) {
+  const b = document.createElement('button');
+  b.type = 'button';
+  b.className = 'msg-suggest';
+  const arrow = document.createElement('span');
+  arrow.className = 'sg-arrow';
+  arrow.textContent = '↘';
+  const txt = document.createElement('span');
+  txt.className = 'sg-text';
+  txt.textContent = r.label;
+  b.appendChild(arrow);
+  b.appendChild(txt);
+  b.addEventListener('click', r.run);
+  return b;
+}
+
+function scrollChatToSuggestions() {
+  try {
+    chatMessages.scrollTo({ top: chatMessages.scrollHeight, behavior: 'smooth' });
+  } catch (e) {
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  }
+}
+
+// One visible row, the rest behind a green "See more..." that unveils them one by one.
 function renderSuggestions(msgDiv, anime) {
   if (!msgDiv || !msgDiv.parentNode) return;
   const myToken = ++_suggestsToken;
@@ -2620,29 +2642,24 @@ function renderSuggestions(msgDiv, anime) {
   if (!rows.length) return;
   const box = document.createElement('div');
   box.className = 'msg-suggests';
-  rows.forEach(function (r) {
-    const b = document.createElement('button');
-    b.type = 'button';
-    b.className = 'msg-suggest';
-    const arrow = document.createElement('span');
-    arrow.className = 'sg-arrow';
-    arrow.textContent = '↘';
-    const txt = document.createElement('span');
-    txt.className = 'sg-text';
-    txt.textContent = r.label;
-    b.appendChild(arrow);
-    b.appendChild(txt);
-    b.addEventListener('click', r.run);
-    box.appendChild(b);
-  });
+  box.appendChild(makeSuggestRow(rows[0]));
+  if (rows.length > 1) {
+    const more = document.createElement('button');
+    more.type = 'button';
+    more.className = 'msg-suggest-more';
+    more.textContent = 'See more...';
+    more.addEventListener('click', function () {
+      if (myToken !== _suggestsToken) return;      // a newer answer took over
+      rows.slice(1).forEach(function (r) { box.insertBefore(makeSuggestRow(r), more); });
+      more.remove();
+      scrollChatToSuggestions();
+    });
+    box.appendChild(more);
+  }
   if (myToken !== _suggestsToken) return;
   msgDiv.parentNode.insertBefore(box, msgDiv.nextSibling);
   // bring them into view as they arrive (the rows hold their space, so this is final)
-  try {
-    chatMessages.scrollTo({ top: chatMessages.scrollHeight, behavior: 'smooth' });
-  } catch (e) {
-    chatMessages.scrollTop = chatMessages.scrollHeight;
-  }
+  scrollChatToSuggestions();
 }
 
 

@@ -337,8 +337,20 @@
   to   { opacity: 1; transform: none; filter: blur(0); }
 }
 @media (prefers-reduced-motion: reduce) {
-  .chat-messages .msg-suggest { animation: none; }
+  .chat-messages .msg-suggest, .chat-messages .msg-suggest-more { animation: none; }
 }
+/* the green "See more..." that unveils the remaining suggestions */
+.chat-messages .msg-suggest-more {
+  align-self: flex-start;
+  background: none; border: none; cursor: pointer; text-align: left;
+  font-family: 'Poppins', sans-serif; font-size: 13px; font-weight: 600; line-height: 1.45;
+  color: #34d399; padding: 6px 8px; border-radius: 8px;
+  transition: color .16s ease, background .16s ease;
+  animation: sugg-row .9s cubic-bezier(.22,1,.36,1) both;
+  animation-delay: .40s;
+}
+.chat-messages .msg-suggest-more:hover { color: #6ee7b7; background: rgba(52,211,153,.12); }
+.chat-messages .msg-suggest-more:focus-visible { outline: 1px solid rgba(52,211,153,.6); outline-offset: 1px; }
 .chat-messages .msg-suggest .sg-arrow {
   color: #6d6d85; font-size: 12px; line-height: 1.6; flex-shrink: 0;
   transition: color .16s ease, transform .16s ease;
