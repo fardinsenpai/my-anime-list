@@ -2096,9 +2096,9 @@ function scrollToEnd() {
     var y = window.pageYOffset || (doc ? doc.scrollTop : 0) || 0;
     var p = max > 0 ? Math.min(1, Math.max(0, y / max)) : 0;
     fill.style.height = (p * 100).toFixed(1) + '%';
-    // the dock lives in the middle band of the page: it fades in once a quarter
-    // of the page is scrolled and is gone again in the last quarter
-    var show = isScrollButtonSection() && p > 0.25 && p < 0.75;
+    // the dock lives in the middle band of the page: it fades in once a sixth
+    // of the page is scrolled and is gone again in the last sixth
+    var show = isScrollButtonSection() && p > (1 / 6) && p < (5 / 6);
     dock.style.opacity = show ? '1' : '0';
     dock.style.transform = show ? 'translateY(0) scale(1)' : 'translateY(18px) scale(.92)';
     dock.style.pointerEvents = show ? 'auto' : 'none';
