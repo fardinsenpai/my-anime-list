@@ -90,6 +90,7 @@
         <button class="admin-g-tab" data-tab="ai"      onclick="switchAdminTab('ai')"><b>🤖</b> AI<span>chat model</span></button>
         <button class="admin-g-tab" data-tab="avatars" onclick="switchAdminTab('avatars'); renderAvatarsTab()"><b>🖼️</b> AVATARS<span>chat avatars</span></button>
         <button class="admin-g-tab" data-tab="notes"   onclick="switchAdminTab('notes'); renderNotesTab()"><b>📝</b> NOTES<span>private pad</span></button>
+        <button class="admin-g-tab" data-tab="logo"    onclick="switchAdminTab('logo'); renderLogoTab()"><b>🎨</b> LOGO<span>panel identity</span></button>
       </nav>
 
       <div class="ad-side-block">
@@ -357,6 +358,41 @@
         <div class="ad-status dim" id="notesSyncStatus"></div>
       </section>
 
+      <!-- LOGO -->
+      <section class="admin-g-content" id="tabLogo">
+        <h2 class="ad-h">// PANEL LOGO //</h2>
+        <div class="ad-note">
+          Give the console your own face: upload a picture and/or set the wordmark and subtitle.
+          It is applied instantly to the header, the PIN gate, the browser-tab title and the tab icon —
+          and kept in <b>this browser only</b>, so it never touches the repo or the public site.
+        </div>
+
+        <div id="adLogoPreview" style="display:flex;align-items:center;gap:14px;margin:16px 0;padding:16px 18px;border:1px solid var(--g-line);border-radius:14px;background:var(--g-bg);min-height:84px;"></div>
+
+        <div class="ad-row">
+          <input type="text" id="adLogoMain" class="admin-g-input" placeholder="Wordmark (ROOT@FARDIN)" maxlength="28" oninput="adLogoPreview()">
+          <input type="text" id="adLogoIcon" class="admin-g-input narrow" placeholder="⚡" maxlength="4" title="Icon shown before the wordmark" oninput="adLogoPreview()">
+        </div>
+        <input type="text" id="adLogoSub" class="admin-g-input" placeholder="Subtitle (~ ADMIN PANEL v3.0 …)" maxlength="70" oninput="adLogoPreview()">
+
+        <div class="ad-row wrap">
+          <button class="admin-g-btn tight" onclick="adLogoPickFile()">📷 UPLOAD PICTURE</button>
+          <button class="admin-g-btn tight" onclick="adLogoDropImage()">🧹 REMOVE PICTURE</button>
+          <input type="file" id="adLogoFile" accept="image/*" style="display:none" onchange="adLogoFileChosen(this)">
+          <span class="ad-count" id="adLogoImgNote">no picture — wordmark only</span>
+        </div>
+
+        <div class="ad-row wrap">
+          <button class="admin-g-btn" onclick="adLogoSave()">▶ APPLY LOGO</button>
+          <button class="admin-g-btn tight danger" onclick="adLogoReset()">↺ RESET TO DEFAULT</button>
+        </div>
+
+        <div class="ad-note" style="margin-top:14px">
+          Picture tips: a PNG with transparency looks best. It is downscaled to 512px and stored in this
+          browser, so the panel stays fast and the site gains no weight.
+        </div>
+      </section>
+
     </main>
   </div>
 
@@ -369,6 +405,6 @@
   </div>
 </div>
 
-<script src="admin.js?v=20261024c"></script>
+<script src="admin.js?v=20261024e"></script>
 </body>
 </html>

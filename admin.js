@@ -2129,6 +2129,181 @@ function renderAvatarsTab() {
   renderAvatarPicker();
 }
 
+/* ══════════════════════════════════════════════════════════════════════
+   LOGO module — a picture and/or wordmark for the console. Applied to the
+   header, the PIN gate, the tab title and the favicon. Browser-local:
+   the repo never sees it, so the public site gains no weight.
+   ══════════════════════════════════════════════════════════════════════ */
+var ADMIN_LOGO_KEY = 'fardin.admin.logo';
+var ADMIN_LOGO_DEFAULT = {
+  main: 'ROOT@FARDIN',
+  sub: '~ ADMIN PANEL v3.0 · [ HACK THE MAINFRAME ]',
+  icon: '',
+  src: ''
+};
+var ADMIN_LOGO = { main: ADMIN_LOGO_DEFAULT.main, sub: ADMIN_LOGO_DEFAULT.sub, icon: '', src: '' };
+
+function adEsc(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+  });
+}
+
+function adminLogoLoad() {
+  var cfg = { main: ADMIN_LOGO_DEFAULT.main, sub: ADMIN_LOGO_DEFAULT.sub, icon: '', src: '' };
+  try {
+    var raw = localStorage.getItem(ADMIN_LOGO_KEY);
+    if (raw) {
+      var o = JSON.parse(raw) || {};
+      cfg.main = String(o.main == null ? cfg.main : o.main).slice(0, 28) || ADMIN_LOGO_DEFAULT.main;
+      cfg.sub = String(o.sub == null ? cfg.sub : o.sub).slice(0, 70);
+      cfg.icon = String(o.icon == null ? '' : o.icon).slice(0, 4);
+      cfg.src = /^data:image\/(png|jpeg|webp|gif);base64,/i.test(String(o.src || '')) ? String(o.src) : '';
+    }
+  } catch (e) {}
+  return cfg;
+}
+
+function adminLogoApply(cfg) {
+  cfg = cfg || adminLogoLoad();
+  ADMIN_LOGO = cfg;
+
+  var main = document.querySelector('.ad-brand-main');
+  if (main) {
+    main.innerHTML =
+      (cfg.src ? '<img src="' + cfg.src + '" alt="" style="height:24px;width:auto;max-width:130px;object-fit:contain;vertical-align:middle;margin-right:9px;border-radius:6px;">' : '') +
+      (cfg.icon ? '<span style="margin-right:6px;">' + adEsc(cfg.icon) + '</span>' : '') +
+      adEsc(cfg.main);
+  }
+  var sub = document.querySelector('.ad-brand-sub');
+  if (sub) { sub.textContent = cfg.sub; sub.style.display = cfg.sub ? '' : 'none'; }
+
+  var gate = document.querySelector('.ad-gate-logo');
+  if (gate) {
+    if (cfg.src) gate.innerHTML = '<img src="' + cfg.src + '" alt="" style="height:46px;width:auto;max-width:190px;object-fit:contain;">';
+    else gate.textContent = cfg.main || 'SECURE';
+  }
+
+  var icon = document.querySelector('link[rel="icon"]');
+  if (icon) icon.href = cfg.src || 'logo.png';
+
+  document.title = (cfg.main || 'ADMIN') + ' ~ ADMIN';
+
+  var note = document.getElementById('adLogoImgNote');
+  if (note) note.textContent = cfg.src ? 'picture loaded ✓' : 'no picture — wordmark only';
+  adLogoPreview();
+}
+
+function adLogoPreview() {
+  var box = document.getElementById('adLogoPreview');
+  if (!box) return;
+  var mainEl = document.getElementById('adLogoMain');
+  var subEl = document.getElementById('adLogoSub');
+  var iconEl = document.getElementById('adLogoIcon');
+  var main = mainEl ? mainEl.value : ADMIN_LOGO.main;
+  var sub = subEl ? subEl.value : ADMIN_LOGO.sub;
+  var icon = iconEl ? iconEl.value : ADMIN_LOGO.icon;
+  var src = ADMIN_LOGO.src;
+  box.innerHTML =
+    (src
+      ? '<img src="' + src + '" alt="" style="height:54px;width:auto;max-width:180px;object-fit:contain;border-radius:8px;flex:0 0 auto;">'
+      : '<div style="flex:0 0 auto;width:54px;height:54px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:26px;background:var(--g-faint);border:1px solid var(--g-line);">' + adEsc(icon || '🎨') + '</div>') +
+    '<div style="min-width:0;">' +
+      '<div style="font-family:var(--font-display),sans-serif;font-size:20px;letter-spacing:1px;color:var(--g-ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' +
+        adEsc(main || ADMIN_LOGO_DEFAULT.main) + '</div>' +
+      '<div style="font-size:10px;letter-spacing:2.4px;color:var(--g-dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' +
+        adEsc(sub || '') + '</div>' +
+    '</div>';
+}
+
+function renderLogoTab() {
+  var main = document.getElementById('adLogoMain');
+  var sub = document.getElementById('adLogoSub');
+  var icon = document.getElementById('adLogoIcon');
+  if (main) main.value = ADMIN_LOGO.main;
+  if (sub) sub.value = ADMIN_LOGO.sub;
+  if (icon) icon.value = ADMIN_LOGO.icon;
+  adLogoPreview();
+}
+
+function adLogoPickFile() {
+  var f = document.getElementById('adLogoFile');
+  if (f) f.click();
+}
+
+function adLogoFileChosen(input) {
+  var file = input && input.files && input.files[0];
+  if (!file) return;
+  if (!/^image\//i.test(file.type)) { msgFail('That file is not an image'); input.value = ''; return; }
+  var reader = new FileReader();
+  reader.onload = function () {
+    var img = new Image();
+    img.onload = function () {
+      var max = 512;
+      var scale = Math.min(1, max / Math.max(img.width || 1, img.height || 1));
+      var w = Math.max(1, Math.round((img.width || 1) * scale));
+      var h = Math.max(1, Math.round((img.height || 1) * scale));
+      var c = document.createElement('canvas');
+      c.width = w; c.height = h;
+      var ctx = c.getContext('2d');
+      ctx.clearRect(0, 0, w, h);
+      ctx.drawImage(img, 0, 0, w, h);
+      try {
+        ADMIN_LOGO.src = c.toDataURL('image/png');
+      } catch (e) {
+        msgFail('Could not read that picture');
+        return;
+      }
+      adLogoPreview();
+      var note = document.getElementById('adLogoImgNote');
+      if (note) note.textContent = 'picture loaded — press ▶ APPLY LOGO';
+      msgOk('Picture loaded (' + w + '×' + h + ')');
+    };
+    img.onerror = function () { msgFail('Could not open that picture'); };
+    img.src = String(reader.result || '');
+  };
+  reader.onerror = function () { msgFail('Could not read that file'); };
+  reader.readAsDataURL(file);
+  input.value = '';
+}
+
+function adLogoDropImage() {
+  ADMIN_LOGO.src = '';
+  adLogoPreview();
+  var note = document.getElementById('adLogoImgNote');
+  if (note) note.textContent = 'no picture — wordmark only (press APPLY to save)';
+}
+
+function adLogoSave() {
+  var main = String((document.getElementById('adLogoMain') || {}).value || '').trim();
+  var sub = String((document.getElementById('adLogoSub') || {}).value || '').trim();
+  var icon = String((document.getElementById('adLogoIcon') || {}).value || '').trim();
+  var cfg = {
+    main: main.slice(0, 28) || ADMIN_LOGO_DEFAULT.main,
+    sub: sub.slice(0, 70),
+    icon: icon.slice(0, 4),
+    src: ADMIN_LOGO.src || ''
+  };
+  try {
+    localStorage.setItem(ADMIN_LOGO_KEY, JSON.stringify(cfg));
+  } catch (e) {
+    msgFail('Could not save — the picture may be too big for this browser');
+    return;
+  }
+  adminLogoApply(cfg);
+  msgOk('Logo applied');
+}
+
+function adLogoReset() {
+  try { localStorage.removeItem(ADMIN_LOGO_KEY); } catch (e) {}
+  adminLogoApply({ main: ADMIN_LOGO_DEFAULT.main, sub: ADMIN_LOGO_DEFAULT.sub, icon: '', src: '' });
+  renderLogoTab();
+  msgOk('Back to ROOT@FARDIN');
+}
+
+ADMIN_LOGO = adminLogoLoad();
+adminLogoApply(ADMIN_LOGO);
+
 (function adminBoot() {
   var retry = document.getElementById('bootRetry');
 
