@@ -2045,6 +2045,15 @@
 .card.hidden { display: none; }
 .card { transition: transform 0.2s ease, box-shadow 0.2s ease; }
 
+/* gold pulse on the card the chat just jumped to (uses the existing neon ring, so the
+   card's floating animation keeps running) */
+.card.card-jump-flash::before { animation: cardJumpFlash 1.35s ease-out 2; }
+@keyframes cardJumpFlash {
+  0%   { border-color: rgba(245,197,24,0); box-shadow: 0 0 0 rgba(245,197,24,0); }
+  35%  { border-color: #f5c518; box-shadow: 0 0 22px rgba(245,197,24,.85); }
+  100% { border-color: rgba(245,197,24,0); box-shadow: 0 0 0 rgba(245,197,24,0); }
+}
+
   /* style */
 .card:nth-child(5n+1) { animation-delay: 0.08s; }
 .card:nth-child(5n+2) { animation-delay: 0.12s; }

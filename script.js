@@ -2348,6 +2348,7 @@ function richChatText(text) {
     const strong = document.createElement('strong');
     strong.className = 'msg-strong';
     strong.textContent = m[1];
+    makeAnimeLink(strong);          // underlined + click jumps to that anime's card
     frag.appendChild(strong);
     last = m.index + m[0].length;
   }
@@ -2384,6 +2385,105 @@ function paintNameInFrag(frag) {
     });
     node.parentNode.replaceChild(repl, node);
   });
+}
+
+/* ===== anime names in the chat are links back to their card ===== */
+// Every card on Home, keyed by its title, so a name in the chat can be matched to a card.
+// Rebuilt only when the grid changes shape — the typewriter reprints the text on every chunk.
+let _cardIndex = null;
+let _cardIndexCount = -1;
+let _cardIndexProbe = null;
+
+function normaliseTitle(s) {
+  return String(s == null ? '' : s)
+    .toLowerCase()
+    .replace(/[\u2018\u2019]/g, "'")
+    .replace(/[\u201c\u201d]/g, '"')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function animeCardIndex() {
+  const cards = Array.from(document.querySelectorAll('#grid .card'));
+  if (_cardIndex && cards.length === _cardIndexCount && _cardIndexProbe && document.contains(_cardIndexProbe)) {
+    return _cardIndex;
+  }
+  const map = new Map();
+  cards.forEach(function (card) {
+    const t = card.querySelector('.title');
+    const key = normaliseTitle(t ? t.textContent : '');
+    if (key && !map.has(key)) map.set(key, card);
+  });
+  _cardIndex = map;
+  _cardIndexCount = cards.length;
+  _cardIndexProbe = cards.length ? cards[0] : null;
+  return map;
+}
+
+// "" (unknown) → null. Exact title first, then the closest prefix match, so
+// "Demon Slayer" finds "Demon Slayer: Kimetsu no Yaiba" and "Naruto" never steals
+// "Naruto Shippuden".
+function findAnimeCard(name) {
+  const want = normaliseTitle(name);
+  if (!want) return null;
+  const map = animeCardIndex();
+  if (map.has(want)) return map.get(want);
+  let best = null;
+  let bestLen = Infinity;
+  map.forEach(function (card, key) {
+    if (key.length >= bestLen) return;
+    if (key.indexOf(want) === 0 || want.indexOf(key) === 0) { best = card; bestLen = key.length; }
+  });
+  return best;
+}
+
+// Mark a yellow word as a link when it really is one of Fardin's anime.
+function makeAnimeLink(el) {
+  const card = findAnimeCard(el.textContent);
+  if (!card) return;
+  const titleEl = card.querySelector('.title');
+  const title = (titleEl ? titleEl.textContent : el.textContent).trim();
+  el.classList.add('msg-strong-link');
+  el.setAttribute('data-anime', title);
+  el.setAttribute('title', 'Show ' + title + ' on the page');
+  el.setAttribute('role', 'button');
+  el.setAttribute('tabindex', '0');
+}
+
+// Underline clicked → close the chat if it covers the screen, open Home, scroll the card in.
+function jumpToAnimeCard(title) {
+  const card = findAnimeCard(title);
+  if (!card) return;
+  const chatBoxEl = document.getElementById('chatBox');
+  const fullScreenChat = window.matchMedia('(max-width: 768px)').matches;
+  if (fullScreenChat && chatBoxEl && chatBoxEl.classList.contains('open')) toggleChat();
+
+  const grid = document.getElementById('grid');
+  const leftHome = !grid || grid.style.display === 'none';
+  if (leftHome && typeof goHome === 'function') {
+    goHome();
+    window.scrollTo({ top: 0, behavior: 'auto' });   // cancel goHome's own smooth scroll
+  }
+
+  // a search term can be hiding the card
+  const search = document.getElementById('searchBox');
+  if (search && search.value) {
+    search.value = '';
+    search.dispatchEvent(new Event('input', { bubbles: true }));
+  }
+  if (typeof filterCards === 'function') filterCards();
+
+  card.classList.remove('hidden');
+  card.style.display = '';
+  if (typeof updateBadgeNumbers === 'function') updateBadgeNumbers();
+
+  setTimeout(function () {
+    card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    card.classList.remove('card-jump-flash');
+    void card.offsetWidth;                 // let the pulse replay on a second click
+    card.classList.add('card-jump-flash');
+    setTimeout(function () { card.classList.remove('card-jump-flash'); }, 2800);
+  }, leftHome ? 140 : 30);
 }
 
 function addMessage(text, type, shouldSave = true) {
@@ -3181,6 +3281,26 @@ chatInput.addEventListener('keydown', (e) => {
     e.preventDefault();
     sendMessage();
   }
+});
+
+// ===== ANIME NAME IN A REPLY → JUMP TO ITS CARD =====
+// Delegated, so it keeps working while the typewriter reprints the bubble.
+function chatAnimeLinkTarget(e) {
+  const t = e.target;
+  return (t && t.closest) ? t.closest('.msg-strong-link') : null;
+}
+chatMessages.addEventListener('click', function (e) {
+  const link = chatAnimeLinkTarget(e);
+  if (!link) return;
+  e.preventDefault();
+  jumpToAnimeCard(link.getAttribute('data-anime') || link.textContent);
+});
+chatMessages.addEventListener('keydown', function (e) {
+  if (e.key !== 'Enter' && e.key !== ' ') return;
+  const link = chatAnimeLinkTarget(e);
+  if (!link) return;
+  e.preventDefault();
+  jumpToAnimeCard(link.getAttribute('data-anime') || link.textContent);
 });
 
 // ===== CLOSE CHAT ON OUTSIDE CLICK =====

@@ -286,6 +286,21 @@
 .chat-messages .msg.typing .msg-bubble { padding: 11px 14px; }
 /* the AI wraps anime titles (and names) in **bold** — always show that in the site's yellow */
 .chat-messages .msg-bubble .msg-strong { color: #f5c518; font-weight: 700; }
+/* …and when that yellow word is one of Fardin's anime, it is a link back to its card */
+.chat-messages .msg-bubble .msg-strong-link {
+  text-decoration: underline;
+  text-decoration-color: rgba(245,197,24,.5);
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 3px;
+  cursor: pointer;
+  transition: color .16s ease, text-decoration-color .16s ease;
+}
+.chat-messages .msg-bubble .msg-strong-link:hover,
+.chat-messages .msg-bubble .msg-strong-link:focus-visible {
+  color: #ffe066;
+  text-decoration-color: #ffe066;
+  outline: none;
+}
 .chat-messages .typing-animation { display: flex; gap: 5px; align-items: center; }
 .chat-messages .typing-animation span {
   width: 7px; height: 7px; border-radius: 50%; background: #ff7eb3;
