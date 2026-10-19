@@ -2599,8 +2599,11 @@ function suggestRowsFor(anime) {
 
 // Draw them under this reply — only the newest answer keeps its suggestions, and they
 // stay tucked away until the visitor asks for them (scrolls down or taps the input box).
+let _suggestsToken = 0;
+
 function renderSuggestions(msgDiv, anime) {
-  if (!msgDiv || !msgDiv.parentNode) return;
+  if (!msgDiv) return;
+  const myToken = ++_suggestsToken;
   chatMessages.querySelectorAll('.msg-suggests').forEach(function (el) { el.remove(); });
   _pendingSuggests = null;
   const rows = suggestRowsFor(anime);
@@ -2622,8 +2625,19 @@ function renderSuggestions(msgDiv, anime) {
     b.addEventListener('click', r.run);
     box.appendChild(b);
   });
-  msgDiv.parentNode.insertBefore(box, msgDiv.nextSibling);
-  _pendingSuggests = box;          // waits for scroll-down / input tap
+  // the answer can finish before addMessage() has attached the row (instant reveal in a
+  // background tab), so wait for it to land
+  let tries = 24;
+  (function place() {
+    if (myToken !== _suggestsToken) return;          // a newer reply took over
+    if (!msgDiv.parentNode) {
+      if (tries-- <= 0) return;
+      requestAnimationFrame(place);
+      return;
+    }
+    msgDiv.parentNode.insertBefore(box, msgDiv.nextSibling);
+    _pendingSuggests = box;                          // waits for scroll-down / input tap
+  })();
 }
 
 /* ===== the ↘ rows wait to be asked for ===== */
