@@ -7311,12 +7311,34 @@ function gsiBasicSignIn() {
   signInWithGoogle();   // the original redirect flow, untouched
 }
 
+// Google's popover has to live at the top level of the page. Inside the fixed header it is
+// trapped in the header's stacking context (z-index 10000), so the login page (z-index
+// 10040) always painted over it — the Google button was there but invisible behind the new
+// login popup. Moved straight to <body> it keeps `position: fixed`, so it looks the same.
+function placeGsiPop() {
+  var pop = gsiPop();
+  if (!pop) return;
+  if (pop.parentNode !== document.body) document.body.appendChild(pop);
+  pop.style.top = '';
+  pop.style.left = 'auto';
+  pop.style.right = '';
+  var lg = document.getElementById('loginPage');
+  if (lg && !lg.hidden) {
+    // opened from the login page: centre it so it clearly belongs to that card
+    var w = pop.offsetWidth || 332;
+    pop.style.top = '70px';
+    pop.style.left = Math.max(12, Math.round((window.innerWidth - w) / 2)) + 'px';
+    pop.style.right = 'auto';
+  }
+}
+
 // Called from the topbar button while signed out.
 function startGoogleSignIn() {
   var pop = gsiPop();
   if (!pop) { signInWithGoogle(); return; }   // no markup? behave exactly as before
   if (!pop.hidden) { gsiClosePop(); return; } // clicking Sign in again closes it
   pop.hidden = false;
+  placeGsiPop();                              // out of the header: above the login page too
   var aBtn = document.getElementById('accountBtn');
   if (aBtn) aBtn.setAttribute('aria-expanded', 'true');
   if (gsiAvailable()) { gsiRender(); return; }
@@ -7344,6 +7366,19 @@ function startGoogleSignIn() {
     });
     document.addEventListener('keydown', function(e) {
       if (e.key === 'Escape') gsiClosePop();
+    });
+    // a tap outside closes it (the pop lives on <body> now, so nothing else does this)
+    document.addEventListener('pointerdown', function(e) {
+      var pop = gsiPop();
+      if (!pop || pop.hidden) return;
+      var t = e.target;
+      if (pop === t || (t && pop.contains(t))) return;
+      if (t && t.closest && (t.closest('#accountBtn') || t.closest('#lgGoogleBtn'))) return;
+      gsiClosePop();
+    }, true);
+    window.addEventListener('resize', function() {
+      var pop = gsiPop();
+      if (pop && !pop.hidden) placeGsiPop();
     });
   }
   if (document.readyState === 'complete' || document.readyState === 'interactive') wire();
