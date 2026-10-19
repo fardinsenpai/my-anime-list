@@ -4706,6 +4706,9 @@ document.addEventListener('click', function(e) {
   var htLoading = false;
   function renderFeed(comments) {
     if (!FEED) return;
+    // whatever is now on screen is the new baseline, so the next poll can tell
+    // a real change from a repeat of what this tab already shows
+    htLastSig = htSig(comments);
     FEED.innerHTML = '';
     if (!comments || comments.length === 0) {
       FEED.innerHTML = htLoading
