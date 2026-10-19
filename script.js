@@ -7119,10 +7119,23 @@ function toggleAccountPop(force) {
   btn.setAttribute('aria-expanded', open ? 'true' : 'false');
 }
 
+// Where an OAuth provider should send the visitor back to.
+//
+// This site's router rewrites the address bar to /my-anime-list/home, but GitHub
+// Pages does not actually serve that path — it serves 404.html, whose SPA
+// redirect bounces to the root and LOSES the #access_token in the process, so a
+// redirect login looks like it did nothing. Google never noticed because it
+// signs in through a popup (id_token) instead of a redirect.
+// So: always come back to the folder that really serves the app, tokens and all.
+function authReturnUrl() {
+  var p = String(window.location.pathname || '/');
+  return window.location.origin + p.replace(/[^/]*$/, '');
+}
+
 async function signInWithGoogle() {
   var c = authClient();
   if (!c) { authNotify('Sign-in is unavailable right now 😢'); return; }
-  var back = window.location.origin + window.location.pathname;
+  var back = authReturnUrl();
   try {
     var res = await c.auth.signInWithOAuth({
       provider: 'google',
@@ -7143,7 +7156,7 @@ async function signInWithGoogle() {
 async function signInWithGitHub() {
   var c = authClient();
   if (!c) { authNotify('Sign-in is unavailable right now 😢'); return; }
-  var back = window.location.origin + window.location.pathname;
+  var back = authReturnUrl();
   try {
     var res = await c.auth.signInWithOAuth({
       provider: 'github',
