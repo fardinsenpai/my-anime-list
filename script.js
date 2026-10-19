@@ -5135,6 +5135,7 @@ document.addEventListener('click', function(e) {
   if (htOpenBtn) htOpenBtn.addEventListener('click', function() {
     if (loadComments().length === 0) { htLoading = true; renderFeed([]); }
     syncFromSupabase(true);
+    htSyncAccountName();
     htProbeColumns().then(function(cols) {
       if (cols.avatar) htBuildPicker();
       renderFeed(loadComments());   // pin buttons appear once we know the column exists
@@ -5251,6 +5252,36 @@ document.addEventListener('click', function(e) {
     var htSavedName = localStorage.getItem(NAME_KEY);
     if (htSavedName && nameInput) nameInput.value = htSavedName;
   } catch(e) {}
+
+  // signed in? the account name fills the box (and follows a later sign-in)
+  var htAutoName = '';
+  function htAccountName() {
+    try {
+      if (!AUTH_USER) return '';
+      var full = String(AUTH_USER.name || '').trim();
+      var first = String(AUTH_USER.first || '').trim();
+      var n = full || first;
+      if (n.length > 20) n = (first && first.length <= 20) ? first : n.slice(0, 20);
+      return n;
+    } catch (e) { return ''; }
+  }
+  function htSyncAccountName() {
+    if (!nameInput) return;
+    var n = htAccountName();
+    var cur = String(nameInput.value || '').trim();
+    if (n) {
+      // fill an empty box - never overwrite a name the person typed themselves
+      if (!cur || cur === htAutoName) { nameInput.value = n; htAutoName = n; }
+    } else if (cur && cur === htAutoName) {
+      nameInput.value = '';
+      htAutoName = '';
+    }
+  }
+  htSyncAccountName();
+  document.addEventListener('fardin:auth-changed', function() {
+    htSyncAccountName();
+    if (htAvatarColumn) htBuildPicker();
+  });
   if (nameInput) nameInput.addEventListener('change', function() {
     try { localStorage.setItem(NAME_KEY, nameInput.value.trim()); } catch(e) {}
   });
@@ -7568,6 +7599,8 @@ function setAuthUser(session, opts) {
       if (!awSeen) window.setTimeout(function() { openAvatarWelcome(); }, 600);   // let the toast land first
       authNotify('Signed in as ' + (next.first || next.email) + ' ✨');
     }
+    // other parts of the page (Hot Takes) follow the signed-in name/photo
+    try { document.dispatchEvent(new CustomEvent('fardin:auth-changed')); } catch (e) {}
   }
 }
 
