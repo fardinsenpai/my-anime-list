@@ -1631,7 +1631,9 @@ function fillEditExtras() {
 
   var clean = function (el, drop) {
     if (!el) return;
-    var v = el.value.replace(/[ðŸŒ¸ðŸ“ºðŸŽ¬]/g, '');
+    // strip by codepoint: the site's emoji carry variation selectors the old
+    // /[ðŸŒ¸ðŸ“º]/ regex never matched, which is why "220" arrived as "ðŸ“º 220".
+    var v = el.value.replace(/[^\x20-\x7E]/g, '');
     if (drop) v = v.replace(drop, '');
     el.value = v.replace(/\s+/g, ' ').trim();
   };
