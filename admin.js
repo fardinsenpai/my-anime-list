@@ -2181,7 +2181,8 @@ function adminLogoApply(cfg) {
   var gate = document.querySelector('.ad-gate-logo');
   if (gate) {
     if (cfg.src) gate.innerHTML = '<img src="' + cfg.src + '" alt="" style="height:46px;width:auto;max-width:190px;object-fit:contain;">';
-    else gate.textContent = cfg.main || 'SECURE';
+    else if (cfg.main === ADMIN_LOGO_DEFAULT.main && cfg.sub === ADMIN_LOGO_DEFAULT.sub && !cfg.icon) gate.textContent = 'SECURE';
+    else gate.textContent = (cfg.icon ? cfg.icon + ' ' : '') + cfg.main;
   }
 
   var icon = document.querySelector('link[rel="icon"]');
