@@ -3546,6 +3546,153 @@ document.addEventListener('click', (e) => {
 });
 
 // ===== AI CONTEXT HELPER - Enhanced context building =====
+
+/* ══════════════════════════════════════
+   ⚡ LOCAL QUICK ANSWERS
+   Every quick-action chip is answerable from Fardin's own list, so they are answered
+   right here — no Groq request, no tokens spent.
+══════════════════════════════════════ */
+
+// the same Power Score Anime Duel uses, so both pages agree on "rated"
+function overallScore(a) {
+  const mal = parseFloat(a.malScore || 0);
+  const story = parseFloat(a.storyRating || 0);
+  const anim = parseFloat(a.animRating || 0);
+  const chars = parseFloat(a.characters || 0);
+  const anilist = parseFloat(a.anilist || 0) / 10;
+  return parseFloat(((mal * 0.25) + (story * 0.3) + (anim * 0.2) + (chars * 0.1) + (anilist * 0.15)).toFixed(2));
+}
+
+let ratingsCache = null;
+let ratingsLoading = null;
+function loadRatings() {
+  if (ratingsCache) return Promise.resolve(ratingsCache);
+  if (!ratingsLoading) {
+    ratingsLoading = fetch('anime-ratings.json')
+      .then(function (r) { return r.json(); })
+      .then(function (d) { ratingsCache = d || {}; return ratingsCache; })
+      .catch(function () { ratingsLoading = null; return null; });
+  }
+  return ratingsLoading;
+}
+
+function localCards() {
+  return Array.prototype.slice.call(document.querySelectorAll('.anime-card,.card'));
+}
+
+// title / episodes / seasons, exactly as the card back shows them
+function cardFacts(card) {
+  if (!card) return null;
+  const text = function (sel) {
+    const el = card.querySelector(sel);
+    return el ? String(el.textContent || '').trim() : '';
+  };
+  const title = text('.title') || text('.back-title');
+  if (!title) return null;
+  return { title: title, ep: text('.back-episodes'), seas: text('.back-season') };
+}
+
+// the reply a real API answer would have produced, minus the request
+function quickAiReply(text) {
+  return { ok: true, status: 200, json: function () { return Promise.resolve({ choices: [{ message: { content: text } }] }); } };
+}
+
+function stripEmoji(name) {
+  return String(name || '').replace(/[^\w\s/-]/g, '').replace(/\s+/g, ' ').trim();
+}
+
+// which genre does this message ask for? (works for every chip, emoji or not)
+function genreFromMessage(msg) {
+  const GEN = window.ANIME_GENRES || {};
+  const m = String(msg || '').toLowerCase();
+  let bestKey = null;
+  let bestLen = -1;
+  Object.keys(GEN).forEach(function (key) {
+    if (key === 'All') return;
+    const name = stripEmoji(key).toLowerCase();
+    if (!name || m.indexOf(name) === -1) return;
+    if (name.length > bestLen) { bestLen = name.length; bestKey = key; }   // longest match wins
+  });
+  if (bestKey) return bestKey;
+  // everyday wording that isn't a genre key of its own
+  if (/\bromance\b/.test(m)) {
+    const r = Object.keys(GEN).find(function (k) { return /romcom|romance/i.test(k); });
+    if (r) return r;
+  }
+  return null;
+}
+
+function pickLine(f) {
+  return [f.ep, f.seas].filter(Boolean).join(' • ');
+}
+
+function localQuickAnswer(userMsg) {
+  const msg = String(userMsg || '');
+  if (!msg) return null;
+
+  // 🗓️ when was the hub last updated? — the page's own publish time, straight from the header
+  if (/last updated|latest update|site.*updat|updat.*site|when.*updat/i.test(msg)) {
+    let when = '';
+    try {
+      const d = new Date(document.lastModified);
+      if (!isNaN(d.getTime())) when = d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+    } catch (e) {}
+    return quickAiReply('This hub was last published ' + (when ? 'on **' + when + '**' : 'very recently') +
+      ' — Fardin keeps adding anime to the list, so check back often! ⚡');
+  }
+
+  // 👤 who is Fardin?
+  if (/about fardin|who is fardin|who'?s fardin|fardin.*(bio|owner|taste)/i.test(msg)) {
+    return quickAiReply('Fardin is the owner of this hub — an anime lover who tracks everything he has watched and ranks it all for you.\n\n' +
+      'His taste is wide: **action, comedy, romance and thriller**, with great storytelling and strong character development over flashy fights. ' +
+      'His full info sits in the sidebar under **Owner Info** ⚡');
+  }
+
+  // 🌙 tonight — a short one, so it fits in an evening
+  if (/tonight/i.test(msg)) {
+    const cards = localCards();
+    if (!cards.length) return null;
+    const epsOf = function (c) { const f = cardFacts(c); const n = f ? parseInt(String(f.ep).replace(/\D/g, ''), 10) : 0; return isNaN(n) ? 0 : n; };
+    const shortOnes = cards.filter(function (c) { const n = epsOf(c); return n > 0 && n <= 26; });
+    const pool = shortOnes.length ? shortOnes : cards;
+    const f = cardFacts(pool[Math.floor(Math.random() * pool.length)]);
+    if (!f) return null;
+    const meta = pickLine(f);
+    return quickAiReply("Tonight's pick from Fardin's list:\n\n**" + f.title + "**\n" + (meta ? meta + '\n\n' : '\n') +
+      (shortOnes.length ? 'A short one — perfect for a single sitting 😌' : 'A real ride — clear your evening 😄') +
+      ' Want a different vibe? Just tell me.');
+  }
+
+  // ⭐ highest rated — computed from anime-ratings.json, same score as Anime Duel
+  if (/highest rated|top rated|best rated|highest score|top anime|best anime/i.test(msg)) {
+    return loadRatings().then(function (r) {
+      const rows = [];
+      if (r) {
+        Object.keys(r).forEach(function (k) {
+          const a = r[k];
+          if (!a || !a.title) return;
+          const score = overallScore(a);
+          if (score > 0) rows.push({ title: String(a.title), score: score });
+        });
+        rows.sort(function (x, y) { return y.score - x.score; });
+      }
+      if (!rows.length) {
+        const f = cardFacts(localCards()[0]);
+        return quickAiReply(f ? "The score sheet didn't load for me just now — but Fardin's list opens with **" + f.title + "** 😄"
+                              : 'Give me a second and ask me again! ⚡');
+      }
+      const medals = ['🥇', '🥈', '🥉'];
+      const body = rows.slice(0, 3).map(function (t, i) {
+        return medals[i] + ' **' + t.title + '** — ' + t.score.toFixed(2) + ' 🌟';
+      }).join('\n');
+      return quickAiReply("Highest rated in Fardin's list (overall score):\n\n" + body +
+        '\n\nWant the full head-to-head breakdown? Open **Anime Duel** and put two of them in the ring ⚔️');
+    });
+  }
+
+  return null;
+}
+
 const originalFetch = window.fetch;
 
 window.fetch = function(...args) {
@@ -3557,6 +3704,13 @@ window.fetch = function(...args) {
     try {
       const body = JSON.parse(options.body);
       const userMsg = body.messages[body.messages.length - 1]?.content || '';
+
+      // ⚡ quick buttons: answered from Fardin's own list, so no request leaves the browser
+      const quickLocal = localQuickAnswer(userMsg);
+      if (quickLocal) {
+        console.log('Local quick answer — no Groq tokens used');
+        return Promise.resolve(quickLocal);
+      }
 
       // Build genre reverse-map: anime number → genres
       const animeGenres = window.ANIME_GENRES || {};
@@ -3592,23 +3746,19 @@ window.fetch = function(...args) {
       // Random/suggest: pick one and override
       if (/random|suggest|pick|recommend|give.*anime/i.test(userMsg)) {
         let forcedTitle = '', forcedGenre = '', forcedEp = '', forcedSeas = '';
-        const genreMatch = userMsg.match(/(sports|action|romance|comedy|romcom|isekai|horror|dark|sci.fi|thriller|slice.of.life|adventure|fantasy|psychological|historical)/i);
-        if (genreMatch) {
-          const askedGenre = genreMatch[1].toLowerCase();
-          const genreKey = Object.keys(animeGenres).find(k => k.toLowerCase().includes(askedGenre) || askedGenre.includes(k.toLowerCase()));
-          if (genreKey) {
-            const validNums = [...animeGenres[genreKey].nums];
-            const validCards = cards.filter(c => {
-              const n = c.querySelector('[class*="number"], [class*="no"]')?.textContent?.replace(/\D/g, '');
-              return n && validNums.includes(parseInt(n));
-            });
-            const validCard = validCards.length ? validCards[Math.floor(Math.random() * validCards.length)] : null;
-            if (validCard) {
-              forcedTitle = validCard.querySelector('.title, .back-title, h3')?.textContent?.trim() || '';
-              forcedEp = validCard.querySelector('.back-episodes')?.textContent?.trim() || '';
-              forcedSeas = validCard.querySelector('.back-season')?.textContent?.trim() || '';
-              forcedGenre = genreKey;
-            }
+        const genreKey = genreFromMessage(userMsg);
+        if (genreKey) {
+          const validNums = [...animeGenres[genreKey].nums];
+          const validCards = cards.filter(c => {
+            const n = c.querySelector('[class*="number"], [class*="no"]')?.textContent?.replace(/\D/g, '');
+            return n && validNums.includes(parseInt(n));
+          });
+          const validCard = validCards.length ? validCards[Math.floor(Math.random() * validCards.length)] : null;
+          if (validCard) {
+            forcedTitle = validCard.querySelector('.title, .back-title, h3')?.textContent?.trim() || '';
+            forcedEp = validCard.querySelector('.back-episodes')?.textContent?.trim() || '';
+            forcedSeas = validCard.querySelector('.back-season')?.textContent?.trim() || '';
+            forcedGenre = stripEmoji(genreKey);
           }
         } else {
           const randomCard = cards[Math.floor(Math.random() * cards.length)];
@@ -3622,10 +3772,7 @@ window.fetch = function(...args) {
             ? `Here's ${art} ${forcedGenre} anime from Fardin's list:\n\n**${forcedTitle}**\n${forcedEp} • ${forcedSeas}\n\nThis is an absolute banger from Fardin's collection! Want to know more about it? ⚡`
             : `Here's a random pick from Fardin's list:\n\n**${forcedTitle}**\n${forcedEp} • ${forcedSeas}\n\nGive it a watch if you haven't already! ⚡`;
           // Return fake response — no API call needed
-          return Promise.resolve({
-            json: () => Promise.resolve({ choices: [{ message: { content: forcedMsg } }] }),
-            status: 200
-          });
+          return Promise.resolve(quickAiReply(forcedMsg));
         }
       }
 
