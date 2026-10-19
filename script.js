@@ -4693,6 +4693,16 @@ document.addEventListener('click', function(e) {
     });
   }
 
+  // relative times ("just now" -> "2m ago") keep ticking even on a poll where
+  // the feed itself did not change and the re-render is skipped
+  function htRefreshTimes() {
+    var nodes = document.querySelectorAll('.ht-comment-time[data-t]');
+    for (var i = 0; i < nodes.length; i++) {
+      var txt = formatTime(nodes[i].getAttribute('data-t'));
+      if (txt) nodes[i].textContent = '\uD83D\uDD52 ' + txt;
+    }
+  }
+
   var htLoading = false;
   function renderFeed(comments) {
     if (!FEED) return;
@@ -4732,7 +4742,7 @@ document.addEventListener('click', function(e) {
       voteBtnHtml('up', liked, likes.length) +
       voteBtnHtml('down', disliked, dislikes.length) +
     '</div>' +
-    (c.createdAt ? '<div class="ht-comment-time">\uD83D\uDD52 ' + formatTime(c.createdAt) + '</div>' : '');
+    (c.createdAt ? '<div class="ht-comment-time" data-t="' + escHtml(c.createdAt) + '">\uD83D\uDD52 ' + formatTime(c.createdAt) + '</div>' : '');
 
     var repliesHtml = '';
     if (c.replies && c.replies.length > 0) {
@@ -4752,7 +4762,7 @@ document.addEventListener('click', function(e) {
             voteBtnHtml('up', rLiked, rLikes.length, r) +
             voteBtnHtml('down', rDisliked, rDislikes.length, r) +
           '</div>' +
-          (rep.createdAt ? '<div class="ht-comment-time">' + formatTime(rep.createdAt) + '</div>' : '') +
+          (rep.createdAt ? '<div class="ht-comment-time" data-t="' + escHtml(rep.createdAt) + '">' + formatTime(rep.createdAt) + '</div>' : '') +
         '</div>';
       }
       repliesHtml += '</div>';
@@ -4908,7 +4918,7 @@ document.addEventListener('click', function(e) {
         var sig = htSig(merged);
         var wasLoading = htLoading;
         htLoading = false;
-        if (sig === htLastSig && !wasLoading) return;   // nothing new - leave the DOM alone
+        if (sig === htLastSig && !wasLoading) { htRefreshTimes(); return; }   // nothing new - leave the DOM alone
         if (htReplyBusy()) return;                      // never wipe a reply being typed
         htLastSig = sig;
         renderFeed(merged);
@@ -5064,6 +5074,12 @@ document.addEventListener('click', function(e) {
     if (!comment) { htToast('Say something', 'Please write a take first.', 'warning'); if (commentInput) commentInput.focus(); return; }
     try { localStorage.setItem(NAME_KEY, name); } catch(e) {}
 
+    // same take twice in a minute is almost always a double click, not an opinion
+    var dupe = loadComments().filter(function(c) {
+      return c._userId === myId && String(c.comment || '').trim() === comment && (Date.now() - tsOf(c)) < 60000;
+    })[0];
+    if (dupe) { htToast('Already posted', 'You posted that exact take a minute ago.', 'warning'); return; }
+
     var entry = {
       userName: name,
       comment: comment,
@@ -5107,6 +5123,7 @@ document.addEventListener('click', function(e) {
         }
       }
       saveComments(fresh);
+      if (row && row.id != null) htToast('Posted \uD83D\uDD25', 'Your take is live.', 'info');
     }).catch(function(err) {
       console.warn('Supabase write error:', err);
       htToast('Saved on this device', 'Cloud sync failed - your take is kept here and will show when the connection is back.', 'warning');
