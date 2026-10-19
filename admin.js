@@ -1,28 +1,28 @@
-/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-   ROOT@FARDIN ~ ADMIN PANEL â€” admin.js  (only admin.html loads this)
+/* ══════════════════════════════════════════════════════════════════════
+   ROOT@FARDIN ~ ADMIN PANEL — admin.js  (only admin.html loads this)
 
    The old pop-up became its own page: a green terminal with every module
-   permanently listed in the left sidebar. The editing work is unchanged â€”
+   permanently listed in the left sidebar. The editing work is unchanged —
    it still commits to index.html / script.js on GitHub with your PAT.
 
    This file is three parts:
-     1. the data link below â€” it fetches the live index.html + script.js
+     1. the data link below — it fetches the live index.html + script.js
         from the same domain so the panel can search the real anime cards
         and read the real TOP_5_DATA / AWARD_WINNERS / OTT / STUDIO /
         GROQ_MODELS / CHAT_AVATARS values (no duplicated data, no drift);
      2. the avatar + admin code, copied verbatim from script.js (see the
         markers) so behaviour is byte-for-byte what you already trust;
      3. a short boot block at the end.
-   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+   ══════════════════════════════════════════════════════════════════════ */
 
-/* â”€â”€ the published values; loadAdminData() fills them in â”€â”€ */
+/* ── the published values; loadAdminData() fills them in ── */
 var OTT_DATA = {};
 var STUDIO_DATA = {};
 var TOP_5_DATA = {};
 var AWARD_WINNERS = {};
 var GROQ_MODELS = [];
 var GROQ_API_KEYS = [];
-var GENRE_BY_ID = {};          // anime id â†’ ['Action', â€¦] straight out of script.js
+var GENRE_BY_ID = {};          // anime id → ['Action', …] straight out of script.js
 var ADMIN_DATA_READY = false;
 
 /* The panel has no chat of its own, so the few chat-only helpers the shared
@@ -43,7 +43,7 @@ function paintPatStatus() {
   if (!el) return;
   var p = getPat();
   if (p) {
-    el.textContent = '// PAT: ' + p.slice(0, 7) + 'â€¦' + p.slice(-4);
+    el.textContent = '// PAT: ' + p.slice(0, 7) + '…' + p.slice(-4);
     el.className = 'ad-pat-status ok';
   } else {
     el.textContent = '// PAT: NOT SET';
@@ -76,7 +76,7 @@ function grabLiteral(src, name) {
   try { return Function('return (' + src.slice(start, i) + ')')(); } catch (e) { return null; }
 }
 
-/* The site keeps its genre lists in a `const GENRES = { "Action": { icon, nums: new Set([â€¦]) } }`
+/* The site keeps its genre lists in a `const GENRES = { "Action": { icon, nums: new Set([…]) } }`
    block, and `nums` is exactly the list of anime ids in that genre. Flip it round so the
    EDIT module can show an anime's genres without guessing. */
 function grabGenres(jsText) {
@@ -100,7 +100,7 @@ function grabGenres(jsText) {
 /* Fetch the live site files once and hand the panel everything it needs. */
 async function loadAdminData() {
   try {
-    bootLine('// OPENING DATA LINK â†’ index.html + script.js â€¦');
+    bootLine('// OPENING DATA LINK → index.html + script.js …');
     var res = await Promise.all([
       fetch('index.html', { cache: 'no-store' }),
       fetch('script.js', { cache: 'no-store' })
@@ -141,18 +141,18 @@ async function loadAdminData() {
 
     ADMIN_DATA_READY = true;
     var cards = document.querySelectorAll('#adminDataHost #grid .card').length;
-    bootLine('// DATA LINK OK â€” ' + cards + ' anime Â· TOP5 ' + Object.keys(TOP_5_DATA).length +
-             ' genres Â· ' + Object.keys(AWARD_WINNERS).length + ' award years Â· ' +
+    bootLine('// DATA LINK OK — ' + cards + ' anime · TOP5 ' + Object.keys(TOP_5_DATA).length +
+             ' genres · ' + Object.keys(AWARD_WINNERS).length + ' award years · ' +
              GROQ_MODELS.length + ' models', 'ok');
     return true;
   } catch (e) {
-    bootLine('// DATA LINK FAILED: ' + ((e && e.message) || e) + ' â€” press RETRY', 'err');
+    bootLine('// DATA LINK FAILED: ' + ((e && e.message) || e) + ' — press RETRY', 'err');
     return false;
   }
 }
 
-/* â•â• â–¼â–¼ from here down: avatar + admin code copied verbatim from script.js â–¼â–¼ â•â• */
-/* â”€â”€ BEGIN AVATAR / CHARACTER BLOCK (script.js, message-avatars section) â”€â”€ */
+/* ══ ▼▼ from here down: avatar + admin code copied verbatim from script.js ▼▼ ══ */
+/* ── BEGIN AVATAR / CHARACTER BLOCK (script.js, message-avatars section) ── */
 
 let CHAT_AVATARS = { ai: 'img:https://s4.anilist.co/file/anilistcdn/character/large/b5187-y1OEdRu9sPN2.png', user: 'img:https://s4.anilist.co/file/anilistcdn/character/large/b123285-tKijiuQErDS0.png' };
 
@@ -223,12 +223,12 @@ const AVATAR_PRESETS = {
   }
 };
 
-// The visitor's own choices (chat âš™ï¸ sheet) win per side; '' = use the site default for that side
+// The visitor's own choices (chat ⚙️ sheet) win per side; '' = use the site default for that side
 const MY_AVATAR_KEYS = { user: 'fardin_chat_my_avatar', ai: 'fardin_chat_my_avatar_ai' };
 let MY_AVATAR = { user: '', ai: '' };
-let CS_SIDE = 'user';   // which avatar the âš™ï¸ sheet is editing ('user' | 'ai')
+let CS_SIDE = 'user';   // which avatar the ⚙️ sheet is editing ('user' | 'ai')
 
-// preset:<id> Â· an uploaded picture (data URL) Â· an anime character (AniList URL)
+// preset:<id> · an uploaded picture (data URL) · an anime character (AniList URL)
 function validAvatarValue(v) {
   return /^(preset:[a-z0-9-]+|img:(data:image\/[a-z+]+;base64,[A-Za-z0-9+/=]+|https?:\/\/[^\s'"]+))$/.test(v || '');
 }
@@ -250,7 +250,7 @@ function saveMyAvatar(side, value) {
     else localStorage.removeItem(MY_AVATAR_KEYS[side]);
     return true;
   } catch (e) {
-    // localStorage full (a very big picture) â€” put the previous one back
+    // localStorage full (a very big picture) — put the previous one back
     MY_AVATAR[side] = prev;
     try {
       if (prev) localStorage.setItem(MY_AVATAR_KEYS[side], prev);
@@ -269,13 +269,13 @@ function avatarValue(side) {
   return typeof v === 'string' ? v : '';
 }
 
-// What the site publishes for everyone (ignores this browser's own pick) â€” used by the admin panel
+// What the site publishes for everyone (ignores this browser's own pick) — used by the admin panel
 function publishedAvatar(side) {
   var v = CHAT_AVATARS ? CHAT_AVATARS[side] : '';
   return typeof v === 'string' ? v : '';
 }
 
-// 'preset:neko' â†’ that preset Â· 'img:avatars/ai-avatar.webp?v=1' â†’ your own picture
+// 'preset:neko' → that preset · 'img:avatars/ai-avatar.webp?v=1' → your own picture
 function avatarSpec(side) {
   var v = avatarValue(side);
   var img = /^img:(.+)$/.exec(v);
@@ -357,17 +357,17 @@ function pageAvatarStrip(strip, dir) {
   }, 380);
 }
 
-/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-   ðŸŽ´ ANIME CHARACTER AVATARS (live from AniList)
-   Shared by the chat âš™ï¸ sheet (own avatar) and the admin picker (published).
-   Character art Â© its respective owners â€” displayed from the AniList database.
-â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+/* ══════════════════════════════════════
+   🎴 ANIME CHARACTER AVATARS (live from AniList)
+   Shared by the chat ⚙️ sheet (own avatar) and the admin picker (published).
+   Character art © its respective owners — displayed from the AniList database.
+══════════════════════════════════════ */
 
 const ANILIST_API = 'https://graphql.anilist.co';
 const CHAR_PER_PAGE = 30;
 let CHAR_STATE = { query: '', page: 1, hasNext: true, list: [], busy: false, error: '' };
 
-// top-30 most popular characters, or a name search â€” 30 per call
+// top-30 most popular characters, or a name search — 30 per call
 async function fetchCharacters(query, page) {
   var body = {
     query: 'query($p:Int,$q:String){Page(page:$p,perPage:' + CHAR_PER_PAGE + '){pageInfo{hasNextPage}' +
@@ -438,12 +438,12 @@ function renderCharGrids() {
   if (!grids.length) return;
   var html;
   if (CHAR_STATE.error) {
-    html = '<div class="av-note av-note-err">âš  ' + CHAR_STATE.error.replace(/[<>]/g, '') +
-           '<br><button class="av-mini" onclick="loadCharacters(true)">â†» RETRY</button></div>';
+    html = '<div class="av-note av-note-err">⚠ ' + CHAR_STATE.error.replace(/[<>]/g, '') +
+           '<br><button class="av-mini" onclick="loadCharacters(true)">↻ RETRY</button></div>';
   } else if (CHAR_STATE.busy && !CHAR_STATE.list.length) {
-    html = '<div class="av-note">Loading anime charactersâ€¦</div>';
+    html = '<div class="av-note">Loading anime characters…</div>';
   } else if (!CHAR_STATE.list.length) {
-    html = '<div class="av-note">No characters found â€” try another name.</div>';
+    html = '<div class="av-note">No characters found — try another name.</div>';
   } else {
     html = CHAR_STATE.list.map(function(c) {
       var src = (c.image && (c.image.medium || c.image.large)) || '';
@@ -454,8 +454,8 @@ function renderCharGrids() {
         '<span class="av-name">' + name + '</span>' +
       '</button>';
     }).join('') +
-    (CHAR_STATE.busy ? '<div class="av-note">Loading moreâ€¦</div>'
-                     : (!CHAR_STATE.hasNext ? '<div class="av-note">â€” end of list â€”</div>' : ''));
+    (CHAR_STATE.busy ? '<div class="av-note">Loading more…</div>'
+                     : (!CHAR_STATE.hasNext ? '<div class="av-note">— end of list —</div>' : ''));
   }
   grids.forEach(function(g) {
     g.innerHTML = html;
@@ -474,7 +474,7 @@ function renderCharGrids() {
   });
 }
 
-// AniList image files are named 'b<characterId>-<hash>.<ext>' â€” that pins down the character
+// AniList image files are named 'b<characterId>-<hash>.<ext>' — that pins down the character
 function charIsCurrent(id, value) {
   var m = /^img:(.+)$/.exec(value || '');
   if (!m) return false;
@@ -482,7 +482,7 @@ function charIsCurrent(id, value) {
   return base.indexOf('b' + id + '-') === 0 || base.indexOf('b' + id + '.') === 0;
 }
 
-// 'my' = this visitor's own avatar (kept in the browser) Â· 'ai'/'user' = admin publish
+// 'my' = this visitor's own avatar (kept in the browser) · 'ai'/'user' = admin publish
 async function pickCharacter(btn, id) {
   var ch = null;
   for (var i = 0; i < CHAR_STATE.list.length; i++) {
@@ -497,9 +497,9 @@ async function pickCharacter(btn, id) {
   var value = 'img:' + url;
 
   if (target === 'my') {
-    if (!saveMyAvatar(CS_SIDE, value)) { chatToast('Could not save that avatar ðŸ˜¢'); return; }
+    if (!saveMyAvatar(CS_SIDE, value)) { chatToast('Could not save that avatar 😢'); return; }
     applyMyAvatarChange();
-    chatToast(CS_SIDE === 'ai' ? name + ' is now Senpai ðŸŽ´' : name + ' is now your avatar ðŸŽ´');
+    chatToast(CS_SIDE === 'ai' ? name + ' is now Senpai 🎴' : name + ' is now your avatar 🎴');
     return;
   }
   if (!getPat()) { msgFail('Save your PAT first (field at the top of the panel)'); return; }
@@ -654,7 +654,7 @@ function switchAdminTab(tab) {
   if (tab === 'ai') { updateAiStatus(); refreshAiModels(); renderAvatarPicker(); }
 }
 
-// ===== AI CHATBOT MODEL PICKER (admin â€” rewrites GROQ_MODELS in script.js on GitHub) =====
+// ===== AI CHATBOT MODEL PICKER (admin — rewrites GROQ_MODELS in script.js on GitHub) =====
 var GROQ_MODELS_DEFAULT = ['openai/gpt-oss-120b', 'qwen/qwen3.8-27b', 'openai/gpt-oss-20b'];
 
 function updateAiStatus() {
@@ -681,7 +681,7 @@ async function refreshAiModels() {
     }).sort(function(a, b) { return (b.created || 0) - (a.created || 0); });
     sel.innerHTML = list.map(function(m) {
       var d = m.created ? new Date(m.created * 1000).toISOString().slice(0, 10) : '';
-      return '<option value="' + m.id.replace(/"/g, '&quot;') + '">' + m.id + (d ? '  Â·  added ' + d : '') + '</option>';
+      return '<option value="' + m.id.replace(/"/g, '&quot;') + '">' + m.id + (d ? '  ·  added ' + d : '') + '</option>';
     }).join('');
     status.textContent = list.length + ' chat models found (newest first)';
   } catch (e) {
@@ -691,7 +691,7 @@ async function refreshAiModels() {
 
 function saveAiModel() {
   var sel = document.getElementById('aiModelSelect');
-  if (!sel || !sel.value) { msgFail('No model selected â€” press REFRESH LIST first'); return; }
+  if (!sel || !sel.value) { msgFail('No model selected — press REFRESH LIST first'); return; }
   var picked = sel.value.replace(/['"\\\[\]\s;]/g, ''); // model ids are [a-z0-9/.-_]; strip anything code-like
   var chain = [picked].concat(GROQ_MODELS.filter(function(m) { return m !== picked; })).slice(0, 5);
   updateModelOnGithub(chain, 'set primary model to ' + picked);
@@ -704,54 +704,54 @@ function resetAiModel() {
 async function updateModelOnGithub(chain, why) {
   if (!getPat()) { msgFail('Save your PAT first (field at the top of the panel)'); return; }
   var file = await githubFetch('script.js');
-  if (!file || !file.content) { msgFail('Could not fetch script.js from GitHub â€” check PAT'); return; }
+  if (!file || !file.content) { msgFail('Could not fetch script.js from GitHub — check PAT'); return; }
   var text;
   try { text = decodeURIComponent(escape(atob(file.content))); } catch (e) { msgFail('Could not decode script.js'); return; }
   if (!/(?:const|let|var) GROQ_MODELS = \[[^\]]*\];/.test(text)) { msgFail('GROQ_MODELS line not found in script.js'); return; }
   var newLine = 'let GROQ_MODELS = [' + chain.map(function(m) { return "'" + m + "'"; }).join(', ') + '];';
   var updated = text.replace(/(?:const|let|var) GROQ_MODELS = \[[^\]]*\];/, newLine);
-  if (updated === text) { msgFail('Model line unchanged â€” nothing to commit'); return; }
+  if (updated === text) { msgFail('Model line unchanged — nothing to commit'); return; }
   var ok = await githubCommit('script.js', updated, 'feat(chatbot): admin ' + why);
   if (ok) {
     GROQ_MODELS = chain;
     updateAiStatus();
-    msgOk('Committed to GitHub âœ“ â€” chatbot uses it in ~1 min');
+    msgOk('Committed to GitHub ✓ — chatbot uses it in ~1 min');
   } else {
-    msgFail('GitHub commit failed â€” check PAT and try again');
+    msgFail('GitHub commit failed — check PAT and try again');
   }
 }
 
-// ===== AVATAR PICKER (admin) â€” publishes the CHAT_AVATARS line in script.js on GitHub =====
+// ===== AVATAR PICKER (admin) — publishes the CHAT_AVATARS line in script.js on GitHub =====
 const AVATAR_STRIP_ORDER = ['sharingan', 'rinnegan', 'kitsune', 'neko', 'sakura', 'samurai', 'ramen', 'chibi', 'person'];
 
 function renderAvatarPicker() {
   var body = document.getElementById('avatarPickerBody');
   if (!body) return;
   body.innerHTML = ['ai', 'user'].map(function(side) {
-    var title = side === 'ai' ? 'ðŸ¤– SENPAI (AI)' : 'ðŸ‘¤ YOU (CHAT VISITOR)';
+    var title = side === 'ai' ? '🤖 SENPAI (AI)' : '👤 YOU (CHAT VISITOR)';
     return '' +
       '<div class="av-group" data-side="' + side + '">' +
         '<div class="av-head">' +
           '<span class="av-title">' + title + '</span>' +
-          '<button class="av-mini" onclick="pickAvatarImage(\'' + side + '\')">ðŸ“· UPLOAD</button>' +
-          '<button class="av-mini" onclick="resetAvatar(\'' + side + '\')">â†º RESET</button>' +
+          '<button class="av-mini" onclick="pickAvatarImage(\'' + side + '\')">📷 UPLOAD</button>' +
+          '<button class="av-mini" onclick="resetAvatar(\'' + side + '\')">↺ RESET</button>' +
         '</div>' +
         '<div class="av-rail">' +
-          '<button class="av-nav" onclick="scrollAvatarStrip(\'' + side + '\',-1)" aria-label="previous 3">â—€</button>' +
+          '<button class="av-nav" onclick="scrollAvatarStrip(\'' + side + '\',-1)" aria-label="previous 3">◀</button>' +
           '<div class="av-strip" id="avStrip-' + side + '"></div>' +
-          '<button class="av-nav" onclick="scrollAvatarStrip(\'' + side + '\',1)" aria-label="next 3">â–¶</button>' +
+          '<button class="av-nav" onclick="scrollAvatarStrip(\'' + side + '\',1)" aria-label="next 3">▶</button>' +
         '</div>' +
-        '<div class="av-current" id="avCurrent-' + side + '">current: â€¦</div>' +
+        '<div class="av-current" id="avCurrent-' + side + '">current: …</div>' +
         '<details class="av-chars" ontoggle="charSectionToggled(this)" open>' +
-          '<summary>ðŸŽ´ ANIME CHARACTERS <span class="av-src">AniList</span></summary>' +
+          '<summary>🎴 ANIME CHARACTERS <span class="av-src">AniList</span></summary>' +
           '<div class="av-search">' +
-            '<input type="text" id="avCharQuery-' + side + '" placeholder="search a characterâ€¦" onkeydown="if(event.key===\'Enter\'){event.preventDefault();searchCharacters(\'avCharQuery-' + side + '\');}">' +
-            '<button onclick="searchCharacters(\'avCharQuery-' + side + '\')" aria-label="Search characters">ðŸ”Ž</button>' +
+            '<input type="text" id="avCharQuery-' + side + '" placeholder="search a character…" onkeydown="if(event.key===\'Enter\'){event.preventDefault();searchCharacters(\'avCharQuery-' + side + '\');}">' +
+            '<button onclick="searchCharacters(\'avCharQuery-' + side + '\')" aria-label="Search characters">🔎</button>' +
           '</div>' +
           '<div class="av-grid" data-char-target="' + side + '" id="avCharGrid-' + side + '"></div>' +
           '<div class="av-characts">' +
-            '<button class="av-mini" onclick="resetCharSearch(\'avCharQuery-' + side + '\')">ðŸ”¥ TOP 30</button>' +
-            '<button class="av-mini" onclick="loadMoreCharacters()">â¤“ 30 MORE</button>' +
+            '<button class="av-mini" onclick="resetCharSearch(\'avCharQuery-' + side + '\')">🔥 TOP 30</button>' +
+            '<button class="av-mini" onclick="loadMoreCharacters()">⤓ 30 MORE</button>' +
           '</div>' +
         '</details>' +
         '<input type="file" accept="image/*" id="avFile-' + side + '" style="display:none" onchange="onAvatarFile(\'' + side + '\', this)">' +
@@ -824,7 +824,7 @@ async function onAvatarFile(side, input) {
     var ext = mime.indexOf('webp') > -1 ? 'webp' : (mime.indexOf('png') > -1 ? 'png' : 'jpg');
     var path = 'avatars/' + (side === 'user' ? 'user' : 'ai') + '-avatar.' + ext;
     var ok = await commitBase64(path, dataUrl.slice(dataUrl.indexOf(',') + 1), 'feat(chat): upload the ' + side + ' avatar picture');
-    if (!ok) { msgFail('Picture upload failed â€” check the PAT'); return; }
+    if (!ok) { msgFail('Picture upload failed — check the PAT'); return; }
     await setChatAvatar(side, 'img:' + path + '?v=' + Date.now(), 'picture for the ' + side + ' avatar');
   } catch (e) {
     msgFail('Could not read that picture');
@@ -881,11 +881,11 @@ async function setChatAvatar(side, value, why) {
   showLoading();
   try {
     var file = await githubFetch('script.js');
-    if (!file || !file.content) { msgFail('Could not fetch script.js from GitHub â€” check the PAT'); return; }
+    if (!file || !file.content) { msgFail('Could not fetch script.js from GitHub — check the PAT'); return; }
     var text;
     try { text = decodeURIComponent(escape(atob(file.content))); } catch (e) { msgFail('Could not decode script.js'); return; }
     if (!/(?:const|let|var) CHAT_AVATARS = \{[^}]*\};/.test(text)) { msgFail('CHAT_AVATARS line not found in script.js'); return; }
-    // the OTHER side's value comes from the file on GitHub â€” never from this browser's own pick
+    // the OTHER side's value comes from the file on GitHub — never from this browser's own pick
     var m = /(?:const|let|var) CHAT_AVATARS = \{([^}]*)\};/.exec(text);
     var next = { ai: 'preset:sharingan', user: 'preset:person' };
     if (m) {
@@ -899,12 +899,12 @@ async function setChatAvatar(side, value, why) {
     var updated = text.replace(/(?:const|let|var) CHAT_AVATARS = \{[^}]*\};/, newLine);
     if (updated === text) { msgOk('That avatar is already published'); return; }
     var ok = await githubCommit('script.js', updated, 'feat(chat): ' + why);
-    if (!ok) { msgFail('Publish failed â€” check the PAT'); return; }
+    if (!ok) { msgFail('Publish failed — check the PAT'); return; }
     CHAT_AVATARS = next;
     repaintAllAvatars();
     refreshAvatarSelection(side);
     updateAvatarCurrentLabels();
-    msgOk('Avatar published âœ“ â€” live for everyone in ~1-10 min');
+    msgOk('Avatar published ✓ — live for everyone in ~1-10 min');
   } finally {
     hideLoading();
   }
@@ -1042,7 +1042,7 @@ function addAwardFromSelection() {
     '<div style="display:flex;gap:6px;align-items:center;">' +
     '<input type="number" class="admin-g-id-input" value="' + _awardId + '" placeholder="ID" style="width:50px;">' +
     '<input type="text" class="admin-g-title-input" value="' + title.replace(/"/g,'&quot;') + '" placeholder="Title" style="flex:1;">' +
-    '<button class="admin-g-btn" onclick="this.closest(\'.admin-g-group\').remove()" style="flex-shrink:0;padding:6px 8px;">âœ•</button>' +
+    '<button class="admin-g-btn" onclick="this.closest(\'.admin-g-group\').remove()" style="flex-shrink:0;padding:6px 8px;">✕</button>' +
     '</div>';
   form.appendChild(div);
   document.getElementById('adminAwardYear').value = '';
@@ -1095,8 +1095,8 @@ function renderSelectedPills() {
   all.forEach(function(item) {
     var span = document.createElement('span');
     span.className = 'admin-g-selected-pill';
-    var label = item.type === 'ott' ? 'ðŸ“º ' : item.type === 'studio' ? 'ðŸŽ¬ ' : 'ðŸ·ï¸ ';
-    span.innerHTML = label + item.v + ' <span onclick="togglePill(\'' + item.type + '\',\'' + item.v.replace(/'/g,"\\'") + '\')">âœ•</span>';
+    var label = item.type === 'ott' ? '📺 ' : item.type === 'studio' ? '🎬 ' : '🏷️ ';
+    span.innerHTML = label + item.v + ' <span onclick="togglePill(\'' + item.type + '\',\'' + item.v.replace(/'/g,"\\'") + '\')">✕</span>';
     container.appendChild(span);
   });
 }
@@ -1104,7 +1104,7 @@ function renderSelectedPills() {
 function msgOk(msg) {
   var el = document.createElement('div');
   el.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#0a0a0a;border:1px solid #00ff41;color:#00ff41;padding:10px 20px;font-family:monospace;font-size:12px;z-index:300000;border-radius:4px;box-shadow:0 0 20px rgba(0,255,65,0.2);';
-  el.textContent = 'âœ“ ' + msg;
+  el.textContent = '✓ ' + msg;
   document.body.appendChild(el);
   setTimeout(function() { el.remove(); }, 3000);
 }
@@ -1112,7 +1112,7 @@ function msgOk(msg) {
 function msgFail(msg) {
   var el = document.createElement('div');
   el.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#0a0a0a;border:1px solid #ff3355;color:#ff3355;padding:10px 20px;font-family:monospace;font-size:12px;z-index:300000;border-radius:4px;box-shadow:0 0 20px rgba(255,51,85,0.2);';
-  el.textContent = 'âœ• ' + msg;
+  el.textContent = '✕ ' + msg;
   document.body.appendChild(el);
   setTimeout(function() { el.remove(); }, 3000);
 }
@@ -1213,7 +1213,7 @@ function selectWatchCard(id) {
       if (preview) preview.style.display = 'block';
       if (previewImg && img) previewImg.src = img.src;
       if (previewTitle && title) previewTitle.textContent = title.textContent;
-      if (previewId) previewId.textContent = '#' + id + ' | ' + (seasonEl ? seasonEl.textContent.replace(/[ðŸŒ¸ðŸ“º]/g,'').trim() : '');
+      if (previewId) previewId.textContent = '#' + id + ' | ' + (seasonEl ? seasonEl.textContent.replace(/[🌸📺]/g,'').trim() : '');
       break;
     }
   }
@@ -1300,11 +1300,11 @@ async function commitMangaReading() {
   var data = await githubFetch('index.html');
   if (!data) { hideLoading(); msgFail('Failed to fetch. Check PAT.'); return; }
   var content = decodeURIComponent(escape(atob(data.content)));
-  var readBlock = content.match(/<div class="stats-bar-card">\s*<div class="stats-bar-label">ðŸ“– Currently Reading<\/div>[\s\S]*?<\/div>\s*<\/div>\s*<\/div>/);
+  var readBlock = content.match(/<div class="stats-bar-card">\s*<div class="stats-bar-label">📖 Currently Reading<\/div>[\s\S]*?<\/div>\s*<\/div>\s*<\/div>/);
   if (!readBlock) { hideLoading(); msgFail('Reading block not found'); return; }
   var oldHtml = readBlock[0];
   var newHtml = '<div class="stats-bar-card">' +
-    '<div class="stats-bar-label">ðŸ“– Currently Reading</div>' +
+    '<div class="stats-bar-label">📖 Currently Reading</div>' +
     '<div class="stats-bar-inner">' +
       '<div class="stats-bar-poster"><img src="' + img.replace(/"/g,'&quot;') + '" alt="' + title.replace(/"/g,'&quot;') + '"></div>' +
       '<div class="stats-bar-info">' +
@@ -1379,8 +1379,8 @@ function selectEditCard(id) {
       document.getElementById('adminEditName').value = title ? title.textContent : '';
       document.getElementById('adminEditImg').value = img ? img.src : '';
       document.getElementById('adminEditGenre').value = genreEl ? genreEl.textContent : '';
-      document.getElementById('adminEditSeasons').value = seasonEl ? seasonEl.textContent.replace(/[ðŸŒ¸ðŸ“º]/g,'').trim() : '';
-      document.getElementById('adminEditEps').value = epsEl ? epsEl.textContent.replace(/[ðŸ“ºðŸŽ¬]/g,'').replace('Total Episodes:','').trim() : '';
+      document.getElementById('adminEditSeasons').value = seasonEl ? seasonEl.textContent.replace(/[🌸📺]/g,'').trim() : '';
+      document.getElementById('adminEditEps').value = epsEl ? epsEl.textContent.replace(/[📺🎬]/g,'').replace('Total Episodes:','').trim() : '';
       break;
     }
   }
@@ -1405,13 +1405,13 @@ async function commitEditAnime() {
   }
   if (cardIdx === -1) { hideLoading(); msgFail('Card not found'); return; }
   var img = document.getElementById('adminEditImg').value.trim() || '';
-  var seasonText = seasons ? 'ðŸŒ¸ ' + seasons : '';
-  var epsText = episodes ? 'ðŸ“º Total Episodes: ' + episodes : '';
+  var seasonText = seasons ? '🌸 ' + seasons : '';
+  var epsText = episodes ? '📺 Total Episodes: ' + episodes : '';
   var newCard = '<div class="card"><div class="card-inner"><div class="card-front"><div class="poster-wrap"><img src="' + img.replace(/"/g,'&quot;') + '" alt="' + name.replace(/"/g,'&quot;') + '" loading="lazy"/><span class="badge">#' + _editId + '</span></div><div class="info"><div class="number">NO. ' + _editId + '</div><div class="title">' + name + '</div></div></div><div class="card-back"><div class="back-content"><div class="back-title">' + name + '</div><div class="back-season">' + seasonText + '</div><div class="back-episodes">' + epsText + '</div><div class="back-tap-hint">click to flip back</div></div></div></div></div>';
   lines[cardIdx] = newCard;
   indexContent = lines.join('\n');
   if (genre) {
-    var newGenres = genre.split(/[,Â·]/).map(function(g) { return g.trim(); }).filter(Boolean);
+    var newGenres = genre.split(/[,·]/).map(function(g) { return g.trim(); }).filter(Boolean);
     scriptContent = scriptContent.replace(/"([\w\s/]+)":\s*\{[^}]*?nums:\s*new\s*Set\(\[([\d,]*)\]\)\s*\}/g, function(match, genreName, numsStr) {
       var nums = numsStr ? numsStr.split(',').map(function(n) { return parseInt(n.trim()); }).filter(function(n) { return !isNaN(n); }) : [];
       if (newGenres.indexOf(genreName) !== -1) {
@@ -1421,7 +1421,7 @@ async function commitEditAnime() {
         if (idx !== -1) nums.splice(idx, 1);
       }
       var iconMatch = match.match(/icon:\s*"([^"]+)"/);
-      var icon = iconMatch ? iconMatch[1] : 'âœ¦';
+      var icon = iconMatch ? iconMatch[1] : '✦';
       return '"' + genreName + '":        { icon: "' + icon + '", nums: new Set([' + nums.join(',') + ']) }';
     });
   }
@@ -1507,7 +1507,7 @@ async function commitWatching() {
   var img = foundCard.querySelector('.poster-wrap img').src;
   if (!season) {
     var seasonEl = foundCard.querySelector('.back-season');
-    season = seasonEl ? seasonEl.textContent.replace(/[ðŸŒ¸ðŸ“º]/g,'').trim() : 'Season-1';
+    season = seasonEl ? seasonEl.textContent.replace(/[🌸📺]/g,'').trim() : 'Season-1';
   }
   var data = await githubFetch('index.html');
   if (!data) { hideLoading(); msgFail('Failed to fetch. Check PAT.'); return; }
@@ -1516,7 +1516,7 @@ async function commitWatching() {
   if (!watchBlock) { hideLoading(); msgFail('Watching block not found'); return; }
   var oldHtml = watchBlock[0];
   var newHtml = '<div class="stats-bar-card">' +
-    '<div class="stats-bar-label">ðŸŽ¬ Currently Watching</div>' +
+    '<div class="stats-bar-label">🎬 Currently Watching</div>' +
     '<div class="stats-bar-inner">' +
       '<div class="stats-bar-poster"><img src="' + img.replace(/"/g,'&quot;') + '" alt="' + title.replace(/"/g,'&quot;') + '"></div>' +
       '<div class="stats-bar-info">' +
@@ -1555,7 +1555,7 @@ async function commitAddAnime() {
   var matchMax = scriptContent.match(/"(\d+)":\s*\{/g);
   if (matchMax) matchMax.forEach(function(m) { var n = parseInt(m.replace(/\D/g,'')); if (n > maxId) maxId = n; });
   var nextId = maxId + 1;
-  var cardHtml = '\n\n<div class="card"><div class="card-inner"><div class="card-front"><div class="poster-wrap"><img src="' + img.replace(/"/g,'&quot;') + '" alt="' + title.replace(/"/g,'&quot;') + '" loading="lazy"/><span class="badge">#' + nextId + '</span></div><div class="info"><div class="number">NO. ' + nextId + '</div><div class="title">' + title + '</div></div></div><div class="card-back"><div class="back-content"><div class="back-title">' + title + '</div><div class="back-season">ðŸŒ¸ ' + seasonLabel + '</div><div class="back-episodes">ðŸ“º Total Episodes: ' + eps + '</div><div class="back-tap-hint">click to flip back</div></div></div></div></div>';
+  var cardHtml = '\n\n<div class="card"><div class="card-inner"><div class="card-front"><div class="poster-wrap"><img src="' + img.replace(/"/g,'&quot;') + '" alt="' + title.replace(/"/g,'&quot;') + '" loading="lazy"/><span class="badge">#' + nextId + '</span></div><div class="info"><div class="number">NO. ' + nextId + '</div><div class="title">' + title + '</div></div></div><div class="card-back"><div class="back-content"><div class="back-title">' + title + '</div><div class="back-season">🌸 ' + seasonLabel + '</div><div class="back-episodes">📺 Total Episodes: ' + eps + '</div><div class="back-tap-hint">click to flip back</div></div></div></div></div>';
   indexContent = indexContent.replace(/<!-- === ADMIN PANEL === -->/, cardHtml + '\n\n<!-- === ADMIN PANEL === -->');
   scriptContent = scriptContent.replace(/counterUp\("seasonCount",\s*(\d+)/, function(m, c) { return 'counterUp("seasonCount", ' + (parseInt(c) + 1); });
   scriptContent = scriptContent.replace(/counterUp\("episodeCount",\s*(\d+)/, function(m, c) { return 'counterUp("episodeCount", ' + (parseInt(c) + eps); });
@@ -1582,14 +1582,14 @@ async function commitAddAnime() {
 
 
 
-/* â”€â”€ END ADMIN BLOCK â”€â”€ */
+/* ── END ADMIN BLOCK ── */
 
-/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-   BOOT â€” the PIN gate. The ported checkAdminPin() only toggles the two
+/* ══════════════════════════════════════════════════════════════════════
+   BOOT — the PIN gate. The ported checkAdminPin() only toggles the two
    screens, but here the PIN sits on a full-screen gate, so that gate has
    to step aside too. This declaration is last in the file, which is why
    it takes over from the ported one.
-   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+   ══════════════════════════════════════════════════════════════════════ */
 function checkAdminPin() {
   var inputs = document.querySelectorAll('#adminPinScreen input');
   var pin = '';
@@ -1610,7 +1610,7 @@ function checkAdminPin() {
   initAdminGui();
 }
 
-/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+/* ══════════════════════════════════════════════════════════════════════
    EDIT module: top up what the ported selectEditCard() cannot know.
 
    Cards stopped carrying a `.back-genre` element, so the old prefill came
@@ -1618,7 +1618,7 @@ function checkAdminPin() {
    episodes fields also arrived with the site's emoji and stray spaces
    (which used to be committed back as a double space). Both are filled
    from the real data here, right after a card is picked.
-   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+   ══════════════════════════════════════════════════════════════════════ */
 function fillEditExtras() {
   var id = _editId;
   if (!id) return;
@@ -1632,7 +1632,7 @@ function fillEditExtras() {
   var clean = function (el, drop) {
     if (!el) return;
     // strip by codepoint: the site's emoji carry variation selectors the old
-    // /[ðŸŒ¸ðŸ“º]/ regex never matched, which is why "220" arrived as "ðŸ“º 220".
+    // /[🌸📺]/ regex never matched, which is why "220" arrived as "📺 220".
     var v = el.value.replace(/[^\x20-\x7E]/g, '');
     if (drop) v = v.replace(drop, '');
     el.value = v.replace(/\s+/g, ' ').trim();
