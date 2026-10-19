@@ -2292,6 +2292,18 @@ const chatBox = document.getElementById('chatBox');
 const chatMessages = document.getElementById('chatMessages');
 const chatInput = document.getElementById('chatInput');
 
+// A phone (or anything touch-driven) must never have the keyboard shoved in its face.
+// Width alone is not enough: desktop-site mode and landscape report > 768px on phones.
+function isTouchyDevice() {
+  try {
+    if (window.matchMedia && window.matchMedia('(max-width: 768px)').matches) return true;
+    if ((navigator.maxTouchPoints || 0) > 0) return true;
+    if ('ontouchstart' in window) return true;
+    if (navigator.userAgent && /Android|iPhone|iPad|iPod|Mobile|Tablet/i.test(navigator.userAgent)) return true;
+  } catch (e) {}
+  return false;
+}
+
 let chatHistory = [
   { role: "system", content: getSystemPrompt() }
 ];
@@ -2342,7 +2354,8 @@ function setChatOpen(open) {
   var isMobile = window.matchMedia('(max-width: 768px)').matches;
   if (isMobile) document.body.style.overflow = open ? 'hidden' : '';
   if (open) {
-    if (!isMobile) chatInput.focus();
+    // only a real desktop gets the caret — a touch device would pop the keyboard open
+    if (!isTouchyDevice()) chatInput.focus();
     if (typeof closeMenu === 'function') closeMenu();
     toggleChatActions(false);        // always open clean, with the panel folded away
   } else {
@@ -2463,12 +2476,11 @@ async function sendMessage() {
 
   isResponding = false;
   chatInput.disabled = false;
-  // A message that came from a chip or a suggestion row must not steal focus back —
-  // on mobile that re-opens the keyboard by itself, which is infuriating.
+  // A message that came from a chip or a suggestion row never grabs focus back — on a phone
+  // that yanks the keyboard up by itself. Only a message the visitor actually typed does.
   const fromButton = sentFromButton;
   sentFromButton = false;
-  const narrow = window.matchMedia('(max-width: 768px)').matches;
-  if (!fromButton || !narrow) chatInput.focus();
+  if (!fromButton) chatInput.focus();
 }
 
 // Messages still animating — if the tab gets hidden, we finish them instantly
@@ -3601,6 +3613,10 @@ let sentFromButton = false;
 
 function quickAction(text) {
   sentFromButton = true;
+  // if the keyboard happens to be up, put it away — the visitor tapped a button, not the box
+  if (isTouchyDevice()) {
+    try { chatInput.blur(); } catch (e) {}
+  }
   chatInput.value = text;
   sendMessage();
 }
