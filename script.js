@@ -869,8 +869,9 @@ function copyEmail() {
       if (name === 'All' || have.has(key(name))) return;
       const btn = document.createElement('button');
       btn.textContent = (CHAT_CHIP_ICON[name] || GENRES[name].icon) + ' ' + name;
-      btn.title = 'Ask Senpai for a ' + name + ' anime';
-      btn.addEventListener('click', function () { quickAction('Recommend a ' + name + ' anime'); });
+      const a = /^[aeiou]/i.test(name) ? 'an ' : 'a ';
+      btn.title = 'Ask Senpai for ' + a + name + ' anime';
+      btn.addEventListener('click', function () { quickAction('Recommend ' + a + name + ' anime'); });
       row.appendChild(btn);
     });
   }
