@@ -261,17 +261,6 @@
 }
 .sb-chips-genres button:hover { background: rgba(167,139,250,.3); border-color: #a78bfa; color: #fff; }
 
-/* follow-up chips are rebuilt after every reply — gold, so they stand out from the fixed ones */
-.sb-chips button.sb-chip-follow {
-  background: rgba(245,197,24,.14); border-color: rgba(245,197,24,.5); color: #ffe07a;
-  animation: chipPop .22s ease-out;
-}
-.sb-chips button.sb-chip-follow:hover { background: rgba(245,197,24,.32); border-color: #f5c518; color: #fff; }
-@keyframes chipPop {
-  from { opacity: 0; transform: translateY(-4px) scale(.92); }
-  to   { opacity: 1; transform: none; }
-}
-
 .chat-messages {
   flex: 1; overflow-y: auto; padding: 14px 12px;
   display: flex; flex-direction: column; gap: 12px;
@@ -322,6 +311,29 @@
   text-decoration-color: #ffe066;
   outline: none;
 }
+
+/* --- suggested follow-ups under the newest reply (↘ rows) --- */
+.chat-messages .msg-suggests {
+  display: flex; flex-direction: column; gap: 1px;
+  margin-left: 37px;                 /* line up with the bubble, not the avatar */
+  max-width: 100%;
+  animation: sugg-in .3s ease-out;
+}
+@keyframes sugg-in { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+.chat-messages .msg-suggest {
+  display: flex; align-items: flex-start; gap: 10px;
+  background: none; border: none; cursor: pointer; text-align: left;
+  font-family: 'Poppins', sans-serif; font-size: 13px; line-height: 1.45;
+  color: #9d9db0; padding: 6px 8px; border-radius: 8px;
+  transition: color .16s ease, background .16s ease;
+}
+.chat-messages .msg-suggest .sg-arrow {
+  color: #6d6d85; font-size: 12px; line-height: 1.6; flex-shrink: 0;
+  transition: color .16s ease, transform .16s ease;
+}
+.chat-messages .msg-suggest:hover { color: #f0eefb; background: rgba(167,139,250,.1); }
+.chat-messages .msg-suggest:hover .sg-arrow { color: #f5c518; transform: translate(2px, 2px); }
+.chat-messages .msg-suggest:focus-visible { outline: 1px solid rgba(167,139,250,.6); outline-offset: 1px; }
 .chat-messages .typing-animation { display: flex; gap: 5px; align-items: center; }
 .chat-messages .typing-animation span {
   width: 7px; height: 7px; border-radius: 50%; background: #ff7eb3;
@@ -353,6 +365,8 @@
 @media (max-width: 480px) {
   .chat-messages .msg-avatar { width: 26px; height: 26px; }
   .chat-messages .msg-avatar svg { width: 15px; height: 15px; }
+  .chat-messages .msg-suggests { margin-left: 33px; }
+  .chat-messages .msg-suggest { font-size: 12.5px; }
 }
 
 /* --- per-message copy / share: floating sakura orbs on the opposite side --- */

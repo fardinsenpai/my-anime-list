@@ -2322,10 +2322,10 @@ async function sendMessage() {
         content: botReply
       });
 
-      addMessage(botReply, 'bot');
-
-      // the gold chips under the header change to match what we just recommended
-      renderFollowUpChips(animeMentionedInText(botReply));
+      addMessage(botReply, 'bot', true, function (msgDiv) {
+        // the grey ↘ suggestion rows appear once the answer has finished typing
+        renderSuggestions(msgDiv, animeMentionedInText(botReply));
+      });
 
       saveChatToStorage();
     } else {
@@ -2519,7 +2519,7 @@ function jumpToAnimeCard(title) {
   }, leftHome ? 140 : 30);
 }
 
-/* ===== quick chips: the gold follow-ups change with every reply ===== */
+/* ===== suggestions under the newest reply (the grey ↘ rows) ===== */
 function cardTitleOf(card) {
   const t = card && card.querySelector('.title');
   return t ? t.textContent.trim() : '';
@@ -2543,34 +2543,89 @@ function animeMentionedInText(text) {
   return best ? cardTitleOf(best) : null;
 }
 
-// Rebuild the follow-up chips for the anime we just talked about (pass null to clear them).
-function renderFollowUpChips(anime) {
-  const row = document.getElementById('chatChips');
-  if (!row) return;
-  row.querySelectorAll('.sb-chip-follow').forEach(function (el) { el.remove(); });
-  if (!anime) return;
-  const chips = [
-    { label: '🎬 Show the card', hint: 'Scroll to ' + anime + ' on the page',
-      run: function () { jumpToAnimeCard(anime); } },
-    { label: '📺 How many episodes?', hint: 'Ask about ' + anime,
-      run: function () { quickAction('How many episodes does ' + anime + ' have?'); } },
-    { label: '🍿 More like this', hint: 'Another pick like ' + anime,
-      run: function () { quickAction('Recommend another anime like ' + anime); } },
-    { label: '🔁 Another pick', hint: 'A fresh random anime',
-      run: function () { quickAction('Suggest a random anime'); } }
-  ];
-  for (let i = chips.length - 1; i >= 0; i--) {
-    const c = chips[i];
-    const b = document.createElement('button');
-    b.className = 'sb-chip-follow';
-    b.textContent = c.label;
-    b.title = c.hint;
-    b.addEventListener('click', c.run);
-    row.insertBefore(b, row.firstChild);
-  }
+function genresOfCard(card) {
+  const el = card && card.querySelector('.back-genre');
+  if (!el) return [];
+  return String(el.textContent).split('·').map(function (s) { return s.trim(); }).filter(Boolean);
 }
 
-function addMessage(text, type, shouldSave = true) {
+// Another anime of his in the same genre — used for the "vs" suggestion. Picks the most
+// specific genre the anime has (Sports, say — not the huge Action pile).
+function siblingAnime(card, anime) {
+  const mine = genresOfCard(card);
+  if (!mine.length) return null;
+  const GEN = window.ANIME_GENRES || {};
+  mine.sort(function (a, b) {
+    const sa = GEN[a] && GEN[a].nums ? GEN[a].nums.size : Infinity;
+    const sb = GEN[b] && GEN[b].nums ? GEN[b].nums.size : Infinity;
+    return sa - sb;
+  });
+  const wanted = mine[0];
+  let best = null;
+  animeCardIndex().forEach(function (c, key) {
+    if (best) return;
+    if (cardTitleOf(c) === anime) return;
+    if (genresOfCard(c).indexOf(wanted) > -1) best = c;
+  });
+  return best ? cardTitleOf(best) : null;
+}
+
+// The ↘ rows for one reply. Every one of them is built from Fardin's own data,
+// so suggesting them costs no extra AI request.
+function suggestRowsFor(anime) {
+  if (!anime) return [];
+  const card = findAnimeCard(anime);
+  const rows = [{
+    label: 'Show ' + anime + ' on the page',
+    run: function () { jumpToAnimeCard(anime); }
+  }];
+  const sib = siblingAnime(card, anime);
+  if (sib) {
+    rows.push({
+      label: sib + ' vs ' + anime + ' — which is better?',
+      run: function () { quickAction(sib + ' vs ' + anime + ' — which is better?'); }
+    });
+  }
+  rows.push({
+    label: 'How many episodes and seasons does ' + anime + ' have?',
+    run: function () { quickAction('How many episodes and seasons does ' + anime + ' have?'); }
+  });
+  rows.push({
+    label: 'What should I watch after ' + anime + '?',
+    run: function () { quickAction('What should I watch after ' + anime + '?'); }
+  });
+  return rows;
+}
+
+// Draw them under this reply — only the newest answer keeps its suggestions.
+function renderSuggestions(msgDiv, anime) {
+  if (!msgDiv || !msgDiv.parentNode) return;
+  chatMessages.querySelectorAll('.msg-suggests').forEach(function (el) { el.remove(); });
+  const rows = suggestRowsFor(anime);
+  if (!rows.length) return;
+  const box = document.createElement('div');
+  box.className = 'msg-suggests';
+  rows.forEach(function (r) {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'msg-suggest';
+    const arrow = document.createElement('span');
+    arrow.className = 'sg-arrow';
+    arrow.textContent = '↘';
+    const txt = document.createElement('span');
+    txt.className = 'sg-text';
+    txt.textContent = r.label;
+    b.appendChild(arrow);
+    b.appendChild(txt);
+    b.addEventListener('click', r.run);
+    box.appendChild(b);
+  });
+  msgDiv.parentNode.insertBefore(box, msgDiv.nextSibling);
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+
+function addMessage(text, type, shouldSave = true, onTyped = null) {
   const msgDiv = document.createElement('div');
   msgDiv.className = `msg ${type}`;
   msgDiv.dataset.raw = text; // full text, used by copy/share
@@ -2613,6 +2668,7 @@ function addMessage(text, type, shouldSave = true) {
       textSpan.replaceChildren(richChatText(text));
       pendingTypers.delete(finish);
       chatMessages.scrollTop = chatMessages.scrollHeight;
+      if (typeof onTyped === 'function') onTyped(msgDiv);   // e.g. draw the ↘ suggestions
     }
 
     // Type in small chunks: same typing feel, far less layout thrash
@@ -3522,7 +3578,6 @@ function clearChatHistory() {
       { role: "system", content: getSystemPrompt() }
     ];
     addMessage('Chat history has been cleared successfully!', 'bot');
-    renderFollowUpChips(null);
   }
 }
 
