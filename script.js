@@ -4590,6 +4590,85 @@ document.addEventListener('click', function(e) {
     }
   }
 
+  /* ── avatars ──────────────────────────────────────────────────────────────
+     Every take gets a face: the preset its author picked, the photo from the
+     account they signed in with, or one derived from their id so even anonymous
+     takes look like somebody. Sizes are inline, so the stylesheet is untouched. */
+  var HT_AVATAR_KEY = 'fardin_ht_avatar';
+  var htPickedAvatar = '';
+  try { htPickedAvatar = localStorage.getItem(HT_AVATAR_KEY) || ''; } catch (e) {}
+  var htAvatarColumn = null;   // null = not checked yet, true/false after the probe
+
+  function htAttr(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+
+  function htAvatarOk(v) {
+    v = String(v || '');
+    if (/^preset:[a-z0-9-]+$/.test(v)) return !!AVATAR_PRESETS[v.slice(7)];
+    return /^img:https:\/\/[^\s"'<>]{6,480}$/i.test(v);
+  }
+
+  function htAvatarHash(s) {
+    s = String(s || 'anon');
+    var h = 2166136261;
+    for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); }
+    return h >>> 0;
+  }
+
+  function htAutoPreset(seed) {
+    var ids = Object.keys(AVATAR_PRESETS);
+    return ids[htAvatarHash(seed) % ids.length];
+  }
+
+  // what this browser sends with its next take / reply
+  function htMyAvatar() {
+    if (htPickedAvatar === 'photo') return googleAvatarValue() || '';
+    if (htPickedAvatar === 'auto' || !htPickedAvatar) return '';
+    return htAvatarOk(htPickedAvatar) ? htPickedAvatar : '';
+  }
+
+  function htAvatarHtml(value, person, size) {
+    size = size || 26;
+    var v = htAvatarOk(value) ? value : '';
+    var seed = (person && (person._userId || person.userName)) || '';
+    var box = 'width:' + size + 'px;height:' + size + 'px;border-radius:50%;display:inline-flex;' +
+      'align-items:center;justify-content:center;overflow:hidden;flex:0 0 auto;vertical-align:middle;' +
+      'margin-right:6px;border:1px solid rgba(199,125,255,0.5);';
+    if (/^img:/.test(v)) {
+      var under = AVATAR_PRESETS[htAutoPreset(seed)];
+      return '<span style="' + box + 'background:' + under.bg + ';" title="avatar">' +
+        '<img src="' + htAttr(v.slice(4)) + '" alt="" loading="lazy" data-av="1" ' +
+        'style="width:100%;height:100%;object-fit:cover;display:block;">' +
+      '</span>';
+    }
+    var id = /^preset:/.test(v) ? v.slice(7) : htAutoPreset(seed);
+    var p = AVATAR_PRESETS[id] || AVATAR_PRESETS.person;
+    return '<span style="' + box + 'background:' + p.bg + ';border-color:' + p.border + ';" title="' + htAttr(p.label) + '">' +
+      p.svg.replace('<svg', '<svg width="100%" height="100%"') +
+    '</span>';
+  }
+
+  // a dead picture link hides itself instead of showing a broken-image icon
+  function htWireAvatars(root) {
+    if (!root) return;
+    var imgs = root.querySelectorAll('img[data-av]');
+    for (var i = 0; i < imgs.length; i++) {
+      (function (im) { im.addEventListener('error', function () { im.style.display = 'none'; }); })(imgs[i]);
+    }
+  }
+
+  // does the table have the avatar column yet? (the picker only shows if it can
+  // actually be saved for everyone - no fake choices)
+  function htProbeAvatarColumn() {
+    if (htAvatarColumn !== null) return Promise.resolve(htAvatarColumn);
+    return supabaseFetch('hot_takes?select=id,avatar&limit=1')
+      .then(function (r) { htAvatarColumn = !!r.ok; return htAvatarColumn; })
+      .catch(function () { htAvatarColumn = false; return false; });
+  }
+
   var VOTE_UP_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>';
   var VOTE_DOWN_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3H10zM17 2h3a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-3"/></svg>';
   var ADMIN_SHIELD_SVG = '<svg width="16" height="16" viewBox="0 0 64 64" fill="none" style="vertical-align:middle;margin-right:3px;"><path d="M32 6L8 18v12c0 18 10 28 24 28s24-10 24-28V18L32 6z" fill="#1a1a2e" stroke="#ffd700" stroke-width="3"/><path d="M22 32l7 7 13-13" stroke="#ffd700" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
@@ -4734,7 +4813,7 @@ document.addEventListener('click', function(e) {
     var disliked = dislikes.indexOf(myId) !== -1;
 
     var topHtml = '<div class="ht-comment-top">' +
-      '<span class="ht-comment-user">\uD83D\uDC64 ' + escHtml(c.userName || 'Anonymous') + '</span>' +
+      '<span class="ht-comment-user">' + htAvatarHtml(c.avatar, c, 26) + escHtml(c.userName || 'Anonymous') + '</span>' +
       '<span class="ht-comment-actions">' +
       (adminMode ? '<button class="ht-reply-btn" type="button" title="Reply as ' + escHtml(ADMIN_NAME) + '">\u21A9 Reply</button>' : '') +
       (canDelete ? '<button class="ht-del-btn" type="button" title="Delete this take" aria-label="Delete this take">\uD83D\uDDD1\uFE0F</button>' : '') +
@@ -4757,7 +4836,7 @@ document.addEventListener('click', function(e) {
         var rLiked = rLikes.indexOf(myId) !== -1;
         var rDisliked = rDislikes.indexOf(myId) !== -1;
         repliesHtml += '<div class="ht-reply">' +
-          '<div class="ht-reply-top"><span class="ht-reply-admin">' + ADMIN_SHIELD_SVG + escHtml(rep.userName || ADMIN_NAME) + '</span>' +
+          '<div class="ht-reply-top"><span class="ht-reply-admin">' + htAvatarHtml(rep.avatar, rep, 18) + escHtml(rep.userName || ADMIN_NAME) + '</span>' +
           (adminMode ? '<button class="ht-reply-del" type="button" data-r="' + r + '" title="Delete this reply" aria-label="Delete this reply">\uD83D\uDDD1\uFE0F</button>' : '') +
           '</div>' +
           '<div class="ht-reply-text">' + htText(rep.comment) + '</div>' +
@@ -4772,6 +4851,7 @@ document.addEventListener('click', function(e) {
     }
 
     div.innerHTML = topHtml + repliesHtml;
+    htWireAvatars(div);
 
     // every button re-finds its take by id in the live list - the old code used
     // the array position captured at render time, which is how a like could land
@@ -4818,7 +4898,7 @@ document.addEventListener('click', function(e) {
         if (!hit.item) { syncFromSupabase(true); return; }
         var parent = hit.item;
         if (!parent.replies) parent.replies = [];
-        var reply = { userName: ADMIN_NAME, comment: text, createdAt: new Date().toISOString(), likes: [], dislikes: [] };
+        var reply = { userName: ADMIN_NAME, comment: text, createdAt: new Date().toISOString(), likes: [], dislikes: [], avatar: htMyAvatar() };
         parent.replies.push(reply);
         saveComments(all);
         renderFeed(all);
@@ -4932,10 +5012,80 @@ document.addEventListener('click', function(e) {
       });
   }
 
+  // ── the picker that sits under the name box ───────────────────────────────
+  function htPaintPicker() {
+    var bar = document.getElementById('htAvatarBar');
+    if (!bar) return;
+    var sel = htPickedAvatar || 'auto';
+    if (sel === 'photo' && !googleAvatarValue()) sel = 'auto';
+    var btns = bar.querySelectorAll('[data-av-value]');
+    for (var i = 0; i < btns.length; i++) {
+      var on = btns[i].getAttribute('data-av-value') === sel;
+      btns[i].style.boxShadow = on ? '0 0 0 2px #ffd700, 0 0 12px rgba(255,215,0,0.4)' : 'none';
+      btns[i].style.transform = on ? 'scale(1.1)' : 'none';
+      btns[i].setAttribute('aria-pressed', on ? 'true' : 'false');
+    }
+  }
+
+  function htBuildPicker() {
+    var form = document.querySelector('.hot-takes-form');
+    if (!form) return;
+    var old = document.getElementById('htAvatarBar');
+    if (old && old.parentNode) old.parentNode.removeChild(old);
+    if (!htAvatarColumn) return;   // no column -> nothing would be saved for others
+    if (!htPickedAvatar && googleAvatarValue()) htPickedAvatar = 'photo';
+
+    var bar = document.createElement('div');
+    bar.id = 'htAvatarBar';
+    bar.style.cssText = 'display:flex;flex-wrap:wrap;gap:7px;align-items:center;margin:-2px 0 0;';
+
+    var lab = document.createElement('span');
+    lab.textContent = 'AVATAR';
+    lab.style.cssText = 'font-family:Orbitron,sans-serif;font-size:9px;font-weight:700;letter-spacing:1.6px;color:#c77dff;margin-right:2px;';
+    bar.appendChild(lab);
+
+    function addBtn(value, label, bg, border, html) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.setAttribute('data-av-value', value);
+      b.title = label;
+      b.setAttribute('aria-label', 'Avatar: ' + label);
+      b.style.cssText = 'width:27px;height:27px;border-radius:50%;padding:0;cursor:pointer;' +
+        'display:inline-flex;align-items:center;justify-content:center;overflow:hidden;' +
+        'border:1px solid ' + (border || 'rgba(199,125,255,0.45)') + ';background:' + bg + ';' +
+        'transition:transform .15s, box-shadow .15s;';
+      b.innerHTML = html;
+      b.addEventListener('click', function() {
+        htPickedAvatar = value;
+        try { localStorage.setItem(HT_AVATAR_KEY, value); } catch (e) {}
+        htPaintPicker();
+      });
+      bar.appendChild(b);
+      var im = b.querySelector('img');
+      if (im) im.addEventListener('error', function() { im.style.display = 'none'; });
+    }
+
+    addBtn('auto', 'Automatic - made from your name', 'rgba(0,0,0,0.4)', 'rgba(199,125,255,0.5)',
+      '<span style="font-size:13px;line-height:1;">\u2728</span>');
+
+    var photo = googleAvatarValue();
+    if (photo) addBtn('photo', 'Your account photo', 'rgba(0,0,0,0.4)', 'rgba(0,229,255,0.6)',
+      '<img src="' + htAttr(photo.slice(4)) + '" alt="" style="width:100%;height:100%;object-fit:cover;display:block;">');
+
+    Object.keys(AVATAR_PRESETS).forEach(function(id) {
+      var p = AVATAR_PRESETS[id];
+      addBtn('preset:' + id, p.label, p.bg, p.border, p.svg.replace('<svg', '<svg width="100%" height="100%"'));
+    });
+
+    form.insertBefore(bar, form.children[1] || null);
+    htPaintPicker();
+  }
+
   var htOpenBtn = document.getElementById('hotTakesBtn');
   if (htOpenBtn) htOpenBtn.addEventListener('click', function() {
     if (loadComments().length === 0) { htLoading = true; renderFeed([]); }
     syncFromSupabase(true);
+    htProbeAvatarColumn().then(function(has) { if (has) htBuildPicker(); });
   });
 
   document.addEventListener('visibilitychange', function() {
@@ -5083,12 +5233,14 @@ document.addEventListener('click', function(e) {
     })[0];
     if (dupe) { htToast('Already posted', 'You posted that exact take a minute ago.', 'warning'); return; }
 
+    var av = htMyAvatar();
     var entry = {
       userName: name,
       comment: comment,
       createdAt: new Date().toISOString(),
       _ts: Date.now(),
       _userId: myId,
+      avatar: av,
       replies: [],
       likes: [],
       dislikes: [],
@@ -5104,17 +5256,28 @@ document.addEventListener('click', function(e) {
     if (nameInput) nameInput.value = name;
     if (submitBtn) submitBtn.disabled = true;
 
-    supabaseFetchWithRetry('hot_takes', {
-      method: 'POST',
-      body: JSON.stringify({
-        userName: name,
-        comment: comment,
-        _userId: myId,
-        replies: [],
-        likes: [],
-        dislikes: []
-      })
-    }, 2).then(function(r) {
+    var payload = {
+      userName: name,
+      comment: comment,
+      _userId: myId,
+      replies: [],
+      likes: [],
+      dislikes: []
+    };
+    if (av) payload.avatar = av;
+
+    function insertTake(body) {
+      return supabaseFetchWithRetry('hot_takes', { method: 'POST', body: JSON.stringify(body) }, 2);
+    }
+
+    insertTake(payload).catch(function(err) {
+      // table not migrated yet? post the take anyway, just without the face
+      if (!payload.avatar || String((err && err.message) || '').indexOf('400') === -1) throw err;
+      var bare = {};
+      for (var k in payload) if (k !== 'avatar') bare[k] = payload[k];
+      htAvatarColumn = false;
+      return insertTake(bare);
+    }).then(function(r) {
       return r.json().catch(function() { return null; });
     }).then(function(rows) {
       var row = Array.isArray(rows) ? rows[0] : null;
