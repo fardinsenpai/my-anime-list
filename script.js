@@ -2421,18 +2421,26 @@ function animeCardIndex() {
 }
 
 // "" (unknown) → null. Exact title first, then the closest prefix match, so
-// "Demon Slayer" finds "Demon Slayer: Kimetsu no Yaiba" and "Naruto" never steals
-// "Naruto Shippuden".
+// "Demon Slayer" finds a Demon Slayer card and "Naruto" never steals "Naruto Shippuden".
+function cardRank(card) {
+  const n = card.querySelector('.number');
+  const v = n ? parseInt((n.textContent || '').replace(/\D/g, ''), 10) : NaN;
+  return isNaN(v) ? Infinity : v;
+}
+
 function findAnimeCard(name) {
   const want = normaliseTitle(name);
   if (!want) return null;
   const map = animeCardIndex();
   if (map.has(want)) return map.get(want);
+  // A short name can fit several cards ("Demon Slayer" → series, Mugen Train, …).
+  // Take the one Fardin ranks highest, i.e. the one nearest the top of his own list.
   let best = null;
-  let bestLen = Infinity;
+  let bestRank = Infinity;
   map.forEach(function (card, key) {
-    if (key.length >= bestLen) return;
-    if (key.indexOf(want) === 0 || want.indexOf(key) === 0) { best = card; bestLen = key.length; }
+    if (key.indexOf(want) !== 0 && want.indexOf(key) !== 0) return;
+    const rank = cardRank(card);
+    if (rank < bestRank) { best = card; bestRank = rank; }
   });
   return best;
 }
