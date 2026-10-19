@@ -2162,6 +2162,20 @@ function getAnimeListJSON() {
 // greets the visitor by name the first time it speaks to them.
 var authNameFresh = false;
 
+// "recommend me something like Hunter x Hunter" — a title Fardin does not have. Those go to
+// the assistant (it knows the list + the Suggestion Box rule), never to a random card.
+function namesUnknownAnime(msg) {
+  const m = String(msg || '');
+  const hit = m.match(/(?:\blike\b|\bsimilar to\b|\bsame as\b|\babout\b|\bout of\b)\s+([A-Z][\w'’!:.&-]*(?:\s+[A-Z][\w'’!:.&-]*){0,4})/);
+  if (!hit) return false;
+  const phrase = hit[1].trim();
+  if (phrase.length < 3) return false;
+  if (typeof findAnimeCard === 'function' && findAnimeCard(phrase)) return false;   // it IS in the list
+  if (genreFromMessage(phrase)) return false;                                        // a genre, not a title
+  if (/^(I|You|He|She|It|We|They|Fardin|Fardin's|Anime|Please|Thanks|Thank|That|This|One)$/i.test(phrase)) return false;
+  return true;
+}
+
 // A compact roll-call of Fardin's list, straight from the cards + genre data, so the
 // assistant can tell "in my list" from "not in my list" instead of guessing.
 function animeListForPrompt() {
@@ -3787,8 +3801,11 @@ window.fetch = function(...args) {
         }
       }
 
-      // Random/suggest: pick one and override
-      if (/random|suggest|pick|recommend|give.*anime/i.test(userMsg)) {
+      // Random/suggest: pick one and override — but if the visitor named a specific anime
+      // from the list, that is a real question (compare / similar to), so let the assistant
+      // answer it with the full list instead of throwing a random card at them.
+      const namedAnime = (typeof animeMentionedInText === 'function') ? animeMentionedInText(userMsg) : null;
+      if (!namedAnime && !namesUnknownAnime(userMsg) && /random|suggest|pick|recommend|give.*anime/i.test(userMsg)) {
         let forcedTitle = '', forcedGenre = '', forcedEp = '', forcedSeas = '';
         const genreKey = genreFromMessage(userMsg);
         if (genreKey) {
