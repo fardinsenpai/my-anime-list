@@ -2227,7 +2227,7 @@ function animeListForPrompt() {
 
 // Pure small talk does not need the 260-title roster (~2.5k tokens on every request), so
 // it is left out for greetings and thanks. Anything that could touch anime keeps the list.
-const SMALLTALK_RE = /^(hi+|hey+|hello+|yo+|sup|hola|salam|assalamu?[a-z\s]*|good (morning|afternoon|evening|night)|thanks?( you| a lot)?|thank u|ok(ay)?|k|cool|nice|great|wow|lol|lmao|haha+|bye+|see ya|see you|gn|gm|what'?s up|how are you|how'?s it going|who are you|what can you do)[\s!.,?]*$/i;
+const SMALLTALK_RE = /^(?:hi+|hey+|hello+|yo+|sup|hola|salam|assalamu?[a-z\s]*|good (?:morning|afternoon|evening|night)|thanks?(?: you| a lot)?|thank u|ok(?:ay)?|k|cool|nice|great|wow|lol|lmao|haha+|bye+|see ya|see you|gn|gm|what'?s up|how are you|how'?s it going|who are you|what can you do)(?:[\s,]+(?:bro|bruh|man|dude|mate|fardin|senpai|buddy|bhai|vai|boss))?[\s!.,?]*$/i;
 const ANIME_HINT_RE = /\b(anime|manga|watch|watching|watched|episode|episodes|season|seasons|recommend|suggest|suggestion|best|top|worst|list|similar|like|vs|versus|favourite|favorite|rewatch|character|characters|story|plot|genre|genres|studio|dub|sub|arc|movie|opening|ending|otaku|weeb|show|series|ranking|rank|rated|rating|score|duel|mood|ep)\b/i;
 
 function needsAnimeList(msg) {
@@ -3708,6 +3708,47 @@ function pickLine(f) {
   return [f.ep, f.seas].filter(Boolean).join(' • ');
 }
 
+// a card per ranking number, so a genre's number list can be turned into cards
+function cardsByNumber() {
+  const map = {};
+  localCards().forEach(function (c) {
+    const el = c.querySelector('[class*="number"]');
+    const n = el ? parseInt(String(el.textContent || '').replace(/\D/g, ''), 10) : 0;
+    if (n) map[n] = c;
+  });
+  return map;
+}
+
+// His own anime sharing the most specific genre (Sports before Action, say) — used by
+// "what should I watch after X?" and answered without touching the API.
+function sameGenrePicks(card, want) {
+  const GEN = window.ANIME_GENRES || {};
+  const byNum = cardsByNumber();
+  const myTitle = cardTitleOf(card);
+  const mine = genresOfCard(card).slice().sort(function (a, b) {
+    const sa = GEN[a] && GEN[a].nums ? GEN[a].nums.size : Infinity;
+    const sb = GEN[b] && GEN[b].nums ? GEN[b].nums.size : Infinity;
+    return sa - sb;
+  });
+  const picked = [];
+  mine.forEach(function (g) {
+    if (picked.length >= want) return;
+    const nums = (GEN[g] && GEN[g].nums) ? Array.from(GEN[g].nums) : [];
+    for (let i = nums.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      const t = nums[i]; nums[i] = nums[j]; nums[j] = t;
+    }
+    for (let i = 0; i < nums.length && picked.length < want; i++) {
+      const c = byNum[nums[i]];
+      if (!c || picked.indexOf(c) > -1) continue;
+      const t = cardTitleOf(c);
+      if (!t || t === myTitle) continue;
+      picked.push(c);
+    }
+  });
+  return picked.map(cardFacts).filter(Boolean);
+}
+
 function localQuickAnswer(userMsg) {
   const msg = String(userMsg || '');
   if (!msg) return null;
@@ -3728,6 +3769,58 @@ function localQuickAnswer(userMsg) {
     return quickAiReply('Fardin is the owner of this hub — an anime lover who tracks everything he has watched and ranks it all for you.\n\n' +
       'His taste is wide: **action, comedy, romance and thriller**, with great storytelling and strong character development over flashy fights. ' +
       'His full info sits in the sidebar under **Owner Info** ⚡');
+  }
+
+  // ⚔️ "A vs B — which is better?" — the two cards plus the same score Anime Duel uses
+  if (/\bvs\.?\b/i.test(msg) && /better/i.test(msg)) {
+    const parts = msg.replace(/[—–-]\s*which is better[\s\S]*$/i, '').split(/\s+vs\.?\s+/i);
+    if (parts.length === 2) {
+      const cardA = (typeof findAnimeCard === 'function') ? findAnimeCard(parts[0].trim()) : null;
+      const cardB = (typeof findAnimeCard === 'function') ? findAnimeCard(parts[1].trim()) : null;
+      const fa = cardFacts(cardA), fb = cardFacts(cardB);
+      if (fa && fb) {
+        return loadRatings().then(function (r) {
+          const scoreOf = function (title) {
+            if (!r) return null;
+            const key = String(title).toLowerCase();
+            let hit = null;
+            Object.keys(r).forEach(function (k) {
+              const entry = r[k];
+              const t = entry && entry.title ? String(entry.title).toLowerCase() : '';
+              if (!t) return;
+              if (t === key) hit = entry;
+              else if (!hit && (t.indexOf(key) > -1 || key.indexOf(t) > -1)) hit = entry;
+            });
+            if (!hit) return null;
+            const s = overallScore(hit);
+            return s > 0 ? s : null;
+          };
+          const epOf = function (f) { const n = parseInt(String(f.ep).replace(/\D/g, ''), 10); return isNaN(n) ? '' : n; };
+          const lines = [];
+          const ea = epOf(fa), eb = epOf(fb);
+          if (ea || eb) lines.push('📺 Episodes: ' + (ea || '?') + ' vs ' + (eb || '?'));
+          if (fa.seas || fb.seas) lines.push('🌸 ' + fa.title + ': ' + (fa.seas || '—') + '\n🌸 ' + fb.title + ': ' + (fb.seas || '—'));
+          const sa = scoreOf(fa.title), sb = scoreOf(fb.title);
+          if (sa && sb) lines.push('🌟 Overall score: ' + sa.toFixed(2) + ' vs ' + sb.toFixed(2));
+          return quickAiReply('⚔️ **' + fa.title + '** vs **' + fb.title + '**\n\n' + lines.join('\n') +
+            '\n\nBoth are in Fardin\'s list — open **Anime Duel** in the sidebar and vote for your winner! ⚡');
+        });
+      }
+    }
+  }
+
+  // 🔜 "What should I watch after X?" — the follow-up comes from his list too
+  if (/\bwatch (?:after|next)\b|what should i watch after/i.test(msg)) {
+    const title = (typeof animeMentionedInText === 'function') ? animeMentionedInText(msg) : null;
+    const card = title && typeof findAnimeCard === 'function' ? findAnimeCard(title) : null;
+    if (card) {
+      const picks = sameGenrePicks(card, 2);
+      if (picks.length) {
+        const body = picks.map(function (f) { const m = pickLine(f); return '**' + f.title + '**' + (m ? '\n' + m : ''); }).join('\n\n');
+        return quickAiReply('Right after **' + title + '**, queue these from Fardin\'s list:\n\n' + body +
+          '\n\nWant a completely different genre instead? Just tell me ⚡');
+      }
+    }
   }
 
   // 🔢 "how many episodes and seasons does X have?" — the card already knows
