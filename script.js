@@ -4819,7 +4819,7 @@ document.addEventListener('click', function(e) {
     var nodes = document.querySelectorAll('.ht-comment-time[data-t]');
     for (var i = 0; i < nodes.length; i++) {
       var txt = formatTime(nodes[i].getAttribute('data-t'));
-      if (txt) nodes[i].textContent = '\uD83D\uDD52 ' + txt;
+      if (txt) nodes[i].textContent = (nodes[i].getAttribute('data-noclock') ? '' : '\uD83D\uDD52 ') + txt;
     }
   }
 
@@ -4890,7 +4890,7 @@ document.addEventListener('click', function(e) {
             voteBtnHtml('up', rLiked, rLikes.length, r) +
             voteBtnHtml('down', rDisliked, rDislikes.length, r) +
           '</div>' +
-          (rep.createdAt ? '<div class="ht-comment-time" data-t="' + escHtml(rep.createdAt) + '">' + formatTime(rep.createdAt) + '</div>' : '') +
+          (rep.createdAt ? '<div class="ht-comment-time" data-t="' + escHtml(rep.createdAt) + '" data-noclock="1">' + formatTime(rep.createdAt) + '</div>' : '') +
         '</div>';
       }
       repliesHtml += '</div>';
