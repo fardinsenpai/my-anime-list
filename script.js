@@ -2730,7 +2730,8 @@ function suggestRowsFor(anime) {
   const card = findAnimeCard(anime);
   const rows = [];
   const sib = siblingAnime(card, anime);
-  if (sib) {
+  // a title that already contains "VS" makes a nonsense "X vs Y" row, so skip it there
+  if (sib && !/\bvs\.?\b/i.test(anime)) {
     rows.push({
       label: sib + ' vs ' + anime + ' — which is better?',
       run: function () { quickAction(sib + ' vs ' + anime + ' — which is better?'); }
