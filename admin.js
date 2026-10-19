@@ -22,6 +22,7 @@ var TOP_5_DATA = {};
 var AWARD_WINNERS = {};
 var GROQ_MODELS = [];
 var GROQ_API_KEYS = [];
+var GENRE_BY_ID = {};          // anime id â†’ ['Action', â€¦] straight out of script.js
 var ADMIN_DATA_READY = false;
 
 /* The panel has no chat of its own, so the few chat-only helpers the shared
@@ -75,6 +76,27 @@ function grabLiteral(src, name) {
   try { return Function('return (' + src.slice(start, i) + ')')(); } catch (e) { return null; }
 }
 
+/* The site keeps its genre lists in a `const GENRES = { "Action": { icon, nums: new Set([â€¦]) } }`
+   block, and `nums` is exactly the list of anime ids in that genre. Flip it round so the
+   EDIT module can show an anime's genres without guessing. */
+function grabGenres(jsText) {
+  var i = jsText.indexOf('const GENRES = {');
+  if (i < 0) return {};
+  var body = jsText.slice(i, i + 40000);
+  var re = /"([^"]+)"\s*:\s*\{\s*icon:\s*"[^"]*"\s*,\s*nums:\s*new\s*Set\(\[([\d,\s]*)\]\)/g;
+  var map = {}, m;
+  while ((m = re.exec(body))) {
+    if (m[1] === 'All') continue;
+    (m[2] || '').split(',').forEach(function (n) {
+      var id = parseInt(n.trim(), 10);
+      if (!id) return;
+      if (!map[id]) map[id] = [];
+      map[id].push(m[1]);
+    });
+  }
+  return map;
+}
+
 /* Fetch the live site files once and hand the panel everything it needs. */
 async function loadAdminData() {
   try {
@@ -115,6 +137,7 @@ async function loadAdminData() {
     GROQ_API_KEYS = grabLiteral(jsText, 'GROQ_API_KEYS') || [];
     var avatars = grabLiteral(jsText, 'CHAT_AVATARS');
     if (avatars && typeof avatars === 'object') CHAT_AVATARS = avatars;
+    GENRE_BY_ID = grabGenres(jsText);
 
     ADMIN_DATA_READY = true;
     var cards = document.querySelectorAll('#adminDataHost #grid .card').length;
@@ -1586,6 +1609,42 @@ function checkAdminPin() {
   paintPatStatus();
   initAdminGui();
 }
+
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+   EDIT module: top up what the ported selectEditCard() cannot know.
+
+   Cards stopped carrying a `.back-genre` element, so the old prefill came
+   back empty and every genre edit had to be typed by hand; the seasons /
+   episodes fields also arrived with the site's emoji and stray spaces
+   (which used to be committed back as a double space). Both are filled
+   from the real data here, right after a card is picked.
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+function fillEditExtras() {
+  var id = _editId;
+  if (!id) return;
+
+  var genre = document.getElementById('adminEditGenre');
+  if (genre && !genre.value.trim()) {
+    var list = GENRE_BY_ID[id];
+    if (list && list.length) genre.value = list.join(', ');
+  }
+
+  var clean = function (el, drop) {
+    if (!el) return;
+    var v = el.value.replace(/[ðŸŒ¸ðŸ“ºðŸŽ¬]/g, '');
+    if (drop) v = v.replace(drop, '');
+    el.value = v.replace(/\s+/g, ' ').trim();
+  };
+  clean(document.getElementById('adminEditSeasons'));
+  clean(document.getElementById('adminEditEps'), /Total Episodes:/i);
+}
+
+(function editExtraWire() {
+  var box = document.getElementById('adminEditResults');
+  if (!box) return;
+  // capture phase: runs before the row's own onclick, the timeout after it
+  box.addEventListener('click', function () { window.setTimeout(fillEditExtras, 0); }, true);
+})();
 
 (function adminBoot() {
   var retry = document.getElementById('bootRetry');
