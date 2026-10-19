@@ -4677,18 +4677,24 @@ document.addEventListener('click', function(e) {
 
   function htAvatarHtml(value, person, size) {
     size = size || 26;
-    var v = htAvatarOk(value) ? value : '';
+    var v = htAvatarPickOk(value) ? String(value) : '';
     var seed = (person && (person._userId || person.userName)) || '';
     var box = 'width:' + size + 'px;height:' + size + 'px;border-radius:50%;display:inline-flex;' +
       'align-items:center;justify-content:center;overflow:hidden;flex:0 0 auto;vertical-align:middle;' +
       'margin-right:6px;border:1px solid rgba(199,125,255,0.5);';
-    if (String(value) === ADMIN_AVATAR) {
+    if (v === ADMIN_AVATAR) {
       return '<span style="' + box + 'background:transparent;" title="Fardin\u2019s Anime Hub">' +
         '<img src="' + ADMIN_AVATAR_SRC + '" alt="" data-av="1" ' +
         'style="width:100%;height:100%;object-fit:cover;display:block;">' +
       '</span>';
     }
-    if (/^img:/.test(v)) {
+    if (v === 'site:photo') {
+      return '<span style="' + box + 'background:transparent;" title="Fardin">' +
+        '<img src="' + ADMIN_PHOTO_SRC + '" alt="" data-av="1" ' +
+        'style="width:100%;height:100%;object-fit:cover;display:block;">' +
+      '</span>';
+    }
+    if (/^img:(https:|data:image\/)/i.test(v)) {
       var under = AVATAR_PRESETS[htAutoPreset(seed)];
       return '<span style="' + box + 'background:' + under.bg + ';" title="avatar">' +
         '<img src="' + htAttr(v.slice(4)) + '" alt="" loading="lazy" data-av="1" ' +
@@ -4730,12 +4736,59 @@ document.addEventListener('click', function(e) {
 
   var VOTE_UP_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>';
   var VOTE_DOWN_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3H10zM17 2h3a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-3"/></svg>';
-  var ADMIN_SHIELD_SVG = '<svg width="16" height="16" viewBox="0 0 64 64" fill="none" style="vertical-align:middle;margin-right:3px;filter:drop-shadow(0 0 3px rgba(255,215,0,0.75));"><path d="M32 6L8 18v12c0 18 10 28 24 28s24-10 24-28V18L32 6z" fill="#1a1a2e" stroke="#ffd700" stroke-width="3"/><path d="M22 32l7 7 13-13" stroke="#ffd700" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  // ---- the admin reply look (chosen in admin.html -> REPLY) ----------------
+  // the gold shield stays the default, now with a soft glow; every alternative is
+  // a plain string so the panel can swap it without touching a line of CSS
+  var ADMIN_BADGES = {
+    'shield': '<svg width="16" height="16" viewBox="0 0 64 64" fill="none" style="vertical-align:middle;"><path d="M32 6L8 18v12c0 18 10 28 24 28s24-10 24-28V18L32 6z" fill="#1a1a2e" stroke="#ffd700" stroke-width="3"/><path d="M22 32l7 7 13-13" stroke="#ffd700" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    'shield-glow': '<svg width="16" height="16" viewBox="0 0 64 64" fill="none" style="vertical-align:middle;filter:drop-shadow(0 0 3px rgba(255,215,0,0.75));"><path d="M32 6L8 18v12c0 18 10 28 24 28s24-10 24-28V18L32 6z" fill="#1a1a2e" stroke="#ffd700" stroke-width="3"/><path d="M22 32l7 7 13-13" stroke="#ffd700" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    'coin-gold': '<svg width="16" height="16" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10.5" fill="#ffd700"/><circle cx="12" cy="12" r="10.5" fill="none" stroke="#b8860b" stroke-width="1"/><text x="12" y="16.4" text-anchor="middle" font-size="13" font-weight="900" font-family="Arial,sans-serif" fill="#1a1a2e">F</text></svg>',
+    'coin-blue': '<svg width="16" height="16" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10.5" fill="#1877F2"/><text x="12" y="16.4" text-anchor="middle" font-size="13" font-weight="900" font-family="Arial,sans-serif" fill="#fff">F</text></svg>',
+    'check-gold': '<svg width="16" height="16" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10.5" fill="#ffd700"/><path d="M7.4 12.3l3.1 3.2 6.1-6.6" fill="none" stroke="#1a1a2e" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    'tick-blue': '<svg width="15" height="15" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="11" fill="#1877F2"/><path d="M7 12.4l3.2 3.2L17 8.6" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    'star': '<svg width="16" height="16" viewBox="0 0 24 24"><path d="M12 2.6l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 17.4l-5.8 3.1 1.1-6.5L2.6 9.4l6.5-.9z" fill="#ffd700"/></svg>',
+    'crown': '<span style="font-size:13px;line-height:1;">\uD83D\uDC51</span>',
+    'flame': '<span style="font-size:13px;line-height:1;">\uD83D\uDD25</span>',
+    'bolt': '<span style="font-size:13px;line-height:1;">\u26A1</span>',
+    'sparkle': '<span style="font-size:13px;line-height:1;">\u2728</span>',
+    'gem': '<span style="font-size:13px;line-height:1;">\uD83D\uDC8E</span>',
+    'sakura': '<span style="font-size:13px;line-height:1;">\uD83C\uDF38</span>'
+  };
+  var ADMIN_BADGE_DEFAULT = 'shield-glow';
 
-  // every admin reply wears this face: the character from the site logo, cropped
-  // square and kept light (13 KB) because it is drawn at 18 px
-  var ADMIN_AVATAR_SRC = 'admin-avatar.png';
+  // every admin reply wears one of these faces - both files are small squares
+  var ADMIN_AVATAR_SRC = 'admin-avatar.png';   // the character from the site logo
+  var ADMIN_PHOTO_SRC = 'admin-photo.jpg';     // the real photo, cropped square
   var ADMIN_AVATAR = 'site:admin';
+  var ADMIN_REPLY_KEY = 'fardin.admin.reply';
+
+  // admin.html (REPLY tab) writes this key; the public page only ever reads it
+  function htAdminCfg() {
+    var cfg = { avatar: '', badge: '' };
+    try {
+      var o = JSON.parse(localStorage.getItem(ADMIN_REPLY_KEY) || '{}') || {};
+      cfg.avatar = String(o.avatar || '');
+      cfg.badge = String(o.badge || '');
+    } catch (e) {}
+    if (!ADMIN_BADGES[cfg.badge]) cfg.badge = ADMIN_BADGE_DEFAULT;
+    return cfg;
+  }
+  function htAvatarPickOk(v) {
+    v = String(v || '');
+    if (/^site:(admin|photo)$/.test(v)) return true;
+    if (/^img:data:image\/(png|jpeg|jpg|webp);base64,[A-Za-z0-9+/=]+$/i.test(v)) return true;
+    return htAvatarOk(v);
+  }
+  function htAdminAvatarValue() { return htAdminCfg().avatar || ADMIN_AVATAR; }
+  function htAdminReplyAvatar(rep) {
+    var v = String((rep && rep.avatar) || '');
+    return htAvatarPickOk(v) ? v : htAdminAvatarValue();
+  }
+  function htAdminReplyBadge(rep) {
+    var id = String((rep && rep.badge) || '');
+    if (!ADMIN_BADGES[id]) id = htAdminCfg().badge;
+    return ADMIN_BADGES[id] || ADMIN_BADGES[ADMIN_BADGE_DEFAULT];
+  }
 
   // the blue tick for takes written by a signed-in account
   var VERIFIED_SVG = '<span title="Verified account" aria-label="Verified" style="display:inline-block;vertical-align:middle;margin-left:5px;line-height:0;">' +
@@ -5009,7 +5062,7 @@ document.addEventListener('click', function(e) {
         var rLiked = rLikes.indexOf(myId) !== -1;
         var rDisliked = rDislikes.indexOf(myId) !== -1;
         repliesHtml += '<div class="ht-reply">' +
-          '<div class="ht-reply-top"><span class="ht-reply-admin">' + htAvatarHtml(htIsAdminReply(rep) ? ADMIN_AVATAR : rep.avatar, rep, 18) + escHtml(rep.userName || ADMIN_NAME) + (htIsAdminReply(rep) ? '<span title="Admin" aria-label="Admin" style="display:inline-block;vertical-align:middle;margin-left:5px;">' + ADMIN_SHIELD_SVG + '</span>' : '') + '</span>' +
+          '<div class="ht-reply-top"><span class="ht-reply-admin">' + htAvatarHtml(htIsAdminReply(rep) ? htAdminReplyAvatar(rep) : rep.avatar, rep, 18) + escHtml(rep.userName || ADMIN_NAME) + (htIsAdminReply(rep) ? '<span title="Admin" aria-label="Admin" style="display:inline-block;vertical-align:middle;margin-left:5px;">' + htAdminReplyBadge(rep) + '</span>' : '') + '</span>' +
           (adminMode ? '<button class="ht-reply-del" type="button" data-r="' + r + '" title="Delete this reply" aria-label="Delete this reply">\uD83D\uDDD1\uFE0F</button>' : '') +
           '</div>' +
           '<div class="ht-reply-text">' + htText(rep.comment) + '</div>' +
@@ -5077,7 +5130,8 @@ document.addEventListener('click', function(e) {
         if (!hit.item) { syncFromSupabase(true); return; }
         var parent = hit.item;
         if (!parent.replies) parent.replies = [];
-        var reply = { userName: ADMIN_NAME, comment: text, createdAt: new Date().toISOString(), likes: [], dislikes: [], avatar: htMyAvatar(), admin: true };
+        var acfg = htAdminCfg();
+        var reply = { userName: ADMIN_NAME, comment: text, createdAt: new Date().toISOString(), likes: [], dislikes: [], avatar: acfg.avatar || ADMIN_AVATAR, badge: acfg.badge, admin: true };
         parent.replies.push(reply);
         saveComments(all);
         renderFeed(all);

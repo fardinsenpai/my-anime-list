@@ -2305,6 +2305,284 @@ function adLogoReset() {
 ADMIN_LOGO = adminLogoLoad();
 adminLogoApply(ADMIN_LOGO);
 
+/* ============================================================
+   💬 HOT TAKES — ADMIN REPLY (avatar + badge)
+   script.js reads the same localStorage key, so a pick here is live
+   in this browser at once. APPLY also rewrites the admin replies
+   already stored in Supabase — that is what visitors actually render.
+   ============================================================ */
+var AD_REPLY_KEY = 'fardin.admin.reply';
+var AD_SUPA_URL = 'https://ldzlefdklcgvqcbqibtt.supabase.co';
+var AD_SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxkemxlZmRrbGNndnFjYnFpYnR0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwMzk1OTAsImV4cCI6MjA5NjYxNTU5MH0.X3TGuLIpjrnPXMgCv4ZKIIjB6pItPgkdebf4JPdhuYs';
+var AD_REPLY_DEFAULT = { avatar: 'site:admin', badge: 'shield-glow' };
+var AD_REPLY = { avatar: AD_REPLY_DEFAULT.avatar, badge: AD_REPLY_DEFAULT.badge };
+
+var AD_REPLY_PRESETS = {
+  chibi: { bg: 'radial-gradient(circle at 32% 28%, #fbcfe8, #be185d 82%)', border: 'rgba(252,231,243,0.85)', svg: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.6" fill="#9d174d"></circle><circle cx="12" cy="13.8" r="6.6" fill="#ffe9f2"></circle><path d="M5 11.5C5.6 8.6 8.4 6.9 12 6.9s6.4 1.7 7 4.6c-1.2 1.2-2.4 1.4-3.4 0.6-0.9-0.7-1.2-1.6-2.1-2.2-1.1 0.7-1.6 1.6-2.6 2.2-1 0.6-2.2 0.4-3.5-0.6z" fill="#7f1d4d"></path><circle cx="9.5" cy="14.6" r="1.2" fill="#4a044e"></circle><circle cx="14.5" cy="14.6" r="1.2" fill="#4a044e"></circle><path d="M10.9 17.2c0.8 0.7 1.4 0.7 2.2 0" stroke="#4a044e" stroke-width="1" fill="none" stroke-linecap="round"></path></svg>' },
+  neko: { bg: 'radial-gradient(circle at 32% 28%, #fbcfe8, #db2777 80%)', border: 'rgba(251,207,232,0.85)', svg: '<svg viewBox="0 0 24 24"><path d="M5.2 7.2 L4.4 2.6 L8.7 4.7 Z" fill="#fff0f6"></path><path d="M18.8 7.2 L19.6 2.6 L15.3 4.7 Z" fill="#fff0f6"></path><circle cx="12" cy="12.6" r="7.6" fill="#fff0f6"></circle><circle cx="9.3" cy="11.6" r="1.2" fill="#831843"></circle><circle cx="14.7" cy="11.6" r="1.2" fill="#831843"></circle><path d="M12 14.6l-1.2 1.3h2.4z" fill="#831843"></path></svg>' },
+  sakura: { bg: 'radial-gradient(circle at 32% 28%, #ffe9f4, #ff8fb8 80%)', border: 'rgba(255,143,184,0.95)', svg: '<svg viewBox="0 0 24 24"><g transform="translate(12 12)" fill="#be185d"><ellipse cx="0" cy="-5" rx="3.1" ry="5"></ellipse><ellipse cx="0" cy="-5" rx="3.1" ry="5" transform="rotate(72)"></ellipse><ellipse cx="0" cy="-5" rx="3.1" ry="5" transform="rotate(144)"></ellipse><ellipse cx="0" cy="-5" rx="3.1" ry="5" transform="rotate(216)"></ellipse><ellipse cx="0" cy="-5" rx="3.1" ry="5" transform="rotate(288)"></ellipse></g><circle cx="12" cy="12" r="1.9" fill="#ffe4ef"></circle></svg>' },
+  kitsune: { bg: 'radial-gradient(circle at 32% 28%, #fdba74, #ea580c 78%)', border: 'rgba(254,215,170,0.85)', svg: '<svg viewBox="0 0 24 24"><path d="M4 3 L8.2 6.2 L15.8 6.2 L20 3 L19.5 10.2 C19.5 15.4 16.1 19.5 12 19.5 C7.9 19.5 4.5 15.4 4.5 10.2 Z" fill="#fff7ed"></path><circle cx="9.2" cy="11.2" r="1.3" fill="#7c2d12"></circle><circle cx="14.8" cy="11.2" r="1.3" fill="#7c2d12"></circle><path d="M12 14.4l-1.4 1.5h2.8z" fill="#7c2d12"></path></svg>' },
+  sharingan: { bg: 'radial-gradient(circle at 32% 28%, #ff8fb8, #ff2d55 75%)', border: 'rgba(255,214,232,0.75)', svg: '<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="#8b0000" stroke="#ff2200" stroke-width="3"></circle><circle cx="50" cy="50" r="15" fill="#1a0000"></circle><circle cx="50" cy="28" r="7" fill="#1a0000"></circle><circle cx="69" cy="61" r="7" fill="#1a0000"></circle><circle cx="31" cy="61" r="7" fill="#1a0000"></circle><circle cx="50" cy="50" r="6" fill="#ff2200"></circle></svg>' },
+  rinnegan: { bg: 'radial-gradient(circle at 32% 28%, #c4b5fd, #5b21b6 78%)', border: 'rgba(221,214,254,0.8)', svg: '<svg viewBox="0 0 100 100" fill="none" stroke="#ede9fe" stroke-width="6"><circle cx="50" cy="50" r="40"></circle><circle cx="50" cy="50" r="24"></circle><circle cx="50" cy="50" r="9" fill="#ede9fe" stroke="none"></circle></svg>' },
+  samurai: { bg: 'radial-gradient(circle at 32% 28%, #60a5fa, #1e3a8a 80%)', border: 'rgba(191,219,254,0.85)', svg: '<svg viewBox="0 0 24 24"><path d="M12 2.6c-5 0-8.6 3.7-8.6 8.6 0 1.9 0.5 3.4 1.3 4.6h14.6c0.8-1.2 1.3-2.7 1.3-4.6 0-4.9-3.6-8.6-8.6-8.6z" fill="#f8faff"></path><path d="M12 2.6c-1.3 0-2.5 0.2-3.6 0.7L12 9.4l3.6-6.1c-1.1-0.5-2.3-0.7-3.6-0.7z" fill="#a5b4fc"></path><path d="M4.7 15.8h14.6l-1.9 4.2a1 1 0 0 1-0.9 0.6H7.5a1 1 0 0 1-0.9-0.6z" fill="#4f46e5"></path><rect x="10.7" y="15.8" width="2.6" height="4.8" rx="0.7" fill="#eef2ff"></rect></svg>' },
+  ramen: { bg: 'radial-gradient(circle at 32% 28%, #fde68a, #d97706 80%)', border: 'rgba(253,230,138,0.85)', svg: '<svg viewBox="0 0 24 24"><path d="M3 11.2h18c0 5.1-4 8.8-9 8.8s-9-3.7-9-8.8z" fill="#fde68a"></path><path d="M4.6 12.6h14.8c-0.4 3.6-3.5 6-7.4 6s-7-2.4-7.4-6z" fill="#7c2d12"></path><path d="M8.2 9c1-1.3 1-2.4 0-3.7M12 8.4c1.2-1.5 1.2-2.9 0-4.4M15.8 9c1-1.3 1-2.4 0-3.7" stroke="#fff7ed" stroke-width="1.4" fill="none" stroke-linecap="round"></path></svg>' },
+  person: { bg: 'radial-gradient(circle at 32% 28%, #a78bfa, #6d28d9 80%)', border: 'rgba(196,181,253,0.7)', svg: '<svg viewBox="0 0 24 24" fill="#f3e8ff"><circle cx="12" cy="8" r="4.2"></circle><path d="M3.8 21a8.2 8.2 0 0 1 16.4 0z"></path></svg>' }
+};
+
+var AD_REPLY_AVATARS = [
+  { id: 'site:admin', label: 'SITE LOGO' },
+  { id: 'site:photo', label: 'MY PHOTO' },
+  { id: 'preset:chibi', label: 'CHIBI' },
+  { id: 'preset:neko', label: 'NEKO' },
+  { id: 'preset:sakura', label: 'SAKURA' },
+  { id: 'preset:kitsune', label: 'KITSUNE' },
+  { id: 'preset:sharingan', label: 'SHARINGAN' },
+  { id: 'preset:rinnegan', label: 'RINNEGAN' },
+  { id: 'preset:samurai', label: 'SAMURAI' },
+  { id: 'preset:ramen', label: 'RAMEN' },
+  { id: 'preset:person', label: 'YOU' }
+];
+
+var AD_REPLY_BADGES = {
+  'shield': '<svg width="16" height="16" viewBox="0 0 64 64" fill="none" style="vertical-align:middle;"><path d="M32 6L8 18v12c0 18 10 28 24 28s24-10 24-28V18L32 6z" fill="#1a1a2e" stroke="#ffd700" stroke-width="3"/><path d="M22 32l7 7 13-13" stroke="#ffd700" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  'shield-glow': '<svg width="16" height="16" viewBox="0 0 64 64" fill="none" style="vertical-align:middle;filter:drop-shadow(0 0 3px rgba(255,215,0,0.75));"><path d="M32 6L8 18v12c0 18 10 28 24 28s24-10 24-28V18L32 6z" fill="#1a1a2e" stroke="#ffd700" stroke-width="3"/><path d="M22 32l7 7 13-13" stroke="#ffd700" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  'coin-gold': '<svg width="16" height="16" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10.5" fill="#ffd700"/><circle cx="12" cy="12" r="10.5" fill="none" stroke="#b8860b" stroke-width="1"/><text x="12" y="16.4" text-anchor="middle" font-size="13" font-weight="900" font-family="Arial,sans-serif" fill="#1a1a2e">F</text></svg>',
+  'coin-blue': '<svg width="16" height="16" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10.5" fill="#1877F2"/><text x="12" y="16.4" text-anchor="middle" font-size="13" font-weight="900" font-family="Arial,sans-serif" fill="#fff">F</text></svg>',
+  'check-gold': '<svg width="16" height="16" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10.5" fill="#ffd700"/><path d="M7.4 12.3l3.1 3.2 6.1-6.6" fill="none" stroke="#1a1a2e" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  'tick-blue': '<svg width="15" height="15" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="11" fill="#1877F2"/><path d="M7 12.4l3.2 3.2L17 8.6" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  'star': '<svg width="16" height="16" viewBox="0 0 24 24"><path d="M12 2.6l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 17.4l-5.8 3.1 1.1-6.5L2.6 9.4l6.5-.9z" fill="#ffd700"/></svg>',
+  'crown': '<span style="font-size:13px;line-height:1;">\uD83D\uDC51</span>',
+  'flame': '<span style="font-size:13px;line-height:1;">\uD83D\uDD25</span>',
+  'bolt': '<span style="font-size:13px;line-height:1;">\u26A1</span>',
+  'sparkle': '<span style="font-size:13px;line-height:1;">\u2728</span>',
+  'gem': '<span style="font-size:13px;line-height:1;">\uD83D\uDC8E</span>',
+  'sakura': '<span style="font-size:13px;line-height:1;">\uD83C\uDF38</span>'
+};
+var AD_REPLY_BADGE_ORDER = ['shield-glow', 'shield', 'coin-gold', 'coin-blue', 'check-gold', 'tick-blue', 'star', 'crown', 'flame', 'bolt', 'sparkle', 'gem', 'sakura'];
+var AD_REPLY_BADGE_LABEL = { 'shield-glow': 'SHIELD \u2728', 'shield': 'SHIELD', 'coin-gold': 'GOLD F', 'coin-blue': 'BLUE F', 'check-gold': 'CHECK', 'tick-blue': 'BLUE \u2713', 'star': 'STAR', 'crown': 'CROWN', 'flame': 'FIRE', 'bolt': 'BOLT', 'sparkle': 'SPARKLE', 'gem': 'GEM', 'sakura': 'SAKURA' };
+
+function adReplyLoad() {
+  var cfg = { avatar: AD_REPLY_DEFAULT.avatar, badge: AD_REPLY_DEFAULT.badge };
+  try {
+    var o = JSON.parse(localStorage.getItem(AD_REPLY_KEY) || '{}') || {};
+    if (o.avatar) cfg.avatar = String(o.avatar);
+    if (o.badge) cfg.badge = String(o.badge);
+  } catch (e) {}
+  if (!AD_REPLY_BADGES[cfg.badge]) cfg.badge = AD_REPLY_DEFAULT.badge;
+  return cfg;
+}
+
+function adReplyAvatarHtml(id, size) {
+  size = size || 40;
+  var box = 'width:' + size + 'px;height:' + size + 'px;border-radius:50%;display:inline-flex;' +
+    'align-items:center;justify-content:center;overflow:hidden;flex:0 0 auto;' +
+    'border:1px solid rgba(199,125,255,0.5);';
+  if (id === 'site:admin') {
+    return '<span style="' + box + '" title="Site logo"><img src="admin-avatar.png" alt="" ' +
+      'style="width:100%;height:100%;object-fit:cover;display:block;"></span>';
+  }
+  if (id === 'site:photo') {
+    return '<span style="' + box + '" title="My photo"><img src="admin-photo.jpg" alt="" ' +
+      'style="width:100%;height:100%;object-fit:cover;display:block;"></span>';
+  }
+  if (/^img:(https:|data:image\/)/i.test(String(id || ''))) {
+    return '<span style="' + box + '" title="My picture"><img src="' + String(id).slice(4) + '" alt="" ' +
+      'style="width:100%;height:100%;object-fit:cover;display:block;"></span>';
+  }
+  var pid = /^preset:/.test(id) ? id.slice(7) : '';
+  var p = AD_REPLY_PRESETS[pid] || AD_REPLY_PRESETS.chibi;
+  return '<span style="' + box + 'background:' + p.bg + ';border-color:' + p.border + ';">' + p.svg + '</span>';
+}
+
+function adReplyBadgeHtml(id) {
+  return AD_REPLY_BADGES[id] || AD_REPLY_BADGES[AD_REPLY_DEFAULT.badge];
+}
+
+function adReplyPreview() {
+  var box = document.getElementById('adReplyPreview');
+  if (!box) return;
+  box.innerHTML =
+    adReplyAvatarHtml(AD_REPLY.avatar, 34) +
+    '<span style="font-family:Orbitron,sans-serif;font-size:12px;font-weight:700;color:#00e5ff;letter-spacing:.5px;">Fardin</span>' +
+    '<span style="display:inline-block;vertical-align:middle;margin-left:4px;line-height:0;">' +
+      adReplyBadgeHtml(AD_REPLY.badge) + '</span>';
+}
+
+function renderReplyTab() {
+  var wrap = document.getElementById('adReplyAvatars');
+  if (wrap) {
+    var list = AD_REPLY_AVATARS.slice();
+    if (/^img:/.test(AD_REPLY.avatar)) list.unshift({ id: AD_REPLY.avatar, label: 'MY UPLOAD' });
+    wrap.innerHTML = list.map(function (o) {
+      var on = AD_REPLY.avatar === o.id;
+      return '<button type="button" data-av="' + adEsc(o.id) + '" title="' + adEsc(o.label) + '" ' +
+        'style="background:transparent;border:1px solid ' + (on ? '#ffd700' : 'var(--g-line)') + ';border-radius:12px;' +
+        'padding:8px 10px 6px;display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;' +
+        (on ? 'box-shadow:0 0 0 2px rgba(255,215,0,.28);' : '') + '">' +
+        adReplyAvatarHtml(o.id, 38) +
+        '<span style="font-size:8.5px;letter-spacing:.6px;color:' + (on ? '#ffd700' : 'var(--g-dim)') + ';">' + adEsc(o.label) + '</span>' +
+      '</button>';
+    }).join('');
+    Array.prototype.forEach.call(wrap.querySelectorAll('[data-av]'), function (b) {
+      b.addEventListener('click', function () { adReplyPickAvatar(b.getAttribute('data-av')); });
+    });
+  }
+
+  var bw = document.getElementById('adReplyBadges');
+  if (bw) {
+    bw.innerHTML = AD_REPLY_BADGE_ORDER.map(function (id) {
+      var on = AD_REPLY.badge === id;
+      var lbl = AD_REPLY_BADGE_LABEL[id] || id;
+      return '<button type="button" data-badge="' + id + '" title="' + adEsc(lbl) + '" ' +
+        'style="background:transparent;border:1px solid ' + (on ? '#ffd700' : 'var(--g-line)') + ';border-radius:12px;' +
+        'padding:9px 11px;display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;min-width:64px;' +
+        (on ? 'box-shadow:0 0 0 2px rgba(255,215,0,.28);' : '') + '">' +
+        '<span style="display:inline-flex;align-items:center;justify-content:center;height:16px;line-height:0;">' + adReplyBadgeHtml(id) + '</span>' +
+        '<span style="font-size:8.5px;letter-spacing:.5px;color:' + (on ? '#ffd700' : 'var(--g-dim)') + ';">' + adEsc(lbl) + '</span>' +
+      '</button>';
+    }).join('');
+    Array.prototype.forEach.call(bw.querySelectorAll('[data-badge]'), function (b) {
+      b.addEventListener('click', function () { adReplyPickBadge(b.getAttribute('data-badge')); });
+    });
+  }
+
+  adReplyPreview();
+}
+
+function adReplyPickAvatar(id) {
+  AD_REPLY.avatar = String(id || AD_REPLY_DEFAULT.avatar);
+  renderReplyTab();
+  var note = document.getElementById('adReplyNote');
+  if (note) note.textContent = 'picked — press APPLY TO SITE to keep it';
+}
+
+function adReplyPickBadge(id) {
+  AD_REPLY.badge = AD_REPLY_BADGES[id] ? id : AD_REPLY_DEFAULT.badge;
+  renderReplyTab();
+  var note = document.getElementById('adReplyNote');
+  if (note) note.textContent = 'picked — press APPLY TO SITE to keep it';
+}
+
+function adReplyPickFile() {
+  var f = document.getElementById('adReplyFile');
+  if (f) f.click();
+}
+
+function adReplyFileChosen(input) {
+  var file = input && input.files && input.files[0];
+  if (!file) return;
+  if (!/^image\//i.test(file.type)) { msgFail('That file is not an image'); input.value = ''; return; }
+  var reader = new FileReader();
+  reader.onload = function () {
+    var img = new Image();
+    img.onload = function () {
+      var max = 96;
+      var scale = Math.min(1, max / Math.max(img.width || 1, img.height || 1));
+      var w = Math.max(1, Math.round((img.width || 1) * scale));
+      var h = Math.max(1, Math.round((img.height || 1) * scale));
+      var c = document.createElement('canvas');
+      c.width = w; c.height = h;
+      var ctx = c.getContext('2d');
+      ctx.drawImage(img, 0, 0, w, h);
+      var url = '';
+      try { url = c.toDataURL('image/jpeg', 0.86); } catch (e) {}
+      if (!url) { msgFail('Could not read that picture'); return; }
+      AD_REPLY.avatar = 'img:' + url;
+      renderReplyTab();
+      var note = document.getElementById('adReplyNote');
+      if (note) note.textContent = 'picture loaded (' + w + '\u00D7' + h + ') — press APPLY TO SITE';
+      msgOk('Picture loaded');
+    };
+    img.onerror = function () { msgFail('Could not open that picture'); };
+    img.src = String(reader.result || '');
+  };
+  reader.onerror = function () { msgFail('Could not read that file'); };
+  reader.readAsDataURL(file);
+  input.value = '';
+}
+
+function adReplyIsAdmin(r) {
+  if (!r) return false;
+  if (r.admin) return true;
+  var n = String(r.userName || '').trim().toLowerCase();
+  return !!n && n === 'fardin';
+}
+
+async function adReplyPushToSite() {
+  var st = document.getElementById('adReplyStatus');
+  function say(t) { if (st) st.textContent = t; }
+  say('pushing to the site\u2026');
+  try {
+    var res = await fetch(AD_SUPA_URL + '/rest/v1/hot_takes?select=id,replies', {
+      headers: { apikey: AD_SUPA_KEY, Authorization: 'Bearer ' + AD_SUPA_KEY }
+    });
+    if (!res.ok) throw new Error('read HTTP ' + res.status);
+    var takes = await res.json();
+    var takesChanged = 0, repliesChanged = 0;
+    for (var i = 0; i < takes.length; i++) {
+      var t = takes[i];
+      if (!t || !Array.isArray(t.replies) || !t.replies.length) continue;
+      var changed = false;
+      var next = t.replies.map(function (r) {
+        if (!adReplyIsAdmin(r)) return r;
+        if (r.avatar === AD_REPLY.avatar && r.badge === AD_REPLY.badge) return r;
+        changed = true;
+        repliesChanged++;
+        var copy = {};
+        for (var k in r) if (Object.prototype.hasOwnProperty.call(r, k)) copy[k] = r[k];
+        copy.avatar = AD_REPLY.avatar;
+        copy.badge = AD_REPLY.badge;
+        return copy;
+      });
+      if (!changed) continue;
+      var up = await fetch(AD_SUPA_URL + '/rest/v1/hot_takes?id=eq.' + encodeURIComponent(t.id), {
+        method: 'PATCH',
+        headers: {
+          apikey: AD_SUPA_KEY,
+          Authorization: 'Bearer ' + AD_SUPA_KEY,
+          'Content-Type': 'application/json',
+          Prefer: 'return=minimal'
+        },
+        body: JSON.stringify({ replies: next })
+      });
+      if (!up.ok) throw new Error('write HTTP ' + up.status);
+      takesChanged++;
+    }
+    say('on the site \u2014 ' + repliesChanged + ' admin repl' + (repliesChanged === 1 ? 'y' : 'ies') +
+        ' updated in ' + takesChanged + ' take' + (takesChanged === 1 ? '' : 's'));
+    if (repliesChanged) msgOk('Site updated');
+    else msgOk('Already matches the site');
+  } catch (e) {
+    say('site push failed: ' + ((e && e.message) || e) + ' \u2014 the choice still applies in this browser');
+    msgFail('This browser only \u2014 the site push failed');
+  }
+}
+
+async function adReplySave() {
+  try {
+    localStorage.setItem(AD_REPLY_KEY, JSON.stringify(AD_REPLY));
+  } catch (e) {
+    msgFail('Could not save \u2014 that picture may be too big for this browser');
+    return;
+  }
+  adReplyPreview();
+  msgOk('Saved in this browser');
+  await adReplyPushToSite();
+}
+
+function adReplyReset() {
+  AD_REPLY = { avatar: AD_REPLY_DEFAULT.avatar, badge: AD_REPLY_DEFAULT.badge };
+  try { localStorage.removeItem(AD_REPLY_KEY); } catch (e) {}
+  renderReplyTab();
+  var note = document.getElementById('adReplyNote');
+  if (note) note.textContent = 'a square PNG looks best \u2014 stored at 96px';
+  var st = document.getElementById('adReplyStatus');
+  if (st) st.textContent = 'reset to the site logo + glowing shield (press APPLY TO SITE to push it)';
+  msgOk('Back to the default look');
+}
+
+AD_REPLY = adReplyLoad();
+
 (function adminBoot() {
   var retry = document.getElementById('bootRetry');
 

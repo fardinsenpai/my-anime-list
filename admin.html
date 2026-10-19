@@ -91,6 +91,7 @@
         <button class="admin-g-tab" data-tab="avatars" onclick="switchAdminTab('avatars'); renderAvatarsTab()"><b>🖼️</b> AVATARS<span>chat avatars</span></button>
         <button class="admin-g-tab" data-tab="notes"   onclick="switchAdminTab('notes'); renderNotesTab()"><b>📝</b> NOTES<span>private pad</span></button>
         <button class="admin-g-tab" data-tab="logo"    onclick="switchAdminTab('logo'); renderLogoTab()"><b>🎨</b> LOGO<span>panel identity</span></button>
+        <button class="admin-g-tab" data-tab="reply"   onclick="switchAdminTab('reply'); renderReplyTab()"><b>💬</b> REPLY<span>avatar &amp; badge</span></button>
       </nav>
 
       <div class="ad-side-block">
@@ -393,6 +394,37 @@
         </div>
       </section>
 
+      <!-- REPLY AVATAR + BADGE -->
+      <section class="admin-g-content" id="tabReply">
+        <h2 class="ad-h">// HOT TAKES — ADMIN REPLY //</h2>
+        <div class="ad-note">
+          This is the face and the sign that sit next to <b>Fardin</b> on every reply in Hot Takes.
+          Pick an avatar and a badge, then <b>▶ APPLY TO SITE</b>: the choice is kept in this browser, and the
+          admin replies already stored in Supabase are rewritten so every visitor sees the same thing.
+        </div>
+
+        <div id="adReplyPreview" style="display:flex;align-items:center;gap:9px;margin:16px 0;padding:16px 18px;border:1px solid var(--g-line);border-radius:14px;background:var(--g-bg);min-height:66px;"></div>
+
+        <h3 class="ad-h">// AVATAR //</h3>
+        <div id="adReplyAvatars" style="display:flex;flex-wrap:wrap;gap:9px;"></div>
+        <div class="ad-row wrap" style="margin-top:12px;">
+          <button class="admin-g-btn tight" onclick="adReplyPickFile()">📷 UPLOAD PICTURE</button>
+          <input type="file" id="adReplyFile" accept="image/*" style="display:none" onchange="adReplyFileChosen(this)">
+          <span class="ad-count" id="adReplyNote">a square PNG looks best — stored at 96px</span>
+        </div>
+
+        <div class="ad-hr"></div>
+
+        <h3 class="ad-h">// BADGE //</h3>
+        <div id="adReplyBadges" style="display:flex;flex-wrap:wrap;gap:9px;"></div>
+
+        <div class="ad-row wrap" style="margin-top:18px;">
+          <button class="admin-g-btn" onclick="adReplySave()">▶ APPLY TO SITE</button>
+          <button class="admin-g-btn tight danger" onclick="adReplyReset()">↺ RESET TO DEFAULT</button>
+        </div>
+        <div class="ad-status dim" id="adReplyStatus"></div>
+      </section>
+
     </main>
   </div>
 
@@ -405,6 +437,6 @@
   </div>
 </div>
 
-<script src="admin.js?v=20261024j"></script>
+<script src="admin.js?v=20261024p"></script>
 </body>
 </html>
