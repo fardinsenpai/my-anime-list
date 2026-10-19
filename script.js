@@ -2323,8 +2323,8 @@ async function sendMessage() {
       });
 
       addMessage(botReply, 'bot', true, function (msgDiv) {
-        // the grey ↘ suggestion rows appear once the answer has finished typing
-        renderSuggestions(msgDiv, animeMentionedInText(botReply));
+        // the grey ↘ rows slide in one by one, 3s after the answer finished typing
+        scheduleSuggestions(msgDiv, animeMentionedInText(botReply));
       });
 
       saveChatToStorage();
@@ -2597,19 +2597,29 @@ function suggestRowsFor(anime) {
   return rows;
 }
 
-// Draw them under this reply — only the newest answer keeps its suggestions, and they
-// stay tucked away until the visitor asks for them (scrolls down or taps the input box).
+// Draw them under this reply — only the newest answer keeps its suggestions. They slide
+// in one by one, 3s after the answer ended, and the chat scrolls so they can be seen.
 let _suggestsToken = 0;
+const SUGGEST_DELAY_MS = 3000;
+
+function scheduleSuggestions(msgDiv, anime) {
+  if (!msgDiv) return;
+  setTimeout(function () {
+    // a newer answer may have arrived in the meantime — only the newest keeps them
+    const bots = chatMessages.querySelectorAll('.msg.bot');
+    if (!bots.length || bots[bots.length - 1] !== msgDiv) return;
+    renderSuggestions(msgDiv, anime);
+  }, SUGGEST_DELAY_MS);
+}
 
 function renderSuggestions(msgDiv, anime) {
-  if (!msgDiv) return;
+  if (!msgDiv || !msgDiv.parentNode) return;
   const myToken = ++_suggestsToken;
   chatMessages.querySelectorAll('.msg-suggests').forEach(function (el) { el.remove(); });
-  _pendingSuggests = null;
   const rows = suggestRowsFor(anime);
   if (!rows.length) return;
   const box = document.createElement('div');
-  box.className = 'msg-suggests await';
+  box.className = 'msg-suggests';
   rows.forEach(function (r) {
     const b = document.createElement('button');
     b.type = 'button';
@@ -2625,58 +2635,16 @@ function renderSuggestions(msgDiv, anime) {
     b.addEventListener('click', r.run);
     box.appendChild(b);
   });
-  // the answer can finish before addMessage() has attached the row (instant reveal in a
-  // background tab), so wait for it to land
-  let tries = 24;
-  (function place() {
-    if (myToken !== _suggestsToken) return;          // a newer reply took over
-    if (!msgDiv.parentNode) {
-      if (tries-- <= 0) return;
-      requestAnimationFrame(place);
-      return;
-    }
-    msgDiv.parentNode.insertBefore(box, msgDiv.nextSibling);
-    _pendingSuggests = box;                          // waits for scroll-down / input tap
-  })();
+  if (myToken !== _suggestsToken) return;
+  msgDiv.parentNode.insertBefore(box, msgDiv.nextSibling);
+  // bring them into view as they arrive (the rows hold their space, so this is final)
+  try {
+    chatMessages.scrollTo({ top: chatMessages.scrollHeight, behavior: 'smooth' });
+  } catch (e) {
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  }
 }
 
-/* ===== the ↘ rows wait to be asked for ===== */
-let _pendingSuggests = null;
-let _lastProgrammaticScroll = 0;
-let _lastChatScrollTop = 0;
-let _typingReplies = 0;          // answers still animating right now
-
-// every auto-scroll goes through here, so the reveal below can tell it apart from a
-// real scroll by the visitor
-function chatAutoScroll() {
-  _lastProgrammaticScroll = Date.now();
-  chatMessages.scrollTop = chatMessages.scrollHeight;
-}
-
-function revealPendingSuggestions() {
-  const box = _pendingSuggests;
-  if (!box) return;
-  _pendingSuggests = null;
-  if (!box.isConnected) return;
-  box.classList.remove('await');
-  chatAutoScroll();                // bring them into view
-}
-
-chatMessages.addEventListener('scroll', function () {
-  const top = chatMessages.scrollTop;
-  const movedDown = top > _lastChatScrollTop + 2;
-  _lastChatScrollTop = top;
-  if (!_pendingSuggests) return;
-  if (_typingReplies > 0) return;                           // an answer is typing above — not the visitor
-  if (Date.now() - _lastProgrammaticScroll < 300) return;   // typing / auto-scroll
-  if (movedDown) revealPendingSuggestions();
-}, { passive: true });
-
-chatInput.addEventListener('focus', revealPendingSuggestions);
-var _chatInputArea = chatInput.closest('.chat-input-area') || chatInput.parentNode;
-if (_chatInputArea && _chatInputArea.addEventListener) {
-  _chatInputArea.addEventListener('click', revealPendingSuggestions);
-}
 
 
 function addMessage(text, type, shouldSave = true, onTyped = null) {
@@ -2714,16 +2682,14 @@ function addMessage(text, type, shouldSave = true, onTyped = null) {
     let index = 0;
     let timer = null;
     let done = false;
-    let counted = false;      // did we add this reply to _typingReplies?
 
     function finish() {
       if (done) return;
       done = true;
       if (timer) clearTimeout(timer);
-      if (counted) { counted = false; if (_typingReplies > 0) _typingReplies--; }
       textSpan.replaceChildren(richChatText(text));
       pendingTypers.delete(finish);
-      chatAutoScroll();
+      chatMessages.scrollTop = chatMessages.scrollHeight;
       if (typeof onTyped === 'function') onTyped(msgDiv);   // e.g. draw the ↘ suggestions
     }
 
@@ -2735,7 +2701,7 @@ function addMessage(text, type, shouldSave = true, onTyped = null) {
       textSpan.replaceChildren(richChatText(text.slice(0, index)));
 
       // Auto scroll while typing
-      chatAutoScroll();
+      chatMessages.scrollTop = chatMessages.scrollHeight;
 
       if (index < text.length) timer = setTimeout(typeChunk, 6);
       else finish();
@@ -2746,8 +2712,6 @@ function addMessage(text, type, shouldSave = true, onTyped = null) {
     } else if (document.hidden) {
       finish(); // created while this tab is in the background — no point animating
     } else {
-      counted = true;
-      _typingReplies++;
       pendingTypers.add(finish); // reveal the full answer at once if the tab gets hidden
       timer = setTimeout(typeChunk, 250);
     }
