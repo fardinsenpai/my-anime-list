@@ -2881,23 +2881,34 @@ function addMessage(text, type, shouldSave = true, onTyped = null) {
       if (done) return;
       done = true;
       if (timer) clearTimeout(timer);
+      msgDiv.classList.remove('typing-live');    // the blinking caret has done its job
       textSpan.replaceChildren(richChatText(text));
       pendingTypers.delete(finish);
       chatMessages.scrollTop = chatMessages.scrollHeight;
       if (typeof onTyped === 'function') onTyped(msgDiv);   // e.g. draw the ↘ suggestions
     }
 
-    // Type in small chunks: same typing feel, far less layout thrash
-    const CHUNK = 4;
+    // Type it in visibly — but keep the total time predictable, so a one-liner feels like the
+    // assistant is writing and a long answer never holds the visitor hostage.
+    const duration = Math.min(2800, Math.max(750, text.length * 16));
+    const STEP = 22;                                   // ms between chunks
+    const steps = Math.max(8, Math.round(duration / STEP));
+    const CHUNK = Math.max(1, Math.ceil(text.length / steps));
+
+    // never flash a half-written ** while the bold markers are still being typed out
+    function preview(src) {
+      return richChatText(String(src).replace(/\*{1,2}$/, ''));
+    }
+
     function typeChunk() {
       if (done) return;
       index = Math.min(index + CHUNK, text.length);
-      textSpan.replaceChildren(richChatText(text.slice(0, index)));
+      textSpan.replaceChildren(index >= text.length ? richChatText(text) : preview(text.slice(0, index)));
 
       // Auto scroll while typing
       chatMessages.scrollTop = chatMessages.scrollHeight;
 
-      if (index < text.length) timer = setTimeout(typeChunk, 6);
+      if (index < text.length) timer = setTimeout(typeChunk, STEP);
       else finish();
     }
 
@@ -2907,7 +2918,8 @@ function addMessage(text, type, shouldSave = true, onTyped = null) {
       finish(); // created while this tab is in the background — no point animating
     } else {
       pendingTypers.add(finish); // reveal the full answer at once if the tab gets hidden
-      timer = setTimeout(typeChunk, 250);
+      msgDiv.classList.add('typing-live');          // shows the blinking caret
+      timer = setTimeout(typeChunk, 220);
     }
   }
 

@@ -342,6 +342,18 @@
   box-shadow: 0 4px 16px rgba(255,45,85,.28);
 }
 .chat-messages .msg.typing .msg-bubble { padding: 11px 14px; }
+/* while the assistant is writing, a caret blinks at the end of the text */
+.chat-messages .msg.bot.typing-live .msg-bubble::after {
+  content: '';
+  display: inline-block;
+  width: 2px; height: 1.05em;
+  margin-left: 3px;
+  vertical-align: -0.18em;
+  background: #f5c518;
+  opacity: .85;
+  animation: chat-caret .85s steps(1, end) infinite;
+}
+@keyframes chat-caret { 50% { opacity: 0; } }
 /* the AI wraps anime titles (and names) in **bold** — always show that in the site's yellow */
 .chat-messages .msg-bubble .msg-strong { color: #f5c518; font-weight: 700; }
 /* …and when that yellow word is one of Fardin's anime, it is a link back to its card.
