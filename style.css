@@ -5190,6 +5190,12 @@ body.perf-no-heading-anim .header h1::after { animation: none !important; }
   font-family: 'Rajdhani','Segoe UI',sans-serif; font-weight: 700; font-size: 0.92rem;
 }
 .lg-google:hover { background: #f4f4f5; }
+/* GitHub's own dark button, so the two providers never look like twins */
+.lg-github {
+  margin-top: 10px;
+  background: #21262d; border-color: #4a525c; color: #f0f6fc;
+}
+.lg-github:hover { background: #30363d; border-color: #6e7681; }
 .lg-note {
   margin-top: 12px; font-family: 'Rajdhani','Segoe UI',sans-serif;
   font-size: 0.7rem; line-height: 1.5; color: #6e6e88;

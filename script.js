@@ -6976,7 +6976,7 @@ function authUserFrom(session) {
   var m = u.user_metadata || {};
   var fn = String(m.first_name || '').trim();
   var ln = String(m.last_name || '').trim();
-  var full = String(m.full_name || m.name || ((fn || ln) ? (fn + ' ' + ln).trim() : '')).trim();
+  var full = String(m.full_name || m.name || m.user_name || ((fn || ln) ? (fn + ' ' + ln).trim() : '')).trim();
   var phone = String(m.phone || '').trim();
   var isPhoneAccount = u.email ? String(u.email).indexOf(PHONE_SUFFIX) > -1 : false;
   var first = String(m.given_name || fn).trim() ||
@@ -7131,6 +7131,27 @@ async function signInWithGoogle() {
     if (res && res.error) authNotify('Could not start sign-in 😢');
   } catch (e) {
     authNotify('Could not start sign-in 😢');
+  }
+}
+
+// GitHub sign-in. No popup flow exists for GitHub, so this is a plain redirect:
+// the browser leaves for github.com, comes back with ?code=…, and Supabase's
+// client (goTrue) exchanges it on load — exactly the same return path Google
+// uses through redirectTo.
+// The scopes are asked for explicitly because GitHub reports a null address
+// when the person keeps their email private, and every account here needs one.
+async function signInWithGitHub() {
+  var c = authClient();
+  if (!c) { authNotify('Sign-in is unavailable right now 😢'); return; }
+  var back = window.location.origin + window.location.pathname;
+  try {
+    var res = await c.auth.signInWithOAuth({
+      provider: 'github',
+      options: { redirectTo: back, scopes: 'read:user user:email' }
+    });
+    if (res && res.error) authNotify('Could not start GitHub sign-in 😢');
+  } catch (e) {
+    authNotify('Could not start GitHub sign-in 😢');
   }
 }
 
@@ -7747,6 +7768,12 @@ async function lgDoSubmit(ev) {
     if (g) g.addEventListener('click', function(e) {
       e.preventDefault();
       startGoogleSignIn();   // the small Google popover, raised above this page
+    });
+
+    var gh = document.getElementById('lgGithubBtn');
+    if (gh) gh.addEventListener('click', function(e) {
+      e.preventDefault();
+      signInWithGitHub();    // straight redirect to github.com and back
     });
 
     document.addEventListener('keydown', function(e) {
