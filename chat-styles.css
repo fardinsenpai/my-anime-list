@@ -253,6 +253,25 @@
 }
 .sb-chips button:hover { background: rgba(255,45,85,.28); color: #fff; transform: translateY(-1px); }
 
+/* second row — one chip per genre from Fardin's list (purple, so it reads as a second group) */
+.sb-chips-genres { padding-top: 0; }
+.sb-chips-genres button {
+  font-size: 11px; padding: 5px 10px; color: #d9ccff;
+  background: rgba(167,139,250,.12); border-color: rgba(167,139,250,.42);
+}
+.sb-chips-genres button:hover { background: rgba(167,139,250,.3); border-color: #a78bfa; color: #fff; }
+
+/* follow-up chips are rebuilt after every reply — gold, so they stand out from the fixed ones */
+.sb-chips button.sb-chip-follow {
+  background: rgba(245,197,24,.14); border-color: rgba(245,197,24,.5); color: #ffe07a;
+  animation: chipPop .22s ease-out;
+}
+.sb-chips button.sb-chip-follow:hover { background: rgba(245,197,24,.32); border-color: #f5c518; color: #fff; }
+@keyframes chipPop {
+  from { opacity: 0; transform: translateY(-4px) scale(.92); }
+  to   { opacity: 1; transform: none; }
+}
+
 .chat-messages {
   flex: 1; overflow-y: auto; padding: 14px 12px;
   display: flex; flex-direction: column; gap: 12px;

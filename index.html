@@ -7,7 +7,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Fardin's Anime Hub</title>
   <link rel="stylesheet" href="style.css?v=20261022e">
-  <link rel="stylesheet" href="chat-styles.css?v=20261022h">
+  <link rel="stylesheet" href="chat-styles.css?v=20261022i">
   <link rel="stylesheet" href="duel-system.css">
   <link rel="stylesheet" href="tournament.css">
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600;700&family=Exo+2:wght@400;600;700&family=Yuji+Syuku&family=Bangers&family=Poppins:wght@400;700&family=Cinzel+Decorative:wght@400;700&display=swap" rel="stylesheet">
@@ -1286,16 +1286,20 @@
       <button class="chat-close" onclick="toggleChat()">✕</button>
     </div>
 
-    <div class="sb-chips">
-      <button onclick="quickAction('Recommend me an isekai anime')">🎯 Isekai</button>
+    <!-- row 1: smart follow-ups (rebuilt after every reply) + the fixed quick questions -->
+    <div class="sb-chips" id="chatChips">
       <button onclick="quickAction('Suggest a random anime')">🎲 Random</button>
+      <button onclick="quickAction('What should I watch tonight?')">🌙 Tonight</button>
       <button onclick="quickAction('What\'s the highest rated anime?')">⭐ Top Rated</button>
+      <button onclick="quickAction('When was this site last updated?')">📅 Last Updated</button>
+      <button onclick="quickAction('Tell me about Fardin')">👤 Fardin</button>
+    </div>
+    <!-- row 2: one chip per genre — the four originals stay exactly as they were -->
+    <div class="sb-chips sb-chips-genres" id="chatGenreChips">
+      <button onclick="quickAction('Recommend me an isekai anime')">🎯 Isekai</button>
       <button onclick="quickAction('Recommend a romance anime')">💕 Romance</button>
       <button onclick="quickAction('Suggest a comedy anime')">😂 Comedy</button>
       <button onclick="quickAction('Recommend an action anime')">⚔ Action</button>
-      <button onclick="quickAction('When was this site last updated?')">📅 Last Updated</button>
-      <button onclick="quickAction('What should I watch tonight?')">🌙 Tonight</button>
-      <button onclick="quickAction('Tell me about Fardin')">👤 Fardin</button>
     </div>
 
     <div class="chat-messages" id="chatMessages">
@@ -1531,7 +1535,7 @@
 
   <script src="https://accounts.google.com/gsi/client" async defer></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="script.js?v=20261022g"></script>
+  <script src="script.js?v=20261022i"></script>
 
 <!-- === ADMIN PANEL === -->
 <div class="admin-overlay" id="adminOverlay">

@@ -855,18 +855,38 @@ function copyEmail() {
     if (clr) clr.classList.toggle('hidden', name === 'All');
   }
 
-  if (document.readyState === 'complete' || document.readyState === 'interactive') {
+  // ===== chat chips: one per genre, so the chat can recommend from ANY genre =====
+  // The four chips that were already there stay exactly as they are — this only fills the gaps.
+  const CHAT_CHIP_ICON = { 'Romcom': '💗' };   // 💕 is already taken by the Romance chip
+  function buildChatGenreChips() {
+    const row = document.getElementById('chatGenreChips');
+    if (!row) return;
+    const key = function (s) {
+      return String(s == null ? '' : s).replace(/[^\w ]/g, '').replace(/\s+/g, ' ').trim().toLowerCase();
+    };
+    const have = new Set(Array.from(row.querySelectorAll('button')).map(function (b) { return key(b.textContent); }));
+    Object.keys(GENRES).forEach(function (name) {
+      if (name === 'All' || have.has(key(name))) return;
+      const btn = document.createElement('button');
+      btn.textContent = (CHAT_CHIP_ICON[name] || GENRES[name].icon) + ' ' + name;
+      btn.title = 'Ask Senpai for a ' + name + ' anime';
+      btn.addEventListener('click', function () { quickAction('Recommend a ' + name + ' anime'); });
+      row.appendChild(btn);
+    });
+  }
+
+  function initGenreUI() {
     buildPills();
     injectCardGenres();
+    buildChatGenreChips();
     var clr = document.getElementById('clearBtn');
     if (clr) clr.addEventListener('click', function() { applyFilter('All'); });
+  }
+
+  if (document.readyState === 'complete' || document.readyState === 'interactive') {
+    initGenreUI();
   } else {
-    document.addEventListener('DOMContentLoaded', function() {
-      buildPills();
-      injectCardGenres();
-      var clr = document.getElementById('clearBtn');
-      if (clr) clr.addEventListener('click', function() { applyFilter('All'); });
-    });
+    document.addEventListener('DOMContentLoaded', initGenreUI);
   }
 
     
@@ -2303,6 +2323,9 @@ async function sendMessage() {
 
       addMessage(botReply, 'bot');
 
+      // the gold chips under the header change to match what we just recommended
+      renderFollowUpChips(animeMentionedInText(botReply));
+
       saveChatToStorage();
     } else {
       throw new Error('No response from API');
@@ -2493,6 +2516,57 @@ function jumpToAnimeCard(title) {
     card.classList.add('card-jump-flash');
     card._jumpFlashTimer = setTimeout(function () { card.classList.remove('card-jump-flash'); }, 2800);
   }, leftHome ? 140 : 30);
+}
+
+/* ===== quick chips: the gold follow-ups change with every reply ===== */
+function cardTitleOf(card) {
+  const t = card && card.querySelector('.title');
+  return t ? t.textContent.trim() : '';
+}
+
+// Which anime was that reply about? The AI bolds titles, so look inside ** ** first,
+// then fall back to any known title written plainly in the text.
+function animeMentionedInText(text) {
+  const src = String(text == null ? '' : text);
+  const bold = src.match(/\*\*[^*]+\*\*/g) || [];
+  for (let i = 0; i < bold.length; i++) {
+    const card = findAnimeCard(bold[i].replace(/\*\*/g, ''));
+    if (card) return cardTitleOf(card);
+  }
+  const plain = normaliseTitle(src);
+  let best = null;
+  let bestLen = 0;
+  animeCardIndex().forEach(function (card, key) {
+    if (key.length > bestLen && plain.indexOf(key) > -1) { best = card; bestLen = key.length; }
+  });
+  return best ? cardTitleOf(best) : null;
+}
+
+// Rebuild the follow-up chips for the anime we just talked about (pass null to clear them).
+function renderFollowUpChips(anime) {
+  const row = document.getElementById('chatChips');
+  if (!row) return;
+  row.querySelectorAll('.sb-chip-follow').forEach(function (el) { el.remove(); });
+  if (!anime) return;
+  const chips = [
+    { label: '🎬 Show the card', hint: 'Scroll to ' + anime + ' on the page',
+      run: function () { jumpToAnimeCard(anime); } },
+    { label: '📺 How many episodes?', hint: 'Ask about ' + anime,
+      run: function () { quickAction('How many episodes does ' + anime + ' have?'); } },
+    { label: '🍿 More like this', hint: 'Another pick like ' + anime,
+      run: function () { quickAction('Recommend another anime like ' + anime); } },
+    { label: '🔁 Another pick', hint: 'A fresh random anime',
+      run: function () { quickAction('Suggest a random anime'); } }
+  ];
+  for (let i = chips.length - 1; i >= 0; i--) {
+    const c = chips[i];
+    const b = document.createElement('button');
+    b.className = 'sb-chip-follow';
+    b.textContent = c.label;
+    b.title = c.hint;
+    b.addEventListener('click', c.run);
+    row.insertBefore(b, row.firstChild);
+  }
 }
 
 function addMessage(text, type, shouldSave = true) {
@@ -3446,6 +3520,7 @@ function clearChatHistory() {
       { role: "system", content: getSystemPrompt() }
     ];
     addMessage('Chat history has been cleared successfully!', 'bot');
+    renderFollowUpChips(null);
   }
 }
 
