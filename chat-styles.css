@@ -286,12 +286,14 @@
 .chat-messages .msg.typing .msg-bubble { padding: 11px 14px; }
 /* the AI wraps anime titles (and names) in **bold** — always show that in the site's yellow */
 .chat-messages .msg-bubble .msg-strong { color: #f5c518; font-weight: 700; }
-/* …and when that yellow word is one of Fardin's anime, it is a link back to its card */
+/* …and when that yellow word is one of Fardin's anime, it is a link back to its card.
+   Dotted (· · ·) rather than a straight rule, so it reads as tappable. */
 .chat-messages .msg-bubble .msg-strong-link {
   text-decoration: underline;
-  text-decoration-color: rgba(245,197,24,.5);
-  text-decoration-thickness: 1.5px;
-  text-underline-offset: 3px;
+  text-decoration-style: dotted;
+  text-decoration-color: rgba(245,197,24,.75);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 4px;
   cursor: pointer;
   transition: color .16s ease, text-decoration-color .16s ease;
 }
