@@ -4789,6 +4789,87 @@ document.addEventListener('click', function(e) {
 
   var adminBadge = null;
   var heading = document.querySelector('.hot-takes-heading');
+
+  function setAdminMode(on) {
+    adminMode = !!on;
+    if (adminBadge) adminBadge.style.display = adminMode ? 'inline' : 'none';
+    renderFeed(loadComments());
+  }
+
+  // same PIN as the admin panel (ADMIN_PIN in this file and in admin.js)
+  function htAdminPinCode() {
+    try {
+      if (typeof ADMIN_PIN === 'string' && ADMIN_PIN) return ADMIN_PIN;
+    } catch (e) {}
+    return '112233';
+  }
+
+  // a small PIN pad, styled inline (the Hot Takes stylesheet stays untouched)
+  function htAskPin(onOk) {
+    var old = document.getElementById('htPinOverlay');
+    if (old && old.parentNode) old.parentNode.removeChild(old);
+
+    var ov = document.createElement('div');
+    ov.id = 'htPinOverlay';
+    ov.style.cssText = 'position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;background:rgba(4,4,9,0.84);padding:18px;';
+
+    var box = document.createElement('div');
+    box.style.cssText = 'width:100%;max-width:340px;box-sizing:border-box;background:#12121a;border:1px solid rgba(255,215,0,0.38);border-radius:16px;padding:20px;box-shadow:0 24px 70px rgba(0,0,0,0.65);color:#f2f2f7;text-align:center;';
+    box.innerHTML =
+      '<div style="font-size:11px;letter-spacing:2.2px;color:#ffd700;font-weight:700;">\uD83D\uDD10 HOT TAKES \u00B7 ADMIN</div>' +
+      '<div style="margin:10px 0 14px;font-size:12px;line-height:1.5;color:#b9b9c9;">Enter the admin PIN to unlock the pin, reply and delete tools.</div>' +
+      '<input id="htPinInput" type="password" inputmode="numeric" maxlength="6" autocomplete="off" placeholder="\u2022\u2022\u2022\u2022\u2022\u2022" style="width:100%;box-sizing:border-box;padding:11px 12px;background:#0a0a0f;border:1px solid rgba(255,215,0,0.35);border-radius:10px;color:#fff;font-size:22px;letter-spacing:8px;text-align:center;outline:none;font-family:monospace;">' +
+      '<div id="htPinErr" style="height:16px;margin-top:8px;font-size:11px;letter-spacing:1.2px;color:#ff4d6d;"></div>' +
+      '<div style="display:flex;gap:8px;">' +
+        '<button id="htPinCancel" type="button" style="flex:1;padding:10px;background:transparent;border:1px solid rgba(255,255,255,0.18);border-radius:10px;color:#c9c9d6;font-size:12px;letter-spacing:1px;cursor:pointer;">CANCEL</button>' +
+        '<button id="htPinGo" type="button" style="flex:1.4;padding:10px;background:#ffd700;border:1px solid #ffd700;border-radius:10px;color:#141400;font-weight:700;font-size:12px;letter-spacing:1px;cursor:pointer;">UNLOCK</button>' +
+      '</div>';
+
+    ov.appendChild(box);
+    document.body.appendChild(ov);
+
+    var inp = box.querySelector('#htPinInput');
+    var err = box.querySelector('#htPinErr');
+    var closed = false;
+
+    function onKey(e) {
+      if (e.key === 'Escape') { e.preventDefault(); close(); }
+    }
+    function close() {
+      if (closed) return;
+      closed = true;
+      if (ov.parentNode) ov.parentNode.removeChild(ov);
+      document.removeEventListener('keydown', onKey, true);
+    }
+    function submit() {
+      var val = String(inp.value || '').replace(/\D/g, '');
+      if (val === htAdminPinCode()) {
+        close();
+        try { onOk(); } catch (e) {}
+        return;
+      }
+      err.textContent = val ? 'WRONG PIN \u2014 TRY AGAIN' : 'ENTER THE 6-DIGIT PIN';
+      inp.value = '';
+      inp.focus();
+      inp.style.borderColor = '#ff4d6d';
+      setTimeout(function() { inp.style.borderColor = 'rgba(255,215,0,0.35)'; }, 900);
+    }
+
+    box.querySelector('#htPinCancel').addEventListener('click', close);
+    box.querySelector('#htPinGo').addEventListener('click', submit);
+    inp.addEventListener('input', function() {
+      inp.value = inp.value.replace(/\D/g, '').slice(0, 6);
+      err.textContent = '';
+      if (inp.value.length === 6) submit();
+    });
+    inp.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') { e.preventDefault(); submit(); }
+    });
+    ov.addEventListener('click', function(e) { if (e.target === ov) close(); });
+    document.addEventListener('keydown', onKey, true);
+    setTimeout(function() { try { inp.focus(); } catch (e) {} }, 80);
+  }
+
   if (heading) {
     heading.style.cursor = 'pointer';
     heading.title = '';
@@ -4803,9 +4884,15 @@ document.addEventListener('click', function(e) {
       if (clickCount === 3) {
         clickCount = 0;
         clearTimeout(clickTimer);
-        adminMode = !adminMode;
-        adminBadge.style.display = adminMode ? 'inline' : 'none';
-        renderFeed(loadComments());
+        if (adminMode) {
+          setAdminMode(false);
+          htToast('Admin tools locked', 'Pin, reply and delete are hidden again.', 'info');
+        } else {
+          htAskPin(function() {
+            setAdminMode(true);
+            htToast('Admin tools unlocked', 'Pin, reply and delete are on.', 'info');
+          });
+        }
       } else {
         clearTimeout(clickTimer);
         clickTimer = setTimeout(function() { clickCount = 0; }, 500);
