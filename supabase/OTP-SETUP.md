@@ -30,6 +30,13 @@ and paste the contents of `functions/auth-otp/index.ts` (Deno, `index.ts` requir
 > does not accept relative imports, paste `_lib.ts` **above** `index.ts` in the
 > same file and delete the `import { ... } from "./_lib.ts"` line.
 
+**Or with the Supabase CLI (keeps both files as they are):**
+```bash
+cd /path/to/your/repo
+export SUPABASE_ACCESS_TOKEN=sbp_...        # account -> access tokens
+npx supabase functions deploy auth-otp --project-ref ldzlefdklcgvqcbqibtt
+```
+
 ### Secrets (Edge Functions → auth-otp → Secrets)
 
 | secret | where to get it |
@@ -83,18 +90,30 @@ dashboard.cloudflare.com → **Turnstile → Add widget** → *Managed* → copy
 
 ## What happens to sign-in
 
-- **Email** → 6-digit code (verified). The password is no longer used for email.
-- **Google / GitHub** → unchanged, and the provider already confirms the address.
+- **Create account** → a 6-digit code is mailed and the address is proved → the
+  account is created and you are signed in with the **blue tick**.
+- **Log in** → your password, as before. A link offers a code instead if you
+  prefer (and it also re-proves the address).
+- **Google / GitHub** → unchanged, and the provider already confirms the address
+  → these accounts carry the blue tick straight away.
 - **Phone number** → unchanged (password), and it is **never** verified, so it
   never earns the blue tick.
 
 If the Edge Function is not deployed, the site quietly keeps the old password
 sign-in — you cannot lock anyone out.
 
+## Two free-tier walls (both have an easy answer)
+
+| Wall | What happens | The fix |
+|---|---|---|
+| **Resend's shared sender** (`onboarding@resend.dev`) | codes only reach the account owner's own address; everything else gets "codes are not switched on for everyone yet" | verify your own domain in Resend and set `OTP_FROM` to it (the sending stays on the free tier) |
+| **Cloudflare's test keypair** | the widget always passes and shows a "for testing only" strip | add a real Turnstile widget: site key → `login-otp.js` (`CF_SITE_KEY`), secret key → the `TURNSTILE_SECRET_KEY` secret |
+
 ## Tests
 
 ```bash
-node supabase/functions/auth-otp/_lib.test.ts     # 22 checks, no network needed
+node supabase/functions/auth-otp/_lib.test.ts        # 22 checks: hashing, compare, entropy, caps
+node supabase/functions/auth-otp/_function.test.ts   # 6 checks: the function parses and boots
 ```
 
 ## Rolling it back
