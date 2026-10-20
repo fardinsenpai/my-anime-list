@@ -8729,7 +8729,13 @@ function lgBusy(on) {
   var b = document.getElementById('lgSubmit');
   if (!b) return;
   b.disabled = !!on;
-  b.textContent = on ? 'Working...' : (LG_MODE === 'up' ? 'Create account' : 'Log in');
+  if (on) { b.textContent = 'Working...'; return; }
+  // the code sign-in owns the button label when it is in charge
+  if (window.otpAuth && window.otpAuth.paintPasswordVisibility) {
+    window.otpAuth.paintPasswordVisibility();
+    return;
+  }
+  b.textContent = LG_MODE === 'up' ? 'Create account' : 'Log in';
 }
 
 // never leave a typed password sitting in the box once the person is in (or out)
@@ -8749,8 +8755,8 @@ function setLoginMode(mode) {
   if (t) t.textContent = up ? 'Create your account' : 'Log in';
   var s = document.getElementById('lgSub');
   if (s) s.textContent = up
-    ? 'Your first name, an email or phone number, and a password. Nothing to confirm.'
-    : 'Use your email or phone number with your password.';
+    ? 'Your first name and your email. We mail you a 6-digit code to confirm the address.'
+    : 'Use your email or phone number with your password — or ask for a 6-digit code instead.';
   var tabIn = document.getElementById('lgTabIn'), tabUp = document.getElementById('lgTabUp');
   if (tabIn) tabIn.classList.toggle('on', !up);
   if (tabUp) tabUp.classList.toggle('on', up);

@@ -26,8 +26,15 @@
     timer: null,
     loading: false,
     probed: false,              // has the code service been asked if it exists?
+    wantCode: false,            // this login is going through a code, not a password
     passwordFallback: false   // set when the code service is not reachable
   };
+
+  // which tab of the login card are we on? 'in' = log in, 'up' = create account
+  function loginMode() {
+    if (typeof LG_MODE !== 'undefined' && LG_MODE) return LG_MODE;
+    return 'in';
+  }
 
   function byId(id) { return document.getElementById(id); }
   function supabaseUrl() {
@@ -109,10 +116,12 @@
 
   function showEmailStep() {
     OTP.step = 'email';
+    // a new account must prove the address -> always a code.
+    // an existing account logs in with its password, unless the person asks
+    // for a code instead.
+    OTP.wantCode = (loginMode() === 'up');
     var st = byId('lgOtpStep');
     if (st) st.hidden = true;
-    var gate = byId('lgOtpGate');
-    if (gate) gate.hidden = false;
     paintPasswordVisibility();
     paintTurnstile();
   }
@@ -147,15 +156,23 @@
     // the first time somebody types an email, find out whether the code
     // service is there at all (it is quiet until then, so the page stays clean)
     if (!phone) probeService();
-    var usePassword = phone || OTP.passwordFallback;
+    var usePassword = phone || !OTP.wantCode || OTP.passwordFallback;
     var pf = byId('lgPassField');
     if (pf) pf.hidden = !usePassword;        // an email signs in with a code, not a password
     var p2f = byId('lgPass2Field');
     if (p2f && phone) p2f.hidden = true;      // the confirm-password box belongs to the phone flow
     var gate = byId('lgOtpGate');
-    if (gate) gate.hidden = usePassword || OTP.step === 'code';
+    if (gate) gate.hidden = usePassword;   // the human check is only needed to send a code
+    var link = byId('lgOtpUseCode');
+    if (link) {
+      // only the Log in tab can be switched over to a code
+      link.style.display = (!phone && loginMode() === 'in' && !OTP.passwordFallback && OTP.step !== 'code') ? 'inline-block' : 'none';
+    }
     var sub = byId('lgSubmit');
-    if (sub) sub.textContent = usePassword ? 'Log in' : (OTP.step === 'code' ? 'Verify code' : 'Send code');
+    if (sub) {
+      sub.textContent = OTP.step === 'code' ? 'Verify code'
+        : (usePassword ? 'Log in' : 'Send code');
+    }
   }
 
   function startResendCountdown() {
@@ -304,6 +321,7 @@
   function intercept(ctx) {
     if (ctx.phone) return false;                 // phones keep the old flow
     if (OTP.passwordFallback) return false;      // the code service is down - old flow
+    if (!OTP.wantCode) return false;             // a normal log in with a password
     if (OTP.step === 'code') { verifyCode(ctx); return true; }
     sendCode(ctx);
     return true;
@@ -313,7 +331,11 @@
     var ident = byId('lgIdent');
     if (ident) {
       ident.addEventListener('input', function () {
-        if (OTP.step === 'code') showEmailStep();
+        if (OTP.step === 'code') {
+          var keep = OTP.wantCode;      // do not undo their choice of a code
+          showEmailStep();
+          OTP.wantCode = keep;
+        }
         paintPasswordVisibility();
       });
     }
@@ -344,6 +366,18 @@
       showEmailStep();
       var i = byId('lgIdent');
       if (i) { try { i.focus(); } catch (e) {} }
+    });
+
+    // "use a 6-digit code instead of a password" - only on the Log in tab
+    var useCode = byId('lgOtpUseCode');
+    if (useCode) useCode.addEventListener('click', function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      OTP.wantCode = true;
+      paintPasswordVisibility();
+      paintTurnstile();
+      var i = byId('lgIdent');
+      if (i) { try { i.focus(); } catch (err) {} }
     });
 
     // six boxes: auto-advance, backspace, and paste the whole code
