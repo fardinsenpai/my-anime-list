@@ -4556,7 +4556,14 @@ document.addEventListener('click', function(e) {
   function htSignedIn() {
     try { return !!(typeof AUTH_USER !== 'undefined' && AUTH_USER && AUTH_USER.id); } catch (e) { return false; }
   }
-  function htTakeUserId() { return myId + (htSignedIn() ? '|a' : ''); }
+  // The blue tick now means "we know this person owns that address" - a code
+  // they entered, or a provider (Google/GitHub) that confirmed it. A phone
+  // login name is never confirmed, so it never earns the tick.
+  function htVerified() {
+    if (!htSignedIn()) return false;
+    try { return !!(AUTH_USER && AUTH_USER.confirmed); } catch (e) { return false; }
+  }
+  function htTakeUserId() { return myId + (htVerified() ? '|a' : ''); }
   function htIsVerified(c) {
     return String((c && c._userId) || '').split('|').indexOf('a') !== -1;
   }
@@ -5783,15 +5790,18 @@ document.addEventListener('click', function(e) {
   }
   function htPaintAuthHint() {
     if (!authHint) return;
-    if (htSignedIn()) {
+    if (htVerified()) {
       var who = '';
       try { who = String((AUTH_USER && (AUTH_USER.first || AUTH_USER.name)) || ''); } catch (e) {}
       authHint.innerHTML = '<span style="color:#1877F2;font-weight:700;">&#10003;</span> Signed in' +
         (who ? ' as <span style="color:#ffd700;">' + escHtml(who) + '</span>' : '') +
         ' \u2014 this take gets the blue badge.';
+    } else if (htSignedIn()) {
+      authHint.innerHTML = 'Signed in, but your address is <b>not confirmed</b> \u2014 ' +
+        'sign in with an email code to earn the blue <span style="color:#1877F2;font-weight:700;">&#10003;</span> badge.';
     } else {
       authHint.innerHTML = 'Not signed in \u2014 the blue <span style="color:#1877F2;font-weight:700;">&#10003;</span> ' +
-        'badge is only added to takes written while signed in. ' +
+        'badge is only added to takes written while signed in with a confirmed address. ' +
         '<a href="javascript:void(0)" id="htAuthSignIn" style="color:#c77dff;text-decoration:underline;">Sign in</a>';
       var link = document.getElementById('htAuthSignIn');
       if (link) link.addEventListener('click', function(e) {
@@ -7972,6 +7982,13 @@ function authUserFrom(session) {
   var full = String(m.full_name || m.name || m.user_name || ((fn || ln) ? (fn + ' ' + ln).trim() : '')).trim();
   var phone = String(m.phone || '').trim();
   var isPhoneAccount = u.email ? String(u.email).indexOf(PHONE_SUFFIX) > -1 : false;
+  // "confirmed" means we know this person really owns that address:
+  //   * an email code proved it (those accounts are created email_confirm on)
+  //   * or Google / GitHub confirmed it for us
+  //   * a phone login name never counts
+  var provider = String((u.app_metadata && u.app_metadata.provider) || '').toLowerCase();
+  var oauthConfirmed = provider === 'google' || provider === 'github' || provider === 'apple';
+  var emailConfirmed = !!u.email_confirmed_at || !!u.confirmed_at;
   var first = String(m.given_name || fn).trim() ||
               (full ? full.split(/\s+/)[0] : '') ||
               (isPhoneAccount ? '' : (u.email ? String(u.email).split('@')[0] : '')) ||
@@ -7983,7 +8000,9 @@ function authUserFrom(session) {
     // names are always shown in CAPITALS, whoever they signed in with
     name: String(full || first || '').toUpperCase(),
     first: String(first || '').toUpperCase(),
-    avatar: authPhoto(m.avatar_url || m.picture || '')
+    avatar: authPhoto(m.avatar_url || m.picture || ''),
+    // the blue tick means "confirmed", not just "signed in"
+    confirmed: !isPhoneAccount && (emailConfirmed || oauthConfirmed)
   };
 }
 
@@ -8724,6 +8743,11 @@ function setLoginMode(mode) {
     var p2 = document.getElementById('lgPass2');
     if (p2) p2.value = '';
   }
+  // the email path uses a code instead of a password - reset that screen too
+  if (window.otpAuth) {
+    if (window.otpAuth.showEmailStep) window.otpAuth.showEmailStep();
+    if (window.otpAuth.paintPasswordVisibility) window.otpAuth.paintPasswordVisibility();
+  }
   lgSetMsg('');
   lgBusy(false);
 }
@@ -8766,6 +8790,15 @@ async function lgDoSubmit(ev) {
   if (!ident) { lgSetMsg('Please write your email or your phone number.', 'bad'); return; }
   var email = loginIdToEmail(ident);
   if (!email) { lgSetMsg('That does not look like an email or a phone number.', 'bad'); return; }
+  // EMAIL = a 6-digit code mailed by our own Edge Function (Resend + Turnstile).
+  // PHONE keeps the old password flow, but a phone login is never "verified".
+  if (window.otpAuth && window.otpAuth.intercept && !loginIsPhone(ident)) {
+    var handled = await window.otpAuth.intercept({
+      email: email, ident: ident, up: up, first: first, last: last,
+      phone: false, setMsg: lgSetMsg, busy: lgBusy
+    });
+    if (handled) return;
+  }
   if (!pass) { lgSetMsg('Please write a password.', 'bad'); return; }
   if (up && pass.length < 6) { lgSetMsg('Password must be at least 6 characters.', 'bad'); return; }
   if (up && pass2 !== pass) {

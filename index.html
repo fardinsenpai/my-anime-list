@@ -32,6 +32,7 @@
   <title>Fardin's Anime Hub</title>
   <link rel="stylesheet" href="style.css?v=20261023s">
   <link rel="stylesheet" href="chat-styles.css?v=20261024z">
+<link rel="stylesheet" href="login-otp.css?v=20261024a">
   <link rel="stylesheet" href="duel-system.css">
   <link rel="stylesheet" href="tournament.css">
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600;700&family=Exo+2:wght@400;600;700&family=Yuji+Syuku&family=Bangers&family=Poppins:wght@400;700&family=Cinzel+Decorative:wght@400;700&display=swap" rel="stylesheet">
@@ -1494,7 +1495,7 @@
             <input type="text" id="lgIdent" autocomplete="username" placeholder="you@mail.com  ·  01712 345678" maxlength="80">
           </label>
 
-          <label class="lg-field">
+          <label class="lg-field" id="lgPassField">
             <span class="lg-lab">Password</span>
             <span class="lg-passwrap">
               <input type="password" id="lgPass" autocomplete="current-password" placeholder="••••••••" maxlength="72">
@@ -1506,6 +1507,27 @@
             <span class="lg-lab">Confirm password</span>
             <input type="password" id="lgPass2" autocomplete="new-password" placeholder="type it again" maxlength="72">
           </label>
+
+          <!-- EMAIL CODE: 6-digit code mailed by our own Edge Function (Resend) -->
+          <div class="lg-otp-gate" id="lgOtpGate">
+            <div class="lg-otp-turn" id="lgOtpTurn"></div>
+          </div>
+
+          <div id="lgOtpStep" hidden>
+            <div class="lg-otp-boxes" id="lgOtpBoxes">
+              <input class="lg-otp-box" id="lgOtp0" type="text" inputmode="numeric" maxlength="1" autocomplete="one-time-code" aria-label="Digit 1">
+              <input class="lg-otp-box" id="lgOtp1" type="text" inputmode="numeric" maxlength="1" autocomplete="one-time-code" aria-label="Digit 2">
+              <input class="lg-otp-box" id="lgOtp2" type="text" inputmode="numeric" maxlength="1" autocomplete="one-time-code" aria-label="Digit 3">
+              <input class="lg-otp-box" id="lgOtp3" type="text" inputmode="numeric" maxlength="1" autocomplete="one-time-code" aria-label="Digit 4">
+              <input class="lg-otp-box" id="lgOtp4" type="text" inputmode="numeric" maxlength="1" autocomplete="one-time-code" aria-label="Digit 5">
+              <input class="lg-otp-box" id="lgOtp5" type="text" inputmode="numeric" maxlength="1" autocomplete="one-time-code" aria-label="Digit 6">
+            </div>
+            <div class="lg-otp-foot">
+              <button type="button" class="lg-otp-link" id="lgOtpResend">Resend code</button>
+              <button type="button" class="lg-otp-link" id="lgOtpChange">Change email</button>
+              <span class="lg-otp-note" id="lgOtpNote"></span>
+            </div>
+          </div>
 
           <button class="lg-submit" id="lgSubmit" type="submit">Log in</button>
           <div class="lg-msg" id="lgMsg" hidden></div>
@@ -1523,7 +1545,7 @@
           Continue with GitHub
         </button>
 
-        <div class="lg-note">No verification needed — your email or phone works as your login name straight away. Your password is scrambled (hashed) inside Supabase, so nobody can read it. Phone numbers are used only as a login name — no SMS is sent.</div>
+        <div class="lg-note">Email sign-in now uses a <b>6-digit code</b> we mail to you — nobody can use your address without it. Google and GitHub confirm the address for you. A phone number is only a login name (no SMS is ever sent) and is <b>not</b> verified, so it never earns the blue tick.</div>
       </div>
     </div>
 
@@ -1570,7 +1592,8 @@
 
   <script src="https://accounts.google.com/gsi/client" async defer></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="script.js?v=20261024z"></script>
+  <script src="script.js?v=20261024b"></script>
+<script src="login-otp.js?v=20261024a"></script>
 
 <!-- === ADMIN PANEL === -->
 <div class="admin-overlay" id="adminOverlay">
