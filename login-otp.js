@@ -17,6 +17,13 @@
   var CF_SITE_KEY = '0x4AAAAAAFdDwRBQYy3Tl_Od';   // Cloudflare Turnstile (real widget)
   var CF_SCRIPT = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
 
+  // Email sign-in (the 6-digit code) can be switched off with this one flag.
+  // It is OFF right now because the free mail service can only deliver to
+  // the site owner - a domain fixes that, and then flip this to true.
+  // The Cloudflare Turnstile setup (site key here, secret in the function)
+  // stays exactly as it is either way, so switching back on is instant.
+  var EMAIL_SIGNIN_ENABLED = false;
+
   var OTP = {
     step: 'email',        // 'email' -> 'code'
     email: '',
@@ -150,28 +157,42 @@
     return d.length >= 8;
   }
 
+  // is what they typed an email address?
+  function isEmailMode() {
+    var ident = String((byId('lgIdent') || {}).value || '').trim();
+    return ident.indexOf('@') > -1;
+  }
+
+  // the box only takes a phone number while email sign-in is switched off
+  function paintIdentField() {
+    var ident = byId('lgIdent');
+    if (!ident) return;
+    ident.placeholder = EMAIL_SIGNIN_ENABLED ? 'you@mail.com  \u00b7  01712 345678' : 'phone number  \u00b7  01712 345678';
+  }
+
   function paintPasswordVisibility() {
     var phone = isPhoneMode();
     // the first time somebody types an email, find out whether the code
     // service is there at all (it is quiet until then, so the page stays clean)
-    if (!phone) probeService();
+    if (!phone && EMAIL_SIGNIN_ENABLED) probeService();
     var usePassword = phone || !OTP.wantCode || OTP.passwordFallback;
     var pf = byId('lgPassField');
     if (pf) pf.hidden = !usePassword;        // an email signs in with a code, not a password
     var p2f = byId('lgPass2Field');
     if (p2f && phone) p2f.hidden = true;      // the confirm-password box belongs to the phone flow
     var gate = byId('lgOtpGate');
-    if (gate) gate.hidden = usePassword;   // the human check is only needed to send a code
+    if (gate) gate.hidden = usePassword || !EMAIL_SIGNIN_ENABLED;
     var link = byId('lgOtpUseCode');
     if (link) {
       // only the Log in tab can be switched over to a code
-      link.style.display = (!phone && loginMode() === 'in' && !OTP.passwordFallback && OTP.step !== 'code') ? 'inline-block' : 'none';
+      link.style.display = (!phone && EMAIL_SIGNIN_ENABLED && loginMode() === 'in' && !OTP.passwordFallback && OTP.step !== 'code') ? 'inline-block' : 'none';
     }
     var sub = byId('lgSubmit');
     if (sub) {
       sub.textContent = OTP.step === 'code' ? 'Verify code'
         : (usePassword ? 'Log in' : 'Send code');
     }
+    paintIdentField();
   }
 
   function startResendCountdown() {
@@ -328,6 +349,11 @@
   // "handled, stop here".
   function intercept(ctx) {
     if (ctx.phone) return false;                 // phones keep the old flow
+    if (!EMAIL_SIGNIN_ENABLED) {
+      // email sign-in is switched off for now - say so plainly
+      ctx.setMsg('Email sign-in is switched off right now - please use Google or GitHub, they confirm your address.', 'bad');
+      return true;
+    }
     if (OTP.passwordFallback) return false;      // the code service is down - old flow
     if (!OTP.wantCode) return false;             // a normal log in with a password
     if (OTP.step === 'code') { verifyCode(ctx); return true; }
@@ -425,5 +451,6 @@
     showEmailStep: showEmailStep,
     paintPasswordVisibility: paintPasswordVisibility,
     isCodeStep: function () { return OTP.step === 'code'; },
+    emailEnabled: EMAIL_SIGNIN_ENABLED,
   };
 })();

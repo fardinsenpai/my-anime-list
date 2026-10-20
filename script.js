@@ -8754,9 +8754,16 @@ function setLoginMode(mode) {
   var t = document.getElementById('lgTitle');
   if (t) t.textContent = up ? 'Create your account' : 'Log in';
   var s = document.getElementById('lgSub');
-  if (s) s.textContent = up
-    ? 'Your first name and your email. We mail you a 6-digit code to confirm the address.'
-    : 'Use your email or phone number with your password — or ask for a 6-digit code instead.';
+  if (s) {
+    var emailOn = !(window.otpAuth && window.otpAuth.emailEnabled === false);
+    s.textContent = up
+      ? (emailOn
+        ? 'Your first name and your email. We mail you a 6-digit code to confirm the address.'
+        : 'Your first name and a phone number. A password protects the account.')
+      : (emailOn
+        ? 'Use your email or phone number with your password — or ask for a 6-digit code instead.'
+        : 'Phone number with a password — or use Google or GitHub, they confirm your address.');
+  }
   var tabIn = document.getElementById('lgTabIn'), tabUp = document.getElementById('lgTabUp');
   if (tabIn) tabIn.classList.toggle('on', !up);
   if (tabUp) tabUp.classList.toggle('on', up);
