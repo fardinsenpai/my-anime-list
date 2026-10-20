@@ -50,18 +50,19 @@ grant execute on function public.is_email_verified(text) to anon, authenticated;
 
 -- 4) tidy up: codes that were never used stop being useful after 10 min
 --    (this is also called from the Edge Function on every request)
+--    NB: this is a SQL function, so the body is one query - the delete runs
+--    inside a data-modifying CTE and the count comes back from it.
 create or replace function public.purge_expired_codes()
 returns int
 language sql
+volatile
 security definer
 set search_path = public
 as $$
-declare n int;
-begin
-  delete from public.email_codes where expires_at < now();
-  get diagnostics n = row_count;
-  return n;
-end;
+  with gone as (
+    delete from public.email_codes where expires_at < now() returning 1
+  )
+  select count(*)::int from gone;
 $$;
 
 grant execute on function public.purge_expired_codes() to service_role;
