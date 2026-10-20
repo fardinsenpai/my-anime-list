@@ -180,9 +180,16 @@
 
   /* ---------------------------------------------------- the network */
   function post(body) {
+    // the function's gateway checks the project key - the anon key is public,
+    // so this is not a secret, it just proves the call comes from this project
+    var key = (typeof AUTH_ANON !== 'undefined' && AUTH_ANON) ? AUTH_ANON : '';
     return fetch(functionUrl(), {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': key,
+        'Authorization': 'Bearer ' + key
+      },
       body: JSON.stringify(body),
     }).then(function (r) {
       return r.json().catch(function () { return { ok: false, message: 'No answer from the server.' }; });
