@@ -1372,14 +1372,16 @@
     });
   }
 
-  function removeOverlay() {
+  function removeOverlay(keepUrl) {
     TourState.isSimulating = false;
     var ov = document.querySelector(".tourney-overlay");
     if (!ov) return;
     ov.classList.add("tourney-overlay--hiding");
     var node = ov;
     setTimeout(function () { node.remove(); }, 360);
-    history.replaceState(null, '', '.');
+    // the site closes the panel when the visitor navigates away - that must not
+    // rewrite the address bar, so the url is kept in that case
+    if (!keepUrl) history.replaceState(null, '', '.');
   }
 
   /* ============================================================
@@ -1392,6 +1394,8 @@
   });
 
   window.openTournament = openTournament;
+  // the site slides the panel down when the visitor navigates away
+  window.closeTournament = function () { removeOverlay(true); };
   window.TournamentState = TourState;
 
 })(window, document);

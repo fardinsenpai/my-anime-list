@@ -379,8 +379,35 @@ function hideAllSections() {
     var el = document.querySelector(sel);
     if (el) el.style.display = 'none';
   });
+  closeFloatingOverlays();
   if (typeof closeSuggestion === 'function') closeSuggestion();
 }
+
+// Crown Conquest (and any other floating overlay) is not one of the normal
+// sections, so it has to be told to slide down when the visitor goes elsewhere
+var _overlayClosing = false;
+function closeFloatingOverlays() {
+  if (_overlayClosing) return;
+  if (location.pathname.indexOf('/tournament') > -1) return;   // it is the page we are on
+  _overlayClosing = true;
+  try { if (typeof window.closeTournament === 'function') window.closeTournament(); } catch (e) {}
+  window.setTimeout(function () { _overlayClosing = false; }, 400);
+}
+
+// any route change closes the floating panels - not only the section buttons
+(function () {
+  var push = history.pushState, replace = history.replaceState;
+  history.pushState = function () {
+    var r = push.apply(history, arguments);
+    closeFloatingOverlays();
+    return r;
+  };
+  history.replaceState = function () {
+    var r = replace.apply(history, arguments);
+    closeFloatingOverlays();
+    return r;
+  };
+})();
 
 function showChartLoading() {
   ['pieChart', 'ottChart', 'studioChart', 'episodeChart', 'ratingChart'].forEach(function(id) {
@@ -445,8 +472,9 @@ function showAllAwardWinners() {
 function goHome() {
   history.pushState(null, '', 'home');
   closeWaifus();
+  closeFloatingOverlays();
 
-  var ids = ['analysisContainer', 'statsBarContainer', 'topSecretsContainer', 'hotTakesContainer', 'topFiveDropdown'];
+  var ids = ['analysisContainer', 'statsBarContainer', 'topSecretsContainer', 'hotTakesContainer', 'topFiveDropdown', 'animeQuestContainer'];
   ids.forEach(function(id) {
     var el = document.getElementById(id);
     if (el) el.style.display = 'none';
