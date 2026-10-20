@@ -1,0 +1,6 @@
+# Supabase CLI scratch files (never commit these)
+supabase/.temp/
+supabase/.branches/
+supabase/.env
+.env
+.env.*
