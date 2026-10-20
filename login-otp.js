@@ -25,6 +25,7 @@
     resendAt: 0,
     timer: null,
     loading: false,
+    probed: false,              // has the code service been asked if it exists?
     passwordFallback: false   // set when the code service is not reachable
   };
 
@@ -71,6 +72,8 @@
   // The code service may not be deployed yet. If it is not answering we keep
   // the old password sign-in, so the site never loses a way in.
   function probeService() {
+    if (OTP.probed) return;
+    OTP.probed = true;
     var settled = false;
     var timer = setTimeout(function () {
       if (settled) return;
@@ -141,6 +144,9 @@
 
   function paintPasswordVisibility() {
     var phone = isPhoneMode();
+    // the first time somebody types an email, find out whether the code
+    // service is there at all (it is quiet until then, so the page stays clean)
+    if (!phone) probeService();
     var usePassword = phone || OTP.passwordFallback;
     var pf = byId('lgPassField');
     if (pf) pf.hidden = !usePassword;        // an email signs in with a code, not a password
@@ -356,8 +362,8 @@
     }
   }
 
-  if (document.readyState === 'complete' || document.readyState === 'interactive') { wire(); probeService(); }
-  else document.addEventListener('DOMContentLoaded', function () { wire(); probeService(); });
+  if (document.readyState === 'complete' || document.readyState === 'interactive') wire();
+  else document.addEventListener('DOMContentLoaded', wire);
 
   // the public handle used by script.js
   window.otpAuth = {
