@@ -14,8 +14,7 @@
 (function () {
   'use strict';
 
-  var CF_SITE_KEY = '1x00000000000000000000AA';   // Turnstile test key (always passes)
-  // swap for the real site key from dashboard.cloudflare.com > Turnstile
+  var CF_SITE_KEY = '0x4AAAAAAFdDwRBQYy3Tl_Od';   // Cloudflare Turnstile (real widget)
   var CF_SCRIPT = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
 
   var OTP = {
