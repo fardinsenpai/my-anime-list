@@ -32,7 +32,7 @@
   function byId(id) { return document.getElementById(id); }
   function supabaseUrl() {
     if (typeof AUTH_URL !== 'undefined' && AUTH_URL) return AUTH_URL;
-    return 'https://ldzlefdklkcgvqcbqibtt.supabase.co';
+    return 'https://ldzlefdklcgvqcbqibtt.supabase.co';
   }
   function functionUrl() { return supabaseUrl() + '/functions/v1/auth-otp'; }
 
