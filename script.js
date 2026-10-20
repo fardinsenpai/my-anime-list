@@ -8856,6 +8856,38 @@ async function lgDoSubmit(ev) {
   else document.addEventListener('DOMContentLoaded', wire);
 })();
 
+// ── mobile: keep the chat glued to the visible area ─────────────────────
+// When the phone keyboard opens, the layout viewport does not shrink on
+// every browser, so the input row - and the send button with it - could end
+// up under the keyboard. visualViewport knows the real visible box.
+(function keepChatInView() {
+  function bind() {
+    var box = document.getElementById('chatBox');
+    if (!box) return;
+    var vv = window.visualViewport;
+    if (!vv) return;
+    function sync() {
+      var mobile = window.innerWidth <= 768;
+      var hidden = window.innerHeight - vv.height;   // the keyboard height
+      var open = box.classList.contains('open');
+      if (mobile && open && hidden > 180) {
+        box.style.height = Math.round(vv.height) + 'px';
+        box.style.top = Math.round(vv.offsetTop) + 'px';
+        box.style.bottom = 'auto';
+      } else {
+        box.style.height = '';
+        box.style.top = '';
+        box.style.bottom = '';
+      }
+    }
+    vv.addEventListener('resize', sync);
+    vv.addEventListener('scroll', sync);
+    window.addEventListener('orientationchange', function () { setTimeout(sync, 300); });
+  }
+  if (document.readyState === 'complete' || document.readyState === 'interactive') bind();
+  else document.addEventListener('DOMContentLoaded', bind);
+})();
+
 // ═══════════════════════════════════════════════════════════════════════
 // TITLE THEME — "MANGA INK"
 // Picked from the title-style preview: Yuji Syuku brush, white→pink

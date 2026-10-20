@@ -555,6 +555,29 @@
   background: none; color: #777; font-size: 16px; box-shadow: none;
 }
 
+/* ================================================================
+   MOBILE CHAT FIX
+   The message list could not shrink (flex items keep their content
+   height by default), so on a phone the input row - and with it the
+   send button - slid under the keyboard or off the bottom edge.
+   ================================================================ */
+.chat-messages {
+  min-height: 0;               /* let the list shrink so the input row stays put */
+  overscroll-behavior: contain;
+}
+.chat-input-area { flex-shrink: 0; }
+.chat-input-area input { min-width: 0; }   /* never push the send button out */
+.chat-input-area .clear-btn { flex: 0 0 auto; }
+
+@media (max-width: 480px) {
+  .chat-input-area { gap: 8px; padding-left: 10px; padding-right: 10px; }
+  /* 16px keeps iOS from zooming the page when the field is focused,
+     which is what pushed the send button off screen */
+  .chat-input-area input { padding: 10px 14px; font-size: 16px; }
+  .chat-input-area button { width: 40px; height: 40px; font-size: 16px; }
+  .chat-input-area .clear-btn { width: 32px; height: 32px; }
+}
+
 @media (min-width: 769px) {
   .chat-sidebar {
     inset: auto 24px 24px auto;
