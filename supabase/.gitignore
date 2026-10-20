@@ -1,6 +1,6 @@
 # Supabase CLI scratch files (never commit these)
-supabase/.temp/
-supabase/.branches/
-supabase/.env
+# paths are relative to this folder
+.temp/
+.branches/
 .env
 .env.*
