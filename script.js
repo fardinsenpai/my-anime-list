@@ -7982,13 +7982,13 @@ function authUserFrom(session) {
   var full = String(m.full_name || m.name || m.user_name || ((fn || ln) ? (fn + ' ' + ln).trim() : '')).trim();
   var phone = String(m.phone || '').trim();
   var isPhoneAccount = u.email ? String(u.email).indexOf(PHONE_SUFFIX) > -1 : false;
-  // "confirmed" means we know this person really owns that address:
-  //   * an email code proved it (those accounts are created email_confirm on)
-  //   * or Google / GitHub confirmed it for us
-  //   * a phone login name never counts
+  // "confirmed" means WE know this person owns that address.
+  //   * Google / GitHub confirmed it for us
+  //   * or they entered our email code (checked against verified_users below)
+  // Supabase sets email_confirmed_at on every account when "Confirm email" is
+  // off, so that field proves nothing and must not be used here.
   var provider = String((u.app_metadata && u.app_metadata.provider) || '').toLowerCase();
   var oauthConfirmed = provider === 'google' || provider === 'github' || provider === 'apple';
-  var emailConfirmed = !!u.email_confirmed_at || !!u.confirmed_at;
   var first = String(m.given_name || fn).trim() ||
               (full ? full.split(/\s+/)[0] : '') ||
               (isPhoneAccount ? '' : (u.email ? String(u.email).split('@')[0] : '')) ||
@@ -8002,8 +8002,26 @@ function authUserFrom(session) {
     first: String(first || '').toUpperCase(),
     avatar: authPhoto(m.avatar_url || m.picture || ''),
     // the blue tick means "confirmed", not just "signed in"
-    confirmed: !isPhoneAccount && (emailConfirmed || oauthConfirmed)
+    confirmed: oauthConfirmed,
+    oauth: oauthConfirmed
   };
+}
+
+// A phone login name is never confirmed, so it never earns the blue tick.
+function authCheckVerified() {
+  if (!AUTH_USER || !AUTH_USER.email) return;
+  if (AUTH_USER.oauth || AUTH_USER.confirmed) return;
+  try {
+    var c = authClient();
+    if (!c) return;
+    Promise.resolve(c.rpc('is_email_verified', { p_email: AUTH_USER.email })).then(function (res) {
+      if (res && res.data === true) {
+        AUTH_USER.confirmed = true;
+        try { renderAccountUI(); } catch (e) {}
+        try { htPaintAuthHint(); } catch (e) {}
+      }
+    }).catch(function () {});
+  } catch (e) {}
 }
 
 // Show — in the topbar chip and in the account card — the avatar the person is using
@@ -8098,6 +8116,7 @@ function setAuthUser(session, opts) {
   var was = AUTH_USER;
   AUTH_USER = next;
   var idChanged = (was ? was.id : '') !== (next ? next.id : '');
+  try { authCheckVerified(); } catch (e) {}
   renderAccountUI();
   if (idChanged) {
     applyAuthToChat();

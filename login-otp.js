@@ -289,6 +289,11 @@
       .catch(function () { return c.auth.verifyOtp({ token_hash: tokenHash, type: 'magiclink' }); })
       .then(function (res) {
         if (res && res.error) throw new Error(res.error.message);
+        // the code proved the address - the blue tick can be used straight away
+        try {
+          if (window.AUTH_USER) window.AUTH_USER.confirmed = true;
+          document.dispatchEvent(new CustomEvent('fardin:auth-changed'));
+        } catch (e) {}
         return res;
       });
   }
