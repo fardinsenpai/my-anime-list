@@ -209,7 +209,10 @@
       },
       body: JSON.stringify(body),
     }).then(function (r) {
-      return r.json().catch(function () { return { ok: false, message: 'No answer from the server.' }; });
+      return r.json().catch(function () { return {}; }).then(function (j) {
+        if (j && typeof j === 'object') j.__status = r.status;
+        return j;
+      });
     });
   }
 
@@ -232,7 +235,13 @@
       OTP.loading = false;
       ctx.busy(false);
       if (!res || !res.ok) {
-        ctx.setMsg((res && res.message) || 'The code could not be sent. Please try again.', 'bad');
+        var st = res && res.__status;
+        var msg = (res && res.message) || 'The code could not be sent. Please try again.';
+        if (st === 502 || st === 403) {
+          // the mail provider only delivers to the site owner for now
+          msg = 'We could not send a code to that address right now - please continue with Google or GitHub, or try again later.';
+        }
+        ctx.setMsg(msg, 'bad');
         // a fresh human check is needed for the next attempt
         OTP.token = '';
         paintTurnstile();

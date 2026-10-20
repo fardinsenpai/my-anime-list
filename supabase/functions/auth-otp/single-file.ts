@@ -143,6 +143,13 @@ async function mailCode(to: string, code: string, first: string): Promise<void> 
   if (!r.ok) {
     const t = await r.text().catch(() => "");
     console.error("resend refused the mail:", r.status, t.slice(0, 300));
+    // Resend's shared test sender can only deliver to the account owner.
+    // Say so plainly instead of "the code could not be sent".
+    if (r.status === 403 && /only send testing emails/i.test(t)) {
+      const e: any = new Error("owner only");
+      e.ownerOnly = true;
+      throw e;
+    }
     throw new Error("mail could not be sent");
   }
 }
@@ -242,9 +249,15 @@ async function handleSend(body: SendBody, ip: string) {
   const first = String(body.first || "").trim().toUpperCase().slice(0, 40);
   try {
     await mailCode(email, code, first);
-  } catch (e) {
+  } catch (e: any) {
     console.error("mail failed:", e);
     await sb(`email_codes?email=eq.${encodeURIComponent(email)}`, { method: "DELETE" }).catch(() => {});
+    if (e && e.ownerOnly) {
+      return json({
+        ok: false,
+        message: "Email codes are not switched on for everyone yet - please continue with Google or GitHub.",
+      }, 403);
+    }
     return json({ ok: false, message: "The code could not be sent. Please try again." }, 502);
   }
 
