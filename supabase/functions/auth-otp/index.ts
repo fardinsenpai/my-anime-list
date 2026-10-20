@@ -177,7 +177,7 @@ async function handleSend(body: SendBody, ip: string) {
     const age = Date.now() - new Date(last[0].created_at).getTime();
     if (age < RESEND_SECONDS * 1000) {
       const wait = Math.ceil((RESEND_SECONDS * 1000 - age) / 1000);
-      return json({ ok: false, message: `Please wait ${wait}s before asking for another code.`, 429);
+      return json({ ok: false, message: `Please wait ${wait}s before asking for another code.` }, 429);
     }
   }
 
