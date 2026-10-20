@@ -72,13 +72,22 @@
         sitekey: CF_SITE_KEY,
         theme: 'dark',
         size: 'flexible',
-        callback: function (t) { OTP.token = t || ''; },
-        'expired-callback': function () { OTP.token = ''; },
-        'error-callback': function () { OTP.token = ''; },
+        callback: function (t) { OTP.token = t || ''; paintPasswordVisibility(); },
+        'expired-callback': function () { OTP.token = ''; paintPasswordVisibility(); },
+        'error-callback': function () { OTP.token = ''; paintPasswordVisibility(); },
       });
     } catch (e) {
       host.innerHTML = '<div class="lg-otp-captcha">The human check could not load - use Google or GitHub for now.</div>';
     }
+    paintPasswordVisibility();
+  }
+
+  // a fresh challenge after a failed attempt - the button stays locked until
+  // the person ticks the box again
+  function rearmCaptcha() {
+    if (!EMAIL_SIGNIN_ENABLED && !OTP.token) return;   // nothing to re-arm
+    OTP.token = '';
+    paintTurnstile();
   }
 
   /* ------------------------------------------------------ the ui */
@@ -181,7 +190,7 @@
     var p2f = byId('lgPass2Field');
     if (p2f && phone) p2f.hidden = true;      // the confirm-password box belongs to the phone flow
     var gate = byId('lgOtpGate');
-    if (gate) gate.hidden = usePassword || !EMAIL_SIGNIN_ENABLED;
+    if (gate) gate.hidden = false;   // the human check guards every account action
     var link = byId('lgOtpUseCode');
     if (link) {
       // only the Log in tab can be switched over to a code
@@ -189,8 +198,13 @@
     }
     var sub = byId('lgSubmit');
     if (sub) {
+      var emailOff = !EMAIL_SIGNIN_ENABLED && !phone;
+      var codePath = !emailOff && !usePassword;
       sub.textContent = OTP.step === 'code' ? 'Verify code'
-        : (usePassword ? 'Log in' : 'Send code');
+        : codePath ? 'Send code'
+        : (loginMode() === 'up' ? 'Create account' : 'Log in');
+      // nobody gets past the human check
+      sub.disabled = !OTP.token;
     }
     paintIdentField();
   }
@@ -348,6 +362,11 @@
   // script.js calls this before the old password flow; returning true means
   // "handled, stop here".
   function intercept(ctx) {
+    // the human check comes before anything else - no tick, no sign in
+    if (!OTP.token) {
+      ctx.setMsg('Please tick the "I am human" box first.', 'bad');
+      return true;
+    }
     if (ctx.phone) return false;                 // phones keep the old flow
     if (!EMAIL_SIGNIN_ENABLED) {
       // email sign-in is switched off for now - say so plainly
@@ -450,6 +469,7 @@
     intercept: intercept,
     showEmailStep: showEmailStep,
     paintPasswordVisibility: paintPasswordVisibility,
+    rearmCaptcha: rearmCaptcha,
     isCodeStep: function () { return OTP.step === 'code'; },
     emailEnabled: EMAIL_SIGNIN_ENABLED,
   };

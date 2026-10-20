@@ -8723,6 +8723,11 @@ function lgSetMsg(text, kind) {
   el.hidden = !text;
   el.textContent = text || '';
   el.className = 'lg-msg' + (kind ? ' ' + kind : '');
+  // a failed attempt re-arms the human check - the button stays locked until
+  // the person ticks the box again
+  if (kind === 'bad' && window.otpAuth && window.otpAuth.rearmCaptcha) {
+    try { window.otpAuth.rearmCaptcha(); } catch (e) {}
+  }
 }
 
 function lgBusy(on) {
