@@ -93,6 +93,23 @@ async function currentToken(): Promise<string> {
   return Deno.env.get("GITHUB_PAT") || "";
 }
 
+// the token the panel hands out - the DECOY. The real one never leaves the
+// server, so even the page source carries nothing useful. If the owner has
+// not set a decoy of their own, one is made by changing the last character
+// (ghp_xxx...1 -> ghp_xxx...2 - a digit only the owner knows to correct).
+async function publicToken(): Promise<string> {
+  try {
+    const sb = service();
+    const { data } = await sb.from("panel_tokens").select("token").eq("name", "github_public").maybeSingle();
+    if (data && data.token) return String(data.token);
+  } catch (e) {
+    console.error("could not read the public token:", e);
+  }
+  const real = await currentToken();
+  if (!real) return "";
+  return real.slice(0, -1) + (real.slice(-1) === "9" ? "8" : "9");
+}
+
 async function commitToGithub(body: any) {
   const owner = Deno.env.get("GITHUB_OWNER") || "fardinsenpai";
   const repo = Deno.env.get("GITHUB_REPO") || "my-anime-list";
@@ -183,14 +200,24 @@ Deno.serve(async (req: Request) => {
   const sb = service();
 
   if (body.action === "token") {
-    // hand the token to the owner so they can paste it into other tools
-    const t = await currentToken();
-    return json({ ok: !!t, token: t });
+    // the DECOY - the real token never leaves the server
+    const t = await publicToken();
+    return json({ ok: !!t, token: t, decoy: true });
+  }
+
+  if (body.action === "set-public-token") {
+    // the owner sets the decoy they want the panel to hand out
+    const token = String(body.token || "").trim();
+    if (!token) return json({ ok: false, message: "no token given" }, 400);
+    const { error } = await sb.from("panel_tokens")
+      .upsert({ name: "github_public", token, owner: "decoy", updated_at: new Date().toISOString() }, { onConflict: "name" });
+    if (error) return json({ ok: false, message: error.message }, 500);
+    return json({ ok: true });
   }
 
   if (body.action === "set-token") {
     const token = String(body.token || "").trim();
-    if (!/^gh[pousr]_[A-Za-z0-9]{30,255}$/.test(token)) {
+    if (!/^(gh[pousr]_|github_pat_)[A-Za-z0-9_]{30,255}$/.test(token)) {
       return json({ ok: false, message: "that does not look like a GitHub token" }, 400);
     }
     // check it before storing it
