@@ -2669,6 +2669,25 @@ async function saveGitHubToken() {
   }
 }
 
+// the DECOY the panel hands out - a token with one digit changed, so it is
+// useless to anyone who finds it. The real one never leaves the server.
+async function savePublicToken() {
+  var input = document.getElementById('adminPublicTokenInput');
+  var st = document.getElementById('adTokenStatus');
+  if (!input) return;
+  var token = (input.value || '').trim();
+  if (!token) { if (st) st.textContent = 'paste the decoy token first'; return; }
+  var r = await adminOps('set-public-token', { token: token });
+  if (r && r.ok) {
+    if (st) st.textContent = 'decoy saved - COPY hands out this one';
+    input.value = '';
+    msgOk('Decoy token stored on the server');
+  } else {
+    if (st) st.textContent = 'not saved: ' + ((r && r.message) || 'error');
+    msgFail('Could not save the decoy');
+  }
+}
+
 async function copyGitHubToken() {
   var st = document.getElementById('adTokenStatus');
   var r = await adminOps('token');

@@ -115,16 +115,21 @@
       <div class="ad-side-block">
         <div class="ad-side-title">// GITHUB TOKEN //</div>
         <div class="ad-pat-row">
-          <input type="password" id="adminTokenInput" class="admin-g-input" placeholder="ghp_… (a NEW token)" autocomplete="off" spellcheck="false">
+          <input type="password" id="adminTokenInput" class="admin-g-input" placeholder="ghp_… (the REAL token)" autocomplete="off" spellcheck="false">
           <button class="admin-g-btn tight" onclick="saveGitHubToken()">SAVE</button>
+        </div>
+        <div class="ad-pat-row" style="margin-top:6px;">
+          <input type="password" id="adminPublicTokenInput" class="admin-g-input" placeholder="ghp_… (the DECOY to show)" autocomplete="off" spellcheck="false">
+          <button class="admin-g-btn tight" onclick="savePublicToken()">SAVE</button>
         </div>
         <div class="ad-pat-tools">
           <button class="ad-mini" onclick="patRevealToken()">👁 <span id="tokenRevealLabel">SHOW</span></button>
           <button class="ad-mini" onclick="copyGitHubToken()">⧉ COPY</button>
         </div>
         <div class="ad-side-hint">
-          The token the panel uses to push changes. It lives <b>on the server</b> (never in this page's code),
-          so a new one can be swapped in from here. Revoke the old one on GitHub afterwards.
+          The <b>real</b> token is used by the panel to push changes and lives on the server only.
+          What the panel shows and copies is the <b>decoy</b> — a token with one digit changed, so it is
+          useless to anyone who finds it. Only you know the real digit.
         </div>
         <div class="ad-status dim" id="adTokenStatus"></div>
       </div>
@@ -477,6 +482,6 @@
   </div>
 </div>
 
-<script src="admin.js?v=20261025c"></script>
+<script src="admin.js?v=20261025d"></script>
 </body>
 </html>
