@@ -2634,6 +2634,53 @@ async function adUserVerify(email, on) {
   }
 }
 
+// ===== GITHUB TOKEN VAULT (the token itself lives on the server) =========
+// Paste a new token here -> the function checks it with GitHub and stores it
+// server side. COPY fetches it back for the owner (behind the server key).
+async function saveGitHubToken() {
+  var input = document.getElementById('adminTokenInput');
+  var st = document.getElementById('adTokenStatus');
+  if (!input) return;
+  var token = (input.value || '').trim();
+  if (!token) { if (st) st.textContent = 'paste a token first'; return; }
+  if (st) st.textContent = 'checking the token with GitHub…';
+  var r = await adminOps('set-token', { token: token });
+  if (r && r.ok) {
+    if (st) st.textContent = 'saved on the server' + (r.owner ? ' (' + r.owner + ')' : '') + ' - now revoke the old one on GitHub';
+    input.value = '';
+    msgOk('Token stored on the server');
+  } else {
+    if (st) st.textContent = 'not accepted: ' + ((r && r.message) || 'error');
+    msgFail('GitHub did not accept that token');
+  }
+}
+
+async function copyGitHubToken() {
+  var st = document.getElementById('adTokenStatus');
+  var r = await adminOps('token');
+  if (!r || !r.ok || !r.token) {
+    if (st) st.textContent = 'no token on the server yet';
+    msgFail('No token stored on the server');
+    return;
+  }
+  adCopy(r.token, 'GitHub token');
+  if (st) st.textContent = 'copied to the clipboard';
+}
+
+async function patRevealToken() {
+  var el = document.getElementById('adminTokenInput');
+  var lab = document.getElementById('tokenRevealLabel');
+  if (!el) return;
+  if (!el.value) {
+    var r = await adminOps('token');
+    if (!r || !r.token) { msgFail('No token stored on the server'); return; }
+    el.value = r.token;
+  }
+  var wasHidden = el.type === 'password';
+  el.type = wasHidden ? 'text' : 'password';
+  if (lab) lab.textContent = wasHidden ? 'HIDE' : 'SHOW';
+}
+
 (function adminBoot() {
   var retry = document.getElementById('bootRetry');
 

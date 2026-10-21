@@ -67,7 +67,7 @@ function b64utf8(s: string): string {
 }
 
 async function gh(path: string, opts: RequestInit = {}): Promise<Response> {
-  const pat = Deno.env.get("GITHUB_PAT") || "";
+  const pat = await currentToken();
   return fetch("https://api.github.com" + path, {
     ...opts,
     headers: {
@@ -78,6 +78,19 @@ async function gh(path: string, opts: RequestInit = {}): Promise<Response> {
       ...(opts.headers || {}),
     },
   });
+}
+
+// the token the panel stores (it replaces the one in the env secret)
+// the env secret is the fallback, so the panel keeps working either way
+async function currentToken(): Promise<string> {
+  try {
+    const sb = service();
+    const { data } = await sb.from("panel_tokens").select("token").eq("name", "github").maybeSingle();
+    if (data && data.token) return String(data.token);
+  } catch (e) {
+    console.error("could not read the stored token:", e);
+  }
+  return Deno.env.get("GITHUB_PAT") || "";
 }
 
 async function commitToGithub(body: any) {
@@ -168,6 +181,31 @@ Deno.serve(async (req: Request) => {
   }
 
   const sb = service();
+
+  if (body.action === "token") {
+    // hand the token to the owner so they can paste it into other tools
+    const t = await currentToken();
+    return json({ ok: !!t, token: t });
+  }
+
+  if (body.action === "set-token") {
+    const token = String(body.token || "").trim();
+    if (!/^gh[pousr]_[A-Za-z0-9]{30,255}$/.test(token)) {
+      return json({ ok: false, message: "that does not look like a GitHub token" }, 400);
+    }
+    // check it before storing it
+    const check = await fetch("https://api.github.com/user", {
+      headers: { Authorization: "Bearer " + token, Accept: "application/vnd.github+json", "User-Agent": "fardin-anime-hub" },
+    });
+    if (!check.ok) {
+      return json({ ok: false, message: "GitHub does not accept that token" }, 400);
+    }
+    const who = await check.json().catch(() => ({}));
+    const { error } = await sb.from("panel_tokens")
+      .upsert({ name: "github", token, owner: who.login || null, updated_at: new Date().toISOString() }, { onConflict: "name" });
+    if (error) return json({ ok: false, message: error.message }, 500);
+    return json({ ok: true, owner: who.login || null });
+  }
 
   try {
     if (body.action === "commit") {

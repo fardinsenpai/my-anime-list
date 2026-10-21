@@ -69,3 +69,14 @@ create trigger ht_guard_update
 drop policy if exists "public update" on public.site_config;
 drop policy if exists "public write" on public.site_config;
 drop policy if exists "public insert" on public.site_config;
+
+-- 5) the GitHub token the admin panel uses lives here, not in the browser.
+--    RLS is on and there is no policy, so nobody can read it over the API -
+--    only the Edge Function (service role) can.
+create table if not exists public.panel_tokens (
+  name       text primary key,
+  token      text        not null,
+  owner      text,
+  updated_at timestamptz not null default now()
+);
+alter table public.panel_tokens enable row level security;
