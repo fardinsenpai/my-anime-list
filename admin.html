@@ -303,9 +303,14 @@
           <button class="admin-g-btn tight" onclick="refreshAiModels()">⟳ REFRESH LIST</button>
           <button class="admin-g-btn tight" onclick="saveAiModel()">⬆ UPDATE ON GITHUB</button>
           <button class="admin-g-btn tight danger" onclick="resetAiModel()">↺ DEFAULT CHAIN</button>
+          <button class="admin-g-btn tight" onclick="copyAiToken()">⧉ COPY TOKEN</button>
         </div>
+        <div class="ad-status dim" id="aiTokenStatus"></div>
         <div class="ad-note">UPDATE ON GITHUB rewrites the GROQ_MODELS line in script.js (the picked model first,
-          the older ones stay as fallbacks). Needs your PAT. Live for everyone in ~1 minute.</div>
+          the older ones stay as fallbacks). Needs your <b>server key</b> (sidebar) — the GitHub token itself stays on
+          the server. Live for everyone in ~1 minute.<br>
+          <b>COPY TOKEN</b> puts the GitHub token on your clipboard so you can paste it into another tool
+          (it is fetched from the server on demand and is never part of this page's code).</div>
       </section>
 
       <!-- AVATARS -->
@@ -472,6 +477,6 @@
   </div>
 </div>
 
-<script src="admin.js?v=20261025b"></script>
+<script src="admin.js?v=20261025c"></script>
 </body>
 </html>

@@ -2637,6 +2637,20 @@ async function adUserVerify(email, on) {
 // ===== GITHUB TOKEN VAULT (the token itself lives on the server) =========
 // Paste a new token here -> the function checks it with GitHub and stores it
 // server side. COPY fetches it back for the owner (behind the server key).
+// COPY TOKEN (AI section) - the token is fetched from the server on demand,
+// so it is never part of this page's code
+async function copyAiToken() {
+  var st = document.getElementById('aiTokenStatus');
+  var r = await adminOps('token');
+  if (!r || !r.ok || !r.token) {
+    if (st) st.textContent = 'no token on the server - paste one in the GITHUB TOKEN box first';
+    msgFail('No token stored on the server');
+    return;
+  }
+  adCopy(r.token, 'GitHub token');
+  if (st) st.textContent = 'token copied to the clipboard';
+}
+
 async function saveGitHubToken() {
   var input = document.getElementById('adminTokenInput');
   var st = document.getElementById('adTokenStatus');
