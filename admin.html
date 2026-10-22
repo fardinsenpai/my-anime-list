@@ -66,7 +66,7 @@
       </select>
       <button class="ad-mini" id="themeBtn" onclick="toggleAdminTheme()" title="Switch between day and night mode">🌙 NIGHT MODE</button>
       <span class="ad-clock" id="adClock"></span>
-      <span class="ad-pat-status" id="adPatStatus">// server key: -</span>
+      <span class="ad-pat-status" id="adPatStatus">// PAT: -</span>
       <a class="ad-mini" href="index.html">⬅ SITE</a>
       <button class="ad-mini" onclick="location.reload()">⇄ RELOAD</button>
       <button class="ad-mini danger" onclick="location.reload()">⏻ LOCK</button>
@@ -92,13 +92,12 @@
         <button class="admin-g-tab" data-tab="notes"   onclick="switchAdminTab('notes'); renderNotesTab()"><b>📝</b> NOTES<span>private pad</span></button>
         <button class="admin-g-tab" data-tab="logo"    onclick="switchAdminTab('logo'); renderLogoTab()"><b>🎨</b> LOGO<span>panel identity</span></button>
         <button class="admin-g-tab" data-tab="reply"   onclick="switchAdminTab('reply'); renderReplyTab()"><b>💬</b> REPLY<span>avatar &amp; badge</span></button>
-        <button class="admin-g-tab" data-tab="users"   onclick="switchAdminTab('users'); renderUsersTab()"><b>👥</b> USERS<span>accounts &amp; ticks</span></button>
       </nav>
 
       <div class="ad-side-block">
-        <div class="ad-side-title">// SERVER KEY //</div>
+        <div class="ad-side-title">// GITHUB PAT //</div>
         <div class="ad-pat-row">
-          <input type="password" id="adminPatInput" class="admin-g-input" placeholder="paste your server key" autocomplete="off" spellcheck="false">
+          <input type="password" id="adminPatInput" class="admin-g-input" placeholder="ghp_xxxxxxxx" autocomplete="off" spellcheck="false">
           <button class="admin-g-btn tight" onclick="savePat(); paintPatStatus();">SAVE</button>
         </div>
         <div class="ad-pat-tools">
@@ -110,25 +109,6 @@
           Kept in <b>this browser only</b>, hidden behind the PIN and never committed anywhere.
           Paste it once, press SAVE, then just use ⧉ COPY whenever you need it.
         </div>
-      </div>
-
-      <div class="ad-side-block">
-        <div class="ad-side-title">// GITHUB TOKEN //</div>
-        <div class="ad-pat-row">
-          <input type="password" id="adminTokenInput" class="admin-g-input" placeholder="ghp_… (the REAL token)" autocomplete="off" spellcheck="false">
-          <button class="admin-g-btn tight" onclick="saveGitHubToken()">SAVE</button>
-        </div>
-        <div class="ad-pat-row" style="margin-top:6px;">
-          <input type="password" id="adminPublicTokenInput" class="admin-g-input" placeholder="ghp_… (the DECOY to show)" autocomplete="off" spellcheck="false">
-          <button class="admin-g-btn tight" onclick="savePublicToken()">SAVE</button>
-        </div>
-        <div class="ad-pat-tools">
-          <button class="ad-mini" onclick="patRevealToken()">👁 <span id="tokenRevealLabel">SHOW</span></button>
-          <button class="ad-mini" onclick="copyGitHubToken()">⧉ COPY</button>
-        </div>
-        <div class="ad-side-hint">
-       
-        <div class="ad-status dim" id="adTokenStatus"></div>
       </div>
     </aside>
 
@@ -305,13 +285,9 @@
           <button class="admin-g-btn tight" onclick="refreshAiModels()">⟳ REFRESH LIST</button>
           <button class="admin-g-btn tight" onclick="saveAiModel()">⬆ UPDATE ON GITHUB</button>
           <button class="admin-g-btn tight danger" onclick="resetAiModel()">↺ DEFAULT CHAIN</button>
-          <button class="admin-g-btn tight" onclick="copyAiToken()">⧉ COPY TOKEN</button>
         </div>
-        <div class="ad-status dim" id="aiTokenStatus"></div>
         <div class="ad-note">UPDATE ON GITHUB rewrites the GROQ_MODELS line in script.js (the picked model first,
-          the older ones stay as fallbacks). Needs your <b>server key</b> (sidebar) — the GitHub token itself stays on
-          the server. Live for everyone in ~1 minute.<br>
-          </div>
+          the older ones stay as fallbacks). Needs your PAT. Live for everyone in ~1 minute.</div>
       </section>
 
       <!-- AVATARS -->
@@ -449,23 +425,6 @@
         <div class="ad-status dim" id="adReplyStatus"></div>
       </section>
 
-      <!-- USERS -->
-      <section class="admin-g-content" id="tabUsers">
-        <h2 class="ad-h">// USERS //</h2>
-        <div class="ad-note">
-          Everyone with an account, and whether their address is really theirs. The blue tick on a take
-          appears only for a confirmed address — a code they entered, or Google/GitHub confirming it.
-          <br><b>Note:</b> email sign-in is switched off until a domain is added, so someone who signed up
-          with an email should sign in with Google or GitHub instead.
-        </div>
-        <div class="ad-row wrap" style="margin:14px 0 10px;">
-          <button class="admin-g-btn" onclick="renderUsersTab()">↻ REFRESH</button>
-          <span class="ad-count" id="adUsersCount">—</span>
-        </div>
-        <div id="adUsersList"></div>
-        <div class="ad-status dim" id="adUsersStatus"></div>
-      </section>
-
     </main>
   </div>
 
@@ -478,6 +437,6 @@
   </div>
 </div>
 
-<script src="admin.js?v=20261025d"></script>
+<script src="admin.js?v=20261025e"></script>
 </body>
 </html>

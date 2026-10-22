@@ -3454,7 +3454,7 @@ async function pickCharacter(btn, id) {
     chatToast(CS_SIDE === 'ai' ? name + ' is now Senpai 🎴' : name + ' is now your avatar 🎴');
     return;
   }
-  if (!getServerKey()) { msgFail('Paste your server key first (field at the top of the panel)'); return; }
+  if (!getPat()) { msgFail('Save your PAT first (field at the top of the panel)'); return; }
   await setChatAvatar(target, value, 'anime character avatar: ' + name);
   renderCharGrids();
 }
@@ -6523,10 +6523,14 @@ function openAdmin() {
     var first = document.getElementById('adminPinInput');
     if (first) setTimeout(function() { first.focus(); }, 100);
   }
-  304706(function() {
-  var el = document.getElementById('adminPatDisplay');
-  if (el) el.textContent = '// GitHub token: server-side only';
-})();
+  (function() {
+    var el = document.getElementById('adminPatDisplay');
+    if (!el) return;
+    // the PAT the owner saved in this browser (masked) - never in the code
+    var p = '';
+    try { p = localStorage.getItem('gh_pat') || ''; } catch (e) {}
+    el.textContent = p ? '// PAT: ' + p.slice(0, 7) + '…' + p.slice(-4) : '// PAT: NOT SET';
+  })();
 }
 
 function closeAdmin() {
@@ -6593,53 +6597,40 @@ function getUniqueGenres() {
 function showLoading() { var el = document.getElementById('adminLoading'); if (el) el.style.display = 'flex'; }
 function hideLoading() { var el = document.getElementById('adminLoading'); if (el) el.style.display = 'none'; }
 
-// The GitHub token and the admin PIN now live in an Edge Function - the
-// browser only ever holds a "server key" (one long string, this session only).
-var ADMIN_FUNCTIONS_URL = 'https://ldzlefdklcgvqcbqibtt.supabase.co/functions/v1/admin-ops';
-var SERVER_KEY_STORE = 'fardin_admin_server_key';
-
-function getServerKey() {
-  // the old GitHub token used to live in localStorage - clear it for good
-  try { localStorage.removeItem('gh_pat'); } catch (e) {}
-  try { return sessionStorage.getItem(SERVER_KEY_STORE) || ''; } catch (e) { return ''; }
-}
-function saveServerKey(key) {
-  try {
-    if (key) sessionStorage.setItem(SERVER_KEY_STORE, key);
-    else sessionStorage.removeItem(SERVER_KEY_STORE);
-  } catch (e) {}
-}
-function adminOps(action, extra) {
-  var key = getServerKey();
-  if (!key) return Promise.resolve({ ok: false, message: 'no server key' });
-  var pub = (typeof AUTH_ANON !== 'undefined' && AUTH_ANON) ? AUTH_ANON : '';
-  return fetch(ADMIN_FUNCTIONS_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'apikey': pub, 'Authorization': 'Bearer ' + pub },
-    body: JSON.stringify(Object.assign({ action: action, key: key }, extra || {}))
-  }).then(function (r) {
-    return r.json().catch(function () { return { ok: false, message: 'no answer from the server' }; });
-  });
-}
+function getPat() { return localStorage.getItem('gh_pat'); }
 
 function savePat() {
-  var key = document.getElementById('adminPatInput').value.trim();
-  if (!key) return;
-  saveServerKey(key);
-  msgOk('Server key saved for this session');
+  var pat = document.getElementById('adminPatInput').value.trim();
+  if (!pat) return;
+  localStorage.setItem('gh_pat', pat);
+  msgOk('PAT saved');
 }
 
+
 async function githubFetch(path) {
-  var r = await adminOps('read', { path: path, branch: GITHUB_BRANCH });
-  if (!r || !r.ok) return null;
-  return { sha: r.sha, content: r.content, path: r.path, size: r.size };
+  var pat = getPat();
+  if (!pat) return null;
+  var res = await fetch('https://api.github.com/repos/' + GITHUB_OWNER + '/' + GITHUB_REPO + '/contents/' + path + '?ref=' + GITHUB_BRANCH, {
+    headers: { 'Authorization': 'token ' + pat, 'Accept': 'application/vnd.github.v3+json' }
+  });
+  if (!res.ok) return null;
+  return await res.json();
 }
 
 async function githubCommit(path, content, message) {
+  var pat = getPat();
+  if (!pat) return false;
   try {
-    var r = await adminOps('commit', { path: path, content: content, message: message, branch: GITHUB_BRANCH });
-    return !!(r && r.ok);
-  } catch (e) { return false; }
+    var existing = await githubFetch(path);
+    var body = { message: message, content: btoa(unescape(encodeURIComponent(content))), branch: GITHUB_BRANCH };
+    if (existing && existing.sha) body.sha = existing.sha;
+    var res = await fetch('https://api.github.com/repos/' + GITHUB_OWNER + '/' + GITHUB_REPO + '/contents/' + path, {
+      method: 'PUT', headers: { 'Authorization': 'token ' + pat, 'Accept': 'application/vnd.github.v3+json', 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    if (!res.ok) return false;
+    return true;
+  } catch(e) { return false; }
 }
 
 function switchAdminTab(tab) {
@@ -6697,7 +6688,7 @@ function resetAiModel() {
 }
 
 async function updateModelOnGithub(chain, why) {
-  if (!getServerKey()) { msgFail('Paste your server key first (field at the top of the panel)'); return; }
+  if (!getPat()) { msgFail('Save your PAT first (field at the top of the panel)'); return; }
   var file = await githubFetch('script.js');
   if (!file || !file.content) { msgFail('Could not fetch script.js from GitHub — check PAT'); return; }
   var text;
@@ -6811,7 +6802,7 @@ function pickAvatarImage(side) {
 async function onAvatarFile(side, input) {
   var file = input && input.files && input.files[0];
   if (!file) return;
-  if (!getServerKey()) { msgFail('Paste your server key first (field at the top of the panel)'); input.value = ''; return; }
+  if (!getPat()) { msgFail('Save your PAT first (field at the top of the panel)'); input.value = ''; return; }
   showLoading();
   try {
     var dataUrl = await resizeAvatarImage(file, 256);
@@ -6855,14 +6846,23 @@ function resizeAvatarImage(file, size) {
 
 // Same as githubCommit, but the content is already base64 (used for pictures)
 async function commitBase64(path, base64, message) {
+  var pat = getPat();
+  if (!pat) return false;
   try {
-    var r = await adminOps('commit', { path: path, content: base64, base64: true, message: message, branch: GITHUB_BRANCH });
-    return !!(r && r.ok);
+    var existing = await githubFetch(path);
+    var body = { message: message, content: base64, branch: GITHUB_BRANCH };
+    if (existing && existing.sha) body.sha = existing.sha;
+    var res = await fetch('https://api.github.com/repos/' + GITHUB_OWNER + '/' + GITHUB_REPO + '/contents/' + path, {
+      method: 'PUT',
+      headers: { 'Authorization': 'token ' + pat, 'Accept': 'application/vnd.github.v3+json', 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    return res.ok;
   } catch (e) { return false; }
 }
 
 async function setChatAvatar(side, value, why) {
-  if (!getServerKey()) { msgFail('Paste your server key first (field at the top of the panel)'); return; }
+  if (!getPat()) { msgFail('Save your PAT first (field at the top of the panel)'); return; }
   if (!/^(preset:[a-z0-9-]+|img:[A-Za-z0-9._\-\/]+(\?v=[0-9]+)?|img:https?:\/\/[^\s'"\\]+)$/.test(value)) { msgFail('Unsupported avatar value'); return; }
   showLoading();
   try {
@@ -6897,8 +6897,8 @@ async function setChatAvatar(side, value, why) {
 }
 
 function initAdminGui() {
-  var pat = getServerKey();
-  var sk = getServerKey(); if (sk) document.getElementById('adminPatInput').value = sk;
+  var pat = getPat();
+  var sk = getPat(); if (sk) document.getElementById('adminPatInput').value = sk;
   loadTop5Form();
   loadAwardsForm();
   renderPills('ott', '');

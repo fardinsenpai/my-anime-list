@@ -41,11 +41,12 @@ function bootLine(text, cls) {
 function paintPatStatus() {
   var el = document.getElementById('adPatStatus');
   if (!el) return;
-  if (getServerKey()) {
-    el.textContent = '// server key: set (this session)';
+  var p = getPat();
+  if (p) {
+    el.textContent = '// PAT: ' + p.slice(0, 7) + '…' + p.slice(-4);
     el.className = 'ad-pat-status ok';
   } else {
-    el.textContent = '// server key: NOT SET';
+    el.textContent = '// PAT: NOT SET';
     el.className = 'ad-pat-status';
   }
 }
@@ -501,7 +502,7 @@ async function pickCharacter(btn, id) {
     chatToast(CS_SIDE === 'ai' ? name + ' is now Senpai 🎴' : name + ' is now your avatar 🎴');
     return;
   }
-  if (!getServerKey()) { msgFail('Paste your server key first (field at the top of the panel)'); return; }
+  if (!getPat()) { msgFail('Save your PAT first (field at the top of the panel)'); return; }
   await setChatAvatar(target, value, 'anime character avatar: ' + name);
   renderCharGrids();
 }
@@ -540,10 +541,14 @@ function openAdmin() {
     var first = document.getElementById('adminPinInput');
     if (first) setTimeout(function() { first.focus(); }, 100);
   }
-  24621(function() {
-  var el = document.getElementById('adminPatDisplay');
-  if (el) el.textContent = '// GitHub token: server-side only';
-})();
+  (function() {
+    var el = document.getElementById('adminPatDisplay');
+    if (!el) return;
+    // the PAT the owner saved in this browser (masked) - never in the code
+    var p = '';
+    try { p = localStorage.getItem('gh_pat') || ''; } catch (e) {}
+    el.textContent = p ? '// PAT: ' + p.slice(0, 7) + '…' + p.slice(-4) : '// PAT: NOT SET';
+  })();
 }
 
 function closeAdmin() {
@@ -610,53 +615,40 @@ function getUniqueGenres() {
 function showLoading() { var el = document.getElementById('adminLoading'); if (el) el.style.display = 'flex'; }
 function hideLoading() { var el = document.getElementById('adminLoading'); if (el) el.style.display = 'none'; }
 
-// The GitHub token and the admin PIN now live in an Edge Function - the
-// browser only ever holds a "server key" (one long string, this session only).
-var ADMIN_FUNCTIONS_URL = 'https://ldzlefdklcgvqcbqibtt.supabase.co/functions/v1/admin-ops';
-var SERVER_KEY_STORE = 'fardin_admin_server_key';
-
-function getServerKey() {
-  // the old GitHub token used to live in localStorage - clear it for good
-  try { localStorage.removeItem('gh_pat'); } catch (e) {}
-  try { return sessionStorage.getItem(SERVER_KEY_STORE) || ''; } catch (e) { return ''; }
-}
-function saveServerKey(key) {
-  try {
-    if (key) sessionStorage.setItem(SERVER_KEY_STORE, key);
-    else sessionStorage.removeItem(SERVER_KEY_STORE);
-  } catch (e) {}
-}
-function adminOps(action, extra) {
-  var key = getServerKey();
-  if (!key) return Promise.resolve({ ok: false, message: 'no server key' });
-  var pub = (typeof AD_SUPA_KEY !== 'undefined' && AD_SUPA_KEY) ? AD_SUPA_KEY : '';
-  return fetch(ADMIN_FUNCTIONS_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'apikey': pub, 'Authorization': 'Bearer ' + pub },
-    body: JSON.stringify(Object.assign({ action: action, key: key }, extra || {}))
-  }).then(function (r) {
-    return r.json().catch(function () { return { ok: false, message: 'no answer from the server' }; });
-  });
-}
+function getPat() { return localStorage.getItem('gh_pat'); }
 
 function savePat() {
-  var key = document.getElementById('adminPatInput').value.trim();
-  if (!key) return;
-  saveServerKey(key);
-  msgOk('Server key saved for this session');
+  var pat = document.getElementById('adminPatInput').value.trim();
+  if (!pat) return;
+  localStorage.setItem('gh_pat', pat);
+  msgOk('PAT saved');
 }
 
+
 async function githubFetch(path) {
-  var r = await adminOps('read', { path: path, branch: GITHUB_BRANCH });
-  if (!r || !r.ok) return null;
-  return { sha: r.sha, content: r.content, path: r.path, size: r.size };
+  var pat = getPat();
+  if (!pat) return null;
+  var res = await fetch('https://api.github.com/repos/' + GITHUB_OWNER + '/' + GITHUB_REPO + '/contents/' + path + '?ref=' + GITHUB_BRANCH, {
+    headers: { 'Authorization': 'token ' + pat, 'Accept': 'application/vnd.github.v3+json' }
+  });
+  if (!res.ok) return null;
+  return await res.json();
 }
 
 async function githubCommit(path, content, message) {
+  var pat = getPat();
+  if (!pat) return false;
   try {
-    var r = await adminOps('commit', { path: path, content: content, message: message, branch: GITHUB_BRANCH });
-    return !!(r && r.ok);
-  } catch (e) { return false; }
+    var existing = await githubFetch(path);
+    var body = { message: message, content: btoa(unescape(encodeURIComponent(content))), branch: GITHUB_BRANCH };
+    if (existing && existing.sha) body.sha = existing.sha;
+    var res = await fetch('https://api.github.com/repos/' + GITHUB_OWNER + '/' + GITHUB_REPO + '/contents/' + path, {
+      method: 'PUT', headers: { 'Authorization': 'token ' + pat, 'Accept': 'application/vnd.github.v3+json', 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    if (!res.ok) return false;
+    return true;
+  } catch(e) { return false; }
 }
 
 function switchAdminTab(tab) {
@@ -714,7 +706,7 @@ function resetAiModel() {
 }
 
 async function updateModelOnGithub(chain, why) {
-  if (!getServerKey()) { msgFail('Paste your server key first (field at the top of the panel)'); return; }
+  if (!getPat()) { msgFail('Save your PAT first (field at the top of the panel)'); return; }
   var file = await githubFetch('script.js');
   if (!file || !file.content) { msgFail('Could not fetch script.js from GitHub — check PAT'); return; }
   var text;
@@ -828,7 +820,7 @@ function pickAvatarImage(side) {
 async function onAvatarFile(side, input) {
   var file = input && input.files && input.files[0];
   if (!file) return;
-  if (!getServerKey()) { msgFail('Paste your server key first (field at the top of the panel)'); input.value = ''; return; }
+  if (!getPat()) { msgFail('Save your PAT first (field at the top of the panel)'); input.value = ''; return; }
   showLoading();
   try {
     var dataUrl = await resizeAvatarImage(file, 256);
@@ -872,14 +864,23 @@ function resizeAvatarImage(file, size) {
 
 // Same as githubCommit, but the content is already base64 (used for pictures)
 async function commitBase64(path, base64, message) {
+  var pat = getPat();
+  if (!pat) return false;
   try {
-    var r = await adminOps('commit', { path: path, content: base64, base64: true, message: message, branch: GITHUB_BRANCH });
-    return !!(r && r.ok);
+    var existing = await githubFetch(path);
+    var body = { message: message, content: base64, branch: GITHUB_BRANCH };
+    if (existing && existing.sha) body.sha = existing.sha;
+    var res = await fetch('https://api.github.com/repos/' + GITHUB_OWNER + '/' + GITHUB_REPO + '/contents/' + path, {
+      method: 'PUT',
+      headers: { 'Authorization': 'token ' + pat, 'Accept': 'application/vnd.github.v3+json', 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    return res.ok;
   } catch (e) { return false; }
 }
 
 async function setChatAvatar(side, value, why) {
-  if (!getServerKey()) { msgFail('Paste your server key first (field at the top of the panel)'); return; }
+  if (!getPat()) { msgFail('Save your PAT first (field at the top of the panel)'); return; }
   if (!/^(preset:[a-z0-9-]+|img:[A-Za-z0-9._\-\/]+(\?v=[0-9]+)?|img:https?:\/\/[^\s'"\\]+)$/.test(value)) { msgFail('Unsupported avatar value'); return; }
   showLoading();
   try {
@@ -914,8 +915,8 @@ async function setChatAvatar(side, value, why) {
 }
 
 function initAdminGui() {
-  var pat = getServerKey();
-  var sk = getServerKey(); if (sk) document.getElementById('adminPatInput').value = sk;
+  var pat = getPat();
+  var sk = getPat(); if (sk) document.getElementById('adminPatInput').value = sk;
   loadTop5Form();
   loadAwardsForm();
   renderPills('ott', '');
@@ -1833,7 +1834,7 @@ async function notesPush() {
   var pass = notesPassValue().trim();
   if (!pass) { msgFail('Type a passphrase first'); var p = document.getElementById('notesPass'); if (p) p.focus(); return; }
   if (pass.length < 6) { msgFail('Use at least 6 characters for the passphrase'); return; }
-  if (!getServerKey()) { msgFail('Paste your server key first (left sidebar)'); return; }
+  if (!getPat()) { msgFail('Save your GitHub PAT first (left sidebar)'); return; }
   notesSaveCurrent();
   var payload = JSON.stringify({
     pad: notesLS(NOTES_KEY_PAD, ''),
@@ -1859,7 +1860,7 @@ async function notesPush() {
 async function notesPull() {
   var pass = notesPassValue().trim();
   if (!pass) { msgFail('Type your passphrase first'); return; }
-  if (!getServerKey()) { msgFail('Paste your server key first (left sidebar)'); return; }
+  if (!getPat()) { msgFail('Save your GitHub PAT first (left sidebar)'); return; }
   var hasLocal = (notesLS(NOTES_KEY_PAD, '') || '').trim() || notesLoadList().length;
   if (hasLocal && !confirm('This replaces the notes in this browser with the GitHub copy. Continue?')) return;
   showLoading();
@@ -1987,8 +1988,8 @@ function patReveal() {
   var lab = document.getElementById('patRevealLabel');
   if (!el) return;
   if (!el.value) {
-    var stored = getServerKey();
-    if (!stored) { msgFail('No server key yet — paste it and press SAVE'); return; }
+    var stored = getPat();
+    if (!stored) { msgFail('No PAT saved yet — paste it and press SAVE'); return; }
     el.value = stored;
   }
   var wasHidden = el.type === 'password';
@@ -2023,8 +2024,8 @@ function adCopy(text, what) {
   }
 }
 function patCopy() {
-  var v = (getServerKey() || '').trim();
-  if (!v) { msgFail('No server key yet — paste it and press SAVE'); return; }
+  var v = (getPat() || '').trim();
+  if (!v) { msgFail('No PAT saved yet — paste it and press SAVE'); return; }
   adCopy(v, 'PAT');
 }
 function notesCopyPad() {
@@ -2040,8 +2041,7 @@ function notesCopyNote() {
   adCopy((head ? head + '\n\n' : '') + (b.value || ''), 'Note');
 }
 function patForget() {
-  if (!confirm('Forget the saved GitHub PAT in this browser?')) return;
-  try { sessionStorage.removeItem('fardin_admin_server_key'); } catch (e) {}
+  if (!confirm('Forget the saved GitHub PAT in this browser?')) return;
   var el = document.getElementById('adminPatInput');
   if (el) { el.value = ''; el.type = 'password'; }
   var lab = document.getElementById('patRevealLabel');
@@ -2585,134 +2585,6 @@ function adReplyReset() {
 }
 
 AD_REPLY = adReplyLoad();
-
-// ===== USERS (through the admin-ops function - nothing secret in the browser) =====
-async function renderUsersTab() {
-  var box = document.getElementById('adUsersList');
-  var st = document.getElementById('adUsersStatus');
-  if (!box) return;
-  if (!getServerKey()) {
-    box.innerHTML = '<div class="ad-note">Paste your server key in the sidebar first, then refresh.</div>';
-    return;
-  }
-  box.innerHTML = '<div class="ad-note">loading…</div>';
-  var r = await adminOps('users');
-  if (!r || !r.ok) {
-    box.innerHTML = '<div class="ad-note">could not load the list: ' + adEsc((r && r.message) || 'error') + '</div>';
-    if (st) st.textContent = '';
-    return;
-  }
-  var users = r.users || [];
-  var c = document.getElementById('adUsersCount');
-  if (c) c.textContent = users.length + ' account(s)';
-  if (!users.length) { box.innerHTML = '<div class="ad-note">no accounts yet</div>'; return; }
-  box.innerHTML = users.map(function (u) {
-    var email = u.email || u.phone || '?';
-    var on = u.verified ? 'false' : 'true';
-    return '<div style="display:flex;align-items:center;gap:10px;padding:9px 11px;margin-bottom:6px;' +
-      'border:1px solid var(--g-line);border-radius:10px;background:var(--g-bg);flex-wrap:wrap;">' +
-      '<span style="font-family:monospace;font-size:12px;color:#e9e9f5;flex:1;min-width:190px;word-break:break-all;">' +
-        adEsc(email) + '</span>' +
-      '<span class="ad-count" style="margin:0;">' + (u.confirmed ? 'confirmed' : 'not confirmed') +
-        (u.method ? ' · ' + adEsc(u.method) : '') + '</span>' +
-      '<span class="ad-count" style="margin:0;">last ' + adEsc(String(u.last_sign_in_at || '—').slice(0, 10)) + '</span>' +
-      '<button class="admin-g-btn tight" onclick="adUserVerify(\'' + adEsc(email) + '\',' + on + ')">' +
-        (u.verified ? '✕ UNVERIFY' : '✓ VERIFY') + '</button>' +
-    '</div>';
-  }).join('');
-  if (st) st.textContent = 'a verified address is what earns the blue tick';
-}
-
-async function adUserVerify(email, on) {
-  var st = document.getElementById('adUsersStatus');
-  var r = await adminOps('verify', { email: email, on: on === true || on === 'true' });
-  if (r && r.ok) {
-    if (st) st.textContent = (on === true || on === 'true' ? 'verified ' : 'unverified ') + email;
-    renderUsersTab();
-  } else if (st) {
-    st.textContent = 'failed: ' + ((r && r.message) || 'error');
-  }
-}
-
-// ===== GITHUB TOKEN VAULT (the token itself lives on the server) =========
-// Paste a new token here -> the function checks it with GitHub and stores it
-// server side. COPY fetches it back for the owner (behind the server key).
-// COPY TOKEN (AI section) - the token is fetched from the server on demand,
-// so it is never part of this page's code
-async function copyAiToken() {
-  var st = document.getElementById('aiTokenStatus');
-  var r = await adminOps('token');
-  if (!r || !r.ok || !r.token) {
-    if (st) st.textContent = 'no token on the server - paste one in the GITHUB TOKEN box first';
-    msgFail('No token stored on the server');
-    return;
-  }
-  adCopy(r.token, 'GitHub token');
-  if (st) st.textContent = 'token copied to the clipboard';
-}
-
-async function saveGitHubToken() {
-  var input = document.getElementById('adminTokenInput');
-  var st = document.getElementById('adTokenStatus');
-  if (!input) return;
-  var token = (input.value || '').trim();
-  if (!token) { if (st) st.textContent = 'paste a token first'; return; }
-  if (st) st.textContent = 'checking the token with GitHub…';
-  var r = await adminOps('set-token', { token: token });
-  if (r && r.ok) {
-    if (st) st.textContent = 'saved on the server' + (r.owner ? ' (' + r.owner + ')' : '') + ' - now revoke the old one on GitHub';
-    input.value = '';
-    msgOk('Token stored on the server');
-  } else {
-    if (st) st.textContent = 'not accepted: ' + ((r && r.message) || 'error');
-    msgFail('GitHub did not accept that token');
-  }
-}
-
-// the DECOY the panel hands out - a token with one digit changed, so it is
-// useless to anyone who finds it. The real one never leaves the server.
-async function savePublicToken() {
-  var input = document.getElementById('adminPublicTokenInput');
-  var st = document.getElementById('adTokenStatus');
-  if (!input) return;
-  var token = (input.value || '').trim();
-  if (!token) { if (st) st.textContent = 'paste the decoy token first'; return; }
-  var r = await adminOps('set-public-token', { token: token });
-  if (r && r.ok) {
-    if (st) st.textContent = 'decoy saved - COPY hands out this one';
-    input.value = '';
-    msgOk('Decoy token stored on the server');
-  } else {
-    if (st) st.textContent = 'not saved: ' + ((r && r.message) || 'error');
-    msgFail('Could not save the decoy');
-  }
-}
-
-async function copyGitHubToken() {
-  var st = document.getElementById('adTokenStatus');
-  var r = await adminOps('token');
-  if (!r || !r.ok || !r.token) {
-    if (st) st.textContent = 'no token on the server yet';
-    msgFail('No token stored on the server');
-    return;
-  }
-  adCopy(r.token, 'GitHub token');
-  if (st) st.textContent = 'copied to the clipboard';
-}
-
-async function patRevealToken() {
-  var el = document.getElementById('adminTokenInput');
-  var lab = document.getElementById('tokenRevealLabel');
-  if (!el) return;
-  if (!el.value) {
-    var r = await adminOps('token');
-    if (!r || !r.token) { msgFail('No token stored on the server'); return; }
-    el.value = r.token;
-  }
-  var wasHidden = el.type === 'password';
-  el.type = wasHidden ? 'text' : 'password';
-  if (lab) lab.textContent = wasHidden ? 'HIDE' : 'SHOW';
-}
 
 (function adminBoot() {
   var retry = document.getElementById('bootRetry');

@@ -5,7 +5,7 @@
 --     can only be changed by its owner or by an admin device - votes
 --     and replies stay open, otherwise nobody could like a take
 --  3) site_config is no longer world-writable (the admin panel
---     writes it through the admin-ops function instead)
+--     writes it through the admin panel instead)
 -- ================================================================
 
 -- 1) the admin devices (the owner's own browsers) ---------------------
