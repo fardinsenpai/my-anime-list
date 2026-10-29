@@ -30,7 +30,7 @@
   <link rel="manifest" href="manifest.json">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content"/>
   <title>Fardin's Anime Hub</title>
-  <link rel="stylesheet" href="style.css?v=20261023s">
+  <link rel="stylesheet" href="style.css?v=20261029a">
   <link rel="stylesheet" href="chat-styles.css?v=20261024z">
 <link rel="stylesheet" href="login-otp.css?v=20261024a">
   <link rel="stylesheet" href="duel-system.css">
@@ -333,6 +333,9 @@
     <div class="filter-heading">Filter by genre</div>
     <div class="pills-wrap" id="pillsWrap"></div>
   </div>
+
+  <!-- NOW STRIP — live Currently Reading / Watching tickets (filled by script.js from #statsBarContainer) -->
+  <div class="now-strip" id="nowStrip" style="display:none;" aria-label="Currently reading and watching"></div>
 
   <div id="petals-container"></div>
 
@@ -1601,7 +1604,7 @@
 
   <script src="https://accounts.google.com/gsi/client" async defer></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="script.js?v=20261025e"></script>
+  <script src="script.js?v=20261029a"></script>
 <script src="login-otp.js?v=20261024n"></script>
 
 

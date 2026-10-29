@@ -369,7 +369,7 @@ function showToast(title, msg, type) {
 }
 
 function hideAllSections() {
-  var ids = ['scrollProgress', 'topFiveDropdown', 'analysisContainer', 'statsBarContainer', 'topSecretsContainer', 'hotTakesContainer', 'chatBubble', 'grid', 'animeQuestContainer'];
+  var ids = ['scrollProgress', 'topFiveDropdown', 'analysisContainer', 'statsBarContainer', 'topSecretsContainer', 'hotTakesContainer', 'chatBubble', 'grid', 'animeQuestContainer', 'nowStrip'];
   ids.forEach(function(id) {
     var el = document.getElementById(id);
     if (el) el.style.display = 'none';
@@ -512,6 +512,8 @@ function goHome() {
   if (search) search.style.display = 'flex';
   var chatBubble = document.getElementById('chatBubble');
   if (chatBubble) chatBubble.style.display = 'flex';
+  var nowStrip = document.getElementById('nowStrip');
+  if (nowStrip && nowStrip.innerHTML) nowStrip.style.display = '';
 
   var mainTitle = document.querySelector('.header h1');
   if (mainTitle) {
@@ -879,6 +881,12 @@ function copyEmail() {
     if (status) status.innerHTML = `Showing <strong>${vis}</strong> of <strong>${getTotalCards()}</strong> anime`;
     const clr = document.getElementById('clearBtn');
     if (clr) clr.classList.toggle('hidden', name === 'All');
+    // the now-strip is a home-page feature — hide it while a genre filter is on
+    var nowStrip = document.getElementById('nowStrip');
+    if (nowStrip && nowStrip.innerHTML) {
+      nowStrip.dataset.filterHidden = (name === 'All') ? '' : '1';
+      nowStrip.style.display = (name === 'All') ? '' : 'none';
+    }
   }
 
   // ===== chat chips: one per genre, so the chat can recommend from ANY genre =====
@@ -1848,6 +1856,9 @@ searchBox.addEventListener('input', function () {
 
     if (footerEl) footerEl.style.display = 'none';
 
+    var nowStripSearch = document.getElementById('nowStrip');
+    if (nowStripSearch) nowStripSearch.style.display = 'none';
+
   } else {
     counterContainer.style.opacity = '1';
     counterContainer.style.transform = 'translateY(0)';
@@ -1866,8 +1877,50 @@ searchBox.addEventListener('input', function () {
     filterSection.style.transition = 'all 0.4s ease';
 
     if (footerEl) footerEl.style.display = '';
+
+    var nowStripSearch = document.getElementById('nowStrip');
+    if (nowStripSearch && nowStripSearch.innerHTML && !nowStripSearch.dataset.filterHidden) nowStripSearch.style.display = '';
   }
 });
+
+// ===== NOW STRIP — permanent Currently Reading / Watching tickets on the home page =====
+// Single source of truth is the #statsBarContainer markup the admin panel commits,
+// so a manga/anime update from the admin flows into the home page automatically.
+(function () {
+  var strip = document.getElementById('nowStrip');
+  var source = document.getElementById('statsBarContainer');
+  if (!strip || !source) return;
+  var cards = source.querySelectorAll('.stats-bar-card');
+  if (!cards.length) return;
+  var txt = function (el) { return el ? el.textContent.trim() : ''; };
+  var html = '';
+  cards.forEach(function (card) {
+    var label = txt(card.querySelector('.stats-bar-label'));
+    var imgEl = card.querySelector('.stats-bar-poster img');
+    var title = txt(card.querySelector('.stats-bar-title'));
+    var meta = txt(card.querySelector('.stats-bar-meta'));
+    var eps = txt(card.querySelector('.stats-bar-eps'));
+    var fill = card.querySelector('.stats-bar-fill');
+    var prog = fill ? (parseInt(fill.style.width, 10) || 0) : 0;
+    if (!title) return;
+    var reading = label.indexOf('Reading') > -1;
+    html += '<div class="now-card ' + (reading ? 'now-reading' : 'now-watching') + '">' +
+      '<div class="now-card-head"><span class="now-live-dot"></span>' + label + '</div>' +
+      '<div class="now-card-body">' +
+        '<div class="now-poster">' + (imgEl ? '<img src="' + imgEl.src + '" alt="' + title + '" loading="lazy">' : '') + '</div>' +
+        '<div class="now-info">' +
+          '<div class="now-title">' + title + '</div>' +
+          '<div class="now-meta">' + meta + '</div>' +
+          '<div class="now-track"><div class="now-fill" style="width:' + prog + '%"></div></div>' +
+          '<div class="now-foot"><span>' + eps + '</span><span class="now-pct">' + prog + '%</span></div>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  });
+  if (!html) return;
+  strip.innerHTML = html;
+  strip.style.display = '';
+})();
 
 function searchAnime() {
     const _inp = document.getElementById('search-input');
