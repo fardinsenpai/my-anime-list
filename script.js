@@ -1791,20 +1791,25 @@ function toggleSakuraChat() {
 }
 
 
-// Auto flip back when clicking another card
-document.querySelectorAll('.card').forEach(card => {
-  card.addEventListener('click', function () {
-    
-    // Flip back ALL other cards first
-    document.querySelectorAll('.card.flipped').forEach(flippedCard => {
-      if (flippedCard !== this) {
-        flippedCard.classList.remove('flipped');
-      }
-    });
+// Auto flip back when clicking another card.
+// Delegated on document so cards the admin adds later (they sit in the HTML
+// after this script tag, so they don't exist when the page loads) flip too.
+document.addEventListener('click', function (e) {
+  var card = e.target.closest('.card');
+  if (!card) return;
+  // Top-5 clones bind their own click handler when built — skip them here
+  // or the two handlers would toggle twice and the card would never flip.
+  if (card.closest('#topFiveResults')) return;
 
-    // Then toggle current card
-    this.classList.toggle('flipped');
+  // Flip back ALL other cards first
+  document.querySelectorAll('.card.flipped').forEach(flippedCard => {
+    if (flippedCard !== card) {
+      flippedCard.classList.remove('flipped');
+    }
   });
+
+  // Then toggle current card
+  card.classList.toggle('flipped');
 });
 
 // Dynamic animation delay for pills
@@ -7526,6 +7531,7 @@ async function commitAddAnime() {
   var season = document.getElementById('adminAddSeason').value.trim();
   var eps = parseInt(document.getElementById('adminAddEps').value) || 0;
   var rating = parseInt(document.getElementById('adminAddRating').value) || null;
+  var mal = parseFloat(document.getElementById('adminAddMal').value);
   var ott = _selectedOtt.join(', ');
   var studio = _selectedStudio.join(', ');
   var genre = _selectedGenre.join(', ');
@@ -7557,7 +7563,7 @@ async function commitAddAnime() {
     before = before.replace(/,(\s*)$/, function(m, s) { return s; });
     return before + ',' + entry + after;
   };
-  scriptContent = addEntry('window.RATING_DATA = ', '"' + nextId + '":{"rating":' + rating + ',"season":"' + season + '"}');
+  scriptContent = addEntry('window.RATING_DATA = ', '"' + nextId + '":{"rating":' + rating + ',"season":"' + season + '"' + (isFinite(mal) ? ',"mal":' + mal : '') + '}');
   var ottArr = ott ? '["' + ott.split(/\s*,\s*/).join('","') + '"]' : '[]';
   scriptContent = addEntry('window.OTT_DATA = ', '"' + nextId + '":' + ottArr);
   var studioArr = studio ? '["' + studio.split(/\s*,\s*/).join('","') + '"]' : '[]';

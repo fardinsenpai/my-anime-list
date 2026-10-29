@@ -1543,6 +1543,7 @@ async function commitAddAnime() {
   var season = document.getElementById('adminAddSeason').value.trim();
   var eps = parseInt(document.getElementById('adminAddEps').value) || 0;
   var rating = parseInt(document.getElementById('adminAddRating').value) || null;
+  var mal = parseFloat(document.getElementById('adminAddMal').value);
   var ott = _selectedOtt.join(', ');
   var studio = _selectedStudio.join(', ');
   var genre = _selectedGenre.join(', ');
@@ -1574,7 +1575,7 @@ async function commitAddAnime() {
     before = before.replace(/,(\s*)$/, function(m, s) { return s; });
     return before + ',' + entry + after;
   };
-  scriptContent = addEntry('window.RATING_DATA = ', '"' + nextId + '":{"rating":' + rating + ',"season":"' + season + '"}');
+  scriptContent = addEntry('window.RATING_DATA = ', '"' + nextId + '":{"rating":' + rating + ',"season":"' + season + '"' + (isFinite(mal) ? ',"mal":' + mal : '') + '}');
   var ottArr = ott ? '["' + ott.split(/\s*,\s*/).join('","') + '"]' : '[]';
   scriptContent = addEntry('window.OTT_DATA = ', '"' + nextId + '":' + ottArr);
   var studioArr = studio ? '["' + studio.split(/\s*,\s*/).join('","') + '"]' : '[]';
