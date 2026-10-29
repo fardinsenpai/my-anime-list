@@ -1555,9 +1555,11 @@ async function commitAddAnime() {
   var indexContent = decodeURIComponent(escape(atob(indexData.content)));
   var scriptContent = decodeURIComponent(escape(atob(scriptData.content)));
   var maxId = 0;
+  // card badges in index.html are the real serial numbers — script.js also
+  // holds year keys like "2026": { that must never count as anime IDs
+  var badgeMax = indexContent.match(/class="badge">#(\d+)</g);
+  if (badgeMax) badgeMax.forEach(function(m) { var n = parseInt(m.replace(/\D/g,'')); if (n > maxId) maxId = n; });
   if (typeof RATING_DATA === 'object') Object.keys(RATING_DATA).forEach(function(k) { var n = parseInt(k); if (n > maxId) maxId = n; });
-  var matchMax = scriptContent.match(/"(\d+)":\s*\{/g);
-  if (matchMax) matchMax.forEach(function(m) { var n = parseInt(m.replace(/\D/g,'')); if (n > maxId) maxId = n; });
   var nextId = maxId + 1;
   var cardHtml = '\n\n<div class="card"><div class="card-inner"><div class="card-front"><div class="poster-wrap"><img src="' + img.replace(/"/g,'&quot;') + '" alt="' + title.replace(/"/g,'&quot;') + '" loading="lazy"/><span class="badge">#' + nextId + '</span></div><div class="info"><div class="number">NO. ' + nextId + '</div><div class="title">' + title + '</div></div></div><div class="card-back"><div class="back-content"><div class="back-title">' + title + '</div><div class="back-season">🌸 ' + seasonLabel + '</div><div class="back-episodes">📺 Total Episodes: ' + eps + '</div><div class="back-tap-hint">click to flip back</div></div></div></div></div>';
   indexContent = indexContent.replace(/<!-- === ADMIN PANEL === -->/, cardHtml + '\n\n<!-- === ADMIN PANEL === -->');
@@ -2041,7 +2043,7 @@ function notesCopyNote() {
   adCopy((head ? head + '\n\n' : '') + (b.value || ''), 'Note');
 }
 function patForget() {
-  if (!confirm('Forget the saved GitHub PAT in this browser?')) return;
+  if (!confirm('Forget the saved GitHub PAT in this browser?')) return;
   var el = document.getElementById('adminPatInput');
   if (el) { el.value = ''; el.type = 'password'; }
   var lab = document.getElementById('patRevealLabel');
