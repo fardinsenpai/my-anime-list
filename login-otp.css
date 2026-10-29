@@ -1,0 +1,51 @@
+/* ================================================================
+   EMAIL CODE SIGN-IN  -  the 6 boxes, the human check, the resend
+   Matches the login card's gold theme (style.css is left alone).
+   ================================================================ */
+
+.lg-otp-boxes {
+  display: flex; gap: 7px; justify-content: center; margin: 4px 0 12px;
+}
+.lg-otp-box {
+  width: 44px; height: 52px; padding: 0; text-align: center;
+  border-radius: 11px; border: 1.5px solid rgba(245,197,24,0.35);
+  background: #0b0b14; color: #fff;
+  font-family: 'Orbitron','Segoe UI',sans-serif; font-size: 1.25rem; font-weight: 700;
+  outline: none; transition: border-color .18s, box-shadow .18s, transform .18s;
+}
+.lg-otp-box:focus {
+  border-color: rgba(245,197,24,0.9);
+  box-shadow: 0 0 0 3px rgba(245,197,24,0.14), 0 0 18px rgba(245,197,24,0.25);
+  transform: translateY(-1px);
+}
+.lg-otp-boxes.filled .lg-otp-box { border-color: rgba(245,197,24,0.6); }
+
+.lg-otp-gate { margin: 2px 0 10px; }
+.lg-otp-turn { min-height: 65px; display: flex; align-items: center; }
+.lg-otp-turn iframe { max-width: 100%; }
+.lg-otp-captcha {
+  font-size: 0.72rem; color: #a9a9c2; line-height: 1.5;
+  border: 1px dashed rgba(245,197,24,0.3); border-radius: 9px; padding: 9px 11px;
+}
+
+.lg-otp-foot {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  margin: 10px 0 2px; flex-wrap: wrap;
+}
+.lg-otp-note {
+  font-family: 'Rajdhani','Segoe UI',sans-serif; font-size: 0.72rem;
+  letter-spacing: 0.4px; color: #8f8fa6; line-height: 1.4;
+}
+.lg-otp-note b { color: #f5c518; font-weight: 700; }
+.lg-otp-link {
+  background: none; border: none; padding: 0; cursor: pointer;
+  font-family: 'Rajdhani','Segoe UI',sans-serif; font-size: 0.74rem;
+  letter-spacing: 1px; color: #f5c518; text-transform: uppercase;
+}
+.lg-otp-link:disabled { color: #5c5c72; cursor: default; }
+.lg-otp-link:hover:not(:disabled) { color: #ffe27a; text-decoration: underline; }
+
+@media (max-width: 420px) {
+  .lg-otp-box { width: 38px; height: 46px; font-size: 1.1rem; }
+  .lg-otp-boxes { gap: 5px; }
+}

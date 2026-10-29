@@ -1,0 +1,7 @@
+{
+  "v": 1,
+  "alg": "PBKDF2-SHA256/150000+AES-GCM-256",
+  "salt": "CDBUhTuGWOXkPAl0ZK4ytQ==",
+  "iv": "DeWzaLwalymJ1Y/n",
+  "data": "/FnILY8XxWqwVgLYE417YqoTmfezVh7GQdx3N7YUR2Wkr99SHXmAATQEq4d9kU2pr1xEzWCE5bgxahGfAeSCP5YHFY5WrV5hGuAGV8rneIK8aGyN+T9Aa2CcJC3f79GgXyRoiGyK1xy+nDMng5d+fZYH"
+}

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Redirecting... | Fardin's Anime Hub</title>
+  <script>
+    /* ── SPA deep-link redirect ─────────────────────────────────
+       GitHub Pages যেকোনো unknown path-এ (/analysis, /top-5,
+       /hot-takes ইত্যাদি) এই file serve করে। এখানে original URL
+       sessionStorage-এ save করে home-এ পাঠানো হয়; তারপর
+       index.html-এর script.js সেটা দিয়ে URL ঠিক করে আর
+       routeOnPath() ঠিক করে সঠিক section খুলে দেয়। */
+    (function () {
+      if (location.protocol === 'file:') {
+        // Local preview (file:///E:/Text/404.html) — সরাসরি index.html
+        location.replace('./index.html');
+        return;
+      }
+      sessionStorage.setItem('spaRedirect', location.href);
+      location.replace('/my-anime-list/');
+    })();
+  </script>
+  <style>
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #050505;
+      color: #00ff41;
+      text-align: center;
+      font-family: 'Courier New', Consolas, monospace;
+    }
+    .redirect-box { padding: 24px; }
+    .redirect-box h1 {
+      font-size: 20px;
+      letter-spacing: 2px;
+      margin: 0 0 10px;
+      text-shadow: 0 0 12px rgba(0, 255, 65, 0.6);
+    }
+    .redirect-box p {
+      color: #99ccbb;
+      font-size: 13px;
+      margin: 0 0 18px;
+    }
+    .redirect-box a, noscript a {
+      color: #ff4444;
+      font-weight: 700;
+      text-decoration: none;
+    }
+    .redirect-box a:hover, noscript a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <noscript>
+    <p>JavaScript is disabled. <a href="/my-anime-list/">Go to Home &rarr;</a></p>
+  </noscript>
+  <main class="redirect-box" aria-live="polite">
+    <h1>&#x26A1; Taking you to Fardin's Anime Hub...</h1>
+    <p>This page doesn't exist &mdash; redirecting to Home.</p>
+    <a href="/my-anime-list/">Click here if you are not redirected</a>
+  </main>
+</body>
+</html>

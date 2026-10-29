@@ -1,0 +1,36 @@
+# Supabase Keep-Alive — daily heartbeat so the free-tier
+# "pause after 7 days of inactivity" problem never happens again.
+# URL/key = Supabase anon key, already public in your site's script.js.
+
+name: Supabase Keep-Alive
+
+on:
+  schedule:
+    - cron: '0 6 * * *'
+  workflow_dispatch:
+
+jobs:
+  heartbeat:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wake Supabase (SELECT heartbeat)
+        env:
+          SB_URL: https://ldzlefdklcgvqcbqibtt.supabase.co
+          SB_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxkemxlZmRrbGNndnFjYnFpYnR0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwMzk1OTAsImV4cCI6MjA5NjYxNTU5MH0.X3TGuLIpjrnPXMgCv4ZKIIjB6pItPgkdebf4JPdhuYs
+        run: |
+          if [ -z "$SB_URL" ] || [ -z "$SB_KEY" ]; then
+            echo "::error::SB_URL / SB_KEY missing"
+            exit 1
+          fi
+          code1=$(curl -s -o /dev/null -w '%{http_code}' \
+            "$SB_URL/rest/v1/hot_takes?select=id&limit=1" \
+            -H "apikey: $SB_KEY" -H "Authorization: Bearer $SB_KEY")
+          code2=$(curl -s -o /dev/null -w '%{http_code}' \
+            "$SB_URL/rest/v1/duel_results?select=id&limit=1" \
+            -H "apikey: $SB_KEY" -H "Authorization: Bearer $SB_KEY")
+          echo "hot_takes -> HTTP $code1 | duel_results -> HTTP $code2"
+          if [ "$code1" != "200" ] && [ "$code2" != "200" ]; then
+            echo "::error::Supabase unreachable/failed ($code1/$code2)"
+            exit 1
+          fi
+          echo "OK - project stays awake"
