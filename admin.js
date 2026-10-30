@@ -1595,9 +1595,11 @@ async function commitAddAnime() {
   showLoading();
   var indexData = await githubFetch('index.html');
   var scriptData = await githubFetch('script.js');
+  var ratingsData = await githubFetch('anime-ratings.json');
   if (!indexData || !scriptData) { hideLoading(); msgFail('Failed to fetch files. Check PAT.'); return; }
   var indexContent = decodeURIComponent(escape(atob(indexData.content)));
   var scriptContent = decodeURIComponent(escape(atob(scriptData.content)));
+  var ratingsContent = ratingsData ? decodeURIComponent(escape(atob(ratingsData.content))) : '';
   var maxId = 0;
   // card badges in index.html are the real serial numbers — script.js also
   // holds year keys like "2026": { that must never count as anime IDs
@@ -1623,14 +1625,36 @@ async function commitAddAnime() {
   scriptContent = addEntry('window.OTT_DATA = ', '"' + nextId + '":' + ottArr);
   var studioArr = studio ? '["' + studio.split(/\s*,\s*/).join('","') + '"]' : '[]';
   scriptContent = addEntry('window.STUDIO_DATA = ', '"' + nextId + '":' + studioArr);
+  // Duel ratings entry (anime-ratings.json) - derived from the form values so the new anime works in Anime Duel too.
+  var duelMal = isFinite(mal) ? mal : (rating ? (0.0725 * rating + 2.2649) : 0);
+  duelMal = Math.round(duelMal * 100) / 100;
+  var duelSub = Math.round(duelMal * 2) / 2;
+  var duelPlanet = Math.round((duelMal / 2) * 10) / 10;
+  var duelEntry = '\\n    "' + nextId + '": {\\n' +
+    '        "malScore": ' + duelMal + ',\\n' +
+    '        "characters": ' + duelSub + ',\\n' +
+    '        "animRating": ' + duelSub + ',\\n' +
+    '        "animePlanet": ' + duelPlanet + ',\\n' +
+    '        "anilist": ' + (rating || 0) + ',\\n' +
+    '        "title": ' + JSON.stringify(title) + ',\\n' +
+    '        "storyRating": ' + duelSub + '\\n' +
+    '    }';
+  if (ratingsContent) {
+    var _rc = ratingsContent.lastIndexOf('}');
+    if (_rc >= 0) {
+      var _before = ratingsContent.substring(0, _rc).replace(/,\\s*$/, '');
+      ratingsContent = _before + ',' + duelEntry + '\\n}' + ratingsContent.substring(_rc + 1);
+    }
+  }
   if (genre) {
     var addGenres = genre.split(/[,·]/).map(function(g) { return g.trim(); }).filter(Boolean);
     scriptContent = applyGenres(scriptContent, nextId, addGenres);
   }
   var ok1 = await githubCommit('index.html', indexContent, 'admin: add anime #' + nextId + ' - ' + title);
   var ok2 = await githubCommit('script.js', scriptContent, 'admin: add data for anime #' + nextId + ' - ' + title);
+  var ok3 = ratingsContent ? await githubCommit('anime-ratings.json', ratingsContent, 'admin: duel data for anime #' + nextId + ' - ' + title) : true;
   hideLoading();
-  if (ok1 && ok2) msgOk('Anime #' + nextId + ' added: ' + title);
+  if (ok1 && ok2 && ok3) msgOk('Anime #' + nextId + ' added: ' + title + ' (duel data included)');
   else msgFail('Commit failed');
 }
 
