@@ -1906,10 +1906,12 @@ searchBox.addEventListener('input', function () {
     if (!title) return;
     var reading = label.indexOf('Reading') > -1;
     html += '<div class="now-card ' + (reading ? 'now-reading' : 'now-watching') + '">' +
-      '<div class="now-ring" style="--p:' + prog + '">' +
-        '<div class="now-ring-track"></div>' +
-        '<div class="now-ring-fill"></div>' +
-        '<div class="now-poster">' + (imgEl ? '<img src="' + imgEl.src + '" alt="' + title + '" loading="lazy">' : '') + '</div>' +
+      '<div class="now-ringwrap">' +
+        '<div class="now-ring" style="--p:' + prog + '">' +
+          '<div class="now-ring-track"></div>' +
+          '<div class="now-ring-fill"></div>' +
+          '<div class="now-poster">' + (imgEl ? '<img src="' + imgEl.src + '" alt="' + title + '" loading="lazy">' : '') + '</div>' +
+        '</div>' +
         '<div class="now-pct">' + prog + '%</div>' +
       '</div>' +
       '<div class="now-info">' +

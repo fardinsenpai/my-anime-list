@@ -5328,14 +5328,19 @@ body.perf-no-heading-anim .header h1::after { animation: none !important; }
    ════════════════════════════════════════════════════════════════ */
 .now-strip {
   display: flex;
-  flex-direction: column;
+  flex-wrap: wrap;
   gap: 14px;
   max-width: 1200px;
   margin: 16px auto 22px;
   padding: 0 16px;
 }
+@media (max-width: 760px) {
+  .now-strip { flex-direction: column; }
+}
 .now-card {
   --rc: #4bc0ff;
+  flex: 1 1 calc(50% - 7px);
+  min-width: 300px;
   display: flex;
   align-items: center;
   gap: 18px;
@@ -5345,7 +5350,14 @@ body.perf-no-heading-anim .header h1::after { animation: none !important; }
   border: 1px solid rgba(255, 255, 255, 0.07);
 }
 .now-card.now-reading { --rc: #ff9f43; }
-/* the ring */
+/* ring + % underneath */
+.now-ringwrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
 .now-ring {
   position: relative;
   width: 78px;
@@ -5374,15 +5386,9 @@ body.perf-no-heading-anim .header h1::after { animation: none !important; }
 }
 .now-poster img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .now-pct {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   font-weight: 800;
-  font-size: 13px;
-  color: #fff;
-  text-shadow: 0 1px 5px rgba(0, 0, 0, 0.95);
+  font-size: 12.5px;
+  color: #3ddc84;
 }
 .now-info { flex: 1; min-width: 0; }
 .now-label {
