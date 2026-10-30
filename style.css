@@ -5323,13 +5323,14 @@ body.perf-no-heading-anim .header h1::after { animation: none !important; }
 
 
 /* ════════════════════════════════════════════════════════════════
-   NOW STRIP — Currently Watching / Reading, home page.
-   Progress = Play-Store-style ring around the poster, % in the middle.
+   NOW STRIP — Currently Watching / Reading, sakura theme.
+   Pink glow + shimmer label like the footer, floating petals,
+   blossom-in entry animation, Play-Store progress ring.
    ════════════════════════════════════════════════════════════════ */
 .now-strip {
   display: flex;
   flex-wrap: wrap;
-  gap: 14px;
+  gap: 16px;
   max-width: 1200px;
   margin: 16px auto 22px;
   padding: 0 16px;
@@ -5338,20 +5339,70 @@ body.perf-no-heading-anim .header h1::after { animation: none !important; }
   .now-strip { flex-direction: column; }
 }
 .now-card {
-  --rc: #4bc0ff;
-  flex: 1 1 calc(50% - 7px);
+  --rc: #ff8fbe;
+  position: relative;
+  flex: 1 1 calc(50% - 8px);
   min-width: 300px;
   display: flex;
   align-items: center;
   gap: 18px;
-  border-radius: 16px;
-  padding: 14px 20px;
-  background: rgba(17, 14, 30, 0.88);
-  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 18px;
+  padding: 18px 22px;
+  background:
+    radial-gradient(circle at 85% 20%, rgba(255, 143, 190, 0.10), transparent 55%),
+    linear-gradient(180deg, rgba(24, 18, 36, 0.55), rgba(16, 12, 26, 0.92));
+  border: 1px solid rgba(255, 143, 190, 0.22);
+  box-shadow:
+    0 10px 30px rgba(0, 0, 0, 0.35),
+    0 0 22px rgba(255, 143, 190, 0.07) inset;
+  overflow: hidden;
+  opacity: 0;
+  animation: nowBlossom 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
-.now-card.now-reading { --rc: #ff9f43; }
-/* ring + % underneath */
+.now-card.now-reading {
+  --rc: #ffd166;
+  animation-delay: 0.18s;
+}
+@keyframes nowBlossom {
+  0%   { opacity: 0; transform: translateY(26px) scale(0.94); filter: blur(4px); }
+  60%  { opacity: 1; filter: blur(0); }
+  100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+}
+/* two petals drifting inside each card */
+.now-card::before,
+.now-card::after {
+  content: '';
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  background: hsl(350, 70%, 80%);
+  border-radius: 100% 0% 100% 0% / 100% 0% 100% 0%;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+.now-card::before {
+  top: -16px;
+  left: 18%;
+  animation: nowPetalFall 7s linear infinite 1.2s;
+}
+.now-card::after {
+  top: -16px;
+  left: 72%;
+  width: 10px;
+  height: 10px;
+  animation: nowPetalFall 9s linear infinite 4s;
+}
+@keyframes nowPetalFall {
+  0%   { opacity: 0; transform: translate(0, 0) rotate(0deg); }
+  8%   { opacity: 0.75; }
+  50%  { transform: translate(-18px, 55px) rotate(160deg); }
+  92%  { opacity: 0.55; }
+  100% { opacity: 0; transform: translate(-34px, 120px) rotate(340deg); }
+}
 .now-ringwrap {
+  position: relative;
+  z-index: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -5364,6 +5415,13 @@ body.perf-no-heading-anim .header h1::after { animation: none !important; }
   height: 78px;
   flex-shrink: 0;
   border-radius: 50%;
+  animation: nowRingIn 0.9s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  animation-delay: 0.35s;
+}
+.now-reading .now-ring { animation-delay: 0.53s; }
+@keyframes nowRingIn {
+  0%   { transform: scale(0.6) rotate(-70deg); opacity: 0; }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
 }
 .now-ring-track {
   position: absolute;
@@ -5376,30 +5434,48 @@ body.perf-no-heading-anim .header h1::after { animation: none !important; }
   inset: 0;
   border-radius: 50%;
   background: conic-gradient(from -90deg, var(--rc) calc(var(--p) * 1%), transparent 0);
+  filter: drop-shadow(0 0 6px rgba(255, 143, 190, 0.35));
 }
+.now-reading .now-ring-fill { filter: drop-shadow(0 0 6px rgba(255, 209, 102, 0.35)); }
 .now-poster {
   position: absolute;
   inset: 5px;
   border-radius: 50%;
   overflow: hidden;
-  border: 3px solid #0b0916;
+  border: 3px solid #0d0a16;
 }
 .now-poster img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .now-pct {
   font-weight: 800;
   font-size: 12.5px;
   color: #3ddc84;
+  text-shadow: 0 0 8px rgba(61, 220, 132, 0.35);
 }
-.now-info { flex: 1; min-width: 0; }
+.now-info {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  min-width: 0;
+}
 .now-label {
+  display: inline-block;
+  font-family: 'Orbitron', sans-serif;
   font-size: 10.5px;
   font-weight: 700;
   letter-spacing: 3px;
   text-transform: uppercase;
-  color: #7fc5ff;
-  margin-bottom: 4px;
+  background: linear-gradient(135deg, #ff8fbe 0%, #ffd7ea 30%, #ff8fbe 50%, #ffd7ea 70%, #ff8fbe 100%);
+  background-size: 200% auto;
+  animation: nowShimmer 3s ease-in-out infinite;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 6px;
 }
-.now-reading .now-label { color: #ffb37a; }
+@keyframes nowShimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
 .now-title {
   font-size: 18px;
   font-weight: 700;
@@ -5407,7 +5483,7 @@ body.perf-no-heading-anim .header h1::after { animation: none !important; }
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  text-shadow: 0 0 12px rgba(255, 143, 190, 0.25);
 }
-.now-meta { font-size: 12.5px; font-weight: 600; color: #8fd3ff; margin: 2px 0 3px; }
-.now-reading .now-meta { color: #ffb37a; }
-.now-eps { font-size: 12px; font-weight: 600; color: rgba(255, 255, 255, 0.55); }
+.now-meta { font-size: 12.5px; font-weight: 600; color: #ffb7d5; margin: 3px 0 4px; }
+.now-eps { font-size: 12px; font-weight: 600; color: #7d7d95; }
