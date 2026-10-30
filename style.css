@@ -5472,6 +5472,24 @@ body.perf-no-heading-anim .header h1::after { animation: none !important; }
   background-clip: text;
   margin-bottom: 6px;
 }
+.now-sakura {
+  display: inline-block;
+  margin-right: 7px;
+  font-size: 13px;
+  line-height: 1;
+  vertical-align: -1px;
+  background: none;
+  -webkit-text-fill-color: initial;
+  filter: drop-shadow(0 0 6px rgba(255, 143, 190, 0.55));
+  animation: nowSakuraSway 6s ease-in-out infinite;
+}
+.now-reading .now-sakura {
+  filter: drop-shadow(0 0 6px rgba(255, 209, 102, 0.55));
+}
+@keyframes nowSakuraSway {
+  0%, 100% { transform: rotate(-10deg) scale(1); }
+  50%      { transform: rotate(10deg) scale(1.08); }
+}
 @keyframes nowShimmer {
   0%   { background-position: -200% center; }
   100% { background-position: 200% center; }

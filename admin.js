@@ -19,6 +19,7 @@
 var OTT_DATA = {};
 var STUDIO_DATA = {};
 var TOP_5_DATA = {};
+var RATING_DATA = {};
 var AWARD_WINNERS = {};
 var GROQ_MODELS = [];
 var GROQ_API_KEYS = [];
@@ -132,6 +133,7 @@ async function loadAdminData() {
     OTT_DATA = grabLiteral(jsText, 'OTT_DATA') || {};
     STUDIO_DATA = grabLiteral(jsText, 'STUDIO_DATA') || {};
     TOP_5_DATA = grabLiteral(jsText, 'TOP_5_DATA') || {};
+    RATING_DATA = grabLiteral(jsText, 'RATING_DATA') || {};
     AWARD_WINNERS = grabLiteral(jsText, 'AWARD_WINNERS') || {};
     GROQ_MODELS = grabLiteral(jsText, 'GROQ_MODELS') || [];
     GROQ_API_KEYS = grabLiteral(jsText, 'GROQ_API_KEYS') || [];
@@ -1382,12 +1384,59 @@ function selectEditCard(id) {
       if (previewId) previewId.textContent = '#' + id;
       document.getElementById('adminEditName').value = title ? title.textContent : '';
       document.getElementById('adminEditImg').value = img ? img.src : '';
-      document.getElementById('adminEditGenre').value = genreEl ? genreEl.textContent : '';
+      document.getElementById('adminEditGenre').value = (genreEl && genreEl.textContent) ? genreEl.textContent : ((GENRE_BY_ID && GENRE_BY_ID[id]) ? GENRE_BY_ID[id].join(' · ') : '');
+      var malField = document.getElementById('adminEditMal');
+      if (malField) {
+        var ms = malScoreOf(id);
+        malField.value = ms === null ? '' : ms.toFixed(1);
+      }
       document.getElementById('adminEditSeasons').value = seasonEl ? seasonEl.textContent.replace(/[🌸📺]/g,'').trim() : '';
       document.getElementById('adminEditEps').value = epsEl ? epsEl.textContent.replace(/[📺🎬]/g,'').replace('Total Episodes:','').trim() : '';
       break;
     }
   }
+}
+
+// Add/remove one anime id inside the GENRES sets, so the card back, the genre
+// pills and the admin EDIT form all agree about that anime's genres.
+function applyGenres(js, id, wanted) {
+  return js.replace(/"([\w\s/]+)":\s*\{[^}]*?nums:\s*new\s*Set\(\[([\d,]*)\]\)\s*\}/g, function(match, genreName, numsStr) {
+    var nums = numsStr ? numsStr.split(',').map(function(n) { return parseInt(n.trim(), 10); }).filter(function(n) { return !isNaN(n); }) : [];
+    if (wanted.indexOf(genreName) !== -1) {
+      if (nums.indexOf(id) === -1) { nums.push(id); nums.sort(function(a, b) { return a - b; }); }
+    } else {
+      var idx = nums.indexOf(id);
+      if (idx !== -1) nums.splice(idx, 1);
+    }
+    var iconMatch = match.match(/icon:\s*"([^"]+)"/);
+    var icon = iconMatch ? iconMatch[1] : '✦';
+    return '"' + genreName + '":        { icon: "' + icon + '", nums: new Set([' + nums.join(',') + ']) }';
+  });
+}
+
+// Write one field ("malScore", say) into a RATING_DATA entry, adding it if absent.
+function setRatingField(js, id, field, value) {
+  var entryRe = new RegExp('"' + id + '":\\{[^}]*\\}');
+  return js.replace(entryRe, function(entry) {
+    var fieldRe = new RegExp('"' + field + '":\\s*[^,}]+');
+    if (fieldRe.test(entry)) return entry.replace(fieldRe, '"' + field + '":' + value);
+    return entry.replace(/\}$/, ',"' + field + '":' + value + '}');
+  });
+}
+
+// One MAL score for a card: explicit malScore wins, else the legacy 0-100 rating / 10.
+function malScoreOf(id) {
+  var entry = (typeof RATING_DATA === 'object' && RATING_DATA) ? RATING_DATA[id] : null;
+  if (!entry) return null;
+  if (entry.malScore !== undefined && entry.malScore !== null && entry.malScore !== '') {
+    var m = parseFloat(entry.malScore);
+    if (isFinite(m)) return m;
+  }
+  if (entry.rating !== undefined && entry.rating !== null) {
+    var r = parseFloat(entry.rating);
+    if (isFinite(r)) return r / 10;
+  }
+  return null;
 }
 
 async function commitEditAnime() {
@@ -1416,18 +1465,12 @@ async function commitEditAnime() {
   indexContent = lines.join('\n');
   if (genre) {
     var newGenres = genre.split(/[,·]/).map(function(g) { return g.trim(); }).filter(Boolean);
-    scriptContent = scriptContent.replace(/"([\w\s/]+)":\s*\{[^}]*?nums:\s*new\s*Set\(\[([\d,]*)\]\)\s*\}/g, function(match, genreName, numsStr) {
-      var nums = numsStr ? numsStr.split(',').map(function(n) { return parseInt(n.trim()); }).filter(function(n) { return !isNaN(n); }) : [];
-      if (newGenres.indexOf(genreName) !== -1) {
-        if (nums.indexOf(_editId) === -1) { nums.push(_editId); nums.sort(function(a,b) { return a-b; }); }
-      } else {
-        var idx = nums.indexOf(_editId);
-        if (idx !== -1) nums.splice(idx, 1);
-      }
-      var iconMatch = match.match(/icon:\s*"([^"]+)"/);
-      var icon = iconMatch ? iconMatch[1] : '✦';
-      return '"' + genreName + '":        { icon: "' + icon + '", nums: new Set([' + nums.join(',') + ']) }';
-    });
+    scriptContent = applyGenres(scriptContent, _editId, newGenres);
+  }
+  var malInput = document.getElementById('adminEditMal');
+  var malVal = malInput ? malInput.value.trim() : '';
+  if (malVal !== '' && isFinite(parseFloat(malVal))) {
+    scriptContent = setRatingField(scriptContent, _editId, 'malScore', parseFloat(malVal));
   }
   var ok1 = await githubCommit('index.html', indexContent, 'admin: edit anime #' + _editId + ' - ' + name);
   var ok2 = await githubCommit('script.js', scriptContent, 'admin: edit genres for #' + _editId);
@@ -1563,7 +1606,7 @@ async function commitAddAnime() {
   if (typeof RATING_DATA === 'object') Object.keys(RATING_DATA).forEach(function(k) { var n = parseInt(k); if (n > maxId) maxId = n; });
   var nextId = maxId + 1;
   var cardHtml = '\n\n<div class="card"><div class="card-inner"><div class="card-front"><div class="poster-wrap"><img src="' + img.replace(/"/g,'&quot;') + '" alt="' + title.replace(/"/g,'&quot;') + '" loading="lazy"/><span class="badge">#' + nextId + '</span></div><div class="info"><div class="number">NO. ' + nextId + '</div><div class="title">' + title + '</div></div></div><div class="card-back"><div class="back-content"><div class="back-title">' + title + '</div><div class="back-season">🌸 ' + seasonLabel + '</div><div class="back-episodes">📺 Total Episodes: ' + eps + '</div><div class="back-tap-hint">click to flip back</div></div></div></div></div>';
-  indexContent = indexContent.replace(/<!-- === ADMIN PANEL === -->/, cardHtml + '\n\n<!-- === ADMIN PANEL === -->');
+  indexContent = indexContent.replace(/<!-- === GRID END === -->/, cardHtml + '\n\n<!-- === GRID END === -->');
   scriptContent = scriptContent.replace(/counterUp\("seasonCount",\s*(\d+)/, function(m, c) { return 'counterUp("seasonCount", ' + (parseInt(c) + 1); });
   scriptContent = scriptContent.replace(/counterUp\("episodeCount",\s*(\d+)/, function(m, c) { return 'counterUp("episodeCount", ' + (parseInt(c) + eps); });
   var addEntry = function(key, entry) {
@@ -1575,11 +1618,15 @@ async function commitAddAnime() {
     before = before.replace(/,(\s*)$/, function(m, s) { return s; });
     return before + ',' + entry + after;
   };
-  scriptContent = addEntry('window.RATING_DATA = ', '"' + nextId + '":{"rating":' + rating + ',"season":"' + season + '"' + (isFinite(mal) ? ',"mal":' + mal : '') + '}');
+  scriptContent = addEntry('window.RATING_DATA = ', '"' + nextId + '":{"rating":' + rating + ',"season":"' + season + '"' + (isFinite(mal) ? ',"malScore":' + mal : '') + '}');
   var ottArr = ott ? '["' + ott.split(/\s*,\s*/).join('","') + '"]' : '[]';
   scriptContent = addEntry('window.OTT_DATA = ', '"' + nextId + '":' + ottArr);
   var studioArr = studio ? '["' + studio.split(/\s*,\s*/).join('","') + '"]' : '[]';
   scriptContent = addEntry('window.STUDIO_DATA = ', '"' + nextId + '":' + studioArr);
+  if (genre) {
+    var addGenres = genre.split(/[,·]/).map(function(g) { return g.trim(); }).filter(Boolean);
+    scriptContent = applyGenres(scriptContent, nextId, addGenres);
+  }
   var ok1 = await githubCommit('index.html', indexContent, 'admin: add anime #' + nextId + ' - ' + title);
   var ok2 = await githubCommit('script.js', scriptContent, 'admin: add data for anime #' + nextId + ' - ' + title);
   hideLoading();
