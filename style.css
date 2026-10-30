@@ -1569,11 +1569,11 @@
     pointer-events: none;
     transform-origin: center;
     filter: hue-rotate(var(--hue, 0deg)) saturate(1.2);
-    animation: fall linear infinite, sway ease-in-out infinite alternate;
+    animation: sakuraFall linear infinite, sway ease-in-out infinite alternate;
 }
 
   /* style */
-@keyframes fall {
+@keyframes sakuraFall {
     0% {
         top: -10vh;
     }
