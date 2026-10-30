@@ -9274,27 +9274,3 @@ var TITLE_THEME = {
   st.textContent = css;
   (document.head || document.documentElement).appendChild(st);
 })();
-
-(function () {
-  function hideNowStripInDuel() {
-    var strip = document.getElementById('statsBarContainer');
-    if (!strip) return;
-
-    var duelActive = document.body.classList.contains('duel-mode-active');
-    strip.style.display = duelActive ? 'none' : '';
-  }
-
-  hideNowStripInDuel();
-
-  if (window.MutationObserver) {
-    var duelObserver = new MutationObserver(function () {
-      hideNowStripInDuel();
-    });
-
-    duelObserver.observe(document.body, {
-      attributes: true,
-      attributeFilter: ['class'],
-      subtree: true
-    });
-  }
-})();
