@@ -243,7 +243,11 @@
       <!-- ADD -->
       <section class="admin-g-content" id="tabAdd">
         <h2 class="ad-h">// ADD NEW ANIME //</h2>
-        <input type="text" id="adminAddTitle" class="admin-g-input" placeholder="Anime Title">
+        <div class="ad-row">
+          <input type="text" id="adminAddTitle" class="admin-g-input" placeholder="Anime Title" style="flex:1;">
+          <button class="admin-g-btn" type="button" id="adminFetchBtn" onclick="fetchAnimeData()" style="flex:0 0 auto;width:auto;padding:8px 14px;white-space:nowrap;">🔎 FETCH DATA</button>
+        </div>
+        <div id="adminFetchStatus" class="ad-note" style="margin:-4px 0 10px;line-height:1.5;">Type an anime name, press FETCH DATA — title, poster, season, episodes, rating, MAL, genres, studio and OTT fill themselves.</div>
         <input type="text" id="adminAddImg" class="admin-g-input" placeholder="Image URL">
         <div class="ad-row">
           <input type="text" id="adminAddSeason" class="admin-g-input" placeholder="Spring 2024">
@@ -439,6 +443,7 @@
   </div>
 </div>
 
+<script src="anime-fetch.js?v=20261030a"></script>
 <script src="admin.js?v=20261025e"></script>
 </body>
 </html>
