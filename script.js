@@ -1906,15 +1906,17 @@ searchBox.addEventListener('input', function () {
     if (!title) return;
     var reading = label.indexOf('Reading') > -1;
     html += '<div class="now-card ' + (reading ? 'now-reading' : 'now-watching') + '">' +
-      '<div class="now-card-head"><span class="now-live-dot"></span>' + label + '</div>' +
-      '<div class="now-card-body">' +
+      '<div class="now-ring" style="--p:' + prog + '">' +
+        '<div class="now-ring-track"></div>' +
+        '<div class="now-ring-fill"></div>' +
         '<div class="now-poster">' + (imgEl ? '<img src="' + imgEl.src + '" alt="' + title + '" loading="lazy">' : '') + '</div>' +
-        '<div class="now-info">' +
-          '<div class="now-title">' + title + '</div>' +
-          '<div class="now-meta">' + meta + '</div>' +
-          '<div class="now-track"><div class="now-fill" style="width:' + prog + '%"></div></div>' +
-          '<div class="now-foot"><span>' + eps + '</span><span class="now-pct">' + prog + '%</span></div>' +
-        '</div>' +
+        '<div class="now-pct">' + prog + '%</div>' +
+      '</div>' +
+      '<div class="now-info">' +
+        '<div class="now-label">' + label + '</div>' +
+        '<div class="now-title">' + title + '</div>' +
+        '<div class="now-meta">' + meta + '</div>' +
+        '<div class="now-eps">' + eps + '</div>' +
       '</div>' +
     '</div>';
   });
