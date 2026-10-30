@@ -5327,16 +5327,16 @@ body.perf-no-heading-anim .header h1::after { animation: none !important; }
    ════════════════════════════════════════════════════════════════ */
 .now-strip {
   display: flex;
+  flex-direction: column;
   gap: 16px;
-  flex-wrap: wrap;
   max-width: 1200px;
   margin: 14px auto 4px;
   padding: 0 16px;
 }
 .now-card {
   position: relative;
-  flex: 1 1 340px;
-  min-width: 300px;
+  flex: none;
+  width: 100%;
   border-radius: 18px;
   padding: 13px 16px 14px;
   background: linear-gradient(150deg, rgba(22, 18, 38, 0.94), rgba(11, 9, 22, 0.96));

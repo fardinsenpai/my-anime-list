@@ -1304,7 +1304,7 @@ async function commitMangaReading() {
   var data = await githubFetch('index.html');
   if (!data) { hideLoading(); msgFail('Failed to fetch. Check PAT.'); return; }
   var content = decodeURIComponent(escape(atob(data.content)));
-  var readBlock = content.match(/<div class="stats-bar-card">\s*<div class="stats-bar-label">📖 Currently Reading<\/div>[\s\S]*?<\/div>\s*<\/div>\s*<\/div>/);
+  var readBlock = content.match(/^.*<div class="stats-bar-card">\s*<div class="stats-bar-label">📖 Currently Reading.*$/m);
   if (!readBlock) { hideLoading(); msgFail('Reading block not found'); return; }
   var oldHtml = readBlock[0];
   var newHtml = '<div class="stats-bar-card">' +
@@ -1516,7 +1516,7 @@ async function commitWatching() {
   var data = await githubFetch('index.html');
   if (!data) { hideLoading(); msgFail('Failed to fetch. Check PAT.'); return; }
   var content = decodeURIComponent(escape(atob(data.content)));
-  var watchBlock = content.match(/<div class="stats-bar-card">[\s\S]*?<\/div>\s*<\/div>\s*<\/div>/);
+  var watchBlock = content.match(/^.*<div class="stats-bar-card">\s*<div class="stats-bar-label">🎬 Currently Watching.*$/m);
   if (!watchBlock) { hideLoading(); msgFail('Watching block not found'); return; }
   var oldHtml = watchBlock[0];
   var newHtml = '<div class="stats-bar-card">' +

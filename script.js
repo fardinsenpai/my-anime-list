@@ -1888,9 +1888,10 @@ searchBox.addEventListener('input', function () {
 // so a manga/anime update from the admin flows into the home page automatically.
 (function () {
   var strip = document.getElementById('nowStrip');
-  var source = document.getElementById('statsBarContainer');
-  if (!strip || !source) return;
-  var cards = source.querySelectorAll('.stats-bar-card');
+  if (!strip) return;
+  // document-wide: the cards live in #statsBarContainer, but past admin
+  // commits could leave a stray card outside it — pick them up either way
+  var cards = document.querySelectorAll('.stats-bar-card');
   if (!cards.length) return;
   var txt = function (el) { return el ? el.textContent.trim() : ''; };
   var html = '';
@@ -7345,7 +7346,7 @@ async function commitMangaReading() {
   var data = await githubFetch('index.html');
   if (!data) { hideLoading(); msgFail('Failed to fetch. Check PAT.'); return; }
   var content = decodeURIComponent(escape(atob(data.content)));
-  var readBlock = content.match(/<div class="stats-bar-card">\s*<div class="stats-bar-label">📖 Currently Reading<\/div>[\s\S]*?<\/div>\s*<\/div>\s*<\/div>/);
+  var readBlock = content.match(/^.*<div class="stats-bar-card">\s*<div class="stats-bar-label">📖 Currently Reading.*$/m);
   if (!readBlock) { hideLoading(); msgFail('Reading block not found'); return; }
   var oldHtml = readBlock[0];
   var newHtml = '<div class="stats-bar-card">' +
@@ -7557,7 +7558,7 @@ async function commitWatching() {
   var data = await githubFetch('index.html');
   if (!data) { hideLoading(); msgFail('Failed to fetch. Check PAT.'); return; }
   var content = decodeURIComponent(escape(atob(data.content)));
-  var watchBlock = content.match(/<div class="stats-bar-card">[\s\S]*?<\/div>\s*<\/div>\s*<\/div>/);
+  var watchBlock = content.match(/^.*<div class="stats-bar-card">\s*<div class="stats-bar-label">🎬 Currently Watching.*$/m);
   if (!watchBlock) { hideLoading(); msgFail('Watching block not found'); return; }
   var oldHtml = watchBlock[0];
   var newHtml = '<div class="stats-bar-card">' +
