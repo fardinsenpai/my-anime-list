@@ -323,6 +323,8 @@ select.admin-g-input option { background: var(--surface); color: var(--ink); }
   background: var(--veil);
 }
 .ad-loading-inner { text-align: center; color: var(--g-ink); font-size: 14px; letter-spacing: 2px; }
+.ad-loading-line { font-size: 13px; letter-spacing: 1px; margin-bottom: 6px; color: #00ff41; font-family: monospace; }
+.ad-loading-step { font-size: 11px; color: #8b93a7; letter-spacing: 0.5px; font-family: monospace; margin-bottom: 10px; min-height: 14px; }
 .ad-bar {
   display: block; width: 220px; height: 3px; margin: 12px auto 0;
   background: linear-gradient(90deg, transparent, var(--g), transparent);

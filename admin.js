@@ -617,6 +617,29 @@ function getUniqueGenres() {
 function showLoading() { var el = document.getElementById('adminLoading'); if (el) el.style.display = 'flex'; }
 function hideLoading() { var el = document.getElementById('adminLoading'); if (el) el.style.display = 'none'; }
 
+/* ── commit progress / step indicator ────────────────────────── */
+function adStep(text) {
+  var line = document.getElementById('adLoadingLine');
+  var step = document.getElementById('adLoadingStep');
+  if (line) line.textContent = '⏳ ' + text;
+  if (step) step.textContent = '';
+}
+
+/* ── localStorage commit log (success or failure, always recorded) ───── */
+var COMMIT_LOG_KEY = 'admin_commit_log';
+var COMMIT_LOG_MAX = 50;
+
+function saveCommitResult(kind, ok, detail) {
+  try {
+    var log = [];
+    var raw = localStorage.getItem(COMMIT_LOG_KEY);
+    if (raw) { try { log = JSON.parse(raw); if (!Array.isArray(log)) log = []; } catch (e) { log = []; } }
+    log.unshift({ t: new Date().toISOString(), k: kind, ok: !!ok, d: detail || '' });
+    if (log.length > COMMIT_LOG_MAX) log.length = COMMIT_LOG_MAX;
+    localStorage.setItem(COMMIT_LOG_KEY, JSON.stringify(log));
+  } catch (e) { /* localStorage full — never block the UI */ }
+}
+
 function getPat() { return localStorage.getItem('gh_pat'); }
 
 function savePat() {
@@ -1133,15 +1156,26 @@ async function commitTop5() {
     newData[g][idx] = parseInt(inp.value) || 0;
   });
   showLoading();
-  var scriptData = await githubFetch('script.js');
-  if (!scriptData) { hideLoading(); msgFail('Fetch failed. Check PAT.'); return; }
-  var content = decodeURIComponent(escape(atob(scriptData.content)));
-  var jsonStr = JSON.stringify(newData, null, 2).split('\n').map(function(l, i) { return i === 0 ? l : '  ' + l; }).join('\n');
-  content = content.replace(/const TOP_5_DATA\s*=\s*\{[\s\S]*?\};/, 'const TOP_5_DATA = ' + jsonStr + ';');
-  var ok = await githubCommit('script.js', content, 'admin: update Top 5 picks');
-  hideLoading();
-  if (ok) { msgOk('Top 5 updated'); Object.assign(TOP_5_DATA, newData); }
-  else msgFail('Commit failed');
+  adStep('fetching script.js…');
+  try {
+    var scriptData = await githubFetch('script.js');
+    if (!scriptData) { hideLoading(); adStep(''); saveCommitResult('top5', false, 'fetch failed'); msgFail('Fetch failed. Check PAT.'); return; }
+    var content = decodeURIComponent(escape(atob(scriptData.content)));
+    var jsonStr = JSON.stringify(newData, null, 2).split('\n').map(function(l, i) { return i === 0 ? l : '  ' + l; }).join('\n');
+    content = content.replace(/const TOP_5_DATA\s*=\s*\{[\s\S]*?\};/, 'const TOP_5_DATA = ' + jsonStr + ';');
+    adStep('committing script.js…');
+    var ok = await githubCommit('script.js', content, 'admin: update Top 5 picks');
+    hideLoading();
+    adStep('');
+    saveCommitResult('top5', ok, ok ? 'updated' : 'commit failed');
+    if (ok) { msgOk('Top 5 updated'); Object.assign(TOP_5_DATA, newData); }
+    else msgFail('Commit failed');
+  } catch (e) {
+    hideLoading();
+    adStep('');
+    saveCommitResult('top5', false, 'exception: ' + ((e && e.message) || e));
+    msgFail('Commit threw: ' + ((e && e.message) || e));
+  }
 }
 
 async function commitAwardWinners() {
@@ -1156,15 +1190,26 @@ async function commitAwardWinners() {
     }
   });
   showLoading();
-  var scriptData = await githubFetch('script.js');
-  if (!scriptData) { hideLoading(); msgFail('Fetch failed. Check PAT.'); return; }
-  var content = decodeURIComponent(escape(atob(scriptData.content)));
-  var jsonStr = JSON.stringify(newData, null, 2).split('\n').map(function(l, i) { return i === 0 ? l : '  ' + l; }).join('\n');
-  content = content.replace(/const AWARD_WINNERS\s*=\s*\{[\s\S]*?\};/, 'const AWARD_WINNERS = ' + jsonStr + ';');
-  var ok = await githubCommit('script.js', content, 'admin: update Award Winners');
-  hideLoading();
-  if (ok) { msgOk('Award Winners updated'); Object.assign(AWARD_WINNERS, newData); }
-  else msgFail('Commit failed');
+  adStep('fetching script.js…');
+  try {
+    var scriptData = await githubFetch('script.js');
+    if (!scriptData) { hideLoading(); adStep(''); saveCommitResult('awards', false, 'fetch failed'); msgFail('Fetch failed. Check PAT.'); return; }
+    var content = decodeURIComponent(escape(atob(scriptData.content)));
+    var jsonStr = JSON.stringify(newData, null, 2).split('\n').map(function(l, i) { return i === 0 ? l : '  ' + l; }).join('\n');
+    content = content.replace(/const AWARD_WINNERS\s*=\s*\{[\s\S]*?\};/, 'const AWARD_WINNERS = ' + jsonStr + ';');
+    adStep('committing script.js…');
+    var ok = await githubCommit('script.js', content, 'admin: update Award Winners');
+    hideLoading();
+    adStep('');
+    saveCommitResult('awards', ok, ok ? 'updated' : 'commit failed');
+    if (ok) { msgOk('Award Winners updated'); Object.assign(AWARD_WINNERS, newData); }
+    else msgFail('Commit failed');
+  } catch (e) {
+    hideLoading();
+    adStep('');
+    saveCommitResult('awards', false, 'exception: ' + ((e && e.message) || e));
+    msgFail('Commit threw: ' + ((e && e.message) || e));
+  }
 }
 
 function searchWatch(q) {
@@ -1291,40 +1336,51 @@ async function commitMangaReading() {
   if (!curChapter) { msgFail('Enter current chapter'); return; }
   var prog = parseInt(progress) || 0;
   showLoading();
-  var allCards = document.querySelectorAll('#grid .card');
-  var foundCard = null;
-  for (var i = 0; i < allCards.length; i++) {
-    var numEl = allCards[i].querySelector('.number');
-    var nid = numEl ? parseInt(numEl.textContent.replace(/\D/g, '')) : 0;
-    if (nid === _readId) { foundCard = allCards[i]; break; }
+  adStep('fetching index.html…');
+  try {
+    var allCards = document.querySelectorAll('#grid .card');
+    var foundCard = null;
+    for (var i = 0; i < allCards.length; i++) {
+      var numEl = allCards[i].querySelector('.number');
+      var nid = numEl ? parseInt(numEl.textContent.replace(/\D/g, '')) : 0;
+      if (nid === _readId) { foundCard = allCards[i]; break; }
+    }
+    if (!foundCard) { hideLoading(); adStep(''); saveCommitResult('reading', false, 'card #' + _readId + ' not found'); msgFail('Card #' + _readId + ' not found'); return; }
+    var title = foundCard.querySelector('.title').textContent;
+    var img = foundCard.querySelector('.poster-wrap img').src;
+    if (!meta) meta = 'Manga';
+    var chapterDisplay = totalChapter ? 'Chapter ' + curChapter + ' / ' + totalChapter : 'Chapter ' + curChapter;
+    var data = await githubFetch('index.html');
+    if (!data) { hideLoading(); adStep(''); saveCommitResult('reading', false, 'fetch failed'); msgFail('Failed to fetch. Check PAT.'); return; }
+    var content = decodeURIComponent(escape(atob(data.content)));
+    var readBlock = content.match(/^.*<div class="stats-bar-card">\s*<div class="stats-bar-label">📖 Currently Reading.*$/m);
+    if (!readBlock) { hideLoading(); adStep(''); saveCommitResult('reading', false, 'reading block not found'); msgFail('Reading block not found'); return; }
+    var oldHtml = readBlock[0];
+    var newHtml = '<div class="stats-bar-card">' +
+      '<div class="stats-bar-label">📖 Currently Reading</div>' +
+      '<div class="stats-bar-inner">' +
+        '<div class="stats-bar-poster"><img src="' + img.replace(/"/g,'&quot;') + '" alt="' + title.replace(/"/g,'&quot;') + '"></div>' +
+        '<div class="stats-bar-info">' +
+          '<div class="stats-bar-title">' + title + '</div>' +
+          '<div class="stats-bar-meta">' + meta + '</div>' +
+          '<div class="stats-bar-track"><div class="stats-bar-fill" style="width: ' + prog + '%;"></div></div>' +
+          '<div class="stats-bar-eps">' + chapterDisplay + '</div>' +
+        '</div>' +
+      '</div></div>';
+    content = content.replace(oldHtml, newHtml);
+    adStep('committing index.html…');
+    var ok = await githubCommit('index.html', content, 'admin: update reading to ' + title);
+    hideLoading();
+    adStep('');
+    saveCommitResult('reading', ok, ok ? title : 'commit failed');
+    if (ok) msgOk('Reading updated: ' + title);
+    else msgFail('Commit failed');
+  } catch (e) {
+    hideLoading();
+    adStep('');
+    saveCommitResult('reading', false, 'exception: ' + ((e && e.message) || e));
+    msgFail('Commit threw: ' + ((e && e.message) || e));
   }
-  if (!foundCard) { hideLoading(); msgFail('Card #' + _readId + ' not found'); return; }
-  var title = foundCard.querySelector('.title').textContent;
-  var img = foundCard.querySelector('.poster-wrap img').src;
-  if (!meta) meta = 'Manga';
-  var chapterDisplay = totalChapter ? 'Chapter ' + curChapter + ' / ' + totalChapter : 'Chapter ' + curChapter;
-  var data = await githubFetch('index.html');
-  if (!data) { hideLoading(); msgFail('Failed to fetch. Check PAT.'); return; }
-  var content = decodeURIComponent(escape(atob(data.content)));
-  var readBlock = content.match(/^.*<div class="stats-bar-card">\s*<div class="stats-bar-label">📖 Currently Reading.*$/m);
-  if (!readBlock) { hideLoading(); msgFail('Reading block not found'); return; }
-  var oldHtml = readBlock[0];
-  var newHtml = '<div class="stats-bar-card">' +
-    '<div class="stats-bar-label">📖 Currently Reading</div>' +
-    '<div class="stats-bar-inner">' +
-      '<div class="stats-bar-poster"><img src="' + img.replace(/"/g,'&quot;') + '" alt="' + title.replace(/"/g,'&quot;') + '"></div>' +
-      '<div class="stats-bar-info">' +
-        '<div class="stats-bar-title">' + title + '</div>' +
-        '<div class="stats-bar-meta">' + meta + '</div>' +
-        '<div class="stats-bar-track"><div class="stats-bar-fill" style="width: ' + prog + '%;"></div></div>' +
-        '<div class="stats-bar-eps">' + chapterDisplay + '</div>' +
-      '</div>' +
-    '</div></div>';
-  content = content.replace(oldHtml, newHtml);
-  var ok = await githubCommit('index.html', content, 'admin: update reading to ' + title);
-  hideLoading();
-  if (ok) msgOk('Reading updated: ' + title);
-  else msgFail('Commit failed');
 }
 
 function searchEdit(q) {
@@ -1446,49 +1502,73 @@ async function commitEditAnime() {
   var episodes = document.getElementById('adminEditEps').value.trim();
   if (!_editId || !name) { msgFail('Select anime and enter name'); return; }
   showLoading();
-  var indexData = await githubFetch('index.html');
-  var scriptData = await githubFetch('script.js');
-  if (!indexData || !scriptData) { hideLoading(); msgFail('Failed to fetch files'); return; }
-  var indexContent = decodeURIComponent(escape(atob(indexData.content)));
-  var scriptContent = decodeURIComponent(escape(atob(scriptData.content)));
-  var lines = indexContent.split('\n');
-  var cardIdx = -1;
-  for (var i = 0; i < lines.length; i++) {
-    if (lines[i].includes('<span class="badge">#' + _editId + '</span>')) { cardIdx = i; break; }
+  adStep('fetching files…');
+  try {
+    var indexData = await githubFetch('index.html');
+    var scriptData = await githubFetch('script.js');
+    if (!indexData || !scriptData) { hideLoading(); adStep(''); saveCommitResult('edit-anime', false, 'fetch failed'); msgFail('Failed to fetch files'); return; }
+    var indexContent = decodeURIComponent(escape(atob(indexData.content)));
+    var scriptContent = decodeURIComponent(escape(atob(scriptData.content)));
+    var lines = indexContent.split('\n');
+    var cardIdx = -1;
+    for (var i = 0; i < lines.length; i++) {
+      if (lines[i].includes('<span class="badge">#' + _editId + '</span>')) { cardIdx = i; break; }
+    }
+    if (cardIdx === -1) { hideLoading(); adStep(''); saveCommitResult('edit-anime', false, 'card #' + _editId + ' not found'); msgFail('Card not found'); return; }
+    var img = document.getElementById('adminEditImg').value.trim() || '';
+    var seasonText = seasons ? '🌸 ' + seasons : '';
+    var epsText = episodes ? '📺 Total Episodes: ' + episodes : '';
+    var newCard = '<div class="card"><div class="card-inner"><div class="card-front"><div class="poster-wrap"><img src="' + img.replace(/"/g,'&quot;') + '" alt="' + name.replace(/"/g,'&quot;') + '" loading="lazy"/><span class="badge">#' + _editId + '</span></div><div class="info"><div class="number">NO. ' + _editId + '</div><div class="title">' + name + '</div></div></div><div class="card-back"><div class="back-content"><div class="back-title">' + name + '</div><div class="back-season">' + seasonText + '</div><div class="back-episodes">' + epsText + '</div><div class="back-tap-hint">click to flip back</div></div></div></div></div>';
+    lines[cardIdx] = newCard;
+    indexContent = lines.join('\n');
+    if (genre) {
+      var newGenres = genre.split(/[,·]/).map(function(g) { return g.trim(); }).filter(Boolean);
+      scriptContent = applyGenres(scriptContent, _editId, newGenres);
+    }
+    var malInput = document.getElementById('adminEditMal');
+    var malVal = malInput ? malInput.value.trim() : '';
+    if (malVal !== '' && isFinite(parseFloat(malVal))) {
+      scriptContent = setRatingField(scriptContent, _editId, 'malScore', parseFloat(malVal));
+    }
+    adStep('committing index.html (1/2)…');
+    var ok1 = await githubCommit('index.html', indexContent, 'admin: edit anime #' + _editId + ' - ' + name);
+    adStep('committing script.js (2/2)…');
+    var ok2 = await githubCommit('script.js', scriptContent, 'admin: edit genres for #' + _editId);
+    hideLoading();
+    adStep('');
+    var ok = ok1 && ok2;
+    saveCommitResult('edit-anime', ok, 'anime #' + _editId + ' - ' + name);
+    if (ok) { msgOk('Anime #' + _editId + ' updated'); }
+    else msgFail('Commit failed');
+  } catch (e) {
+    hideLoading();
+    adStep('');
+    saveCommitResult('edit-anime', false, 'exception: ' + ((e && e.message) || e));
+    msgFail('Commit threw: ' + ((e && e.message) || e));
   }
-  if (cardIdx === -1) { hideLoading(); msgFail('Card not found'); return; }
-  var img = document.getElementById('adminEditImg').value.trim() || '';
-  var seasonText = seasons ? '🌸 ' + seasons : '';
-  var epsText = episodes ? '📺 Total Episodes: ' + episodes : '';
-  var newCard = '<div class="card"><div class="card-inner"><div class="card-front"><div class="poster-wrap"><img src="' + img.replace(/"/g,'&quot;') + '" alt="' + name.replace(/"/g,'&quot;') + '" loading="lazy"/><span class="badge">#' + _editId + '</span></div><div class="info"><div class="number">NO. ' + _editId + '</div><div class="title">' + name + '</div></div></div><div class="card-back"><div class="back-content"><div class="back-title">' + name + '</div><div class="back-season">' + seasonText + '</div><div class="back-episodes">' + epsText + '</div><div class="back-tap-hint">click to flip back</div></div></div></div></div>';
-  lines[cardIdx] = newCard;
-  indexContent = lines.join('\n');
-  if (genre) {
-    var newGenres = genre.split(/[,·]/).map(function(g) { return g.trim(); }).filter(Boolean);
-    scriptContent = applyGenres(scriptContent, _editId, newGenres);
-  }
-  var malInput = document.getElementById('adminEditMal');
-  var malVal = malInput ? malInput.value.trim() : '';
-  if (malVal !== '' && isFinite(parseFloat(malVal))) {
-    scriptContent = setRatingField(scriptContent, _editId, 'malScore', parseFloat(malVal));
-  }
-  var ok1 = await githubCommit('index.html', indexContent, 'admin: edit anime #' + _editId + ' - ' + name);
-  var ok2 = await githubCommit('script.js', scriptContent, 'admin: edit genres for #' + _editId);
-  hideLoading();
-  if (ok1 && ok2) { msgOk('Anime #' + _editId + ' updated'); }
-  else msgFail('Commit failed');
 }
 
 async function commitDate(dateStr) {
   showLoading();
-  var data = await githubFetch('index.html');
-  if (!data) { hideLoading(); msgFail('Fetch failed. Check PAT.'); return; }
-  var content = decodeURIComponent(escape(atob(data.content)));
-  content = content.replace(/(<span id="lastUpdatedDate">)(.*?)(<\/span>)/, '$1' + dateStr + '$3');
-  var ok = await githubCommit('index.html', content, 'admin: update date to ' + dateStr);
-  hideLoading();
-  if (ok) { msgOk('Date updated to ' + dateStr); var el = document.getElementById('lastUpdatedDate'); if (el) el.textContent = dateStr; }
-  else msgFail('Commit failed');
+  adStep('fetching index.html…');
+  try {
+    var data = await githubFetch('index.html');
+    if (!data) { hideLoading(); adStep(''); saveCommitResult('date', false, 'fetch failed'); msgFail('Fetch failed. Check PAT.'); return; }
+    var content = decodeURIComponent(escape(atob(data.content)));
+    content = content.replace(/(<span id="lastUpdatedDate">)(.*?)(<\/span>)/, '$1' + dateStr + '$3');
+    adStep('committing index.html…');
+    var ok = await githubCommit('index.html', content, 'admin: update date to ' + dateStr);
+    hideLoading();
+    adStep('');
+    saveCommitResult('date', ok, ok ? dateStr : 'commit failed');
+    if (ok) { msgOk('Date updated to ' + dateStr); var el = document.getElementById('lastUpdatedDate'); if (el) el.textContent = dateStr; }
+    else msgFail('Commit failed');
+  } catch (e) {
+    hideLoading();
+    adStep('');
+    saveCommitResult('date', false, 'exception: ' + ((e && e.message) || e));
+    msgFail('Commit threw: ' + ((e && e.message) || e));
+  }
 }
 
 async function commitStats() {
@@ -1500,35 +1580,46 @@ async function commitStats() {
   var eps = epsInp.value.trim();
   if (!anime && !seasons && !eps) { msgFail('Enter at least one increase'); return; }
   showLoading();
-  var scriptData = await githubFetch('script.js');
-  if (!scriptData) { hideLoading(); msgFail('Fetch failed'); return; }
-  var content = decodeURIComponent(escape(atob(scriptData.content)));
-  var newAnime = null, newSeasons = null, newEps = null;
-  if (anime) {
-    var cur = parseInt((animeInp.placeholder.match(/\d+/) || ['0'])[0]) || 0;
-    newAnime = cur + parseInt(anime);
-    content = content.replace(/counterUp\("animeCount",\s*\d+/, 'counterUp("animeCount", ' + newAnime);
+  adStep('fetching script.js…');
+  try {
+    var scriptData = await githubFetch('script.js');
+    if (!scriptData) { hideLoading(); adStep(''); saveCommitResult('stats', false, 'fetch failed'); msgFail('Fetch failed'); return; }
+    var content = decodeURIComponent(escape(atob(scriptData.content)));
+    var newAnime = null, newSeasons = null, newEps = null;
+    if (anime) {
+      var cur = parseInt((animeInp.placeholder.match(/\d+/) || ['0'])[0]) || 0;
+      newAnime = cur + parseInt(anime);
+      content = content.replace(/counterUp\("animeCount",\s*\d+/, 'counterUp("animeCount", ' + newAnime);
+    }
+    if (seasons) {
+      var curS = parseInt((seasonsInp.placeholder.match(/\d+/) || ['0'])[0]) || 0;
+      newSeasons = curS + parseInt(seasons);
+      content = content.replace(/counterUp\("seasonCount",\s*\d+/, 'counterUp("seasonCount", ' + newSeasons);
+    }
+    if (eps) {
+      var curE = parseInt((epsInp.placeholder.match(/\d+/) || ['0'])[0]) || 0;
+      newEps = curE + parseInt(eps);
+      content = content.replace(/counterUp\("episodeCount",\s*\d+/, 'counterUp("episodeCount", ' + newEps);
+    }
+    adStep('committing script.js…');
+    var ok = await githubCommit('script.js', content, 'admin: increase counter stats');
+    hideLoading();
+    adStep('');
+    saveCommitResult('stats', ok, ok ? 'updated' : 'commit failed');
+    if (ok) {
+      msgOk('Stats increased');
+      if (newAnime !== null) { document.getElementById('animeCount').textContent = newAnime; animeInp.placeholder = 'Current: ' + newAnime; }
+      if (newSeasons !== null) { document.getElementById('seasonCount').textContent = newSeasons; seasonsInp.placeholder = 'Current: ' + newSeasons; }
+      if (newEps !== null) { document.getElementById('episodeCount').textContent = newEps; epsInp.placeholder = 'Current: ' + newEps; }
+      animeInp.value = ''; seasonsInp.value = ''; epsInp.value = '';
+    }
+    else msgFail('Commit failed');
+  } catch (e) {
+    hideLoading();
+    adStep('');
+    saveCommitResult('stats', false, 'exception: ' + ((e && e.message) || e));
+    msgFail('Commit threw: ' + ((e && e.message) || e));
   }
-  if (seasons) {
-    var curS = parseInt((seasonsInp.placeholder.match(/\d+/) || ['0'])[0]) || 0;
-    newSeasons = curS + parseInt(seasons);
-    content = content.replace(/counterUp\("seasonCount",\s*\d+/, 'counterUp("seasonCount", ' + newSeasons);
-  }
-  if (eps) {
-    var curE = parseInt((epsInp.placeholder.match(/\d+/) || ['0'])[0]) || 0;
-    newEps = curE + parseInt(eps);
-    content = content.replace(/counterUp\("episodeCount",\s*\d+/, 'counterUp("episodeCount", ' + newEps);
-  }
-  var ok = await githubCommit('script.js', content, 'admin: increase counter stats');
-  hideLoading();
-  if (ok) {
-    msgOk('Stats increased');
-    if (newAnime !== null) { document.getElementById('animeCount').textContent = newAnime; animeInp.placeholder = 'Current: ' + newAnime; }
-    if (newSeasons !== null) { document.getElementById('seasonCount').textContent = newSeasons; seasonsInp.placeholder = 'Current: ' + newSeasons; }
-    if (newEps !== null) { document.getElementById('episodeCount').textContent = newEps; epsInp.placeholder = 'Current: ' + newEps; }
-    animeInp.value = ''; seasonsInp.value = ''; epsInp.value = '';
-  }
-  else msgFail('Commit failed');
 }
 
 async function commitWatching() {
@@ -1542,42 +1633,95 @@ async function commitWatching() {
   var eps = totalEps ? 'Episode ' + curEps + ' / ' + totalEps : 'Episode ' + curEps;
   var prog = parseInt(progress) || 0;
   showLoading();
-  var allCards = document.querySelectorAll('#grid .card');
-  var foundCard = null;
-  for (var i = 0; i < allCards.length; i++) {
-    var numEl = allCards[i].querySelector('.number');
-    var nid = numEl ? parseInt(numEl.textContent.replace(/\D/g, '')) : 0;
-    if (nid === watchId) { foundCard = allCards[i]; break; }
+  adStep('fetching index.html…');
+  try {
+    var allCards = document.querySelectorAll('#grid .card');
+    var foundCard = null;
+    for (var i = 0; i < allCards.length; i++) {
+      var numEl = allCards[i].querySelector('.number');
+      var nid = numEl ? parseInt(numEl.textContent.replace(/\D/g, '')) : 0;
+      if (nid === watchId) { foundCard = allCards[i]; break; }
+    }
+    if (!foundCard) { hideLoading(); adStep(''); saveCommitResult('watching', false, 'card #' + watchId + ' not found'); msgFail('Card #' + watchId + ' not found'); return; }
+    var title = foundCard.querySelector('.title').textContent;
+    var img = foundCard.querySelector('.poster-wrap img').src;
+    if (!season) {
+      var seasonEl = foundCard.querySelector('.back-season');
+      season = seasonEl ? seasonEl.textContent.replace(/[🌸📺]/g,'').trim() : 'Season-1';
+    }
+    var data = await githubFetch('index.html');
+    if (!data) { hideLoading(); adStep(''); saveCommitResult('watching', false, 'fetch failed'); msgFail('Failed to fetch. Check PAT.'); return; }
+    var content = decodeURIComponent(escape(atob(data.content)));
+    var watchBlock = content.match(/^.*<div class="stats-bar-card">\s*<div class="stats-bar-label">🎬 Currently Watching.*$/m);
+    if (!watchBlock) { hideLoading(); adStep(''); saveCommitResult('watching', false, 'watching block not found'); msgFail('Watching block not found'); return; }
+    var oldHtml = watchBlock[0];
+    var newHtml = '<div class="stats-bar-card">' +
+      '<div class="stats-bar-label">🎬 Currently Watching</div>' +
+      '<div class="stats-bar-inner">' +
+        '<div class="stats-bar-poster"><img src="' + img.replace(/"/g,'&quot;') + '" alt="' + title.replace(/"/g,'&quot;') + '"></div>' +
+        '<div class="stats-bar-info">' +
+          '<div class="stats-bar-title">' + title + '</div>' +
+          '<div class="stats-bar-meta">' + season + '</div>' +
+          '<div class="stats-bar-track"><div class="stats-bar-fill" style="width: ' + prog + '%;"></div></div>' +
+          '<div class="stats-bar-eps">' + eps + '</div>' +
+        '</div>' +
+      '</div></div>';
+    content = content.replace(oldHtml, newHtml);
+    adStep('committing index.html…');
+    var ok = await githubCommit('index.html', content, 'admin: update watching to ' + title);
+    hideLoading();
+    adStep('');
+    saveCommitResult('watching', ok, ok ? title : 'commit failed');
+    if (ok) msgOk('Watching updated to: ' + title);
+    else msgFail('Commit failed');
+  } catch (e) {
+    hideLoading();
+    adStep('');
+    saveCommitResult('watching', false, 'exception: ' + ((e && e.message) || e));
+    msgFail('Commit threw: ' + ((e && e.message) || e));
   }
-  if (!foundCard) { hideLoading(); msgFail('Card #' + watchId + ' not found'); return; }
-  var title = foundCard.querySelector('.title').textContent;
-  var img = foundCard.querySelector('.poster-wrap img').src;
-  if (!season) {
-    var seasonEl = foundCard.querySelector('.back-season');
-    season = seasonEl ? seasonEl.textContent.replace(/[🌸📺]/g,'').trim() : 'Season-1';
-  }
-  var data = await githubFetch('index.html');
-  if (!data) { hideLoading(); msgFail('Failed to fetch. Check PAT.'); return; }
-  var content = decodeURIComponent(escape(atob(data.content)));
-  var watchBlock = content.match(/^.*<div class="stats-bar-card">\s*<div class="stats-bar-label">🎬 Currently Watching.*$/m);
-  if (!watchBlock) { hideLoading(); msgFail('Watching block not found'); return; }
-  var oldHtml = watchBlock[0];
-  var newHtml = '<div class="stats-bar-card">' +
-    '<div class="stats-bar-label">🎬 Currently Watching</div>' +
-    '<div class="stats-bar-inner">' +
-      '<div class="stats-bar-poster"><img src="' + img.replace(/"/g,'&quot;') + '" alt="' + title.replace(/"/g,'&quot;') + '"></div>' +
-      '<div class="stats-bar-info">' +
-        '<div class="stats-bar-title">' + title + '</div>' +
-        '<div class="stats-bar-meta">' + season + '</div>' +
-        '<div class="stats-bar-track"><div class="stats-bar-fill" style="width: ' + prog + '%;"></div></div>' +
-        '<div class="stats-bar-eps">' + eps + '</div>' +
+}
+
+/* ── manual duel-rating popup ── lets the admin override/enter the duel
+   ratings (malScore, characters, animRating, animePlanet, anilist, storyRating)
+   when auto-derived values are missing or wrong (e.g. no Anime Planet data). ── */
+function showDuelRatingPopup(title, derived) {
+  return new Promise(function (resolve) {
+    var overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:1000000;display:flex;align-items:center;justify-content:center;font-family:monospace;';
+    var box = document.createElement('div');
+    box.style.cssText = 'background:#0a0a0a;border:1px solid #00ff41;border-radius:6px;padding:18px;max-width:460px;width:90%;color:#fff;box-shadow:0 0 30px rgba(0,255,65,0.25);';
+    box.innerHTML =
+      '<div style="font-weight:bold;margin-bottom:12px;color:#00ff41;">⚔️ Duel Ratings for "' + title.replace(/"/g, '&quot;') + '"</div>' +
+      '<div style="font-size:11px;color:#8b93a7;margin-bottom:12px;">Auto-derived values shown — edit any field, then press SAVE. Leave blank to keep the derived value.</div>' +
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px 16px;margin-bottom:14px;">' +
+      '<div style="font-size:11px;color:#aaa;">MAL Score</div><input id="dr-mal" type="number" step="0.01" min="0" max="10" value="' + (derived.mal || '') + '" style="background:#111;border:1px solid #333;color:#fff;padding:4px 6px;border-radius:3px;">' +
+      '<div style="font-size:11px;color:#aaa;">Characters</div><input id="dr-char" type="number" step="0.1" min="0" max="10" value="' + (derived.chars || '') + '" style="background:#111;border:1px solid #333;color:#fff;padding:4px 6px;border-radius:3px;">' +
+      '<div style="font-size:11px;color:#aaa;">Animation</div><input id="dr-anim" type="number" step="0.1" min="0" max="10" value="' + (derived.anim || '') + '" style="background:#111;border:1px solid #333;color:#fff;padding:4px 6px;border-radius:3px;">' +
+      '<div style="font-size:11px;color:#aaa;">Anime Planet</div><input id="dr-planet" type="number" step="0.1" min="0" max="10" value="' + (derived.planet || '') + '" style="background:#111;border:1px solid #333;color:#fff;padding:4px 6px;border-radius:3px;">' +
+      '<div style="font-size:11px;color:#aaa;">AniList</div><input id="dr-anilist" type="number" step="1" min="0" max="100" value="' + (derived.anilist || '') + '" style="background:#111;border:1px solid #333;color:#fff;padding:4px 6px;border-radius:3px;">' +
+      '<div style="font-size:11px;color:#aaa;">Story Rating</div><input id="dr-story" type="number" step="0.1" min="0" max="10" value="' + (derived.story || '') + '" style="background:#111;border:1px solid #333;color:#fff;padding:4px 6px;border-radius:3px;">' +
       '</div>' +
-    '</div></div>';
-  content = content.replace(oldHtml, newHtml);
-  var ok = await githubCommit('index.html', content, 'admin: update watching to ' + title);
-  hideLoading();
-  if (ok) msgOk('Watching updated to: ' + title);
-  else msgFail('Commit failed');
+      '<div style="display:flex;gap:8px;justify-content:flex-end;">' +
+      '<button id="dr-cancel" style="background:#222;border:1px solid #444;color:#fff;padding:6px 14px;border-radius:3px;cursor:pointer;">CANCEL</button>' +
+      '<button id="dr-save" style="background:#00ff41;border:none;color:#000;padding:6px 16px;border-radius:3px;font-weight:bold;cursor:pointer;">SAVE</button>' +
+      '</div>';
+    overlay.appendChild(box);
+    document.body.appendChild(overlay);
+    var inputs = { mal: box.querySelector('#dr-mal'), chars: box.querySelector('#dr-char'), anim: box.querySelector('#dr-anim'), planet: box.querySelector('#dr-planet'), anilist: box.querySelector('#dr-anilist'), story: box.querySelector('#dr-story') };
+    function cleanup() { if (overlay.parentNode) overlay.parentNode.removeChild(overlay); }
+    box.querySelector('#dr-cancel').onclick = function () { cleanup(); resolve(null); };
+    box.querySelector('#dr-save').onclick = function () {
+      var out = {};
+      Object.keys(inputs).forEach(function (k) {
+        var v = inputs[k].value.trim();
+        out[k] = v === '' ? null : parseFloat(v);
+      });
+      cleanup();
+      resolve(out);
+    };
+    box.querySelector('#dr-mal').focus();
+  });
 }
 
 async function commitAddAnime() {
@@ -1593,69 +1737,96 @@ async function commitAddAnime() {
   var seasonLabel = document.getElementById('adminAddSeasonLabel').value.trim() || 'Season-1';
   if (!title || !img) { msgFail('Title and Image URL required'); return; }
   showLoading();
-  var indexData = await githubFetch('index.html');
-  var scriptData = await githubFetch('script.js');
-  var ratingsData = await githubFetch('anime-ratings.json');
-  if (!indexData || !scriptData) { hideLoading(); msgFail('Failed to fetch files. Check PAT.'); return; }
-  var indexContent = decodeURIComponent(escape(atob(indexData.content)));
-  var scriptContent = decodeURIComponent(escape(atob(scriptData.content)));
-  var ratingsContent = ratingsData ? decodeURIComponent(escape(atob(ratingsData.content))) : '';
-  var maxId = 0;
-  // card badges in index.html are the real serial numbers — script.js also
-  // holds year keys like "2026": { that must never count as anime IDs
-  var badgeMax = indexContent.match(/class="badge">#(\d+)</g);
-  if (badgeMax) badgeMax.forEach(function(m) { var n = parseInt(m.replace(/\D/g,'')); if (n > maxId) maxId = n; });
-  if (typeof RATING_DATA === 'object') Object.keys(RATING_DATA).forEach(function(k) { var n = parseInt(k); if (n > maxId) maxId = n; });
-  var nextId = maxId + 1;
-  var cardHtml = '\n\n<div class="card"><div class="card-inner"><div class="card-front"><div class="poster-wrap"><img src="' + img.replace(/"/g,'&quot;') + '" alt="' + title.replace(/"/g,'&quot;') + '" loading="lazy"/><span class="badge">#' + nextId + '</span></div><div class="info"><div class="number">NO. ' + nextId + '</div><div class="title">' + title + '</div></div></div><div class="card-back"><div class="back-content"><div class="back-title">' + title + '</div><div class="back-season">🌸 ' + seasonLabel + '</div><div class="back-episodes">📺 Total Episodes: ' + eps + '</div><div class="back-tap-hint">click to flip back</div></div></div></div></div>';
-  indexContent = indexContent.replace(/<!-- === GRID END === -->/, cardHtml + '\n\n<!-- === GRID END === -->');
-  scriptContent = scriptContent.replace(/counterUp\("seasonCount",\s*(\d+)/, function(m, c) { return 'counterUp("seasonCount", ' + (parseInt(c) + 1); });
-  scriptContent = scriptContent.replace(/counterUp\("episodeCount",\s*(\d+)/, function(m, c) { return 'counterUp("episodeCount", ' + (parseInt(c) + eps); });
-  var addEntry = function(key, entry) {
-    var pos = scriptContent.indexOf(key); if (pos === -1) return scriptContent;
-    var start = pos + key.length, i = start, braces = 0;
-    if (scriptContent[i] === '{') braces = 1; else return scriptContent;
-    i++; while (i < scriptContent.length && braces > 0) { if (scriptContent[i] === '{') braces++; else if (scriptContent[i] === '}') braces--; i++; }
-    var before = scriptContent.substring(0, i - 1), after = scriptContent.substring(i - 1);
-    before = before.replace(/,(\s*)$/, function(m, s) { return s; });
-    return before + ',' + entry + after;
-  };
-  scriptContent = addEntry('window.RATING_DATA = ', '"' + nextId + '":{"rating":' + rating + ',"season":"' + season + '"' + (isFinite(mal) ? ',"malScore":' + mal : '') + '}');
-  var ottArr = ott ? '["' + ott.split(/\s*,\s*/).join('","') + '"]' : '[]';
-  scriptContent = addEntry('window.OTT_DATA = ', '"' + nextId + '":' + ottArr);
-  var studioArr = studio ? '["' + studio.split(/\s*,\s*/).join('","') + '"]' : '[]';
-  scriptContent = addEntry('window.STUDIO_DATA = ', '"' + nextId + '":' + studioArr);
-  // Duel ratings entry (anime-ratings.json) - derived from the form values so the new anime works in Anime Duel too.
-  var duelMal = isFinite(mal) ? mal : (rating ? (0.0725 * rating + 2.2649) : 0);
-  duelMal = Math.round(duelMal * 100) / 100;
-  var duelSub = Math.round(duelMal * 2) / 2;
-  var duelPlanet = Math.round((duelMal / 2) * 10) / 10;
-  var duelEntry = '\\n    "' + nextId + '": {\\n' +
-    '        "malScore": ' + duelMal + ',\\n' +
-    '        "characters": ' + duelSub + ',\\n' +
-    '        "animRating": ' + duelSub + ',\\n' +
-    '        "animePlanet": ' + duelPlanet + ',\\n' +
-    '        "anilist": ' + (rating || 0) + ',\\n' +
-    '        "title": ' + JSON.stringify(title) + ',\\n' +
-    '        "storyRating": ' + duelSub + '\\n' +
-    '    }';
-  if (ratingsContent) {
-    var _rc = ratingsContent.lastIndexOf('}');
-    if (_rc >= 0) {
-      var _before = ratingsContent.substring(0, _rc).replace(/,\\s*$/, '');
-      ratingsContent = _before + ',' + duelEntry + '\\n}' + ratingsContent.substring(_rc + 1);
+  adStep('fetching site files…');
+  try {
+    var indexData = await githubFetch('index.html');
+    var scriptData = await githubFetch('script.js');
+    var ratingsData = await githubFetch('anime-ratings.json');
+    if (!indexData || !scriptData) { hideLoading(); adStep(''); saveCommitResult('add-anime', false, 'fetch failed (index.html / script.js)'); msgFail('Failed to fetch files. Check PAT.'); return; }
+    var indexContent = decodeURIComponent(escape(atob(indexData.content)));
+    var scriptContent = decodeURIComponent(escape(atob(scriptData.content)));
+    var ratingsContent = ratingsData ? decodeURIComponent(escape(atob(ratingsData.content))) : '';
+    var maxId = 0;
+    var badgeMax = indexContent.match(/class="badge">#(\d+)</g);
+    if (badgeMax) badgeMax.forEach(function(m) { var n = parseInt(m.replace(/\D/g,'')); if (n > maxId) maxId = n; });
+    if (typeof RATING_DATA === 'object') Object.keys(RATING_DATA).forEach(function(k) { var n = parseInt(k); if (n > maxId) maxId = n; });
+    var nextId = maxId + 1;
+    var cardHtml = '\n\n<div class="card"><div class="card-inner"><div class="card-front"><div class="poster-wrap"><img src="' + img.replace(/"/g,'&quot;') + '" alt="' + title.replace(/"/g,'&quot;') + '" loading="lazy"/><span class="badge">#' + nextId + '</span></div><div class="info"><div class="number">NO. ' + nextId + '</div><div class="title">' + title + '</div></div></div><div class="card-back"><div class="back-content"><div class="back-title">' + title + '</div><div class="back-season">🌸 ' + seasonLabel + '</div><div class="back-episodes">📺 Total Episodes: ' + eps + '</div><div class="back-tap-hint">click to flip back</div></div></div></div></div>';
+    indexContent = indexContent.replace(/<!-- === GRID END === -->/, cardHtml + '\n\n<!-- === GRID END === -->');
+    scriptContent = scriptContent.replace(/counterUp\("seasonCount",\s*(\d+)/, function(m, c) { return 'counterUp("seasonCount", ' + (parseInt(c) + 1); });
+    scriptContent = scriptContent.replace(/counterUp\("episodeCount",\s*(\d+)/, function(m, c) { return 'counterUp("episodeCount", ' + (parseInt(c) + eps); });
+    var addEntry = function(key, entry) {
+      var pos = scriptContent.indexOf(key); if (pos === -1) return scriptContent;
+      var start = pos + key.length, i = start, braces = 0;
+      if (scriptContent[i] === '{') braces = 1; else return scriptContent;
+      i++; while (i < scriptContent.length && braces > 0) { if (scriptContent[i] === '{') braces++; else if (scriptContent[i] === '}') braces--; i++; }
+      var before = scriptContent.substring(0, i - 1), after = scriptContent.substring(i - 1);
+      before = before.replace(/,(\s*)$/, function(m, s) { return s; });
+      return before + ',' + entry + after;
+    };
+    adStep('committing index.html (1/4)…');
+    scriptContent = addEntry('window.RATING_DATA = ', '"' + nextId + '":{"rating":' + rating + ',"season":"' + season + '"' + (isFinite(mal) ? ',"malScore":' + mal : '') + '}');
+    var ottArr = ott ? '["' + ott.split(/\s*,\s*/).join('","') + '"]' : '[]';
+    scriptContent = addEntry('window.OTT_DATA = ', '"' + nextId + '":' + ottArr);
+    var studioArr = studio ? '["' + studio.split(/\s*,\s*/).join('","') + '"]' : '[]';
+    scriptContent = addEntry('window.STUDIO_DATA = ', '"' + nextId + '":' + studioArr);
+    var duelMal = isFinite(mal) ? mal : (rating ? (0.0725 * rating + 2.2649) : 0);
+    duelMal = Math.round(duelMal * 100) / 100;
+    var duelSub = Math.round(duelMal * 2) / 2;
+    var duelPlanet = Math.round((duelMal / 2) * 10) / 10;
+    var duelAnilist = rating || 0;
+    var derived = { mal: duelMal, chars: duelSub, anim: duelSub, planet: duelPlanet, anilist: duelAnilist, story: duelSub };
+    // If any duel data is missing / unsure (e.g. no Anime Planet), let the admin enter it manually.
+    var manual = await showDuelRatingPopup(title, derived);
+    if (manual) {
+      if (manual.mal != null) duelMal = manual.mal;
+      if (manual.chars != null) duelSub = manual.chars;
+      if (manual.anim != null) duelSub = manual.anim;
+      if (manual.planet != null) duelPlanet = manual.planet;
+      if (manual.anilist != null) duelAnilist = manual.anilist;
+      if (manual.story != null) duelSub = manual.story;
     }
+    var duelEntry = '\\n    "' + nextId + '": {\\n' +
+      '        "malScore": ' + duelMal + ',\\n' +
+      '        "characters": ' + duelSub + ',\\n' +
+      '        "animRating": ' + duelSub + ',\\n' +
+      '        "animePlanet": ' + duelPlanet + ',\\n' +
+      '        "anilist": ' + duelAnilist + ',\\n' +
+      '        "title": ' + JSON.stringify(title) + ',\\n' +
+      '        "storyRating": ' + duelSub + '\\n' +
+      '    }';
+    if (ratingsContent) {
+      var _rc = ratingsContent.lastIndexOf('}');
+      if (_rc >= 0) {
+        var _before = ratingsContent.substring(0, _rc).replace(/,\s*$/, '');
+        ratingsContent = _before + ',' + duelEntry + '\n}' + ratingsContent.substring(_rc + 1);
+      }
+    } else {
+      // anime-ratings.json does not exist yet — create it with this single entry
+      ratingsContent = '{\n' + duelEntry + '\n}';
+    }
+    if (genre) {
+      var addGenres = genre.split(/[,·]/).map(function(g) { return g.trim(); }).filter(Boolean);
+      scriptContent = applyGenres(scriptContent, nextId, addGenres);
+    }
+    adStep('committing script.js (2/4)…');
+    var ok1 = await githubCommit('index.html', indexContent, 'admin: add anime #' + nextId + ' - ' + title);
+    adStep('committing script.js (3/4)…');
+    var ok2 = await githubCommit('script.js', scriptContent, 'admin: add data for anime #' + nextId + ' - ' + title);
+    adStep('committing anime-ratings.json (4/4)…');
+    var ok3 = await githubCommit('anime-ratings.json', ratingsContent, 'admin: duel data for anime #' + nextId + ' - ' + title);
+    hideLoading();
+    adStep('');
+    var ok = ok1 && ok2 && ok3;
+    saveCommitResult('add-anime', ok, 'anime #' + nextId + ' - ' + title);
+    if (ok) msgOk('Anime #' + nextId + ' added: ' + title + ' (duel data included)');
+    else msgFail('One or more commits failed — check the commit log');
+  } catch (e) {
+    hideLoading();
+    adStep('');
+    saveCommitResult('add-anime', false, 'exception: ' + ((e && e.message) || e));
+    msgFail('Commit threw: ' + ((e && e.message) || e));
   }
-  if (genre) {
-    var addGenres = genre.split(/[,·]/).map(function(g) { return g.trim(); }).filter(Boolean);
-    scriptContent = applyGenres(scriptContent, nextId, addGenres);
-  }
-  var ok1 = await githubCommit('index.html', indexContent, 'admin: add anime #' + nextId + ' - ' + title);
-  var ok2 = await githubCommit('script.js', scriptContent, 'admin: add data for anime #' + nextId + ' - ' + title);
-  var ok3 = ratingsContent ? await githubCommit('anime-ratings.json', ratingsContent, 'admin: duel data for anime #' + nextId + ' - ' + title) : true;
-  hideLoading();
-  if (ok1 && ok2 && ok3) msgOk('Anime #' + nextId + ' added: ' + title + ' (duel data included)');
-  else msgFail('Commit failed');
 }
 
 

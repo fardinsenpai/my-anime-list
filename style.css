@@ -30,6 +30,7 @@
    /* --------------------------------------
    TOP NAVIGATION BAR - SLIM VERSION
 -------------------------------------- */
+body.duel-mode-active .now-strip { display: none !important; }
 .topbar {
   position: fixed;
   top: 0;
@@ -3178,24 +3179,6 @@
   0% { opacity: 0; transform: translateX(-12px); }
   100% { opacity: 1; transform: translateX(0); }
 }
-.body-stats-bar {
-  max-width: 640px;
-  margin: 0 auto;
-  padding: 24px 16px 40px;
-}
-.stats-bar-heading {
-  font-family: 'Orbitron', sans-serif;
-  font-size: 20px;
-  font-weight: 900;
-  text-align: center;
-  margin-bottom: 32px;
-  letter-spacing: 3px;
-  background: linear-gradient(135deg, #FFD700, #FF6B35, #FF1493);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  filter: drop-shadow(0 0 20px rgba(255,215,0,0.3));
-}
 .stats-bar-card {
   background: rgba(15, 20, 40, 0.7);
   border: 1px solid rgba(255, 215, 0, 0.12);
@@ -3340,9 +3323,6 @@
   letter-spacing: 0.5px;
 }
 @media (max-width: 767px) {
-  .body-stats-bar {
-    padding: 16px 10px 30px;
-  }
   .stats-bar-card {
     padding: 14px 14px;
   }
@@ -3352,9 +3332,6 @@
   }
   .stats-bar-title {
     font-size: 13px;
-  }
-  .stats-bar-heading {
-    font-size: 16px;
   }
 }
 
@@ -5368,38 +5345,8 @@ body.perf-no-heading-anim .header h1::after { animation: none !important; }
   60%  { opacity: 1; filter: blur(0); }
   100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
 }
-/* two petals drifting inside each card */
-.now-card::before,
-.now-card::after {
-  content: '';
-  position: absolute;
-  width: 14px;
-  height: 14px;
-  background: hsl(350, 70%, 80%);
-  border-radius: 100% 0% 100% 0% / 100% 0% 100% 0%;
-  opacity: 0;
-  pointer-events: none;
-  z-index: 0;
-}
-.now-card::before {
-  top: -16px;
-  left: 18%;
-  animation: nowPetalFall 7s linear infinite 1.2s;
-}
-.now-card::after {
-  top: -16px;
-  left: 72%;
-  width: 10px;
-  height: 10px;
-  animation: nowPetalFall 9s linear infinite 4s;
-}
-@keyframes nowPetalFall {
-  0%   { opacity: 0; transform: translate(0, 0) rotate(0deg); }
-  8%   { opacity: 0.75; }
-  50%  { transform: translate(-18px, 55px) rotate(160deg); }
-  92%  { opacity: 0.55; }
-  100% { opacity: 0; transform: translate(-34px, 120px) rotate(340deg); }
-}
+/* hidden while Anime Duel is active (duel-system.js toggles body.duel-mode-active) */
+body.duel-mode-active #nowStrip { display: none !important; }
 .now-ringwrap {
   position: relative;
   z-index: 1;
@@ -5505,3 +5452,5 @@ body.perf-no-heading-anim .header h1::after { animation: none !important; }
 }
 .now-meta { font-size: 12.5px; font-weight: 600; color: #ffb7d5; margin: 3px 0 4px; }
 .now-eps { font-size: 12px; font-weight: 600; color: #7d7d95; }
+
+@keyframes adBar { from { transform: translateX(-70px); } to { transform: translateX(70px); } }

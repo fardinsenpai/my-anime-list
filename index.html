@@ -251,15 +251,6 @@
   </a>
 </li>
 <li>
-  <a href="javascript:void(0)" id="statsBarBtn">
-    <svg width="32" height="32" viewBox="0 0 64 64">
-      <rect x="10" y="30" width="10" height="24" fill="#00E5FF"/>
-      <rect x="27" y="20" width="10" height="34" fill="#FFD700"/>
-      <rect x="44" y="10" width="10" height="44" fill="#FF69B4"/>
-    </svg> Stats Bar
-  </a>
-</li>
-<li>
   <a href="javascript:void(0)" id="topSecretsBtn">
     <svg width="32" height="32" viewBox="0 0 64 64" fill="none">
       <rect x="10" y="24" width="44" height="32" rx="4" stroke="#FF6B6B" stroke-width="3.5" fill="none"/>
@@ -614,7 +605,8 @@
   </div>
 </div>
 
-<div class="body-stats-bar" id="statsBarContainer" style="display:none;">
+<!-- hidden data source for the home-page Now Strip + the admin Update Watching/Reading tabs -->
+<div id="statsBarSource" hidden>
   <div class="stats-bar-card"><div class="stats-bar-label">🎬 Currently Watching</div><div class="stats-bar-inner"><div class="stats-bar-poster"><img src="https://media.kitsu.app/anime/50108/poster_image/large-72566980f13de5aeae5c636ff3381917.jpeg" alt="Liar Game"></div><div class="stats-bar-info"><div class="stats-bar-title">Liar Game</div><div class="stats-bar-meta">Season-1</div><div class="stats-bar-track"><div class="stats-bar-fill" style="width: 87%;"></div></div><div class="stats-bar-eps">Episode 21 / 24</div></div></div></div>
 
   <div class="stats-bar-card"><div class="stats-bar-label">📖 Currently Reading</div><div class="stats-bar-inner"><div class="stats-bar-poster"><img src="https://media.kitsu.app/anime/44973/poster_image/large-ca235304c71f4233e60f6efb3967654d.jpeg" alt="Blue Lock"></div><div class="stats-bar-info"><div class="stats-bar-title">Blue Lock</div><div class="stats-bar-meta">Volume 40</div><div class="stats-bar-track"><div class="stats-bar-fill" style="width: 68%;"></div></div><div class="stats-bar-eps">Chapter 364</div></div></div></div>
@@ -1891,7 +1883,11 @@
 
       <!-- Loading overlay -->
       <div id="adminLoading" style="display:none;position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.85);z-index:10;align-items:center;justify-content:center;border-radius:4px;">
-        <div style="color:#00ff41;font-family:monospace;font-size:14px;">⏳ EXECUTING...</div>
+        <div style="text-align:center;color:#00ff41;font-family:monospace;">
+          <div id="adLoadingLine" style="font-size:14px;letter-spacing:2px;margin-bottom:6px;">⏳ EXECUTING...</div>
+          <div id="adLoadingStep" style="font-size:11px;color:#8b93a7;letter-spacing:0.5px;margin-bottom:10px;"></div>
+          <span style="display:block;width:220px;height:3px;margin:12px auto 0;background:linear-gradient(90deg,transparent,#00ff41,transparent);animation:adBar 1s linear infinite;"></span>
+        </div>
       </div>
     </div>
   </div>
