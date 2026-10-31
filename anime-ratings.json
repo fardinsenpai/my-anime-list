@@ -1,4 +1,4 @@
-{
+﻿{
     "1": {
         "malScore": 7.9,
         "characters": 8.5,
@@ -2138,7 +2138,7 @@
         "animRating": 7,
         "animePlanet": 3.5,
         "anilist": 68,
-        "title": "An Observation Log of My FiancÃ©e Who Calls Herself a Villainess",
+        "title": "An Observation Log of My Fiancée Who Calls Herself a Villainess",
         "storyRating": 7
     },
     "239": {
@@ -2340,51 +2340,50 @@
         "storyRating": 7.5
     },
     "261": {
-        "malScore": 7.0,
-        "characters": 7.0,
-        "animRating": 7.0,
-        "animePlanet": 3.5,
-        "anilist": 70,
-        "title": "The Water Magician",
-        "storyRating": 7.0
-    },
+        "malScore": 6.2,
+        "characters": 6,
+        "animRating": 6.5,
+        "animePlanet": 3.3,
+        "anilist": 61,
+        "title": "The Strongest Sage With the Weakest Crest",
+        "storyRating": 6
+    }
     "262": {
         "malScore": 6.9,
-        "characters": 7.0,
-        "animRating": 7.0,
+        "characters": 7,
+        "animRating": 7,
         "animePlanet": 3.5,
         "anilist": 69,
         "title": "Seirei Gensouki: Spirit Chronicles",
-        "storyRating": 7.0
+        "storyRating": 7
     },
     "263": {
         "malScore": 6.9,
-        "characters": 7.0,
-        "animRating": 7.0,
+        "characters": 7,
+        "animRating": 7,
         "animePlanet": 3.5,
         "anilist": 69,
         "title": "BLACK TORCH",
-        "storyRating": 7.0
+        "storyRating": 7
     },
     "264": {
         "malScore": 6.2,
-        "characters": 6.0,
-        "animRating": 6.0,
+        "characters": 6,
+        "animRating": 6,
         "animePlanet": 3.1,
         "anilist": 62,
         "title": "From Overshadowed to Overpowered: Second Reincarnation of a Talentless Sage",
-        "storyRating": 6.0
+        "storyRating": 6
     },
     "265": {
         "malScore": 6.5,
         "characters": 6.9,
-        "animRating": 6.0,
+        "animRating": 6,
         "animePlanet": 3.3,
         "anilist": 68,
         "title": "Am I Actually the Strongest?",
         "storyRating": 6.8
-    }
-,
+    },
     "266": {
         "malScore": 7.19,
         "characters": 7,
@@ -2393,8 +2392,7 @@
         "anilist": 68,
         "title": "Tomb Raider King",
         "storyRating": 7
-    }
-,
+    },
     "267": {
         "malScore": 7.56,
         "characters": 7.5,
@@ -2403,8 +2401,7 @@
         "anilist": 73,
         "title": "Hanaori-san Still Wants to Fight in the Next Life",
         "storyRating": 7.5
-    }
-,
+    },
     "268": {
         "malScore": 6.76,
         "characters": 7,
@@ -2413,8 +2410,7 @@
         "anilist": 62,
         "title": "I Became a Legend After My 10 Year-Long Last Stand",
         "storyRating": 7
-    }
-,
+    },
     "269": {
         "malScore": 6.99,
         "characters": 7,
@@ -2423,8 +2419,7 @@
         "anilist": 69,
         "title": "Rich Girl Caretaker: I'm Secretly the Caregiver of the Most Popular Girl in This Rich Kid School",
         "storyRating": 7
-    }
-,
+    },
     "270": {
         "malScore": 7.12,
         "characters": 7,
@@ -2433,8 +2428,7 @@
         "anilist": 67,
         "title": "The Exiled Heavy Knight Knows How to Game the System",
         "storyRating": 7
-    }
-,
+    },
     "271": {
         "malScore": 6.89,
         "characters": 7,
@@ -2443,8 +2437,7 @@
         "anilist": 73,
         "title": "The Laid-Off Cheat-Granting Mage Enjoys a Second Lease on Life",
         "storyRating": 7
-    }
-,
+    },
     "272": {
         "malScore": 7.77,
         "characters": 8,
@@ -2453,8 +2446,7 @@
         "anilist": 76,
         "title": "Overgeared",
         "storyRating": 8
-    }
-,
+    },
     "273": {
         "malScore": 6.2,
         "characters": 6,
@@ -2463,8 +2455,7 @@
         "anilist": 61,
         "title": "The Villager of Level 999",
         "storyRating": 6
-    }
-,
+    },
     "274": {
         "malScore": 7.56,
         "characters": 7.5,
@@ -2473,8 +2464,7 @@
         "anilist": 74,
         "title": "KONOSUBA -An Explosion on This Wonderful World!",
         "storyRating": 7.5
-    }
-,
+    },
     "275": {
         "malScore": 7.24,
         "characters": 7,
@@ -2483,8 +2473,7 @@
         "anilist": 71,
         "title": "Cinderella Chef",
         "storyRating": 7
-    }
-,
+    },
     "276": {
         "malScore": 7.78,
         "characters": 8,
@@ -2493,8 +2482,7 @@
         "anilist": 78,
         "title": "Tamon's B-Side",
         "storyRating": 8
-    }
-,
+    },
     "277": {
         "malScore": 7.85,
         "characters": 8,
@@ -2503,8 +2491,7 @@
         "anilist": 77,
         "title": "Mobile Suit Gundam",
         "storyRating": 8
-    }
-,
+    },
     "278": {
         "malScore": 7.54,
         "characters": 7.5,
@@ -2513,8 +2500,7 @@
         "anilist": 76,
         "title": "Agents of the Four Seasons: Dance of Spring",
         "storyRating": 7.5
-    }
-,
+    },
     "279": {
         "malScore": 6.9,
         "characters": 7,
@@ -2523,8 +2509,7 @@
         "anilist": 64,
         "title": "Gantz",
         "storyRating": 7
-    }
-,
+    },
     "280": {
         "malScore": 6.4,
         "characters": 6.5,
@@ -2533,8 +2518,7 @@
         "anilist": 57,
         "title": "The strongest job is apparently not a hero or a sage, but an appraiser (provisional)!",
         "storyRating": 6.5
-    }
-,
+    },
     "281": {
         "malScore": 7.41,
         "characters": 7.5,
@@ -2543,8 +2527,7 @@
         "anilist": 71,
         "title": "Kusunoki's Garden of Gods",
         "storyRating": 7.5
-    }
-,
+    },
     "282": {
         "malScore": 7.05,
         "characters": 7,
@@ -2553,8 +2536,7 @@
         "anilist": 66,
         "title": "Noble Reincarnation: Born Blessed, So I'll Obtain Ultimate Power",
         "storyRating": 7
-    }
-,
+    },
     "283": {
         "malScore": 6.9,
         "characters": 7,
@@ -2563,8 +2545,7 @@
         "anilist": 64,
         "title": "ROLL OVER AND DIE: I Will Fight for an Ordinary Life with My Love and Cursed Sword!",
         "storyRating": 7
-    }
-,
+    },
     "284": {
         "malScore": 7.48,
         "characters": 7.5,
@@ -2573,8 +2554,7 @@
         "anilist": 72,
         "title": "HELL MODE: The Hardcore Gamer Dominates in Another World with Garbage Balancing",
         "storyRating": 7.5
-    }
-,
+    },
     "285": {
         "malScore": 6.9,
         "characters": 7,
@@ -2583,8 +2563,7 @@
         "anilist": 64,
         "title": "Quanqiu Gao Wu",
         "storyRating": 7
-    }
-,
+    },
     "286": {
         "malScore": 6.83,
         "characters": 7,
@@ -2593,8 +2572,7 @@
         "anilist": 63,
         "title": "Plunderer",
         "storyRating": 7
-    }
-,
+    },
     "287": {
         "malScore": 7.7,
         "characters": 7.5,
@@ -2603,6 +2581,14 @@
         "anilist": 75,
         "title": "The King's Avatar",
         "storyRating": 7.5
+    },
+    "288": {
+        "malScore": 7.63,
+        "characters": 7.5,
+        "animRating": 7.5,
+        "animePlanet": 3.8,
+        "anilist": 69,
+        "title": "The First Order",
+        "storyRating": 7.5
     }
-,\n    "288": {\n        "malScore": 7.63,\n        "characters": 7.5,\n        "animRating": 7.5,\n        "animePlanet": 3.8,\n        "anilist": 69,\n        "title": "The First Order",\n        "storyRating": 7.5\n    }
 }

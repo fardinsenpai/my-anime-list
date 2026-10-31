@@ -7771,14 +7771,14 @@ async function commitAddAnime() {
       if (manual.anilist != null) duelAnilist = manual.anilist;
       if (manual.story != null) duelSub = manual.story;
     }
-    var duelEntry = '\\n    "' + nextId + '": {\\n' +
-      '        "malScore": ' + duelMal + ',\\n' +
-      '        "characters": ' + duelSub + ',\\n' +
-      '        "animRating": ' + duelSub + ',\\n' +
-      '        "animePlanet": ' + duelPlanet + ',\\n' +
-      '        "anilist": ' + duelAnilist + ',\\n' +
-      '        "title": ' + JSON.stringify(title) + ',\\n' +
-      '        "storyRating": ' + duelSub + '\\n' +
+    var duelEntry = '\n    "' + nextId + '": {\n' +
+      '        "malScore": ' + duelMal + ',\n' +
+      '        "characters": ' + duelSub + ',\n' +
+      '        "animRating": ' + duelSub + ',\n' +
+      '        "animePlanet": ' + duelPlanet + ',\n' +
+      '        "anilist": ' + duelAnilist + ',\n' +
+      '        "title": ' + JSON.stringify(title) + ',\n' +
+      '        "storyRating": ' + duelSub + '\n' +
       '    }';
     if (ratingsContent) {
       var _rc = ratingsContent.lastIndexOf('}');
