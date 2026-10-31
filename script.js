@@ -3967,7 +3967,9 @@ function injectCardMetaFromRatings() {
       }
       if (!malEl) {
         var backContent = card.querySelector('.back-content');
-        if (backContent && typeof entry.malScore === 'number') {
+        // Skip if the card already shows a MAL value (hardcoded from admin form)
+        var existingMalText = card.textContent || '';
+        if (backContent && typeof entry.malScore === 'number' && !existingMalText.match(/MAL Rating:/)) {
           var div = document.createElement('div');
           div.className = 'back-mal';
           div.innerHTML = '⭐ MAL: ' + entry.malScore.toFixed(2);
