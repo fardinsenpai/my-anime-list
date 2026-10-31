@@ -30,8 +30,8 @@
     <div class="ad-gate-sub">// PROVE YOU ARE ADMIN //</div>
 
     <div class="ad-gate-card" style="border:1px solid #ff9ec633;background:rgba(26,10,18,0.7);box-shadow:0 0 30px #ff9ec622, inset 0 0 20px #ff9ec611;border-radius:16px;padding:24px;">
+      <label style="color:#ff9ec6;font-size:12px;cursor:pointer;text-shadow:0 0 8px #ff9ec6;letter-spacing:0.5px;display:block;margin-bottom:8px;"><input type="checkbox" id="adminRememberPin" style="margin-right:6px;accent-color:#ff9ec6;width:16px;height:16px;"> 🌸 Remember PIN</label>
       <div class="ad-pin-row" id="adminPinScreen" style="display:none">
-        <label style="color:#ff9ec6;font-size:12px;cursor:pointer;text-shadow:0 0 8px #ff9ec6;letter-spacing:0.5px;"><input type="checkbox" id="adminRememberPin" style="margin-right:6px;accent-color:#ff9ec6;width:16px;height:16px;"> 🌸 Remember PIN</label>
         <input type="password" maxlength="1" id="adminPinInput" autocomplete="off" oninput="movePin(this,0)" onkeydown="pinKey(this,event,0)" style="background:#1a0f15;border:1px solid #ff9ec6;border-radius:6px;color:#fff;padding:6px 10px;font-size:18px;text-align:center;box-shadow:0 0 12px #ff9ec633, inset 0 0 8px #ff9ec611;transition:box-shadow .2s;">
         <input type="password" maxlength="1" autocomplete="off" oninput="movePin(this,1)" onkeydown="pinKey(this,event,1)" style="background:#1a0f15;border:1px solid #ff9ec6;border-radius:6px;color:#fff;padding:6px 10px;font-size:18px;text-align:center;box-shadow:0 0 12px #ff9ec633, inset 0 0 8px #ff9ec611;">
         <input type="password" maxlength="1" autocomplete="off" oninput="movePin(this,2)" onkeydown="pinKey(this,event,2)" style="background:#1a0f15;border:1px solid #ff9ec6;border-radius:6px;color:#fff;padding:6px 10px;font-size:18px;text-align:center;box-shadow:0 0 12px #ff9ec633, inset 0 0 8px #ff9ec611;">
