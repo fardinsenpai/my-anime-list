@@ -29,18 +29,18 @@
     <div class="ad-gate-logo">SECURE</div>
     <div class="ad-gate-sub">// PROVE YOU ARE ADMIN //</div>
 
-    <div class="ad-gate-card">
+    <div class="ad-gate-card" style="border:1px solid #ff9ec633;background:rgba(26,10,18,0.7);box-shadow:0 0 30px #ff9ec622, inset 0 0 20px #ff9ec611;border-radius:16px;padding:24px;">
       <div class="ad-pin-row" id="adminPinScreen" style="display:none">
-        <label style="color:#8b93a7;font-size:11px;cursor:pointer;"><input type="checkbox" id="adminRememberPin" style="margin-right:4px;"> Remember PIN</label>
-        <input type="password" maxlength="1" id="adminPinInput" autocomplete="off" oninput="movePin(this,0)" onkeydown="pinKey(this,event,0)">
-        <input type="password" maxlength="1" autocomplete="off" oninput="movePin(this,1)" onkeydown="pinKey(this,event,1)">
-        <input type="password" maxlength="1" autocomplete="off" oninput="movePin(this,2)" onkeydown="pinKey(this,event,2)">
-        <input type="password" maxlength="1" autocomplete="off" oninput="movePin(this,3)" onkeydown="pinKey(this,event,3)">
-        <input type="password" maxlength="1" autocomplete="off" oninput="movePin(this,4)" onkeydown="pinKey(this,event,4)">
-        <input type="password" maxlength="1" autocomplete="off" oninput="movePin(this,5)" onkeydown="pinKey(this,event,5)">
+        <label style="color:#ff9ec6;font-size:12px;cursor:pointer;text-shadow:0 0 8px #ff9ec6;letter-spacing:0.5px;"><input type="checkbox" id="adminRememberPin" style="margin-right:6px;accent-color:#ff9ec6;width:16px;height:16px;"> 🌸 Remember PIN</label>
+        <input type="password" maxlength="1" id="adminPinInput" autocomplete="off" oninput="movePin(this,0)" onkeydown="pinKey(this,event,0)" style="background:#1a0f15;border:1px solid #ff9ec6;border-radius:6px;color:#fff;padding:6px 10px;font-size:18px;text-align:center;box-shadow:0 0 12px #ff9ec633, inset 0 0 8px #ff9ec611;transition:box-shadow .2s;">
+        <input type="password" maxlength="1" autocomplete="off" oninput="movePin(this,1)" onkeydown="pinKey(this,event,1)" style="background:#1a0f15;border:1px solid #ff9ec6;border-radius:6px;color:#fff;padding:6px 10px;font-size:18px;text-align:center;box-shadow:0 0 12px #ff9ec633, inset 0 0 8px #ff9ec611;">
+        <input type="password" maxlength="1" autocomplete="off" oninput="movePin(this,2)" onkeydown="pinKey(this,event,2)" style="background:#1a0f15;border:1px solid #ff9ec6;border-radius:6px;color:#fff;padding:6px 10px;font-size:18px;text-align:center;box-shadow:0 0 12px #ff9ec633, inset 0 0 8px #ff9ec611;">
+        <input type="password" maxlength="1" autocomplete="off" oninput="movePin(this,3)" onkeydown="pinKey(this,event,3)" style="background:#1a0f15;border:1px solid #ff9ec6;border-radius:6px;color:#fff;padding:6px 10px;font-size:18px;text-align:center;box-shadow:0 0 12px #ff9ec633, inset 0 0 8px #ff9ec611;">
+        <input type="password" maxlength="1" autocomplete="off" oninput="movePin(this,4)" onkeydown="pinKey(this,event,4)" style="background:#1a0f15;border:1px solid #ff9ec6;border-radius:6px;color:#fff;padding:6px 10px;font-size:18px;text-align:center;box-shadow:0 0 12px #ff9ec633, inset 0 0 8px #ff9ec611;">
+        <input type="password" maxlength="1" autocomplete="off" oninput="movePin(this,5)" onkeydown="pinKey(this,event,5)" style="background:#1a0f15;border:1px solid #ff9ec6;border-radius:6px;color:#fff;padding:6px 10px;font-size:18px;text-align:center;box-shadow:0 0 12px #ff9ec633, inset 0 0 8px #ff9ec611;">
       </div>
-      <div class="ad-gate-err" id="adminPinError" style="display:none">✕ ACCESS DENIED</div>
-      <button class="ad-gate-btn" id="adminPinBtn" onclick="checkAdminPin()">▶ VERIFY</button>
+      <div class="ad-gate-err" id="adminPinError" style="display:none;color:#ff7eb8;text-shadow:0 0 8px #ff7eb8;font-size:13px;font-weight:600;letter-spacing:0.5px;">✕ ACCESS DENIED</div>
+      <button class="ad-gate-btn" id="adminPinBtn" onclick="checkAdminPin()" style="background:linear-gradient(135deg,#ff6b9d,#ff9ec6);border:1px solid #ff9ec6;border-radius:8px;color:#fff;padding:8px 18px;font-size:14px;letter-spacing:1px;box-shadow:0 0 16px #ff9ec655, 0 0 4px #ff6b9d88;transition:all .2s;text-transform:uppercase;font-weight:600;">▶ VERIFY</button>
     </div>
 
     <div class="ad-boot" id="bootLine">// STANDING BY //</div>
