@@ -21,7 +21,7 @@
 
   /* ── DATA LOADING (cached) ─────────────────────────── */
   var DB_CACHE_KEY = 'fardin_anime_db';
-  var DB_CACHE_VER = 2;
+  var DB_CACHE_VER = 3;
 
   async function loadAnimeDatabase() {
     // Try localStorage cache first
@@ -39,7 +39,9 @@
 
     // Fetch fresh
     try {
-      const res  = await fetch('anime-ratings.json');
+      // no-cache: revalidate with the server (ETag) so an edited
+      // anime-ratings.json is never served from a stale HTTP cache
+      const res  = await fetch('anime-ratings.json', { cache: 'no-cache' });
       if (!res.ok) throw new Error(res.status);
       const data = await res.json();
       DuelState.animeDatabase = Array.isArray(data) ? data : Object.values(data);

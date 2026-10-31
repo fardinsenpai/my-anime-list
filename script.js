@@ -3933,7 +3933,7 @@ let ratingsLoading = null;
 function loadRatings() {
   if (ratingsCache) return Promise.resolve(ratingsCache);
   if (!ratingsLoading) {
-    ratingsLoading = fetch('anime-ratings.json')
+    ratingsLoading = fetch('anime-ratings.json', { cache: 'no-cache' })
       .then(function (r) { return r.json(); })
       .then(function (d) { ratingsCache = d || {}; return ratingsCache; })
       .catch(function () { ratingsLoading = null; return null; });
