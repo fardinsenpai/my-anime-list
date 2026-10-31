@@ -2608,5 +2608,14 @@
                 "anilist": 67,
                 "title": "TRIGUN STARGAZE",
                 "storyRating": 7
+        },
+        "291": {
+                "malScore": 6.83,
+                "characters": 7,
+                "animRating": 7,
+                "animePlanet": 3.4,
+                "anilist": 68,
+                "title": "The Frontier Lord Begins with Zero Subjects",
+                "storyRating": 7
         }
 }
