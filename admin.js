@@ -1796,10 +1796,13 @@ async function commitAddAnime() {
       '        "storyRating": ' + duelSub + '\n' +
       '    }';
     if (ratingsContent) {
-      var _rc = ratingsContent.lastIndexOf('}');
-      if (_rc >= 0) {
-        var _before = ratingsContent.substring(0, _rc).replace(/,\s*$/, '');
-        ratingsContent = _before + ',' + duelEntry + '\n}' + ratingsContent.substring(_rc + 1);
+      try {
+        var dbObj = JSON.parse(ratingsContent);
+        dbObj[nextId] = { malScore: duelMal, characters: duelSub, animRating: duelSub, animePlanet: duelPlanet, anilist: duelAnilist, title: title, storyRating: duelSub };
+        ratingsContent = JSON.stringify(dbObj, null, 8);
+      } catch (e) {
+        var _rc = ratingsContent.lastIndexOf('}');
+        if (_rc >= 0) { var _before = ratingsContent.substring(0, _rc).replace(/,\s*$/, ''); ratingsContent = _before + ',' + duelEntry + '\n}' + ratingsContent.substring(_rc + 1); }
       }
     } else {
       // anime-ratings.json does not exist yet — create it with this single entry
