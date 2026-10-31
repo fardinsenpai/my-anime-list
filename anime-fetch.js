@@ -298,6 +298,44 @@
     return bits.join(' | ');
   }
 
+  /* Re-fetch just the MAL score for the currently typed title — calls Jikan
+     again (useful when Jikan was blocked/rate-limited on the first FETCH DATA). */
+  window.refetchMal = function () {
+    var input = document.getElementById('adminAddTitle');
+    var malField = document.getElementById('adminAddMal');
+    var status = document.getElementById('adminFetchStatus');
+    var name = input ? input.value.trim() : '';
+
+    if (!name) {
+      if (status) { status.textContent = 'Type an anime name first.'; status.style.color = '#ff3355'; }
+      if (input) input.focus();
+      return;
+    }
+
+    if (status) { status.textContent = 'Re-fetching MAL from Jikan for "' + name + '"…'; status.style.color = '#8b93a7'; }
+
+    searchAniList(name).then(function (data) {
+      if (!data || !data.idMal) {
+        if (status) { status.textContent = 'No AniList match — cannot re-fetch MAL.'; status.style.color = '#ff3355'; }
+        return;
+      }
+      return malScore(data.idMal).then(function (real) {
+        if (real !== null && malField) {
+          malField.value = real;
+          if (status) { status.textContent = 'MAL re-fetched: ' + real + ' (Jikan)'; status.style.color = '#00ff41'; }
+        } else if (data.rating !== null && malField) {
+          var est = Math.round((MAL_FIT.slope * data.rating + MAL_FIT.intercept) * 100) / 100;
+          malField.value = est;
+          if (status) { status.textContent = 'MAL re-fetched: ' + est + ' (est.) — Jikan unreachable'; status.style.color = '#ffa500'; }
+        } else {
+          if (status) { status.textContent = 'Could not get MAL score.'; status.style.color = '#ff3355'; }
+        }
+      });
+    }).catch(function (err) {
+      if (status) { status.textContent = 'Re-fetch failed: ' + ((err && err.message) || 'network error'); status.style.color = '#ff3355'; }
+    });
+  };
+
   window.fetchAnimeData = function () {
     var input = document.getElementById('adminAddTitle');
     var button = document.getElementById('adminFetchBtn');
