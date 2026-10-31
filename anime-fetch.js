@@ -192,14 +192,22 @@
     return best;
   }
 
-  function malScore(idMal) {
+  function malScore(idMal, attempt) {
     if (!idMal) return Promise.resolve(null);
-    return fetchJson(JIKAN_URL + idMal + '?sfw', { headers: { Accept: 'application/json' } }, 6000)
+    attempt = attempt || 1;
+    return fetchJson(JIKAN_URL + idMal + '?sfw', { headers: { Accept: 'application/json' } }, 10000)
       .then(function (json) {
         var score = json && json.data && json.data.score;
-        return typeof score === 'number' && score > 0 ? Math.round(score * 100) / 100 : null;
+        if (typeof score === 'number' && score > 0) return Math.round(score * 100) / 100;
+        // Jikan returned 200 but no usable score — retry once
+        if (attempt < 2) return malScore(idMal, 2);
+        return null;
       })
-      .catch(function () { return null; });
+      .catch(function (e) {
+        // Network/timeout — retry once before giving up
+        if (attempt < 2) return malScore(idMal, 2);
+        return null;
+      });
   }
 
   function searchAniList(name) {
@@ -290,7 +298,8 @@
     bits.push(data.season || 'season ?');
     bits.push((data.episodes || '?') + ' eps');
     bits.push('AniList ' + (data.rating === null ? '?' : data.rating));
-    bits.push('MAL ' + (data.mal === null ? 'n/a' : data.mal + (data.malEstimated ? ' (est.)' : '')));
+    if (data.mal === null) bits.push('MAL n/a');
+    else bits.push('MAL ' + data.mal + (data.malEstimated ? ' (est.)' : ' (Jikan)'));
     bits.push(data.genres.length ? data.genres.join(' · ') : 'no genre matched — pick one');
     return bits.join(' | ');
   }
