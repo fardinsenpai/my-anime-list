@@ -2529,6 +2529,7 @@ document.addEventListener('DOMContentLoaded', () => {
   loadMyAvatar();        // the visitor's own choice (if any) wins for their side
   restoreChatFromStorage();
   repaintAllAvatars();   // the welcome line's avatar follows the published CHAT_AVATARS
+  injectCardMetaFromRatings();
 });
 
 // ===== TOGGLE CHAT =====
@@ -3939,6 +3940,42 @@ function loadRatings() {
       .catch(function () { ratingsLoading = null; return null; });
   }
   return ratingsLoading;
+}
+
+/* Safeguard: if any card is missing genre/MAL display, inject it from
+   the ratings DB so future admin commits never leave cards blank. */
+function injectCardMetaFromRatings() {
+  loadRatings().then(function (db) {
+    if (!db) return;
+    document.querySelectorAll('.card, .anime-card').forEach(function (card) {
+      var badgeEl = card.querySelector('.badge');
+      if (!badgeEl) return;
+      var idMatch = String(badgeEl.textContent || '').trim().match(/#(\d+)/);
+      if (!idMatch) return;
+      var entry = db[idMatch[1]];
+      if (!entry || !entry.title) return;
+      var genreEl = card.querySelector('.back-genre');
+      var malEl = card.querySelector('.back-mal');
+      if (!genreEl) {
+        var backContent = card.querySelector('.back-content');
+        if (backContent && entry.genres) {
+          var div = document.createElement('div');
+          div.className = 'back-genre';
+          div.innerHTML = '⚔️ ' + (Array.isArray(entry.genres) ? entry.genres.join(' · ') : String(entry.genres || ''));
+          backContent.appendChild(div);
+        }
+      }
+      if (!malEl) {
+        var backContent = card.querySelector('.back-content');
+        if (backContent && typeof entry.malScore === 'number') {
+          var div = document.createElement('div');
+          div.className = 'back-mal';
+          div.innerHTML = '⭐ MAL: ' + entry.malScore.toFixed(2);
+          backContent.appendChild(div);
+        }
+      }
+    });
+  });
 }
 
 function localCards() {
