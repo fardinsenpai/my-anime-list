@@ -1748,6 +1748,9 @@ async function commitAddAnime() {
   var eps = parseInt(document.getElementById('adminAddEps').value) || 0;
   var rating = parseInt(document.getElementById('adminAddRating').value) || null;
   var mal = parseFloat(document.getElementById('adminAddMal').value);
+  var anim = parseFloat(document.getElementById('adminAddAnim').value);
+  var char = parseFloat(document.getElementById('adminAddChar').value);
+  var planet = parseFloat(document.getElementById('adminAddPlanet').value);
   var ott = _selectedOtt.join(', ');
   var studio = _selectedStudio.join(', ');
   var genre = _selectedGenre.join(', ');
@@ -1789,33 +1792,35 @@ async function commitAddAnime() {
     scriptContent = addEntry('window.STUDIO_DATA = ', '"' + nextId + '":' + studioArr);
     var duelMal = isFinite(mal) ? mal : (rating ? (0.0725 * rating + 2.2649) : 0);
     duelMal = Math.round(duelMal * 100) / 100;
-    var duelSub = Math.round(duelMal * 2) / 2;
-    var duelPlanet = Math.round((duelMal / 2) * 10) / 10;
+    var duelAnim = isFinite(anim) ? anim : Math.round(duelMal * 2) / 2;
+    var duelChar = isFinite(char) ? char : Math.round(duelMal * 2) / 2;
+    var duelPlanet = isFinite(planet) ? planet : Math.round((duelMal / 2) * 10) / 10;
     var duelAnilist = rating || 0;
-    var derived = { mal: duelMal, chars: duelSub, anim: duelSub, planet: duelPlanet, anilist: duelAnilist, story: duelSub };
+    var duelStory = isFinite(char) ? char : Math.round(duelMal * 2) / 2;
+    var derived = { mal: duelMal, chars: duelChar, anim: duelAnim, planet: duelPlanet, anilist: duelAnilist, story: duelStory };
     // If any duel data is missing / unsure (e.g. no Anime Planet), let the admin enter it manually.
     var manual = await showDuelRatingPopup(title, derived);
     if (manual) {
       if (manual.mal != null) duelMal = manual.mal;
-      if (manual.chars != null) duelSub = manual.chars;
-      if (manual.anim != null) duelSub = manual.anim;
+      if (manual.chars != null) duelChar = manual.chars;
+      if (manual.anim != null) duelAnim = manual.anim;
       if (manual.planet != null) duelPlanet = manual.planet;
       if (manual.anilist != null) duelAnilist = manual.anilist;
-      if (manual.story != null) duelSub = manual.story;
+      if (manual.story != null) duelStory = manual.story;
     }
     var duelEntry = '\n    "' + nextId + '": {\n' +
       '        "malScore": ' + duelMal + ',\n' +
-      '        "characters": ' + duelSub + ',\n' +
-      '        "animRating": ' + duelSub + ',\n' +
+      '        "characters": ' + duelChar + ',\n' +
+      '        "animRating": ' + duelAnim + ',\n' +
       '        "animePlanet": ' + duelPlanet + ',\n' +
       '        "anilist": ' + duelAnilist + ',\n' +
       '        "title": ' + JSON.stringify(title) + ',\n' +
-      '        "storyRating": ' + duelSub + '\n' +
+      '        "storyRating": ' + duelStory + '\n' +
       '    }';
     if (ratingsContent) {
       try {
         var dbObj = JSON.parse(ratingsContent);
-        dbObj[nextId] = { malScore: duelMal, characters: duelSub, animRating: duelSub, animePlanet: duelPlanet, anilist: duelAnilist, title: title, storyRating: duelSub };
+        dbObj[nextId] = { malScore: duelMal, characters: duelChar, animRating: duelAnim, animePlanet: duelPlanet, anilist: duelAnilist, title: title, storyRating: duelStory };
         ratingsContent = JSON.stringify(dbObj, null, 8);
       } catch (e) {
         var _rc = ratingsContent.lastIndexOf('}');

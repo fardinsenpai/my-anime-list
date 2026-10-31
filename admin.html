@@ -248,13 +248,16 @@
           <input type="text" id="adminAddTitle" class="admin-g-input" placeholder="Anime Title" style="flex:1;">
           <button class="admin-g-btn" type="button" id="adminFetchBtn" onclick="fetchAnimeData()" style="flex:0 0 auto;width:auto;padding:8px 14px;white-space:nowrap;">🔎 FETCH DATA</button>
         </div>
-        <div id="adminFetchStatus" class="ad-note" style="margin:-4px 0 10px;line-height:1.5;">Type an anime name, press FETCH DATA — title, poster, season, episodes, rating, MAL, genres, studio and OTT fill themselves.</div>
+        <div id="adminFetchStatus" class="ad-note" style="margin:-4px 0 10px;line-height:1.5;">Type an anime name, press FETCH DATA — title, poster, season, episodes, rating, MAL, genres, studio, OTT, Anim, Char, Planet fill themselves.</div>
         <input type="text" id="adminAddImg" class="admin-g-input" placeholder="Image URL">
         <div class="ad-row">
           <input type="text" id="adminAddSeason" class="admin-g-input" placeholder="Spring 2024">
           <input type="number" id="adminAddEps" class="admin-g-input narrow" placeholder="Eps">
           <input type="number" id="adminAddRating" class="admin-g-input narrow" placeholder="Rating" step="0.1" max="100">
           <input type="number" id="adminAddMal" class="admin-g-input narrow" placeholder="MAL" step="0.01" min="0" max="10">
+          <input type="number" id="adminAddAnim" class="admin-g-input narrow" placeholder="Anim" step="0.1" min="0" max="10">
+          <input type="number" id="adminAddChar" class="admin-g-input narrow" placeholder="Char" step="0.1" min="0" max="10">
+          <input type="number" id="adminAddPlanet" class="admin-g-input narrow" placeholder="Planet" step="0.1" min="0" max="10">
           <button type="button" onclick="refetchMal()" style="flex:0 0 auto;width:auto;padding:6px 10px;font-size:0.8rem;margin-left:4px;">↻ MAL</button>
         </div>
         <input type="text" id="adminAddSeasonLabel" class="admin-g-input" placeholder="Season Label (Season-1)">

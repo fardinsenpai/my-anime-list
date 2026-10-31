@@ -377,6 +377,24 @@
     return true;
   }
 
+  function fillExtraRatings(idOrTitle, db) {
+    if (!db) return;
+    var hit = null;
+    if (idOrTitle && String(idOrTitle).match(/^\d+$/) && db[String(idOrTitle)]) hit = db[String(idOrTitle)];
+    if (!hit && db) {
+      var key = String(idOrTitle || '').toLowerCase();
+      Object.keys(db).forEach(function(k){
+        var en = db[k];
+        if (en && en.title && String(en.title).toLowerCase() === key) hit = en;
+      });
+    }
+    if (hit) {
+      var a = document.getElementById('adminAddAnim'); if (a && (hit.animRating !== undefined && hit.animRating !== null)) a.value = hit.animRating;
+      var c = document.getElementById('adminAddChar'); if (c && (hit.characters !== undefined && hit.characters !== null)) c.value = hit.characters;
+      var p = document.getElementById('adminAddPlanet'); if (p && (hit.animePlanet !== undefined && hit.animePlanet !== null)) p.value = hit.animePlanet;
+    }
+  }
+
   function applyToForm(data) {
     setValue('adminAddTitle', data.title);
     setValue('adminAddImg', data.image);
@@ -384,6 +402,12 @@
     setValue('adminAddEps', data.episodes);
     setValue('adminAddRating', data.rating);
     setValue('adminAddMal', data.mal);
+    // Pull Animation / Characters / Anime Planet from ratings DB (updated via API/commit)
+    try {
+      var db = window.RATING_DATA || (typeof loadRatings !== 'undefined' ? null : null);
+      if (!db && typeof loadRatings === 'function') { loadRatings().then(function(d){ fillExtraRatings(data.id || data.title, d); }); }
+      else { fillExtraRatings(data.id || data.title, db); }
+    } catch(e){}
     var seasonLabel = document.getElementById('adminAddSeasonLabel');
     if (seasonLabel && !seasonLabel.value.trim()) seasonLabel.value = 'Season-1';
     applyPills(data);
