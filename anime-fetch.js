@@ -192,16 +192,29 @@
     return best;
   }
 
-  /* Fetch the real MAL score from Jikan. Falls back to the fitted estimate
-     only when Jikan is unreachable (labelled "(est.)" so you can correct it). */
+  /* Fetch the real MAL score from Jikan.
+     If Jikan is blocked directly (common on some networks), try again
+     through a CORS proxy so the real score is still found instead of
+     always falling back to the estimate. */
   function malScore(idMal) {
     if (!idMal) return Promise.resolve(null);
-    return fetchJson(JIKAN_URL + idMal + '?sfw', { headers: { Accept: 'application/json' } }, 8000)
+    var directUrl = JIKAN_URL + idMal + '?sfw';
+    return fetchJson(directUrl, { headers: { Accept: 'application/json' } }, 8000)
       .then(function (json) {
         var score = json && json.data && json.data.score;
-        return typeof score === 'number' && score > 0 ? Math.round(score * 100) / 100 : null;
+        if (typeof score === 'number' && score > 0) return Math.round(score * 100) / 100;
+        throw new Error('no score');
       })
-      .catch(function () { return null; });
+      .catch(function () {
+        // Jikan blocked — retry through CORS proxy
+        return fetchJson('https://api.allorigins.win/raw?url=' + encodeURIComponent(directUrl), { headers: { Accept: 'application/json' } }, 10000)
+          .then(function (json) {
+            var score = json && json.data && json.data.score;
+            if (typeof score === 'number' && score > 0) return Math.round(score * 100) / 100;
+            return null;
+          })
+          .catch(function () { return null; });
+      });
   }
 
   function searchAniList(name) {
