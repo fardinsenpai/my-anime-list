@@ -31,6 +31,7 @@
 
     <div class="ad-gate-card">
       <div class="ad-pin-row" id="adminPinScreen" style="display:none">
+        <label style="color:#8b93a7;font-size:11px;cursor:pointer;"><input type="checkbox" id="adminRememberPin" style="margin-right:4px;"> Remember PIN</label>
         <input type="password" maxlength="1" id="adminPinInput" autocomplete="off" oninput="movePin(this,0)" onkeydown="pinKey(this,event,0)">
         <input type="password" maxlength="1" autocomplete="off" oninput="movePin(this,1)" onkeydown="pinKey(this,event,1)">
         <input type="password" maxlength="1" autocomplete="off" oninput="movePin(this,2)" onkeydown="pinKey(this,event,2)">
