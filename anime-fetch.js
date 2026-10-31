@@ -8,9 +8,12 @@
    Sources
      · AniList GraphQL  — title, poster, episodes, air season, score, genres,
                           tags, studios, streaming links. CORS-friendly.
-     · Jikan (MAL API)  — the real MAL score, when it is reachable.
-     · Local fit        — if Jikan is down, MAL is estimated from the AniList
-                          score with the line fitted on this site's own
+     · Jikan (MAL API)  — the real MAL score, when the host is reachable.
+     · MAL page         — the same real score read straight off
+                          myanimelist.net through the r.jina.ai reader, used
+                          when Jikan is blocked by the network.
+     · Local fit        — if both of the above fail, MAL is estimated from the
+                          AniList score with the line fitted on this site's own
                           anime-ratings.json (0.0725 * score + 2.2649, R² 0.72)
                           and is clearly labelled as an estimate.
 
@@ -192,29 +195,114 @@
     return best;
   }
 
-  /* Fetch the real MAL score from Jikan.
-     If Jikan is blocked directly (common on some networks), try again
-     through a CORS proxy so the real score is still found instead of
-     always falling back to the estimate. */
-  function malScore(idMal) {
+  /* Where the last successful MAL score came from ("Jikan" or "MAL"). */
+  var malSource = '';
+
+  /* Scores are stable for months, so remember what we already fetched: a
+     repeat FETCH DATA for the same anime then fills MAL instantly instead of
+     waiting on the network. "↻ MAL" bypasses this on purpose. */
+  var MAL_CACHE_KEY = 'mal_score_cache_v1';
+  var MAL_CACHE_TTL = 30 * 24 * 60 * 60 * 1000;
+
+  function readMalCache() {
+    try {
+      var raw = localStorage.getItem(MAL_CACHE_KEY);
+      var map = raw ? JSON.parse(raw) : {};
+      return map && typeof map === 'object' ? map : {};
+    } catch (e) { return {}; }
+  }
+
+  function writeMalCache(idMal, score, source) {
+    try {
+      var map = readMalCache();
+      map[idMal] = { s: score, src: source, t: Date.now() };
+      var keys = Object.keys(map);
+      if (keys.length > 300) {
+        keys.sort(function (a, b) { return map[a].t - map[b].t; });
+        keys.slice(0, keys.length - 300).forEach(function (k) { delete map[k]; });
+      }
+      localStorage.setItem(MAL_CACHE_KEY, JSON.stringify(map));
+    } catch (e) { /* private mode / quota — caching is optional */ }
+  }
+
+  /* Same as fetchJson, for endpoints that answer with text (the MAL page
+     reader returns markdown, not JSON). */
+  function fetchText(url, options, timeoutMs) {
+    if (typeof AbortController !== 'function') return fetch(url, options).then(function (r) { return r.text(); });
+    var controller = new AbortController();
+    var timer = setTimeout(function () { controller.abort(); }, timeoutMs || 8000);
+    var opts = options || {};
+    opts.signal = controller.signal;
+    return fetch(url, opts).then(function (r) {
+      clearTimeout(timer);
+      return r.text();
+    }, function (e) {
+      clearTimeout(timer);
+      throw e;
+    });
+  }
+
+  /* "Score:6.30" in the statistics block of the MAL page. */
+  function parseMalScore(text) {
+    if (!text) return null;
+    var match = String(text).match(/Score:\s*([0-9]+(?:\.[0-9]+)?)/);
+    if (!match) return null;
+    var value = parseFloat(match[1]);
+    return value > 0 && value <= 10 ? Math.round(value * 100) / 100 : null;
+  }
+
+  /* The real MAL score, over two independent routes raced against each other:
+       1. Jikan (api.jikan.moe) — fast and clean, but blocked on some networks.
+       2. The MAL page itself, read through r.jina.ai — a different host and a
+          different data source, so it still answers when Jikan refuses the
+          connection. Confirmed working from the live site's origin.
+     Both carry the same official score, so whichever answers first wins and a
+     blocked Jikan no longer costs the fetch a multi-second timeout.
+     Returns null only when both routes fail. */
+  function malScore(idMal, force) {
+    malSource = '';
     if (!idMal) return Promise.resolve(null);
-    var directUrl = JIKAN_URL + idMal + '?sfw';
-    return fetchJson(directUrl, { headers: { Accept: 'application/json' } }, 8000)
-      .then(function (json) {
-        var score = json && json.data && json.data.score;
-        if (typeof score === 'number' && score > 0) return Math.round(score * 100) / 100;
-        throw new Error('no score');
-      })
-      .catch(function () {
-        // Jikan blocked — retry through CORS proxy
-        return fetchJson('https://api.allorigins.win/raw?url=' + encodeURIComponent(directUrl), { headers: { Accept: 'application/json' } }, 10000)
-          .then(function (json) {
-            var score = json && json.data && json.data.score;
-            if (typeof score === 'number' && score > 0) return Math.round(score * 100) / 100;
-            return null;
-          })
-          .catch(function () { return null; });
-      });
+
+    if (!force) {
+      var cached = readMalCache()[idMal];
+      if (cached && cached.s > 0 && (Date.now() - cached.t) < MAL_CACHE_TTL) {
+        malSource = cached.src || 'MAL';
+        return Promise.resolve(cached.s);
+      }
+    }
+
+    return new Promise(function (resolve) {
+      var pending = 2;
+      var settled = false;
+
+      function win(score, source) {
+        if (settled || score === null) return;
+        settled = true;
+        malSource = source;
+        writeMalCache(idMal, score, source);
+        resolve(score);
+      }
+      function miss() {
+        if (settled) return;
+        if (--pending === 0) { settled = true; resolve(null); }
+      }
+
+      fetchJson(JIKAN_URL + idMal + '?sfw', { headers: { Accept: 'application/json' } }, 5000)
+        .then(function (json) {
+          var score = json && json.data && json.data.score;
+          if (typeof score === 'number' && score > 0) win(Math.round(score * 100) / 100, 'Jikan');
+          else miss();
+        })
+        .catch(miss);
+
+      fetchText('https://r.jina.ai/https://myanimelist.net/anime/' + idMal, { headers: { Accept: 'text/plain' } }, 12000)
+        .then(function (text) {
+          var score = parseMalScore(text);
+          if (score !== null) win(score, 'MAL');
+          else miss();
+        })
+        .catch(miss);
+    });
   }
 
   function searchAniList(name) {
@@ -251,6 +339,7 @@
       return malScore(media.idMal).then(function (real) {
         if (real !== null) {
           data.mal = real;
+          data.malSource = malSource;
         } else if (score !== null) {
           data.mal = Math.round((MAL_FIT.slope * score + MAL_FIT.intercept) * 100) / 100;
           data.malEstimated = true;
@@ -306,13 +395,14 @@
     bits.push((data.episodes || '?') + ' eps');
     bits.push('AniList ' + (data.rating === null ? '?' : data.rating));
     if (data.mal === null) bits.push('MAL n/a');
-    else bits.push('MAL ' + data.mal + (data.malEstimated ? ' (est.)' : ' (Jikan)'));
+    else bits.push('MAL ' + data.mal + (data.malEstimated ? ' (est.)' : ' (' + (data.malSource || 'MAL') + ')'));
     bits.push(data.genres.length ? data.genres.join(' · ') : 'no genre matched — pick one');
     return bits.join(' | ');
   }
 
-  /* Re-fetch just the MAL score for the currently typed title — calls Jikan
-     again (useful when Jikan was blocked/rate-limited on the first FETCH DATA). */
+  /* Re-fetch just the MAL score for the currently typed title — runs the full
+     Jikan → MAL-page chain again (useful when the first FETCH DATA was
+     rate-limited or Jikan was blocked). */
   window.refetchMal = function () {
     var input = document.getElementById('adminAddTitle');
     var malField = document.getElementById('adminAddMal');
@@ -325,21 +415,21 @@
       return;
     }
 
-    if (status) { status.textContent = 'Re-fetching MAL from Jikan for "' + name + '"…'; status.style.color = '#8b93a7'; }
+    if (status) { status.textContent = 'Re-fetching MAL score for "' + name + '"…'; status.style.color = '#8b93a7'; }
 
     searchAniList(name).then(function (data) {
       if (!data || !data.idMal) {
         if (status) { status.textContent = 'No AniList match — cannot re-fetch MAL.'; status.style.color = '#ff3355'; }
         return;
       }
-      return malScore(data.idMal).then(function (real) {
+      return malScore(data.idMal, true).then(function (real) {
         if (real !== null && malField) {
           malField.value = real;
-          if (status) { status.textContent = 'MAL re-fetched: ' + real + ' (Jikan)'; status.style.color = '#00ff41'; }
+          if (status) { status.textContent = 'MAL re-fetched: ' + real + ' (' + (malSource || 'MAL') + ')'; status.style.color = '#00ff41'; }
         } else if (data.rating !== null && malField) {
           var est = Math.round((MAL_FIT.slope * data.rating + MAL_FIT.intercept) * 100) / 100;
           malField.value = est;
-          if (status) { status.textContent = 'MAL re-fetched: ' + est + ' (est.) — Jikan unreachable'; status.style.color = '#ffa500'; }
+          if (status) { status.textContent = 'MAL re-fetched: ' + est + ' (est.) — both Jikan and the MAL page were unreachable'; status.style.color = '#ffa500'; }
         } else {
           if (status) { status.textContent = 'Could not get MAL score.'; status.style.color = '#ff3355'; }
         }
