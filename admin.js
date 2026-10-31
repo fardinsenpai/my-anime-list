@@ -536,12 +536,24 @@ function openAdmin() {
   var o = document.getElementById('adminOverlay');
   if (o) {
     o.classList.add('open');
-    document.querySelectorAll('#adminPinScreen input').forEach(function(inp) { inp.value = ''; });
-    document.getElementById('adminPinError').style.display = 'none';
-    document.getElementById('adminPinScreen').style.display = 'block';
-    document.getElementById('adminDashboard').style.display = 'none';
-    var first = document.getElementById('adminPinInput');
-    if (first) setTimeout(function() { first.focus(); }, 100);
+    // Skip PIN screen if remembered and PAT is saved
+    var remembered = false;
+    try { remembered = localStorage.getItem('admin_pin_remembered') === 'true'; } catch (e) {}
+    if (remembered && getPat()) {
+      document.getElementById('adminPinScreen').style.display = 'none';
+      document.getElementById('adminPinError').style.display = 'none';
+      document.getElementById('adminDashboard').style.display = 'block';
+      initAdminGui();
+    } else {
+      document.querySelectorAll('#adminPinScreen input').forEach(function(inp) { inp.value = ''; });
+      document.getElementById('adminPinError').style.display = 'none';
+      document.getElementById('adminPinScreen').style.display = 'block';
+      document.getElementById('adminDashboard').style.display = 'none';
+      var first = document.getElementById('adminPinInput');
+      if (first) setTimeout(function() { first.focus(); }, 100);
+      var chk = document.getElementById('adminRememberPin');
+      if (chk) chk.checked = !!remembered;
+    }
   }
   (function() {
     var el = document.getElementById('adminPatDisplay');
@@ -579,6 +591,11 @@ function checkAdminPin() {
   var pin = '';
   document.querySelectorAll('#adminPinScreen input').forEach(function(inp) { pin += inp.value; });
   if (pin === ADMIN_PIN) {
+    try {
+      var chk = document.getElementById('adminRememberPin');
+      if (chk && chk.checked) localStorage.setItem('admin_pin_remembered', 'true');
+      else localStorage.removeItem('admin_pin_remembered');
+    } catch (e) {}
     document.getElementById('adminPinScreen').style.display = 'none';
     document.getElementById('adminDashboard').style.display = 'block';
     initAdminGui();
