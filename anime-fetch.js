@@ -192,28 +192,16 @@
     return best;
   }
 
-  /* sleep helper for retry backoff */
-  function sleep(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
-
-  /* Fetch the real MAL score from Jikan.
-     Jikan rate-limits aggressively, so we retry with backoff instead of
-     immediately falling back to the less accurate MAL_FIT estimate. */
-  function malScore(idMal, attempt) {
+  /* Fetch the real MAL score from Jikan. Falls back to the fitted estimate
+     only when Jikan is unreachable (labelled "(est.)" so you can correct it). */
+  function malScore(idMal) {
     if (!idMal) return Promise.resolve(null);
-    attempt = attempt || 1;
-    return fetchJson(JIKAN_URL + idMal + '?sfw', { headers: { Accept: 'application/json' } }, 15000)
+    return fetchJson(JIKAN_URL + idMal + '?sfw', { headers: { Accept: 'application/json' } }, 8000)
       .then(function (json) {
         var score = json && json.data && json.data.score;
-        if (typeof score === 'number' && score > 0) return Math.round(score * 100) / 100;
-        // Jikan returned 200 but no usable score — retry with backoff
-        if (attempt < 4) { return sleep(1200 * attempt).then(function () { return malScore(idMal, attempt + 1); }); }
-        return null;
+        return typeof score === 'number' && score > 0 ? Math.round(score * 100) / 100 : null;
       })
-      .catch(function (e) {
-        // Network/timeout/rate-limit — retry with backoff
-        if (attempt < 4) { return sleep(1200 * attempt).then(function () { return malScore(idMal, attempt + 1); }); }
-        return null;
-      });
+      .catch(function () { return null; });
   }
 
   function searchAniList(name) {
