@@ -1710,11 +1710,11 @@ function showDuelRatingPopup(title, derived) {
     box.style.cssText = 'background:#0a0a0a;border:1px solid #00ff41;border-radius:6px;padding:18px;max-width:460px;width:90%;color:#fff;box-shadow:0 0 30px rgba(0,255,65,0.25);';
     box.innerHTML =
       '<div style="font-weight:bold;margin-bottom:12px;color:#00ff41;">⚔️ Duel Ratings for "' + title.replace(/"/g, '&quot;') + '"</div>' +
-      '<div style="font-size:11px;color:#8b93a7;margin-bottom:12px;">Auto-derived values shown — edit any field, then press SAVE. Leave blank to keep the derived value.</div>' +
+      '<div style="font-size:11px;color:#8b93a7;margin-bottom:12px;">Auto-derived for MAL / Planet / AniList / Story — edit any field. Characters and Animation are manual ratings (enter your own).</div>' +
       '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px 16px;margin-bottom:14px;">' +
       '<div style="font-size:11px;color:#aaa;">MAL Score</div><input id="dr-mal" type="number" step="0.01" min="0" max="10" value="' + (derived.mal || '') + '" style="background:#111;border:1px solid #333;color:#fff;padding:4px 6px;border-radius:3px;">' +
-      '<div style="font-size:11px;color:#aaa;">Characters</div><input id="dr-char" type="number" step="0.1" min="0" max="10" value="' + (derived.chars || '') + '" style="background:#111;border:1px solid #333;color:#fff;padding:4px 6px;border-radius:3px;">' +
-      '<div style="font-size:11px;color:#aaa;">Animation</div><input id="dr-anim" type="number" step="0.1" min="0" max="10" value="' + (derived.anim || '') + '" style="background:#111;border:1px solid #333;color:#fff;padding:4px 6px;border-radius:3px;">' +
+      '<div style="font-size:11px;color:#aaa;">Characters (manual)</div><input id="dr-char" type="number" step="0.1" min="0" max="10" value="" placeholder="0-10" style="background:#111;border:1px solid #ff6b9d;color:#fff;padding:4px 6px;border-radius:3px;">' +
+      '<div style="font-size:11px;color:#aaa;">Animation (manual)</div><input id="dr-anim" type="number" step="0.1" min="0" max="10" value="" placeholder="0-10" style="background:#111;border:1px solid #ff6b9d;color:#fff;padding:4px 6px;border-radius:3px;">' +
       '<div style="font-size:11px;color:#aaa;">Anime Planet</div><input id="dr-planet" type="number" step="0.1" min="0" max="10" value="' + (derived.planet || '') + '" style="background:#111;border:1px solid #333;color:#fff;padding:4px 6px;border-radius:3px;">' +
       '<div style="font-size:11px;color:#aaa;">AniList</div><input id="dr-anilist" type="number" step="1" min="0" max="100" value="' + (derived.anilist || '') + '" style="background:#111;border:1px solid #333;color:#fff;padding:4px 6px;border-radius:3px;">' +
       '<div style="font-size:11px;color:#aaa;">Story Rating</div><input id="dr-story" type="number" step="0.1" min="0" max="10" value="' + (derived.story || '') + '" style="background:#111;border:1px solid #333;color:#fff;padding:4px 6px;border-radius:3px;">' +
