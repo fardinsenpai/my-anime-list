@@ -3998,11 +3998,24 @@ function applyBurningCard() {
     var badge = card.querySelector('.badge');
     if (!badge) return;
     var text = String(badge.textContent || '').trim();
-    if (text === '#7') card.classList.add('card-burning');
-    else if (text === '#5') card.classList.add('card-black');
-    else if (text === '#24') card.classList.add('card-lightning');
-    else if (text === '#118') card.classList.add('card-frozen');
-    else if (text === '#191') card.classList.add('card-wind');
+    var special = '';
+    if (text === '#7') special = 'burning';
+    else if (text === '#5') special = 'black';
+    else if (text === '#24') special = 'lightning';
+    else if (text === '#118') special = 'frozen';
+    else if (text === '#191') special = 'wind';
+    if (special) {
+      card.classList.add('card-' + special);
+      // inject stamp if not already present
+      var poster = card.querySelector('.poster-wrap');
+      if (poster && !poster.querySelector('.special-stamp')) {
+        var stampMap = { burning: 'Fire Type', frozen: 'Frozen Type', wind: 'Wind Type', black: 'Black Type', lightning: 'Lightning Type' };
+        var stamp = document.createElement('div');
+        stamp.className = 'special-stamp card-stamp-' + special;
+        stamp.textContent = stampMap[special];
+        poster.appendChild(stamp);
+      }
+    }
   });
 }
 
