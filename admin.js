@@ -1771,7 +1771,7 @@ async function commitAddAnime() {
     if (badgeMax) badgeMax.forEach(function(m) { var n = parseInt(m.replace(/\D/g,'')); if (n > maxId) maxId = n; });
     if (typeof RATING_DATA === 'object') Object.keys(RATING_DATA).forEach(function(k) { var n = parseInt(k); if (n > maxId) maxId = n; });
     var nextId = maxId + 1;
-    var cardHtml = '\n\n<div class="card"><div class="card-inner"><div class="card-front"><div class="poster-wrap"><img src="' + img.replace(/"/g,'&quot;') + '" alt="' + title.replace(/"/g,'&quot;') + '" loading="lazy"/><span class="badge">#' + nextId + '</span></div><div class="info"><div class="number">NO. ' + nextId + '</div><div class="title">' + title + '</div></div></div><div class="card-back"><div class="back-content"><div class="back-title">' + title + '</div><div class="back-season">🌸 ' + seasonLabel + '</div><div class="back-episodes">📺 Total Episodes: ' + eps + '</div>' + (genre ? '<div class="back-genre">⚔️ ' + genre + '</div>' : '') + (isFinite(mal) ? '<div class="back-mal">⭐ MAL Rating: ' + mal.toFixed(2) + '/10</div>' : '') + '<div class="back-tap-hint">click to flip back</div></div></div></div></div>';
+    var cardHtml = '\n\n<div class="card"><div class="card-inner"><div class="card-front"><div class="poster-wrap"><img src="' + img.replace(/"/g,'&quot;') + '" alt="' + title.replace(/"/g,'&quot;') + '" loading="lazy"/><span class="badge">#' + nextId + '</span></div><div class="info"><div class="number">NO. ' + nextId + '</div><div class="title">' + title + '</div></div></div><div class="card-back"><div class="back-content"><div class="back-title">' + title + '</div><div class="back-season">🌸 ' + seasonLabel + '</div><div class="back-episodes">📺 Total Episodes: ' + eps + '</div><div class="back-tap-hint">click to flip back</div></div></div></div></div>';
     indexContent = indexContent.replace(/<!-- === GRID END === -->/, cardHtml + '\n\n<!-- === GRID END === -->');
     scriptContent = scriptContent.replace(/counterUp\("seasonCount",\s*(\d+)/, function(m, c) { return 'counterUp("seasonCount", ' + (parseInt(c) + 1); });
     scriptContent = scriptContent.replace(/counterUp\("episodeCount",\s*(\d+)/, function(m, c) { return 'counterUp("episodeCount", ' + (parseInt(c) + eps); });
@@ -1808,6 +1808,7 @@ async function commitAddAnime() {
       if (manual.anilist != null) duelAnilist = manual.anilist;
       if (manual.story != null) duelStory = manual.story;
     }
+    var addGenres = genre ? genre.split(/[,·]/).map(function(g) { return g.trim(); }).filter(Boolean) : [];
     var duelEntry = '\n    "' + nextId + '": {\n' +
       '        "malScore": ' + duelMal + ',\n' +
       '        "characters": ' + duelChar + ',\n' +
@@ -1815,12 +1816,13 @@ async function commitAddAnime() {
       '        "animePlanet": ' + duelPlanet + ',\n' +
       '        "anilist": ' + duelAnilist + ',\n' +
       '        "title": ' + JSON.stringify(title) + ',\n' +
+      '        "genres": ' + JSON.stringify(addGenres) + ',\n' +
       '        "storyRating": ' + duelStory + '\n' +
       '    }';
     if (ratingsContent) {
       try {
         var dbObj = JSON.parse(ratingsContent);
-        dbObj[nextId] = { malScore: duelMal, characters: duelChar, animRating: duelAnim, animePlanet: duelPlanet, anilist: duelAnilist, title: title, storyRating: duelStory };
+        dbObj[nextId] = { malScore: duelMal, characters: duelChar, animRating: duelAnim, animePlanet: duelPlanet, anilist: duelAnilist, title: title, genres: addGenres, storyRating: duelStory };
         ratingsContent = JSON.stringify(dbObj, null, 8);
       } catch (e) {
         var _rc = ratingsContent.lastIndexOf('}');
@@ -1830,8 +1832,7 @@ async function commitAddAnime() {
       // anime-ratings.json does not exist yet — create it with this single entry
       ratingsContent = '{\n' + duelEntry + '\n}';
     }
-    if (genre) {
-      var addGenres = genre.split(/[,·]/).map(function(g) { return g.trim(); }).filter(Boolean);
+    if (addGenres.length) {
       scriptContent = applyGenres(scriptContent, nextId, addGenres);
     }
     adStep('committing script.js (2/4)…');

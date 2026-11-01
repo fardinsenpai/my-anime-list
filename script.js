@@ -3956,26 +3956,23 @@ function injectCardMetaFromRatings() {
       var entry = db[idMatch[1]];
       if (!entry || !entry.title) return;
       var genreEl = card.querySelector('.back-genre');
-      var malEl = card.querySelector('.back-mal');
-      if (!genreEl) {
-        var backContent = card.querySelector('.back-content');
-        if (backContent && entry.genres) {
-          var div = document.createElement('div');
-          div.className = 'back-genre';
-          div.innerHTML = '⚔️ ' + (Array.isArray(entry.genres) ? entry.genres.join(' · ') : String(entry.genres || ''));
-          backContent.appendChild(div);
-        }
+      var malEl = card.querySelector('.back-mal, .back-mal-score');
+      var backContent = card.querySelector('.back-content');
+      if (!genreEl && backContent && entry.genres) {
+        var div = document.createElement('div');
+        div.className = 'back-genre';
+        div.textContent = Array.isArray(entry.genres) ? entry.genres.join(' · ') : String(entry.genres || '');
+        var t = backContent.querySelector('.back-title');
+        if (t && t.nextSibling) backContent.insertBefore(div, t.nextSibling);
+        else backContent.appendChild(div);
       }
-      if (!malEl) {
-        var backContent = card.querySelector('.back-content');
-        // Skip if the card already shows a MAL value (hardcoded from admin form)
-        var existingMalText = card.textContent || '';
-        if (backContent && typeof entry.malScore === 'number' && !existingMalText.match(/MAL Rating:|⭐ MAL:/)) {
-          var div = document.createElement('div');
-          div.className = 'back-mal';
-          div.innerHTML = '⭐ MAL Rating: ' + entry.malScore.toFixed(2) + '/10';
-          backContent.appendChild(div);
-        }
+      if (!malEl && backContent && typeof entry.malScore === 'number') {
+        var mdiv = document.createElement('div');
+        mdiv.className = 'back-mal-score';
+        mdiv.textContent = '⭐ MAL Rating: ' + entry.malScore.toFixed(1) + '/10';
+        var hint = backContent.querySelector('.back-tap-hint');
+        if (hint) backContent.insertBefore(mdiv, hint);
+        else backContent.appendChild(mdiv);
       }
     });
   });
