@@ -429,9 +429,22 @@
     setValue('adminAddMal', data.mal);
     // Pull Animation / Characters / Anime Planet from ratings DB (updated via API/commit)
     try {
+      var fillWithFallback = function (d) {
+        fillExtraRatings(data.id, d, data.title);
+        // No DB entry (brand-new anime) → derive estimates from the MAL score
+        // fetched by the API so the boxes are never left blank.
+        var mal = parseFloat(data.mal);
+        if (!isFinite(mal)) return;
+        var animEl = document.getElementById('adminAddAnim');
+        var charEl = document.getElementById('adminAddChar');
+        var planetEl = document.getElementById('adminAddPlanet');
+        if (animEl && !animEl.value) animEl.value = (Math.round(mal * 2) / 2).toFixed(1);
+        if (charEl && !charEl.value) charEl.value = (Math.round(mal * 2) / 2).toFixed(1);
+        if (planetEl && !planetEl.value) planetEl.value = (Math.round((mal / 2) * 10) / 10).toFixed(1);
+      };
       var db = window.RATING_DATA || _ratingsDbCache || null;
-      if (!db) { getRatingsDb(function(d){ fillExtraRatings(data.id, d, data.title); }); }
-      else { fillExtraRatings(data.id, db, data.title); }
+      if (!db) { getRatingsDb(fillWithFallback); }
+      else { fillWithFallback(db); }
     } catch(e){}
     var seasonLabel = document.getElementById('adminAddSeasonLabel');
     if (seasonLabel && !seasonLabel.value.trim()) seasonLabel.value = 'Season-1';
