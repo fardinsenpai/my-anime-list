@@ -378,7 +378,12 @@
   }
 
   function fillExtraRatings(idOrTitle, db) {
-    if (!db) return;
+    if (!db) {
+      if (typeof loadRatings === 'function') {
+        loadRatings().then(function(d){ fillExtraRatings(idOrTitle, d); });
+      }
+      return;
+    }
     var hit = null;
     if (idOrTitle && String(idOrTitle).match(/^\d+$/) && db[String(idOrTitle)]) hit = db[String(idOrTitle)];
     if (!hit && db) {
