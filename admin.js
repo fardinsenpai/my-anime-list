@@ -2202,6 +2202,11 @@ function checkAdminPin() {
   }
 
   document.getElementById('adminPinError').style.display = 'none';
+  try {
+    var rememberChk = document.getElementById('adminRememberPin');
+    if (rememberChk && rememberChk.checked) localStorage.setItem('admin_pin_remembered', 'true');
+    else localStorage.removeItem('admin_pin_remembered');
+  } catch (e) {}
   document.getElementById('pinGate').style.display = 'none';
   document.getElementById('adminDashboard').style.display = 'block';
   paintPatStatus();
@@ -2861,20 +2866,41 @@ AD_REPLY = adReplyLoad();
   var retry = document.getElementById('bootRetry');
 
   function revealPin() {
+    var remembered = false;
+    try { remembered = localStorage.getItem('admin_pin_remembered') === 'true'; } catch (e) {}
+    var chk = document.getElementById('adminRememberPin');
+    if (chk) chk.checked = remembered;
     var screen = document.getElementById('adminPinScreen');
     if (screen) screen.style.display = 'flex';
     var first = document.getElementById('adminPinInput');
     if (first) first.focus();
   }
 
+  function skipPin() {
+    document.getElementById('adminPinError').style.display = 'none';
+    document.getElementById('pinGate').style.display = 'none';
+    document.getElementById('adminDashboard').style.display = 'block';
+    paintPatStatus();
+    initAdminGui();
+  }
+
   loadAdminData().then(function (ok) {
     if (!ok) { if (retry) retry.style.display = 'inline-block'; return; }
+    var remembered = false;
+    try { remembered = localStorage.getItem('admin_pin_remembered') === 'true'; } catch (e) {}
+    if (remembered && getPat()) { skipPin(); return; }
     revealPin();
   });
 
   if (retry) retry.addEventListener('click', function () {
     retry.style.display = 'none';
-    loadAdminData().then(function (ok) { if (ok) revealPin(); });
+    loadAdminData().then(function (ok) {
+      if (!ok) { retry.style.display = 'inline-block'; return; }
+      var remembered = false;
+      try { remembered = localStorage.getItem('admin_pin_remembered') === 'true'; } catch (e) {}
+      if (remembered && getPat()) { skipPin(); return; }
+      revealPin();
+    });
   });
 
   function tick() {
