@@ -3916,6 +3916,44 @@ body.duel-mode-active .now-strip { display: none !important; }
 }
 .perf-popup__close:hover { color: #ffd6e8; }
 
+/* === SPECIAL BURNING CARD (#7 — Fairy Tail) === */
+@keyframes fireGlow {
+  0% { box-shadow: 0 0 8px 2px rgba(255,90,20,.55), 0 0 18px 4px rgba(255,60,0,.35), 0 0 30px 8px rgba(255,140,30,.18); border-color: rgba(255,160,60,.7); }
+  25% { box-shadow: 0 0 14px 4px rgba(255,130,30,.75), 0 0 28px 10px rgba(255,80,10,.45), 0 0 45px 16px rgba(255,160,40,.28); border-color: rgba(255,180,70,.9); }
+  50% { box-shadow: 0 0 8px 2px rgba(255,90,20,.55), 0 0 18px 4px rgba(255,60,0,.35), 0 0 30px 8px rgba(255,140,30,.18); border-color: rgba(255,160,60,.7); }
+  75% { box-shadow: 0 0 12px 3px rgba(255,130,30,.65), 0 0 22px 6px rgba(255,100,20,.4), 0 0 38px 14px rgba(255,150,40,.22); border-color: rgba(255,170,65,.85); }
+  100% { box-shadow: 0 0 8px 2px rgba(255,90,20,.55), 0 0 18px 4px rgba(255,60,0,.35), 0 0 30px 8px rgba(255,140,30,.18); border-color: rgba(255,160,60,.7); }
+}
+.card-burning .card-inner,
+.card-burning .card-inner::before {
+  animation: fireGlow 2.2s ease-in-out infinite !important;
+}
+.card-burning .card-inner {
+  border: 2px solid rgba(255,160,60,.8) !important;
+  border-radius: 12px !important;
+}
+.card-burning .card-inner::before {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: 16px;
+  border: 1.5px solid rgba(255,200,100,.35);
+  pointer-events: none;
+  z-index: 10;
+}
+.card-burning .badge {
+  background: linear-gradient(135deg,#ff5a14,#ff8a3a) !important;
+  border-color: #ff5a14 !important;
+  box-shadow: 0 0 8px #ff5a14, 0 0 4px #ffa500 !important;
+  color: #fff !important;
+  text-shadow: 0 0 4px #ff5a14;
+}
+.card-burning .back-genre,
+.card-burning .back-mal,
+.card-burning .back-mal-score {
+  text-shadow: 0 0 6px rgba(255,160,60,.7) !important;
+  color: #ffd6a0 !important;
+}
 /* ---- Performance body classes ---- */
 body.perf-no-thunder #lightningCanvas { display: none !important; }
 body.perf-no-counter-anim .counter-box { transition: none !important; }

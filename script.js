@@ -2540,6 +2540,7 @@ document.addEventListener('DOMContentLoaded', () => {
   restoreChatFromStorage();
   repaintAllAvatars();   // the welcome line's avatar follows the published CHAT_AVATARS
   injectCardMetaFromRatings();
+  applyBurningCard();
 });
 
 // ===== TOGGLE CHAT =====
@@ -3989,6 +3990,16 @@ function injectCardMetaFromRatings() {
 
 function localCards() {
   return Array.prototype.slice.call(document.querySelectorAll('.anime-card,.card'));
+}
+
+// Special burning glow for card #7 (Fairy Tail)
+function applyBurningCard() {
+  document.querySelectorAll('.card').forEach(function(card) {
+    var badge = card.querySelector('.badge');
+    if (badge && String(badge.textContent || '').trim().match(/#7\b/)) {
+      card.classList.add('card-burning');
+    }
+  });
 }
 
 // title / episodes / seasons, exactly as the card back shows them
