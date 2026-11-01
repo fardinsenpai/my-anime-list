@@ -1772,7 +1772,7 @@ async function commitAddAnime() {
     if (typeof RATING_DATA === 'object') Object.keys(RATING_DATA).forEach(function(k) { var n = parseInt(k); if (n > maxId) maxId = n; });
     var nextId = maxId + 1;
     var special = document.getElementById('adminAddSpecial').value;
-    var stampMap = { burning: 'Fire Special', frozen: 'Frozen Special', wind: 'Wind Special', black: 'Black Special', lightning: 'Lightning Special' };
+    var stampMap = { burning: 'Fire Type', frozen: 'Frozen Type', wind: 'Wind Type', black: 'Black Type', lightning: 'Lightning Type' };
     var stamp = stampMap[special] || '';
     var specialClass = special ? ' class="card-' + special + '"' : '';
     var stampHtml = stamp ? '<div class="special-stamp card-stamp-' + special + '">' + stamp + '</div>' : '';

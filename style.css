@@ -3926,18 +3926,47 @@ body.duel-mode-active .now-strip { display: none !important; }
 /* === Red stamp for special cards === */
 .special-stamp {
   position: absolute;
-  top: 8px;
-  left: 8px;
-  z-index: 40;
+  top: -18px;
+  left: -18px;
+  z-index: 99;
+  width: 78px;
+  height: 78px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #ff3333 0%, #aa0000 70%, #330000 100%);
+  border: 3px solid #ff3333;
+  box-shadow: 0 0 14px #ff3333, 0 0 28px rgba(255,51,51,.45), inset 0 0 8px rgba(255,255,255,.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  pointer-events: none;
   font-family: 'Orbitron', sans-serif;
-  font-weight: 700;
-  font-size: 9px;
-  letter-spacing: 1px;
+  font-weight: 900;
+  font-size: 7px;
+  letter-spacing: .6px;
   color: #fff;
-  padding: 2px 6px;
-  border-radius: 4px;
-  box-shadow: 0 2px 8px rgba(0,0,0,.5);
+  text-shadow: 0 0 4px #ff3333, 0 0 8px #aa0000, 0 0 2px #330000;
   text-transform: uppercase;
+  overflow: hidden;
+}
+.special-stamp::before {
+  content: '';
+  position: absolute;
+  inset: 3px;
+  border-radius: 50%;
+  border: 1.5px dashed rgba(255,230,150,.6);
+  pointer-events: none;
+}
+.special-stamp::after {
+  content: '★ ★ ★ ★ ★';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 6.5px;
+  letter-spacing: 3.5px;
+  color: rgba(255,255,200,.55);
+  opacity: .35;
   pointer-events: none;
 }
 .poster-wrap {
