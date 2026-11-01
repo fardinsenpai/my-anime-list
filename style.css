@@ -1178,6 +1178,7 @@ body.duel-mode-active .now-strip { display: none !important; }
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
   border-radius: 16px;
+  overflow: hidden;
 }
 
 .card-front {
