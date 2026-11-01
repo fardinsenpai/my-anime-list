@@ -1465,6 +1465,15 @@ function selectEditCard(id) {
       }
       document.getElementById('adminEditSeasons').value = seasonEl ? seasonEl.textContent.replace(/[🌸📺]/g,'').trim() : '';
       document.getElementById('adminEditEps').value = epsEl ? epsEl.textContent.replace(/[📺🎬]/g,'').replace('Total Episodes:','').trim() : '';
+      // Detect special card effect
+      var specialSel = document.getElementById('adminEditSpecial');
+      if (specialSel) {
+        var specialClass = '';
+        for (var sc = 0; sc < allCards[i].classList.length; sc++) {
+          if (allCards[i].classList[sc].indexOf('card-') === 0 && allCards[i].classList[sc] !== 'card-inner') specialClass = allCards[i].classList[sc].replace('card-', '');
+        }
+        specialSel.value = specialClass;
+      }
       break;
     }
   }
@@ -1535,7 +1544,13 @@ async function commitEditAnime() {
     var img = document.getElementById('adminEditImg').value.trim() || '';
     var seasonText = seasons ? '🌸 ' + seasons : '';
     var epsText = episodes ? '📺 Total Episodes: ' + episodes : '';
-    var newCard = '<div class="card"><div class="card-inner"><div class="card-front"><div class="poster-wrap"><img src="' + img.replace(/"/g,'&quot;') + '" alt="' + name.replace(/"/g,'&quot;') + '" loading="lazy"/><span class="badge">#' + _editId + '</span></div><div class="info"><div class="number">NO. ' + _editId + '</div><div class="title">' + name + '</div></div></div><div class="card-back"><div class="back-content"><div class="back-title">' + name + '</div><div class="back-season">' + seasonText + '</div><div class="back-episodes">' + epsText + '</div><div class="back-tap-hint">click to flip back</div></div></div></div></div>';
+    var specialSel = document.getElementById('adminEditSpecial');
+    var special = specialSel ? specialSel.value : '';
+    var stampMap = { burning: 'Fire Type', frozen: 'Frozen Type', wind: 'Wind Type', black: 'Black Type', lightning: 'Lightning Type' };
+    var stamp = stampMap[special] || '';
+    var specialClass = special ? ' class="card-' + special + '"' : '';
+    var stampHtml = stamp ? '<div class="special-stamp card-stamp-' + special + '">' + stamp + '</div>' : '';
+    var newCard = '<div class="card"' + specialClass + '><div class="card-inner"><div class="card-front">' + stampHtml + '<div class="poster-wrap"><img src="' + img.replace(/"/g,'&quot;') + '" alt="' + name.replace(/"/g,'&quot;') + '" loading="lazy"/><span class="badge">#' + _editId + '</span></div><div class="info"><div class="number">NO. ' + _editId + '</div><div class="title">' + name + '</div></div></div><div class="card-back"><div class="back-content"><div class="back-title">' + name + '</div><div class="back-season">' + seasonText + '</div><div class="back-episodes">' + epsText + '</div><div class="back-tap-hint">click to flip back</div></div></div></div></div>';
     lines[cardIdx] = newCard;
     indexContent = lines.join('\n');
     if (genre) {
