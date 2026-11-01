@@ -1550,7 +1550,7 @@ async function commitEditAnime() {
     var stamp = stampMap[special] || '';
     var specialClass = special ? ' class="card-' + special + '"' : '';
     var stampHtml = stamp ? '<div class="special-stamp card-stamp-' + special + '">' + stamp + '</div>' : '';
-    var newCard = '<div class="card"' + specialClass + '><div class="card-inner"><div class="card-front">' + stampHtml + '<div class="poster-wrap"><img src="' + img.replace(/"/g,'&quot;') + '" alt="' + name.replace(/"/g,'&quot;') + '" loading="lazy"/><span class="badge">#' + _editId + '</span></div><div class="info"><div class="number">NO. ' + _editId + '</div><div class="title">' + name + '</div></div></div><div class="card-back"><div class="back-content"><div class="back-title">' + name + '</div><div class="back-season">' + seasonText + '</div><div class="back-episodes">' + epsText + '</div><div class="back-tap-hint">click to flip back</div></div></div></div></div>';
+    var newCard = '<div class="card"' + specialClass + '><div class="card-inner">' + stampHtml + '<div class="card-front"><div class="poster-wrap"><img src="' + img.replace(/"/g,'&quot;') + '" alt="' + name.replace(/"/g,'&quot;') + '" loading="lazy"/><span class="badge">#' + _editId + '</span></div><div class="info"><div class="number">NO. ' + _editId + '</div><div class="title">' + name + '</div></div></div><div class="card-back"><div class="back-content"><div class="back-title">' + name + '</div><div class="back-season">' + seasonText + '</div><div class="back-episodes">' + epsText + '</div><div class="back-tap-hint">click to flip back</div></div></div></div></div>';
     lines[cardIdx] = newCard;
     indexContent = lines.join('\n');
     if (genre) {
