@@ -796,6 +796,7 @@ function copyEmail() {
         return set && set.has(n);
       });
       if (genres.length === 0) return;
+      if (card.querySelector('.back-genre')) return;
       const backContent = card.querySelector('.back-content');
       if (!backContent) return;
       const genreDiv = document.createElement('div');
@@ -3969,10 +3970,10 @@ function injectCardMetaFromRatings() {
         var backContent = card.querySelector('.back-content');
         // Skip if the card already shows a MAL value (hardcoded from admin form)
         var existingMalText = card.textContent || '';
-        if (backContent && typeof entry.malScore === 'number' && !existingMalText.match(/MAL Rating:/)) {
+        if (backContent && typeof entry.malScore === 'number' && !existingMalText.match(/MAL Rating:|⭐ MAL:/)) {
           var div = document.createElement('div');
           div.className = 'back-mal';
-          div.innerHTML = '⭐ MAL: ' + entry.malScore.toFixed(2);
+          div.innerHTML = '⭐ MAL Rating: ' + entry.malScore.toFixed(2) + '/10';
           backContent.appendChild(div);
         }
       }
@@ -6217,7 +6218,7 @@ document.addEventListener('click', function(e) {
       var cardNum = numEl ? parseInt(numEl.textContent.replace(/\D/g, '')) : null;
       var backContent = card.querySelector('.back-content');
       var score = cardNum ? malScoreOf(cardNum) : null;
-      if (score !== null && backContent) {
+      if (score !== null && backContent && !card.querySelector('.back-mal, .back-mal-score')) {
         var malEl = document.createElement('div');
         malEl.className = 'back-mal-score';
         malEl.textContent = '⭐ MAL Rating: ' + score.toFixed(1) + '/10';
