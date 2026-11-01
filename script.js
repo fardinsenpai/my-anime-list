@@ -3996,9 +3996,13 @@ function localCards() {
 function applyBurningCard() {
   document.querySelectorAll('.card').forEach(function(card) {
     var badge = card.querySelector('.badge');
-    if (badge && String(badge.textContent || '').trim().match(/#7\b/)) {
-      card.classList.add('card-burning');
-    }
+    if (!badge) return;
+    var text = String(badge.textContent || '').trim();
+    if (text === '#7') card.classList.add('card-burning');
+    else if (text === '#5') card.classList.add('card-black');
+    else if (text === '#24') card.classList.add('card-lightning');
+    else if (text === '#118') card.classList.add('card-frozen');
+    else if (text === '#191') card.classList.add('card-wind');
   });
 }
 
