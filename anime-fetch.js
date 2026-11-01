@@ -377,22 +377,42 @@
     return true;
   }
 
-  function fillExtraRatings(idOrTitle, db) {
+  var _ratingsDbCache = null;
+  function getRatingsDb(cb) {
+    if (_ratingsDbCache) { cb(_ratingsDbCache); return; }
+    if (typeof loadRatings === 'function') {
+      loadRatings().then(function(d){ if (d) _ratingsDbCache = d; cb(d || null); });
+      return;
+    }
+    fetch('anime-ratings.json', { cache: 'no-cache' })
+      .then(function(r){ return r.json(); })
+      .then(function(d){ _ratingsDbCache = d || null; cb(_ratingsDbCache); })
+      .catch(function(){ cb(null); });
+  }
+
+  function fillExtraRatings(idOrTitle, db, titleHint) {
     if (!db) {
-      if (typeof loadRatings === 'function') {
-        loadRatings().then(function(d){ fillExtraRatings(idOrTitle, d); });
-      }
+      getRatingsDb(function(d){ fillExtraRatings(idOrTitle, d, titleHint); });
       return;
     }
     var hit = null;
+    // 1. numeric key (card #)
     if (idOrTitle && String(idOrTitle).match(/^\d+$/) && db[String(idOrTitle)]) hit = db[String(idOrTitle)];
-    if (!hit && db) {
-      var key = String(idOrTitle || '').toLowerCase();
+    // 2. title match (exact, then normalised partial)
+    var titles = [titleHint, idOrTitle].filter(function(t){ return t && !String(t).match(/^\d+$/); });
+    var norm = function(s){ return String(s || '').toLowerCase().replace(/[^a-z0-9]/g, ''); };
+    titles.forEach(function(t){
+      if (hit) return;
+      var key = norm(t);
+      if (key.length < 3) return;
       Object.keys(db).forEach(function(k){
+        if (hit) return;
         var en = db[k];
-        if (en && en.title && String(en.title).toLowerCase() === key) hit = en;
+        if (!en || !en.title) return;
+        var et = norm(en.title);
+        if (et === key || et.indexOf(key) > -1 || key.indexOf(et) > -1) hit = en;
       });
-    }
+    });
     if (hit) {
       var a = document.getElementById('adminAddAnim'); if (a && (hit.animRating !== undefined && hit.animRating !== null)) a.value = hit.animRating;
       var c = document.getElementById('adminAddChar'); if (c && (hit.characters !== undefined && hit.characters !== null)) c.value = hit.characters;
@@ -409,9 +429,9 @@
     setValue('adminAddMal', data.mal);
     // Pull Animation / Characters / Anime Planet from ratings DB (updated via API/commit)
     try {
-      var db = window.RATING_DATA || (typeof loadRatings !== 'undefined' ? null : null);
-      if (!db && typeof loadRatings === 'function') { loadRatings().then(function(d){ fillExtraRatings(data.id || data.title, d); }); }
-      else { fillExtraRatings(data.id || data.title, db); }
+      var db = window.RATING_DATA || _ratingsDbCache || null;
+      if (!db) { getRatingsDb(function(d){ fillExtraRatings(data.id, d, data.title); }); }
+      else { fillExtraRatings(data.id, db, data.title); }
     } catch(e){}
     var seasonLabel = document.getElementById('adminAddSeasonLabel');
     if (seasonLabel && !seasonLabel.value.trim()) seasonLabel.value = 'Season-1';
