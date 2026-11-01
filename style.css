@@ -3812,11 +3812,11 @@ body.duel-mode-active .now-strip { display: none !important; }
   top: 62px;
   right: 14px;
   width: 320px;
-  background: rgba(8,8,20,0.98);
-  border: 1px solid rgba(255,215,0,0.2);
+  background: rgba(18,8,16,0.98);
+  border: 1px solid rgba(255,143,190,0.35);
   border-radius: 16px;
   padding: 20px 18px 16px;
-  box-shadow: 0 8px 40px rgba(0,0,0,0.7), 0 0 30px rgba(255,215,0,0.08);
+  box-shadow: 0 8px 40px rgba(0,0,0,0.7), 0 0 32px rgba(255,143,190,0.18);
   z-index: 99999;
   opacity: 0;
   transform: translateY(-8px) scale(0.96);
@@ -3833,12 +3833,13 @@ body.duel-mode-active .now-strip { display: none !important; }
   font-weight: 700;
   font-size: 15px;
   letter-spacing: 1.5px;
-  color: #FFD700;
+  color: #ff9ec6;
+  text-shadow: 0 0 10px rgba(255,143,190,0.6);
   margin-bottom: 4px;
 }
 .perf-popup__desc {
   font-size: 12px;
-  color: #889;
+  color: #b9a3b0;
   margin-bottom: 14px;
   line-height: 1.4;
 }
@@ -3852,23 +3853,24 @@ body.duel-mode-active .now-strip { display: none !important; }
   align-items: center;
   gap: 10px;
   padding: 10px 12px;
-  background: rgba(255,255,255,0.03);
-  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,143,190,0.04);
+  border: 1px solid rgba(255,143,190,0.14);
   border-radius: 10px;
-  color: #bbc;
+  color: #d9c3d0;
   cursor: pointer;
   transition: all 0.2s ease;
   text-align: left;
   font-family: 'Exo 2', sans-serif;
 }
 .perf-mode-btn:hover {
-  background: rgba(255,255,255,0.06);
-  border-color: rgba(255,215,0,0.2);
+  background: rgba(255,143,190,0.10);
+  border-color: rgba(255,143,190,0.45);
+  box-shadow: 0 0 14px rgba(255,143,190,0.20);
 }
 .perf-mode-btn--active {
-  border-color: #FFD700 !important;
-  background: rgba(255,215,0,0.08) !important;
-  box-shadow: 0 0 10px rgba(255,215,0,0.1);
+  border-color: #ff8fbe !important;
+  background: rgba(255,143,190,0.14) !important;
+  box-shadow: 0 0 16px rgba(255,143,190,0.30);
 }
 .perf-mode-btn__icon {
   font-size: 22px;
@@ -3879,32 +3881,32 @@ body.duel-mode-active .now-strip { display: none !important; }
 .perf-mode-btn__label {
   font-weight: 700;
   font-size: 14px;
-  color: #dde;
+  color: #f4e6ee;
 }
-.perf-mode-btn--active .perf-mode-btn__label { color: #FFD700; }
+.perf-mode-btn--active .perf-mode-btn__label { color: #ff9ec6; text-shadow: 0 0 8px rgba(255,143,190,0.5); }
 .perf-mode-btn__sub {
   font-size: 11px;
-  color: #667;
+  color: #9a8292;
   margin-left: auto;
 }
 .perf-popup__note {
   margin-top: 12px;
   padding: 8px 10px;
-  background: rgba(0,240,255,0.05);
+  background: rgba(255,143,190,0.06);
   border-radius: 8px;
   font-size: 11px;
-  color: #7aa;
+  color: #d4b8c6;
   line-height: 1.4;
-  border: 1px solid rgba(0,240,255,0.08);
+  border: 1px solid rgba(255,143,190,0.18);
 }
-.perf-popup__note b { color: #FFD700; }
+.perf-popup__note b { color: #ff9ec6; }
 .perf-popup__close {
   position: absolute;
   top: 10px;
   right: 12px;
   background: none;
   border: none;
-  color: #667;
+  color: #a07f90;
   font-size: 16px;
   cursor: pointer;
   padding: 4px;
@@ -3912,7 +3914,7 @@ body.duel-mode-active .now-strip { display: none !important; }
   border-radius: 4px;
   transition: color 0.2s;
 }
-.perf-popup__close:hover { color: #fff; }
+.perf-popup__close:hover { color: #ffd6e8; }
 
 /* ---- Performance body classes ---- */
 body.perf-no-thunder #lightningCanvas { display: none !important; }
@@ -3921,6 +3923,23 @@ body.perf-no-card-float .card { animation: none !important; }
 body.perf-no-heading-anim .header h1,
 body.perf-no-heading-anim .header h1::before,
 body.perf-no-heading-anim .header h1::after { animation: none !important; }
+
+/* Poor / Low: kill the glow layer */
+body.perf-no-glow .card-glow,
+body.perf-no-glow .footer-glow,
+body.perf-no-glow .ambient-particle { display: none !important; }
+body.perf-no-glow .card:hover,
+body.perf-no-glow .card:focus-within { box-shadow: none !important; }
+body.perf-no-glow .header h1,
+body.perf-no-glow .side-header span { text-shadow: none !important; }
+
+/* High / Poor / Low: kill blinking animations */
+body.perf-no-blink .side-header img,
+body.perf-no-blink .badge,
+body.perf-no-blink .counter-box,
+body.perf-no-blink .pill,
+body.perf-no-blink .header h1::before,
+body.perf-no-blink .header h1::after { animation: none !important; }
 
 /* === OWNER INFO PANEL === */
 .owner-panel {
