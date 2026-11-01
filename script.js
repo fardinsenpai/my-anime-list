@@ -4007,13 +4007,13 @@ function applyBurningCard() {
     if (special) {
       card.classList.add('card-' + special);
       // inject stamp if not already present
-      var poster = card.querySelector('.poster-wrap');
-      if (poster && !poster.querySelector('.special-stamp')) {
+      var front = card.querySelector('.card-front');
+      if (front && !front.querySelector('.special-stamp')) {
         var stampMap = { burning: 'Fire Type', frozen: 'Frozen Type', wind: 'Wind Type', black: 'Black Type', lightning: 'Lightning Type' };
         var stamp = document.createElement('div');
         stamp.className = 'special-stamp card-stamp-' + special;
         stamp.textContent = stampMap[special];
-        poster.appendChild(stamp);
+        front.appendChild(stamp);
       }
     }
   });

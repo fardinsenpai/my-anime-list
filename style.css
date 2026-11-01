@@ -1178,7 +1178,6 @@ body.duel-mode-active .now-strip { display: none !important; }
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
   border-radius: 16px;
-  overflow: hidden;
 }
 
 .card-front {
@@ -3948,6 +3947,8 @@ body.duel-mode-active .now-strip { display: none !important; }
   text-shadow: 0 0 4px #ff3333, 0 0 8px #aa0000, 0 0 2px #330000;
   text-transform: uppercase;
   overflow: hidden;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 .special-stamp::before {
   content: '';
