@@ -2096,10 +2096,8 @@ function scrollToEnd() {
   var doc = document.documentElement;
   var body = document.body;
   var max = Math.max(doc ? doc.scrollHeight : 0, body ? body.scrollHeight : 0) - window.innerHeight;
-  // a smooth ride over tens of thousands of pixels takes seconds and feels
-  // broken, so a long jump is instant and a short one still glides
-  var far = max > window.innerHeight * 3;
-  window.scrollTo({ top: max > 0 ? max : 0, behavior: (far || prefersReducedMotion()) ? 'auto' : 'smooth' });
+  // always animate — a long smooth ride is what the END button should feel like
+  window.scrollTo({ top: max > 0 ? max : 0, behavior: prefersReducedMotion() ? 'auto' : 'smooth' });
 }
 
 (function buildScrollDock() {
@@ -2120,25 +2118,25 @@ function scrollToEnd() {
     b.type = 'button';
     b.title = title;
     b.setAttribute('aria-label', title);
-    b.style.cssText = 'width:46px;height:46px;border-radius:15px;cursor:pointer;' +
-      'background:linear-gradient(150deg, rgba(255,255,255,.10), rgba(255,143,190,.16));' +
-      'border:1.5px solid rgba(255,143,190,.45);color:#fff;' +
-      "font-family:'Yuji Syuku',cursive;font-size:15px;line-height:1;" +
+    b.style.cssText = 'width:54px;height:54px;border-radius:17px;cursor:pointer;' +
+      'background:linear-gradient(150deg, rgba(255,143,190,.30), rgba(255,45,120,.22));' +
+      'border:2px solid rgba(255,143,190,.80);color:#fff;' +
+      "font-family:'Yuji Syuku',cursive;font-size:18px;line-height:1;" +
       'display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;' +
-      'backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);' +
-      'box-shadow:0 6px 18px rgba(0,0,0,.45), inset 0 0 12px rgba(255,143,190,.10);' +
+      'backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);' +
+      'box-shadow:0 8px 24px rgba(0,0,0,.5), 0 0 20px rgba(255,143,190,.38), inset 0 0 14px rgba(255,143,190,.16);' +
       'transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease, opacity .2s ease;';
-    b.innerHTML = '<span style="text-shadow:0 0 10px rgba(255,143,190,.85);-webkit-text-stroke:.5px rgba(255,60,140,.55);">' + arrow + '</span>' +
-      '<span style="font-size:7.5px;letter-spacing:1.4px;color:rgba(255,215,234,.85);">' + label + '</span>';
+    b.innerHTML = '<span style="text-shadow:0 0 12px rgba(255,143,190,1);-webkit-text-stroke:.6px rgba(255,60,140,.65);">' + arrow + '</span>' +
+      '<span style="font-size:8.5px;letter-spacing:1.6px;color:#ffe3f0;font-weight:600;text-shadow:0 0 6px rgba(255,143,190,.9);">' + label + '</span>';
     b.addEventListener('mouseenter', function () {
-      b.style.borderColor = '#ff8fbe';
-      b.style.boxShadow = '0 8px 24px rgba(0,0,0,.5), 0 0 22px rgba(255,143,190,.45)';
-      b.style.transform = 'translateY(-3px)';
+      b.style.borderColor = '#ffd6e8';
+      b.style.boxShadow = '0 10px 28px rgba(0,0,0,.55), 0 0 30px rgba(255,143,190,.70)';
+      b.style.transform = 'translateY(-3px) scale(1.06)';
     });
     b.addEventListener('mouseleave', function () {
-      b.style.borderColor = 'rgba(255,143,190,.45)';
-      b.style.boxShadow = '0 6px 18px rgba(0,0,0,.45), inset 0 0 12px rgba(255,143,190,.10)';
-      b.style.transform = 'translateY(0)';
+      b.style.borderColor = 'rgba(255,143,190,.80)';
+      b.style.boxShadow = '0 8px 24px rgba(0,0,0,.5), 0 0 20px rgba(255,143,190,.38), inset 0 0 14px rgba(255,143,190,.16)';
+      b.style.transform = 'translateY(0) scale(1)';
     });
     b.addEventListener('click', action);
     return b;
@@ -2149,8 +2147,8 @@ function scrollToEnd() {
 
   var track = document.createElement('div');
   track.title = 'How far down the page you are';
-  track.style.cssText = 'width:3px;height:54px;border-radius:3px;background:rgba(255,255,255,.12);' +
-    'overflow:hidden;position:relative;box-shadow:inset 0 0 4px rgba(0,0,0,.6);';
+  track.style.cssText = 'width:4px;height:60px;border-radius:4px;background:rgba(255,255,255,.16);' +
+    'overflow:hidden;position:relative;box-shadow:inset 0 0 5px rgba(0,0,0,.65), 0 0 10px rgba(255,143,190,.25);';
   var fill = document.createElement('div');
   fill.style.cssText = 'position:absolute;left:0;bottom:0;width:100%;height:0%;' +
     'background:linear-gradient(180deg,#ffffff,#ff8fbe);border-radius:3px;' +
@@ -2162,6 +2160,17 @@ function scrollToEnd() {
   dock.appendChild(endBtn);
   document.body.appendChild(dock);
 
+  if (!document.getElementById('scrollDockStyle')) {
+    var dockStyle = document.createElement('style');
+    dockStyle.id = 'scrollDockStyle';
+    dockStyle.textContent =
+      '@keyframes dockGlow{0%,100%{box-shadow:0 8px 24px rgba(0,0,0,.5),0 0 16px rgba(255,143,190,.32),inset 0 0 14px rgba(255,143,190,.16);}' +
+      '50%{box-shadow:0 8px 28px rgba(0,0,0,.55),0 0 30px rgba(255,143,190,.65),inset 0 0 18px rgba(255,143,190,.24);}}' +
+      '#scrollTopBtn,#scrollEndBtn{animation:dockGlow 2.6s ease-in-out infinite;}' +
+      '#scrollTopBtn:hover,#scrollEndBtn:hover{animation-play-state:paused;}';
+    document.head.appendChild(dockStyle);
+  }
+
   var ticking = false;
   function paint() {
     ticking = false;
@@ -2171,9 +2180,9 @@ function scrollToEnd() {
     var y = window.pageYOffset || (doc ? doc.scrollTop : 0) || 0;
     var p = max > 0 ? Math.min(1, Math.max(0, y / max)) : 0;
     fill.style.height = (p * 100).toFixed(1) + '%';
-    // the dock lives in the middle band of the page: it fades in once a sixth
-    // of the page is scrolled and is gone again in the last sixth
-    var show = isScrollButtonSection() && p > (1 / 6) && p < (5 / 6);
+    // keep the dock on screen for nearly the whole page — it's the main
+    // way to jump between top and bottom now
+    var show = isScrollButtonSection() && p > 0.04 && p < 0.995;
     dock.style.opacity = show ? '1' : '0';
     dock.style.transform = show ? 'translateY(0) scale(1)' : 'translateY(18px) scale(.92)';
     dock.style.pointerEvents = show ? 'auto' : 'none';
