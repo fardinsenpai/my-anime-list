@@ -1465,12 +1465,24 @@ function selectEditCard(id) {
       }
       document.getElementById('adminEditSeasons').value = seasonEl ? seasonEl.textContent.replace(/[🌸📺]/g,'').trim() : '';
       document.getElementById('adminEditEps').value = epsEl ? epsEl.textContent.replace(/[📺🎬]/g,'').replace('Total Episodes:','').trim() : '';
-      // Detect special card effect
+      // Detect special card effect (from class or badge #)
       var specialSel = document.getElementById('adminEditSpecial');
       if (specialSel) {
         var specialClass = '';
         for (var sc = 0; sc < allCards[i].classList.length; sc++) {
           if (allCards[i].classList[sc].indexOf('card-') === 0 && allCards[i].classList[sc] !== 'card-inner') specialClass = allCards[i].classList[sc].replace('card-', '');
+        }
+        // Fallback by badge number for cards not yet styled
+        if (!specialClass) {
+          var badgeEl = allCards[i].querySelector('.badge');
+          if (badgeEl) {
+            var badgeText = String(badgeEl.textContent || '').trim();
+            if (badgeText === '#7') specialClass = 'burning';
+            else if (badgeText === '#5') specialClass = 'black';
+            else if (badgeText === '#24') specialClass = 'lightning';
+            else if (badgeText === '#118') specialClass = 'frozen';
+            else if (badgeText === '#191') specialClass = 'wind';
+          }
         }
         specialSel.value = specialClass;
       }
