@@ -209,6 +209,17 @@
           <input type="text" id="adminEditSeasons" class="admin-g-input" placeholder="Total Seasons (Season-1,2,3)">
           <input type="text" id="adminEditEps" class="admin-g-input" placeholder="Total Episodes (190)">
         </div>
+        <div style="display:flex;gap:8px;margin-top:6px;align-items:center;">
+          <label style="font-size:11px;color:#aaa;">Special Card:</label>
+          <select id="adminEditSpecial" class="admin-g-input narrow" style="width:140px;background:#1a0f15;color:#fff;border:1px solid #333;">
+            <option value="">None</option>
+            <option value="burning">Fire Type</option>
+            <option value="frozen">Frozen Type</option>
+            <option value="wind">Wind Type</option>
+            <option value="black">Black Type</option>
+            <option value="lightning">Lightning Type</option>
+          </select>
+        </div>
         <button class="admin-g-btn" onclick="commitEditAnime()">▶ COMMIT EDIT</button>
         <div class="ad-note">Editing an anime rewrites its card in index.html and its genre list in script.js.  ghp_jdMFzDeqsfRbxIXnJ5efO4xL5q6J0S3UDUt0</div>
       </section>
