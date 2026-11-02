@@ -4096,6 +4096,7 @@ body.perf-no-blink .counter-box,
 body.perf-no-blink .pill,
 body.perf-no-blink .header h1::before,
 body.perf-no-blink .header h1::after { animation: none !important; }
+body.perf-no-blink .pill { opacity: 1 !important; transform: scale(1) translateY(0) !important; }
 
 /* === OWNER INFO PANEL === */
 .owner-panel {
