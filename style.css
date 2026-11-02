@@ -1207,20 +1207,64 @@ body.duel-mode-active .now-strip { display: none !important; }
 
 /* Top-of-back label for special cards */
 .back-special-label {
+  --sc: #ffd700;
+  --sc-soft: rgba(255, 215, 0, 0.2);
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
   font-family: 'Orbitron', sans-serif;
   font-size: 9px;
   font-weight: 900;
   letter-spacing: 2.5px;
   text-transform: uppercase;
-  color: #ffd700;
-  padding: 4px 14px;
-  border: 1px solid rgba(255, 215, 0, 0.55);
+  color: var(--sc);
+  padding: 5px 16px;
+  border: 1px solid var(--sc);
   border-radius: 999px;
-  background: rgba(255, 215, 0, 0.08);
-  box-shadow: 0 0 10px rgba(255, 215, 0, 0.4), inset 0 0 8px rgba(255, 215, 0, 0.12);
-  text-shadow: 0 0 6px rgba(255, 215, 0, 0.85), 0 0 12px rgba(255, 170, 0, 0.5);
+  background:
+    linear-gradient(90deg, transparent, var(--sc-soft), transparent),
+    rgba(0, 0, 0, 0.28);
+  box-shadow:
+    0 0 10px var(--sc-soft),
+    0 0 22px var(--sc-soft),
+    inset 0 0 10px var(--sc-soft);
+  text-shadow: 0 0 6px var(--sc), 0 0 14px var(--sc);
   margin-bottom: 2px;
+  overflow: hidden;
+  animation: specialLabelPulse 2.4s ease-in-out infinite;
 }
+.back-special-label::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 40%;
+  background: linear-gradient(110deg, transparent, rgba(255, 255, 255, 0.45), transparent);
+  transform: translateX(-160%);
+  animation: specialLabelShine 3.4s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes specialLabelPulse {
+  0%, 100% { box-shadow: 0 0 8px var(--sc-soft), 0 0 16px var(--sc-soft), inset 0 0 8px var(--sc-soft); }
+  50% { box-shadow: 0 0 16px var(--sc), 0 0 30px var(--sc-soft), inset 0 0 14px var(--sc-soft); }
+}
+@keyframes specialLabelShine {
+  0%, 55% { transform: translateX(-160%); }
+  100% { transform: translateX(420%); }
+}
+.back-special-label--burning { --sc: #ff6a4a; --sc-soft: rgba(255, 90, 58, 0.22); }
+.back-special-label--frozen { --sc: #4fc3ff; --sc-soft: rgba(51, 170, 255, 0.22); }
+.back-special-label--wind { --sc: #4be08a; --sc-soft: rgba(75, 224, 138, 0.22); }
+.back-special-label--black { --sc: #cccccc; --sc-soft: rgba(190, 190, 190, 0.22); }
+.back-special-label--lightning { --sc: #ffd633; --sc-soft: rgba(255, 204, 0, 0.24); }
+.back-special-label--healing { --sc: #7ee65a; --sc-soft: rgba(102, 221, 68, 0.22); }
+.back-special-label--earth { --sc: #d4a373; --sc-soft: rgba(200, 155, 106, 0.24); }
+.back-special-label--speed { --sc: #b57bff; --sc-soft: rgba(168, 85, 247, 0.26); }
+body.perf-no-blink .back-special-label { animation: none !important; }
+body.perf-no-blink .back-special-label::before { display: none !important; }
 
 .back-title {
   font-family: 'Cinzel Decorative', cursive;
