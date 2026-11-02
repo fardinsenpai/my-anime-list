@@ -3987,6 +3987,9 @@ body.duel-mode-active .now-strip { display: none !important; }
 .card-stamp-wind { background: radial-gradient(circle at 35% 35%, #99ee66 0%, #33aa11 70%, #113300 100%); border: 2px solid #99ee66; box-shadow: 0 0 10px #66dd44, 0 0 20px rgba(102,221,68,.5); text-shadow: 0 0 4px #66dd44, 0 0 8px #338811; }
 .card-stamp-black { background: radial-gradient(circle at 35% 35%, #777777 0%, #222222 70%, #000000 100%); border: 2px solid #aaaaaa; box-shadow: 0 0 10px #888888, 0 0 20px rgba(120,120,120,.5); color: #fff; text-shadow: 0 0 4px #999, 0 0 8px #444; }
 .card-stamp-lightning { background: radial-gradient(circle at 35% 35%, #ffee66 0%, #ffb300 70%, #664400 100%); border: 2px solid #ffe066; box-shadow: 0 0 10px #ffcc00, 0 0 20px rgba(255,204,0,.55); color: #221a00; text-shadow: 0 0 3px rgba(255,255,255,.85), 0 0 6px rgba(255,230,120,.7); }
+.card-stamp-healing { background: radial-gradient(circle at 35% 35%, #b9ffd0 0%, #35b56a 70%, #0a3318 100%); border: 2px solid #9cffc0; box-shadow: 0 0 10px #4be08a, 0 0 20px rgba(75,224,138,.55); color: #062b14; text-shadow: 0 0 3px rgba(255,255,255,.85), 0 0 6px rgba(120,255,180,.7); }
+.card-stamp-earth { background: radial-gradient(circle at 35% 35%, #c89b6a 0%, #8a5a2b 70%, #2b1607 100%); border: 2px solid #d4a373; box-shadow: 0 0 10px #a9713f, 0 0 20px rgba(169,113,63,.55); color: #fff4e6; text-shadow: 0 0 4px #8a5a2b, 0 0 8px #4a2a10; }
+.card-stamp-speed { background: radial-gradient(circle at 35% 35%, #d8a6ff 0%, #7b2ff7 70%, #22004d 100%); border: 2px solid #c78bff; box-shadow: 0 0 10px #a855f7, 0 0 20px rgba(168,85,247,.55); color: #f3e8ff; text-shadow: 0 0 4px #a855f7, 0 0 8px #6b21a8; }
 
 /* === SPECIAL EFFECT CARDS === */
 @keyframes frozenGlow {
@@ -4017,6 +4020,27 @@ body.duel-mode-active .now-strip { display: none !important; }
   75% { box-shadow: 0 0 12px 3px rgba(255,215,0,.75), 0 0 22px 6px rgba(255,190,0,.45), 0 0 38px 14px rgba(255,225,60,.22); border-color: rgba(255,215,0,.9); }
   100% { box-shadow: 0 0 8px 2px rgba(255,215,0,.55), 0 0 18px 4px rgba(255,180,0,.35), 0 0 30px 8px rgba(255,220,50,.18); border-color: rgba(255,215,0,.7); }
 }
+@keyframes healingGlow {
+  0% { box-shadow: 0 0 8px 2px rgba(90,230,150,.55), 0 0 18px 4px rgba(50,190,110,.35), 0 0 30px 8px rgba(140,255,190,.18); border-color: rgba(120,240,170,.7); }
+  25% { box-shadow: 0 0 14px 4px rgba(100,240,160,.8), 0 0 28px 10px rgba(60,200,120,.5), 0 0 45px 16px rgba(150,255,200,.28); border-color: rgba(130,255,180,.95); }
+  50% { box-shadow: 0 0 8px 2px rgba(90,230,150,.55), 0 0 18px 4px rgba(50,190,110,.35), 0 0 30px 8px rgba(140,255,190,.18); border-color: rgba(120,240,170,.7); }
+  75% { box-shadow: 0 0 12px 3px rgba(100,240,160,.7), 0 0 22px 6px rgba(60,200,120,.42), 0 0 38px 14px rgba(150,255,200,.22); border-color: rgba(130,250,175,.9); }
+  100% { box-shadow: 0 0 8px 2px rgba(90,230,150,.55), 0 0 18px 4px rgba(50,190,110,.35), 0 0 30px 8px rgba(140,255,190,.18); border-color: rgba(120,240,170,.7); }
+}
+@keyframes earthGlow {
+  0% { box-shadow: 0 0 8px 2px rgba(160,110,60,.55), 0 0 18px 4px rgba(120,80,40,.35), 0 0 30px 8px rgba(190,140,90,.18); border-color: rgba(180,130,80,.7); }
+  25% { box-shadow: 0 0 14px 4px rgba(180,125,70,.8), 0 0 28px 10px rgba(140,95,50,.5), 0 0 45px 16px rgba(205,155,100,.28); border-color: rgba(200,150,95,.95); }
+  50% { box-shadow: 0 0 8px 2px rgba(160,110,60,.55), 0 0 18px 4px rgba(120,80,40,.35), 0 0 30px 8px rgba(190,140,90,.18); border-color: rgba(180,130,80,.7); }
+  75% { box-shadow: 0 0 12px 3px rgba(180,125,70,.7), 0 0 22px 6px rgba(140,95,50,.42), 0 0 38px 14px rgba(200,150,95,.22); border-color: rgba(195,145,90,.9); }
+  100% { box-shadow: 0 0 8px 2px rgba(160,110,60,.55), 0 0 18px 4px rgba(120,80,40,.35), 0 0 30px 8px rgba(190,140,90,.18); border-color: rgba(180,130,80,.7); }
+}
+@keyframes speedGlow {
+  0% { box-shadow: 0 0 8px 2px rgba(170,90,255,.55), 0 0 18px 4px rgba(130,50,220,.35), 0 0 30px 8px rgba(200,130,255,.18); border-color: rgba(190,120,255,.7); }
+  25% { box-shadow: 0 0 14px 4px rgba(185,105,255,.85), 0 0 28px 10px rgba(145,65,235,.5), 0 0 45px 16px rgba(215,145,255,.3); border-color: rgba(205,135,255,.95); }
+  50% { box-shadow: 0 0 8px 2px rgba(170,90,255,.55), 0 0 18px 4px rgba(130,50,220,.35), 0 0 30px 8px rgba(200,130,255,.18); border-color: rgba(190,120,255,.7); }
+  75% { box-shadow: 0 0 12px 3px rgba(185,105,255,.75), 0 0 22px 6px rgba(145,65,235,.45), 0 0 38px 14px rgba(210,140,255,.24); border-color: rgba(200,130,255,.9); }
+  100% { box-shadow: 0 0 8px 2px rgba(170,90,255,.55), 0 0 18px 4px rgba(130,50,220,.35), 0 0 30px 8px rgba(200,130,255,.18); border-color: rgba(190,120,255,.7); }
+}
 .card-frozen .card-inner,
 .card-frozen .card-inner::before { animation: frozenGlow 2.2s ease-in-out infinite !important; }
 .card-frozen .card-inner { border: 2px solid rgba(0,200,255,.8) !important; border-radius: 12px !important; }
@@ -4041,6 +4065,27 @@ body.duel-mode-active .now-strip { display: none !important; }
 .card-lightning .card-inner::before { content: ''; position: absolute; inset: -4px; border-radius: 16px; border: 1.5px solid rgba(255,215,0,.35); pointer-events: none; z-index: 10; }
 .card-lightning .badge { background: linear-gradient(135deg,#ffd700,#ffab00) !important; border-color: #ffd700 !important; box-shadow: 0 0 8px #ffd700, 0 0 4px #ff9900 !important; color: #222 !important; text-shadow: none; }
 .card-lightning .back-genre, .card-lightning .back-mal, .card-lightning .back-mal-score { text-shadow: 0 0 6px rgba(255,215,0,.7) !important; color: #ffeaa7 !important; }
+
+/* Healing — soft green */
+.card-healing .card-inner, .card-healing .card-inner::before { animation: healingGlow 2.4s ease-in-out infinite !important; }
+.card-healing .card-inner { border: 2px solid rgba(120,240,170,.8) !important; border-radius: 12px !important; }
+.card-healing .card-inner::before { content: ''; position: absolute; inset: -4px; border-radius: 16px; border: 1.5px solid rgba(120,240,170,.35); pointer-events: none; z-index: 10; }
+.card-healing .badge { background: linear-gradient(135deg,#7dffb0,#2ecc71) !important; border-color: #4be08a !important; box-shadow: 0 0 8px #4be08a, 0 0 4px #2ecc71 !important; color: #062b14 !important; text-shadow: none; }
+.card-healing .back-genre, .card-healing .back-mal, .card-healing .back-mal-score { text-shadow: 0 0 6px rgba(90,230,150,.7) !important; color: #d4ffe4 !important; }
+
+/* Earth — brown */
+.card-earth .card-inner, .card-earth .card-inner::before { animation: earthGlow 2.6s ease-in-out infinite !important; }
+.card-earth .card-inner { border: 2px solid rgba(190,140,90,.8) !important; border-radius: 12px !important; }
+.card-earth .card-inner::before { content: ''; position: absolute; inset: -4px; border-radius: 16px; border: 1.5px solid rgba(190,140,90,.35); pointer-events: none; z-index: 10; }
+.card-earth .badge { background: linear-gradient(135deg,#c89b6a,#8a5a2b) !important; border-color: #a9713f !important; box-shadow: 0 0 8px #a9713f, 0 0 4px #6b3f1d !important; color: #fff4e6 !important; text-shadow: 0 0 4px #4a2a10; }
+.card-earth .back-genre, .card-earth .back-mal, .card-earth .back-mal-score { text-shadow: 0 0 6px rgba(180,125,70,.7) !important; color: #f0d5b8 !important; }
+
+/* Speed — cosmic violet */
+.card-speed .card-inner, .card-speed .card-inner::before { animation: speedGlow 2.2s ease-in-out infinite !important; }
+.card-speed .card-inner { border: 2px solid rgba(190,120,255,.8) !important; border-radius: 12px !important; }
+.card-speed .card-inner::before { content: ''; position: absolute; inset: -4px; border-radius: 16px; border: 1.5px solid rgba(190,120,255,.35); pointer-events: none; z-index: 10; }
+.card-speed .badge { background: linear-gradient(135deg,#c78bff,#7b2ff7) !important; border-color: #a855f7 !important; box-shadow: 0 0 8px #a855f7, 0 0 4px #6b21a8 !important; color: #f3e8ff !important; text-shadow: 0 0 4px #6b21a8; }
+.card-speed .back-genre, .card-speed .back-mal, .card-speed .back-mal-score { text-shadow: 0 0 6px rgba(170,90,255,.7) !important; color: #e9d5ff !important; }
 
 /* === SPECIAL BURNING CARD (#7 — Fairy Tail) === */
 @keyframes fireGlow {

@@ -1474,6 +1474,15 @@ function selectEditCard(id) {
         }
         // Fallback by badge number for cards not yet styled
         if (!specialClass) {
+          var existingStamp = allCards[i].querySelector('.special-stamp');
+          if (existingStamp) {
+            var stampTypes = ['burning','frozen','wind','black','lightning','healing','earth','speed'];
+            for (var st = 0; st < stampTypes.length; st++) {
+              if (existingStamp.classList.contains('card-stamp-' + stampTypes[st])) { specialClass = stampTypes[st]; break; }
+            }
+          }
+        }
+        if (!specialClass) {
           var badgeEl = allCards[i].querySelector('.badge');
           if (badgeEl) {
             var badgeText = String(badgeEl.textContent || '').trim();
@@ -1482,6 +1491,9 @@ function selectEditCard(id) {
             else if (badgeText === '#24') specialClass = 'lightning';
             else if (badgeText === '#118') specialClass = 'frozen';
             else if (badgeText === '#191') specialClass = 'wind';
+            else if (badgeText === '#139') specialClass = 'healing';
+            else if (badgeText === '#102') specialClass = 'earth';
+            else if (badgeText === '#23') specialClass = 'speed';
           }
         }
         specialSel.value = specialClass;
@@ -1558,7 +1570,7 @@ async function commitEditAnime() {
     var epsText = episodes ? '📺 Total Episodes: ' + episodes : '';
     var specialSel = document.getElementById('adminEditSpecial');
     var special = specialSel ? specialSel.value : '';
-    var stampMap = { burning: 'Fire Type', frozen: 'Frozen Type', wind: 'Wind Type', black: 'Black Type', lightning: 'Lightning Type' };
+    var stampMap = { burning: 'Fire Type', frozen: 'Frozen Type', wind: 'Wind Type', black: 'Black Type', lightning: 'Lightning Type', healing: 'Healing Type', earth: 'Earth Type', speed: 'Speed Type' };
     var stamp = stampMap[special] || '';
     var specialClass = special ? ' card-' + special : '';
     var stampHtml = stamp ? '<div class="special-stamp card-stamp-' + special + '">' + stamp + '</div>' : '';
@@ -1801,7 +1813,7 @@ async function commitAddAnime() {
     var nextId = maxId + 1;
     // Special card effects are edit-only; new cards start without one.
     var special = '';
-    var stampMap = { burning: 'Fire Type', frozen: 'Frozen Type', wind: 'Wind Type', black: 'Black Type', lightning: 'Lightning Type' };
+    var stampMap = { burning: 'Fire Type', frozen: 'Frozen Type', wind: 'Wind Type', black: 'Black Type', lightning: 'Lightning Type', healing: 'Healing Type', earth: 'Earth Type', speed: 'Speed Type' };
     var stamp = stampMap[special] || '';
     var specialClass = special ? ' card-' + special : '';
     var stampHtml = stamp ? '<div class="special-stamp card-stamp-' + special + '">' + stamp + '</div>' : '';

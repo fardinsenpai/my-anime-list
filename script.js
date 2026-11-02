@@ -3994,7 +3994,7 @@ function localCards() {
 
 // Special burning glow for card #7 (Fairy Tail)
 function applyBurningCard() {
-  var stampMap = { burning: 'Fire Type', frozen: 'Frozen Type', wind: 'Wind Type', black: 'Black Type', lightning: 'Lightning Type' };
+  var stampMap = { burning: 'Fire Type', frozen: 'Frozen Type', wind: 'Wind Type', black: 'Black Type', lightning: 'Lightning Type', healing: 'Healing Type', earth: 'Earth Type', speed: 'Speed Type' };
   document.querySelectorAll('.card').forEach(function(card) {
     var badge = card.querySelector('.badge');
     if (!badge) return;
@@ -4015,6 +4015,9 @@ function applyBurningCard() {
       else if (text === '#24') special = 'lightning';
       else if (text === '#118') special = 'frozen';
       else if (text === '#191') special = 'wind';
+      else if (text === '#139') special = 'healing';
+      else if (text === '#102') special = 'earth';
+      else if (text === '#23') special = 'speed';
     }
     if (special) {
       card.classList.add('card-' + special);
