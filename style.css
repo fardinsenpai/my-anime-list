@@ -1205,6 +1205,23 @@ body.duel-mode-active .now-strip { display: none !important; }
   gap: 10px;
 }
 
+/* Top-of-back label for special cards */
+.back-special-label {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: #ffd700;
+  padding: 4px 14px;
+  border: 1px solid rgba(255, 215, 0, 0.55);
+  border-radius: 999px;
+  background: rgba(255, 215, 0, 0.08);
+  box-shadow: 0 0 10px rgba(255, 215, 0, 0.4), inset 0 0 8px rgba(255, 215, 0, 0.12);
+  text-shadow: 0 0 6px rgba(255, 215, 0, 0.85), 0 0 12px rgba(255, 170, 0, 0.5);
+  margin-bottom: 2px;
+}
+
 .back-title {
   font-family: 'Cinzel Decorative', cursive;
   font-size: 13px;
@@ -3929,8 +3946,8 @@ body.duel-mode-active .now-strip { display: none !important; }
   top: -18px;
   left: -18px;
   z-index: 99;
-  width: 78px;
-  height: 78px;
+  width: 82px;
+  height: 82px;
   border-radius: 50%;
   background: radial-gradient(circle at 35% 35%, #ff3333 0%, #aa0000 70%, #330000 100%);
   border: 3px solid #ff3333;
@@ -3942,11 +3959,14 @@ body.duel-mode-active .now-strip { display: none !important; }
   pointer-events: none;
   font-family: 'Orbitron', sans-serif;
   font-weight: 900;
-  font-size: 7px;
-  letter-spacing: .6px;
+  font-size: 8px;
+  line-height: 1.15;
+  letter-spacing: .4px;
+  padding: 0 10px;
   color: #fff;
   text-shadow: 0 0 4px #ff3333, 0 0 8px #aa0000, 0 0 2px #330000;
   text-transform: uppercase;
+  word-break: break-word;
   overflow: hidden;
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
@@ -3959,26 +3979,14 @@ body.duel-mode-active .now-strip { display: none !important; }
   border: 1.5px dashed rgba(255,230,150,.6);
   pointer-events: none;
 }
-.special-stamp::after {
-  content: '★ ★ ★ ★ ★';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  font-size: 6.5px;
-  letter-spacing: 3.5px;
-  color: rgba(255,255,200,.55);
-  opacity: .35;
-  pointer-events: none;
-}
 .poster-wrap {
   position: relative;
 }
-.card-stamp-burning { background: #ff3333; border: 1px solid #ff6666; box-shadow: 0 0 10px #ff3333; }
-.card-stamp-frozen { background: #33aaff; border: 1px solid #66ccff; box-shadow: 0 0 10px #33aaff; }
-.card-stamp-wind { background: #66dd44; border: 1px solid #99ee66; box-shadow: 0 0 10px #66dd44; }
-.card-stamp-black { background: #555555; border: 1px solid #888888; box-shadow: 0 0 10px #777777; color: #fff; }
-.card-stamp-lightning { background: #ffcc00; border: 1px solid #ffdd44; box-shadow: 0 0 10px #ffcc00; color: #222; }
+.card-stamp-burning { background: radial-gradient(circle at 35% 35%, #ff5a3a 0%, #cc1100 70%, #440000 100%); border: 2px solid #ff6666; box-shadow: 0 0 10px #ff3333, 0 0 20px rgba(255,51,51,.5); text-shadow: 0 0 4px #ff3333, 0 0 8px #aa0000; }
+.card-stamp-frozen { background: radial-gradient(circle at 35% 35%, #66ccff 0%, #0077cc 70%, #002244 100%); border: 2px solid #66ccff; box-shadow: 0 0 10px #33aaff, 0 0 20px rgba(51,170,255,.5); text-shadow: 0 0 4px #33aaff, 0 0 8px #0066aa; }
+.card-stamp-wind { background: radial-gradient(circle at 35% 35%, #99ee66 0%, #33aa11 70%, #113300 100%); border: 2px solid #99ee66; box-shadow: 0 0 10px #66dd44, 0 0 20px rgba(102,221,68,.5); text-shadow: 0 0 4px #66dd44, 0 0 8px #338811; }
+.card-stamp-black { background: radial-gradient(circle at 35% 35%, #777777 0%, #222222 70%, #000000 100%); border: 2px solid #aaaaaa; box-shadow: 0 0 10px #888888, 0 0 20px rgba(120,120,120,.5); color: #fff; text-shadow: 0 0 4px #999, 0 0 8px #444; }
+.card-stamp-lightning { background: radial-gradient(circle at 35% 35%, #ffee66 0%, #ffb300 70%, #664400 100%); border: 2px solid #ffe066; box-shadow: 0 0 10px #ffcc00, 0 0 20px rgba(255,204,0,.55); color: #221a00; text-shadow: 0 0 3px rgba(255,255,255,.85), 0 0 6px rgba(255,230,120,.7); }
 
 /* === SPECIAL EFFECT CARDS === */
 @keyframes frozenGlow {

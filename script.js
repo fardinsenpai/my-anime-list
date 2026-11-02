@@ -4026,6 +4026,14 @@ function applyBurningCard() {
         stamp.textContent = stampMap[special];
         inner.appendChild(stamp);
       }
+      // inject "SPECIAL CARD" label at the top of the back
+      var backContent = card.querySelector('.back-content');
+      if (backContent && !backContent.querySelector('.back-special-label')) {
+        var label = document.createElement('div');
+        label.className = 'back-special-label';
+        label.textContent = '✦ Special Card ✦';
+        backContent.insertBefore(label, backContent.firstChild);
+      }
     }
   });
 }
