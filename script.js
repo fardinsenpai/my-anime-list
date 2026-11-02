@@ -3994,22 +3994,33 @@ function localCards() {
 
 // Special burning glow for card #7 (Fairy Tail)
 function applyBurningCard() {
+  var stampMap = { burning: 'Fire Type', frozen: 'Frozen Type', wind: 'Wind Type', black: 'Black Type', lightning: 'Lightning Type' };
   document.querySelectorAll('.card').forEach(function(card) {
     var badge = card.querySelector('.badge');
     if (!badge) return;
     var text = String(badge.textContent || '').trim();
     var special = '';
-    if (text === '#7') special = 'burning';
-    else if (text === '#5') special = 'black';
-    else if (text === '#24') special = 'lightning';
-    else if (text === '#118') special = 'frozen';
-    else if (text === '#191') special = 'wind';
+    // 1) If the card already has a stamp, use its type — fixes cards whose
+    //    class attribute was written incorrectly by the old admin code.
+    var existingStamp = card.querySelector('.special-stamp');
+    if (existingStamp) {
+      for (var t in stampMap) {
+        if (existingStamp.classList.contains('card-stamp-' + t)) { special = t; break; }
+      }
+    }
+    // 2) Fallback by badge number for the built-in special cards.
+    if (!special) {
+      if (text === '#7') special = 'burning';
+      else if (text === '#5') special = 'black';
+      else if (text === '#24') special = 'lightning';
+      else if (text === '#118') special = 'frozen';
+      else if (text === '#191') special = 'wind';
+    }
     if (special) {
       card.classList.add('card-' + special);
       // inject stamp if not already present
       var inner = card.querySelector('.card-inner');
       if (inner && !inner.querySelector('.special-stamp')) {
-        var stampMap = { burning: 'Fire Type', frozen: 'Frozen Type', wind: 'Wind Type', black: 'Black Type', lightning: 'Lightning Type' };
         var stamp = document.createElement('div');
         stamp.className = 'special-stamp card-stamp-' + special;
         stamp.textContent = stampMap[special];

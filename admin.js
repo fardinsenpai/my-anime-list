@@ -1560,9 +1560,9 @@ async function commitEditAnime() {
     var special = specialSel ? specialSel.value : '';
     var stampMap = { burning: 'Fire Type', frozen: 'Frozen Type', wind: 'Wind Type', black: 'Black Type', lightning: 'Lightning Type' };
     var stamp = stampMap[special] || '';
-    var specialClass = special ? ' class="card-' + special + '"' : '';
+    var specialClass = special ? ' card-' + special : '';
     var stampHtml = stamp ? '<div class="special-stamp card-stamp-' + special + '">' + stamp + '</div>' : '';
-    var newCard = '<div class="card"' + specialClass + '><div class="card-inner">' + stampHtml + '<div class="card-front"><div class="poster-wrap"><img src="' + img.replace(/"/g,'&quot;') + '" alt="' + name.replace(/"/g,'&quot;') + '" loading="lazy"/><span class="badge">#' + _editId + '</span></div><div class="info"><div class="number">NO. ' + _editId + '</div><div class="title">' + name + '</div></div></div><div class="card-back"><div class="back-content"><div class="back-title">' + name + '</div><div class="back-season">' + seasonText + '</div><div class="back-episodes">' + epsText + '</div><div class="back-tap-hint">click to flip back</div></div></div></div></div>';
+    var newCard = '<div class="card' + specialClass + '"><div class="card-inner">' + stampHtml + '<div class="card-front"><div class="poster-wrap"><img src="' + img.replace(/"/g,'&quot;') + '" alt="' + name.replace(/"/g,'&quot;') + '" loading="lazy"/><span class="badge">#' + _editId + '</span></div><div class="info"><div class="number">NO. ' + _editId + '</div><div class="title">' + name + '</div></div></div><div class="card-back"><div class="back-content"><div class="back-title">' + name + '</div><div class="back-season">' + seasonText + '</div><div class="back-episodes">' + epsText + '</div><div class="back-tap-hint">click to flip back</div></div></div></div></div>';
     lines[cardIdx] = newCard;
     indexContent = lines.join('\n');
     if (genre) {
@@ -1801,9 +1801,9 @@ async function commitAddAnime() {
     var special = document.getElementById('adminAddSpecial').value;
     var stampMap = { burning: 'Fire Type', frozen: 'Frozen Type', wind: 'Wind Type', black: 'Black Type', lightning: 'Lightning Type' };
     var stamp = stampMap[special] || '';
-    var specialClass = special ? ' class="card-' + special + '"' : '';
+    var specialClass = special ? ' card-' + special : '';
     var stampHtml = stamp ? '<div class="special-stamp card-stamp-' + special + '">' + stamp + '</div>' : '';
-    var cardHtml = '\n\n<div class="card"' + specialClass + '><div class="card-inner">' + stampHtml + '<div class="card-front"><div class="poster-wrap"><img src="' + img.replace(/"/g,'&quot;') + '" alt="' + title.replace(/"/g,'&quot;') + '" loading="lazy"/><span class="badge">#' + nextId + '</span></div><div class="info"><div class="number">NO. ' + nextId + '</div><div class="title">' + title + '</div></div></div><div class="card-back"><div class="back-content"><div class="back-title">' + title + '</div><div class="back-season">🌸 ' + seasonLabel + '</div><div class="back-episodes">📺 Total Episodes: ' + eps + '</div><div class="back-tap-hint">click to flip back</div></div></div></div></div>';
+    var cardHtml = '\n\n<div class="card' + specialClass + '"><div class="card-inner">' + stampHtml + '<div class="card-front"><div class="poster-wrap"><img src="' + img.replace(/"/g,'&quot;') + '" alt="' + title.replace(/"/g,'&quot;') + '" loading="lazy"/><span class="badge">#' + nextId + '</span></div><div class="info"><div class="number">NO. ' + nextId + '</div><div class="title">' + title + '</div></div></div><div class="card-back"><div class="back-content"><div class="back-title">' + title + '</div><div class="back-season">🌸 ' + seasonLabel + '</div><div class="back-episodes">📺 Total Episodes: ' + eps + '</div><div class="back-tap-hint">click to flip back</div></div></div></div></div>';
     indexContent = indexContent.replace(/<!-- === GRID END === -->/, cardHtml + '\n\n<!-- === GRID END === -->');
     scriptContent = scriptContent.replace(/counterUp\("seasonCount",\s*(\d+)/, function(m, c) { return 'counterUp("seasonCount", ' + (parseInt(c) + 1); });
     scriptContent = scriptContent.replace(/counterUp\("episodeCount",\s*(\d+)/, function(m, c) { return 'counterUp("episodeCount", ' + (parseInt(c) + eps); });
