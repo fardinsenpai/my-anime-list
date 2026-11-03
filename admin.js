@@ -25,6 +25,7 @@ var GROQ_MODELS = [];
 var GROQ_API_KEYS = [];
 var GENRE_BY_ID = {};          // anime id → ['Action', …] straight out of script.js
 var ADMIN_DATA_READY = false;
+var ADMIN_STATS_BASE = { anime: 0, seasons: 0, episodes: 0 };
 
 /* The panel has no chat of its own, so the few chat-only helpers the shared
    avatar code can reach get harmless stand-ins. */
@@ -141,8 +142,18 @@ async function loadAdminData() {
     if (avatars && typeof avatars === 'object') CHAT_AVATARS = avatars;
     GENRE_BY_ID = grabGenres(jsText);
 
+    // current counter values: the season/episode counters are hardcoded numbers in
+    // script.js, the anime counter is counted from the cards at runtime
+    var _mS = jsText.match(/counterUp\("seasonCount",\s*(\d+)/);
+    var _mE = jsText.match(/counterUp\("episodeCount",\s*(\d+)/);
+    ADMIN_STATS_BASE = {
+      anime: document.querySelectorAll('#adminDataHost #grid .card').length,
+      seasons: _mS ? parseInt(_mS[1], 10) : 0,
+      episodes: _mE ? parseInt(_mE[1], 10) : 0
+    };
+
     ADMIN_DATA_READY = true;
-    var cards = document.querySelectorAll('#adminDataHost #grid .card').length;
+    var cards = ADMIN_STATS_BASE.anime;
     bootLine('// DATA LINK OK — ' + cards + ' anime · TOP5 ' + Object.keys(TOP_5_DATA).length +
              ' genres · ' + Object.keys(AWARD_WINNERS).length + ' award years · ' +
              GROQ_MODELS.length + ' models', 'ok');
@@ -587,23 +598,6 @@ function pinKey(inp, e, idx) {
   }
 }
 
-function checkAdminPin() {
-  var pin = '';
-  document.querySelectorAll('#adminPinScreen input').forEach(function(inp) { pin += inp.value; });
-  if (pin === ADMIN_PIN) {
-    try {
-      var chk = document.getElementById('adminRememberPin');
-      if (chk && chk.checked) localStorage.setItem('admin_pin_remembered', 'true');
-      else localStorage.removeItem('admin_pin_remembered');
-    } catch (e) {}
-    document.getElementById('adminPinScreen').style.display = 'none';
-    document.getElementById('adminDashboard').style.display = 'block';
-    initAdminGui();
-  } else {
-    document.getElementById('adminPinError').style.display = 'block';
-  }
-}
-
 // === GUI ADMIN ===
 var _selectedOtt = [], _selectedStudio = [], _selectedGenre = [];
 var _watchId = 0, _readId = 0, _editId = 0, _awardId = 0;
@@ -974,14 +968,11 @@ function initAdminGui() {
   var today = new Date().toLocaleDateString('en-GB');
   var dateInput = document.getElementById('adminDateInput');
   if (dateInput) dateInput.value = today;
-  var ac = document.getElementById('animeCount'), sc = document.getElementById('seasonCount'), ec = document.getElementById('episodeCount');
-  var acv = ac ? ac.textContent : '0', scv = sc ? sc.textContent : '0', ecv = ec ? ec.textContent : '0';
-  if (document.getElementById('adminStatsAnime')) document.getElementById('adminStatsAnime').placeholder = 'Current: ' + acv;
-  if (document.getElementById('adminStatsSeasons')) document.getElementById('adminStatsSeasons').placeholder = 'Current: ' + scv;
-  if (document.getElementById('adminStatsEps')) document.getElementById('adminStatsEps').placeholder = 'Current: ' + ecv;
-  if (document.getElementById('adminStatsAnime')) document.getElementById('adminStatsAnime').value = '';
-  if (document.getElementById('adminStatsSeasons')) document.getElementById('adminStatsSeasons').value = '';
-  if (document.getElementById('adminStatsEps')) document.getElementById('adminStatsEps').value = '';
+  var statsInfo = document.getElementById('adminStatsAnimeInfo');
+  if (statsInfo) statsInfo.textContent = ADMIN_STATS_BASE.anime + ' cards — counted automatically';
+  var statsS = document.getElementById('adminStatsSeasons'), statsE = document.getElementById('adminStatsEps');
+  if (statsS) { statsS.placeholder = 'Increase by — current: ' + ADMIN_STATS_BASE.seasons; statsS.value = ''; }
+  if (statsE) { statsE.placeholder = 'Increase by — current: ' + ADMIN_STATS_BASE.episodes; statsE.value = ''; }
   switchAdminTab('watch');
 }
 
@@ -1629,35 +1620,35 @@ async function commitDate(dateStr) {
 }
 
 async function commitStats() {
-  var animeInp = document.getElementById('adminStatsAnime');
   var seasonsInp = document.getElementById('adminStatsSeasons');
   var epsInp = document.getElementById('adminStatsEps');
-  var anime = animeInp.value.trim();
-  var seasons = seasonsInp.value.trim();
-  var eps = epsInp.value.trim();
-  if (!anime && !seasons && !eps) { msgFail('Enter at least one increase'); return; }
+  var seasons = seasonsInp ? seasonsInp.value.trim() : '';
+  var eps = epsInp ? epsInp.value.trim() : '';
+  if (!seasons && !eps) { msgFail('Enter a season or episode increase'); return; }
+  var addS = parseInt(seasons, 10) || 0;
+  var addE = parseInt(eps, 10) || 0;
+  if ((seasons && !addS) || (eps && !addE)) { msgFail('Enter a whole number'); return; }
   showLoading();
   adStep('fetching script.js…');
   try {
     var scriptData = await githubFetch('script.js');
     if (!scriptData) { hideLoading(); adStep(''); saveCommitResult('stats', false, 'fetch failed'); msgFail('Fetch failed'); return; }
     var content = decodeURIComponent(escape(atob(scriptData.content)));
-    var newAnime = null, newSeasons = null, newEps = null;
-    if (anime) {
-      var cur = parseInt((animeInp.placeholder.match(/\d+/) || ['0'])[0]) || 0;
-      newAnime = cur + parseInt(anime);
-      content = content.replace(/counterUp\("animeCount",\s*\d+/, 'counterUp("animeCount", ' + newAnime);
-    }
-    if (seasons) {
-      var curS = parseInt((seasonsInp.placeholder.match(/\d+/) || ['0'])[0]) || 0;
-      newSeasons = curS + parseInt(seasons);
+    var before = content;
+    var newSeasons = null, newEps = null;
+    if (addS) {
+      var mS = content.match(/counterUp\("seasonCount",\s*(\d+)/);
+      if (!mS) { hideLoading(); adStep(''); saveCommitResult('stats', false, 'seasonCount line not found'); msgFail('seasonCount line not found in script.js'); return; }
+      newSeasons = parseInt(mS[1], 10) + addS;
       content = content.replace(/counterUp\("seasonCount",\s*\d+/, 'counterUp("seasonCount", ' + newSeasons);
     }
-    if (eps) {
-      var curE = parseInt((epsInp.placeholder.match(/\d+/) || ['0'])[0]) || 0;
-      newEps = curE + parseInt(eps);
+    if (addE) {
+      var mE = content.match(/counterUp\("episodeCount",\s*(\d+)/);
+      if (!mE) { hideLoading(); adStep(''); saveCommitResult('stats', false, 'episodeCount line not found'); msgFail('episodeCount line not found in script.js'); return; }
+      newEps = parseInt(mE[1], 10) + addE;
       content = content.replace(/counterUp\("episodeCount",\s*\d+/, 'counterUp("episodeCount", ' + newEps);
     }
+    if (content === before) { hideLoading(); adStep(''); saveCommitResult('stats', false, 'nothing changed'); msgFail('Nothing to change'); return; }
     adStep('committing script.js…');
     var ok = await githubCommit('script.js', content, 'admin: increase counter stats');
     hideLoading();
@@ -1665,10 +1656,18 @@ async function commitStats() {
     saveCommitResult('stats', ok, ok ? 'updated' : 'commit failed');
     if (ok) {
       msgOk('Stats increased');
-      if (newAnime !== null) { document.getElementById('animeCount').textContent = newAnime; animeInp.placeholder = 'Current: ' + newAnime; }
-      if (newSeasons !== null) { document.getElementById('seasonCount').textContent = newSeasons; seasonsInp.placeholder = 'Current: ' + newSeasons; }
-      if (newEps !== null) { document.getElementById('episodeCount').textContent = newEps; epsInp.placeholder = 'Current: ' + newEps; }
-      animeInp.value = ''; seasonsInp.value = ''; epsInp.value = '';
+      if (newSeasons !== null) {
+        var sEl = document.getElementById('seasonCount'); if (sEl) sEl.textContent = newSeasons;
+        ADMIN_STATS_BASE.seasons = newSeasons;
+        if (seasonsInp) seasonsInp.placeholder = 'Increase by — current: ' + newSeasons;
+      }
+      if (newEps !== null) {
+        var eEl = document.getElementById('episodeCount'); if (eEl) eEl.textContent = newEps;
+        ADMIN_STATS_BASE.episodes = newEps;
+        if (epsInp) epsInp.placeholder = 'Increase by — current: ' + newEps;
+      }
+      if (seasonsInp) seasonsInp.value = '';
+      if (epsInp) epsInp.value = '';
     }
     else msgFail('Commit failed');
   } catch (e) {
