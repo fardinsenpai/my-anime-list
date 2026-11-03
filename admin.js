@@ -2237,10 +2237,8 @@ function renderNotesTab() {
 /* ── END ADMIN BLOCK ── */
 
 /* ══════════════════════════════════════════════════════════════════════
-   BOOT — the PIN gate. The ported checkAdminPin() only toggles the two
-   screens, but here the PIN sits on a full-screen gate, so that gate has
-   to step aside too. This declaration is last in the file, which is why
-   it takes over from the ported one.
+   BOOT — the PIN gate. The PIN sits on a full-screen gate, so a correct
+   PIN has to hide the gate as well as the PIN screen.
    ══════════════════════════════════════════════════════════════════════ */
 function checkAdminPin() {
   var inputs = document.querySelectorAll('#adminPinScreen input');
@@ -2265,6 +2263,13 @@ function checkAdminPin() {
   document.getElementById('adminDashboard').style.display = 'block';
   paintPatStatus();
   initAdminGui();
+}
+
+// the ⏻ LOCK button: forget the "remember me" flag first, otherwise the
+// reload would skip the PIN gate again
+function lockAdmin() {
+  try { localStorage.removeItem('admin_pin_remembered'); } catch (e) {}
+  location.reload();
 }
 
 /* ══════════════════════════════════════════════════════════════════════
