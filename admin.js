@@ -152,6 +152,8 @@ async function loadAdminData() {
       episodes: _mE ? parseInt(_mE[1], 10) : 0
     };
 
+    refreshStatsPlaceholders();
+
     ADMIN_DATA_READY = true;
     var cards = ADMIN_STATS_BASE.anime;
     bootLine('// DATA LINK OK — ' + cards + ' anime · TOP5 ' + Object.keys(TOP_5_DATA).length +
@@ -950,6 +952,14 @@ async function setChatAvatar(side, value, why) {
   }
 }
 
+function refreshStatsPlaceholders() {
+  var info = document.getElementById('adminStatsAnimeInfo');
+  if (info) info.textContent = ADMIN_STATS_BASE.anime + ' cards — counted automatically';
+  var s = document.getElementById('adminStatsSeasons'), e = document.getElementById('adminStatsEps');
+  if (s) s.placeholder = 'Increase by — current: ' + ADMIN_STATS_BASE.seasons;
+  if (e) e.placeholder = 'Increase by — current: ' + ADMIN_STATS_BASE.episodes;
+}
+
 function initAdminGui() {
   var pat = getPat();
   var sk = getPat(); if (sk) document.getElementById('adminPatInput').value = sk;
@@ -968,11 +978,9 @@ function initAdminGui() {
   var today = new Date().toLocaleDateString('en-GB');
   var dateInput = document.getElementById('adminDateInput');
   if (dateInput) dateInput.value = today;
-  var statsInfo = document.getElementById('adminStatsAnimeInfo');
-  if (statsInfo) statsInfo.textContent = ADMIN_STATS_BASE.anime + ' cards — counted automatically';
-  var statsS = document.getElementById('adminStatsSeasons'), statsE = document.getElementById('adminStatsEps');
-  if (statsS) { statsS.placeholder = 'Increase by — current: ' + ADMIN_STATS_BASE.seasons; statsS.value = ''; }
-  if (statsE) { statsE.placeholder = 'Increase by — current: ' + ADMIN_STATS_BASE.episodes; statsE.value = ''; }
+  refreshStatsPlaceholders();
+  if (document.getElementById('adminStatsSeasons')) document.getElementById('adminStatsSeasons').value = '';
+  if (document.getElementById('adminStatsEps')) document.getElementById('adminStatsEps').value = '';
   switchAdminTab('watch');
 }
 
