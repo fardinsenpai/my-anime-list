@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex, nofollow">
-<meta name="theme-color" content="#ffffff">
+<meta name="theme-color" content="#eef2ef">
 <title>ROOT@FARDIN ~ ADMIN</title>
 <link rel="icon" href="logo.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -19,7 +19,7 @@
     if (f) document.documentElement.setAttribute('data-font', f);
   } catch (e) {}
 </script>
-<link rel="stylesheet" href="admin.css?v=20261103a">
+<link rel="stylesheet" href="admin.css?v=20261103e">
 </head>
 <body>
 
@@ -27,20 +27,20 @@
 <div class="ad-gate" id="pinGate">
   <div class="ad-gate-box">
     <div class="ad-gate-logo">SECURE</div>
-    <div class="ad-gate-sub">// PROVE YOU ARE ADMIN //</div>
+    <div class="ad-gate-sub">// ROOT@FARDIN · ADMIN ACCESS //</div>
 
-    <div class="ad-gate-card" style="border:1px solid #ff9ec633;background:rgba(26,10,18,0.7);box-shadow:0 0 30px #ff9ec622, inset 0 0 20px #ff9ec611;border-radius:16px;padding:24px;">
-      <label style="color:#ff9ec6;font-size:12px;cursor:pointer;text-shadow:0 0 8px #ff9ec6;letter-spacing:0.5px;display:block;margin-bottom:8px;"><input type="checkbox" id="adminRememberPin" style="margin-right:6px;accent-color:#ff9ec6;width:16px;height:16px;"> 🌸 Remember PIN</label>
+    <div class="ad-gate-card">
+      <label class="ad-gate-remember"><input type="checkbox" id="adminRememberPin"> 🌸 Remember this device</label>
       <div class="ad-pin-row" id="adminPinScreen" style="display:none">
-        <input type="password" maxlength="1" id="adminPinInput" autocomplete="off" oninput="movePin(this,0)" onkeydown="pinKey(this,event,0)" style="background:#1a0f15;border:1px solid #ff9ec6;border-radius:6px;color:#fff;padding:6px 10px;font-size:18px;text-align:center;box-shadow:0 0 12px #ff9ec633, inset 0 0 8px #ff9ec611;transition:box-shadow .2s;">
-        <input type="password" maxlength="1" autocomplete="off" oninput="movePin(this,1)" onkeydown="pinKey(this,event,1)" style="background:#1a0f15;border:1px solid #ff9ec6;border-radius:6px;color:#fff;padding:6px 10px;font-size:18px;text-align:center;box-shadow:0 0 12px #ff9ec633, inset 0 0 8px #ff9ec611;">
-        <input type="password" maxlength="1" autocomplete="off" oninput="movePin(this,2)" onkeydown="pinKey(this,event,2)" style="background:#1a0f15;border:1px solid #ff9ec6;border-radius:6px;color:#fff;padding:6px 10px;font-size:18px;text-align:center;box-shadow:0 0 12px #ff9ec633, inset 0 0 8px #ff9ec611;">
-        <input type="password" maxlength="1" autocomplete="off" oninput="movePin(this,3)" onkeydown="pinKey(this,event,3)" style="background:#1a0f15;border:1px solid #ff9ec6;border-radius:6px;color:#fff;padding:6px 10px;font-size:18px;text-align:center;box-shadow:0 0 12px #ff9ec633, inset 0 0 8px #ff9ec611;">
-        <input type="password" maxlength="1" autocomplete="off" oninput="movePin(this,4)" onkeydown="pinKey(this,event,4)" style="background:#1a0f15;border:1px solid #ff9ec6;border-radius:6px;color:#fff;padding:6px 10px;font-size:18px;text-align:center;box-shadow:0 0 12px #ff9ec633, inset 0 0 8px #ff9ec611;">
-        <input type="password" maxlength="1" autocomplete="off" oninput="movePin(this,5)" onkeydown="pinKey(this,event,5)" style="background:#1a0f15;border:1px solid #ff9ec6;border-radius:6px;color:#fff;padding:6px 10px;font-size:18px;text-align:center;box-shadow:0 0 12px #ff9ec633, inset 0 0 8px #ff9ec611;">
+        <input type="password" maxlength="1" id="adminPinInput" autocomplete="off" oninput="movePin(this,0)" onkeydown="pinKey(this,event,0)">
+        <input type="password" maxlength="1" autocomplete="off" oninput="movePin(this,1)" onkeydown="pinKey(this,event,1)">
+        <input type="password" maxlength="1" autocomplete="off" oninput="movePin(this,2)" onkeydown="pinKey(this,event,2)">
+        <input type="password" maxlength="1" autocomplete="off" oninput="movePin(this,3)" onkeydown="pinKey(this,event,3)">
+        <input type="password" maxlength="1" autocomplete="off" oninput="movePin(this,4)" onkeydown="pinKey(this,event,4)">
+        <input type="password" maxlength="1" autocomplete="off" oninput="movePin(this,5)" onkeydown="pinKey(this,event,5)">
       </div>
-      <div class="ad-gate-err" id="adminPinError" style="display:none;color:#ff7eb8;text-shadow:0 0 8px #ff7eb8;font-size:13px;font-weight:600;letter-spacing:0.5px;">✕ ACCESS DENIED</div>
-      <button class="ad-gate-btn" id="adminPinBtn" onclick="checkAdminPin()" style="background:linear-gradient(135deg,#ff6b9d,#ff9ec6);border:1px solid #ff9ec6;border-radius:8px;color:#fff;padding:8px 18px;font-size:14px;letter-spacing:1px;box-shadow:0 0 16px #ff9ec655, 0 0 4px #ff6b9d88;transition:all .2s;text-transform:uppercase;font-weight:600;">▶ VERIFY</button>
+      <div class="ad-gate-err" id="adminPinError" style="display:none">✕ ACCESS DENIED</div>
+      <button class="ad-gate-btn" id="adminPinBtn" onclick="checkAdminPin()">▸ VERIFY IDENTITY</button>
     </div>
 
     <div class="ad-boot" id="bootLine">// STANDING BY //</div>
@@ -54,10 +54,15 @@
 
   <header class="ad-top">
     <div class="ad-brand">
-      <span class="ad-brand-main">ROOT@FARDIN</span>
-      <span class="ad-brand-sub">~ ADMIN PANEL v3.0 · [ HACK THE MAINFRAME ]</span>
+      <span class="ad-brand-tile" aria-hidden="true">&gt;_</span>
+      <span class="ad-brand-text">
+        <span class="ad-brand-main">ROOT@FARDIN</span>
+        <span class="ad-brand-sub">ADMIN CONTROL · v3.0</span>
+      </span>
     </div>
     <div class="ad-top-right">
+      <span class="ad-clock" id="adClock"></span>
+      <span class="ad-vsep"></span>
       <select class="ad-fontpick" id="fontPick" onchange="adminFontPick(this.value)" title="Panel font">
         <option value="jetbrains">JETBRAINS MONO</option>
         <option value="spacemono">SPACE MONO</option>
@@ -66,11 +71,10 @@
         <option value="grotesk">SPACE GROTESK</option>
       </select>
       <button class="ad-mini" id="themeBtn" onclick="toggleAdminTheme()" title="Switch between day and night mode">🌙 NIGHT MODE</button>
-      <span class="ad-clock" id="adClock"></span>
-      <span class="ad-pat-status" id="adPatStatus">// PAT: -</span>
-      <a class="ad-mini" href="index.html">⬅ SITE</a>
-      <button class="ad-mini" onclick="location.reload()">⇄ RELOAD</button>
-      <button class="ad-mini danger" onclick="lockAdmin()">🔒 LOCK</button>
+      <span class="ad-vsep"></span>
+      <a class="ad-mini" href="index.html" title="Back to the site">↗ SITE</a>
+      <button class="ad-mini" onclick="location.reload()" title="Reload the panel">⟳ RELOAD</button>
+      <button class="ad-mini danger" onclick="lockAdmin()" title="Lock the panel">🔒 LOCK</button>
     </div>
   </header>
 
@@ -78,6 +82,7 @@
 
     <!-- ── every module, permanently visible ── -->
     <aside class="ad-side">
+      <div class="ad-side-navwrap">
       <div class="ad-side-title">// MODULES //</div>
       <nav class="ad-nav">
         <button class="admin-g-tab active" data-tab="watch"  onclick="switchAdminTab('watch')"><b>🎬</b> WATCH<span>currently watching</span></button>
@@ -94,9 +99,11 @@
         <button class="admin-g-tab" data-tab="logo"    onclick="switchAdminTab('logo'); renderLogoTab()"><b>🎨</b> LOGO<span>panel identity</span></button>
         <button class="admin-g-tab" data-tab="reply"   onclick="switchAdminTab('reply'); renderReplyTab()"><b>💬</b> REPLY<span>avatar &amp; badge</span></button>
       </nav>
+      </div>
 
       <div class="ad-side-block">
         <div class="ad-side-title">// GITHUB PAT //</div>
+        <div class="ad-pat-status" id="adPatStatus">// PAT: -</div>
         <div class="ad-pat-row">
           <input type="password" id="adminPatInput" class="admin-g-input" placeholder="ghp_xxxxxxxx" autocomplete="off" spellcheck="false">
           <button class="admin-g-btn tight" onclick="savePat(); paintPatStatus();">SAVE</button>
@@ -399,7 +406,7 @@
           <input type="text" id="adLogoMain" class="admin-g-input" placeholder="Wordmark (ROOT@FARDIN)" maxlength="28" oninput="adLogoPreview()">
           <input type="text" id="adLogoIcon" class="admin-g-input narrow" placeholder="⚡" maxlength="4" title="Icon shown before the wordmark" oninput="adLogoPreview()">
         </div>
-        <input type="text" id="adLogoSub" class="admin-g-input" placeholder="Subtitle (~ ADMIN PANEL v3.0 …)" maxlength="70" oninput="adLogoPreview()">
+        <input type="text" id="adLogoSub" class="admin-g-input" placeholder="Subtitle (ADMIN CONTROL · v3.0)" maxlength="70" oninput="adLogoPreview()">
 
         <div class="ad-row wrap">
           <button class="admin-g-btn tight" onclick="adLogoPickFile()">📷 UPLOAD PICTURE</button>
@@ -467,6 +474,6 @@
 </div>
 
 <script src="anime-fetch.js?v=20261101b"></script>
-<script src="admin.js?v=20261103c"></script>
+<script src="admin.js?v=20261103d"></script>
 </body>
 </html>

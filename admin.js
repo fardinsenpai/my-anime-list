@@ -1033,10 +1033,8 @@ function searchAwardAnime(q) {
     var img = c.querySelector('.poster-wrap img');
     var id = parseInt(n.textContent.replace(/\D/g, ''));
     var div = document.createElement('div');
-    div.style.cssText = 'display:flex;align-items:center;gap:4px;padding:3px;border-radius:3px;background:rgba(0,255,65,0.02);border:1px solid rgba(0,255,65,0.06);cursor:pointer;transition:all 0.15s;font-family:monospace;';
-    div.onmouseover = function() { this.style.background = 'rgba(0,255,65,0.06)'; this.style.borderColor = 'rgba(0,255,65,0.15)'; };
-    div.onmouseout = function() { this.style.background = 'rgba(0,255,65,0.02)'; this.style.borderColor = 'rgba(0,255,65,0.06)'; };
-    div.innerHTML = (img ? '<img src="' + img.src + '" style="width:24px;height:34px;object-fit:cover;border-radius:2px;flex-shrink:0;">' : '') + '<span style="font-size:9px;color:rgba(0,255,65,0.5);">#' + id + '</span><span style="font-size:9px;color:rgba(0,255,65,0.7);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + t.textContent + '</span>';
+    div.className = 'ad-result';
+    div.innerHTML = (img ? '<img src="' + img.src + '" alt="">' : '') + '<span class="ad-result-id">#' + id + '</span><span class="ad-result-title">' + t.textContent + '</span>';
     div.setAttribute('data-id', id);
     div.onclick = function() { selectAwardAnime(parseInt(this.getAttribute('data-id'))); };
     container.appendChild(div);
@@ -1045,13 +1043,8 @@ function searchAwardAnime(q) {
 
 function selectAwardAnime(id) {
   _awardId = id;
-  document.querySelectorAll('#adminAwardResults > div').forEach(function(d) {
-    d.style.borderColor = 'rgba(0,255,65,0.06)';
-    d.style.background = 'rgba(0,255,65,0.02)';
-    if (parseInt(d.getAttribute('data-id')) === id) {
-      d.style.borderColor = '#00ff41';
-      d.style.background = 'rgba(0,255,65,0.1)';
-    }
+  document.querySelectorAll('#adminAwardResults > .ad-result').forEach(function(d) {
+    d.classList.toggle('sel', parseInt(d.getAttribute('data-id')) === id);
   });
   document.querySelectorAll('#grid .card').forEach(function(c) {
     var numEl = c.querySelector('.number');
@@ -1148,7 +1141,7 @@ function renderSelectedPills() {
 
 function msgOk(msg) {
   var el = document.createElement('div');
-  el.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#0a0a0a;border:1px solid #00ff41;color:#00ff41;padding:10px 20px;font-family:monospace;font-size:12px;z-index:300000;border-radius:4px;box-shadow:0 0 20px rgba(0,255,65,0.2);';
+  el.className = 'ad-toast';
   el.textContent = '✓ ' + msg;
   document.body.appendChild(el);
   setTimeout(function() { el.remove(); }, 3000);
@@ -1156,7 +1149,7 @@ function msgOk(msg) {
 
 function msgFail(msg) {
   var el = document.createElement('div');
-  el.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#0a0a0a;border:1px solid #ff3355;color:#ff3355;padding:10px 20px;font-family:monospace;font-size:12px;z-index:300000;border-radius:4px;box-shadow:0 0 20px rgba(255,51,85,0.2);';
+  el.className = 'ad-toast err';
   el.textContent = '✕ ' + msg;
   document.body.appendChild(el);
   setTimeout(function() { el.remove(); }, 3000);
@@ -1245,10 +1238,8 @@ function searchWatch(q) {
     var img = c.querySelector('.poster-wrap img');
     var id = parseInt(n.textContent.replace(/\D/g, ''));
     var div = document.createElement('div');
-    div.style.cssText = 'display:flex;align-items:center;gap:4px;padding:3px;border-radius:3px;background:rgba(0,255,65,0.02);border:1px solid rgba(0,255,65,0.06);cursor:pointer;transition:all 0.15s;font-family:monospace;';
-    div.onmouseover = function() { this.style.background = 'rgba(0,255,65,0.06)'; this.style.borderColor = 'rgba(0,255,65,0.15)'; };
-    div.onmouseout = function() { this.style.background = 'rgba(0,255,65,0.02)'; this.style.borderColor = 'rgba(0,255,65,0.06)'; };
-    div.innerHTML = (img ? '<img src="' + img.src + '" style="width:24px;height:34px;object-fit:cover;border-radius:2px;flex-shrink:0;">' : '') + '<span style="font-size:9px;color:rgba(0,255,65,0.5);">#' + id + '</span><span style="font-size:9px;color:rgba(0,255,65,0.7);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + t.textContent + '</span>';
+    div.className = 'ad-result';
+    div.innerHTML = (img ? '<img src="' + img.src + '" alt="">' : '') + '<span class="ad-result-id">#' + id + '</span><span class="ad-result-title">' + t.textContent + '</span>';
     div.setAttribute('data-id', id);
     div.onclick = function() { selectWatchCard(id); };
     container.appendChild(div);
@@ -1257,13 +1248,8 @@ function searchWatch(q) {
 
 function selectWatchCard(id) {
   _watchId = id;
-  document.querySelectorAll('#adminWatchResults > div').forEach(function(d) {
-    d.style.borderColor = 'rgba(0,255,65,0.06)';
-    d.style.background = 'rgba(0,255,65,0.02)';
-    if (parseInt(d.getAttribute('data-id')) === id) {
-      d.style.borderColor = '#00ff41';
-      d.style.background = 'rgba(0,255,65,0.1)';
-    }
+  document.querySelectorAll('#adminWatchResults > .ad-result').forEach(function(d) {
+    d.classList.toggle('sel', parseInt(d.getAttribute('data-id')) === id);
   });
   var allCards = document.querySelectorAll('#grid .card');
   for (var i = 0; i < allCards.length; i++) {
@@ -1303,10 +1289,8 @@ function searchRead(q) {
     var img = c.querySelector('.poster-wrap img');
     var id = parseInt(n.textContent.replace(/\D/g, ''));
     var div = document.createElement('div');
-    div.style.cssText = 'display:flex;align-items:center;gap:4px;padding:3px;border-radius:3px;background:rgba(0,255,65,0.02);border:1px solid rgba(0,255,65,0.06);cursor:pointer;transition:all 0.15s;font-family:monospace;';
-    div.onmouseover = function() { this.style.background = 'rgba(0,255,65,0.06)'; this.style.borderColor = 'rgba(0,255,65,0.15)'; };
-    div.onmouseout = function() { this.style.background = 'rgba(0,255,65,0.02)'; this.style.borderColor = 'rgba(0,255,65,0.06)'; };
-    div.innerHTML = (img ? '<img src="' + img.src + '" style="width:24px;height:34px;object-fit:cover;border-radius:2px;flex-shrink:0;">' : '') + '<span style="font-size:9px;color:rgba(0,255,65,0.5);">#' + id + '</span><span style="font-size:9px;color:rgba(0,255,65,0.7);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + t.textContent + '</span>';
+    div.className = 'ad-result';
+    div.innerHTML = (img ? '<img src="' + img.src + '" alt="">' : '') + '<span class="ad-result-id">#' + id + '</span><span class="ad-result-title">' + t.textContent + '</span>';
     div.setAttribute('data-id', id);
     div.onclick = function() { selectReadCard(id); };
     container.appendChild(div);
@@ -1315,13 +1299,8 @@ function searchRead(q) {
 
 function selectReadCard(id) {
   _readId = id;
-  document.querySelectorAll('#adminReadResults > div').forEach(function(d) {
-    d.style.borderColor = 'rgba(0,255,65,0.06)';
-    d.style.background = 'rgba(0,255,65,0.02)';
-    if (parseInt(d.getAttribute('data-id')) === id) {
-      d.style.borderColor = '#00ff41';
-      d.style.background = 'rgba(0,255,65,0.1)';
-    }
+  document.querySelectorAll('#adminReadResults > .ad-result').forEach(function(d) {
+    d.classList.toggle('sel', parseInt(d.getAttribute('data-id')) === id);
   });
   var allCards = document.querySelectorAll('#grid .card');
   for (var i = 0; i < allCards.length; i++) {
@@ -1416,10 +1395,8 @@ function searchEdit(q) {
     var img = c.querySelector('.poster-wrap img');
     var id = parseInt(n.textContent.replace(/\D/g, ''));
     var div = document.createElement('div');
-    div.style.cssText = 'display:flex;align-items:center;gap:4px;padding:3px;border-radius:3px;background:rgba(0,255,65,0.02);border:1px solid rgba(0,255,65,0.06);cursor:pointer;transition:all 0.15s;font-family:monospace;';
-    div.onmouseover = function() { this.style.background = 'rgba(0,255,65,0.06)'; this.style.borderColor = 'rgba(0,255,65,0.15)'; };
-    div.onmouseout = function() { this.style.background = 'rgba(0,255,65,0.02)'; this.style.borderColor = 'rgba(0,255,65,0.06)'; };
-    div.innerHTML = (img ? '<img src="' + img.src + '" style="width:24px;height:34px;object-fit:cover;border-radius:2px;flex-shrink:0;">' : '') + '<span style="font-size:9px;color:rgba(0,255,65,0.5);">#' + id + '</span><span style="font-size:9px;color:rgba(0,255,65,0.7);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + t.textContent + '</span>';
+    div.className = 'ad-result';
+    div.innerHTML = (img ? '<img src="' + img.src + '" alt="">' : '') + '<span class="ad-result-id">#' + id + '</span><span class="ad-result-title">' + t.textContent + '</span>';
     div.setAttribute('data-id', id);
     div.onclick = function() { selectEditCard(id); };
     container.appendChild(div);
@@ -1428,13 +1405,8 @@ function searchEdit(q) {
 
 function selectEditCard(id) {
   _editId = id;
-  document.querySelectorAll('#adminEditResults > div').forEach(function(d) {
-    d.style.borderColor = 'rgba(0,255,65,0.06)';
-    d.style.background = 'rgba(0,255,65,0.02)';
-    if (parseInt(d.getAttribute('data-id')) === id) {
-      d.style.borderColor = '#00ff41';
-      d.style.background = 'rgba(0,255,65,0.1)';
-    }
+  document.querySelectorAll('#adminEditResults > .ad-result').forEach(function(d) {
+    d.classList.toggle('sel', parseInt(d.getAttribute('data-id')) === id);
   });
   var allCards = document.querySelectorAll('#grid .card');
   for (var i = 0; i < allCards.length; i++) {
@@ -1752,23 +1724,28 @@ async function commitWatching() {
 function showDuelRatingPopup(title, derived) {
   return new Promise(function (resolve) {
     var overlay = document.createElement('div');
-    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:1000000;display:flex;align-items:center;justify-content:center;font-family:monospace;';
+    overlay.className = 'ad-duel-overlay';
     var box = document.createElement('div');
-    box.style.cssText = 'background:#0a0a0a;border:1px solid #00ff41;border-radius:6px;padding:18px;max-width:460px;width:90%;color:#fff;box-shadow:0 0 30px rgba(0,255,65,0.25);';
+    box.className = 'ad-duel';
+    function duelField(id, label, hint, value, step, min, max) {
+      return '<label class="ad-duel-field"><span>' + label +
+        (hint ? '<small>' + hint + '</small>' : '') +
+        '</span><input id="' + id + '" type="number" step="' + step + '" min="' + min + '" max="' + max + '" value="' + value + '"></label>';
+    }
     box.innerHTML =
-      '<div style="font-weight:bold;margin-bottom:12px;color:#00ff41;">⚔️ Duel Ratings for "' + title.replace(/"/g, '&quot;') + '"</div>' +
-      '<div style="font-size:11px;color:#8b93a7;margin-bottom:12px;">Auto-derived for MAL / Planet / AniList / Story. Characters & Animation pulled from DB/API — edit to override.</div>' +
-      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px 16px;margin-bottom:14px;">' +
-      '<div style="font-size:11px;color:#aaa;">MAL Score</div><input id="dr-mal" type="number" step="0.01" min="0" max="10" value="' + (derived.mal || '') + '" style="background:#111;border:1px solid #333;color:#fff;padding:4px 6px;border-radius:3px;">' +
-      '<div style="font-size:11px;color:#aaa;">Characters <span style="color:#ff9ec6;font-size:10px">(DB / API)</span></div><input id="dr-char" type="number" step="0.1" min="0" max="10" value="' + (derived.chars || '') + '" style="background:#111;border:1px solid #ff6b9d;color:#fff;padding:4px 6px;border-radius:3px;">' +
-      '<div style="font-size:11px;color:#aaa;">Animation <span style="color:#ff9ec6;font-size:10px">(DB / API)</span></div><input id="dr-anim" type="number" step="0.1" min="0" max="10" value="' + (derived.anim || '') + '" style="background:#111;border:1px solid #ff6b9d;color:#fff;padding:4px 6px;border-radius:3px;">' +
-      '<div style="font-size:11px;color:#aaa;">Anime Planet</div><input id="dr-planet" type="number" step="0.1" min="0" max="10" value="' + (derived.planet || '') + '" style="background:#111;border:1px solid #333;color:#fff;padding:4px 6px;border-radius:3px;">' +
-      '<div style="font-size:11px;color:#aaa;">AniList</div><input id="dr-anilist" type="number" step="1" min="0" max="100" value="' + (derived.anilist || '') + '" style="background:#111;border:1px solid #333;color:#fff;padding:4px 6px;border-radius:3px;">' +
-      '<div style="font-size:11px;color:#aaa;">Story Rating</div><input id="dr-story" type="number" step="0.1" min="0" max="10" value="' + (derived.story || '') + '" style="background:#111;border:1px solid #333;color:#fff;padding:4px 6px;border-radius:3px;">' +
+      '<div class="ad-duel-title">⚔️ DUEL RATINGS</div>' +
+      '<div class="ad-duel-sub"><b>' + title.replace(/"/g, '&quot;') + '</b> — auto-derived for MAL / Planet / AniList / Story. Characters and Animation come from the DB/API; edit any field to override.</div>' +
+      '<div class="ad-duel-grid">' +
+      duelField('dr-mal', 'MAL Score', '', derived.mal || '', '0.01', 0, 10) +
+      duelField('dr-char', 'Characters', 'DB / API', derived.chars || '', '0.1', 0, 10) +
+      duelField('dr-anim', 'Animation', 'DB / API', derived.anim || '', '0.1', 0, 10) +
+      duelField('dr-planet', 'Anime Planet', '', derived.planet || '', '0.1', 0, 10) +
+      duelField('dr-anilist', 'AniList', '', derived.anilist || '', '1', 0, 100) +
+      duelField('dr-story', 'Story Rating', '', derived.story || '', '0.1', 0, 10) +
       '</div>' +
-      '<div style="display:flex;gap:8px;justify-content:flex-end;">' +
-      '<button id="dr-cancel" style="background:#222;border:1px solid #444;color:#fff;padding:6px 14px;border-radius:3px;cursor:pointer;">CANCEL</button>' +
-      '<button id="dr-save" style="background:#00ff41;border:none;color:#000;padding:6px 16px;border-radius:3px;font-weight:bold;cursor:pointer;">SAVE</button>' +
+      '<div class="ad-duel-actions">' +
+      '<button type="button" class="ad-duel-cancel" id="dr-cancel">CANCEL</button>' +
+      '<button type="button" class="ad-duel-save" id="dr-save">SAVE</button>' +
       '</div>';
     overlay.appendChild(box);
     document.body.appendChild(overlay);
@@ -2397,12 +2374,22 @@ var ADMIN_THEME_KEY = 'fardin.admin.theme';
 
 function adminThemeApply(theme) {
   var dark = theme === 'dark';
-  document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+  var root = document.documentElement;
+  /* Kill transitions for the swap itself: without this every colour on the
+     page animates (and elements on hidden tabs can get stuck mid-way). */
+  root.classList.add('ad-no-transition');
+  root.setAttribute('data-theme', dark ? 'dark' : 'light');
   try { localStorage.setItem(ADMIN_THEME_KEY, dark ? 'dark' : 'light'); } catch (e) {}
   var btn = document.getElementById('themeBtn');
   if (btn) btn.textContent = dark ? '☀️ DAY MODE' : '🌙 NIGHT MODE';
   var meta = document.querySelector('meta[name="theme-color"]');
-  if (meta) meta.setAttribute('content', dark ? '#050705' : '#ffffff');
+  if (meta) meta.setAttribute('content', dark ? '#040705' : '#eef2ef');
+  void root.offsetWidth; /* force the repaint before transitions come back */
+  requestAnimationFrame(function () {
+    requestAnimationFrame(function () {
+      root.classList.remove('ad-no-transition');
+    });
+  });
 }
 function adminThemeNow() {
   return document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
@@ -2475,7 +2462,7 @@ function renderAvatarsTab() {
 var ADMIN_LOGO_KEY = 'fardin.admin.logo';
 var ADMIN_LOGO_DEFAULT = {
   main: 'ROOT@FARDIN',
-  sub: '~ ADMIN PANEL v3.0 · [ HACK THE MAINFRAME ]',
+  sub: 'ADMIN CONTROL · v3.0',
   icon: '',
   src: ''
 };
