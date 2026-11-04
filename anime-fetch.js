@@ -377,78 +377,95 @@
     return true;
   }
 
+  /* ── site ratings DB ────────────────────────────────────────────────
+     characters / animRating / animePlanet live in anime-ratings.json.
+     They must NEVER be read from RATING_DATA (script.js) — that object
+     only carries { rating, season, malScore } and has no title field, so
+     looking a title up there always failed and FETCH fell back to a
+     made-up estimate (round(mal*2)/2). That was the bug: the boxes were
+     never filled with the values the site already stores. */
   var _ratingsDbCache = null;
+  var _ratingsDbQueue = null;
+
   function getRatingsDb(cb) {
     if (_ratingsDbCache) { cb(_ratingsDbCache); return; }
+    if (_ratingsDbQueue) { _ratingsDbQueue.push(cb); return; }
+    _ratingsDbQueue = [cb];
+    var done = function (db) {
+      _ratingsDbCache = db || {};
+      var list = _ratingsDbQueue || [];
+      _ratingsDbQueue = null;
+      list.forEach(function (fn) { try { fn(_ratingsDbCache); } catch (e) {} });
+    };
     if (typeof loadRatings === 'function') {
-      loadRatings().then(function(d){ if (d) _ratingsDbCache = d; cb(d || null); });
+      loadRatings().then(function (d) { done(d); }, function () { done(null); });
       return;
     }
     fetch('anime-ratings.json', { cache: 'no-cache' })
-      .then(function(r){ return r.json(); })
-      .then(function(d){ _ratingsDbCache = d || null; cb(_ratingsDbCache); })
-      .catch(function(){ cb(null); });
+      .then(function (r) { return r.json(); })
+      .then(function (d) { done(d); }, function () { done(null); });
   }
 
-  function fillExtraRatings(idOrTitle, db, titleHint) {
-    if (!db) {
-      getRatingsDb(function(d){ fillExtraRatings(idOrTitle, d, titleHint); });
-      return;
-    }
+  function normRatingTitle(s) { return String(s || '').toLowerCase().replace(/[^a-z0-9]/g, ''); }
+
+  /* Fills the three boxes from the stored entry for this title.
+     Returns the entry it used, or null when the anime is not on the site
+     yet. When there is no entry the boxes are CLEARED, so the previous
+     anime's numbers can never leak into the next one. */
+  function fillExtraRatings(title, db) {
+    var animEl = document.getElementById('adminAddAnim');
+    var charEl = document.getElementById('adminAddChar');
+    var planetEl = document.getElementById('adminAddPlanet');
+    var want = normRatingTitle(title);
     var hit = null;
-    // 1. numeric key (card #)
-    if (idOrTitle && String(idOrTitle).match(/^\d+$/) && db[String(idOrTitle)]) hit = db[String(idOrTitle)];
-    // 2. title match (exact, then normalised partial)
-    var titles = [titleHint, idOrTitle].filter(function(t){ return t && !String(t).match(/^\d+$/); });
-    var norm = function(s){ return String(s || '').toLowerCase().replace(/[^a-z0-9]/g, ''); };
-    titles.forEach(function(t){
-      if (hit) return;
-      var key = norm(t);
-      if (key.length < 3) return;
-      Object.keys(db).forEach(function(k){
+    if (db && want.length >= 3) {
+      Object.keys(db).forEach(function (k) {
         if (hit) return;
-        var en = db[k];
-        if (!en || !en.title) return;
-        var et = norm(en.title);
-        if (et === key || et.indexOf(key) > -1 || key.indexOf(et) > -1) hit = en;
+        var e = db[k];
+        if (e && e.title && normRatingTitle(e.title) === want) hit = e;
       });
-    });
-    if (hit) {
-      var a = document.getElementById('adminAddAnim'); if (a && (hit.animRating !== undefined && hit.animRating !== null)) a.value = hit.animRating;
-      var c = document.getElementById('adminAddChar'); if (c && (hit.characters !== undefined && hit.characters !== null)) c.value = hit.characters;
-      var p = document.getElementById('adminAddPlanet'); if (p && (hit.animePlanet !== undefined && hit.animePlanet !== null)) p.value = hit.animePlanet;
+      if (!hit) {
+        /* unique prefix match — covers season suffixes and subtitle drift */
+        var loose = [];
+        Object.keys(db).forEach(function (k) {
+          var e = db[k];
+          if (!e || !e.title) return;
+          var t = normRatingTitle(e.title);
+          if (t.length < 3) return;
+          if (t.indexOf(want) === 0 || want.indexOf(t) === 0) loose.push(e);
+        });
+        if (loose.length === 1) hit = loose[0];
+      }
     }
+    if (animEl) animEl.value = (hit && hit.animRating != null) ? hit.animRating : '';
+    if (charEl) charEl.value = (hit && hit.characters != null) ? hit.characters : '';
+    if (planetEl) planetEl.value = (hit && hit.animePlanet != null) ? hit.animePlanet : '';
+    return hit;
+  }
+
+  function setOrClear(id, value) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    el.value = (value === undefined || value === null) ? '' : value;
   }
 
   function applyToForm(data) {
     setValue('adminAddTitle', data.title);
-    setValue('adminAddImg', data.image);
-    setValue('adminAddSeason', data.season);
-    setValue('adminAddEps', data.episodes);
-    setValue('adminAddRating', data.rating);
-    setValue('adminAddMal', data.mal);
-    // Pull Animation / Characters / Anime Planet from ratings DB (updated via API/commit)
-    try {
-      var fillWithFallback = function (d) {
-        fillExtraRatings(data.id, d, data.title);
-        // No DB entry (brand-new anime) → derive estimates from the MAL score
-        // fetched by the API so the boxes are never left blank.
-        var mal = parseFloat(data.mal);
-        if (!isFinite(mal)) return;
-        var animEl = document.getElementById('adminAddAnim');
-        var charEl = document.getElementById('adminAddChar');
-        var planetEl = document.getElementById('adminAddPlanet');
-        if (animEl && !animEl.value) animEl.value = (Math.round(mal * 2) / 2).toFixed(1);
-        if (charEl && !charEl.value) charEl.value = (Math.round(mal * 2) / 2).toFixed(1);
-        if (planetEl && !planetEl.value) planetEl.value = (Math.round((mal / 2) * 10) / 10).toFixed(1);
-      };
-      var db = window.RATING_DATA || _ratingsDbCache || null;
-      if (!db) { getRatingsDb(fillWithFallback); }
-      else { fillWithFallback(db); }
-    } catch(e){}
+    setOrClear('adminAddImg', data.image);
+    setOrClear('adminAddSeason', data.season);
+    setOrClear('adminAddEps', data.episodes);
+    setOrClear('adminAddRating', data.rating);
+    setOrClear('adminAddMal', data.mal);
     var seasonLabel = document.getElementById('adminAddSeasonLabel');
     if (seasonLabel && !seasonLabel.value.trim()) seasonLabel.value = 'Season-1';
     applyPills(data);
+    /* resolves with the stored entry (or null) */
+    return new Promise(function (resolve) {
+      var settled = false;
+      var finish = function (hit) { if (settled) return; settled = true; resolve(hit); };
+      setTimeout(function () { finish(null); }, 6000);
+      getRatingsDb(function (db) { finish(fillExtraRatings(data.title, db)); });
+    });
   }
 
   function summary(data) {
@@ -520,9 +537,13 @@
         setStatus('No AniList match for "' + name + '". Try the romanised title or add the year.', 'err');
         return;
       }
-      applyToForm(data);
-      if (typeof window.adDupHint === 'function') window.adDupHint();
-      setStatus('Filled from: ' + summary(data), 'ok');
+      return applyToForm(data).then(function (hit) {
+        if (typeof window.adDupHint === 'function') window.adDupHint();
+        setStatus('Filled from: ' + summary(data) +
+          (hit
+            ? '  ·  characters/animation from the site DB'
+            : '  ·  new anime: no stored characters/animation — rate it in the commit popup'), 'ok');
+      });
     }).catch(function (err) {
       setStatus('Fetch failed (' + (err && err.message ? err.message : 'network error') + '). Fill it manually.', 'err');
     }).then(function () {
