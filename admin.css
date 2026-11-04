@@ -524,6 +524,24 @@ select.admin-g-input option { background: var(--panel); color: var(--ink); }
 .admin-g-btn.danger:hover { background: var(--danger-soft); border-color: var(--danger); box-shadow: none; }
 .admin-g-label { font-size: 9px; letter-spacing: .18em; color: var(--ink-3); margin: 16px 0 8px; }
 
+/* ───────────────  LABELLED FIELDS  ───────────────
+   A caption that stays visible once the box is filled — a placeholder is
+   gone the moment a value lands, which left every numeric box nameless. */
+.ad-field {
+  display: flex; flex-direction: column; gap: 5px;
+  flex: 1 1 0; min-width: 0; margin-bottom: 10px;
+}
+.ad-field > span {
+  font-family: var(--mono); font-size: 8.5px; letter-spacing: .14em;
+  text-transform: uppercase; color: var(--ink-3); padding-left: 2px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.ad-field > .admin-g-input,
+.ad-field > select.admin-g-input {
+  width: 100%; max-width: none; margin-bottom: 0;
+}
+.ad-row > .ad-field { margin-bottom: 0; }
+
 /* ───────────────  SEARCH RESULTS + PREVIEW  ─────────────── */
 .ad-results {
   display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 5px;
@@ -933,6 +951,9 @@ html.ad-no-transition *::after {
   .ad-main { padding: 22px 22px 60px; }
 }
 
+/* tablet + phone: the rail becomes a horizontal strip and the PAT drawer —
+   which used to be display:none here, leaving phones with no way to save a
+   token at all — stays open right underneath it. */
 @media (max-width: 820px) {
   .ad-fontpick { display: none; }
   .ad-brand-sub { display: none; }
@@ -940,36 +961,58 @@ html.ad-no-transition *::after {
     position: static; width: auto;
     display: block; overflow: visible;
     border-right: none; border-bottom: 1px solid var(--line);
-    padding: 10px 12px 12px;
+    padding: 10px 12px 0;
   }
   .ad-side-navwrap { overflow: visible; margin: 0; padding: 0; }
   .ad-body { flex-direction: column; }
+  .ad-side-title { display: none; }
   .ad-nav {
-    flex-direction: row; overflow-x: auto; padding-bottom: 4px;
-    margin-bottom: 10px; gap: 6px;
+    flex-direction: row; overflow-x: auto; overflow-y: hidden;
+    padding: 0 0 6px; margin-bottom: 0; gap: 6px;
+    scrollbar-width: none;
     -webkit-mask-image: linear-gradient(90deg, #000 94%, transparent);
     mask-image: linear-gradient(90deg, #000 94%, transparent);
   }
+  .ad-nav::-webkit-scrollbar { display: none; }
   .admin-g-tab {
     width: auto; flex: 0 0 auto; white-space: nowrap;
-    padding: 6px 10px; gap: 8px;
+    padding: 6px 10px; gap: 7px;
   }
   .admin-g-tab b { width: 26px; height: 26px; flex-basis: 26px; font-size: 13px; }
   .admin-g-tab span { display: none; }
   .admin-g-tab.active::after { display: none; }
   .admin-g-tab.active { box-shadow: inset 0 -2px 0 var(--accent); }
-  .ad-side-block { display: none; }
-  .ad-main { margin-left: 0; padding: 16px 14px 50px; max-width: none; }
+
+  /* PAT drawer */
+  .ad-side-block {
+    display: block;
+    border-top: 1px solid var(--line);
+    padding: 9px 0 12px;
+    margin-top: 2px;
+    background: transparent;
+  }
+  .ad-side .ad-pat-status { margin: 0 2px 7px; font-size: 9.5px; }
+  .ad-pat-row { gap: 6px; }
+  .ad-pat-row .admin-g-input { height: 38px; padding: 0 10px; font-size: 12px; }
+  .ad-pat-row .admin-g-btn.tight { height: 38px; padding: 0 14px; }
+  .ad-pat-tools { gap: 6px; margin-top: 6px; }
+  .ad-pat-tools .ad-mini { padding: 8px 4px; font-size: 9px; }
+  .ad-side-hint { display: none; }
+
+  .ad-main { margin-left: 0; padding: 16px 14px 56px; max-width: none; }
   .admin-g-content.active { padding: 18px 16px 20px; border-radius: var(--r-md); }
-  .ad-results { grid-template-columns: 1fr; }
+  .ad-h { font-size: 10.5px; letter-spacing: .13em; gap: 8px; margin-bottom: 16px; padding-bottom: 12px; }
+  .ad-results { grid-template-columns: 1fr; max-height: 190px; }
   .admin-g-stat-row { flex-direction: column; align-items: stretch; gap: 7px; }
   .admin-g-stat-label { flex: none; }
-  .ad-row { flex-wrap: wrap; }
+  .ad-row { flex-wrap: wrap; gap: 10px; }
+  .ad-row > .ad-field { flex: 1 1 140px; }
   .ad-row > .admin-g-input { flex: 1 1 100%; }
   .ad-row > .admin-g-input.narrow { flex: 0 0 130px; }
   .ad-notes-split { flex-direction: column; }
   .ad-notes-list { flex: none; width: 100%; max-height: 210px; }
   .ad-duel-grid { grid-template-columns: 1fr; }
+  .ad-scroll { max-height: 46vh; }
 }
 
 @media (max-width: 560px) {
@@ -981,10 +1024,42 @@ html.ad-no-transition *::after {
     padding: 8px 12px; gap: 6px;
   }
   .ad-brand { flex: 1 1 100%; }
-  .ad-top-right { flex: 1 1 100%; width: 100%; gap: 6px; overflow-x: auto; }
+  .ad-top-right { flex: 1 1 100%; width: 100%; gap: 6px; overflow-x: auto; scrollbar-width: none; }
+  .ad-top-right::-webkit-scrollbar { display: none; }
   .ad-brand-main { font-size: 14px; letter-spacing: .06em; }
-  .ad-top-right .ad-mini { padding: 6px 9px; font-size: 9px; white-space: nowrap; }
+  .ad-top-right .ad-mini { padding: 8px 10px; font-size: 9px; white-space: nowrap; }
   .ad-vsep { display: none; }
+
+  /* 16px fields: anything smaller makes iOS zoom the whole page on focus */
+  .admin-g-input, select.admin-g-input {
+    font-size: 16px; height: 46px; padding: 0 12px;
+  }
+  select.admin-g-input {
+    padding-right: 34px;
+    background-position: calc(100% - 16px) 21px, calc(100% - 11px) 21px;
+  }
+  .ad-field > span { font-size: 9px; letter-spacing: .1em; }
+  .ad-pat-row .admin-g-input { font-size: 16px; height: 44px; }
+  .ad-pat-row .admin-g-btn.tight { height: 44px; }
+  .ad-row > .ad-field { flex: 1 1 100%; }
+  .ad-row > .admin-g-input.narrow { flex: 1 1 100%; max-width: none; }
+  .ad-row > .admin-g-btn.tight { width: 100%; height: 44px; }
+  .admin-g-btn { font-size: 11px; padding: 14px 14px; }
+  .admin-g-btn.tight { font-size: 10px; padding: 10px 12px; }
+  .admin-g-id-input, .admin-g-title-input { height: 38px; font-size: 16px; }
+  .admin-g-content.active { padding: 16px 13px 18px; }
+  .ad-main { padding: 12px 10px 52px; }
+  .ad-h { font-size: 9.5px; letter-spacing: .1em; }
+  .ad-result { padding: 7px 9px; }
+  .ad-result img { width: 26px; height: 35px; }
+  .ad-preview { padding: 9px 10px; gap: 10px; }
+  .ad-scroll { max-height: 52vh; }
+  .ad-toast { bottom: 10px; font-size: 10.5px; padding: 10px 14px; }
+  .ad-loading-inner { min-width: 0; width: calc(100vw - 40px); padding: 20px; }
+  .ad-duel { padding: 16px 14px; }
+  .ad-gate-box { padding: 0; }
+  .ad-gate-card { padding: 22px 16px 20px; }
   .ad-gate-logo { font-size: 26px; }
+  .ad-pin-row { gap: 6px; }
   .ad-pin-row input { width: 40px; height: 50px; font-size: 19px; }
 }

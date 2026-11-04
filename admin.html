@@ -19,7 +19,7 @@
     if (f) document.documentElement.setAttribute('data-font', f);
   } catch (e) {}
 </script>
-<link rel="stylesheet" href="admin.css?v=20261103g">
+<link rel="stylesheet" href="admin.css?v=20261104a">
 </head>
 <body>
 
@@ -125,7 +125,10 @@
       <!-- WATCH -->
       <section class="admin-g-content active" id="tabWatch">
         <h2 class="ad-h">// UPDATE CURRENTLY WATCHING //</h2>
-        <input type="text" id="adminWatchSearch" class="admin-g-input" placeholder="1. Search anime..." oninput="searchWatch(this.value)">
+        <label class="ad-field">
+          <span>Search anime</span>
+          <input type="text" id="adminWatchSearch" class="admin-g-input" placeholder="Type a title…" oninput="searchWatch(this.value)">
+        </label>
         <div class="ad-results" id="adminWatchResults"></div>
         <div class="ad-preview" id="adminWatchPreview" style="display:none">
           <img id="adminWatchPreviewImg" alt="">
@@ -135,12 +138,24 @@
           </div>
         </div>
         <div class="ad-row">
-          <input type="number" id="adminWatchCurEps" class="admin-g-input" placeholder="2. Current ep">
-          <input type="number" id="adminWatchTotalEps" class="admin-g-input" placeholder="3. Total ep">
+          <label class="ad-field">
+            <span>Current episode</span>
+            <input type="number" id="adminWatchCurEps" class="admin-g-input" placeholder="12">
+          </label>
+          <label class="ad-field">
+            <span>Total episodes</span>
+            <input type="number" id="adminWatchTotalEps" class="admin-g-input" placeholder="24">
+          </label>
         </div>
         <div class="ad-row">
-          <input type="text" id="adminWatchSeason" class="admin-g-input" placeholder="4. Season (Season 4)">
-          <input type="number" id="adminWatchProgress" class="admin-g-input narrow" placeholder="5. Progress %">
+          <label class="ad-field">
+            <span>Season</span>
+            <input type="text" id="adminWatchSeason" class="admin-g-input" placeholder="Season 4">
+          </label>
+          <label class="ad-field">
+            <span>Progress %</span>
+            <input type="number" id="adminWatchProgress" class="admin-g-input" placeholder="50">
+          </label>
         </div>
         <button class="admin-g-btn" onclick="commitWatching()">▶ COMMIT WATCHING</button>
       </section>
@@ -148,7 +163,10 @@
       <!-- READ -->
       <section class="admin-g-content" id="tabRead">
         <h2 class="ad-h">// UPDATE CURRENTLY READING //</h2>
-        <input type="text" id="adminReadSearch" class="admin-g-input" placeholder="1. Search manga..." oninput="searchRead(this.value)">
+        <label class="ad-field">
+          <span>Search manga</span>
+          <input type="text" id="adminReadSearch" class="admin-g-input" placeholder="Type a title…" oninput="searchRead(this.value)">
+        </label>
         <div class="ad-results" id="adminReadResults"></div>
         <div class="ad-preview" id="adminReadPreview" style="display:none">
           <img id="adminReadPreviewImg" alt="">
@@ -158,12 +176,24 @@
           </div>
         </div>
         <div class="ad-row">
-          <input type="number" id="adminReadCurChapter" class="admin-g-input" placeholder="2. Current chapter">
-          <input type="text" id="adminReadTotalChapter" class="admin-g-input" placeholder="3. Total (or ∞)">
+          <label class="ad-field">
+            <span>Current chapter</span>
+            <input type="number" id="adminReadCurChapter" class="admin-g-input" placeholder="42">
+          </label>
+          <label class="ad-field">
+            <span>Total chapters</span>
+            <input type="text" id="adminReadTotalChapter" class="admin-g-input" placeholder="120 or ∞">
+          </label>
         </div>
         <div class="ad-row">
-          <input type="text" id="adminReadMeta" class="admin-g-input" placeholder="4. Label (Manga / Volume 1)">
-          <input type="number" id="adminReadProgress" class="admin-g-input narrow" placeholder="5. Progress %">
+          <label class="ad-field">
+            <span>Label</span>
+            <input type="text" id="adminReadMeta" class="admin-g-input" placeholder="Manga / Volume 1">
+          </label>
+          <label class="ad-field">
+            <span>Progress %</span>
+            <input type="number" id="adminReadProgress" class="admin-g-input" placeholder="50">
+          </label>
         </div>
         <button class="admin-g-btn" onclick="commitMangaReading()">▶ COMMIT READING</button>
       </section>
@@ -178,7 +208,10 @@
       <!-- AWARDS -->
       <section class="admin-g-content" id="tabAwards">
         <h2 class="ad-h">// EDIT AWARD WINNERS //</h2>
-        <input type="text" id="adminAwardSearch" class="admin-g-input" placeholder="1. Search anime..." oninput="searchAwardAnime(this.value)">
+        <label class="ad-field">
+          <span>Search anime</span>
+          <input type="text" id="adminAwardSearch" class="admin-g-input" placeholder="Type a title…" oninput="searchAwardAnime(this.value)">
+        </label>
         <div class="ad-results" id="adminAwardResults"></div>
         <div class="ad-preview" id="adminAwardPreview" style="display:none">
           <img id="adminAwardPreviewImg" alt="">
@@ -187,8 +220,11 @@
             <div class="ad-preview-id" id="adminAwardPreviewId"></div>
           </div>
         </div>
-        <div class="ad-row">
-          <input type="text" id="adminAwardYear" class="admin-g-input" placeholder="2. Year (e.g. 2021)">
+        <div class="ad-row" style="align-items:flex-end;">
+          <label class="ad-field">
+            <span>Year</span>
+            <input type="text" id="adminAwardYear" class="admin-g-input" placeholder="2021">
+          </label>
           <button class="admin-g-btn tight" onclick="addAwardFromSelection()">+ ADD</button>
         </div>
         <div class="ad-scroll short" id="adminAwardsForm"></div>
@@ -198,7 +234,10 @@
       <!-- EDIT -->
       <section class="admin-g-content" id="tabEdit">
         <h2 class="ad-h">// EDIT ANIME INFO //</h2>
-        <input type="text" id="adminEditSearch" class="admin-g-input" placeholder="Search anime..." oninput="searchEdit(this.value)">
+        <label class="ad-field">
+          <span>Search anime</span>
+          <input type="text" id="adminEditSearch" class="admin-g-input" placeholder="Type a title…" oninput="searchEdit(this.value)">
+        </label>
         <div class="ad-results" id="adminEditResults"></div>
         <div class="ad-preview" id="adminEditPreview" style="display:none">
           <img id="adminEditPreviewImg" alt="">
@@ -207,17 +246,35 @@
             <div class="ad-preview-id" id="adminEditPreviewId"></div>
           </div>
         </div>
-        <input type="text" id="adminEditName" class="admin-g-input" placeholder="Anime Name">
-        <input type="text" id="adminEditImg" class="admin-g-input" placeholder="Image URL">
-        <input type="text" id="adminEditGenre" class="admin-g-input" placeholder="Genre (comma separated)">
-        <input type="number" id="adminEditMal" class="admin-g-input" placeholder="MAL Rating (e.g. 8.4)" step="0.1" min="0" max="10">
+        <label class="ad-field">
+          <span>Anime name</span>
+          <input type="text" id="adminEditName" class="admin-g-input" placeholder="Full title">
+        </label>
+        <label class="ad-field">
+          <span>Poster image URL</span>
+          <input type="text" id="adminEditImg" class="admin-g-input" placeholder="https://…">
+        </label>
+        <label class="ad-field">
+          <span>Genres</span>
+          <input type="text" id="adminEditGenre" class="admin-g-input" placeholder="Action, Fantasy">
+        </label>
+        <label class="ad-field">
+          <span>MAL score /10</span>
+          <input type="number" id="adminEditMal" class="admin-g-input" placeholder="8.4" step="0.1" min="0" max="10">
+        </label>
         <div class="ad-row">
-          <input type="text" id="adminEditSeasons" class="admin-g-input" placeholder="Total Seasons (Season-1,2,3)">
-          <input type="text" id="adminEditEps" class="admin-g-input" placeholder="Total Episodes (190)">
+          <label class="ad-field">
+            <span>Total seasons</span>
+            <input type="text" id="adminEditSeasons" class="admin-g-input" placeholder="Season-1,2,3">
+          </label>
+          <label class="ad-field">
+            <span>Total episodes</span>
+            <input type="text" id="adminEditEps" class="admin-g-input" placeholder="190">
+          </label>
         </div>
-        <div class="ad-row" style="margin-top:6px;">
-          <label class="admin-g-stat-label" for="adminEditSpecial" style="flex:0 0 auto;">Special Card</label>
-          <select id="adminEditSpecial" class="admin-g-input narrow" style="width:160px;margin:0;">
+        <label class="ad-field" style="flex:0 1 240px;">
+          <span>Special card</span>
+          <select id="adminEditSpecial" class="admin-g-input">
             <option value="">None</option>
             <option value="burning">Fire Type</option>
             <option value="frozen">Frozen Type</option>
@@ -228,7 +285,7 @@
             <option value="earth">Earth Type</option>
             <option value="speed">Speed Type</option>
           </select>
-        </div>
+        </label>
         <button class="admin-g-btn" onclick="commitEditAnime()">▶ COMMIT EDIT</button>
         <div class="ad-note">Editing an anime rewrites its card in index.html and its genre list in script.js.  ghp_jdMFzDeqsfRbxIXnJ5efO4xL5q6J0S3UDUt0</div>
       </section>
@@ -236,8 +293,11 @@
       <!-- DATE -->
       <section class="admin-g-content" id="tabDate">
         <h2 class="ad-h">// UPDATE LAST UPDATED DATE //</h2>
-        <div class="ad-row">
-          <input type="text" id="adminDateInput" class="admin-g-input" placeholder="DD/MM/YYYY">
+        <div class="ad-row" style="align-items:flex-end;">
+          <label class="ad-field">
+            <span>Last updated date</span>
+            <input type="text" id="adminDateInput" class="admin-g-input" placeholder="DD/MM/YYYY">
+          </label>
           <button class="admin-g-btn tight" onclick="commitDate(document.getElementById('adminDateInput').value)">▶ SET</button>
         </div>
         <div class="ad-link" onclick="document.getElementById('adminDateInput').value = new Date().toLocaleDateString('en-GB')">[ click to fill today ]</div>
@@ -264,24 +324,58 @@
       <!-- ADD -->
       <section class="admin-g-content" id="tabAdd">
         <h2 class="ad-h">// ADD NEW ANIME //</h2>
-        <div class="ad-row">
-          <input type="text" id="adminAddTitle" class="admin-g-input" placeholder="Anime Title" style="flex:1;" oninput="adDupHint()" onchange="adDupHint()">
-          <button class="admin-g-btn tight" type="button" id="adminFetchBtn" onclick="fetchAnimeData()">🔎 FETCH DATA</button>
+        <div class="ad-row" style="align-items:flex-end;">
+          <label class="ad-field" style="flex:1 1 220px;">
+            <span>Anime title</span>
+            <input type="text" id="adminAddTitle" class="admin-g-input" placeholder="Type a title…" oninput="adDupHint()" onchange="adDupHint()">
+          </label>
+          <button class="admin-g-btn tight" type="button" id="adminFetchBtn" onclick="fetchAnimeData()" style="height:42px;">🔎 FETCH DATA</button>
         </div>
         <div id="adminAddDup" class="ad-warn" style="display:none"></div>
-        <div id="adminFetchStatus" class="ad-note" style="margin:-4px 0 10px;line-height:1.5;">Type an anime name, press FETCH DATA — title, poster, season, episodes, rating, MAL, genres, studio, OTT, Anim, Char, Planet fill themselves.</div>
-        <input type="text" id="adminAddImg" class="admin-g-input" placeholder="Image URL">
+        <div id="adminFetchStatus" class="ad-note" style="margin:-2px 0 12px;line-height:1.55;">Type an anime name, press FETCH DATA — title, poster, season, episodes, rating, MAL, genres, studio, OTT, Anim, Char, Planet fill themselves.</div>
+        <label class="ad-field">
+          <span>Poster image URL</span>
+          <input type="text" id="adminAddImg" class="admin-g-input" placeholder="https://…">
+        </label>
         <div class="ad-row">
-          <input type="text" id="adminAddSeason" class="admin-g-input" placeholder="Spring 2024">
-          <input type="number" id="adminAddEps" class="admin-g-input narrow" placeholder="Eps">
-          <input type="number" id="adminAddRating" class="admin-g-input narrow" placeholder="Rating" step="0.1" max="100">
-          <input type="number" id="adminAddMal" class="admin-g-input narrow" placeholder="MAL" step="0.01" min="0" max="10">
-          <input type="number" id="adminAddAnim" class="admin-g-input narrow" placeholder="Anim" step="0.1" min="0" max="10">
-          <input type="number" id="adminAddChar" class="admin-g-input narrow" placeholder="Char" step="0.1" min="0" max="10">
-          <input type="number" id="adminAddPlanet" class="admin-g-input narrow" placeholder="Planet" step="0.1" min="0" max="10">
+          <label class="ad-field">
+            <span>Season</span>
+            <input type="text" id="adminAddSeason" class="admin-g-input" placeholder="Spring 2024">
+          </label>
+          <label class="ad-field">
+            <span>Episodes</span>
+            <input type="number" id="adminAddEps" class="admin-g-input" placeholder="12">
+          </label>
+        </div>
+        <div class="ad-row" style="align-items:flex-end;">
+          <label class="ad-field">
+            <span>AniList score /100</span>
+            <input type="number" id="adminAddRating" class="admin-g-input" placeholder="80" step="0.1" max="100">
+          </label>
+          <label class="ad-field">
+            <span>MAL score /10</span>
+            <input type="number" id="adminAddMal" class="admin-g-input" placeholder="8.2" step="0.01" min="0" max="10">
+          </label>
           <button class="admin-g-btn tight" type="button" onclick="refetchMal()" title="Re-fetch the MAL score">↻ MAL</button>
         </div>
-        <input type="text" id="adminAddSeasonLabel" class="admin-g-input" placeholder="Season Label (Season-1)">
+        <div class="ad-row">
+          <label class="ad-field">
+            <span>Animation /10</span>
+            <input type="number" id="adminAddAnim" class="admin-g-input" placeholder="8.0" step="0.1" min="0" max="10">
+          </label>
+          <label class="ad-field">
+            <span>Characters /10</span>
+            <input type="number" id="adminAddChar" class="admin-g-input" placeholder="8.0" step="0.1" min="0" max="10">
+          </label>
+          <label class="ad-field">
+            <span>Anime-Planet /5</span>
+            <input type="number" id="adminAddPlanet" class="admin-g-input" placeholder="4.1" step="0.1" min="0" max="5">
+          </label>
+        </div>
+        <label class="ad-field">
+          <span>Season label</span>
+          <input type="text" id="adminAddSeasonLabel" class="admin-g-input" placeholder="Season-1">
+        </label>
 
         <div class="admin-g-label">OTT Platforms</div>
         <div class="admin-pill-container">
@@ -400,10 +494,19 @@
         <div id="adLogoPreview" style="display:flex;align-items:center;gap:14px;margin:16px 0;padding:16px 18px;border:1px solid var(--g-line);border-radius:14px;background:var(--g-bg);min-height:84px;"></div>
 
         <div class="ad-row">
-          <input type="text" id="adLogoMain" class="admin-g-input" placeholder="Wordmark (ROOT@FARDIN)" maxlength="28" oninput="adLogoPreview()">
-          <input type="text" id="adLogoIcon" class="admin-g-input narrow" placeholder="⚡" maxlength="4" title="Icon shown before the wordmark" oninput="adLogoPreview()">
+          <label class="ad-field">
+            <span>Wordmark</span>
+            <input type="text" id="adLogoMain" class="admin-g-input" placeholder="ROOT@FARDIN" maxlength="28" oninput="adLogoPreview()">
+          </label>
+          <label class="ad-field" style="flex:0 1 120px;">
+            <span>Icon</span>
+            <input type="text" id="adLogoIcon" class="admin-g-input" placeholder="⚡" maxlength="4" title="Icon shown before the wordmark" oninput="adLogoPreview()">
+          </label>
         </div>
-        <input type="text" id="adLogoSub" class="admin-g-input" placeholder="Subtitle (ADMIN CONTROL · v3.0)" maxlength="70" oninput="adLogoPreview()">
+        <label class="ad-field">
+          <span>Subtitle</span>
+          <input type="text" id="adLogoSub" class="admin-g-input" placeholder="ADMIN CONTROL · v3.0" maxlength="70" oninput="adLogoPreview()">
+        </label>
 
         <div class="ad-row wrap">
           <button class="admin-g-btn tight" onclick="adLogoPickFile()">📷 UPLOAD PICTURE</button>
