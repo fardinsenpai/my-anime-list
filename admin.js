@@ -685,6 +685,11 @@ async function githubCommit(path, content, message) {
       body: JSON.stringify(body)
     });
     if (!res.ok) return false;
+    // After any successful non-date commit, refresh the "last updated" date on
+    // the site automatically so it never lags behind the data.
+    if (!(path === 'index.html' && /update date/i.test(message || ''))) {
+      setTimeout(autoUpdateDate, 50);
+    }
     return true;
   } catch(e) { return false; }
 }
@@ -1597,6 +1602,26 @@ async function commitDate(dateStr) {
     saveCommitResult('date', false, 'exception: ' + ((e && e.message) || e));
     msgFail('Commit threw: ' + ((e && e.message) || e));
   }
+}
+
+/* Quietly refresh the "last updated" date on the site after any admin commit,
+   so the date never lags behind the data without a manual step. */
+var _dateAutoPending = false;
+async function autoUpdateDate() {
+  if (_dateAutoPending) return;
+  _dateAutoPending = true;
+  try {
+    var today = new Date().toLocaleDateString('en-GB');
+    var data = await githubFetch('index.html');
+    if (!data) return;
+    var content = decodeURIComponent(escape(atob(data.content)));
+    var next = content.replace(/(<span id=\"lastUpdatedDate\">)(.*?)(<\/span>)/, '$1' + today + '$3');
+    if (next === content) return;
+    await githubCommit('index.html', next, 'admin: auto-update date to ' + today);
+    var el = document.getElementById('lastUpdatedDate');
+    if (el) el.textContent = today;
+  } catch (e) { /* silent: date refresh is best-effort */ }
+  finally { _dateAutoPending = false; }
 }
 
 async function commitStats() {
