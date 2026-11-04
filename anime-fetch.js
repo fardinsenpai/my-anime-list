@@ -26,6 +26,10 @@
   var ANILIST_URL = 'https://graphql.anilist.co';
   var JIKAN_URL = 'https://api.jikan.moe/v4/anime/';
   var MAL_FIT = { slope: 0.0725, intercept: 2.2649 };
+  /* Anime-Planet has no public API and sends no CORS header, so its pages are
+     read through the r.jina.ai text reader — the same route the MAL page uses. */
+  var AP_BASE = 'https://www.anime-planet.com';
+  var AP_READER = 'https://r.jina.ai/';
 
   /* AniList's SEARCH_MATCH alone happily returns a special or a recap for a
      well known title, so we ask for ten results and rank them ourselves. */
@@ -305,6 +309,159 @@
     });
   }
 
+  /* ── ANIME-PLANET (out of 5) ────────────────────────────────────────
+     Anime-Planet publishes no API and no CORS headers, so the anime page is
+     read as text through r.jina.ai. The header carries the real community
+     score: "4.361 out of 5 from 117,202 votes".
+     Route 1: the slug built from the title (one request, exact).
+     Route 2: Anime-Planet's own search, then the best matching result — for
+              romaji titles and punctuation that do not slugify the same way.
+
+     Note: the panel used to fill Anime-Planet with round(mal / 2), a made-up
+     number. That is gone; this is the real rating, rounded to one decimal. */
+  var AP_CACHE_KEY = 'anime_planet_cache_v1';
+  var AP_CACHE_TTL = 30 * 24 * 60 * 60 * 1000;
+
+  function apSlug(title) {
+    return String(title || '')
+      .toLowerCase()
+      .replace(/&/g, ' and ')
+      .replace(/['\u2019`]/g, '')          // Journey's -> journeys, not journey-s
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+  }
+
+  /* Anime-Planet's slugs usually stop at the colon or drop the season part,
+     e.g. "Frieren: Beyond Journey's End" -> frieren-beyond-journeys-end,
+     "… Slime Season 3" -> …-slime. Extra candidates are tried only after the
+     full title misses. */
+  function apSlugVariants(title) {
+    var full = apSlug(title);
+    var out = [];
+    function add(value) { if (value && out.indexOf(value) === -1) out.push(value); }
+    add(full);
+    add(apSlug(String(title || '').split(':')[0]));
+    add(apSlug(String(title || '').replace(/\s+(season|part|cour)\s+\d+.*$/i, '')));
+    add(apSlug(String(title || '').replace(/\s+(the\s+)?movie.*$/i, '')));
+    return out;
+  }
+
+  function parseApRating(text) {
+    if (!text) return null;
+    var head = String(text).slice(0, 400);
+    if (head.indexOf('Search Results for') !== -1) return null;   // slug missed
+    var match = String(text).match(/([0-9]\.[0-9]{1,3})\s*out of 5/i);
+    if (!match) return null;
+    var value = parseFloat(match[1]);
+    return value > 0 && value <= 5 ? Math.round(value * 10) / 10 : null;
+  }
+
+  function readApCache() {
+    try {
+      var raw = localStorage.getItem(AP_CACHE_KEY);
+      var map = raw ? JSON.parse(raw) : {};
+      return map && typeof map === 'object' ? map : {};
+    } catch (e) { return {}; }
+  }
+
+  function writeApCache(slug, rating) {
+    try {
+      var map = readApCache();
+      map[slug] = { r: rating, t: Date.now() };
+      var keys = Object.keys(map);
+      if (keys.length > 300) {
+        keys.sort(function (a, b) { return map[a].t - map[b].t; });
+        keys.slice(0, keys.length - 300).forEach(function (k) { delete map[k]; });
+      }
+      localStorage.setItem(AP_CACHE_KEY, JSON.stringify(map));
+    } catch (e) { /* private mode — caching is optional */ }
+  }
+
+  /* Pulls every /anime/<slug> out of a search page, in page order. */
+  function apResultSlugs(text) {
+    var NAV = { all: 1, seasons: 1, recommendations: 1, 'top-anime': 1, studios: 1, tags: 1, primary: 1, search: 1 };
+    var seen = {};
+    var out = [];
+    var re = /anime-planet\.com\/anime\/([a-z0-9-]+)/g;
+    var match;
+    while ((match = re.exec(String(text || ''))) !== null) {
+      var slug = match[1];
+      if (NAV[slug] || seen[slug] || slug.length < 2) continue;
+      seen[slug] = 1;
+      out.push(slug);
+    }
+    return out;
+  }
+
+  /* Resolves the real Anime-Planet rating (0-5, one decimal) or null.
+     `titles` is a list of candidate names, English first. */
+  function animePlanetScore(titles, force) {
+    var candidates = [];
+    (titles || []).forEach(function (t) {
+      apSlugVariants(t).forEach(function (s) {
+        if (candidates.indexOf(s) === -1) candidates.push(s);
+      });
+    });
+    if (!candidates.length) return Promise.resolve(null);
+
+    if (!force) {
+      var cache = readApCache();
+      for (var i = 0; i < candidates.length; i++) {
+        var hit = cache[candidates[i]];
+        if (hit && hit.r > 0 && (Date.now() - hit.t) < AP_CACHE_TTL) return Promise.resolve(hit.r);
+      }
+    }
+
+    return new Promise(function (resolve) {
+      var settled = false;
+      var guard = setTimeout(function () { finish(null); }, 55000);
+
+      function finish(value) {
+        if (settled) return;
+        settled = true;
+        clearTimeout(guard);
+        resolve(value);
+      }
+
+      function fromPage(slug) {
+        return fetchText(AP_READER + AP_BASE + '/anime/' + slug, { headers: { Accept: 'text/plain' } }, 16000)
+          .then(function (text) { return parseApRating(text); });
+      }
+
+      function tryCandidate(index) {
+        if (index >= candidates.length) return searchFallback();
+        return fromPage(candidates[index]).then(function (rating) {
+          if (rating !== null) { writeApCache(candidates[index], rating); return finish(rating); }
+          return tryCandidate(index + 1);
+        }, function () { return tryCandidate(index + 1); });
+      }
+
+      function searchFallback() {
+        var query = (titles && titles[0]) || candidates[0];
+        return fetchText(AP_READER + AP_BASE + '/anime/all?name=' + encodeURIComponent(query), { headers: { Accept: 'text/plain' } }, 16000)
+          .then(function (search) {
+            var slugs = apResultSlugs(search);
+            var want = candidates[0];
+            var pick = '';
+            for (var i = 0; i < slugs.length && !pick; i++) {
+              if (slugs[i] === want) pick = slugs[i];
+            }
+            for (var j = 0; j < slugs.length && !pick; j++) {
+              if (slugs[j].indexOf(want) === 0 || want.indexOf(slugs[j]) === 0) pick = slugs[j];
+            }
+            if (!pick) pick = slugs[0] || '';
+            if (!pick) return finish(null);
+            return fromPage(pick).then(function (rating) {
+              if (rating !== null) writeApCache(pick, rating);
+              finish(rating);
+            });
+          }, function () { finish(null); });
+      }
+
+      tryCandidate(0);
+    });
+  }
+
   function searchAniList(name) {
     return fetchJson(ANILIST_URL, {
       method: 'POST',
@@ -322,10 +479,13 @@
         studio = media.studios.nodes[0].name || '';
       }
       var score = typeof media.averageScore === 'number' ? media.averageScore : null;
+      var display = titleOf(media) || name;
       var data = {
         id: media.id,
         idMal: media.idMal,
-        title: titleOf(media) || name,
+        title: display,
+        /* candidate names for the Anime-Planet slug (English, romaji, typed) */
+        apTitles: [display, (media.title && media.title.romaji) || '', (media.title && media.title.english) || '', name],
         image: (media.coverImage && (media.coverImage.extraLarge || media.coverImage.large)) || '',
         season: seasonOf(media.startDate),
         episodes: media.episodes || '',
@@ -479,6 +639,62 @@
     return bits.join(' | ');
   }
 
+  /* ── fills the Anime-Planet box after the main form is ready ──
+     Runs in the background of FETCH DATA (r.jina.ai is slow), and a newer
+     fetch always wins over a slower one that is still in flight. */
+  var apSeq = 0;
+
+  function fillAnimePlanet(data) {
+    var mySeq = ++apSeq;
+    var field = document.getElementById('adminAddPlanet');
+    if (!field) return Promise.resolve(null);
+    return animePlanetScore(data.apTitles).then(function (rating) {
+      if (mySeq !== apSeq) return null;
+      var status = document.getElementById('adminFetchStatus');
+      var live = status && /^Filled from:/.test(status.textContent || '');
+      if (rating === null) {
+        /* Nothing on Anime-Planet (or the reader was rate-limited). Say so
+           instead of leaving a silent blank box. */
+        if (!String(field.value || '').trim() && live) {
+          status.textContent += '  ·  Anime-Planet: no match (press ↻ AP)';
+        }
+        return null;
+      }
+      field.value = rating;
+      if (live) status.textContent += '  ·  Anime-Planet ' + rating + '/5 (live)';
+      return rating;
+    }, function () { return null; });
+  }
+
+  /* Re-fetch just the Anime-Planet rating for the typed title, ignoring the
+     cache — used when jina was rate-limited on the first pass. */
+  window.refetchAnimePlanet = function () {
+    var input = document.getElementById('adminAddTitle');
+    var field = document.getElementById('adminAddPlanet');
+    var status = document.getElementById('adminFetchStatus');
+    var name = input ? input.value.trim() : '';
+
+    if (!name) {
+      if (status) { status.textContent = 'Type an anime name first.'; status.style.color = '#ff3355'; }
+      if (input) input.focus();
+      return;
+    }
+    if (status) { status.textContent = 'Reading Anime-Planet for "' + name + '"…'; status.style.color = '#8b93a7'; }
+
+    var mySeq = ++apSeq;
+    animePlanetScore([name], true).then(function (rating) {
+      if (mySeq !== apSeq || !status) return;
+      if (rating === null) {
+        status.textContent = 'Anime-Planet: no rating found for "' + name + '" — fill it by hand.';
+        status.style.color = '#ff3355';
+      } else {
+        if (field) field.value = rating;
+        status.textContent = 'Anime-Planet: ' + rating + '/5 (live)';
+        status.style.color = '#00ff41';
+      }
+    });
+  };
+
   /* Re-fetch just the MAL score for the currently typed title — runs the full
      Jikan → MAL-page chain again (useful when the first FETCH DATA was
      rate-limited or Jikan was blocked). */
@@ -543,6 +759,10 @@
           (hit
             ? '  ·  characters/animation from the site DB'
             : '  ·  new anime: no stored characters/animation — rate it in the commit popup'), 'ok');
+        /* Anime-Planet is read through a slow text proxy, so it lands after
+           the rest of the form instead of holding the whole fetch up. */
+        fillAnimePlanet(data);
+        return hit;
       });
     }).catch(function (err) {
       setStatus('Fetch failed (' + (err && err.message ? err.message : 'network error') + '). Fill it manually.', 'err');
