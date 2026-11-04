@@ -521,6 +521,7 @@
         return;
       }
       applyToForm(data);
+      if (typeof window.adDupHint === 'function') window.adDupHint();
       setStatus('Filled from: ' + summary(data), 'ok');
     }).catch(function (err) {
       setStatus('Fetch failed (' + (err && err.message ? err.message : 'network error') + '). Fill it manually.', 'err');

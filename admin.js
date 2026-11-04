@@ -1765,6 +1765,66 @@ function showDuelRatingPopup(title, derived) {
   });
 }
 
+/* ══════════════════════════════════════════════════════════════════════
+   ONE ANIME = ONE CARD
+   ADD refuses to commit a title that is already in the grid. Titles are
+   compared after normalising case, accents, punctuation and spacing, so
+   "Attack on Titan!", "attack on titan" and "Attack  on Titan" collide.
+   Two layers:
+     · instant check against the loaded grid (live hint + commit guard)
+     · authoritative check against the freshly fetched index.html, so a
+       card added from another tab or device still blocks the commit
+   ══════════════════════════════════════════════════════════════════════ */
+function adUnescape(s) {
+  return String(s || '')
+    .replace(/&amp;/g, '&').replace(/&quot;/g, '"')
+    .replace(/&#0*39;/g, "'").replace(/&#x27;/gi, "'")
+    .replace(/&lt;/g, '<').replace(/&gt;/g, '>');
+}
+
+function adNormTitle(s) {
+  return adUnescape(s)
+    .normalize('NFKD').replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/&/g, ' and ')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim()
+    .replace(/\s+/g, ' ');
+}
+
+function adFindExistingAnime(title) {
+  var want = adNormTitle(title);
+  if (!want) return null;
+  var hit = null;
+  Array.prototype.some.call(document.querySelectorAll('#grid .card'), function (c) {
+    var t = c.querySelector('.title');
+    if (!t || adNormTitle(t.textContent) !== want) return false;
+    var n = c.querySelector('.number');
+    hit = {
+      id: parseInt(String(n ? n.textContent : '').replace(/\D/g, ''), 10) || 0,
+      title: t.textContent.trim()
+    };
+    return true;
+  });
+  return hit;
+}
+
+function adDupHint() {
+  var box = document.getElementById('adminAddDup');
+  var input = document.getElementById('adminAddTitle');
+  if (!box || !input) return;
+  var v = input.value.trim();
+  var hit = v ? adFindExistingAnime(v) : null;
+  if (!hit) {
+    box.style.display = 'none';
+    box.textContent = '';
+    return;
+  }
+  box.style.display = '';
+  box.innerHTML = '⚠ Already in the list as <b>card #' + hit.id + '</b> — “' +
+    adEsc(hit.title) + '”. A second card is blocked; edit that card instead.';
+}
+
 async function commitAddAnime() {
   var title = document.getElementById('adminAddTitle').value.trim();
   var img = document.getElementById('adminAddImg').value.trim();
@@ -1780,6 +1840,12 @@ async function commitAddAnime() {
   var genre = _selectedGenre.join(', ');
   var seasonLabel = document.getElementById('adminAddSeasonLabel').value.trim() || 'Season-1';
   if (!title || !img) { msgFail('Title and Image URL required'); return; }
+  var dupLocal = adFindExistingAnime(title);
+  if (dupLocal) {
+    adDupHint();
+    msgFail('Already added as card #' + dupLocal.id + ' — ' + dupLocal.title);
+    return;
+  }
   showLoading();
   adStep('fetching site files…');
   try {
@@ -1788,6 +1854,21 @@ async function commitAddAnime() {
     var ratingsData = await githubFetch('anime-ratings.json');
     if (!indexData || !scriptData) { hideLoading(); adStep(''); saveCommitResult('add-anime', false, 'fetch failed (index.html / script.js)'); msgFail('Failed to fetch files. Check PAT.'); return; }
     var indexContent = decodeURIComponent(escape(atob(indexData.content)));
+    /* authoritative duplicate check against the very file we are about to edit */
+    var wanted = adNormTitle(title);
+    var dupInFile = null;
+    var titleScan = /class="title">([^<]*)</g;
+    var tmScan;
+    while ((tmScan = titleScan.exec(indexContent))) {
+      if (adNormTitle(tmScan[1]) === wanted) { dupInFile = adUnescape(tmScan[1]).trim(); break; }
+    }
+    if (dupInFile) {
+      hideLoading(); adStep('');
+      saveCommitResult('add-anime', false, 'duplicate: ' + dupInFile);
+      msgFail('Already in the list: ' + dupInFile);
+      adDupHint();
+      return;
+    }
     var scriptContent = decodeURIComponent(escape(atob(scriptData.content)));
     var ratingsContent = ratingsData ? decodeURIComponent(escape(atob(ratingsData.content))) : '';
     var maxId = 0;

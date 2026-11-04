@@ -19,7 +19,7 @@
     if (f) document.documentElement.setAttribute('data-font', f);
   } catch (e) {}
 </script>
-<link rel="stylesheet" href="admin.css?v=20261103e">
+<link rel="stylesheet" href="admin.css?v=20261103f">
 </head>
 <body>
 
@@ -114,8 +114,7 @@
           <button class="ad-mini danger" onclick="patForget()">🗑 FORGET</button>
         </div>
         <div class="ad-side-hint">
-          Kept in <b>this browser only</b>, hidden behind the PIN and never committed anywhere.
-          Paste it once, press SAVE, then just use ⧉ COPY whenever you need it.
+          Stored in <b>this browser only</b> — never committed.
         </div>
       </div>
     </aside>
@@ -216,9 +215,9 @@
           <input type="text" id="adminEditSeasons" class="admin-g-input" placeholder="Total Seasons (Season-1,2,3)">
           <input type="text" id="adminEditEps" class="admin-g-input" placeholder="Total Episodes (190)">
         </div>
-        <div style="display:flex;gap:8px;margin-top:6px;align-items:center;">
-          <label style="font-size:11px;color:#aaa;">Special Card:</label>
-          <select id="adminEditSpecial" class="admin-g-input narrow" style="width:140px;background:#1a0f15;color:#fff;border:1px solid #333;">
+        <div class="ad-row" style="margin-top:6px;">
+          <label class="admin-g-stat-label" for="adminEditSpecial" style="flex:0 0 auto;">Special Card</label>
+          <select id="adminEditSpecial" class="admin-g-input narrow" style="width:160px;margin:0;">
             <option value="">None</option>
             <option value="burning">Fire Type</option>
             <option value="frozen">Frozen Type</option>
@@ -266,9 +265,10 @@
       <section class="admin-g-content" id="tabAdd">
         <h2 class="ad-h">// ADD NEW ANIME //</h2>
         <div class="ad-row">
-          <input type="text" id="adminAddTitle" class="admin-g-input" placeholder="Anime Title" style="flex:1;">
-          <button class="admin-g-btn" type="button" id="adminFetchBtn" onclick="fetchAnimeData()" style="flex:0 0 auto;width:auto;padding:8px 14px;white-space:nowrap;">🔎 FETCH DATA</button>
+          <input type="text" id="adminAddTitle" class="admin-g-input" placeholder="Anime Title" style="flex:1;" oninput="adDupHint()" onchange="adDupHint()">
+          <button class="admin-g-btn tight" type="button" id="adminFetchBtn" onclick="fetchAnimeData()">🔎 FETCH DATA</button>
         </div>
+        <div id="adminAddDup" class="ad-warn" style="display:none"></div>
         <div id="adminFetchStatus" class="ad-note" style="margin:-4px 0 10px;line-height:1.5;">Type an anime name, press FETCH DATA — title, poster, season, episodes, rating, MAL, genres, studio, OTT, Anim, Char, Planet fill themselves.</div>
         <input type="text" id="adminAddImg" class="admin-g-input" placeholder="Image URL">
         <div class="ad-row">
@@ -279,7 +279,7 @@
           <input type="number" id="adminAddAnim" class="admin-g-input narrow" placeholder="Anim" step="0.1" min="0" max="10">
           <input type="number" id="adminAddChar" class="admin-g-input narrow" placeholder="Char" step="0.1" min="0" max="10">
           <input type="number" id="adminAddPlanet" class="admin-g-input narrow" placeholder="Planet" step="0.1" min="0" max="10">
-          <button type="button" onclick="refetchMal()" style="flex:0 0 auto;width:auto;padding:6px 10px;font-size:0.8rem;margin-left:4px;">↻ MAL</button>
+          <button class="admin-g-btn tight" type="button" onclick="refetchMal()" title="Re-fetch the MAL score">↻ MAL</button>
         </div>
         <input type="text" id="adminAddSeasonLabel" class="admin-g-input" placeholder="Season Label (Season-1)">
 
@@ -326,9 +326,6 @@
       <section class="admin-g-content" id="tabAvatars">
         <h2 class="ad-h">// CHAT AVATARS //</h2>
         <div id="avatarPickerBody"></div>
-        <div class="ad-note">◀ ▶ = next 3 avatars · click one to publish it for <b>everyone</b>.<br>
-          📷 UPLOAD = your own picture (auto-cropped square, saved in the repo's avatars/ folder).
-          Needs your PAT. Live in ~1-10 min.</div>
       </section>
 
       <!-- NOTES -->
@@ -410,7 +407,7 @@
 
         <div class="ad-row wrap">
           <button class="admin-g-btn tight" onclick="adLogoPickFile()">📷 UPLOAD PICTURE</button>
-          <button class="admin-g-btn tight" onclick="adLogoDropImage()">🧹 REMOVE PICTURE</button>
+          <button class="admin-g-btn tight danger" onclick="adLogoDropImage()">🧹 REMOVE PICTURE</button>
           <input type="file" id="adLogoFile" accept="image/*" style="display:none" onchange="adLogoFileChosen(this)">
           <span class="ad-count" id="adLogoImgNote">no picture — wordmark only</span>
         </div>
@@ -473,7 +470,7 @@
   </div>
 </div>
 
-<script src="anime-fetch.js?v=20261101b"></script>
-<script src="admin.js?v=20261103d"></script>
+<script src="anime-fetch.js?v=20261104a"></script>
+<script src="admin.js?v=20261103e"></script>
 </body>
 </html>
