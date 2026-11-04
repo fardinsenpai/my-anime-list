@@ -973,9 +973,17 @@ html.ad-no-transition *::after {
 }
 
 @media (max-width: 560px) {
-  .ad-top { padding: 0 12px; gap: 8px; }
+  /* two-row header: identity on top, controls underneath.
+     keeps ROOT@FARDIN readable instead of squeezing it behind the buttons */
+  :root { --top-h: 100px; }
+  .ad-top {
+    flex-wrap: wrap; align-content: center; row-gap: 8px;
+    padding: 8px 12px; gap: 6px;
+  }
+  .ad-brand { flex: 1 1 100%; }
+  .ad-top-right { flex: 1 1 100%; width: 100%; gap: 6px; overflow-x: auto; }
   .ad-brand-main { font-size: 14px; letter-spacing: .06em; }
-  .ad-top-right .ad-mini { padding: 6px 9px; font-size: 9px; }
+  .ad-top-right .ad-mini { padding: 6px 9px; font-size: 9px; white-space: nowrap; }
   .ad-vsep { display: none; }
   .ad-gate-logo { font-size: 26px; }
   .ad-pin-row input { width: 40px; height: 50px; font-size: 19px; }
