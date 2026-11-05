@@ -6297,7 +6297,7 @@ document.addEventListener('click', function(e) {
      type:'slug' builds that path; type:'search' uses the site's search box. */
   var WATCH_SITES = [
     { name: 'Hianime', tag: 'SUB', type: 'slug', url: 'https://hianime.dk/' },
-    { name: 'AniDisk', tag: 'HINDI', type: 'search', url: 'https://anidisk.org/search?keyword=' },
+    { name: 'AniDisk', tag: 'HINDI', type: 'slug', url: 'https://anidisk.org/anime/' },
     { name: 'AnimeVilla', tag: 'HINDI', type: 'search', url: 'https://animevilla.org/?s=' }
   ];
 
@@ -6325,7 +6325,7 @@ document.addEventListener('click', function(e) {
     _watchPopup = null;
   }
 
-  function openWatchPopup(card, title) {
+  function openWatchPopup(card, title, anchor) {
     closeWatchPopup();
     var popup = document.createElement('div');
     popup.className = 'watch-popup';
@@ -6370,17 +6370,25 @@ document.addEventListener('click', function(e) {
     popup.appendChild(list);
     document.body.appendChild(popup);
 
-    /* Measure the real box, then place it centred over the card. Read
-       offsetWidth/Height AFTER it is in the DOM so the values are final. */
-    var rect = card.getBoundingClientRect();
+    /* Measure the real box, then place it right above the Watch button,
+       right-aligned so it hugs the button's corner. Flips below the button
+       when there is no room above, and clamps to the viewport. */
+    var btn = anchor || card.querySelector('.watch-btn') || card;
+    var brect = btn.getBoundingClientRect();
     var pw = popup.offsetWidth;
     var ph = popup.offsetHeight;
     var margin = 8;
-    var left = rect.left + (rect.width - pw) / 2;          // centre on the card
+
+    // right edges line up with the button
+    var left = brect.right - pw;
     left = Math.max(margin, Math.min(left, window.innerWidth - pw - margin));
-    var top = rect.top - ph - margin;                       // above the card
-    if (top < margin) top = rect.bottom + margin;           // no room -> below
+
+    // sit just above the button; if that overflows the top, go below it
+    var top = brect.top - ph - 6;
+    if (top < margin) top = brect.bottom + 6;
     top = Math.min(top, window.innerHeight - ph - margin);
+    // never cover the card's own top edge when going below on a short screen
+    top = Math.max(top, margin);
 
     popup.style.left = Math.round(left) + 'px';
     popup.style.top = Math.round(top) + 'px';
@@ -6490,7 +6498,7 @@ document.addEventListener('click', function(e) {
       btn.onclick = function (e) {
         e.stopPropagation();
         e.preventDefault();
-        openWatchPopup(card, title);
+        openWatchPopup(card, title, btn);
       };
       posterWrap.appendChild(btn);
     });

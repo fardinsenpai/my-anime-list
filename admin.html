@@ -301,6 +301,14 @@
           <button class="admin-g-btn tight" onclick="commitDate(document.getElementById('adminDateInput').value)">▶ SET</button>
         </div>
         <div class="ad-link" onclick="document.getElementById('adminDateInput').value = new Date().toLocaleDateString('en-GB')">[ click to fill today ]</div>
+
+        <h2 class="ad-h" style="margin-top:22px;">// CACHE VERSIONS //</h2>
+        <div class="ad-note" style="margin-top:0;">
+          Every admin commit re-stamps the <b>?v=</b> links in index.html and admin.html automatically, so visitors get the new css/js without a hard refresh. Use the button to force a fresh stamp now.
+        </div>
+        <div class="ad-row" style="margin-top:10px;">
+          <button class="admin-g-btn tight" onclick="restampAssets()">↻ RESTAMP ASSETS NOW</button>
+        </div>
       </section>
 
       <!-- STATS -->

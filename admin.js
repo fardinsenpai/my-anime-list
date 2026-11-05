@@ -685,11 +685,14 @@ async function githubCommit(path, content, message) {
       body: JSON.stringify(body)
     });
     if (!res.ok) return false;
-    // After any successful non-date commit, refresh the "last updated" date on
-    // the site automatically so it never lags behind the data.
-    if (!(path === 'index.html' && /update date/i.test(message || ''))) {
-      setTimeout(autoUpdateDate, 50);
-    }
+    // After any successful commit, refresh the "last updated" date and re-stamp
+    // the asset ?v= links so visitors see the change without a hard refresh.
+    // Both are skipped for their own commits so they cannot loop.
+    var msg = message || '';
+    var isDateCommit = path === 'index.html' && /update date/i.test(msg);
+    var isStampCommit = /refresh asset cache stamp/i.test(msg);
+    if (!isDateCommit) setTimeout(autoUpdateDate, 50);
+    if (!isStampCommit) setTimeout(function () { stampAssetVersions(); }, 120);
     return true;
   } catch(e) { return false; }
 }
@@ -1623,6 +1626,47 @@ async function autoUpdateDate() {
   } catch (e) { /* silent: date refresh is best-effort */ }
   finally { _dateAutoPending = false; }
 }
+
+/* After an admin commit, re-stamp every ?v= asset link in the two HTML files
+   so browsers fetch the new css/js instead of a cached copy. The stamp is the
+   current time (yyyymmddHHMM), so it changes on every commit. Skipped for the
+   stamp/date commits themselves so they cannot loop. */
+var _stampPending = false;
+function assetStamp() {
+  var d = new Date();
+  function p(n) { return (n < 10 ? '0' : '') + n; }
+  return '' + d.getFullYear() + p(d.getMonth() + 1) + p(d.getDate()) + p(d.getHours()) + p(d.getMinutes());
+}
+
+async function stampAssetVersions(force) {
+  if (_stampPending) return;
+  _stampPending = true;
+  try {
+    var stamp = assetStamp();
+    var files = ['index.html', 'admin.html'];
+    for (var i = 0; i < files.length; i++) {
+      var path = files[i];
+      var data = await githubFetch(path);
+      if (!data) continue;
+      var content = decodeURIComponent(escape(atob(data.content)));
+      var next = content.replace(/((?:src|href)="[^"]+)\?v=[^"]*/g, '$1?v=' + stamp);
+      if (next === content) continue;               // nothing to change
+      await githubCommit(path, next, 'admin: refresh asset cache stamp ' + stamp);
+    }
+  } catch (e) { /* silent: version stamping is best-effort */ }
+  finally { _stampPending = false; }
+}
+
+/* Public: the DATE tab's "restamp now" button. */
+window.restampAssets = function () {
+  showLoading();
+  adStep('refreshing asset versions…');
+  stampAssetVersions(true).then(function () {
+    hideLoading();
+    adStep('');
+    msgOk('Asset versions refreshed to ' + assetStamp());
+  });
+};
 
 async function commitStats() {
   var seasonsInp = document.getElementById('adminStatsSeasons');
