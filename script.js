@@ -866,12 +866,7 @@ function copyEmail() {
     if (status) status.innerHTML = `Showing <strong>${vis}</strong> of <strong>${getTotalCards()}</strong> anime`;
     const clr = document.getElementById('clearBtn');
     if (clr) clr.classList.toggle('hidden', name === 'All');
-    // the now-strip is a home-page feature — hide it while a genre filter is on
-    var nowStrip = document.getElementById('nowStrip');
-    if (nowStrip && nowStrip.innerHTML) {
-      nowStrip.dataset.filterHidden = (name === 'All') ? '' : '1';
-      nowStrip.style.display = (name === 'All') ? '' : 'none';
-    }
+    // the now-strip stays visible while a genre filter is on
   }
 
   // ===== chat chips: one per genre, so the chat can recommend from ANY genre =====
@@ -1864,7 +1859,7 @@ searchBox.addEventListener('input', function () {
     if (footerEl) footerEl.style.display = '';
 
     var nowStripSearch = document.getElementById('nowStrip');
-    if (nowStripSearch && nowStripSearch.innerHTML && !nowStripSearch.dataset.filterHidden) nowStripSearch.style.display = '';
+    if (nowStripSearch && nowStripSearch.innerHTML) nowStripSearch.style.display = '';
   }
 });
 

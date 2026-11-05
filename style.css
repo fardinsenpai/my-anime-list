@@ -1561,22 +1561,23 @@ body.perf-no-blink .back-special-label::before { display: none !important; }
   .counter-container {
     flex-direction: column;   /* keep the original stacked layout on phones */
     align-items: center;
-    gap: 12px;
-    padding: 0 12px;
+    gap: 22px;
+    padding: 26px 20px;
   }
   .counter-box {
-    width: 78%;
-    max-width: 260px;
+    width: 62%;
+    max-width: 210px;
+    flex: 0 0 auto;
     margin-bottom: 0;
-    padding: 14px 10px;
+    padding: 18px 12px;
   }
   .counter {
-    font-size: 26px !important;
+    font-size: 25px !important;
     line-height: 1.1;
   }
   .counter-box p {
     font-size: 12px !important;
-    margin-top: 6px;
+    margin-top: 8px;
   }
 }
 
