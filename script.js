@@ -6319,7 +6319,10 @@ document.addEventListener('click', function(e) {
   var _watchPopup = null;
 
   function closeWatchPopup() {
-    if (_watchPopup) { _watchPopup.remove(); _watchPopup = null; }
+    if (!_watchPopup) return;
+    if (_watchPopup._watchCleanup) _watchPopup._watchCleanup();
+    _watchPopup.remove();
+    _watchPopup = null;
   }
 
   function openWatchPopup(card, title) {
@@ -6383,11 +6386,29 @@ document.addEventListener('click', function(e) {
     popup.style.top = Math.round(top) + 'px';
     _watchPopup = popup;
 
-    setTimeout(function () {
-      document.addEventListener('click', function dismissWatch(e) {
-        if (!popup.contains(e.target)) { closeWatchPopup(); document.removeEventListener('click', dismissWatch); }
-      });
-    }, 60);
+    /* Close when the user clicks/taps anywhere outside the popup, presses
+       Escape, or scrolls the page. Listeners are bound on the NEXT frame so
+       the very click that opened the popup does not immediately close it. */
+    requestAnimationFrame(function () {
+      function onOutside(e) {
+        if (!popup.contains(e.target)) closeWatchPopup();
+      }
+      function onKey(e) {
+        if (e.key === 'Escape') closeWatchPopup();
+      }
+      function onScroll() { closeWatchPopup(); }
+
+      popup._watchCleanup = function () {
+        document.removeEventListener('pointerdown', onOutside, true);
+        document.removeEventListener('click', onOutside, true);
+        document.removeEventListener('keydown', onKey, true);
+        window.removeEventListener('scroll', onScroll, true);
+      };
+      document.addEventListener('pointerdown', onOutside, true);
+      document.addEventListener('click', onOutside, true);
+      document.addEventListener('keydown', onKey, true);
+      window.addEventListener('scroll', onScroll, true);
+    });
   }
 
   function injectWatchButtons() {
