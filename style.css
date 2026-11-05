@@ -1580,10 +1580,19 @@ body.perf-no-blink .back-special-label::before { display: none !important; }
 
 /* Any screen up to 900px: keep the boxes from getting oversized (landscape phones) */
 @media (max-width: 900px) {
-  .counter-box { padding: 22px 14px; }
-  .counter-box::before { width: 150px; height: 150px; }
-  .counter { font-size: 28px; }
-  .counter-box p { font-size: 13px; }
+  .counter-container {
+    gap: 16px;
+    padding: 0 24px;
+    margin: 16px 0;
+  }
+  .counter-box {
+    padding: 20px 14px;
+    max-width: 170px;
+    flex: 0 1 170px;
+  }
+  .counter-box::before { width: 140px; height: 140px; }
+  .counter { font-size: 26px; }
+  .counter-box p { font-size: 12.5px; }
 }
 
 /* style */
