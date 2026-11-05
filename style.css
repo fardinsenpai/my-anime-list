@@ -1546,83 +1546,31 @@ body.perf-no-blink .back-special-label::before { display: none !important; }
   margin-top: 8px;
 }
 
-.counter {
-  font-size: 28px;
-  font-weight: bold;
-  color: #ff4d4d;
-}
-
-.counter-box p {
-  font-size: 14px;
-  font-weight: 600;
-  color: black;
-  margin-top: 8px;
-}
-
   /* style */
 @media (min-width: 768px) {
   .counter-container {
-    flex-direction: row;   /* landscape phones / tablets / desktop */
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: center;
-    gap: 18px;
-    padding: 0 16px;
+    flex-direction: row; /* style */
   }
   .counter-box {
     max-width: 200px;
-    padding: 24px 18px;
-  }
-  .counter {
-    font-size: 30px;
   }
 }
 
-/* Any screen up to 900px: keep the boxes from getting oversized (landscape phones) */
-@media (max-width: 900px) {
+/* style */
+@media (max-width: 767px) {
   .counter-container {
-    gap: 14px;
-    padding: 0 18px;
-    margin: 16px 0;
-    flex-direction: row;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-items: stretch;
-  }
-  .counter-box {
-    padding: 16px 10px;
-    flex: 0 0 calc(50% - 7px);   /* two per row, third centres underneath */
-    width: calc(50% - 7px);
-    max-width: 240px;
-    box-sizing: border-box;
-  }
-  .counter-box::before { width: 130px; height: 130px; }
-  .counter { font-size: 24px; }
-  .counter-box p { font-size: 12px; }
-}
-
-/* Portrait phones keep the single stacked column */
-@media (max-width: 767px) and (orientation: portrait) {
-  .counter-container {
-    flex-direction: column;
+    flex-direction: column; /* Mobile ? */
     align-items: center;
-    gap: 22px;
-    padding: 26px 20px;
   }
   .counter-box {
-    width: 62%;
-    max-width: 210px;
-    flex: 0 0 auto;
-    margin-bottom: 0;
-    padding: 18px 12px;
+    width: 80%; /* Mobile ? */
+    margin-bottom: 15px;
   }
   .counter {
-    font-size: 25px !important;
-    line-height: 1.1;
+    font-size: 22px; /* Mobile ? */
   }
   .counter-box p {
-    font-size: 12px !important;
-    margin-top: 8px;
+    font-size: 12px; /* Mobile ? */
   }
 }
 
@@ -1631,7 +1579,24 @@ body.perf-no-blink .back-special-label::before { display: none !important; }
   transform: translateY(0);
 }
 
-.counter-box p {
+.counter {
+  font-size: 40px;
+  font-weight: bold;
+  color: #ff4d4d;
+}
+
+
+.counter-box.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.counter {
+  font-size: 40px;
+  font-weight: bold;
+  color: #ff4d4d;
+}
+  .counter-box p {
   font-size: 18px;
   font-weight: 600;
   color: black;

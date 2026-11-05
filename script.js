@@ -867,6 +867,8 @@ function copyEmail() {
     const clr = document.getElementById('clearBtn');
     if (clr) clr.classList.toggle('hidden', name === 'All');
     // the now-strip stays visible while a genre filter is on
+    // block the END dock button while a genre filter is active
+    window.__genreFilterActive = (name !== 'All');
   }
 
   // ===== chat chips: one per genre, so the chat can recommend from ANY genre =====
@@ -2088,6 +2090,8 @@ function scrollToTop() {
 }
 
 function scrollToEnd() {
+  // A genre filter is active — the list is short, so the END jump is disabled.
+  if (window.__genreFilterActive) return;
   var doc = document.documentElement;
   var body = document.body;
   var max = Math.max(doc ? doc.scrollHeight : 0, body ? body.scrollHeight : 0) - window.innerHeight;
@@ -2182,7 +2186,9 @@ function scrollToEnd() {
     dock.style.transform = show ? 'translateY(0) scale(1)' : 'translateY(18px) scale(.92)';
     dock.style.pointerEvents = show ? 'auto' : 'none';
     topBtn.style.opacity = y > 40 ? '1' : '.42';
-    endBtn.style.opacity = p > 0.995 ? '.42' : '1';
+    // END is meaningless (and blocked) while a genre filter narrows the list
+    endBtn.style.opacity = (window.__genreFilterActive || p > 0.995) ? '.42' : '1';
+    endBtn.style.pointerEvents = window.__genreFilterActive ? 'none' : '';
   }
   function onScroll() {
     if (ticking) return;
@@ -6293,7 +6299,7 @@ document.addEventListener('click', function(e) {
   var WATCH_SITES = [
     { name: 'Hianime', tag: 'SUB', type: 'slug', url: 'https://hianime.dk/' },
     { name: 'AniDisk', tag: 'HINDI', type: 'slug', url: 'https://anidisk.org/anime/' },
-    { name: 'AnimeVilla', tag: 'HINDI', type: 'search', url: 'https://animevilla.org/?s=' }
+    { name: 'AnimeVilla', tag: 'HINDI', type: 'slug', url: 'https://animevilla.org/anime/', suffix: '-hindi-dubbed/' }
   ];
 
   /* "Naruto Shippuden" -> "naruto-shippuden"; drops punctuation/accents. */
@@ -6307,7 +6313,7 @@ document.addEventListener('click', function(e) {
   }
 
   function buildWatchUrl(site, title) {
-    if (site.type === 'slug') return site.url + watchSlug(title);
+    if (site.type === 'slug') return site.url + watchSlug(title) + (site.suffix || '');
     return site.url + encodeURIComponent(title.trim());
   }
 
