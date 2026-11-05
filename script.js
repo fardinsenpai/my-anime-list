@@ -6291,6 +6291,109 @@ document.addEventListener('click', function(e) {
     });
   }
 
+  /* ── WATCH ANIME — open streaming sites (Hianime, Hindi options) ── */
+  var WATCH_SITES = [
+    { name: 'Hianime', url: 'https://hianime.to/search?keyword=' },
+    { name: 'AniDisk (Hindi)', url: 'https://anidisk.org/search?keyword=' },
+    { name: 'SubHi Anime', url: 'https://subhianime.com/search?keyword=' }
+  ];
+
+  function buildWatchUrl(site, title) {
+    return site.url + encodeURIComponent(title.trim());
+  }
+
+  var _watchPopup = null;
+
+  function closeWatchPopup() {
+    if (_watchPopup) { _watchPopup.remove(); _watchPopup = null; }
+  }
+
+  function openWatchPopup(card, title) {
+    closeWatchPopup();
+    var popup = document.createElement('div');
+    popup.className = 'watch-popup';
+    var close = document.createElement('button');
+    close.className = 'watch-close';
+    close.textContent = '✕';
+    close.onclick = function (e) { e.stopPropagation(); closeWatchPopup(); };
+    popup.appendChild(close);
+    WATCH_SITES.forEach(function (site) {
+      var b = document.createElement('button');
+      b.className = 'watch-site';
+      b.textContent = site.name;
+      b.onclick = function (e) {
+        e.stopPropagation();
+        window.open(buildWatchUrl(site, title), '_blank');
+        closeWatchPopup();
+      };
+      popup.appendChild(b);
+    });
+    document.body.appendChild(popup);
+    var rect = card.getBoundingClientRect();
+    var h = popup.offsetHeight;
+    var left = Math.min(Math.max(rect.left, 8), window.innerWidth - popup.offsetWidth - 8);
+    var top = Math.max(8, rect.top - h - 8);
+    popup.style.left = left + 'px';
+    popup.style.top = top + 'px';
+    _watchPopup = popup;
+    setTimeout(function () {
+      document.addEventListener('click', function dismissWatch(e) {
+        if (!popup.contains(e.target)) { closeWatchPopup(); document.removeEventListener('click', dismissWatch); }
+      });
+    }, 60);
+  }
+
+  function injectWatchButtons() {
+    var style = document.createElement('style');
+    style.textContent = [
+      '.poster-wrap { position: relative !important; }',
+      '.watch-btn {',
+      '  position: absolute; bottom: 8px; right: 8px;',
+      '  background: #ffd700; color: #000; border: none;',
+      '  padding: 6px 10px; border-radius: 6px; font-weight: 800;',
+      '  font-size: 12px; cursor: pointer; z-index: 12;',
+      '  box-shadow: 0 2px 10px rgba(0,0,0,0.55); font-family: inherit; white-space: nowrap;',
+      '}',
+      '.watch-btn:hover { background: #ffeb3b; }',
+      '.watch-popup {',
+      '  position: fixed; z-index: 2000; background: #0a0a0a; border: 1px solid #ffd700;',
+      '  border-radius: 10px; padding: 8px 10px; box-shadow: 0 4px 24px rgba(0,0,0,0.7);',
+      '  font-family: Exo 2, sans-serif; display: flex; flex-direction: column; gap: 6px;',
+      '  width: 190px;',
+      '}',
+      '.watch-close {',
+      '  align-self: flex-end; background: transparent; border: none; color: #666;',
+      '  cursor: pointer; font-size: 18px; padding: 2px 6px; line-height: 1;',
+      '}',
+      '.watch-site {',
+      '  background: #141414; border: 1px solid #ffd700; color: #ffd700;',
+      '  padding: 8px 12px; border-radius: 6px; cursor: pointer;',
+      '  text-align: left; font-size: 14px; font-weight: 700;',
+      '}',
+      '.watch-site:hover { background: #ffd700; color: #000; }'
+    ].join('');
+    document.head.appendChild(style);
+
+    var cards = document.querySelectorAll('#grid .card');
+    cards.forEach(function (card) {
+      if (card.querySelector('.watch-btn')) return;
+      var posterWrap = card.querySelector('.poster-wrap');
+      if (!posterWrap) return;
+      var titleEl = card.querySelector('.title') || card.querySelector('.back-title');
+      var title = titleEl ? titleEl.textContent.trim() : '';
+      var btn = document.createElement('button');
+      btn.className = 'watch-btn';
+      btn.title = 'Watch ' + title + ' online';
+      btn.textContent = '🎬 Watch';
+      btn.onclick = function (e) {
+        e.stopPropagation();
+        e.preventDefault();
+        openWatchPopup(card, title);
+      };
+      posterWrap.appendChild(btn);
+    });
+  }
+
   // 4. Card hover glow trail
   document.addEventListener('mousemove', function(e) {
     if (document.body.classList.contains('perf-no-glow')) return;
@@ -6433,6 +6536,7 @@ document.addEventListener('click', function(e) {
   // Init all enhancements on DOM ready
   function initEnhancements() {
     injectCardEnhancements();
+    injectWatchButtons();
     randomizeCardTilt();
     createAmbientParticles();
   }
