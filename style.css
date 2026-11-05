@@ -98,6 +98,12 @@ body.duel-mode-active .now-strip { display: none !important; }
   -webkit-text-fill-color: transparent;
   background-clip: text;
   letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+@media (max-width: 480px) {
+  .topbar-logo { gap: 5px; }
+  .topbar-logo img { width: 26px !important; height: 26px !important; }
+  .topbar-logo span { font-size: 0.66rem; letter-spacing: 0.2px; }
 }
 
 
@@ -1553,18 +1559,28 @@ body.perf-no-blink .back-special-label::before { display: none !important; }
 /* style */
 @media (max-width: 767px) {
   .counter-container {
-    flex-direction: column; /* Mobile ? */
-    align-items: center;
+    flex-direction: row;      /* three counters side by side, not a tall stack */
+    align-items: stretch;
+    justify-content: center;
+    flex-wrap: nowrap;
+    gap: 8px;
+    padding: 0 10px;
   }
   .counter-box {
-    width: 80%; /* Mobile ? */
-    margin-bottom: 15px;
+    width: auto;              /* let flex size them evenly */
+    flex: 1 1 0;
+    min-width: 0;
+    max-width: 130px;
+    margin-bottom: 8px;
+    padding: 12px 6px;
   }
   .counter {
-    font-size: 22px; /* Mobile ? */
+    font-size: 26px !important;
+    line-height: 1.1;
   }
   .counter-box p {
-    font-size: 12px; /* Mobile ? */
+    font-size: 11px !important;
+    margin-top: 6px;
   }
 }
 
@@ -1744,6 +1760,15 @@ body.perf-no-blink .back-special-label::before { display: none !important; }
   animation: titleFloat 4s ease-in-out infinite, glitch-main 6s infinite;
 }
 .header h1 .h1-emoji { background: none !important; -webkit-text-fill-color: initial; }
+
+/* Mobile: keep the main heading on one line and stop it wrapping awkwardly. */
+@media (max-width: 767px) {
+  .header h1 {
+    font-size: clamp(1.05rem, 5.4vw, 1.55rem);
+    letter-spacing: 0.5px;
+    margin-bottom: 18px;
+  }
+}
 
 .header h1::before,
 .header h1::after {
@@ -5589,7 +5614,9 @@ body.perf-no-blink .pill { opacity: 1 !important; transform: scale(1) translateY
   padding: 0 16px;
 }
 @media (max-width: 760px) {
-  .now-strip { flex-direction: column; }
+  .now-strip { flex-direction: column; padding: 0 12px; }
+  .now-card { min-width: 0; width: 100%; flex: 0 0 auto; padding: 14px 16px; gap: 14px; }
+  .now-ring { width: 62px; height: 62px; }
 }
 .now-card {
   --rc: #ff8fbe;
