@@ -1546,14 +1546,44 @@ body.perf-no-blink .back-special-label::before { display: none !important; }
   margin-top: 8px;
 }
 
+.counter {
+  font-size: 28px;
+  font-weight: bold;
+  color: #ff4d4d;
+}
+
+.counter-box p {
+  font-size: 14px;
+  font-weight: 600;
+  color: black;
+  margin-top: 8px;
+}
+
   /* style */
 @media (min-width: 768px) {
   .counter-container {
-    flex-direction: row; /* style */
+    flex-direction: row;   /* landscape phones / tablets / desktop */
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+    padding: 0 16px;
   }
   .counter-box {
     max-width: 200px;
+    padding: 24px 18px;
   }
+  .counter {
+    font-size: 30px;
+  }
+}
+
+/* Any screen up to 900px: keep the boxes from getting oversized (landscape phones) */
+@media (max-width: 900px) {
+  .counter-box { padding: 22px 14px; }
+  .counter-box::before { width: 150px; height: 150px; }
+  .counter { font-size: 28px; }
+  .counter-box p { font-size: 13px; }
 }
 
 /* style */
@@ -1586,24 +1616,7 @@ body.perf-no-blink .back-special-label::before { display: none !important; }
   transform: translateY(0);
 }
 
-.counter {
-  font-size: 40px;
-  font-weight: bold;
-  color: #ff4d4d;
-}
-
-
-.counter-box.show {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.counter {
-  font-size: 40px;
-  font-weight: bold;
-  color: #ff4d4d;
-}
-  .counter-box p {
+.counter-box p {
   font-size: 18px;
   font-weight: 600;
   color: black;
