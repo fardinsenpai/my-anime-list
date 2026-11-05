@@ -1581,24 +1581,30 @@ body.perf-no-blink .back-special-label::before { display: none !important; }
 /* Any screen up to 900px: keep the boxes from getting oversized (landscape phones) */
 @media (max-width: 900px) {
   .counter-container {
-    gap: 16px;
-    padding: 0 24px;
+    gap: 14px;
+    padding: 0 18px;
     margin: 16px 0;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: stretch;
   }
   .counter-box {
-    padding: 20px 14px;
-    max-width: 170px;
-    flex: 0 1 170px;
+    padding: 16px 10px;
+    flex: 0 0 calc(50% - 7px);   /* two per row, third centres underneath */
+    width: calc(50% - 7px);
+    max-width: 240px;
+    box-sizing: border-box;
   }
-  .counter-box::before { width: 140px; height: 140px; }
-  .counter { font-size: 26px; }
-  .counter-box p { font-size: 12.5px; }
+  .counter-box::before { width: 130px; height: 130px; }
+  .counter { font-size: 24px; }
+  .counter-box p { font-size: 12px; }
 }
 
-/* style */
-@media (max-width: 767px) {
+/* Portrait phones keep the single stacked column */
+@media (max-width: 767px) and (orientation: portrait) {
   .counter-container {
-    flex-direction: column;   /* keep the original stacked layout on phones */
+    flex-direction: column;
     align-items: center;
     gap: 22px;
     padding: 26px 20px;
