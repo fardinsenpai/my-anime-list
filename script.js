@@ -6291,14 +6291,28 @@ document.addEventListener('click', function(e) {
     });
   }
 
-  /* ── WATCH ANIME — open streaming sites (Hianime, Hindi options) ── */
+  /* ── WATCH ANIME — open streaming sites ──
+     hianime.dk resolves /<title-slug> straight to the anime page (with or
+     without the trailing number), so no search page and no extra clicks.
+     type:'slug' builds that path; type:'search' uses the site's search box. */
   var WATCH_SITES = [
-    { name: 'Hianime', url: 'https://hianime.to/search?keyword=' },
-    { name: 'AniDisk (Hindi)', url: 'https://anidisk.org/search?keyword=' },
-    { name: 'SubHi Anime', url: 'https://subhianime.com/search?keyword=' }
+    { name: 'Hianime', type: 'slug', url: 'https://hianime.dk/' },
+    { name: 'AniDisk (Hindi)', type: 'search', url: 'https://anidisk.org/search?keyword=' },
+    { name: 'AnimeVilla (Hindi)', type: 'search', url: 'https://animevilla.in/?s=' }
   ];
 
+  /* "Naruto Shippuden" -> "naruto-shippuden"; drops punctuation/accents. */
+  function watchSlug(title) {
+    return String(title || '')
+      .toLowerCase()
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      .replace(/&/g, ' and ')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+  }
+
   function buildWatchUrl(site, title) {
+    if (site.type === 'slug') return site.url + watchSlug(title);
     return site.url + encodeURIComponent(title.trim());
   }
 
@@ -6329,13 +6343,25 @@ document.addEventListener('click', function(e) {
       popup.appendChild(b);
     });
     document.body.appendChild(popup);
+
+    /* Measure the real box, then place it centred over the card. Read
+       offsetWidth/Height AFTER it is in the DOM so the values are final.
+       Clamp to the viewport, and only then write left/top — writing them
+       before measuring is what pushed the old popup off the card. */
     var rect = card.getBoundingClientRect();
-    var h = popup.offsetHeight;
-    var left = Math.min(Math.max(rect.left, 8), window.innerWidth - popup.offsetWidth - 8);
-    var top = Math.max(8, rect.top - h - 8);
-    popup.style.left = left + 'px';
-    popup.style.top = top + 'px';
+    var pw = popup.offsetWidth;
+    var ph = popup.offsetHeight;
+    var margin = 8;
+    var left = rect.left + (rect.width - pw) / 2;          // centre on the card
+    left = Math.max(margin, Math.min(left, window.innerWidth - pw - margin));
+    var top = rect.top - ph - margin;                       // above the card
+    if (top < margin) top = rect.bottom + margin;           // no room -> below
+    top = Math.min(top, window.innerHeight - ph - margin);
+
+    popup.style.left = Math.round(left) + 'px';
+    popup.style.top = Math.round(top) + 'px';
     _watchPopup = popup;
+
     setTimeout(function () {
       document.addEventListener('click', function dismissWatch(e) {
         if (!popup.contains(e.target)) { closeWatchPopup(); document.removeEventListener('click', dismissWatch); }
@@ -6359,8 +6385,10 @@ document.addEventListener('click', function(e) {
       '  position: fixed; z-index: 2000; background: #0a0a0a; border: 1px solid #ffd700;',
       '  border-radius: 10px; padding: 8px 10px; box-shadow: 0 4px 24px rgba(0,0,0,0.7);',
       '  font-family: Exo 2, sans-serif; display: flex; flex-direction: column; gap: 6px;',
-      '  width: 190px;',
+      '  width: min(190px, calc(100vw - 20px)); box-sizing: border-box;',
+      '  animation: watchPop 0.14s ease-out;',
       '}',
+      '@keyframes watchPop { from { opacity: 0; transform: translateY(4px) scale(0.96); } to { opacity: 1; transform: none; } }',
       '.watch-close {',
       '  align-self: flex-end; background: transparent; border: none; color: #666;',
       '  cursor: pointer; font-size: 18px; padding: 2px 6px; line-height: 1;',
