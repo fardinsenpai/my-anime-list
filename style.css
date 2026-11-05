@@ -1559,27 +1559,23 @@ body.perf-no-blink .back-special-label::before { display: none !important; }
 /* style */
 @media (max-width: 767px) {
   .counter-container {
-    flex-direction: row;      /* three counters side by side, not a tall stack */
-    align-items: stretch;
-    justify-content: center;
-    flex-wrap: nowrap;
-    gap: 8px;
-    padding: 0 10px;
+    flex-direction: column;   /* keep the original stacked layout on phones */
+    align-items: center;
+    gap: 12px;
+    padding: 0 12px;
   }
   .counter-box {
-    width: auto;              /* let flex size them evenly */
-    flex: 1 1 0;
-    min-width: 0;
-    max-width: 130px;
-    margin-bottom: 8px;
-    padding: 12px 6px;
+    width: 78%;
+    max-width: 260px;
+    margin-bottom: 0;
+    padding: 14px 10px;
   }
   .counter {
     font-size: 26px !important;
     line-height: 1.1;
   }
   .counter-box p {
-    font-size: 11px !important;
+    font-size: 12px !important;
     margin-top: 6px;
   }
 }
