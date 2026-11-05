@@ -6296,9 +6296,9 @@ document.addEventListener('click', function(e) {
      without the trailing number), so no search page and no extra clicks.
      type:'slug' builds that path; type:'search' uses the site's search box. */
   var WATCH_SITES = [
-    { name: 'Hianime', type: 'slug', url: 'https://hianime.dk/' },
-    { name: 'AniDisk (Hindi)', type: 'search', url: 'https://anidisk.org/search?keyword=' },
-    { name: 'AnimeVilla (Hindi)', type: 'search', url: 'https://animevilla.in/?s=' }
+    { name: 'Hianime', tag: 'SUB', type: 'slug', url: 'https://hianime.dk/' },
+    { name: 'AniDisk', tag: 'HINDI', type: 'search', url: 'https://anidisk.org/search?keyword=' },
+    { name: 'AnimeVilla', tag: 'HINDI', type: 'search', url: 'https://animevilla.org/?s=' }
   ];
 
   /* "Naruto Shippuden" -> "naruto-shippuden"; drops punctuation/accents. */
@@ -6326,28 +6326,49 @@ document.addEventListener('click', function(e) {
     closeWatchPopup();
     var popup = document.createElement('div');
     popup.className = 'watch-popup';
+
+    /* header: "SELECT A SERVER" + close */
+    var head = document.createElement('div');
+    head.className = 'watch-head';
+    var headText = document.createElement('span');
+    headText.className = 'watch-head-title';
+    headText.textContent = '🎬 SELECT A SERVER';
     var close = document.createElement('button');
     close.className = 'watch-close';
     close.textContent = '✕';
     close.onclick = function (e) { e.stopPropagation(); closeWatchPopup(); };
-    popup.appendChild(close);
+    head.appendChild(headText);
+    head.appendChild(close);
+    popup.appendChild(head);
+
+    /* the anime name being searched */
+    var sub = document.createElement('div');
+    sub.className = 'watch-sub';
+    sub.textContent = title;
+    popup.appendChild(sub);
+
+    /* one row per streaming site */
+    var list = document.createElement('div');
+    list.className = 'watch-list';
     WATCH_SITES.forEach(function (site) {
       var b = document.createElement('button');
       b.className = 'watch-site';
-      b.textContent = site.name;
+      b.innerHTML =
+        '<span class="watch-site-name">' + site.name + '</span>' +
+        '<span class="watch-site-tag ' + (site.tag === 'SUB' ? 'tag-sub' : 'tag-hindi') + '">' + site.tag + '</span>' +
+        '<span class="watch-site-go">↗</span>';
       b.onclick = function (e) {
         e.stopPropagation();
         window.open(buildWatchUrl(site, title), '_blank');
         closeWatchPopup();
       };
-      popup.appendChild(b);
+      list.appendChild(b);
     });
+    popup.appendChild(list);
     document.body.appendChild(popup);
 
     /* Measure the real box, then place it centred over the card. Read
-       offsetWidth/Height AFTER it is in the DOM so the values are final.
-       Clamp to the viewport, and only then write left/top — writing them
-       before measuring is what pushed the old popup off the card. */
+       offsetWidth/Height AFTER it is in the DOM so the values are final. */
     var rect = card.getBoundingClientRect();
     var pw = popup.offsetWidth;
     var ph = popup.offsetHeight;
@@ -6382,23 +6403,55 @@ document.addEventListener('click', function(e) {
       '}',
       '.watch-btn:hover { background: #ffeb3b; }',
       '.watch-popup {',
-      '  position: fixed; z-index: 2000; background: #0a0a0a; border: 1px solid #ffd700;',
-      '  border-radius: 10px; padding: 8px 10px; box-shadow: 0 4px 24px rgba(0,0,0,0.7);',
-      '  font-family: Exo 2, sans-serif; display: flex; flex-direction: column; gap: 6px;',
-      '  width: min(190px, calc(100vw - 20px)); box-sizing: border-box;',
-      '  animation: watchPop 0.14s ease-out;',
+      '  position: fixed; z-index: 2000;',
+      '  background: linear-gradient(160deg, #101014 0%, #0a0a0d 100%);',
+      '  border: 1px solid rgba(255,215,0,0.55); border-radius: 14px;',
+      '  padding: 0; overflow: hidden;',
+      '  box-shadow: 0 10px 40px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,215,0,0.08), 0 0 24px rgba(255,215,0,0.12);',
+      '  font-family: Exo 2, sans-serif;',
+      '  width: min(228px, calc(100vw - 20px)); box-sizing: border-box;',
+      '  animation: watchPop 0.16s ease-out;',
       '}',
-      '@keyframes watchPop { from { opacity: 0; transform: translateY(4px) scale(0.96); } to { opacity: 1; transform: none; } }',
+      '@keyframes watchPop { from { opacity: 0; transform: translateY(6px) scale(0.94); } to { opacity: 1; transform: none; } }',
+      '.watch-head {',
+      '  display: flex; align-items: center; justify-content: space-between;',
+      '  padding: 9px 10px 9px 12px;',
+      '  background: linear-gradient(90deg, rgba(255,215,0,0.14), rgba(255,215,0,0.02));',
+      '  border-bottom: 1px solid rgba(255,215,0,0.22);',
+      '}',
+      '.watch-head-title {',
+      '  font-size: 11px; font-weight: 800; letter-spacing: 1.1px;',
+      '  color: #ffd700; text-transform: uppercase;',
+      '}',
       '.watch-close {',
-      '  align-self: flex-end; background: transparent; border: none; color: #666;',
-      '  cursor: pointer; font-size: 18px; padding: 2px 6px; line-height: 1;',
+      '  background: transparent; border: none; color: #777;',
+      '  cursor: pointer; font-size: 15px; padding: 0 2px; line-height: 1;',
       '}',
+      '.watch-close:hover { color: #ffd700; }',
+      '.watch-sub {',
+      '  font-size: 10.5px; color: #8b93a7; padding: 7px 12px 3px;',
+      '  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;',
+      '}',
+      '.watch-list { display: flex; flex-direction: column; gap: 6px; padding: 7px 10px 11px; }',
       '.watch-site {',
-      '  background: #141414; border: 1px solid #ffd700; color: #ffd700;',
-      '  padding: 8px 12px; border-radius: 6px; cursor: pointer;',
-      '  text-align: left; font-size: 14px; font-weight: 700;',
+      '  display: flex; align-items: center; gap: 8px;',
+      '  background: rgba(255,255,255,0.03); border: 1px solid rgba(255,215,0,0.3);',
+      '  color: #eee; padding: 9px 11px; border-radius: 9px; cursor: pointer;',
+      '  text-align: left; font-size: 13.5px; font-weight: 700; font-family: inherit;',
+      '  transition: background 0.14s, border-color 0.14s, color 0.14s;',
       '}',
-      '.watch-site:hover { background: #ffd700; color: #000; }'
+      '.watch-site:hover { background: #ffd700; border-color: #ffd700; color: #000; }',
+      '.watch-site-name { flex: 1; }',
+      '.watch-site-tag {',
+      '  font-size: 8.5px; font-weight: 800; letter-spacing: 0.6px;',
+      '  padding: 2px 5px; border-radius: 4px;',
+      '}',
+      '.tag-sub { background: rgba(0,180,255,0.18); color: #3fc4ff; }',
+      '.tag-hindi { background: rgba(255,120,0,0.18); color: #ff9a3c; }',
+      '.watch-site:hover .tag-sub { background: rgba(0,0,0,0.18); color: #00506b; }',
+      '.watch-site:hover .tag-hindi { background: rgba(0,0,0,0.18); color: #7a3d00; }',
+      '.watch-site-go { font-size: 13px; opacity: 0.5; }',
+      '.watch-site:hover .watch-site-go { opacity: 1; }'
     ].join('');
     document.head.appendChild(style);
 
