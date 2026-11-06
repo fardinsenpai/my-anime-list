@@ -1176,10 +1176,25 @@ body.duel-mode-active .now-strip { display: none !important; }
   transform: rotateY(180deg);
 }
 
-/* Side 3 — server picker. Sits on the same 3D stack, rotated the other way,
-   and is revealed when the card gets the .show-servers class (Watch click). */
-.card.show-servers .card-inner {
-  transform: rotateY(-180deg);
+/* Side 3 — server picker. A 3-way 3D stack is fragile (the browser can freeze
+   at the 90-degree edge), so the servers face gets a short, separate turn on
+   its own and the other two are faded out. */
+.card.show-servers .card-front,
+.card.show-servers .card-back {
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.25s ease;
+}
+.card-servers {
+  opacity: 0;
+  visibility: hidden;
+  transform: rotateY(-90deg);
+  transition: opacity 0.3s ease, transform 0.45s ease;
+}
+.card.show-servers .card-servers {
+  opacity: 1;
+  visibility: visible;
+  transform: rotateY(0deg);
 }
 
 /* Only the face that is actually facing the viewer may receive clicks. The
@@ -1204,10 +1219,14 @@ body.duel-mode-active .now-strip { display: none !important; }
   position: absolute;
   width: 100%;
   height: 100%;
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
   border-radius: 16px;
   overflow: hidden;
+}
+/* the flipping faces keep their 3D back-face hiding */
+.card-front,
+.card-back {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
 .card-front {
@@ -1227,13 +1246,13 @@ body.duel-mode-active .now-strip { display: none !important; }
   text-align: center;
 }
 
-/* Servers face — mirrored the other way so it shows on a -180 turn */
+/* Servers face — its own short turn, no 3D back-face tricks */
 .card-servers {
-  transform: rotateY(-180deg);
   background: linear-gradient(160deg, #101014, #0a0a0d);
   display: flex;
   flex-direction: column;
   padding: 0;
+  z-index: 3;
 }
 .csrv-head {
   padding: 10px 12px;
