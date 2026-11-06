@@ -1620,32 +1620,107 @@ window.addEventListener("scroll", function() {
 window.addEventListener("load", showCardsOnScroll);
 
     function filterCards(){
-      const q=document.getElementById('searchBox').value.toLowerCase().trim();
-      let visible = 0;
-      document.querySelectorAll('.card').forEach(c=>{
-        const title = c.querySelector('.title');
-        const badge = c.querySelector('.badge');
-        const number = c.querySelector('.number');
-        const titleMatch = title && title.textContent.toLowerCase().includes(q);
-        const numMatch = (badge && badge.textContent.toLowerCase().includes(q)) || (number && number.textContent.toLowerCase().includes(q));
-        const match = titleMatch || numMatch;
+      var q = document.getElementById('searchBox').value.toLowerCase().trim();
+      var cards = Array.prototype.slice.call(document.querySelectorAll('.card'));
+      var msg = document.getElementById('noResultMsg');
+      if (!q) {
+        cards.forEach(function(c){ c.style.display = ''; c.classList.remove('hidden'); });
+        updateBadgeNumbers();
+        if (msg) msg.remove();
+        return;
+      }
+
+      function titleOf(c){
+        var t = c.querySelector('.title');
+        return t ? t.textContent.toLowerCase() : '';
+      }
+      function numOf(c){
+        var b = c.querySelector('.badge'), n = c.querySelector('.number');
+        return ((b ? b.textContent : '') + ' ' + (n ? n.textContent : '')).toLowerCase();
+      }
+
+      // 1. exact substring pass
+      var visible = 0;
+      cards.forEach(function(c){
+        var match = titleOf(c).indexOf(q) !== -1 || numOf(c).indexOf(q) !== -1
+          // "#12" typed for card 12
+          || numOf(c).replace(/\D/g, '') === q.replace(/\D/g, '');
         c.style.display = '';
         c.classList.toggle('hidden', !match);
         if (match) visible++;
       });
-      updateBadgeNumbers();
-      let msg = document.getElementById('noResultMsg');
-      if (!q) { if (msg) msg.remove(); return; }
-      if (!msg) {
-        msg = document.createElement('div');
-        msg.id = 'noResultMsg';
-        msg.style.cssText = 'grid-column:1/-1;text-align:center;padding:60px 20px;color:rgba(255,255,255,0.3);font-family:Poppins,sans-serif;font-size:15px;';
-        msg.innerHTML = '😕 No anime found matching "<strong>' + q + '</strong>"';
-        document.getElementById('grid').appendChild(msg);
-      } else {
-        msg.innerHTML = '😕 No anime found matching "<strong>' + q + '</strong>"';
+
+      // 2. if nothing matched, fuzzy pass — show the closest titles
+      var fuzzy = false;
+      if (visible === 0) {
+        var scored = cards.map(function(c){
+          return { card: c, score: fuzzyScore(q, titleOf(c)) };
+        }).filter(function(x){ return x.score > 0; })
+          .sort(function(a, b){ return b.score - a.score; });
+        // only keep results that are actually similar (not the whole list)
+        var cutoff = Math.max(scored.length ? scored[0].score * 0.55 : 0, 0.3);
+        var top = scored.filter(function(x){ return x.score >= cutoff; }).slice(0, 12);
+        if (top.length) {
+          fuzzy = true;
+          visible = top.length;
+          var keep = [];
+          top.forEach(function(x){ keep.push(x.card); });
+          cards.forEach(function(c){
+            var on = keep.indexOf(c) !== -1;
+            c.style.display = '';
+            c.classList.toggle('hidden', !on);
+          });
+        } else {
+          cards.forEach(function(c){ c.classList.add('hidden'); c.style.display = 'none'; });
+        }
       }
-      msg.style.display = visible === 0 && q ? '' : 'none';
+
+      updateBadgeNumbers();
+
+      // 3. message: no result, or a "did you mean" hint for fuzzy hits
+      if (visible === 0) {
+        if (!msg) {
+          msg = document.createElement('div');
+          msg.id = 'noResultMsg';
+          msg.style.cssText = 'grid-column:1/-1;text-align:center;padding:60px 20px;color:rgba(255,255,255,0.3);font-family:Poppins,sans-serif;font-size:15px;';
+          document.getElementById('grid').appendChild(msg);
+        }
+        msg.innerHTML = '😕 No anime found matching "<strong>' + q + '</strong>"';
+        msg.style.display = '';
+      } else if (fuzzy) {
+        if (!msg) {
+          msg = document.createElement('div');
+          msg.id = 'noResultMsg';
+          msg.style.cssText = 'grid-column:1/-1;text-align:center;padding:18px 20px 6px;color:rgba(255,215,0,0.75);font-family:Poppins,sans-serif;font-size:14px;';
+        }
+        msg.innerHTML = '🤔 No exact match for "<strong>' + q + '</strong>" — did you mean one of these?';
+        msg.style.display = '';
+        var grid = document.getElementById('grid');
+        if (grid && msg.parentElement !== grid) grid.insertBefore(msg, grid.firstChild);
+        else if (grid) grid.insertBefore(msg, grid.firstChild);
+      } else {
+        if (msg) msg.remove();
+      }
+    }
+
+    /* Similarity 0..1 between two strings (Dice bigram coefficient), used to
+       surface near-matches when a search is misspelled. */
+    function fuzzyScore(a, b) {
+      if (!a || !b) return 0;
+      if (a === b) return 1;
+      function bigrams(s) {
+        s = s.replace(/[^a-z0-9]+/g, ' ').replace(/\s+/g, ' ').trim();
+        if (s.length < 2) return [s];
+        var out = [];
+        for (var i = 0; i < s.length - 1; i++) out.push(s.substr(i, 2));
+        return out;
+      }
+      var A = bigrams(a), B = bigrams(b);
+      if (!A.length || !B.length) return 0;
+      var counts = {}, hit = 0;
+      A.forEach(function(g){ counts[g] = (counts[g] || 0) + 1; });
+      B.forEach(function(g){ if (counts[g] > 0) { counts[g]--; hit++; } });
+      return (2 * hit) / (A.length + B.length);
     }
 
 window.onscroll = function() {
