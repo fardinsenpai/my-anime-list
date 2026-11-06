@@ -1801,6 +1801,11 @@ function autoFilter(category) {
 // script.js
 
 function createSakura() {
+    // Never build petals while the tab is hidden, and keep a hard cap on how
+    // many exist at once — the old version added one every 550ms forever.
+    if (document.hidden) return;
+    var MAX_PETALS = (typeof window.__lightDevice !== 'undefined' && window.__lightDevice) ? 6 : 18;
+    if (document.querySelectorAll('.sakura').length >= MAX_PETALS) return;
     const sakura = document.createElement("div");
     sakura.classList.add("sakura");
 
@@ -6506,19 +6511,30 @@ document.addEventListener('click', function(e) {
   }
 
   // 4. Card hover glow trail
+  //    rAF-throttled: a raw mousemove fires dozens of times a second and each
+  //    pass writes a fresh radial-gradient — the single biggest source of
+  //    jank on weak devices. We now read the last position once per frame.
+  var _glowX = -1, _glowY = -1, _glowQueued = false;
   document.addEventListener('mousemove', function(e) {
     if (document.body.classList.contains('perf-no-glow')) return;
-    var cards = document.querySelectorAll('#grid .card:hover .card-glow');
-    cards.forEach(function(glow) {
-      var rect = glow.parentElement.getBoundingClientRect();
-      var x = ((e.clientX - rect.left) / rect.width) * 100;
-      var y = ((e.clientY - rect.top) / rect.height) * 100;
-      glow.style.background = 'radial-gradient(circle at ' + x + '% ' + y + '%, rgba(0,229,255,0.15), transparent 70%)';
+    _glowX = e.clientX; _glowY = e.clientY;
+    if (_glowQueued) return;
+    _glowQueued = true;
+    requestAnimationFrame(function() {
+      _glowQueued = false;
+      var cards = document.querySelectorAll('#grid .card:hover .card-glow');
+      cards.forEach(function(glow) {
+        var rect = glow.parentElement.getBoundingClientRect();
+        var x = ((_glowX - rect.left) / rect.width) * 100;
+        var y = ((_glowY - rect.top) / rect.height) * 100;
+        glow.style.background = 'radial-gradient(circle at ' + x.toFixed(1) + '% ' + y.toFixed(1) + '%, rgba(0,229,255,0.15), transparent 70%)';
+      });
     });
-  });
+  }, { passive: true });
 
   // 5. Random card tilt
   function randomizeCardTilt() {
+    if (document.body.classList.contains('perf-no-card-float')) return;
     var cards = document.querySelectorAll('#grid .card');
     cards.forEach(function(card) {
       var tilt = ((Math.random() - 0.5) * 1.2).toFixed(2);
@@ -6528,7 +6544,13 @@ document.addEventListener('click', function(e) {
 
   // 7. Ambient floating particles
   function createAmbientParticles() {
-    for (var i = 0; i < 12; i++) {
+    // Skip decorative particles entirely on light modes / small screens — they
+    // are pure eye-candy and each one costs a compositor layer.
+    var body = document.body;
+    if (body.classList.contains('perf-no-glow') || body.classList.contains('perf-no-card-float')) return;
+    if (window.matchMedia && window.matchMedia('(max-width: 768px)').matches) return;
+    var count = (typeof window.__lightDevice !== 'undefined' && window.__lightDevice) ? 4 : 12;
+    for (var i = 0; i < count; i++) {
       (function() {
         var p = document.createElement('div');
         p.className = 'ambient-particle';
@@ -6636,7 +6658,7 @@ document.addEventListener('click', function(e) {
   function prevQuote() { displayQuote(quoteIndex - 1); resetAutoTimer(); }
   function resetAutoTimer() {
     if (quoteTimer) clearInterval(quoteTimer);
-    quoteTimer = setInterval(function() {
+    window.__quoteTimer = quoteTimer = setInterval(function() {
       displayQuote(Math.floor(Math.random() * ANIME_QUOTES.length));
     }, 9000);
   }
@@ -6664,6 +6686,8 @@ document.addEventListener('click', function(e) {
     try { localStorage.setItem('perfMode', mode); } catch (e) {}
     document.body.classList.remove('perf-no-thunder', 'perf-no-counter-anim',
       'perf-no-blink', 'perf-no-card-float', 'perf-no-heading-anim', 'perf-no-glow', 'perf-no-blur');
+    // heavy modes can afford the full particle budget again
+    window.__lightDevice = (mode === 'poor' || mode === 'low');
 
     if (mode === 'ultra') {
       if (window.__perfLightning) window.__perfLightning.start();
@@ -6690,7 +6714,10 @@ document.addEventListener('click', function(e) {
         'perf-no-blink', 'perf-no-card-float', 'perf-no-heading-anim', 'perf-no-glow', 'perf-no-blur');
       if (window.__perfLightning) window.__perfLightning.stop();
       if (window.__perfSakuraInterval) { clearInterval(window.__perfSakuraInterval); window.__perfSakuraInterval = null; }
-      window.__perfSakuraInterval = setInterval(createSakura, 1400);
+      // stop the petals and the quote rotator entirely, and clear what is on screen
+      window.__lightDevice = true;
+      document.querySelectorAll('.sakura').forEach(function (s) { s.remove(); });
+      if (window.__quoteTimer) { clearInterval(window.__quoteTimer); window.__quoteTimer = null; }
       return;
     }
     if (mode === 'low') {
@@ -6698,6 +6725,9 @@ document.addEventListener('click', function(e) {
         'perf-no-blink', 'perf-no-card-float', 'perf-no-heading-anim', 'perf-no-glow', 'perf-no-blur');
       if (window.__perfLightning) window.__perfLightning.stop();
       if (window.__perfSakuraInterval) { clearInterval(window.__perfSakuraInterval); window.__perfSakuraInterval = null; }
+      window.__lightDevice = true;
+      document.querySelectorAll('.sakura').forEach(function (s) { s.remove(); });
+      if (window.__quoteTimer) { clearInterval(window.__quoteTimer); window.__quoteTimer = null; }
       return;
     }
   }
@@ -6759,10 +6789,41 @@ document.addEventListener('click', function(e) {
     });
   }
 
+  /* ── auto-detect a light device so the first paint is already smooth ──
+     Weak phones used to start on "advanced" (heavy) and only stop lagging if
+     the visitor found the Graphics Mode menu. Now we look at memory, CPU
+     cores, screen size and DPR and pick a sensible default the first time. */
+  function detectLightDevice() {
+    try {
+      if (navigator.deviceMemory && navigator.deviceMemory <= 4) return true;
+      if (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4) return true;
+      if (window.matchMedia && window.matchMedia('(max-width: 768px)').matches) return true;
+      var conn = navigator.connection;
+      if (conn && (conn.saveData || /(^|-)2g$/.test(conn.effectiveType || ''))) return true;
+    } catch (e) {}
+    return false;
+  }
+
+  var _savedMode = null;
+  try { _savedMode = localStorage.getItem('perfMode'); } catch (e) {}
+  window.__lightDevice = detectLightDevice();
+
   if (document.readyState === 'complete' || document.readyState === 'interactive') {
     wirePerfUI();
   } else {
     document.addEventListener('DOMContentLoaded', wirePerfUI);
+  }
+
+  // If the visitor never chose a mode, give a weak device a light default.
+  if (!_savedMode && window.__lightDevice) {
+    setPerfMode('poor');
+    try { localStorage.setItem('perfMode', 'poor'); } catch (e) {}
+    setTimeout(function () {
+      var popup = document.getElementById('perfPopup');
+      if (popup) popup.querySelectorAll('.perf-mode-btn').forEach(function (b) {
+        b.classList.toggle('perf-mode-btn--active', b.getAttribute('data-mode') === 'poor');
+      });
+    }, 400);
   }
 
   if (document.readyState === 'complete' || document.readyState === 'interactive') {

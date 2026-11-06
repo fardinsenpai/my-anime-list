@@ -4292,6 +4292,14 @@ body.perf-no-blink .header h1::before,
 body.perf-no-blink .header h1::after { animation: none !important; }
 body.perf-no-blink .pill { opacity: 1 !important; transform: scale(1) translateY(0) !important; }
 
+/* Poor / Low also stop the petals and the perpetual card/glow compositing
+   that makes weak phones stutter while scrolling. */
+body.perf-no-glow .sakura { display: none !important; }
+body.perf-no-glow .card::before,
+body.perf-no-glow .card::after { animation: none !important; }
+body.perf-no-glow .card { box-shadow: 0 4px 14px rgba(0,0,0,0.35) !important; }
+body.perf-no-glow .poster-wrap img { transition: none !important; }
+
 /* === OWNER INFO PANEL === */
 .owner-panel {
   position: fixed; inset: 0; z-index: 100002;
