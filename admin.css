@@ -901,6 +901,28 @@ select.admin-g-input option { background: var(--panel); color: var(--ink); }
   color: var(--accent-ink); font-weight: 600;
 }
 .ad-notes-split { display: flex; gap: 14px; align-items: flex-start; }
+
+/* ── commit history list ── */
+.ad-history { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
+.ad-history-empty { font-size: 10.5px; color: var(--ink-3); padding: 18px 12px; line-height: 1.7; text-align: center;
+  border: 1px dashed var(--line); border-radius: var(--r-md); }
+.ad-hist-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 11px 13px; border: 1px solid var(--line); border-radius: var(--r-md);
+  background: var(--panel-2);
+}
+.ad-hist-row.ok { border-left: 3px solid #00c853; }
+.ad-hist-row.fail { border-left: 3px solid #ff3355; }
+.ad-hist-badge {
+  flex: 0 0 auto; font-size: 9px; font-weight: 800; letter-spacing: .06em;
+  padding: 3px 8px; border-radius: 5px; text-transform: uppercase; min-width: 62px; text-align: center;
+}
+.ad-hist-badge.ok { background: rgba(0,200,83,.15); color: #4ce08a; }
+.ad-hist-badge.fail { background: rgba(255,51,85,.15); color: #ff7a90; }
+.ad-hist-main { flex: 1; min-width: 0; }
+.ad-hist-kind { font-size: 11.5px; font-weight: 700; color: var(--ink); text-transform: uppercase; letter-spacing: .03em; }
+.ad-hist-detail { font-size: 10px; color: var(--ink-3); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ad-hist-when { flex: 0 0 auto; font-size: 9.5px; color: var(--ink-3); text-align: right; white-space: nowrap; }
 .ad-notes-list {
   flex: 0 0 250px; max-height: 440px; overflow-y: auto; padding: 6px;
   border: 1px solid var(--line); border-radius: var(--r-md);

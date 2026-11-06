@@ -681,6 +681,57 @@ function saveCommitResult(kind, ok, detail) {
   } catch (e) { /* localStorage full — never block the UI */ }
 }
 
+/* ── HISTORY tab: the last 10 commit results, newest first ── */
+var HISTORY_SHOW = 10;
+
+function readCommitLog() {
+  try {
+    var raw = localStorage.getItem(COMMIT_LOG_KEY);
+    var log = raw ? JSON.parse(raw) : [];
+    return Array.isArray(log) ? log : [];
+  } catch (e) { return []; }
+}
+
+function fmtWhen(iso) {
+  var d = new Date(iso);
+  if (isNaN(d.getTime())) return '';
+  return d.toLocaleDateString('en-GB') + ' ' + d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+}
+
+var HISTORY_LABELS = {
+  watching: 'WATCHING', reading: 'READING', top5: 'TOP 5', awards: 'AWARDS',
+  'edit-anime': 'EDIT', add: 'ADD', date: 'DATE', stats: 'STATS', ai: 'AI',
+  avatars: 'AVATARS', notes: 'NOTES', logo: 'LOGO', reply: 'REPLY'
+};
+
+function renderHistoryTab() {
+  var host = document.getElementById('adHistoryList');
+  if (!host) return;
+  var log = readCommitLog().slice(0, HISTORY_SHOW);
+  if (!log.length) {
+    host.innerHTML = '<div class="ad-history-empty">No commits recorded in this browser yet.<br>The next admin commit will appear here.</div>';
+    return;
+  }
+  host.innerHTML = log.map(function (row) {
+    var ok = !!row.ok;
+    var label = HISTORY_LABELS[row.k] || String(row.k || 'COMMIT').toUpperCase();
+    return '<div class="ad-hist-row ' + (ok ? 'ok' : 'fail') + '">' +
+      '<span class="ad-hist-badge ' + (ok ? 'ok' : 'fail') + '">' + (ok ? 'SUCCESS' : 'FAILED') + '</span>' +
+      '<div class="ad-hist-main">' +
+        '<div class="ad-hist-kind">' + label + '</div>' +
+        (row.d ? '<div class="ad-hist-detail">' + String(row.d).replace(/</g, '&lt;') + '</div>' : '') +
+      '</div>' +
+      '<div class="ad-hist-when">' + fmtWhen(row.t) + '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function clearHistory() {
+  try { localStorage.removeItem(COMMIT_LOG_KEY); } catch (e) {}
+  renderHistoryTab();
+  msgOk('Commit history cleared');
+}
+
 function getPat() { return localStorage.getItem('gh_pat'); }
 
 function savePat() {

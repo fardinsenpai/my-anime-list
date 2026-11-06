@@ -98,6 +98,7 @@
         <button class="admin-g-tab" data-tab="notes"   onclick="switchAdminTab('notes'); renderNotesTab()"><b>📝</b> NOTES<span>private pad</span></button>
         <button class="admin-g-tab" data-tab="logo"    onclick="switchAdminTab('logo'); renderLogoTab()"><b>🎨</b> LOGO<span>panel identity</span></button>
         <button class="admin-g-tab" data-tab="reply"   onclick="switchAdminTab('reply'); renderReplyTab()"><b>💬</b> REPLY<span>avatar &amp; badge</span></button>
+        <button class="admin-g-tab" data-tab="history" onclick="switchAdminTab('history'); renderHistoryTab()"><b>🕓</b> HISTORY<span>last 10 commits</span></button>
       </nav>
       </div>
 
@@ -558,6 +559,20 @@
           <button class="admin-g-btn tight danger" onclick="adReplyReset()">↺ RESET TO DEFAULT</button>
         </div>
         <div class="ad-status dim" id="adReplyStatus"></div>
+      </section>
+
+      <!-- HISTORY -->
+      <section class="admin-g-content" id="tabHistory">
+        <h2 class="ad-h">// COMMIT HISTORY //</h2>
+        <div class="ad-note">
+          The last 10 admin commits, newest first — successes and failures alike. Kept in this
+          browser (localStorage); press <b>↻ REFRESH</b> to reload, or <b>🗑 CLEAR</b> to empty the list.
+        </div>
+        <div class="ad-row wrap" style="margin:14px 0 6px;">
+          <button class="admin-g-btn tight" onclick="renderHistoryTab()">↻ REFRESH</button>
+          <button class="admin-g-btn tight danger" onclick="clearHistory()">🗑 CLEAR</button>
+        </div>
+        <div id="adHistoryList" class="ad-history"></div>
       </section>
 
     </main>
