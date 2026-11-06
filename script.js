@@ -6298,7 +6298,9 @@ document.addEventListener('click', function(e) {
      type:'slug' builds that path; type:'search' uses the site's search box. */
   var WATCH_SITES = [
     { name: 'Hianime', tag: 'SUB', type: 'slug', url: 'https://hianime.dk/' },
+    { name: '9anime', tag: 'SUB', type: 'search', url: 'https://9anime.or.at/?s=' },
     { name: 'AniDisk', tag: 'HINDI', type: 'slug', url: 'https://anidisk.org/anime/' },
+    { name: 'AnimeWorld', tag: 'HINDI', type: 'slug', url: 'https://watchanimeworld.one/series/' },
     { name: 'AnimeVilla', tag: 'HINDI', type: 'slug', url: 'https://animevilla.org/anime/', suffix: '-hindi-dubbed/' }
   ];
 
