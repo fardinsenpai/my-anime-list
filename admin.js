@@ -670,15 +670,41 @@ function adStep(text) {
 var COMMIT_LOG_KEY = 'admin_commit_log';
 var COMMIT_LOG_MAX = 50;
 
+/* Supabase gives the history a shared home: the same list shows on every
+   device, not just the one that made the commit. Credentials mirror the
+   ones the reply/hot-takes sync already uses. */
+var CL_SUPA_URL = 'https://ldzlefdklcgvqcbqibtt.supabase.co';
+var CL_SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxkemxlZmRrbGNndnFjYnFpYnR0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwMzk1OTAsImV4cCI6MjA5NjYxNTU5MH0.X3TGuLIpjrnPXMgCv4ZKIIjB6pItPgkdebf4JPdhuYs';
+
+function clSupabase(path, options) {
+  options = options || {};
+  return fetch(CL_SUPA_URL + '/rest/v1/' + path, {
+    method: options.method || 'GET',
+    headers: Object.assign({
+      'apikey': CL_SUPA_KEY,
+      'Authorization': 'Bearer ' + CL_SUPA_KEY,
+      'Content-Type': 'application/json',
+      'Prefer': 'return=representation'
+    }, options.headers || {}),
+    body: options.body
+  });
+}
+
 function saveCommitResult(kind, ok, detail) {
+  var entry = { t: new Date().toISOString(), k: kind, ok: !!ok, d: detail || '' };
+  // 1. local first — instant, never blocked by the network
   try {
     var log = [];
     var raw = localStorage.getItem(COMMIT_LOG_KEY);
     if (raw) { try { log = JSON.parse(raw); if (!Array.isArray(log)) log = []; } catch (e) { log = []; } }
-    log.unshift({ t: new Date().toISOString(), k: kind, ok: !!ok, d: detail || '' });
+    log.unshift(entry);
     if (log.length > COMMIT_LOG_MAX) log.length = COMMIT_LOG_MAX;
     localStorage.setItem(COMMIT_LOG_KEY, JSON.stringify(log));
   } catch (e) { /* localStorage full — never block the UI */ }
+  // 2. mirror to Supabase (best effort; a failure only affects cross-device view)
+  try {
+    clSupabase('commit_log', { method: 'POST', body: JSON.stringify(entry) }).catch(function () {});
+  } catch (e) {}
 }
 
 /* ── HISTORY tab: the last 10 commit results, newest first ── */
@@ -690,6 +716,26 @@ function readCommitLog() {
     var log = raw ? JSON.parse(raw) : [];
     return Array.isArray(log) ? log : [];
   } catch (e) { return []; }
+}
+
+/* Pull the shared list from Supabase, merge it with the local one, and cache
+   it back to localStorage. Silently keeps whatever it already had on error. */
+function syncCommitLogFromSupabase() {
+  return clSupabase('commit_log?select=t,k,ok,d&order=t.desc&limit=' + COMMIT_LOG_MAX)
+    .then(function (r) { if (!r.ok) throw new Error('status ' + r.status); return r.json(); })
+    .then(function (rows) {
+      if (!Array.isArray(rows)) return;
+      var merged = rows.map(function (x) { return { t: x.t, k: x.k, ok: x.ok, d: x.d || '' }; });
+      // keep any local-only rows (offline commits) that Supabase does not know yet
+      var seen = {};
+      merged.forEach(function (m) { seen[m.t + '|' + m.k] = 1; });
+      readCommitLog().forEach(function (l) { if (!seen[l.t + '|' + l.k]) merged.push(l); });
+      merged.sort(function (a, b) { return new Date(b.t) - new Date(a.t); });
+      if (merged.length > COMMIT_LOG_MAX) merged.length = COMMIT_LOG_MAX;
+      try { localStorage.setItem(COMMIT_LOG_KEY, JSON.stringify(merged)); } catch (e) {}
+      renderHistoryTab();
+    })
+    .catch(function () { /* offline or table missing — the local list still shows */ });
 }
 
 function fmtWhen(iso) {
@@ -709,25 +755,32 @@ function renderHistoryTab() {
   if (!host) return;
   var log = readCommitLog().slice(0, HISTORY_SHOW);
   if (!log.length) {
-    host.innerHTML = '<div class="ad-history-empty">No commits recorded in this browser yet.<br>The next admin commit will appear here.</div>';
-    return;
+    host.innerHTML = '<div class="ad-history-empty">No commits recorded yet.<br>The next admin commit will appear here.</div>';
+  } else {
+    host.innerHTML = log.map(function (row) {
+      var ok = !!row.ok;
+      var label = HISTORY_LABELS[row.k] || String(row.k || 'COMMIT').toUpperCase();
+      return '<div class="ad-hist-row ' + (ok ? 'ok' : 'fail') + '">' +
+        '<span class="ad-hist-badge ' + (ok ? 'ok' : 'fail') + '">' + (ok ? 'SUCCESS' : 'FAILED') + '</span>' +
+        '<div class="ad-hist-main">' +
+          '<div class="ad-hist-kind">' + label + '</div>' +
+          (row.d ? '<div class="ad-hist-detail">' + String(row.d).replace(/</g, '&lt;') + '</div>' : '') +
+        '</div>' +
+        '<div class="ad-hist-when">' + fmtWhen(row.t) + '</div>' +
+      '</div>';
+    }).join('');
   }
-  host.innerHTML = log.map(function (row) {
-    var ok = !!row.ok;
-    var label = HISTORY_LABELS[row.k] || String(row.k || 'COMMIT').toUpperCase();
-    return '<div class="ad-hist-row ' + (ok ? 'ok' : 'fail') + '">' +
-      '<span class="ad-hist-badge ' + (ok ? 'ok' : 'fail') + '">' + (ok ? 'SUCCESS' : 'FAILED') + '</span>' +
-      '<div class="ad-hist-main">' +
-        '<div class="ad-hist-kind">' + label + '</div>' +
-        (row.d ? '<div class="ad-hist-detail">' + String(row.d).replace(/</g, '&lt;') + '</div>' : '') +
-      '</div>' +
-      '<div class="ad-hist-when">' + fmtWhen(row.t) + '</div>' +
-    '</div>';
-  }).join('');
+  // refresh from the shared store in the background
+  syncCommitLogFromSupabase();
 }
+
 
 function clearHistory() {
   try { localStorage.removeItem(COMMIT_LOG_KEY); } catch (e) {}
+  // wipe the shared list too so it does not reappear on the next sync
+  try {
+    clSupabase('commit_log?t=neq.1970-01-01', { method: 'DELETE' }).catch(function () {});
+  } catch (e) {}
   renderHistoryTab();
   msgOk('Commit history cleared');
 }

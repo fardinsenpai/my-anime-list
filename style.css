@@ -1182,6 +1182,22 @@ body.duel-mode-active .now-strip { display: none !important; }
   transform: rotateY(-180deg);
 }
 
+/* Only the face that is actually facing the viewer may receive clicks. The
+   hidden faces sit at the same spot in the 3D stack, so without this the
+   last-added face (servers) would swallow every tap on the card. */
+.card-front,
+.card-back,
+.card-servers {
+  pointer-events: none;
+}
+.card:not(.flipped):not(.show-servers) .card-front,
+.card.flipped .card-back,
+.card.show-servers .card-servers {
+  pointer-events: auto;
+}
+/* the Watch button must stay tappable even though .card-front is inert when flipped */
+.card .watch-btn { pointer-events: auto; }
+
 .card-front,
 .card-back,
 .card-servers {
