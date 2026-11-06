@@ -1720,6 +1720,31 @@ body.perf-no-blink .back-special-label::before { display: none !important; }
   margin-top: 10px;
 }
 
+/* ── Mobile: 2 + 1 counter grid (two per row, the third centred under) ──
+   Placed last so it wins over the older single-column rule above. */
+@media (max-width: 767px) {
+  .counter-container {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: stretch;
+    gap: 14px;
+    padding: 0 14px;
+    margin: 16px 0;
+  }
+  .counter-box {
+    flex: 0 0 calc(50% - 7px);
+    width: calc(50% - 7px);
+    max-width: 190px;
+    box-sizing: border-box;
+    margin-bottom: 0;
+    padding: 18px 10px;
+  }
+  .counter-box::before { width: 140px; height: 140px; }
+  .counter { font-size: 24px !important; line-height: 1.1; }
+  .counter-box p { font-size: 12px !important; margin-top: 6px; }
+}
+
 
 
 

@@ -2031,7 +2031,11 @@ cards.forEach((card, i) => {
   }, i * 80);
 });
 
-/* ⚡⚡⚡ LIGHTNING - BLUE & LONGER DURATION ⚡⚡⚡ */
+/* ⚡⚡⚡ LIGHTNING — plasma-core bolts with recursive branches, afterglow
+   and a soft thunder flash. The old version was a single blue polyline with
+   one level of branches; this one has a white-hot core, layered glow, branch
+   chains that fork again, per-bolt life so several can be live at once, and a
+   short screen flash that sells the "thunder" moment. ⚡⚡⚡ */
 
 class LightningBolt {
   constructor(canvas) {
@@ -2039,77 +2043,88 @@ class LightningBolt {
     this.ctx = canvas.getContext('2d');
     this.width = canvas.width;
     this.height = canvas.height;
-    this.reset();
-  }
 
-  reset() {
+    // start somewhere along the sky, bias the aim slightly toward the middle
     this.x = Math.random() * this.width;
-    this.y = 0;
-    this.segments = [];
-    this.createSegments();
+    this.y = -10;
+    this.hue = 200 + Math.random() * 40;          // blue → violet
+    this.life = 0;
+    this.maxLife = 22 + Math.floor(Math.random() * 16);
+    this.glow = 1;
+    this.segments = this.createPath(this.x, this.y, this.height * (0.55 + Math.random() * 0.45), 1);
+    this.branches = [];
+    this.segments.forEach((seg, i) => {
+      if (i > 3 && Math.random() < 0.22) this.branches.push(this.createPath(seg.x, seg.y, 80 + Math.random() * 180, 0.7));
+    });
   }
 
-  createSegments() {
-    this.segments = [];
-    let x = this.x;
-    let y = this.y;
-    
-    for (let i = 0; i < 20; i++) {
-      x += (Math.random() - 0.5) * 40;
-      y += Math.random() * (this.height / 20);
-      this.segments.push({ x, y });
+  /* Builds a jagged path with gently increasing / decreasing step sizes so the
+     bolt looks natural instead of uniformly random. */
+  createPath(startX, startY, length, scale) {
+    const pts = [{ x: startX, y: startY }];
+    let x = startX, y = startY;
+    const steps = Math.max(6, Math.round((length / this.height) * 22));
+    let step = length / steps;
+    for (let i = 0; i < steps; i++) {
+      step *= 0.92 + Math.random() * 0.18;        // vary the stride
+      x += (Math.random() - 0.5) * 46 * scale;
+      y += step;
+      pts.push({ x, y });
     }
+    return pts;
+  }
+
+  strokePath(pts, width, style) {
+    const c = this.ctx;
+    c.strokeStyle = style;
+    c.lineWidth = width;
+    c.lineCap = 'round';
+    c.lineJoin = 'round';
+    c.beginPath();
+    c.moveTo(pts[0].x, pts[0].y);
+    for (let i = 1; i < pts.length; i++) c.lineTo(pts[i].x, pts[i].y);
+    c.stroke();
   }
 
   draw() {
-    // Draw Lightning bolt effect
-    this.ctx.strokeStyle = `rgba(100, 150, 255, 0.95)`; // Lightning blue
-    this.ctx.lineWidth = 4 + Math.random() * 3;
-    this.ctx.lineCap = 'round';
-    this.ctx.lineJoin = 'round';
+    const c = this.ctx;
+    const flicker = 0.55 + Math.random() * 0.45;
+    const fade = Math.max(0, 1 - this.life / this.maxLife);
+    const alpha = flicker * fade;
 
-    this.ctx.beginPath();
-    this.ctx.moveTo(this.x, this.y);
+    c.save();
+    c.globalCompositeOperation = 'lighter';       // additive → real glow
 
-    for (let segment of this.segments) {
-      this.ctx.lineTo(segment.x, segment.y);
-    }
+    const paths = [{ pts: this.segments, w: 1 }];
+    this.branches.forEach(b => {
+      paths.push({ pts: b, w: 0.6 });
+      // one second-generation fork on a longer branch, occasionally
+      if (b.length > 4 && Math.random() < 0.35) paths.push({ pts: this.createPath(b[b.length - 1].x, b[b.length - 1].y, 60 + Math.random() * 90, 0.5), w: 0.35 });
+    });
 
-    this.ctx.stroke();
+    paths.forEach(({ pts, w }) => {
+      // wide violet halo
+      this.strokePath(pts, (11 + Math.random() * 4) * w, `hsla(${this.hue + 30}, 100%, 62%, ${0.045 * alpha})`);
+      // mid glow
+      this.strokePath(pts, (5.5 + Math.random() * 2) * w, `hsla(${this.hue}, 100%, 68%, ${0.15 * alpha})`);
+      // bright body
+      this.strokePath(pts, (2.2 + Math.random() * 1.2) * w, `hsla(${this.hue}, 100%, 80%, ${0.55 * alpha})`);
+      // white-hot core
+      this.strokePath(pts, (0.9 + Math.random() * 0.5) * w, `rgba(255,255,255,${0.9 * alpha})`);
+    });
 
-    // Draw branching sub-bolts
-    for (let segment of this.segments) {
-      if (Math.random() > 0.7) {
-        this.drawBranch(segment.x, segment.y);
-      }
-    }
+    c.restore();
+    this.life++;
   }
 
-  drawBranch(startX, startY) {
-    this.ctx.strokeStyle = `rgba(100, 150, 255, 0.7)`; // Lightning sub-color
-    this.ctx.lineWidth = 2;
-    
-    this.ctx.beginPath();
-    this.ctx.moveTo(startX, startY);
-
-    let x = startX;
-    let y = startY;
-
-    for (let i = 0; i < 5; i++) {
-      x += (Math.random() - 0.5) * 30;
-      y += Math.random() * 30;
-      this.ctx.lineTo(x, y);
-    }
-
-    this.ctx.stroke();
-  }
+  get finished() { return this.life > this.maxLife; }
 }
 
 // Canvas resize handler
 const canvas = document.getElementById('lightningCanvas');
 if (canvas) {
   const ctx = canvas.getContext('2d');
-  
+
   function resizeCanvas() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
@@ -2118,28 +2133,42 @@ if (canvas) {
   resizeCanvas();
   window.addEventListener('resize', resizeCanvas);
 
-  let lightningBolt = null;
+  let bolts = [];
   let lightningTimeout = null;
+  let flashLevel = 0;
+
+  /* A short full-screen brightness pulse that fades out — the "thunder" feel. */
+  function flashCanvas() {
+    flashLevel = 0.5 + Math.random() * 0.4;
+  }
 
   function createLightning() {
-    lightningBolt = new LightningBolt(canvas);
-    
-    // Check if enough time has passed for next lightning (min 3000ms)
-    setTimeout(() => {
-      lightningBolt = null;
-    }, 400);
-
-    // Generate random lightning (1-3 bolts with varying intensity)
-    lightningTimeout = setTimeout(createLightning, 2000 + Math.random() * 5000);
+    // Occasionally a double-strike (two bolts a hair apart)
+    const count = Math.random() < 0.3 ? 2 : 1;
+    for (let i = 0; i < count; i++) {
+      setTimeout(() => {
+        bolts.push(new LightningBolt(canvas));
+        if (i === 0) flashCanvas();
+      }, i * 90);
+    }
+    // next strike, with a sometimes-dramatic pause
+    const gap = Math.random() < 0.18 ? 600 + Math.random() * 900 : 2600 + Math.random() * 6000;
+    lightningTimeout = setTimeout(createLightning, gap);
   }
 
   function animate() {
     if (matchMedia('(pointer: coarse)').matches) return;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    if (lightningBolt) {
-      lightningBolt.draw();
+    // thunder flash (fills the whole canvas softly, then decays)
+    if (flashLevel > 0.001) {
+      ctx.fillStyle = 'rgba(150,190,255,' + (flashLevel * 0.16).toFixed(3) + ')';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      flashLevel *= 0.86;
     }
+
+    bolts.forEach(b => b.draw());
+    bolts = bolts.filter(b => !b.finished);
 
     requestAnimationFrame(animate);
   }
@@ -2150,7 +2179,8 @@ if (canvas) {
   window.__perfLightning = {
     stop: function() {
       if (lightningTimeout) { clearTimeout(lightningTimeout); lightningTimeout = null; }
-      lightningBolt = null;
+      bolts = [];
+      flashLevel = 0;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
     },
     start: function() {
