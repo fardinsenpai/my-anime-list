@@ -1176,8 +1176,15 @@ body.duel-mode-active .now-strip { display: none !important; }
   transform: rotateY(180deg);
 }
 
+/* Side 3 — server picker. Sits on the same 3D stack, rotated the other way,
+   and is revealed when the card gets the .show-servers class (Watch click). */
+.card.show-servers .card-inner {
+  transform: rotateY(-180deg);
+}
+
 .card-front,
-.card-back {
+.card-back,
+.card-servers {
   position: absolute;
   width: 100%;
   height: 100%;
@@ -1203,6 +1210,81 @@ body.duel-mode-active .now-strip { display: none !important; }
   padding: 20px;
   text-align: center;
 }
+
+/* Servers face — mirrored the other way so it shows on a -180 turn */
+.card-servers {
+  transform: rotateY(-180deg);
+  background: linear-gradient(160deg, #101014, #0a0a0d);
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+}
+.csrv-head {
+  padding: 10px 12px;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1.1px;
+  color: #ffd700;
+  text-transform: uppercase;
+  background: linear-gradient(90deg, rgba(255,215,0,0.16), rgba(255,215,0,0.02));
+  border-bottom: 1px solid rgba(255,215,0,0.22);
+  text-align: center;
+}
+.csrv-title {
+  font-size: 11px;
+  color: #8b93a7;
+  padding: 8px 12px 4px;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.csrv-list {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 7px;
+  padding: 6px 10px;
+  overflow-y: auto;
+}
+.csite {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,215,0,0.3);
+  color: #eee;
+  padding: 8px 10px;
+  border-radius: 9px;
+  cursor: pointer;
+  font-size: 12.5px;
+  font-weight: 700;
+  font-family: inherit;
+  transition: background 0.14s, color 0.14s, border-color 0.14s;
+}
+.csite:hover { background: #ffd700; border-color: #ffd700; color: #000; }
+.csite-name { flex: 1; text-align: left; }
+.csite-tag { font-size: 8px; font-weight: 800; letter-spacing: 0.5px; padding: 2px 5px; border-radius: 4px; }
+.csite-tag.tag-sub { background: rgba(0,180,255,0.18); color: #3fc4ff; }
+.csite-tag.tag-hindi { background: rgba(255,120,0,0.18); color: #ff9a3c; }
+.csite:hover .csite-tag { background: rgba(0,0,0,0.18); color: #444; }
+.csite-go { font-size: 12px; opacity: 0.5; }
+.csite:hover .csite-go { opacity: 1; }
+.csrv-back {
+  margin: 0 10px 12px;
+  padding: 7px;
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.16);
+  color: #9aa3b5;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 11.5px;
+  font-weight: 700;
+  font-family: inherit;
+}
+.csrv-back:hover { border-color: #ffd700; color: #ffd700; }
 
 .back-content {
   display: flex;

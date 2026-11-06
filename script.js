@@ -869,6 +869,7 @@ function copyEmail() {
     // the now-strip stays visible while a genre filter is on
     // block the END dock button while a genre filter is active
     window.__genreFilterActive = (name !== 'All');
+    if (typeof window.__repaintScrollDock === 'function') window.__repaintScrollDock();
   }
 
   // ===== chat chips: one per genre, so the chat can recommend from ANY genre =====
@@ -1790,6 +1791,8 @@ document.addEventListener('click', function (e) {
   // Top-5 clones bind their own click handler when built — skip them here
   // or the two handlers would toggle twice and the card would never flip.
   if (card.closest('#topFiveResults')) return;
+  // clicks inside the server-picker face (side 3) are handled by its own UI
+  if (card.classList.contains('show-servers')) return;
 
   // Flip back ALL other cards first
   document.querySelectorAll('.card.flipped').forEach(flippedCard => {
@@ -1797,6 +1800,11 @@ document.addEventListener('click', function (e) {
       flippedCard.classList.remove('flipped');
     }
   });
+  document.querySelectorAll('.card.show-servers').forEach(function (c) {
+    if (c !== card) c.classList.remove('show-servers');
+  });
+  // a fresh flip from the front also clears any servers face on this card
+  card.classList.remove('show-servers');
 
   // Then toggle current card
   card.classList.toggle('flipped');
@@ -1863,6 +1871,8 @@ searchBox.addEventListener('input', function () {
     var nowStripSearch = document.getElementById('nowStrip');
     if (nowStripSearch && nowStripSearch.innerHTML) nowStripSearch.style.display = '';
   }
+  // a search can leave a short list — let the dock re-check its <20 rule
+  if (typeof window.__repaintScrollDock === 'function') window.__repaintScrollDock();
 });
 
 // ===== NOW STRIP — permanent Currently Reading / Watching tickets on the home page =====
@@ -2179,9 +2189,16 @@ function scrollToEnd() {
     var y = window.pageYOffset || (doc ? doc.scrollTop : 0) || 0;
     var p = max > 0 ? Math.min(1, Math.max(0, y / max)) : 0;
     fill.style.height = (p * 100).toFixed(1) + '%';
+    // A genre filter or a search can leave only a handful of cards — when the
+    // visible list is short (<20) the TOP/END dock is pointless, so hide it.
+    var visible = 0;
+    document.querySelectorAll('#grid .card:not(.hidden)').forEach(function (c) {
+      if (c.style.display !== 'none') visible++;
+    });
+    var shortList = visible > 0 && visible < 20;
     // keep the dock on screen for nearly the whole page — it's the main
     // way to jump between top and bottom now
-    var show = isScrollButtonSection() && p > 0.04 && p < 0.995;
+    var show = isScrollButtonSection() && p > 0.04 && p < 0.995 && !shortList;
     dock.style.opacity = show ? '1' : '0';
     dock.style.transform = show ? 'translateY(0) scale(1)' : 'translateY(18px) scale(.92)';
     dock.style.pointerEvents = show ? 'auto' : 'none';
@@ -2223,6 +2240,8 @@ function scrollToEnd() {
   } catch (e) {}
 
   document.addEventListener('DOMContentLoaded', paint);
+  // expose for the genre filter / search so the dock re-evaluates its short-list rule
+  window.__repaintScrollDock = paint;
   paint();
 })();
 
@@ -6319,109 +6338,6 @@ document.addEventListener('click', function(e) {
     return site.url + encodeURIComponent(title.trim());
   }
 
-  var _watchPopup = null;
-
-  function closeWatchPopup() {
-    if (!_watchPopup) return;
-    if (_watchPopup._watchCleanup) _watchPopup._watchCleanup();
-    _watchPopup.remove();
-    _watchPopup = null;
-  }
-
-  function openWatchPopup(card, title, anchor) {
-    closeWatchPopup();
-    var popup = document.createElement('div');
-    popup.className = 'watch-popup';
-
-    /* header: "SELECT A SERVER" + close */
-    var head = document.createElement('div');
-    head.className = 'watch-head';
-    var headText = document.createElement('span');
-    headText.className = 'watch-head-title';
-    headText.textContent = '🎬 SELECT A SERVER';
-    var close = document.createElement('button');
-    close.className = 'watch-close';
-    close.textContent = '✕';
-    close.onclick = function (e) { e.stopPropagation(); closeWatchPopup(); };
-    head.appendChild(headText);
-    head.appendChild(close);
-    popup.appendChild(head);
-
-    /* the anime name being searched */
-    var sub = document.createElement('div');
-    sub.className = 'watch-sub';
-    sub.textContent = title;
-    popup.appendChild(sub);
-
-    /* one row per streaming site */
-    var list = document.createElement('div');
-    list.className = 'watch-list';
-    WATCH_SITES.forEach(function (site) {
-      var b = document.createElement('button');
-      b.className = 'watch-site';
-      b.innerHTML =
-        '<span class="watch-site-name">' + site.name + '</span>' +
-        '<span class="watch-site-tag ' + (site.tag === 'SUB' ? 'tag-sub' : 'tag-hindi') + '">' + site.tag + '</span>' +
-        '<span class="watch-site-go">↗</span>';
-      b.onclick = function (e) {
-        e.stopPropagation();
-        window.open(buildWatchUrl(site, title), '_blank');
-        closeWatchPopup();
-      };
-      list.appendChild(b);
-    });
-    popup.appendChild(list);
-    document.body.appendChild(popup);
-
-    /* Measure the real box, then place it right above the Watch button,
-       right-aligned so it hugs the button's corner. Flips below the button
-       when there is no room above, and clamps to the viewport. */
-    var btn = anchor || card.querySelector('.watch-btn') || card;
-    var brect = btn.getBoundingClientRect();
-    var pw = popup.offsetWidth;
-    var ph = popup.offsetHeight;
-    var margin = 8;
-
-    // right edges line up with the button
-    var left = brect.right - pw;
-    left = Math.max(margin, Math.min(left, window.innerWidth - pw - margin));
-
-    // sit just above the button; if that overflows the top, go below it
-    var top = brect.top - ph - 6;
-    if (top < margin) top = brect.bottom + 6;
-    top = Math.min(top, window.innerHeight - ph - margin);
-    // never cover the card's own top edge when going below on a short screen
-    top = Math.max(top, margin);
-
-    popup.style.left = Math.round(left) + 'px';
-    popup.style.top = Math.round(top) + 'px';
-    _watchPopup = popup;
-
-    /* Close when the user clicks/taps anywhere outside the popup, presses
-       Escape, or scrolls the page. Listeners are bound on the NEXT frame so
-       the very click that opened the popup does not immediately close it. */
-    requestAnimationFrame(function () {
-      function onOutside(e) {
-        if (!popup.contains(e.target)) closeWatchPopup();
-      }
-      function onKey(e) {
-        if (e.key === 'Escape') closeWatchPopup();
-      }
-      function onScroll() { closeWatchPopup(); }
-
-      popup._watchCleanup = function () {
-        document.removeEventListener('pointerdown', onOutside, true);
-        document.removeEventListener('click', onOutside, true);
-        document.removeEventListener('keydown', onKey, true);
-        window.removeEventListener('scroll', onScroll, true);
-      };
-      document.addEventListener('pointerdown', onOutside, true);
-      document.addEventListener('click', onOutside, true);
-      document.addEventListener('keydown', onKey, true);
-      window.addEventListener('scroll', onScroll, true);
-    });
-  }
-
   function injectWatchButtons() {
     var style = document.createElement('style');
     style.textContent = [
@@ -6433,57 +6349,7 @@ document.addEventListener('click', function(e) {
       '  font-size: 12px; cursor: pointer; z-index: 12;',
       '  box-shadow: 0 2px 10px rgba(0,0,0,0.55); font-family: inherit; white-space: nowrap;',
       '}',
-      '.watch-btn:hover { background: #ffeb3b; }',
-      '.watch-popup {',
-      '  position: fixed; z-index: 2000;',
-      '  background: linear-gradient(160deg, #101014 0%, #0a0a0d 100%);',
-      '  border: 1px solid rgba(255,215,0,0.55); border-radius: 14px;',
-      '  padding: 0; overflow: hidden;',
-      '  box-shadow: 0 10px 40px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,215,0,0.08), 0 0 24px rgba(255,215,0,0.12);',
-      '  font-family: Exo 2, sans-serif;',
-      '  width: min(228px, calc(100vw - 20px)); box-sizing: border-box;',
-      '  animation: watchPop 0.16s ease-out;',
-      '}',
-      '@keyframes watchPop { from { opacity: 0; transform: translateY(6px) scale(0.94); } to { opacity: 1; transform: none; } }',
-      '.watch-head {',
-      '  display: flex; align-items: center; justify-content: space-between;',
-      '  padding: 9px 10px 9px 12px;',
-      '  background: linear-gradient(90deg, rgba(255,215,0,0.14), rgba(255,215,0,0.02));',
-      '  border-bottom: 1px solid rgba(255,215,0,0.22);',
-      '}',
-      '.watch-head-title {',
-      '  font-size: 11px; font-weight: 800; letter-spacing: 1.1px;',
-      '  color: #ffd700; text-transform: uppercase;',
-      '}',
-      '.watch-close {',
-      '  background: transparent; border: none; color: #777;',
-      '  cursor: pointer; font-size: 15px; padding: 0 2px; line-height: 1;',
-      '}',
-      '.watch-close:hover { color: #ffd700; }',
-      '.watch-sub {',
-      '  font-size: 10.5px; color: #8b93a7; padding: 7px 12px 3px;',
-      '  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;',
-      '}',
-      '.watch-list { display: flex; flex-direction: column; gap: 6px; padding: 7px 10px 11px; }',
-      '.watch-site {',
-      '  display: flex; align-items: center; gap: 8px;',
-      '  background: rgba(255,255,255,0.03); border: 1px solid rgba(255,215,0,0.3);',
-      '  color: #eee; padding: 9px 11px; border-radius: 9px; cursor: pointer;',
-      '  text-align: left; font-size: 13.5px; font-weight: 700; font-family: inherit;',
-      '  transition: background 0.14s, border-color 0.14s, color 0.14s;',
-      '}',
-      '.watch-site:hover { background: #ffd700; border-color: #ffd700; color: #000; }',
-      '.watch-site-name { flex: 1; }',
-      '.watch-site-tag {',
-      '  font-size: 8.5px; font-weight: 800; letter-spacing: 0.6px;',
-      '  padding: 2px 5px; border-radius: 4px;',
-      '}',
-      '.tag-sub { background: rgba(0,180,255,0.18); color: #3fc4ff; }',
-      '.tag-hindi { background: rgba(255,120,0,0.18); color: #ff9a3c; }',
-      '.watch-site:hover .tag-sub { background: rgba(0,0,0,0.18); color: #00506b; }',
-      '.watch-site:hover .tag-hindi { background: rgba(0,0,0,0.18); color: #7a3d00; }',
-      '.watch-site-go { font-size: 13px; opacity: 0.5; }',
-      '.watch-site:hover .watch-site-go { opacity: 1; }'
+      '.watch-btn:hover { background: #ffeb3b; }'
     ].join('');
     document.head.appendChild(style);
 
@@ -6494,6 +6360,16 @@ document.addEventListener('click', function(e) {
       if (!posterWrap) return;
       var titleEl = card.querySelector('.title') || card.querySelector('.back-title');
       var title = titleEl ? titleEl.textContent.trim() : '';
+
+      /* build side 3 — the server picker face */
+      var inner = card.querySelector('.card-inner');
+      if (inner && !card.querySelector('.card-servers')) {
+        var face = document.createElement('div');
+        face.className = 'card-servers';
+        face.innerHTML = buildServersHTML(title);
+        inner.appendChild(face);
+      }
+
       var btn = document.createElement('button');
       btn.className = 'watch-btn';
       btn.title = 'Watch ' + title + ' online';
@@ -6501,10 +6377,57 @@ document.addEventListener('click', function(e) {
       btn.onclick = function (e) {
         e.stopPropagation();
         e.preventDefault();
-        openWatchPopup(card, title, btn);
+        openServersFace(card);
       };
       posterWrap.appendChild(btn);
     });
+  }
+
+  /* Server-picker face markup (side 3 of the card). */
+  function buildServersHTML(title) {
+    var rows = WATCH_SITES.map(function (site) {
+      var tag = site.tag === 'SUB' ? 'tag-sub' : 'tag-hindi';
+      return '<button class="csite" data-url="' + buildWatchUrl(site, title).replace(/"/g, '&quot;') + '">' +
+        '<span class="csite-name">' + site.name + '</span>' +
+        '<span class="csite-tag ' + tag + '">' + site.tag + '</span>' +
+        '<span class="csite-go">↗</span></button>';
+    }).join('');
+    return '<div class="csrv-head">🎬 SELECT A SERVER</div>' +
+      '<div class="csrv-title">' + title.replace(/</g, '&lt;') + '</div>' +
+      '<div class="csrv-list">' + rows + '</div>' +
+      '<button class="csrv-back">↩ Back</button>';
+  }
+
+  /* Wire clicks once per card face (delegated on the grid). */
+  function wireServerFaces() {
+    var grid = document.getElementById('grid');
+    if (!grid || grid.dataset.srvWired) return;
+    grid.dataset.srvWired = '1';
+    grid.addEventListener('click', function (e) {
+      var siteBtn = e.target.closest('.csite');
+      if (siteBtn) {
+        e.stopPropagation();
+        e.preventDefault();
+        if (siteBtn.dataset.url) window.open(siteBtn.dataset.url, '_blank');
+        return;
+      }
+      var back = e.target.closest('.csrv-back');
+      if (back) {
+        e.stopPropagation();
+        e.preventDefault();
+        var c = back.closest('.card');
+        if (c) c.classList.remove('show-servers');
+      }
+    });
+  }
+
+  function openServersFace(card) {
+    // close any other open server faces, then flip this one
+    document.querySelectorAll('.card.show-servers').forEach(function (c) {
+      if (c !== card) c.classList.remove('show-servers');
+    });
+    card.classList.remove('flipped');
+    card.classList.add('show-servers');
   }
 
   // 4. Card hover glow trail
@@ -6650,6 +6573,7 @@ document.addEventListener('click', function(e) {
   function initEnhancements() {
     injectCardEnhancements();
     injectWatchButtons();
+    wireServerFaces();
     randomizeCardTilt();
     createAmbientParticles();
   }

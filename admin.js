@@ -40,6 +40,34 @@ function bootLine(text, cls) {
   el.className = 'ad-boot' + (cls ? ' ' + cls : '');
 }
 
+/* Progress % is never typed by hand — it is derived from current ÷ total and
+   shown with two decimals (e.g. 12 episodes of 51 -> 23.53). Total may be
+   blank or "∞", in which case there is no percentage to show (0). */
+function calcProgress(current, total) {
+  var c = parseFloat(String(current).replace(/[^\d.]/g, ''));
+  var t = parseFloat(String(total).replace(/[^\d.]/g, ''));
+  if (!isFinite(c) || !isFinite(t) || t <= 0) return 0;
+  var pct = (c / t) * 100;
+  if (pct < 0) pct = 0;
+  if (pct > 100) pct = 100;
+  return Math.round(pct * 100) / 100;   // 2 decimals
+}
+
+/* Live preview line under the WATCH / READ forms. */
+function paintProgressPreview(elId, curId, totId, unit) {
+  var el = document.getElementById(elId);
+  if (!el) return;
+  var cur = document.getElementById(curId);
+  var tot = document.getElementById(totId);
+  var c = cur ? cur.value.trim() : '';
+  var t = tot ? tot.value.trim() : '';
+  if (!c || !t || !parseFloat(t)) {
+    el.textContent = 'Progress is calculated automatically from current ÷ total ' + unit + '.';
+    return;
+  }
+  el.textContent = 'Auto progress: ' + calcProgress(c, t).toFixed(2) + '%  (' + c + ' of ' + t + ')';
+}
+
 function paintPatStatus() {
   var el = document.getElementById('adPatStatus');
   if (!el) return;
@@ -989,7 +1017,23 @@ function initAdminGui() {
   refreshStatsPlaceholders();
   if (document.getElementById('adminStatsSeasons')) document.getElementById('adminStatsSeasons').value = '';
   if (document.getElementById('adminStatsEps')) document.getElementById('adminStatsEps').value = '';
+  wireProgressPreviews();
   switchAdminTab('watch');
+}
+
+/* Keep the auto-progress line in sync while the admin types the episode count. */
+function wireProgressPreviews() {
+  var pairs = [
+    ['adminWatchProgressPreview', 'adminWatchCurEps', 'adminWatchTotalEps', 'episodes'],
+    ['adminReadProgressPreview', 'adminReadCurChapter', 'adminReadTotalChapter', 'chapters']
+  ];
+  pairs.forEach(function (p) {
+    var cur = document.getElementById(p[1]);
+    var tot = document.getElementById(p[2]);
+    if (cur) cur.addEventListener('input', function () { paintProgressPreview(p[0], p[1], p[2], p[3]); });
+    if (tot) tot.addEventListener('input', function () { paintProgressPreview(p[0], p[1], p[2], p[3]); });
+    paintProgressPreview(p[0], p[1], p[2], p[3]);
+  });
 }
 
 function loadTop5Form() {
@@ -1335,9 +1379,8 @@ async function commitMangaReading() {
   var curChapter = document.getElementById('adminReadCurChapter').value.trim();
   var totalChapter = document.getElementById('adminReadTotalChapter').value.trim();
   var meta = document.getElementById('adminReadMeta').value.trim();
-  var progress = document.getElementById('adminReadProgress').value.trim();
   if (!curChapter) { msgFail('Enter current chapter'); return; }
-  var prog = parseInt(progress) || 0;
+  var prog = calcProgress(curChapter, totalChapter);
   showLoading();
   adStep('fetching index.html…');
   try {
@@ -1732,11 +1775,10 @@ async function commitWatching() {
   var curEps = document.getElementById('adminWatchCurEps').value.trim();
   var totalEps = document.getElementById('adminWatchTotalEps').value.trim();
   var season = document.getElementById('adminWatchSeason').value.trim();
-  var progress = document.getElementById('adminWatchProgress').value.trim();
   if (!curEps) { msgFail('Enter current episode'); return; }
   var watchId = _watchId;
   var eps = totalEps ? 'Episode ' + curEps + ' / ' + totalEps : 'Episode ' + curEps;
-  var prog = parseInt(progress) || 0;
+  var prog = calcProgress(curEps, totalEps);
   showLoading();
   adStep('fetching index.html…');
   try {

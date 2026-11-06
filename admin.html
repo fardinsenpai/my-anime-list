@@ -152,11 +152,8 @@
             <span>Season</span>
             <input type="text" id="adminWatchSeason" class="admin-g-input" placeholder="Season 4">
           </label>
-          <label class="ad-field">
-            <span>Progress %</span>
-            <input type="number" id="adminWatchProgress" class="admin-g-input" placeholder="50">
-          </label>
         </div>
+        <div class="ad-note" id="adminWatchProgressPreview">Progress is calculated automatically from current ÷ total episodes.</div>
         <button class="admin-g-btn" onclick="commitWatching()">▶ COMMIT WATCHING</button>
       </section>
 
@@ -190,11 +187,8 @@
             <span>Label</span>
             <input type="text" id="adminReadMeta" class="admin-g-input" placeholder="Manga / Volume 1">
           </label>
-          <label class="ad-field">
-            <span>Progress %</span>
-            <input type="number" id="adminReadProgress" class="admin-g-input" placeholder="50">
-          </label>
         </div>
+        <div class="ad-note" id="adminReadProgressPreview">Progress is calculated automatically from current ÷ total chapters.</div>
         <button class="admin-g-btn" onclick="commitMangaReading()">▶ COMMIT READING</button>
       </section>
 
