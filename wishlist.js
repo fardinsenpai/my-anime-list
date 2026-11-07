@@ -202,7 +202,10 @@
       renderNow();                                   // paint the cache instantly
       return fetchVisible().then(function (rows) {
         if (Array.isArray(rows)) { WL.rows = rows; persist(); }
-      }).catch(function () { /* offline / table not created yet */ });
+        setSync('ok');
+      }).catch(function () {
+        setSync('warn');
+      });
     }).catch(function () {}).then(function () {
       WL.loading = null;
       renderNow();
@@ -407,6 +410,122 @@
     });
   }
 
+  /* ── window chrome (sync pill, counts, user chip, maximize, drag) ── */
+  function setSync(state) {
+    var el = $('wlSync');
+    if (!el) return;
+    el.classList.remove('ok', 'warn');
+    if (state === 'ok') {
+      el.classList.add('ok');
+      el.textContent = 'SYNCED';
+    } else if (state === 'warn') {
+      el.classList.add('warn');
+      el.textContent = 'LOCAL ONLY';
+    } else {
+      el.textContent = 'LOCAL';
+    }
+  }
+
+  function paintCounts() {
+    var me = rowsFor('me').length;
+    var admin = rowsFor('admin').length;
+    var a = document.querySelector('[data-wl-count="me"]');
+    var b = document.querySelector('[data-wl-count="admin"]');
+    if (a) a.textContent = me;
+    if (b) b.textContent = admin;
+  }
+
+  function paintUser() {
+    var el = $('wlUser');
+    if (!el) return;
+    var name = WL.me
+      ? (WL.me.name || WL.me.email || 'SIGNED IN')
+      : 'GUEST';
+    el.classList.toggle('on', !!WL.me);
+    el.innerHTML = '<span class="wl-user-dot"></span><span>' + esc(name) + '</span>';
+  }
+
+  function paintChrome() {
+    paintCounts();
+    paintUser();
+  }
+
+  var dragState = null;
+
+  function panelEl() {
+    return document.querySelector('.wl-panel');
+  }
+
+  function resetDrag() {
+    var panel = panelEl();
+    if (!panel) return;
+    panel.style.transform = '';
+    panel.dataset.dx = '0';
+    panel.dataset.dy = '0';
+  }
+
+  function toggleMax() {
+    var panel = panelEl();
+    if (!panel) return;
+    panel.classList.toggle('maxed');
+    resetDrag();
+  }
+
+  function wireChrome() {
+    var chrome = $('wlChrome');
+    var panel = panelEl();
+    if (!chrome || !panel) return;
+
+    chrome.addEventListener('pointerdown', function (e) {
+      if (e.target.closest('button')) return;
+      if (window.matchMedia('(max-width: 700px)').matches) return;
+      if (panel.classList.contains('maxed')) return;
+      dragState = {
+        sx: e.clientX,
+        sy: e.clientY,
+        dx: parseFloat(panel.dataset.dx || '0'),
+        dy: parseFloat(panel.dataset.dy || '0'),
+        id: e.pointerId
+      };
+      panel.classList.add('dragging');
+      try { chrome.setPointerCapture(e.pointerId); } catch (err) {}
+      e.preventDefault();
+    });
+
+    chrome.addEventListener('pointermove', function (e) {
+      if (!dragState || e.pointerId !== dragState.id) return;
+      var rect = panel.getBoundingClientRect();
+      var maxX = Math.max(0, (window.innerWidth - rect.width) / 2 - 8);
+      var maxY = Math.max(0, (window.innerHeight - rect.height) / 2 - 8);
+      var ndx = Math.max(-maxX, Math.min(maxX, dragState.dx + (e.clientX - dragState.sx)));
+      var ndy = Math.max(-maxY, Math.min(maxY, dragState.dy + (e.clientY - dragState.sy)));
+      panel.dataset.dx = ndx;
+      panel.dataset.dy = ndy;
+      panel.style.transform = 'translate(' + ndx + 'px,' + ndy + 'px)';
+    });
+
+    function endDrag(e) {
+      if (!dragState) return;
+      if (e && e.pointerId !== dragState.id) return;
+      dragState = null;
+      panel.classList.remove('dragging');
+      try { chrome.releasePointerCapture(e.pointerId); } catch (err) {}
+    }
+    chrome.addEventListener('pointerup', endDrag);
+    chrome.addEventListener('pointercancel', endDrag);
+    chrome.addEventListener('dblclick', function (e) {
+      if (e.target.closest('button')) return;
+      toggleMax();
+    });
+
+    window.addEventListener('resize', function () {
+      resetDrag();
+      if (window.matchMedia('(max-width: 700px)').matches) {
+        panel.classList.remove('maxed');
+      }
+    });
+  }
+
   function itemHTML(row) {
     var editable = !!(WL.me && row.user_id === WL.me.id);
     var moved = STATUSES.map(function (s) {
@@ -430,6 +549,9 @@
   function paintPanel() {
     var body = $('wlBody');
     if (!body) return;
+
+    syncTabs();
+    paintChrome();
 
     var sub = $('wlSub');
     if (sub) {
@@ -479,6 +601,7 @@
     var ov = $('wlOverlay');
     if (!ov) return;
     if (!WL.me) WL.view = 'admin';
+    resetDrag();
     syncTabs();
     ov.hidden = false;
     document.body.classList.add('wl-open');
@@ -490,6 +613,7 @@
     var ov = $('wlOverlay');
     if (ov) ov.hidden = true;
     document.body.classList.remove('wl-open');
+    resetDrag();
     closeChooser();
   }
 
@@ -519,6 +643,11 @@
 
     var close = $('wlClose');
     if (close) close.addEventListener('click', closePanel);
+
+    var max = $('wlMax');
+    if (max) max.addEventListener('click', toggleMax);
+
+    wireChrome();
 
     var ov = $('wlOverlay');
     if (ov) ov.addEventListener('click', function (e) {

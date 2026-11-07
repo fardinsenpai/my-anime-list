@@ -30,7 +30,7 @@
   <link rel="manifest" href="manifest.json">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content"/>
   <title>Fardin's Anime Hub</title>
-  <link rel="stylesheet" href="style.css?v=20261107a">
+  <link rel="stylesheet" href="style.css?v=20261107b">
   <link rel="stylesheet" href="chat-styles.css?v=20261024z">
 <link rel="stylesheet" href="login-otp.css?v=20261024a">
   <link rel="stylesheet" href="duel-system.css">
@@ -1725,25 +1725,49 @@
   <script src="https://accounts.google.com/gsi/client" async defer></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="anime-fetch.js?v=20261104c"></script>
-<script src="script.js?v=20261107a"></script>
+<script src="script.js?v=20261107b"></script>
 <script src="login-otp.js?v=20261024n"></script>
-<script src="wishlist.js?v=20261107a"></script>
+<script src="wishlist.js?v=20261107b"></script>
 
 <!-- === 💖 WISH LIST === -->
 <div class="wl-overlay" id="wlOverlay" hidden>
   <div class="wl-panel" role="dialog" aria-modal="true" aria-labelledby="wlTitle">
-    <div class="wl-head">
-      <div class="wl-title" id="wlTitle">💖 Wish List</div>
-      <button class="wl-x" id="wlClose" type="button" aria-label="Close wish list">✕</button>
+    <div class="wl-chrome" id="wlChrome">
+      <div class="wl-lights" aria-hidden="true"><i></i><i></i><i></i></div>
+      <div class="wl-chrome-title">WISH LIST — RAPAYEL ARCHIVE</div>
+      <div class="wl-chrome-controls">
+        <button class="wl-max" id="wlMax" type="button" aria-label="Maximize wish list" title="Maximize / restore">⤢</button>
+        <button class="wl-x" id="wlClose" type="button" aria-label="Close wish list">✕</button>
+      </div>
     </div>
-    <div class="wl-sub" id="wlSub">Save any anime from the main list. Only you can see your own list.</div>
-    <div class="wl-tabs" id="wlTabs">
-      <button class="wl-tab on" type="button" data-wl-view="me">MY LIST</button>
-      <button class="wl-tab" type="button" data-wl-view="admin">FARDIN'S LIST</button>
-    </div>
-    <div class="wl-body" id="wlBody"></div>
-    <div class="wl-foot">
-      <a class="wl-add" id="wlAddLink" href="#grid">＋ Add anime from the main list</a>
+    <div class="wl-shell">
+      <aside class="wl-rail">
+        <div class="wl-brand">
+          <div class="wl-brand-ic">💖</div>
+          <div>
+            <div class="wl-brand-t" id="wlTitle">WISH LIST</div>
+            <div class="wl-brand-s">Rapayel archive</div>
+          </div>
+        </div>
+        <div class="wl-tabs" id="wlTabs">
+          <button class="wl-tab on" type="button" data-wl-view="me"><span class="wl-tab-ic">💖</span><span>MY LIST</span><span class="wl-tab-n" data-wl-count="me">0</span></button>
+          <button class="wl-tab" type="button" data-wl-view="admin"><span class="wl-tab-ic">⭐</span><span>FARDIN'S LIST</span><span class="wl-tab-n" data-wl-count="admin">0</span></button>
+        </div>
+        <div class="wl-rail-foot">
+          <div class="wl-user" id="wlUser"><span class="wl-user-dot"></span><span>Guest</span></div>
+          <div class="wl-hint">Tap a heart on any card to save it. Click an item to jump back to its card.</div>
+        </div>
+      </aside>
+      <div class="wl-main">
+        <div class="wl-main-head">
+          <div class="wl-sub" id="wlSub">Save any anime from the main list. Only you can see your own list.</div>
+          <div class="wl-sync" id="wlSync">LOCAL</div>
+        </div>
+        <div class="wl-body" id="wlBody"></div>
+        <div class="wl-foot">
+          <a class="wl-add" id="wlAddLink" href="#grid">＋ Add anime from the main list</a>
+        </div>
+      </div>
     </div>
   </div>
 </div>

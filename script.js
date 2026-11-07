@@ -4541,6 +4541,7 @@ document.addEventListener('click', function(e) {
   var tourSteps;
   var overlay, highlight, tooltip, arrow, autoCloseTimer, autoCloseCount;
   var closeBtn, titleEl, descEl, progressEl, prevBtn, nextBtn, skipBtn;
+  var guideAva, guideImg, guideForm, barEl;
 
   function initTour() {
     overlay = document.createElement('div');
@@ -4552,6 +4553,15 @@ document.addEventListener('click', function(e) {
     tooltip.innerHTML =
       '<div class="tour-tooltip-inner">' +
         '<button class="tour-close-btn">&times;</button>' +
+        '<div class="tour-guide">' +
+          '<div class="tour-guide-ava"><img alt=""></div>' +
+          '<div class="tour-guide-meta">' +
+            '<span class="tour-guide-name">RAPAYEL</span>' +
+            '<span class="tour-guide-form"></span>' +
+          '</div>' +
+          '<span class="tour-guide-tag">GUIDE</span>' +
+        '</div>' +
+        '<div class="tour-bar"><span></span></div>' +
         '<div class="tour-title"></div>' +
         '<div class="tour-desc"></div>' +
         '<div class="tour-footer">' +
@@ -4578,14 +4588,50 @@ document.addEventListener('click', function(e) {
     prevBtn = tooltip.querySelector('.tour-btn-prev');
     nextBtn = tooltip.querySelector('.tour-btn-next');
     skipBtn = tooltip.querySelector('.tour-btn-skip');
+    guideAva = tooltip.querySelector('.tour-guide-ava');
+    guideImg = tooltip.querySelector('.tour-guide-ava img');
+    guideForm = tooltip.querySelector('.tour-guide-form');
+    barEl = tooltip.querySelector('.tour-bar span');
 
     closeBtn.addEventListener('click', function () { clearInterval(autoCloseTimer); endTour(); });
     prevBtn.addEventListener('click', function () { if (currentStep > 0) showStep(currentStep - 1); });
     nextBtn.addEventListener('click', function () {
       if (currentStep < tourSteps.length - 1) { showStep(currentStep + 1); }
-      else { endTour(); }
+      else { finishTour(); }
     });
     skipBtn.addEventListener('click', function () { clearInterval(autoCloseTimer); endTour(); });
+  }
+
+  /* Each step is hosted by one of Fardin's waifus; Rapayel is the guide
+     persona and the portrait changes form as the tour moves along. */
+  function tourForm(name) {
+    if (typeof waifus !== 'undefined' && waifus) {
+      for (var i = 0; i < waifus.length; i++) {
+        if (waifus[i].name === name) return waifus[i];
+      }
+    }
+    return { name: name, img: '' };
+  }
+
+  function burstConfetti() {
+    var colors = ['#ffd166', '#ff6b9d', '#00e5ff', '#a78bfa', '#4ade80'];
+    for (var i = 0; i < 30; i++) {
+      var c = document.createElement('i');
+      c.className = 'tour-confetti';
+      c.style.left = (44 + Math.random() * 12).toFixed(1) + 'vw';
+      c.style.top = (32 + Math.random() * 12).toFixed(1) + 'vh';
+      c.style.background = colors[i % colors.length];
+      c.style.setProperty('--dx', ((Math.random() - 0.5) * 70).toFixed(1) + 'vw');
+      c.style.setProperty('--rot', (Math.random() * 720 - 360).toFixed(0) + 'deg');
+      c.style.animationDelay = (Math.random() * 0.25).toFixed(2) + 's';
+      document.body.appendChild(c);
+      (function (el) { setTimeout(function () { el.remove(); }, 1900); })(c);
+    }
+  }
+
+  function finishTour() {
+    burstConfetti();
+    endTour();
   }
 
   function showStep(index) {
@@ -4607,7 +4653,7 @@ document.addEventListener('click', function(e) {
 
       highlight.style.cssText =
         'display:block;position:fixed;z-index:100001;pointer-events:none;' +
-        'border-radius:6px;box-shadow:0 0 0 9999px rgba(4,6,16,0.55),0 0 0 4px rgba(0,229,255,0.85),0 0 30px 8px rgba(0,229,255,0.7);' +
+        'border-radius:14px;box-shadow:0 0 0 9999px rgba(4,6,16,0.62),0 0 0 2px rgba(255,209,102,0.92),0 0 0 7px rgba(255,105,157,0.18),0 0 46px 10px rgba(255,209,102,0.38);' +
         'left:' + rect.left + 'px;top:' + rect.top + 'px;' +
         'width:' + rect.width + 'px;height:' + rect.height + 'px';
       overlay.style.display = 'block';
@@ -4618,9 +4664,29 @@ document.addEventListener('click', function(e) {
       titleEl.textContent = step.popover && step.popover.title || '';
       descEl.innerHTML = step.popover && step.popover.description || '';
       progressEl.textContent = (index + 1) + ' of ' + tourSteps.length;
+      if (barEl) barEl.style.width = (((index + 1) / tourSteps.length) * 100).toFixed(1) + '%';
+
+      /* Rapayel changes form for every stop of the tour. */
+      var g = step.guide ? tourForm(step.guide) : null;
+      if (g && guideAva && guideImg && guideForm) {
+        guideAva.classList.remove('fallback');
+        guideAva.setAttribute('data-initial', String(g.name || 'R').charAt(0).toUpperCase());
+        guideForm.textContent = 'FORM \u00B7 ' + String(g.name || 'RAPAYEL').toUpperCase();
+        guideImg.alt = g.name || 'Rapayel';
+        guideImg.onerror = function () { guideAva.classList.add('fallback'); };
+        guideImg.src = g.img || '';
+      }
+
+      /* warm the next portrait only — preloading all 22 would hammer the
+         network on the first visit, which matters on light devices. */
+      var nextGuide = tourSteps[index + 1] && tourSteps[index + 1].guide;
+      if (nextGuide) {
+        var nw = tourForm(nextGuide);
+        if (nw.img) { var nimg = new Image(); nimg.src = nw.img; }
+      }
 
       prevBtn.style.display = index === 0 ? 'none' : '';
-      nextBtn.textContent = index === tourSteps.length - 1 ? '\uD83C\uDF89 Done' : 'Next \u2192';
+      nextBtn.textContent = index === tourSteps.length - 1 ? '\uD83C\uDF89 Finish' : 'Next \u2192';
       skipBtn.style.display = index === 0 ? '' : 'none';
       if (index === 0) { skipBtn.textContent = 'Skip 10'; autoCloseCount = 10; }
 
@@ -4735,96 +4801,118 @@ document.addEventListener('click', function(e) {
     return [
       {
         element: '.heading-glitch',
-        popover: { title: '\uD83D\uDC4B Welcome!', description: 'This is <strong>Fardin\'s Anime Hub</strong> \u2014 your personal anime collection dashboard. Let\'s explore what you can do here!<br><br>You can find this tour again anytime from the <strong>sidebar \u2192 Tour Guide</strong>.', side: 'bottom' }
+        guide: 'Zero Two',
+        popover: { title: '\uD83D\uDC4B I\'m Rapayel', description: 'Welcome to <strong>Fardin\'s Anime Hub</strong> \u2014 your personal anime collection dashboard. I\'ll be your guide, and every stop is hosted by one of Fardin\'s waifus.<br><br>You can replay this tour anytime from <strong>sidebar \u2192 Tour Guide</strong>.', side: 'bottom' }
       },
       {
         element: '.counter-container',
+        guide: 'Frieren',
         popover: { title: '\uD83D\uDCCA Anime Stats', description: 'See your total anime, seasons, and episodes count at a glance. Everything updates automatically!', side: 'bottom' }
       },
       {
         element: '#searchBox',
+        guide: 'Fern',
         popover: { title: '\uD83D\uDD0D Quick Search', description: 'Type any anime name here to instantly filter the entire collection. No page reload needed!', side: 'bottom' }
       },
       {
         element: '#perfToggle',
+        guide: 'Makima',
         popover: { title: '⚙️ Graphics Mode', description: 'Is the site lagging? Click here to switch between Advanced, High, Poor, or Low mode to control effects like thunder, sakura, and card animations.', side: 'bottom' }
       },
       {
         element: '.filter-section',
+        guide: 'Marin Kitagawa',
         popover: { title: '\uD83C\uDFF7\uFE0F Genre Filter', description: 'Click any genre pill to filter anime by category \u2014 Action, Comedy, Romance, Isekai, and more. Each shows the count!', side: 'bottom' }
       },
       {
         element: '#grid',
+        guide: 'Hinata Hyuga',
         popover: { title: '\uD83D\uDCDA Anime Collection', description: 'Browse all <strong>' + document.querySelectorAll('#grid .card').length + ' anime</strong> Fardin has watched. Click any card to flip it and see details.', side: 'top' },
         onHighlightStarted: function () { var _c = document.querySelector('.card'); if (_c) { setTimeout(function() { _c.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 50); } }
       },
       {
         element: '.share-btn',
+        guide: 'Yor Forger',
         popover: { title: '\uD83D\uDD17 Share Cards', description: 'Click the <strong>gold share icon</strong> on any card to share it with friends! Copies the link so you can send it anywhere.', side: 'bottom' },
         onHighlightStarted: function () { var _s = document.querySelector('.share-btn'); if (_s) { _s.closest('.card') && _s.closest('.card').scrollIntoView({ behavior: 'smooth', block: 'center' }); } }
       },
       {
         element: '.menu-btn',
+        guide: 'Emilia',
         popover: { title: '\uD83D\uDCCC Sidebar Menu', description: 'Click the hamburger menu to open the sidebar. Let\'s look at what\'s inside!', side: 'bottom' },
         onHighlightStarted: function () { closeMenu(); }
       },
       {
         element: '#homeLink',
+        guide: 'Asuna Yuuki',
         popover: { title: '\uD83C\uDFE0 Home', description: 'Returns to the main anime grid anytime. Your home base!', side: 'right' },
         onHighlightStarted: function () { openMenu(); },
         sidebarTransition: true
       },
       {
         element: '#topFiveSideBtn',
+        guide: 'Erza Scarlet',
         popover: { title: '\uD83C\uDFC6 Top 5 Picks', description: 'See the top 5 anime recommendations by genre \u2014 Action, Isekai, Romcom, and more!', side: 'right' }
       },
       {
         element: '#duel-nav-link',
+        guide: 'Mikasa Ackerman',
         popover: { title: '\u2694\uFE0F Anime Duel', description: 'Battle two anime head-to-head! Compare ratings and see which one wins. A fun way to discover top-rated shows.', side: 'right' }
       },
       {
         element: '#tournament-nav-link',
+        guide: 'Kaguya Shinomiya',
         popover: { title: '🏆 Crown Conquest', description: 'Enter the tournament arena! Pick a genre, draft your roster, and auto-simulate a bracket to crown a champion. Full power-based matchups!', side: 'right' }
       },
       {
         element: '#animeQuestBtn',
+        guide: 'Chika Fujiwara',
         popover: { title: '\uD83C\uDFAE Anime Quest', description: 'Test your anime knowledge! Pick your favorite series, choose a difficulty, and answer 10 trivia questions. Earn ranks from F to SSS and download your certificate!', side: 'right' }
       },
       {
         element: 'nav.side-nav a[onclick*="showAllAwardWinners"]',
+        guide: 'Maomao',
         popover: { title: '\uD83C\uDFC5 Anime of the Year', description: 'See Crunchyroll\'s Anime of the Year winners from 2017 to 2026, filtered from Fardin\'s list.', side: 'right' }
       },
       {
         element: 'nav.side-nav a[onclick*="openWaifus"]',
+        guide: 'Momo Ayase',
         popover: { title: '\uD83D\uDC95 Find Your Waifus', description: 'Browse a gallery of beloved anime waifus with flip cards. Search by name or series!', side: 'right' }
       },
       {
         element: '#hotTakesBtn',
+        guide: 'Power',
         popover: { title: '\uD83D\uDD25 Hot Takes', description: 'Share your hot takes on any anime! Post comments and see what others think in real-time.', side: 'right' }
       },
       {
         element: 'nav.side-nav a[onclick*="openRandomPick"]',
+        guide: 'Akari Watanabe',
         popover: { title: '\uD83C\uDFA8 Random Pick by Mood', description: 'Choose your mood \u2014 Funny, Sad, Romantic, Dark & more! We\'ll pick a matching anime just for your vibe.', side: 'right' }
       },
       {
         element: 'nav.side-nav a[onclick*="openSuggestion"]',
+        guide: 'Hori Kyouko',
         popover: { title: '\uD83D\uDCA1 Drop Suggestion', description: 'Have an anime you think Fardin should watch? Drop your suggestion here!', side: 'right' },
         onHighlightStarted: function () { if (!sideMenu || !sideMenu.classList.contains('open')) openMenu(); }
       },
       {
         element: '#analysisSideBtn',
+        guide: 'Maki Zenin',
         popover: { title: '\uD83D\uDCC8 Analysis', description: 'Interactive pie charts and bar charts for genre distribution, OTT platforms, studios, episodes, and ratings.', side: 'right' }
       },
       {
         element: '#topSecretsBtn',
+        guide: 'C.C.',
         popover: { title: '\uD83D\uDD10 Top Secrets', description: 'Hidden resource guide! Get download sites, streaming platforms, and pro tips for watching anime.', side: 'right' }
       },
       {
         element: '#installAppBtn',
+        guide: 'Noelle Silva',
         popover: { title: '\u2B07 Install App', description: 'Install Fardin\'s Anime Hub as a standalone app on your device for quick access anytime! Works like a native app.', side: 'right' }
       },
       {
         element: '#chatBubble',
+        guide: 'Alya',
         popover: { title: '\uD83E\uDD16 AI Chat', description: 'Chat with Fardin\'s personal AI assistant! Ask about any anime, get recommendations, or just have fun.', side: 'left' },
         onHighlightStarted: function () { closeMenu(); }
       },
@@ -4836,7 +4924,7 @@ document.addEventListener('click', function(e) {
     if (e.key === 'Escape') { clearInterval(autoCloseTimer); endTour(); }
     else if (e.key === 'ArrowRight' || e.key === 'Enter') {
       if (currentStep < tourSteps.length - 1) showStep(currentStep + 1);
-      else endTour();
+      else finishTour();
     }
     else if (e.key === 'ArrowLeft') { if (currentStep > 0) showStep(currentStep - 1); }
   });
@@ -4851,6 +4939,14 @@ document.addEventListener('click', function(e) {
     localStorage.setItem('fardin_tour_done', '1');
     setTimeout(startTour, 1000);
   }
+
+  /* small public surface for debugging / manual replay */
+  window.__tour = {
+    start: startTour,
+    end: endTour,
+    next: function () { if (tourActive && currentStep < tourSteps.length - 1) showStep(currentStep + 1); },
+    prev: function () { if (tourActive && currentStep > 0) showStep(currentStep - 1); }
+  };
 
   // ========== Hot Takes ==========
   var ADMIN_NAME = 'Fardin';
@@ -6454,12 +6550,31 @@ document.addEventListener('click', function(e) {
       '.poster-wrap { position: relative !important; }',
       '.watch-btn {',
       '  position: absolute; bottom: 8px; right: 8px;',
-      '  background: #ffd700; color: #000; border: none;',
-      '  padding: 6px 10px; border-radius: 6px; font-weight: 800;',
-      '  font-size: 12px; cursor: pointer; z-index: 12;',
-      '  box-shadow: 0 2px 10px rgba(0,0,0,0.55); font-family: inherit; white-space: nowrap;',
+      '  display: inline-flex; align-items: center; gap: 5px;',
+      '  padding: 6px 11px 6px 8px; border: 0; border-radius: 999px;',
+      '  background: linear-gradient(135deg, #ffe066 0%, #ffc107 46%, #ff9800 100%);',
+      '  color: #201000; font-family: inherit; font-size: 10.5px; font-weight: 900;',
+      '  letter-spacing: .6px; line-height: 1; text-transform: uppercase; white-space: nowrap;',
+      '  cursor: pointer; z-index: 12; overflow: hidden; isolation: isolate;',
+      '  box-shadow: 0 4px 14px -2px rgba(255,170,0,.55), inset 0 1px 0 rgba(255,255,255,.7), inset 0 -2px 6px rgba(180,90,0,.35);',
+      '  transition: transform .2s cubic-bezier(.34,1.56,.64,1), box-shadow .2s, filter .2s;',
       '}',
-      '.watch-btn:hover { background: #ffeb3b; }'
+      '.watch-btn::before { content: ""; position: absolute; inset: -2px; z-index: -1;',
+      '  background: linear-gradient(100deg, transparent 18%, rgba(255,255,255,.75) 48%, transparent 78%);',
+      '  transform: translateX(-160%) skewX(-12deg); transition: transform .6s cubic-bezier(.4,0,.2,1); }',
+      '.watch-btn:hover { transform: translateY(-2px) scale(1.05);',
+      '  box-shadow: 0 8px 22px -4px rgba(255,170,0,.8), inset 0 1px 0 rgba(255,255,255,.85);',
+      '  filter: saturate(1.12) brightness(1.04); }',
+      '.watch-btn:hover::before { transform: translateX(160%) skewX(-12deg); }',
+      '.watch-btn:active { transform: translateY(0) scale(.96); }',
+      '.watch-btn:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }',
+      '.watch-btn .wb-ico { display: grid; place-items: center; width: 16px; height: 16px;',
+      '  padding-left: 1px; border-radius: 50%; background: rgba(32,16,0,.85);',
+      '  color: #ffd54a; font-size: 7px; box-shadow: inset 0 0 6px rgba(0,0,0,.6); }',
+      '@media (max-width: 767px) {',
+      '  .watch-btn { padding: 5px 9px 5px 7px; font-size: 9.5px; gap: 4px; }',
+      '  .watch-btn .wb-ico { width: 14px; height: 14px; font-size: 6px; }',
+      '}'
     ].join('');
     document.head.appendChild(style);
 
@@ -6483,7 +6598,7 @@ document.addEventListener('click', function(e) {
       var btn = document.createElement('button');
       btn.className = 'watch-btn';
       btn.title = 'Watch ' + title + ' online';
-      btn.textContent = '🎬 Watch';
+      btn.innerHTML = '<span class="wb-ico">\u25B6</span><span>Watch</span>';
       btn.onclick = function (e) {
         e.stopPropagation();
         e.preventDefault();
