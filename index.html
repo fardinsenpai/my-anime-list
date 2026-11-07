@@ -30,7 +30,7 @@
   <link rel="manifest" href="manifest.json">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content"/>
   <title>Fardin's Anime Hub</title>
-  <link rel="stylesheet" href="style.css?v=20261106a">
+  <link rel="stylesheet" href="style.css?v=20261107a">
   <link rel="stylesheet" href="chat-styles.css?v=20261024z">
 <link rel="stylesheet" href="login-otp.css?v=20261024a">
   <link rel="stylesheet" href="duel-system.css">
@@ -206,6 +206,16 @@
       <path d="M24 44C26 48 30 50 32 50" stroke="#FFD700" stroke-width="3" stroke-linecap="round"/>
       <circle cx="32" cy="34" r="4" fill="#FFD700"/>
     </svg> Hot Takes 🔥
+  </a>
+</li>
+
+<li>
+  <a href="javascript:void(0)" id="wishlistBtn">
+    <svg width="32" height="32" viewBox="0 0 64 64" fill="none">
+      <path d="M32 54L10 32C4 26 4 16 12 10C18 6 26 8 32 14C38 8 46 6 52 10C60 16 60 26 54 32L32 54Z"
+            stroke="#FF4D8D" stroke-width="4" fill="rgba(255,77,141,0.14)"/>
+      <path d="M32 20V38M23 29H41" stroke="#FFD700" stroke-width="3.4" stroke-linecap="round"/>
+    </svg> Wish List 💖
   </a>
 </li>
 
@@ -1715,8 +1725,46 @@
   <script src="https://accounts.google.com/gsi/client" async defer></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="anime-fetch.js?v=20261104c"></script>
-<script src="script.js?v=20261106a"></script>
+<script src="script.js?v=20261107a"></script>
 <script src="login-otp.js?v=20261024n"></script>
+<script src="wishlist.js?v=20261107a"></script>
+
+<!-- === 💖 WISH LIST === -->
+<div class="wl-overlay" id="wlOverlay" hidden>
+  <div class="wl-panel" role="dialog" aria-modal="true" aria-labelledby="wlTitle">
+    <div class="wl-head">
+      <div class="wl-title" id="wlTitle">💖 Wish List</div>
+      <button class="wl-x" id="wlClose" type="button" aria-label="Close wish list">✕</button>
+    </div>
+    <div class="wl-sub" id="wlSub">Save any anime from the main list. Only you can see your own list.</div>
+    <div class="wl-tabs" id="wlTabs">
+      <button class="wl-tab on" type="button" data-wl-view="me">MY LIST</button>
+      <button class="wl-tab" type="button" data-wl-view="admin">FARDIN'S LIST</button>
+    </div>
+    <div class="wl-body" id="wlBody"></div>
+    <div class="wl-foot">
+      <a class="wl-add" id="wlAddLink" href="#grid">＋ Add anime from the main list</a>
+    </div>
+  </div>
+</div>
+
+<!-- === 📢 FIRST-WATCH NOTICE === -->
+<div class="wn-overlay" id="wnOverlay" hidden>
+  <div class="wn-card" role="dialog" aria-modal="true" aria-labelledby="wnTitle">
+    <button class="wn-x" id="wnClose" type="button" aria-label="Close notice">✕</button>
+    <div class="wn-badge" id="wnBadge">🖥️</div>
+    <div class="wn-kicker">NOTICE</div>
+    <div class="wn-title" id="wnTitle">You are on a PC</div>
+    <p class="wn-text" id="wnText"></p>
+    <a class="wn-link" id="wnLink" href="https://ublockorigin.com/" target="_blank" rel="noopener">Get uBlock Origin ↗</a>
+    <label class="wn-check"><input type="checkbox" id="wnDont" checked><span>Do not show it again</span></label>
+    <label class="wn-check"><input type="checkbox" id="wnUnderstand"><span>I understood it</span></label>
+    <div class="wn-actions">
+      <button class="wn-cancel" id="wnCancel" type="button">Cancel</button>
+      <button class="wn-ok" id="wnOk" type="button" disabled>Continue →</button>
+    </div>
+  </div>
+</div>
 
 
 <!-- === ADMIN PANEL === -->

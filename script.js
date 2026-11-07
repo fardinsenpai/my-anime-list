@@ -6426,11 +6426,11 @@ document.addEventListener('click', function(e) {
      without the trailing number), so no search page and no extra clicks.
      type:'slug' builds that path; type:'search' uses the site's search box. */
   var WATCH_SITES = [
-    { name: 'Hianime', tag: 'SUB', type: 'slug', url: 'https://hianime.dk/' },
-    { name: '9anime', tag: 'SUB', type: 'search', url: 'https://9anime.or.at/?s=' },
-    { name: 'AniDisk', tag: 'HINDI', type: 'slug', url: 'https://anidisk.org/anime/' },
-    { name: 'AnimeWorld', tag: 'HINDI', type: 'slug', url: 'https://watchanimeworld.one/series/' },
-    { name: 'AnimeVilla', tag: 'HINDI', type: 'slug', url: 'https://animevilla.org/anime/', suffix: '-hindi-dubbed/' }
+    { name: 'Hianime', tag: 'SUB', type: 'slug', url: 'https://hianime.dk/', icon: 'H', color: '#6ee7ff' },
+    { name: '9anime', tag: 'SUB', type: 'search', url: 'https://9anime.or.at/?s=', icon: '9', color: '#ff8a3d' },
+    { name: 'AniDisk', tag: 'HINDI', type: 'slug', url: 'https://anidisk.org/anime/', icon: 'AD', color: '#ffd700' },
+    { name: 'AnimeWorld', tag: 'HINDI', type: 'slug', url: 'https://watchanimeworld.one/series/', icon: 'AW', color: '#7cf29b' },
+    { name: 'AnimeVilla', tag: 'HINDI', type: 'slug', url: 'https://animevilla.org/anime/', suffix: '-hindi-dubbed/', icon: 'AV', color: '#ff6b9d' }
   ];
 
   /* "Naruto Shippuden" -> "naruto-shippuden"; drops punctuation/accents. */
@@ -6497,15 +6497,16 @@ document.addEventListener('click', function(e) {
   function buildServersHTML(title) {
     var rows = WATCH_SITES.map(function (site) {
       var tag = site.tag === 'SUB' ? 'tag-sub' : 'tag-hindi';
-      return '<button class="csite" data-url="' + buildWatchUrl(site, title).replace(/"/g, '&quot;') + '">' +
+      return '<button class="csite" type="button" style="--sc:' + site.color + '" data-url="' + buildWatchUrl(site, title).replace(/"/g, '&quot;') + '">' +
+        '<span class="csite-icon">' + site.icon + '</span>' +
         '<span class="csite-name">' + site.name + '</span>' +
         '<span class="csite-tag ' + tag + '">' + site.tag + '</span>' +
         '<span class="csite-go">↗</span></button>';
     }).join('');
-    return '<div class="csrv-head">🎬 SELECT A SERVER</div>' +
+    return '<div class="csrv-head"><span>SELECT A SERVER</span></div>' +
       '<div class="csrv-title">' + title.replace(/</g, '&lt;') + '</div>' +
       '<div class="csrv-list">' + rows + '</div>' +
-      '<button class="csrv-back">↩ Back</button>';
+      '<button class="csrv-back" type="button">↩ Back</button>';
   }
 
   /* Wire clicks once per card face (delegated on the grid). */
@@ -6518,7 +6519,7 @@ document.addEventListener('click', function(e) {
       if (siteBtn) {
         e.stopPropagation();
         e.preventDefault();
-        if (siteBtn.dataset.url) window.open(siteBtn.dataset.url, '_blank');
+        if (siteBtn.dataset.url) window.open(siteBtn.dataset.url, '_blank', 'noopener');
         return;
       }
       var back = e.target.closest('.csrv-back');
