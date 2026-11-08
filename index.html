@@ -30,7 +30,15 @@
   <link rel="manifest" href="manifest.json">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content"/>
   <title>Fardin's Anime Hub</title>
-  <link rel="stylesheet" href="style.css?v=20261107c">
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.166.1/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.166.1/examples/jsm/"
+    }
+  }
+  </script>
+  <link rel="stylesheet" href="style.css?v=20261107e">
   <link rel="stylesheet" href="chat-styles.css?v=20261024z">
 <link rel="stylesheet" href="login-otp.css?v=20261024a">
   <link rel="stylesheet" href="duel-system.css">
@@ -1725,9 +1733,9 @@
   <script src="https://accounts.google.com/gsi/client" async defer></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="anime-fetch.js?v=20261104c"></script>
-<script src="script.js?v=20261107c"></script>
+<script src="script.js?v=20261107e"></script>
 <script src="login-otp.js?v=20261024n"></script>
-<script src="wishlist.js?v=20261107c"></script>
+<script src="wishlist.js?v=20261107e"></script>
 
 <!-- === 💖 WISH LIST === -->
 <div class="wl-overlay" id="wlOverlay" hidden>

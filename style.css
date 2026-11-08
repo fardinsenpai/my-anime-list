@@ -3891,6 +3891,183 @@ body.perf-no-counter-anim .td-base i { animation: none !important; }
   margin-top: -13px;
 }
 
+/* ══════════════════════════════════════════════════════════════════════
+   🧍 FULL-SCREEN 3D MASCOT + MANGA BUBBLE (guide-mascot.js)
+   The canvas is a transparent overlay above the tour dim. The tour card
+   turns into a hand-drawn speech bubble pinned above her head.
+   ══════════════════════════════════════════════════════════════════════ */
+.guide-mascot-canvas {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 100001;
+  display: none;
+  pointer-events: none;
+  contain: strict;
+}
+body.tour-mascot-on .guide-mascot-canvas { display: block; }
+
+.tour-tooltip--mascot {
+  width: min(380px, calc(100vw - 24px));
+  border: 0;
+  background: none;
+  box-shadow: none;
+  animation: none;
+  color: #171a24;
+}
+.tour-tooltip--mascot::before { display: none; }
+.tour-tooltip--mascot .tour-arrow { display: none; }
+.tour-tooltip--mascot .tour-guide { display: none; }
+
+.tour-tooltip--mascot .tour-tooltip-inner {
+  position: relative;
+  padding: 14px 16px 13px;
+  border: 2.5px solid #14181f;
+  border-radius: 30px 32px 26px 34px;
+  background: radial-gradient(120% 90% at 8% 0%, #ffffff 0%, #fffdf4 55%, #f7f0dd 100%);
+  box-shadow:
+    0 8px 0 -2px rgba(8, 10, 16, 0.5),
+    0 26px 50px -12px rgba(0, 0, 0, 0.7),
+    inset 0 0 0 3px rgba(255, 255, 255, 0.7);
+  transform: rotate(-0.6deg);
+  animation: tourBubbleIn 0.3s cubic-bezier(.2, 1.2, .35, 1);
+}
+.tour-tooltip--mascot .tour-tooltip-inner::after {
+  content: '';
+  position: absolute;
+  left: var(--tail-x, 50%);
+  bottom: -15px;
+  width: 24px;
+  height: 24px;
+  margin-left: -12px;
+  background: #fffdf4;
+  border-right: 2.5px solid #14181f;
+  border-bottom: 2.5px solid #14181f;
+  border-radius: 0 0 7px 0;
+  transform: rotate(45deg) skew(4deg, 4deg);
+}
+@keyframes tourBubbleIn {
+  from { opacity: 0; transform: rotate(-0.6deg) translateY(10px) scale(.96); }
+  to   { opacity: 1; transform: rotate(-0.6deg) translateY(0) scale(1); }
+}
+
+.tour-mascot-tag { display: none; }
+.tour-tooltip--mascot .tour-mascot-tag {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+  margin: 0 0 7px;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 2px;
+  color: #9a7420;
+}
+.tour-tooltip--mascot .tour-mascot-tag i {
+  font-style: normal;
+  font-family: 'Exo 2', sans-serif;
+  font-size: 8px;
+  letter-spacing: 1.4px;
+  color: #9aa1ad;
+}
+
+.tour-tooltip--mascot .tour-title {
+  padding: 0 0 6px;
+  font-family: 'Bangers', 'Orbitron', sans-serif;
+  font-size: 21px;
+  font-weight: 400;
+  letter-spacing: 0.9px;
+  line-height: 1.12;
+  color: #14181f;
+}
+.tour-tooltip--mascot .tour-desc {
+  padding: 0 0 10px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: #333a49;
+}
+.tour-tooltip--mascot .tour-desc strong { color: #a8770d; }
+
+.tour-tooltip--mascot .tour-bar {
+  height: 5px;
+  margin: 0 0 10px;
+  border: 1.5px solid #14181f;
+  border-radius: 99px;
+  background: #e7e0cd;
+}
+.tour-tooltip--mascot .tour-bar span {
+  background: repeating-linear-gradient(45deg, #ffd166 0 6px, #ff9a3c 6px 12px);
+  box-shadow: none;
+}
+
+.tour-tooltip--mascot .tour-footer {
+  padding: 9px 0 0;
+  border-top: 1.5px dashed rgba(20, 24, 31, 0.25);
+  background: none;
+  border-radius: 0;
+}
+.tour-tooltip--mascot .tour-progress {
+  font-size: 10px;
+  letter-spacing: 0.6px;
+  color: #7a8190;
+}
+.tour-tooltip--mascot .tour-btn {
+  border: 2px solid #14181f;
+  border-radius: 10px;
+  box-shadow: 0 3px 0 #14181f;
+  transform: translateY(0);
+}
+.tour-tooltip--mascot .tour-btn:active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 #14181f;
+}
+.tour-tooltip--mascot .tour-btn-next {
+  background: linear-gradient(135deg, #ffd166, #ffb03a);
+  color: #14181f;
+  box-shadow: 0 3px 0 #14181f;
+}
+.tour-tooltip--mascot .tour-btn-prev,
+.tour-tooltip--mascot .tour-btn-skip {
+  background: #fffdf4;
+  color: #14181f;
+}
+.tour-tooltip--mascot .tour-btn-prev:hover,
+.tour-tooltip--mascot .tour-btn-skip:hover { background: #fff3cf; }
+.tour-tooltip--mascot .tour-btn-next:hover { filter: brightness(1.05); }
+
+.tour-tooltip--mascot .tour-close-btn {
+  top: 9px;
+  right: 9px;
+  width: 26px;
+  height: 26px;
+  border: 2px solid #14181f;
+  border-radius: 50%;
+  background: #fffdf4;
+  color: #14181f;
+  box-shadow: 0 2px 0 #14181f;
+  font-size: 15px;
+}
+.tour-tooltip--mascot .tour-close-btn:hover {
+  background: #ffe7ea;
+  color: #14181f;
+  border-color: #14181f;
+}
+
+@media (max-width: 767px) {
+  .tour-tooltip--mascot { width: calc(100vw - 20px); }
+  .tour-tooltip--mascot .tour-tooltip-inner {
+    padding: 12px 13px 11px;
+    border-radius: 24px 26px 22px 28px;
+  }
+  .tour-tooltip--mascot .tour-title { font-size: 18px; }
+  .tour-tooltip--mascot .tour-desc { font-size: 12px; line-height: 1.55; }
+  .tour-tooltip--mascot .tour-btn { padding: 7px 12px; font-size: 11px; }
+  .tour-tooltip--mascot .tour-mascot-tag { display: none; }
+  .tour-tooltip--mascot .tour-footer { gap: 6px; }
+}
+
 /* ── finish confetti ── */
 .tour-confetti {
   position: fixed;

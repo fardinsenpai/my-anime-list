@@ -4674,11 +4674,65 @@ document.addEventListener('click', function(e) {
   var closeBtn, titleEl, descEl, progressEl, prevBtn, nextBtn, skipBtn;
   var guideDoll, guideEyes, guideForm, barEl;
   var baseGaze = { x: 0, y: 0 };
+  var mascot = null, mascotLoading = null, lastStepRect = null;
+  var bubbleSide = -1;
+  var MASCOT_SRC = './guide-mascot.js?v=20261107e';
 
   function applyGaze(x, y) {
     if (!guideEyes) return;
     guideEyes.style.setProperty('--td-ex', x.toFixed(2) + 'px');
     guideEyes.style.setProperty('--td-ey', y.toFixed(2) + 'px');
+  }
+
+  /* ── full-screen 3D mascot ──────────────────────────────────────────
+     The tour guide is a WebGL figure that stands on top of the page (not
+     inside a card): she walks toward each highlighted element, points at
+     it, and the tour bubble is pinned above her head. The old in-card doll
+     stays as a fallback until the engine is ready / if WebGL is missing. */
+  function loadMascot() {
+    if (mascot || mascotLoading) return;
+    mascotLoading = import(MASCOT_SRC)
+      .then(function (mod) {
+        return mod.createGuide({
+          onAnchor: function (x, y) {
+            if (tourActive) anchorBubble(x, y);
+          }
+        });
+      })
+      .then(function (api) {
+        mascot = api;
+        mascotLoading = null;
+        if (tourActive) enableMascotMode();
+        return api;
+      })
+      .catch(function () { mascotLoading = null; });
+  }
+
+  function enableMascotMode() {
+    if (!tooltip || !mascot) return;
+    tooltip.classList.add('tour-tooltip--mascot');
+    document.body.classList.add('tour-mascot-on');
+    if (lastStepRect) {
+      mascot.show();
+      mascot.setStep(lastStepRect, bubbleSide);
+    }
+  }
+
+  function anchorBubble(x, y) {
+    if (!tooltip || !tourActive) return;
+    if (!tooltip.classList.contains('tour-tooltip--mascot')) return;
+    var tw = tooltip.offsetWidth || 360;
+    var th = tooltip.offsetHeight || 180;
+    var vw = window.innerWidth;
+    /* Keep the pointing arm visible: on desktop the bubble sits on the side
+       away from whatever she is pointing at. */
+    var shift = 0;
+    if (vw >= 768) shift = bubbleSide * Math.min(120, tw * 0.3);
+    var left = Math.max(10, Math.min(vw - tw - 10, x + shift - tw / 2));
+    var top = Math.max(10, y - th - 18);
+    tooltip.style.left = Math.round(left) + 'px';
+    tooltip.style.top = Math.round(top) + 'px';
+    tooltip.style.setProperty('--tail-x', Math.round(Math.max(20, Math.min(tw - 20, x - left))) + 'px');
   }
 
   /* A real 3D figure, built from depth layers — no avatar image anywhere. */
@@ -4733,6 +4787,7 @@ document.addEventListener('click', function(e) {
     tooltip.className = 'tour-tooltip';
     tooltip.innerHTML =
       '<div class="tour-tooltip-inner">' +
+        '<div class="tour-mascot-tag"><span>RAPAYEL</span><i>ALISA MIKHAILOVNA KUJOU</i></div>' +
         '<button class="tour-close-btn">&times;</button>' +
         '<div class="tour-guide">' +
           DOLL_HTML +
@@ -4825,7 +4880,13 @@ document.addEventListener('click', function(e) {
 
   function finishTour() {
     burstConfetti();
-    endTour();
+    clearInterval(autoCloseTimer);
+    if (mascot) {
+      mascot.celebrate();
+      setTimeout(endTour, 750);
+    } else {
+      endTour();
+    }
   }
 
   function showStep(index) {
@@ -4882,10 +4943,23 @@ document.addEventListener('click', function(e) {
         }, 1000);
       }
 
+      lastStepRect = rect;
+      var targetCx = rect.left + rect.width / 2;
+      bubbleSide = targetCx >= window.innerWidth * 0.5 ? -1 : 1;
+      if (mascot) {
+        mascot.show();
+        mascot.setStep(rect, bubbleSide);
+      }
+
       tooltip.style.display = 'block';
-      tooltip.style.left = '-9999px';
-      tooltip.style.top = '-9999px';
-      positionTooltip(rect, side, align);
+      if (tooltip.classList.contains('tour-tooltip--mascot') && mascot) {
+        var hp = mascot.headScreen();
+        anchorBubble(hp.x, hp.y);
+      } else {
+        tooltip.style.left = '-9999px';
+        tooltip.style.top = '-9999px';
+        positionTooltip(rect, side, align);
+      }
 
       /* eyes track the spotlight target for this step */
       if (guideDoll) {
@@ -4980,6 +5054,9 @@ document.addEventListener('click', function(e) {
     overlay.style.display = 'none';
     highlight.style.display = 'none';
     tooltip.style.display = 'none';
+    tooltip.classList.remove('tour-tooltip--mascot');
+    document.body.classList.remove('tour-mascot-on');
+    if (mascot) mascot.hide();
     closeMenu();
   }
 
@@ -4989,6 +5066,11 @@ document.addEventListener('click', function(e) {
     currentStep = 0;
     tourSteps = initSteps();
     closeMenu();
+    loadMascot();
+    if (mascot) {
+      tooltip.classList.add('tour-tooltip--mascot');
+      document.body.classList.add('tour-mascot-on');
+    }
     setTimeout(function () { showStep(0); }, 300);
   }
 
@@ -5130,7 +5212,11 @@ document.addEventListener('click', function(e) {
   }
 
   var p = window.location.pathname.replace(/\/+$/, '');
-  if (!localStorage.getItem('fardin_tour_done') && (p.endsWith('/home') || p.endsWith('/my-anime-list') || p === '' || p === '/')) {
+  var forceTour = /[?&]tour=1\b/.test(window.location.search);
+  if (forceTour) {
+    localStorage.setItem('fardin_tour_done', '1');
+    setTimeout(startTour, 700);
+  } else if (!localStorage.getItem('fardin_tour_done') && (p.endsWith('/home') || p.endsWith('/my-anime-list') || p === '' || p === '/')) {
     localStorage.setItem('fardin_tour_done', '1');
     setTimeout(startTour, 1000);
   }
@@ -5141,6 +5227,19 @@ document.addEventListener('click', function(e) {
     end: endTour,
     next: function () { if (tourActive && currentStep < tourSteps.length - 1) showStep(currentStep + 1); },
     prev: function () { if (tourActive && currentStep > 0) showStep(currentStep - 1); }
+  };
+  window.__tourDebug = function () {
+    return {
+      active: tourActive,
+      step: currentStep,
+      steps: tourSteps ? tourSteps.length : 0,
+      mascot: !!mascot,
+      loading: !!mascotLoading,
+      ttStyle: tooltip ? tooltip.getAttribute('style') : null,
+      ttDisplay: tooltip ? getComputedStyle(tooltip).display : null,
+      ttRect: tooltip ? (function () { var r = tooltip.getBoundingClientRect(); return { x: Math.round(r.x), y: Math.round(r.y), w: Math.round(r.width), h: Math.round(r.height) }; })() : null,
+      rect: lastStepRect ? { x: Math.round(lastStepRect.x), y: Math.round(lastStepRect.y), w: Math.round(lastStepRect.width), h: Math.round(lastStepRect.height) } : null
+    };
   };
 
   // ========== Hot Takes ==========
