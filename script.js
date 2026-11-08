@@ -1723,16 +1723,24 @@ window.addEventListener("load", showCardsOnScroll);
       return (2 * hit) / (A.length + B.length);
     }
 
-window.onscroll = function() {
+/* Sticky search visibility — throttled to one read per animation frame.
+   The old handler measured layout on every scroll event (dozens per second). */
+(function () {
+  var ticking = false;
+  function paintSticky() {
+    ticking = false;
     var mainSearch = document.getElementById("searchBox");
     var stickySearch = document.getElementById('stickySearch');
+    if (!mainSearch || !stickySearch) return;
     var rect = mainSearch.getBoundingClientRect();
-    if (rect.bottom < 0) {
-        stickySearch.style.display = "block";
-    } else {
-        stickySearch.style.display = "none";
-    }
-};
+    stickySearch.style.display = rect.bottom < 0 ? "block" : "none";
+  }
+  window.addEventListener('scroll', function () {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(paintSticky);
+  }, { passive: true });
+})();
 
 // Search bar interaction logic
 function filterAnime(value) {
@@ -1750,20 +1758,51 @@ function filterAnime(value) {
     updateBadgeNumbers();
 }
 
+var hubActiveCounters = 0;
 function counterUp(id, target, duration) {
-  let count = 0;
   const element = document.getElementById(id);
-  const steps = duration / 20;
-  const increment = target / steps;
+  if (!element) return;
+  duration = duration || 1200;
+  // iv) While a counter is running, heavy decoration (thunder, petals,
+  // particles, quote rotation) checks hubCounting() and stays quiet.
+  hubActiveCounters++;
+  window.counterThrottleEnd = Math.max(window.counterThrottleEnd || 0, Date.now() + duration + 200);
+  document.body.classList.add('hub-counting');
 
-  const interval = setInterval(() => {
-    count += increment;
-    if (count >= target) {
-      count = target;
-      clearInterval(interval);
+  var finished = false;
+  var guard = null;
+
+  function finish() {
+    if (finished) return;
+    finished = true;
+    if (guard) clearTimeout(guard);
+    element.innerText = target + "+";
+    hubActiveCounters--;
+    if (hubActiveCounters <= 0) {
+      hubActiveCounters = 0;
+      window.counterThrottleEnd = 0;
+      document.body.classList.remove('hub-counting');
     }
-    element.innerText = Math.floor(count) + "+";
-  }, 20);
+  }
+
+  // A hidden tab has no animation frames — settle the number and release the
+  // "counting" lock instead of freezing the whole decoration budget.
+  if (document.hidden) { finish(); return; }
+  guard = setTimeout(finish, duration + 400);
+
+  const startAt = performance.now();
+  function frame(now) {
+    if (finished) return;
+    var t = Math.min(1, (now - startAt) / duration);
+    var eased = 1 - Math.pow(1 - t, 3);           // ease-out, no jank
+    element.innerText = Math.floor(target * eased) + "+";
+    if (t < 1) {
+      requestAnimationFrame(frame);
+      return;
+    }
+    finish();
+  }
+  requestAnimationFrame(frame);
 }
 function autoFilter(category) {
     const cards = document.querySelectorAll('.card');
@@ -1800,11 +1839,47 @@ function autoFilter(category) {
 }
 // script.js
 
+/* ══════════════════════════════════════════════════════════════════
+   🧊 BOOT BUDGET — the first seconds after a reload belong to the page,
+   not to decoration. Every ambient effect checks these clocks, so the
+   counters, poster decoding and first paint get the main thread alone.
+   ══════════════════════════════════════════════════════════════════ */
+var HUB_BOOT_AT = Date.now();
+var hubThunderQuietUntil = HUB_BOOT_AT + 10000;   // i)   10s: no thunder
+var hubSakuraQuietUntil  = HUB_BOOT_AT + 8000;    // iii)  8s: max 3 petals
+var hubCardQuietUntil    = HUB_BOOT_AT + 12000;   // ii)  12s: no card float
+var hubBackendAt         = HUB_BOOT_AT + 20000;   // v)   20s: backend sync
+
+/* iv) the counter animation owns the main thread while it runs */
+function hubCounting() { return Date.now() < (window.counterThrottleEnd || 0); }
+/* vi) the visitor is reading a card — keep the sky quiet */
+function hubWatchingCard() {
+  return !!document.querySelector('.card.flipped, .card.show-servers');
+}
+/* v/vii) run a backend task once the page has been idle for a while */
+function hubOnIdle(fn) {
+  var wait = Math.max(0, hubBackendAt - Date.now());
+  setTimeout(function () {
+    if (typeof window.requestIdleCallback === 'function') {
+      window.requestIdleCallback(fn, { timeout: 3000 });
+    } else {
+      fn();
+    }
+  }, wait);
+}
+/* vii) pause every decorative CSS animation while the tab is hidden */
+document.addEventListener('visibilitychange', function () {
+  document.body.classList.toggle('hub-hidden', document.hidden);
+});
+document.body.classList.toggle('hub-hidden', document.hidden);
+
 function createSakura() {
-    // Never build petals while the tab is hidden, and keep a hard cap on how
-    // many exist at once — the old version added one every 550ms forever.
+    // Never build petals while the tab is hidden or the counter is animating.
     if (document.hidden) return;
+    if (hubCounting()) return;
     var MAX_PETALS = (typeof window.__lightDevice !== 'undefined' && window.__lightDevice) ? 6 : 18;
+    // iii) Very few sakura will drop when the web is starting — 3 for 8s
+    if (Date.now() < hubSakuraQuietUntil) MAX_PETALS = Math.min(MAX_PETALS, 3);
     if (document.querySelectorAll('.sakura').length >= MAX_PETALS) return;
     const sakura = document.createElement("div");
     sakura.classList.add("sakura");
@@ -1851,8 +1926,11 @@ function createSakura() {
     }, (fallDuration + delay) * 1000 + 500);
 }
 
-// Periodic petal regeneration for continuous effect
+// Periodic petal regeneration for continuous effect.
+// One interval, one budget — createSakura() itself throttles the first 8s and
+// returns instantly while the counter animates or the tab is hidden.
 var sakuraInterval = setInterval(createSakura, 550);
+window.__perfSakuraInterval = sakuraInterval;
 
 /* === FARDIN'S OTAKU LIST - PREMIUM SAKURA CHAT JS === */
 
@@ -2124,6 +2202,7 @@ class LightningBolt {
 const canvas = document.getElementById('lightningCanvas');
 if (canvas) {
   const ctx = canvas.getContext('2d');
+  const coarsePointer = !!(window.matchMedia && window.matchMedia('(pointer: coarse)').matches);
 
   function resizeCanvas() {
     canvas.width = window.innerWidth;
@@ -2136,28 +2215,62 @@ if (canvas) {
   let bolts = [];
   let lightningTimeout = null;
   let flashLevel = 0;
+  let rafId = null;
+  let lightningEnabled = !coarsePointer;
 
   /* A short full-screen brightness pulse that fades out — the "thunder" feel. */
   function flashCanvas() {
     flashLevel = 0.5 + Math.random() * 0.4;
   }
 
+  function nextGap() {
+    return Math.random() < 0.18 ? 600 + Math.random() * 900 : 2600 + Math.random() * 6000;
+  }
+
+  function scheduleNext(ms) {
+    if (!lightningEnabled) return;
+    if (lightningTimeout) clearTimeout(lightningTimeout);
+    lightningTimeout = setTimeout(createLightning, ms);
+  }
+
+  /* The rAF loop only exists while a bolt or a flash is on screen. */
+  function ensureLoop() {
+    if (rafId === null) rafId = requestAnimationFrame(animate);
+  }
+
   function createLightning() {
+    lightningTimeout = null;
+    if (!lightningEnabled) return;
+
+    // i) Thunder drops on reload, no thunder for the next 10 seconds
+    if (Date.now() < hubThunderQuietUntil) {
+      scheduleNext(Math.min(2000, Math.max(250, hubThunderQuietUntil - Date.now() + 120)));
+      return;
+    }
+
+    // iv) never fight the counters, and never run in a hidden tab
+    if (document.hidden) { scheduleNext(4000); return; }
+    if (hubCounting()) { scheduleNext(1200); return; }
+
+    // vi) a flipped / watching card gets a calm sky
+    if (hubWatchingCard()) { scheduleNext(2500); return; }
+
     // Occasionally a double-strike (two bolts a hair apart)
     const count = Math.random() < 0.3 ? 2 : 1;
     for (let i = 0; i < count; i++) {
       setTimeout(() => {
+        if (!lightningEnabled) return;
         bolts.push(new LightningBolt(canvas));
         if (i === 0) flashCanvas();
+        ensureLoop();
       }, i * 90);
     }
-    // next strike, with a sometimes-dramatic pause
-    const gap = Math.random() < 0.18 ? 600 + Math.random() * 900 : 2600 + Math.random() * 6000;
-    lightningTimeout = setTimeout(createLightning, gap);
+    scheduleNext(nextGap());
   }
 
   function animate() {
-    if (matchMedia('(pointer: coarse)').matches) return;
+    rafId = null;
+    if (!lightningEnabled) return;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     // thunder flash (fills the whole canvas softly, then decays)
@@ -2170,23 +2283,40 @@ if (canvas) {
     bolts.forEach(b => b.draw());
     bolts = bolts.filter(b => !b.finished);
 
-    requestAnimationFrame(animate);
+    // vii) idle sky = zero animation frames
+    if (bolts.length || flashLevel > 0.001) ensureLoop();
+    else ctx.clearRect(0, 0, canvas.width, canvas.height);
   }
-
-  animate();
-  createLightning();
 
   window.__perfLightning = {
     stop: function() {
+      lightningEnabled = false;
       if (lightningTimeout) { clearTimeout(lightningTimeout); lightningTimeout = null; }
+      if (rafId !== null) { cancelAnimationFrame(rafId); rafId = null; }
       bolts = [];
       flashLevel = 0;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
     },
     start: function() {
-      createLightning();
+      if (coarsePointer) return;
+      lightningEnabled = true;
+      if (!lightningTimeout) createLightning();
     }
   };
+
+  /* vii) hidden tab: stop drawing immediately, resume gently on return */
+  document.addEventListener('visibilitychange', function () {
+    if (document.hidden) {
+      if (rafId !== null) { cancelAnimationFrame(rafId); rafId = null; }
+      bolts = [];
+      flashLevel = 0;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    } else if (lightningEnabled && !lightningTimeout) {
+      scheduleNext(1200);
+    }
+  });
+
+  if (lightningEnabled) createLightning();
 }
 
 // ── Back to Top Button ──
@@ -2669,7 +2799,8 @@ document.addEventListener('DOMContentLoaded', () => {
   loadMyAvatar();        // the visitor's own choice (if any) wins for their side
   restoreChatFromStorage();
   repaintAllAvatars();   // the welcome line's avatar follows the published CHAT_AVATARS
-  injectCardMetaFromRatings();
+  // v) the ratings repair pass is heavy (291 cards) — it waits for idle time
+  hubOnIdle(injectCardMetaFromRatings);
   applyBurningCard();
 });
 
@@ -4541,7 +4672,57 @@ document.addEventListener('click', function(e) {
   var tourSteps;
   var overlay, highlight, tooltip, arrow, autoCloseTimer, autoCloseCount;
   var closeBtn, titleEl, descEl, progressEl, prevBtn, nextBtn, skipBtn;
-  var guideAva, guideImg, guideForm, barEl;
+  var guideDoll, guideEyes, guideForm, barEl;
+  var baseGaze = { x: 0, y: 0 };
+
+  function applyGaze(x, y) {
+    if (!guideEyes) return;
+    guideEyes.style.setProperty('--td-ex', x.toFixed(2) + 'px');
+    guideEyes.style.setProperty('--td-ey', y.toFixed(2) + 'px');
+  }
+
+  /* A real 3D figure, built from depth layers — no avatar image anywhere. */
+  var DOLL_HTML =
+    '<div class="tour-doll" aria-hidden="true">' +
+      '<div class="td-scene">' +
+        '<div class="td-rig">' +
+          '<div class="td-stage">' +
+            '<div class="td-backhair"></div>' +
+            '<div class="td-neck"></div>' +
+            '<div class="td-body">' +
+              '<span class="td-shirt"></span>' +
+              '<span class="td-lapel td-lapel-l"></span>' +
+              '<span class="td-lapel td-lapel-r"></span>' +
+              '<span class="td-pin"></span>' +
+              '<span class="td-ribbon"><i></i></span>' +
+            '</div>' +
+            '<div class="td-head">' +
+              '<div class="td-face">' +
+                '<span class="td-brow td-brow-l"></span>' +
+                '<span class="td-brow td-brow-r"></span>' +
+                '<span class="td-eyes">' +
+                  '<span class="td-eye td-eye-l"><i class="td-iris"></i><i class="td-pupil"></i><i class="td-glint"></i><i class="td-lid"></i></span>' +
+                  '<span class="td-eye td-eye-r"><i class="td-iris"></i><i class="td-pupil"></i><i class="td-glint"></i><i class="td-lid"></i></span>' +
+                '</span>' +
+                '<span class="td-blush td-blush-l"></span>' +
+                '<span class="td-blush td-blush-r"></span>' +
+                '<span class="td-mouth"></span>' +
+              '</div>' +
+            '</div>' +
+            '<div class="td-crown"></div>' +
+            '<div class="td-bangs">' +
+              '<span class="td-bang-1"></span><span class="td-bang-2"></span><span class="td-bang-3"></span><span class="td-bang-4"></span><span class="td-bang-5"></span>' +
+            '</div>' +
+            '<div class="td-lock td-lock-l"></div>' +
+            '<div class="td-lock td-lock-r"></div>' +
+            '<div class="td-ahoge"></div>' +
+            '<div class="td-rim"></div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="td-base"><i></i></div>' +
+      '</div>' +
+      '<div class="td-holo"></div>' +
+    '</div>';
 
   function initTour() {
     overlay = document.createElement('div');
@@ -4554,10 +4735,11 @@ document.addEventListener('click', function(e) {
       '<div class="tour-tooltip-inner">' +
         '<button class="tour-close-btn">&times;</button>' +
         '<div class="tour-guide">' +
-          '<div class="tour-guide-ava"><img alt=""></div>' +
+          DOLL_HTML +
           '<div class="tour-guide-meta">' +
             '<span class="tour-guide-name">RAPAYEL</span>' +
-            '<span class="tour-guide-form"></span>' +
+            '<span class="tour-guide-form">ALISA MIKHAILOVNA KUJOU</span>' +
+            '<span class="tour-guide-status"><i></i>Hologram online</span>' +
           '</div>' +
           '<span class="tour-guide-tag">GUIDE</span>' +
         '</div>' +
@@ -4588,10 +4770,30 @@ document.addEventListener('click', function(e) {
     prevBtn = tooltip.querySelector('.tour-btn-prev');
     nextBtn = tooltip.querySelector('.tour-btn-next');
     skipBtn = tooltip.querySelector('.tour-btn-skip');
-    guideAva = tooltip.querySelector('.tour-guide-ava');
-    guideImg = tooltip.querySelector('.tour-guide-ava img');
+    guideDoll = tooltip.querySelector('.tour-doll');
+    guideEyes = tooltip.querySelector('.td-eyes');
     guideForm = tooltip.querySelector('.tour-guide-form');
     barEl = tooltip.querySelector('.tour-bar span');
+
+    /* live parallax: the figure turns toward the cursor, eyes follow. */
+    tooltip.addEventListener('mousemove', function (e) {
+      if (!guideDoll) return;
+      var r = guideDoll.getBoundingClientRect();
+      if (!r.width) return;
+      var nx = Math.max(-1, Math.min(1, (e.clientX - (r.left + r.width / 2)) / (r.width * 1.4)));
+      var ny = Math.max(-1, Math.min(1, (e.clientY - (r.top + r.height / 2)) / (r.height * 1.4)));
+      guideDoll.classList.add('td-live');
+      guideDoll.style.setProperty('--td-ry', (nx * 26).toFixed(1) + 'deg');
+      guideDoll.style.setProperty('--td-rx', (-ny * 14).toFixed(1) + 'deg');
+      applyGaze(nx * 1.6, ny * 1.2);
+    });
+    tooltip.addEventListener('mouseleave', function () {
+      if (!guideDoll) return;
+      guideDoll.classList.remove('td-live');
+      guideDoll.style.setProperty('--td-ry', '0deg');
+      guideDoll.style.setProperty('--td-rx', '0deg');
+      applyGaze(baseGaze.x, baseGaze.y);
+    });
 
     closeBtn.addEventListener('click', function () { clearInterval(autoCloseTimer); endTour(); });
     prevBtn.addEventListener('click', function () { if (currentStep > 0) showStep(currentStep - 1); });
@@ -4602,16 +4804,8 @@ document.addEventListener('click', function(e) {
     skipBtn.addEventListener('click', function () { clearInterval(autoCloseTimer); endTour(); });
   }
 
-  /* Each step is hosted by one of Fardin's waifus; Rapayel is the guide
-     persona and the portrait changes form as the tour moves along. */
-  function tourForm(name) {
-    if (typeof waifus !== 'undefined' && waifus) {
-      for (var i = 0; i < waifus.length; i++) {
-        if (waifus[i].name === name) return waifus[i];
-      }
-    }
-    return { name: name, img: '' };
-  }
+  /* Rapayel's body is a single fixed 3D figure — Alisa Mikhailovna Kujou.
+     She never swaps avatars; the model itself reacts to each stop. */
 
   function burstConfetti() {
     var colors = ['#ffd166', '#ff6b9d', '#00e5ff', '#a78bfa', '#4ade80'];
@@ -4666,23 +4860,12 @@ document.addEventListener('click', function(e) {
       progressEl.textContent = (index + 1) + ' of ' + tourSteps.length;
       if (barEl) barEl.style.width = (((index + 1) / tourSteps.length) * 100).toFixed(1) + '%';
 
-      /* Rapayel changes form for every stop of the tour. */
-      var g = step.guide ? tourForm(step.guide) : null;
-      if (g && guideAva && guideImg && guideForm) {
-        guideAva.classList.remove('fallback');
-        guideAva.setAttribute('data-initial', String(g.name || 'R').charAt(0).toUpperCase());
-        guideForm.textContent = 'FORM \u00B7 ' + String(g.name || 'RAPAYEL').toUpperCase();
-        guideImg.alt = g.name || 'Rapayel';
-        guideImg.onerror = function () { guideAva.classList.add('fallback'); };
-        guideImg.src = g.img || '';
-      }
-
-      /* warm the next portrait only — preloading all 22 would hammer the
-         network on the first visit, which matters on light devices. */
-      var nextGuide = tourSteps[index + 1] && tourSteps[index + 1].guide;
-      if (nextGuide) {
-        var nw = tourForm(nextGuide);
-        if (nw.img) { var nimg = new Image(); nimg.src = nw.img; }
+      /* Alisa reacts to every stop: a small hop, then she looks at the
+         highlighted element instead of staring straight ahead. */
+      if (guideDoll) {
+        guideDoll.classList.remove('td-pop');
+        void guideDoll.offsetWidth;
+        guideDoll.classList.add('td-pop');
       }
 
       prevBtn.style.display = index === 0 ? 'none' : '';
@@ -4703,6 +4886,18 @@ document.addEventListener('click', function(e) {
       tooltip.style.left = '-9999px';
       tooltip.style.top = '-9999px';
       positionTooltip(rect, side, align);
+
+      /* eyes track the spotlight target for this step */
+      if (guideDoll) {
+        var dr = guideDoll.getBoundingClientRect();
+        if (dr.width) {
+          baseGaze = {
+            x: Math.max(-1.5, Math.min(1.5, (rect.left + rect.width / 2 - (dr.left + dr.width / 2)) / 260)),
+            y: Math.max(-1.3, Math.min(1.3, (rect.top + rect.height / 2 - (dr.top + dr.height / 2)) / 280))
+          };
+          applyGaze(baseGaze.x, baseGaze.y);
+        }
+      }
     };
 
     if (step.sidebarTransition) {
@@ -6586,15 +6781,8 @@ document.addEventListener('click', function(e) {
       var titleEl = card.querySelector('.title') || card.querySelector('.back-title');
       var title = titleEl ? titleEl.textContent.trim() : '';
 
-      /* build side 3 — the server picker face */
-      var inner = card.querySelector('.card-inner');
-      if (inner && !card.querySelector('.card-servers')) {
-        var face = document.createElement('div');
-        face.className = 'card-servers';
-        face.innerHTML = buildServersHTML(title);
-        inner.appendChild(face);
-      }
-
+      /* side 3 (the server picker) is built on the first Watch click —
+         291 server lists at boot was the single heaviest part of first paint */
       var btn = document.createElement('button');
       btn.className = 'watch-btn';
       btn.title = 'Watch ' + title + ' online';
@@ -6647,7 +6835,21 @@ document.addEventListener('click', function(e) {
     });
   }
 
+  /* Build the server face lazily — only when the visitor actually watches. */
+  function ensureServersFace(card) {
+    if (!card || card.querySelector('.card-servers')) return;
+    var inner = card.querySelector('.card-inner');
+    if (!inner) return;
+    var titleEl = card.querySelector('.title') || card.querySelector('.back-title');
+    var title = titleEl ? titleEl.textContent.trim() : '';
+    var face = document.createElement('div');
+    face.className = 'card-servers';
+    face.innerHTML = buildServersHTML(title);
+    inner.appendChild(face);
+  }
+
   function openServersFace(card) {
+    ensureServersFace(card);
     // close any other open server faces, then flip this one
     document.querySelectorAll('.card.show-servers').forEach(function (c) {
       if (c !== card) c.classList.remove('show-servers');
@@ -6680,9 +6882,18 @@ document.addEventListener('click', function(e) {
 
   // 5. Random card tilt
   function randomizeCardTilt() {
-    if (document.body.classList.contains('perf-no-card-float')) return;
+    // vii) No extra script will work when the user does not see it.
+    // Cards out of display won't float — only tilt cards that are in viewport.
     var cards = document.querySelectorAll('#grid .card');
     cards.forEach(function(card) {
+      var rect = card.getBoundingClientRect();
+      var isVisible = rect.top <= (window.innerHeight || document.documentElement.clientHeight) &&
+                      rect.bottom >= 0;
+      if (!isVisible) {
+        // card is out of view — remove tilt to save scripts
+        card.style.removeProperty('--card-tilt');
+        return;
+      }
       var tilt = ((Math.random() - 0.5) * 1.2).toFixed(2);
       card.style.setProperty('--card-tilt', tilt + 'deg');
     });
@@ -6693,6 +6904,8 @@ document.addEventListener('click', function(e) {
     // Skip decorative particles entirely on light modes / small screens — they
     // are pure eye-candy and each one costs a compositor layer.
     var body = document.body;
+    if (document.hidden) return;
+    if (hubCounting()) return;
     if (body.classList.contains('perf-no-glow') || body.classList.contains('perf-no-card-float')) return;
     if (window.matchMedia && window.matchMedia('(max-width: 768px)').matches) return;
     var count = (typeof window.__lightDevice !== 'undefined' && window.__lightDevice) ? 4 : 12;
@@ -6805,6 +7018,8 @@ document.addEventListener('click', function(e) {
   function resetAutoTimer() {
     if (quoteTimer) clearInterval(quoteTimer);
     window.__quoteTimer = quoteTimer = setInterval(function() {
+      // vii) no point rotating a quote nobody can see (or while counters run)
+      if (document.hidden || hubCounting()) return;
       displayQuote(Math.floor(Math.random() * ANIME_QUOTES.length));
     }, 9000);
   }
@@ -6812,13 +7027,60 @@ document.addEventListener('click', function(e) {
   document.getElementById('quotePrevBtn').onclick = prevQuote;
   document.getElementById('quoteNextBtn').onclick = nextQuote;
 
-  // Init all enhancements on DOM ready
+  // Init all enhancements on DOM ready (exactly once)
+  var hubEnhancementsReady = false;
+  var hubCardObserver = null;
+
+  /* vii) Only cards near the viewport float. 291 infinite CSS animations
+     collapsed to the ~8 the visitor can actually see. */
+  function observeCardFloat() {
+    var gridCards = document.querySelectorAll('#grid .card');
+    if (!gridCards.length) return;           // other pages keep their own motion
+    if (!('IntersectionObserver' in window)) {
+      gridCards.forEach(function (c) { c.classList.add('card-live'); });
+      return;
+    }
+    document.body.classList.add('hub-float-io');
+    if (hubCardObserver) hubCardObserver.disconnect();
+    hubCardObserver = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        en.target.classList.toggle('card-live', en.isIntersecting);
+      });
+    }, { rootMargin: '240px 0px' });
+    // mark the cards already near the fold synchronously — the observer
+    // callback is async and a hidden tab may not deliver it at all
+    var vh = window.innerHeight || 800;
+    document.querySelectorAll('#grid .card').forEach(function (c) {
+      var r = c.getBoundingClientRect();
+      if (r.top < vh + 240 && r.bottom > -240) c.classList.add('card-live');
+      hubCardObserver.observe(c);
+    });
+  }
+  window.__observeCards = observeCardFloat;
+
   function initEnhancements() {
+    if (hubEnhancementsReady) return;
+    hubEnhancementsReady = true;
+
     injectCardEnhancements();
     injectWatchButtons();
     wireServerFaces();
     randomizeCardTilt();
-    createAmbientParticles();
+    observeCardFloat();
+
+    // ii) every floating card stays still for the first 12s after a reload
+    document.body.classList.add('hub-quiet');
+    var quietLeft = Math.max(0, hubCardQuietUntil - Date.now());
+    setTimeout(function () { document.body.classList.remove('hub-quiet'); }, quietLeft);
+
+    // vii) ambient dust is pure decoration — it can wait for the quiet window
+    setTimeout(createAmbientParticles, quietLeft);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initEnhancements);
+  } else {
+    initEnhancements();
   }
 
   /* ============================================================
@@ -6826,6 +7088,7 @@ document.addEventListener('click', function(e) {
      ============================================================ */
   var perfMode = 'advanced';
   var isPerfOpen = false;
+  var lightDeviceDetected = false;
 
   function setPerfMode(mode) {
     perfMode = mode;
@@ -6878,12 +7141,7 @@ document.addEventListener('click', function(e) {
     }
   }
 
-  // Store sakura interval reference for perf manager
-  if (typeof sakuraInterval !== 'undefined') {
-    window.__perfSakuraInterval = sakuraInterval;
-  }
-
-  // Wire up UI
+  // Wire up the Graphics Mode UI
   function wirePerfUI() {
     var toggle = document.getElementById('perfToggle');
     var popup = document.getElementById('perfPopup');

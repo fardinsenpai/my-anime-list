@@ -46,7 +46,8 @@
     me: null,       // { id, name, avatar, handle, email, isAdmin }
     rows: [],       // visible rows (mine + admin)
     view: 'me',
-    loading: null
+    loading: null,
+    loadedAt: 0     // first successful cloud sync (deferred boot)
   };
   var chooserEl = null;
   var toastEl = null;
@@ -202,6 +203,7 @@
       renderNow();                                   // paint the cache instantly
       return fetchVisible().then(function (rows) {
         if (Array.isArray(rows)) { WL.rows = rows; persist(); }
+        WL.loadedAt = Date.now();
         setSync('ok');
       }).catch(function () {
         setSync('warn');
@@ -311,27 +313,63 @@
     });
   }
 
-  function injectHearts() {
-    Array.prototype.forEach.call(document.querySelectorAll('#grid .card'), function (card) {
-      if (card.querySelector('.wl-heart')) return;
-      var wrap = card.querySelector('.poster-wrap');
-      if (!wrap) return;
-      var info = cardInfo(card);
-      if (!info.num) return;
+  /* vii) Hearts are created only when a card gets near the viewport. Building
+     291 buttons at boot was measurable on weak phones; this makes it ~8. */
+  var heartIO = null;
 
-      var b = document.createElement('button');
-      b.type = 'button';
-      b.className = 'wl-heart';
-      b.setAttribute('aria-label', 'Save ' + info.title + ' to your wish list');
-      b.innerHTML = HEART_SVG;
-      b.addEventListener('click', function (e) {
-        e.stopPropagation();
-        e.preventDefault();
-        openChooser(card, info, b);
-      });
-      wrap.appendChild(b);
+  function addHeart(card) {
+    if (card.querySelector('.wl-heart')) return;
+    var wrap = card.querySelector('.poster-wrap');
+    if (!wrap) return;
+    var info = cardInfo(card);
+    if (!info.num) return;
+
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'wl-heart';
+    b.setAttribute('aria-label', 'Save ' + info.title + ' to your wish list');
+    b.innerHTML = HEART_SVG;
+    b.addEventListener('click', function (e) {
+      e.stopPropagation();
+      e.preventDefault();
+      openChooser(card, info, b);
     });
-    paintHearts();
+    wrap.appendChild(b);
+
+    var row = myRow(info.num);
+    if (row) {
+      b.classList.add('on');
+      b.title = 'In your wish list — ' + statusLabel(row.status);
+      b.setAttribute('aria-pressed', 'true');
+    }
+  }
+
+  function injectHearts() {
+    var cards = Array.prototype.slice.call(document.querySelectorAll('#grid .card'));
+
+    if (!('IntersectionObserver' in window)) {
+      cards.forEach(addHeart);
+      paintHearts();
+      return;
+    }
+
+    if (!heartIO) {
+      heartIO = new IntersectionObserver(function (entries) {
+        entries.forEach(function (en) {
+          if (!en.isIntersecting) return;
+          heartIO.unobserve(en.target);
+          addHeart(en.target);
+        });
+      }, { rootMargin: '320px 0px' });
+    }
+
+    cards.forEach(function (card) {
+      if (card.querySelector('.wl-heart')) return;
+      heartIO.observe(card);
+    });
+
+    // a handful of hearts exist even before the observer reports
+    cards.slice(0, 12).forEach(addHeart);
   }
 
   /* ── status chooser popover ─────────────────────────────────────── */
@@ -814,7 +852,9 @@
     wireNotice();
     wireWatchNotice();
     injectHearts();
-    loadAll();
+    // v) the cloud round-trip can wait — the local cache already painted
+    // every heart. Opening the window still syncs instantly.
+    setTimeout(function () { if (!WL.loadedAt) loadAll(); }, 20000);
   }
 
   /* small public surface (also handy for the admin panel and manual testing) */
