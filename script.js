@@ -5162,6 +5162,11 @@ document.addEventListener('click', function(e) {
         popover: { title: '\uD83D\uDD25 Hot Takes', description: 'Share your hot takes on any anime! Post comments and see what others think in real-time.', side: 'right' }
       },
       {
+        element: '#wishlistBtn',
+        guide: 'Alyssa',
+        popover: { title: '\uD83D\uDC96 Wish List', description: 'Log in, then tap the <strong>heart</strong> on any card to save it. Your list lives in <strong>Available, Ongoing, Pending</strong> and <strong>Re-watch</strong> \u2014 add anime by URL and track what to watch next!', side: 'right' }
+      },
+      {
         element: 'nav.side-nav a[onclick*="openRandomPick"]',
         guide: 'Akari Watanabe',
         popover: { title: '\uD83C\uDFA8 Random Pick by Mood', description: 'Choose your mood \u2014 Funny, Sad, Romantic, Dark & more! We\'ll pick a matching anime just for your vibe.', side: 'right' }
