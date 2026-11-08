@@ -573,6 +573,14 @@ select.admin-g-input option { background: var(--panel); color: var(--ink); }
   font-size: 11px; color: var(--ink);
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
+.ad-result-copy {
+  margin-left: auto; flex: 0 0 auto;
+  border: 1px solid var(--line); border-radius: 6px;
+  background: var(--panel-2); color: var(--ink-2);
+  font-size: 12px; line-height: 1;
+  padding: 5px 8px; cursor: pointer; transition: .13s;
+}
+.ad-result-copy:hover { color: #fff; border-color: var(--accent-line); background: var(--accent-soft); }
 
 .ad-preview {
   display: flex; align-items: center; gap: 12px;

@@ -1192,6 +1192,7 @@ function searchAwardAnime(q) {
     div.className = 'ad-result';
     div.innerHTML = (img ? '<img src="' + img.src + '" alt="">' : '') + '<span class="ad-result-id">#' + id + '</span><span class="ad-result-title">' + t.textContent + '</span>';
     div.setAttribute('data-id', id);
+    div.appendChild(adResultCopyBtn(id, t.textContent));
     div.onclick = function() { selectAwardAnime(parseInt(this.getAttribute('data-id'))); };
     container.appendChild(div);
   });
@@ -1397,6 +1398,7 @@ function searchWatch(q) {
     div.className = 'ad-result';
     div.innerHTML = (img ? '<img src="' + img.src + '" alt="">' : '') + '<span class="ad-result-id">#' + id + '</span><span class="ad-result-title">' + t.textContent + '</span>';
     div.setAttribute('data-id', id);
+    div.appendChild(adResultCopyBtn(id, t.textContent));
     div.onclick = function() { selectWatchCard(id); };
     container.appendChild(div);
   });
@@ -1448,6 +1450,7 @@ function searchRead(q) {
     div.className = 'ad-result';
     div.innerHTML = (img ? '<img src="' + img.src + '" alt="">' : '') + '<span class="ad-result-id">#' + id + '</span><span class="ad-result-title">' + t.textContent + '</span>';
     div.setAttribute('data-id', id);
+    div.appendChild(adResultCopyBtn(id, t.textContent));
     div.onclick = function() { selectReadCard(id); };
     container.appendChild(div);
   });
@@ -1553,6 +1556,7 @@ function searchEdit(q) {
     div.className = 'ad-result';
     div.innerHTML = (img ? '<img src="' + img.src + '" alt="">' : '') + '<span class="ad-result-id">#' + id + '</span><span class="ad-result-title">' + t.textContent + '</span>';
     div.setAttribute('data-id', id);
+    div.appendChild(adResultCopyBtn(id, t.textContent));
     div.onclick = function() { selectEditCard(id); };
     container.appendChild(div);
   });
@@ -2630,6 +2634,21 @@ function adCopy(text, what) {
   } else {
     adCopyFallback(text, what);
   }
+}
+/* ⧉ COPY on every admin result row (WATCH / READ / EDIT / AWARDS):
+   copies "#id | title" and never selects the card. */
+function adResultCopyBtn(id, title) {
+  var b = document.createElement('button');
+  b.type = 'button';
+  b.className = 'ad-result-copy';
+  b.textContent = '⧉';
+  b.title = 'Copy #' + id + ' + title';
+  b.setAttribute('aria-label', 'Copy number and title');
+  b.onclick = function (e) {
+    if (e) e.stopPropagation();
+    adCopy('#' + id + ' | ' + (title || ''), 'Row');
+  };
+  return b;
 }
 function patCopy() {
   var v = (getPat() || '').trim();
