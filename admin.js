@@ -2282,7 +2282,13 @@ function notesRenderList() {
   var list = all.filter(function (n) {
     if (!q) return true;
     return (n.title || '').toLowerCase().indexOf(q) > -1 || (n.body || '').toLowerCase().indexOf(q) > -1;
-  }).sort(function (a, b) { return String(b.updated || '').localeCompare(String(a.updated || '')); });
+  }).sort(function (a, b) {
+    var pa = a.pinned ? 0 : 1, pb = b.pinned ? 0 : 1;
+    if (pa !== pb) return pa - pb;
+    var da = a.done ? 1 : 0, db = b.done ? 1 : 0;
+    if (da !== db) return da - db;
+    return String(b.updated || '').localeCompare(String(a.updated || ''));
+  });
 
   box.innerHTML = '';
   if (!list.length) {
@@ -2294,7 +2300,7 @@ function notesRenderList() {
   }
   list.forEach(function (n) {
     var item = document.createElement('div');
-    item.className = 'ad-note-item' + (n.id === NOTES_SEL ? ' sel' : '');
+    item.className = 'ad-note-item' + (n.id === NOTES_SEL ? ' sel' : '') + (n.pinned ? ' pinned' : '') + (n.done ? ' done' : '');
     var t = document.createElement('div');
     t.className = 'ad-note-item-title';
     t.textContent = (n.title || '').trim() || '(untitled)';
@@ -2304,7 +2310,28 @@ function notesRenderList() {
     var w = document.createElement('div');
     w.className = 'ad-note-item-when';
     w.textContent = notesWhen(n.updated);
-    item.appendChild(t); item.appendChild(s); item.appendChild(w);
+    var ctl = document.createElement('div');
+    ctl.className = 'ad-note-item-ctl';
+    var done = document.createElement('label');
+    done.className = 'ad-note-check';
+    done.title = 'Mark done';
+    var cb = document.createElement('input');
+    cb.type = 'checkbox';
+    cb.checked = !!n.done;
+    cb.onchange = function (e) { if (e) e.stopPropagation(); notesToggleDone(n.id); };
+    done.appendChild(cb);
+    var dn = document.createElement('span');
+    dn.textContent = 'done';
+    done.appendChild(dn);
+    var pin = document.createElement('button');
+    pin.type = 'button';
+    pin.className = 'ad-note-pin' + (n.pinned ? ' on' : '');
+    pin.textContent = n.pinned ? '📌' : '📍';
+    pin.title = n.pinned ? 'Unpin' : 'Pin to top';
+    pin.setAttribute('aria-label', n.pinned ? 'Unpin note' : 'Pin note');
+    pin.onclick = function (e) { if (e) e.stopPropagation(); notesTogglePin(n.id); };
+    ctl.appendChild(done); ctl.appendChild(pin);
+    item.appendChild(t); item.appendChild(s); item.appendChild(w); item.appendChild(ctl);
     item.onclick = function () { notesSelect(n.id); };
     box.appendChild(item);
   });
@@ -2365,6 +2392,57 @@ function notesDelete() {
   notesCount('noteMeta', '');
   notesRenderList();
   msgOk('Note deleted');
+}
+
+/* ── pin + done + export ── */
+function notesTogglePin(id) {
+  if (!id) return;
+  var list = notesLoadList();
+  var n = list.filter(function (x) { return x.id === id; })[0];
+  if (!n) return;
+  n.pinned = !n.pinned;
+  notesSet(NOTES_KEY_LIST, JSON.stringify(list));
+  notesRenderList();
+  msgOk(n.pinned ? 'Pinned to top' : 'Unpinned');
+}
+function notesToggleDone(id) {
+  if (!id) return;
+  var list = notesLoadList();
+  var n = list.filter(function (x) { return x.id === id; })[0];
+  if (!n) return;
+  n.done = !n.done;
+  n.doneAt = n.done ? new Date().toISOString() : '';
+  notesSet(NOTES_KEY_LIST, JSON.stringify(list));
+  notesRenderList();
+  msgOk(n.done ? 'Marked done ✓' : 'Reopened');
+}
+function notesExport() {
+  var list = notesLoadList();
+  if (!list.length) { msgFail('No notes to export'); return; }
+  var out = ['# Fardin — Private Notes', '', 'Exported ' + new Date().toLocaleString('en-GB') +
+    ' · ' + list.length + ' note(s)', ''];
+  list.forEach(function (n, i) {
+    var title = (n.title || '').trim() || 'Untitled';
+    var flags = [];
+    if (n.pinned) flags.push('📌 pinned');
+    if (n.done) flags.push('✅ done' + (n.doneAt ? ' (' + notesWhen(n.doneAt) + ')' : ''));
+    out.push('## ' + title);
+    out.push(flags.length ? '_' + flags.join(' · ') + '_ · updated ' + notesWhen(n.updated) : '_updated ' + notesWhen(n.updated) + '_');
+    out.push('');
+    out.push((n.body || '').trim());
+    out.push('');
+    out.push('---');
+    out.push('');
+  });
+  var blob = new Blob([out.join('\n')], { type: 'text/markdown;charset=utf-8' });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = 'fardin-notes.md';
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(function () { URL.revokeObjectURL(url); document.body.removeChild(a); }, 800);
+  msgOk('Notes exported as fardin-notes.md');
 }
 
 /* ── passphrase handling ── */

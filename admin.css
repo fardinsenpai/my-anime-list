@@ -949,6 +949,19 @@ select.admin-g-input option { background: var(--panel); color: var(--ink); }
 .ad-note-item-title { font-size: 11px; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .ad-note-item-snip { font-size: 9px; color: var(--ink-3); margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .ad-note-item-when { font-size: 8px; color: var(--ink-3); margin-top: 3px; letter-spacing: .04em; }
+.ad-note-item.pinned { border-left-color: #ffb340; background: linear-gradient(90deg, rgba(255,179,64,.10), transparent); }
+.ad-note-item.done { opacity: .62; }
+.ad-note-item.done .ad-note-item-title { text-decoration: line-through; }
+.ad-note-item-ctl { display: flex; align-items: center; gap: 8px; margin-top: 6px; }
+.ad-note-check { display: inline-flex; align-items: center; gap: 5px; font-size: 9px; color: var(--ink-2); cursor: pointer; }
+.ad-note-check input { accent-color: #00c853; cursor: pointer; }
+.ad-note-pin {
+  margin-left: auto; border: 1px solid var(--line); border-radius: 6px;
+  background: var(--panel); font-size: 11px; line-height: 1;
+  padding: 4px 7px; cursor: pointer; transition: .13s;
+}
+.ad-note-pin:hover { border-color: var(--accent-line); background: var(--accent-soft); }
+.ad-note-pin.on { background: rgba(255,179,64,.18); border-color: #ffb340; }
 .ad-notes-editor { flex: 1; min-width: 0; }
 
 /* the fetched site data never shows */
