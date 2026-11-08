@@ -388,7 +388,7 @@ export async function createGuide(hooks = {}) {
 
     /* spawn pop */
     if (state.spawn < 1) {
-      state.spawn = Math.min(1, state.spawn + dt * 3.4);
+      state.spawn = Math.max(0, Math.min(1, state.spawn + dt * 3.4));
       const e = 1 - Math.pow(1 - state.spawn, 3);
       root.scale.setScalar(0.7 + e * 0.3);
     } else {
@@ -404,6 +404,7 @@ export async function createGuide(hooks = {}) {
       const step = Math.sign(dx) * Math.min(dist, 2.5 * dt);
       root.position.x += step;
       state.phase += dt * 10.5;
+      root.position.x = Math.max(-maxX, Math.min(maxX, root.position.x));
     } else {
       state.phase += dt * 3;
     }
@@ -496,7 +497,10 @@ export async function createGuide(hooks = {}) {
   function frame(now) {
     raf = requestAnimationFrame(frame);
     if (!state.visible) return;
-    const dt = Math.min(0.05, (now - last) / 1000 || 0.016);
+    /* rAF timestamps can be slightly behind performance.now() on the first
+       frame after show() — never let dt go negative or the walk runs away. */
+    const raw = (now - last) / 1000;
+    const dt = Math.min(0.05, raw > 0 ? raw : 0.016);
     last = now;
     tick(dt);
     renderer.render(scene, camera);

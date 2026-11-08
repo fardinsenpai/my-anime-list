@@ -4676,7 +4676,7 @@ document.addEventListener('click', function(e) {
   var baseGaze = { x: 0, y: 0 };
   var mascot = null, mascotLoading = null, lastStepRect = null;
   var bubbleSide = -1;
-  var MASCOT_SRC = './guide-mascot.js?v=20261107e';
+  var MASCOT_SRC = './guide-mascot.js?v=20261107f';
 
   function applyGaze(x, y) {
     if (!guideEyes) return;
