@@ -4679,7 +4679,7 @@ document.addEventListener('click', function(e) {
   var baseGaze = { x: 0, y: 0 };
   var mascot = null, mascotLoading = null, lastStepRect = null;
   var bubbleSide = -1;
-  var MASCOT_SRC = './guide-mascot.js?v=20261109e';
+  var MASCOT_SRC = './guide-mascot.js?v=20261109h';
 
   function applyGaze(x, y) {
     if (!guideEyes) return;
@@ -4699,6 +4699,14 @@ document.addEventListener('click', function(e) {
         return mod.createGuide({
           onAnchor: function (x, y) {
             if (tourActive) anchorBubble(x, y);
+          },
+          onModel: function () {
+            /* The VRM can finish loading after the welcome step began —
+               wave again so she greets the visitor when she appears. */
+            if (!tourActive || currentStep !== 0) return;
+            setTimeout(function () {
+              if (tourActive && currentStep === 0 && mascot) mascot.wave();
+            }, 250);
           }
         });
       })
@@ -4736,6 +4744,7 @@ document.addEventListener('click', function(e) {
        head it covered the sidebar option she was explaining. The tail still
        points down toward her head. */
     if (vw < 768) {
+      tooltip.classList.remove('tour-tooltip--below');
       var top = 74;
       if (lastStepRect && lastStepRect.top < vh * 0.3) {
         top = Math.min(vh * 0.44, lastStepRect.bottom + 12);
@@ -4750,10 +4759,27 @@ document.addEventListener('click', function(e) {
     }
 
     /* Desktop: keep the pointing arm visible — the bubble sits on the side
-       away from whatever she is pointing at. */
+       away from whatever she is pointing at. When she has climbed up to a
+       high target, the bubble flips below her head so it cannot cover the
+       option she is explaining. */
     var shift = bubbleSide * Math.min(120, tw * 0.3);
-    var dleft = Math.max(10, Math.min(vw - tw - 10, x + shift - tw / 2));
-    var dtop = Math.max(10, y - th - 18);
+    var targetCy = lastStepRect ? lastStepRect.top + lastStepRect.height / 2 : y;
+    var below = targetCy < y - 4 && (y + 18 + th <= vh - 10);
+    tooltip.classList.toggle('tour-tooltip--below', below);
+    var dleft;
+    if (below) {
+      /* Below her head and fully to one side, so her body stays visible. */
+      var wantLeft = bubbleSide < 0;
+      var lx = x - tw - 28;
+      var rx = x + 28;
+      if (wantLeft && lx < 10 && rx + tw <= vw - 10) wantLeft = false;
+      if (!wantLeft && rx + tw > vw - 10 && lx >= 10) wantLeft = true;
+      dleft = wantLeft ? lx : rx;
+      dleft = Math.max(10, Math.min(vw - tw - 10, dleft));
+    } else {
+      dleft = Math.max(10, Math.min(vw - tw - 10, x + shift - tw / 2));
+    }
+    var dtop = below ? y + 18 : Math.max(10, y - th - 18);
     tooltip.style.left = Math.round(dleft) + 'px';
     tooltip.style.top = Math.round(dtop) + 'px';
     tooltip.style.setProperty('--tail-x', Math.round(Math.max(20, Math.min(tw - 20, x - dleft))) + 'px');
@@ -4913,15 +4939,21 @@ document.addEventListener('click', function(e) {
     }
   }
 
-  function showStep(index) {
+  function showStep(index, attempt) {
     if (!tourActive || !tourSteps) return;
     var step = tourSteps[index];
     if (!step) { endTour(); return; }
     var el = typeof step.element === 'string' ? document.querySelector(step.element) : step.element;
     var preBox = el ? el.getBoundingClientRect() : null;
     if (!el || (!preBox.width && !preBox.height)) {
-      /* A step whose element is hidden right now (for example Install App
-         when the browser cannot install it) is skipped, not fatal. */
+      /* Late-rendering sections (the now-strip, a page transition) get a
+         short grace period before the step is skipped, so the tour always
+         starts at the welcome card instead of jumping ahead. */
+      attempt = attempt || 0;
+      if (attempt < 6) {
+        setTimeout(function () { showStep(index, attempt + 1); }, 300);
+        return;
+      }
       if (index < tourSteps.length - 1) { showStep(index + 1); return; }
       finishTour(); return;
     }
@@ -5252,6 +5284,10 @@ document.addEventListener('click', function(e) {
 
   var tourBtn = document.getElementById('tourGuideBtn');
   if (tourBtn) {
+    /* Start fetching the VRM as soon as the visitor shows intent, so Komi
+       is already there when the welcome card appears. */
+    tourBtn.addEventListener('pointerenter', loadMascot, { passive: true });
+    tourBtn.addEventListener('focus', loadMascot);
     tourBtn.addEventListener('click', function (e) { e.preventDefault(); goHome(); setTimeout(startTour, 300); });
   }
 

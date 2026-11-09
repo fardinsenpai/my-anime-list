@@ -3947,6 +3947,15 @@ body.tour-mascot-on .guide-mascot-canvas { display: block; }
   border-radius: 0 0 7px 0;
   transform: rotate(45deg) skew(4deg, 4deg);
 }
+.tour-tooltip--mascot.tour-tooltip--below .tour-tooltip-inner::after {
+  bottom: auto;
+  top: -15px;
+  border-right: 0;
+  border-bottom: 0;
+  border-left: 2.5px solid #14181f;
+  border-top: 2.5px solid #14181f;
+  border-radius: 7px 0 0 0;
+}
 @keyframes tourBubbleIn {
   from { opacity: 0; transform: rotate(-0.6deg) translateY(10px) scale(.96); }
   to   { opacity: 1; transform: rotate(-0.6deg) translateY(0) scale(1); }

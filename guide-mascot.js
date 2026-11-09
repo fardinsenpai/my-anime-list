@@ -423,12 +423,12 @@ export async function createGuide(hooks = {}) {
       const wantFeet = cy + charHpx * 0.5;
       feet = Math.min(maxFeet, Math.max(minFeet, wantFeet));
     } else {
-      /* How far up she may climb without the bubble sliding over the
-         highlighted target (or off the top of the page). */
-      const spaceUp = Math.max(0, maxFeet - (rect.bottom + 10 + bubbleH + 18 + charHpx));
-      const maxUp = Math.max(0, maxFeet - (110 + bubbleH + 18 + charHpx));
-      const t = Math.max(0, Math.min(1, (vh * 0.6 - cy) / (vh * 0.6)));
-      feet = maxFeet - Math.min(spaceUp, maxUp) * t;
+      /* Walk to the target's level so she stands beside it instead of
+         staying pinned to the bottom. Her head lands just under the
+         target; the bubble flips below her head so the target stays
+         visible while she climbs. */
+      const minFeet = Math.min(maxFeet, 110 + charHpx);
+      feet = Math.min(maxFeet, Math.max(minFeet, cy + charHpx + 20));
     }
     state.targetY = pxToWorldY(feet);
     state.targetY = Math.max(-visH / 2 + 0.02, Math.min(visH / 2 - 1.84, state.targetY));
