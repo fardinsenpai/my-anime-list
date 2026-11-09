@@ -14,6 +14,7 @@
    ══════════════════════════════════════════════════════════════════════ */
 
 const MODEL_CANDIDATES = [
+  './Komi%20Shouko.vrm',
   'assets/guide/alisa.vrm',
   'assets/guide/alisa.glb'
 ];
@@ -184,7 +185,9 @@ export async function createGuide(hooks = {}) {
     body.add(arm);
   });
 
-  /* fingertip glow (only while pointing) */
+  /* pointing stick + fingertip glow (only while pointing).
+     The stick extends her reach so the tip clearly lands on the option she
+     is explaining; the glow rides on the stick tip. */
   const glowTex = (() => {
     const c = document.createElement('canvas');
     c.width = c.height = 64;
@@ -202,10 +205,19 @@ export async function createGuide(hooks = {}) {
   const glow = new THREE.Sprite(new THREE.SpriteMaterial({
     map: glowTex, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending
   }));
-  glow.scale.setScalar(0.26);
-  glow.position.set(0, -0.66, 0);
-  glow.visible = false;
-  armL.add(glow);
+  glow.scale.setScalar(0.32);
+  glow.position.set(0, -0.995, 0);
+
+  const pointer = new THREE.Group();
+  const stick = new THREE.Mesh(new THREE.CylinderGeometry(0.013, 0.009, 0.5, 8), toon(0x8a6134));
+  stick.position.y = -0.72;
+  pointer.add(stick);
+  const stickTip = new THREE.Mesh(new THREE.SphereGeometry(0.028, 10, 8), toon(0xffd166));
+  stickTip.position.y = -0.975;
+  pointer.add(stickTip);
+  pointer.add(glow);
+  pointer.visible = false;
+  armL.add(pointer);
 
   /* neck */
   const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.052, 0.058, 0.1, 12), toon(SKIN));
@@ -311,6 +323,8 @@ export async function createGuide(hooks = {}) {
   const state = {
     visible: false,
     targetX: 0,
+    targetY: 0,        // feet height she is walking toward
+    rootY: 0,          // current feet height (before bob/hop)
     side: -1,
     point: new THREE.Vector3(0, 1.4, 0),
     pointing: false,
@@ -318,12 +332,18 @@ export async function createGuide(hooks = {}) {
     phase: 0,
     hopT: 0,
     spawn: 1,
+    greetT: 0,         // >0 while she waves hello
+    bubbleH: 240,
     rect: null,
-    model: null
+    model: null,
+    rig: null,
+    modelPointer: null
   };
 
   const baseQuatR = new THREE.Quaternion();
   const tmpV = new THREE.Vector3();
+  const tmpV2 = new THREE.Vector3();
+  const tmpV3 = new THREE.Vector3();
   const tmpQ = new THREE.Quaternion();
   const tmpQ2 = new THREE.Quaternion();
   const tmpE = new THREE.Euler();
@@ -355,6 +375,7 @@ export async function createGuide(hooks = {}) {
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, vw < 768 ? 1.35 : 1.6));
     renderer.setSize(vw, vh, false);
 
+    if (!state.visible) { state.rootY = baseY; state.targetY = baseY; }
     if (state.rect) aimAt(state.rect);
   }
 
@@ -365,17 +386,53 @@ export async function createGuide(hooks = {}) {
     return (0.5 - py / window.innerHeight) * visH;
   }
 
-  function aimAt(rect, side) {
+  function aimAt(rect, side, opts) {
     state.rect = rect;
     if (side != null) state.side = side;
+    if (opts) {
+      if (opts.bubbleH) state.bubbleH = opts.bubbleH;
+      if (opts.greet != null) state.greetT = opts.greet ? 2.8 : 0;
+    }
     if (!rect) { state.pointing = false; return; }
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
     const cx = rect.left + rect.width / 2;
     const cy = rect.top + rect.height / 2;
-    /* Stand beside the target, not on top of it, so the bubble above her
-       head does not cover the thing she is explaining. */
-    const off = window.innerWidth >= 768 ? Math.min(300, window.innerWidth * 0.24) : 0;
-    const standX = cx + (state.side < 0 ? -off : off);
+
+    /* Horizontal: stand beside the target, not on top of it. On phones she
+       swaps to the opposite edge so sidebar names stay readable. */
+    let standX;
+    if (vw < 768) {
+      standX = state.side < 0 ? vw * 0.24 : vw * 0.76;
+    } else {
+      const off = Math.min(300, vw * 0.24);
+      standX = cx + (state.side < 0 ? -off : off);
+    }
     state.targetX = Math.max(-maxX, Math.min(maxX, pxToWorldX(standX)));
+
+    /* Vertical: she can walk up and down as well. On phones the bubble is
+       pinned to the top, so she may climb until her head sits under it. On
+       desktop the bubble rides above her head, so the climb is capped to
+       keep that bubble below the top strip of the page. */
+    const charHpx = 1.79 / visH * vh;
+    const bubbleH = state.bubbleH || 240;
+    const maxFeet = vh - 8;
+    let feet;
+    if (vw < 768) {
+      const minFeet = Math.min(maxFeet, Math.max(vh - 210, 76 + bubbleH + 16 + charHpx));
+      const wantFeet = cy + charHpx * 0.5;
+      feet = Math.min(maxFeet, Math.max(minFeet, wantFeet));
+    } else {
+      /* How far up she may climb without the bubble sliding over the
+         highlighted target (or off the top of the page). */
+      const spaceUp = Math.max(0, maxFeet - (rect.bottom + 10 + bubbleH + 18 + charHpx));
+      const maxUp = Math.max(0, maxFeet - (110 + bubbleH + 18 + charHpx));
+      const t = Math.max(0, Math.min(1, (vh * 0.6 - cy) / (vh * 0.6)));
+      feet = maxFeet - Math.min(spaceUp, maxUp) * t;
+    }
+    state.targetY = pxToWorldY(feet);
+    state.targetY = Math.max(-visH / 2 + 0.02, Math.min(visH / 2 - 1.84, state.targetY));
+
     state.point.set(pxToWorldX(cx), pxToWorldY(cy), 0.06);
     state.pointing = true;
     state.hopT = HOP;
@@ -395,14 +452,16 @@ export async function createGuide(hooks = {}) {
       root.scale.setScalar(1);
     }
 
-    /* walk toward the highlighted element */
+    /* walk toward the highlighted element — on both axes */
     const dx = state.targetX - root.position.x;
-    const dist = Math.abs(dx);
+    const dy = state.targetY - state.rootY;
+    const dist = Math.sqrt(dx * dx + dy * dy);
     const wantWalk = dist > 0.015 ? 1 : 0;
     state.walk += (wantWalk - state.walk) * Math.min(1, dt * 8);
     if (dist > 0.004) {
-      const step = Math.sign(dx) * Math.min(dist, 2.5 * dt);
-      root.position.x += step;
+      const step = Math.min(dist, 2.5 * dt);
+      root.position.x += (dx / dist) * step;
+      state.rootY += (dy / dist) * step;
       state.phase += dt * 10.5;
       root.position.x = Math.max(-maxX, Math.min(maxX, root.position.x));
     } else {
@@ -422,7 +481,7 @@ export async function createGuide(hooks = {}) {
       state.hopT = Math.max(0, state.hopT - dt);
       hopY = Math.sin((1 - state.hopT / HOP) * Math.PI) * 0.11;
     }
-    root.position.y = baseY + bob + breath + hopY;
+    root.position.y = state.rootY + bob + breath + hopY;
 
     /* lean into the walk, idle sway when still */
     root.rotation.y = Math.sin(clock * 0.55) * 0.05 * (1 - state.walk) +
@@ -430,16 +489,24 @@ export async function createGuide(hooks = {}) {
 
     /* look at the target */
     const lookX = Math.max(-0.45, Math.min(0.45, (state.point.x - root.position.x) * 0.5));
-    const lookY = Math.max(-0.22, Math.min(0.22, (state.point.y - (baseY + 1.46)) * 0.22));
+    const lookY = Math.max(-0.22, Math.min(0.22, (state.point.y - (state.rootY + 1.46)) * 0.22));
     head.rotation.y += (lookX - head.rotation.y) * Math.min(1, dt * 5);
     head.rotation.x += (-lookY - head.rotation.x) * Math.min(1, dt * 5);
 
-    /* pointing arm — the arm on the target's side */
+    /* greeting wave, then normal pointing */
     const armK = 1 - Math.pow(0.0005, dt);
     tmpE.set(-swing * 0.7, 0, 0);
     tmpQ2.setFromEuler(tmpE);
-    glow.visible = state.pointing;
-    if (state.pointing) {
+    if (state.greetT > 0) {
+      state.greetT = Math.max(0, state.greetT - dt);
+      /* right arm (screen left) raised high, hand waving */
+      tmpE.set(0.18, 0, -2.24 - Math.sin(clock * 9) * 0.32);
+      armR.quaternion.slerp(tmpQ2.setFromEuler(tmpE), armK);
+      tmpE.set(-swing * 0.7, 0, 0);
+      armL.quaternion.slerp(tmpQ2.setFromEuler(tmpE), armK);
+      pointer.visible = false;
+      glow.visible = false;
+    } else if (state.pointing) {
       const useLeft = state.point.x >= root.position.x;
       const pArm = useLeft ? armL : armR;
       const oArm = useLeft ? armR : armL;
@@ -447,18 +514,42 @@ export async function createGuide(hooks = {}) {
       body.worldToLocal(tmpV);
       tmpV.sub(pArm.position);
       /* Chibi arms are short: bias the arm outward and forward so the hand
-         and its glow stay visible beside her face instead of vanishing
-         behind her head. */
+         and the pointer stick stay visible beside her face instead of
+         vanishing behind her head. */
       tmpV.x += useLeft ? 0.35 : -0.35;
       tmpV.z += 0.5;
       tmpV.normalize();
       tmpQ.setFromUnitVectors(DOWN, tmpV);
       pArm.quaternion.slerp(tmpQ, armK);
       oArm.quaternion.slerp(tmpQ2, armK);
-      if (glow.parent !== pArm) pArm.add(glow);
+      if (pointer.parent !== pArm) pArm.add(pointer);
+      pointer.visible = true;
+      glow.visible = true;
     } else {
       armL.quaternion.slerp(tmpQ2, armK);
       armR.quaternion.slerp(tmpQ2, armK);
+      pointer.visible = false;
+      glow.visible = false;
+    }
+
+    /* real model: pose the arms and keep the pointer stick in the hand */
+    if (state.model) poseModel();
+    if (state.modelPointer && state.rig) {
+      const useLeft = state.point.x >= root.position.x;
+      const hand = useLeft ? state.rig.handL : state.rig.handR;
+      if (state.pointing && state.greetT <= 0) {
+        hand.getWorldPosition(tmpV2);
+        state.modelPointer.position.copy(tmpV2);
+        tmpV3.copy(state.point).sub(tmpV2);
+        if (tmpV3.lengthSq() > 1e-6) {
+          tmpV3.normalize();
+          tmpQ.setFromUnitVectors(DOWN, tmpV3);
+          state.modelPointer.quaternion.copy(tmpQ);
+        }
+        state.modelPointer.visible = true;
+      } else {
+        state.modelPointer.visible = false;
+      }
     }
 
     /* blink */
@@ -512,6 +603,9 @@ export async function createGuide(hooks = {}) {
     state.spawn = 0;
     state.hopT = HOP;
     layout();
+    state.rootY = baseY;
+    state.targetY = baseY;
+    state.greetT = 0;
     root.position.y = baseY;
     state.targetX = Math.max(-maxX, Math.min(maxX, state.targetX));
     last = performance.now();
@@ -527,7 +621,7 @@ export async function createGuide(hooks = {}) {
   }
 
   /* ── optional real model (VRM loads as glTF) ───────────────────────── */
-  function normalizeModel(obj, isVrm) {
+  function normalizeModel(obj, isVrm, isVrm1) {
     const box = new THREE.Box3().setFromObject(obj);
     const size = box.getSize(new THREE.Vector3());
     if (!isFinite(size.y) || size.y <= 0) return;
@@ -537,25 +631,95 @@ export async function createGuide(hooks = {}) {
     obj.position.y -= box.min.y;
     obj.position.x -= (box.min.x + box.max.x) / 2;
     obj.position.z -= (box.min.z + box.max.z) / 2;
-    if (isVrm) obj.rotation.y = Math.PI;   // VRM0 models face -Z
+    /* VRM0 faces -Z; VRM1 faces +Z (same as our camera). */
+    if (isVrm && !isVrm1) obj.rotation.y = Math.PI;
+  }
+
+  /* ── real-model arm posing (VRM files have no animation clips) ─────── */
+  const IDLE_L = new THREE.Vector3(0.38, -0.92, 0.08).normalize();
+  const IDLE_R = new THREE.Vector3(-0.38, -0.92, 0.08).normalize();
+  const poseDir = new THREE.Vector3();
+
+  function findBone(model, re) {
+    let out = null;
+    model.traverse((n) => { if (!out && n.isBone && re.test(n.name)) out = n; });
+    return out;
+  }
+
+  function setupRig(model) {
+    const armL = findBone(model, /(L_?UpperArm|leftUpperArm)$/i);
+    const armR = findBone(model, /(R_?UpperArm|rightUpperArm)$/i);
+    if (!armL || !armR) return;
+    state.rig = {
+      armL: armL,
+      armR: armR,
+      handL: findBone(model, /(L_?Hand|leftHand)$/i) || armL,
+      handR: findBone(model, /(R_?Hand|rightHand)$/i) || armR
+    };
+  }
+
+  /* Rotate an upper-arm bone so the whole arm points along `dir` (world). */
+  function aimArm(arm, hand, dir) {
+    arm.getWorldPosition(tmpV2);
+    hand.getWorldPosition(tmpV3);
+    tmpV3.sub(tmpV2);
+    if (tmpV3.lengthSq() < 1e-6) return;
+    tmpV3.normalize();
+    tmpQ.setFromUnitVectors(tmpV3, dir);
+    arm.getWorldQuaternion(tmpQ2);
+    tmpQ2.premultiply(tmpQ);
+    arm.parent.getWorldQuaternion(tmpQ);
+    tmpQ.invert();
+    arm.quaternion.copy(tmpQ.multiply(tmpQ2));
+  }
+
+  function poseModel() {
+    const rig = state.rig;
+    if (!rig) return;
+    root.updateMatrixWorld(true);
+    let dirL = IDLE_L;
+    let dirR = IDLE_R;
+    if (state.greetT > 0) {
+      const w = Math.sin(clock * 9) * 0.16;
+      dirR = poseDir.set(-0.55 + w, 0.8, 0.16).normalize();
+    } else if (state.pointing) {
+      const useLeft = state.point.x >= root.position.x;
+      const arm = useLeft ? rig.armL : rig.armR;
+      arm.getWorldPosition(tmpV2);
+      poseDir.copy(state.point).sub(tmpV2);
+      if (poseDir.lengthSq() > 1e-6) {
+        poseDir.normalize();
+        if (useLeft) dirL = poseDir; else dirR = poseDir;
+      }
+    }
+    aimArm(rig.armL, rig.handL, dirL);
+    aimArm(rig.armR, rig.handR, dirR);
+    root.updateMatrixWorld(true);
   }
 
   async function tryModel() {
     let url = null;
+    window.__guideModelPhase = 'head';
     for (let i = 0; i < MODEL_CANDIDATES.length; i++) {
       try {
         const res = await fetch(MODEL_CANDIDATES[i], { method: 'HEAD' });
         if (res.ok) { url = MODEL_CANDIDATES[i]; break; }
       } catch (e) { /* keep looking */ }
     }
-    if (!url) return;
+    window.__guideModelUrl = url;
+    if (!url) { window.__guideModelPhase = 'none'; return; }
     try {
+      window.__guideModelPhase = 'import';
       const { GLTFLoader } = await import('three/addons/loaders/GLTFLoader.js');
+      window.__guideModelPhase = 'load';
       const gltf = await new Promise((resolve, reject) => {
         new GLTFLoader().load(url, resolve, undefined, reject);
       });
+      window.__guideModelPhase = 'loaded';
       const model = gltf.scene;
-      normalizeModel(model, /\.vrm($|\?)/i.test(url));
+      const isVrm = /\.vrm($|\?)/i.test(url);
+      const ext = (gltf.parser && gltf.parser.json && gltf.parser.json.extensions) || {};
+      normalizeModel(model, isVrm, !!ext.VRMC_vrm);
       model.traverse((n) => {
         if (n.isMesh && n.material) {
           n.material.side = THREE.FrontSide;
@@ -567,8 +731,37 @@ export async function createGuide(hooks = {}) {
         if (c !== model && c !== shadow) c.visible = false;
       });
       state.model = model;
+      setupRig(model);
+
+      /* A real model can hold the pointer stick too: a world-space stick
+         that starts at the pointing hand and aims at the highlighted
+         option. */
+      if (state.rig) {
+        const mp = new THREE.Group();
+        const L = 0.62;
+        const st = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.009, L, 8), toon(0x8a6134));
+        st.position.y = -L / 2;
+        mp.add(st);
+        const tp = new THREE.Mesh(new THREE.SphereGeometry(0.026, 10, 8), toon(0xffd166));
+        tp.position.y = -L;
+        mp.add(tp);
+        const g2 = new THREE.Sprite(glow.material.clone());
+        g2.scale.setScalar(0.34);
+        g2.position.y = -L;
+        mp.add(g2);
+        mp.visible = false;
+        scene.add(mp);
+        state.modelPointer = mp;
+      }
+
       if (hooks.onModel) hooks.onModel(url);
-    } catch (e) { /* keep the built-in figure */ }
+      window.__guideModelPhase = 'ok';
+    } catch (e) {
+      window.__guideModelPhase = 'error';
+      window.__guideModelError = String(e && (e.message || e));
+      window.__guideModelStack = String(e && e.stack || '').slice(0, 1200);
+      /* keep the built-in figure */
+    }
   }
 
   /* ── resize + visibility ───────────────────────────────────────────── */
@@ -590,10 +783,11 @@ export async function createGuide(hooks = {}) {
   const api = {
     show: show,
     hide: hide,
-    setStep: function (rect, side) {
-      aimAt(rect || null, side);
+    setStep: function (rect, side, opts) {
+      aimAt(rect || null, side, opts);
       if (state.visible) renderNow(0.016);
     },
+    wave: function () { state.greetT = 2.8; },
     celebrate: function () { state.hopT = HOP; state.spawn = Math.min(state.spawn, 0.75); },
     headScreen: function () {
       camera.updateMatrixWorld();
@@ -610,6 +804,12 @@ export async function createGuide(hooks = {}) {
       return {
         rootY: root.position.y,
         rootX: root.position.x,
+        rootBaseY: state.rootY,
+        targetY: state.targetY,
+        greetT: state.greetT,
+        pointerVis: pointer.visible,
+        hasModel: !!state.model,
+        modelPointerVis: !!(state.modelPointer && state.modelPointer.visible),
         camZ: camera.position.z,
         visH: visH,
         baseY: baseY,

@@ -638,7 +638,10 @@
   function openPanel() {
     var ov = $('wlOverlay');
     if (!ov) return;
-    if (!WL.me) WL.view = 'admin';
+    /* Always land on MY LIST. The session read is async, so on the very
+       first open it used to fall through to Fardin's public list; keep the
+       view on 'me' and repaint once the account is known. */
+    WL.view = 'me';
     resetDrag();
     syncTabs();
     ov.hidden = false;

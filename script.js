@@ -4528,7 +4528,10 @@ function localQuickAnswer(userMsg) {
 const originalFetch = window.fetch;
 
 window.fetch = function(...args) {
-  const [url, options] = args;
+  const [input, options] = args;
+  /* Some libraries (three.js FileLoader) pass a Request object, not a
+     string — normalise it before the Groq check. */
+  const url = typeof input === 'string' ? input : ((input && input.url) || '');
 
   // Intercept Groq API call
   if (url.includes('groq.com') && options?.body) {
@@ -4676,7 +4679,7 @@ document.addEventListener('click', function(e) {
   var baseGaze = { x: 0, y: 0 };
   var mascot = null, mascotLoading = null, lastStepRect = null;
   var bubbleSide = -1;
-  var MASCOT_SRC = './guide-mascot.js?v=20261107f';
+  var MASCOT_SRC = './guide-mascot.js?v=20261109e';
 
   function applyGaze(x, y) {
     if (!guideEyes) return;
@@ -4714,7 +4717,10 @@ document.addEventListener('click', function(e) {
     document.body.classList.add('tour-mascot-on');
     if (lastStepRect) {
       mascot.show();
-      mascot.setStep(lastStepRect, bubbleSide);
+      mascot.setStep(lastStepRect, bubbleSide, {
+        greet: currentStep === 0,
+        bubbleH: tooltip.offsetHeight || 220
+      });
     }
   }
 
@@ -4724,15 +4730,33 @@ document.addEventListener('click', function(e) {
     var tw = tooltip.offsetWidth || 360;
     var th = tooltip.offsetHeight || 180;
     var vw = window.innerWidth;
-    /* Keep the pointing arm visible: on desktop the bubble sits on the side
+    var vh = window.innerHeight;
+
+    /* Phones: pin the bubble to the top of the screen. Anchored above her
+       head it covered the sidebar option she was explaining. The tail still
+       points down toward her head. */
+    if (vw < 768) {
+      var top = 74;
+      if (lastStepRect && lastStepRect.top < vh * 0.3) {
+        top = Math.min(vh * 0.44, lastStepRect.bottom + 12);
+      }
+      top = Math.max(10, Math.min(vh - th - 10, top));
+      var left = Math.max(8, (vw - tw) / 2);
+      tooltip.style.left = Math.round(left) + 'px';
+      tooltip.style.top = Math.round(top) + 'px';
+      var tail = Math.max(22, Math.min(tw - 22, x - left));
+      tooltip.style.setProperty('--tail-x', Math.round(tail) + 'px');
+      return;
+    }
+
+    /* Desktop: keep the pointing arm visible — the bubble sits on the side
        away from whatever she is pointing at. */
-    var shift = 0;
-    if (vw >= 768) shift = bubbleSide * Math.min(120, tw * 0.3);
-    var left = Math.max(10, Math.min(vw - tw - 10, x + shift - tw / 2));
-    var top = Math.max(10, y - th - 18);
-    tooltip.style.left = Math.round(left) + 'px';
-    tooltip.style.top = Math.round(top) + 'px';
-    tooltip.style.setProperty('--tail-x', Math.round(Math.max(20, Math.min(tw - 20, x - left))) + 'px');
+    var shift = bubbleSide * Math.min(120, tw * 0.3);
+    var dleft = Math.max(10, Math.min(vw - tw - 10, x + shift - tw / 2));
+    var dtop = Math.max(10, y - th - 18);
+    tooltip.style.left = Math.round(dleft) + 'px';
+    tooltip.style.top = Math.round(dtop) + 'px';
+    tooltip.style.setProperty('--tail-x', Math.round(Math.max(20, Math.min(tw - 20, x - dleft))) + 'px');
   }
 
   /* A real 3D figure, built from depth layers — no avatar image anywhere. */
@@ -4894,7 +4918,13 @@ document.addEventListener('click', function(e) {
     var step = tourSteps[index];
     if (!step) { endTour(); return; }
     var el = typeof step.element === 'string' ? document.querySelector(step.element) : step.element;
-    if (!el) { endTour(); return; }
+    var preBox = el ? el.getBoundingClientRect() : null;
+    if (!el || (!preBox.width && !preBox.height)) {
+      /* A step whose element is hidden right now (for example Install App
+         when the browser cannot install it) is skipped, not fatal. */
+      if (index < tourSteps.length - 1) { showStep(index + 1); return; }
+      finishTour(); return;
+    }
 
     currentStep = index;
 
@@ -4946,13 +4976,18 @@ document.addEventListener('click', function(e) {
       lastStepRect = rect;
       var targetCx = rect.left + rect.width / 2;
       bubbleSide = targetCx >= window.innerWidth * 0.5 ? -1 : 1;
+
+      /* Show the card before measuring, so the mascot knows how tall the
+         bubble is and can keep it on screen while walking up and down. */
+      tooltip.style.display = 'block';
+      var bubbleH = tooltip.offsetHeight || 220;
+
       if (mascot) {
         mascot.show();
-        mascot.setStep(rect, bubbleSide);
+        mascot.setStep(rect, bubbleSide, { greet: index === 0, bubbleH: bubbleH });
       }
 
-      tooltip.style.display = 'block';
-      if (tooltip.classList.contains('tour-tooltip--mascot') && mascot) {
+      if (mascot && tooltip.classList.contains('tour-tooltip--mascot')) {
         var hp = mascot.headScreen();
         anchorBubble(hp.x, hp.y);
       } else {
@@ -5079,12 +5114,12 @@ document.addEventListener('click', function(e) {
       {
         element: '.heading-glitch',
         guide: 'Zero Two',
-        popover: { title: '\uD83D\uDC4B I\'m Rapayel', description: 'Welcome to <strong>Fardin\'s Anime Hub</strong> \u2014 your personal anime collection dashboard. I\'ll be your guide, and every stop is hosted by one of Fardin\'s waifus.<br><br>You can replay this tour anytime from <strong>sidebar \u2192 Tour Guide</strong>.', side: 'bottom' }
+        popover: { title: '\uD83D\uDC4B I\'m Rapayel', description: 'Welcome to <strong>Fardin\'s Anime Hub</strong> \u2014 your personal anime collection dashboard. I\'m Rapayel, your guide. I\'ll walk beside every feature and point at it with my stick.<br><br>You can replay this tour anytime from <strong>sidebar \u2192 Tour Guide</strong>.', side: 'bottom' }
       },
       {
-        element: '.counter-container',
+        element: '#nowStrip',
         guide: 'Frieren',
-        popover: { title: '\uD83D\uDCCA Anime Stats', description: 'See your total anime, seasons, and episodes count at a glance. Everything updates automatically!', side: 'bottom' }
+        popover: { title: '\u25B6 Currently Watching & Reading', description: 'This strip shows what Fardin is watching and reading right now, pulled from his own tracker.', side: 'bottom' }
       },
       {
         element: '#searchBox',
@@ -5092,26 +5127,20 @@ document.addEventListener('click', function(e) {
         popover: { title: '\uD83D\uDD0D Quick Search', description: 'Type any anime name here to instantly filter the entire collection. No page reload needed!', side: 'bottom' }
       },
       {
-        element: '#perfToggle',
-        guide: 'Makima',
-        popover: { title: '⚙️ Graphics Mode', description: 'Is the site lagging? Click here to switch between Advanced, High, Poor, or Low mode to control effects like thunder, sakura, and card animations.', side: 'bottom' }
-      },
-      {
         element: '.filter-section',
         guide: 'Marin Kitagawa',
         popover: { title: '\uD83C\uDFF7\uFE0F Genre Filter', description: 'Click any genre pill to filter anime by category \u2014 Action, Comedy, Romance, Isekai, and more. Each shows the count!', side: 'bottom' }
       },
       {
-        element: '#grid',
-        guide: 'Hinata Hyuga',
-        popover: { title: '\uD83D\uDCDA Anime Collection', description: 'Browse all <strong>' + document.querySelectorAll('#grid .card').length + ' anime</strong> Fardin has watched. Click any card to flip it and see details.', side: 'top' },
-        onHighlightStarted: function () { var _c = document.querySelector('.card'); if (_c) { setTimeout(function() { _c.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 50); } }
+        element: '#perfToggle',
+        guide: 'Makima',
+        popover: { title: '⚙️ Graphics Mode', description: 'Is the site lagging? Click here to switch between Advanced, High, Poor, or Low mode to control effects like thunder, sakura, and card animations.', side: 'bottom' }
       },
       {
-        element: '.share-btn',
-        guide: 'Yor Forger',
-        popover: { title: '\uD83D\uDD17 Share Cards', description: 'Click the <strong>gold share icon</strong> on any card to share it with friends! Copies the link so you can send it anywhere.', side: 'bottom' },
-        onHighlightStarted: function () { var _s = document.querySelector('.share-btn'); if (_s) { _s.closest('.card') && _s.closest('.card').scrollIntoView({ behavior: 'smooth', block: 'center' }); } }
+        element: '#grid',
+        guide: 'Hinata Hyuga',
+        popover: { title: '\uD83D\uDCDA Total Cards', description: 'Browse all <strong>' + document.querySelectorAll('#grid .card').length + ' anime cards</strong> Fardin has watched. Click any card to flip it and see details.', side: 'top' },
+        onHighlightStarted: function () { var _c = document.querySelector('.card'); if (_c) { setTimeout(function() { _c.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 50); } }
       },
       {
         element: '.menu-btn',
@@ -5137,6 +5166,11 @@ document.addEventListener('click', function(e) {
         popover: { title: '\u2694\uFE0F Anime Duel', description: 'Battle two anime head-to-head! Compare ratings and see which one wins. A fun way to discover top-rated shows.', side: 'right' }
       },
       {
+        element: '#hotTakesBtn',
+        guide: 'Power',
+        popover: { title: '\uD83D\uDD25 Hot Takes', description: 'Share your hot takes on any anime! Post comments and see what others think in real-time.', side: 'right' }
+      },
+      {
         element: '#tournament-nav-link',
         guide: 'Kaguya Shinomiya',
         popover: { title: '🏆 Crown Conquest', description: 'Enter the tournament arena! Pick a genre, draft your roster, and auto-simulate a bracket to crown a champion. Full power-based matchups!', side: 'right' }
@@ -5157,11 +5191,6 @@ document.addEventListener('click', function(e) {
         popover: { title: '\uD83D\uDC95 Find Your Waifus', description: 'Browse a gallery of beloved anime waifus with flip cards. Search by name or series!', side: 'right' }
       },
       {
-        element: '#hotTakesBtn',
-        guide: 'Power',
-        popover: { title: '\uD83D\uDD25 Hot Takes', description: 'Share your hot takes on any anime! Post comments and see what others think in real-time.', side: 'right' }
-      },
-      {
         element: '#wishlistBtn',
         guide: 'Alyssa',
         popover: { title: '\uD83D\uDC96 Wish List', description: 'Log in, then tap the <strong>heart</strong> on any card to save it. Your list lives in <strong>Available, Ongoing, Pending</strong> and <strong>Re-watch</strong> \u2014 add anime by URL and track what to watch next!', side: 'right' }
@@ -5170,6 +5199,11 @@ document.addEventListener('click', function(e) {
         element: 'nav.side-nav a[onclick*="openRandomPick"]',
         guide: 'Akari Watanabe',
         popover: { title: '\uD83C\uDFA8 Random Pick by Mood', description: 'Choose your mood \u2014 Funny, Sad, Romantic, Dark & more! We\'ll pick a matching anime just for your vibe.', side: 'right' }
+      },
+      {
+        element: 'nav.side-nav a[onclick*="showDuelLeaderboard"]',
+        guide: 'Mikasa Ackerman',
+        popover: { title: '\uD83C\uDFC6 Duel Leaderboard', description: 'See every anime duel result \u2014 wins, losses and the current champions across the hub.', side: 'right' }
       },
       {
         element: 'nav.side-nav a[onclick*="openSuggestion"]',
@@ -5186,6 +5220,11 @@ document.addEventListener('click', function(e) {
         element: '#topSecretsBtn',
         guide: 'C.C.',
         popover: { title: '\uD83D\uDD10 Top Secrets', description: 'Hidden resource guide! Get download sites, streaming platforms, and pro tips for watching anime.', side: 'right' }
+      },
+      {
+        element: '#tourGuideBtn',
+        guide: 'Rapayel',
+        popover: { title: '\uD83E\uDDED Tour Guide', description: 'Replay this walkthrough anytime from here \u2014 Rapayel will show you around the hub again.', side: 'right' }
       },
       {
         element: '#installAppBtn',
