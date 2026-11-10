@@ -233,9 +233,9 @@ function renderWaifuPreview() {
   frame.srcdoc =
     '<!doctype html><html><head><meta charset="utf-8">' +
     '<link rel="stylesheet" href="style.css">' +
-    '<style>html,body{margin:0;min-height:100%;background:#07070c;}' +
-    'body{display:flex;align-items:center;justify-content:center;padding:22px;box-sizing:border-box;}' +
-    '.waifu-card{cursor:pointer;}</style></head><body>' + card +
+    '<style>html,body{margin:0;padding:0;background:#07070c;}' +
+    'body{display:flex;align-items:center;justify-content:center;height:100vh;overflow:hidden;}' +
+    '.waifu-card{width:200px!important;height:280px;cursor:pointer;}</style></head><body>' + card +
     '<script>document.addEventListener("click",function(e){var c=e.target.closest(".waifu-card");if(c)c.classList.toggle("flip");});<\/script>' +
     '</body></html>';
 }
@@ -2440,9 +2440,10 @@ function renderCardPreview() {
     '<!doctype html><html><head><meta charset="utf-8">' +
     '<link rel="stylesheet" href="style.css">' +
     '<style>' +
-      'html,body{margin:0;min-height:100%;background:#07070c;}' +
-      'body{display:flex;align-items:center;justify-content:center;padding:22px;box-sizing:border-box;}' +
-      '#grid{display:block!important;grid-template-columns:none!important;}' +
+      'html,body{margin:0;padding:0;background:#07070c;}' +
+      'body{display:flex;align-items:center;justify-content:center;height:100vh;overflow:hidden;}' +
+      '#grid{display:block!important;grid-template-columns:none!important;margin:0!important;padding:0!important;}' +
+      '#grid .card{width:220px!important;height:380px;}' +
       '.card{cursor:pointer;}' +
     '</style></head><body>' +
     '<div class="grid" id="grid">' + card + '</div>' +
