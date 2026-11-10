@@ -742,7 +742,8 @@ export async function createGuide(hooks = {}) {
     root.updateMatrixWorld(true);
   }
 
-  async function tryModel() {
+  async function tryModel(attempt) {
+    attempt = attempt || 0;
     let url = null;
     state.modelPending = true;
     window.__guideModelPhase = 'head';
@@ -754,6 +755,12 @@ export async function createGuide(hooks = {}) {
     }
     window.__guideModelUrl = url;
     if (!url) {
+      /* a flaky connection can swallow the HEAD request - give it one more
+         try before falling back to the built-in figure */
+      if (attempt < 1) {
+        setTimeout(function () { tryModel(attempt + 1); }, 2500);
+        return;
+      }
       window.__guideModelPhase = 'none';
       state.modelPending = false;
       chibi.visible = true;
@@ -812,9 +819,16 @@ export async function createGuide(hooks = {}) {
       if (hooks.onModel) hooks.onModel(url);
       window.__guideModelPhase = 'ok';
     } catch (e) {
-      window.__guideModelPhase = 'error';
       window.__guideModelError = String(e && (e.message || e));
       window.__guideModelStack = String(e && e.stack || '').slice(0, 1200);
+      /* the download can die on a flaky line - one more try, and only then
+         fall back to the built-in figure */
+      if (attempt < 1) {
+        window.__guideModelPhase = 'retry';
+        setTimeout(function () { tryModel(attempt + 1); }, 2500);
+        return;
+      }
+      window.__guideModelPhase = 'error';
       /* keep the built-in figure */
       state.modelPending = false;
       chibi.visible = true;

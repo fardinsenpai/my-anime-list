@@ -3221,7 +3221,7 @@ body.hub-hidden .card.card-live { animation-play-state: paused !important; }
 .tour-tooltip {
   display: none;
   position: fixed;
-  z-index: 100002;
+  z-index: 100003;
   width: min(404px, calc(100vw - 28px));
   border-radius: 18px;
   border: 1px solid rgba(255,209,102,0.35);
@@ -3901,7 +3901,7 @@ body.perf-no-counter-anim .td-base i { animation: none !important; }
   inset: 0;
   width: 100%;
   height: 100%;
-  z-index: 100001;
+  z-index: 100002;
   display: none;
   pointer-events: none;
   contain: strict;
@@ -4199,7 +4199,7 @@ body.tour-mascot-on .guide-mascot-canvas { display: block; }
   display: none;
   position: fixed;
   inset: 0;
-  z-index: 100002;
+  z-index: 100004;
   background: rgba(4, 6, 16, 0.8);
   backdrop-filter: blur(8px);
   align-items: center;
@@ -5434,7 +5434,7 @@ body.perf-no-glow .poster-wrap img { transition: none !important; }
 
 /* === OWNER INFO PANEL === */
 .owner-panel {
-  position: fixed; inset: 0; z-index: 100002;
+  position: fixed; inset: 0; z-index: 100004;
   display: flex; align-items: center; justify-content: center;
   background: rgba(0,0,0,0.7); backdrop-filter: blur(8px);
   opacity: 0; pointer-events: none;
@@ -8401,4 +8401,62 @@ body.duel-mode-active #nowStrip { display: none !important; }
   .aq-brief { position: static; }
   .aq-question { font-size: 16px; }
   .aq-result-score { font-size: 26px; }
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   A&D group (Anime & Waifu) — the sidebar section header and its two rows
+   ══════════════════════════════════════════════════════════════════════ */
+.side-group-head {
+  display: flex !important;
+  align-items: baseline !important;
+  gap: 9px !important;
+  margin: 16px 18px 6px !important;
+  padding: 0 4px 6px !important;
+  border-bottom: 1px solid rgba(0, 230, 255, 0.22) !important;
+  position: relative !important;
+  list-style: none !important;
+}
+.side-group-head::before {
+  content: '' !important;
+  position: absolute !important;
+  left: 0 !important; bottom: -1px !important;
+  width: 46px !important; height: 2px !important;
+  background: linear-gradient(90deg, #ff4040, #ff69b4) !important;
+  border-radius: 2px !important;
+}
+.side-group-title {
+  font-family: 'Exo 2', sans-serif !important;
+  font-size: 13px !important;
+  font-weight: 800 !important;
+  letter-spacing: 3px !important;
+  color: #fff !important;
+  text-transform: uppercase !important;
+  background: linear-gradient(90deg, #ff4040, #ff69b4 60%, #00e5ff) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  text-shadow: 0 0 14px rgba(255, 105, 180, 0.25) !important;
+}
+.side-group-sub {
+  font-family: 'Exo 2', sans-serif !important;
+  font-size: 9px !important;
+  letter-spacing: 1.4px !important;
+  color: #7fa6c4 !important;
+  text-transform: uppercase !important;
+}
+.ad-group-item a {
+  border-left-color: rgba(255, 105, 180, 0.35) !important;
+}
+.ad-group-item a svg { filter: drop-shadow(0 0 6px rgba(255, 105, 180, 0.35)); }
+.ad-group-tag {
+  margin-left: auto !important;
+  font-size: 8.5px !important;
+  font-weight: 800 !important;
+  letter-spacing: 1.2px !important;
+  padding: 3px 8px !important;
+  border-radius: 999px !important;
+  color: #ffd7ea !important;
+  background: rgba(255, 105, 180, 0.16) !important;
+  border: 1px solid rgba(255, 105, 180, 0.45) !important;
+  white-space: nowrap !important;
 }
