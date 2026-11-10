@@ -1,0 +1,125 @@
+{
+  "_note": "Hand-verified entries for scripts/fetch-dub-data.js - these win over the wiki lookup. \"hi\" = Hindi dub platform, \"en\" = official English dub.",
+  "titles": {
+    "Jujutsu Kaisen": {
+      "hi": "Crunchyroll",
+      "en": "Official"
+    },
+    "Demon Slayer: Kimetsu no Yaiba": {
+      "hi": "Crunchyroll",
+      "en": "Official"
+    },
+    "Attack on Titan": {
+      "hi": "Crunchyroll",
+      "en": "Official"
+    },
+    "Chainsaw Man": {
+      "hi": "Crunchyroll",
+      "en": "Official"
+    },
+    "Spy x Family": {
+      "hi": "Crunchyroll",
+      "en": "Official"
+    },
+    "Blue Lock": {
+      "hi": "Crunchyroll",
+      "en": "Official"
+    },
+    "Solo Leveling": {
+      "hi": "Crunchyroll",
+      "en": "Official"
+    },
+    "Mashle: Magic and Muscles": {
+      "hi": "Crunchyroll",
+      "en": "Official"
+    },
+    "Fire Force": {
+      "hi": "Crunchyroll",
+      "en": "Official"
+    },
+    "Tokyo Revengers": {
+      "hi": "Crunchyroll",
+      "en": "Official"
+    },
+    "My Hero Academia": {
+      "hi": "Crunchyroll",
+      "en": "Official"
+    },
+    "Haikyuu!!": {
+      "hi": "Crunchyroll",
+      "en": "Official"
+    },
+    "Black Clover": {
+      "hi": "Crunchyroll",
+      "en": "Official"
+    },
+    "One Piece": {
+      "hi": "Crunchyroll",
+      "en": "Official"
+    },
+    "Naruto": {
+      "hi": "Sony YAY / Netflix",
+      "en": "Official"
+    },
+    "Naruto Shippuden": {
+      "hi": "Sony YAY / Netflix",
+      "en": "Official"
+    },
+    "Death Note": {
+      "hi": "Netflix",
+      "en": "Official"
+    },
+    "Fullmetal Alchemist: Brotherhood": {
+      "hi": "Netflix",
+      "en": "Official"
+    },
+    "Vinland Saga": {
+      "hi": "Netflix",
+      "en": "Official"
+    },
+    "Mushoku Tensei Jobless Reincarnation": {
+      "hi": "Crunchyroll",
+      "en": "Official"
+    },
+    "Hunter x Hunter": {
+      "hi": "Crunchyroll",
+      "en": "Official"
+    },
+    "Bleach": {
+      "hi": "Crunchyroll",
+      "en": "Official"
+    },
+    "Dragon Ball Z": {
+      "hi": "MX Player",
+      "en": "Official"
+    },
+    "Kaiju No. 8": {
+      "hi": "Crunchyroll",
+      "en": "Official"
+    },
+    "Wind Breaker": {
+      "hi": "Crunchyroll",
+      "en": "Official"
+    },
+    "Hell's Paradise": {
+      "hi": "Crunchyroll",
+      "en": "Official"
+    },
+    "Dandadan": {
+      "hi": "Crunchyroll",
+      "en": "Official"
+    },
+    "Frieren: Beyond Journey's End": {
+      "hi": "Crunchyroll",
+      "en": "Official"
+    },
+    "Dr.Stone": {
+      "hi": "Crunchyroll",
+      "en": "Official"
+    },
+    "Classroom of the Elite": {
+      "hi": "Crunchyroll",
+      "en": "Official"
+    }
+  }
+}

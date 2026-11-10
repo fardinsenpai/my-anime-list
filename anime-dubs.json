@@ -1,39 +1,1738 @@
 {
   "_meta": {
-    "note": "Official/OTT audio only. hi = Hindi dub platform, en = official English dub, sub = Japanese audio with subtitles. A missing key means no verified data for that title — the chat must say so instead of guessing.",
-    "updated": "2026-11-10",
-    "platforms": ["Crunchyroll", "Netflix", "Sony", "MX Player", "Muse India"]
+    "note": "Official dub data for the AI chat. hi = Hindi dub platform(s), en = official English dub, sub = Japanese audio with subtitles. null means no verified official dub found - the chat must say so instead of guessing.",
+    "generated": "2026-11-10",
+    "generator": "scripts/fetch-dub-data.js",
+    "sources": [
+      "dubdb.fandom.com",
+      "hindi-dubbing.fandom.com"
+    ],
+    "titles": 287,
+    "withHindi": 33,
+    "withEnglish": 61
   },
   "titles": {
-    "Jujutsu Kaisen": { "hi": "Crunchyroll", "en": "Official", "sub": "Japanese" },
-    "Demon Slayer: Kimetsu no Yaiba": { "hi": "Crunchyroll", "en": "Official", "sub": "Japanese" },
-    "Attack on Titan": { "hi": "Crunchyroll", "en": "Official", "sub": "Japanese" },
-    "Chainsaw Man": { "hi": "Crunchyroll", "en": "Official", "sub": "Japanese" },
-    "Spy x Family": { "hi": "Crunchyroll", "en": "Official", "sub": "Japanese" },
-    "Blue Lock": { "hi": "Crunchyroll", "en": "Official", "sub": "Japanese" },
-    "Solo Leveling": { "hi": "Crunchyroll", "en": "Official", "sub": "Japanese" },
-    "Mashle: Magic and Muscles": { "hi": "Crunchyroll", "en": "Official", "sub": "Japanese" },
-    "Fire Force": { "hi": "Crunchyroll", "en": "Official", "sub": "Japanese" },
-    "Tokyo Revengers": { "hi": "Crunchyroll", "en": "Official", "sub": "Japanese" },
-    "My Hero Academia": { "hi": "Crunchyroll", "en": "Official", "sub": "Japanese" },
-    "Haikyuu!!": { "hi": "Crunchyroll", "en": "Official", "sub": "Japanese" },
-    "Black Clover": { "hi": "Crunchyroll", "en": "Official", "sub": "Japanese" },
-    "One Piece": { "hi": "Crunchyroll", "en": "Official", "sub": "Japanese" },
-    "Naruto": { "hi": "Sony YAY / Netflix", "en": "Official", "sub": "Japanese" },
-    "Naruto Shippuden": { "hi": "Sony YAY / Netflix", "en": "Official", "sub": "Japanese" },
-    "Death Note": { "hi": "Netflix", "en": "Official", "sub": "Japanese" },
-    "Fullmetal Alchemist: Brotherhood": { "hi": "Netflix", "en": "Official", "sub": "Japanese" },
-    "Vinland Saga": { "hi": "Netflix", "en": "Official", "sub": "Japanese" },
-    "Mushoku Tensei Jobless Reincarnation": { "hi": "Crunchyroll", "en": "Official", "sub": "Japanese" },
-    "Hunter x Hunter": { "hi": "Crunchyroll", "en": "Official", "sub": "Japanese" },
-    "Bleach": { "hi": "Crunchyroll", "en": "Official", "sub": "Japanese" },
-    "Dragon Ball Z": { "hi": "MX Player", "en": "Official", "sub": "Japanese" },
-    "Kaiju No. 8": { "hi": "Crunchyroll", "en": "Official", "sub": "Japanese" },
-    "Wind Breaker": { "hi": "Crunchyroll", "en": "Official", "sub": "Japanese" },
-    "Hell's Paradise": { "hi": "Crunchyroll", "en": "Official", "sub": "Japanese" },
-    "Dandadan": { "hi": "Crunchyroll", "en": "Official", "sub": "Japanese" },
-    "Frieren: Beyond Journey's End": { "hi": "Crunchyroll", "en": "Official", "sub": "Japanese" },
-    "Dr.Stone": { "hi": "Crunchyroll", "en": "Official", "sub": "Japanese" },
-    "Classroom of the Elite": { "hi": "Crunchyroll", "en": "Official", "sub": "Japanese" }
+    "My Hero Academia": {
+      "hi": "Crunchyroll",
+      "en": "Official",
+      "sub": "Japanese",
+      "source": "manual + wiki"
+    },
+    "Naruto": {
+      "hi": "Sony YAY / Netflix",
+      "en": "Official",
+      "sub": "Japanese",
+      "source": "manual + wiki"
+    },
+    "Naruto Shippuden": {
+      "hi": "Sony YAY / Netflix",
+      "en": "Official",
+      "sub": "Japanese",
+      "source": "manual + wiki"
+    },
+    "One Piece": {
+      "hi": "Crunchyroll",
+      "en": "Official",
+      "sub": "Japanese",
+      "source": "manual + wiki"
+    },
+    "Black Clover": {
+      "hi": "Crunchyroll",
+      "en": "Official",
+      "sub": "Japanese",
+      "source": "manual + wiki"
+    },
+    "Bleach": {
+      "hi": "Crunchyroll / MX Player",
+      "en": "Official",
+      "sub": "Japanese",
+      "source": "manual + wiki"
+    },
+    "Fairy Tail": {
+      "hi": null,
+      "en": "Crunchyroll",
+      "sub": "Japanese",
+      "source": "dubdb"
+    },
+    "Baki Hanma": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Blue Lock": {
+      "hi": "Crunchyroll",
+      "en": "Official",
+      "sub": "Japanese",
+      "source": "manual + wiki"
+    },
+    "Solo Leveling": {
+      "hi": "Crunchyroll / Amazon Prime / YouTube",
+      "en": "Official",
+      "sub": "Japanese",
+      "source": "manual + wiki"
+    },
+    "Jujutsu Kaisen": {
+      "hi": "Crunchyroll / Sony YAY! / MX Player / Hotstar / Medialink",
+      "en": "Official",
+      "sub": "Japanese",
+      "source": "manual + wiki"
+    },
+    "Death Note": {
+      "hi": "Netflix",
+      "en": "Official",
+      "sub": "Japanese",
+      "source": "manual + wiki"
+    },
+    "Vinland Saga": {
+      "hi": "Netflix",
+      "en": "Official",
+      "sub": "Japanese",
+      "source": "manual + wiki"
+    },
+    "Assassination Classroom": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Mashle: Magic and Muscles": {
+      "hi": "Crunchyroll",
+      "en": "Official",
+      "sub": "Japanese",
+      "source": "manual + wiki"
+    },
+    "Viral Hit": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Hunter x Hunter": {
+      "hi": "Crunchyroll",
+      "en": "Official",
+      "sub": "Japanese",
+      "source": "manual + wiki"
+    },
+    "Mushoku Tensei Jobless Reincarnation": {
+      "hi": "Crunchyroll",
+      "en": "Official",
+      "sub": "Japanese",
+      "source": "manual + wiki"
+    },
+    "Spy x Family": {
+      "hi": "Crunchyroll",
+      "en": "Official",
+      "sub": "Japanese",
+      "source": "manual + wiki"
+    },
+    "ReLIFE": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Haikyuu!!": {
+      "hi": "Crunchyroll",
+      "en": "Official",
+      "sub": "Japanese",
+      "source": "manual + wiki"
+    },
+    "Tokyo Revengers": {
+      "hi": "Crunchyroll / YouTube",
+      "en": "Official",
+      "sub": "Japanese",
+      "source": "manual + wiki"
+    },
+    "One-Punch Man": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Demon Slayer: Kimetsu no Yaiba": {
+      "hi": "Crunchyroll / JioCinema / Amazon Prime",
+      "en": "Official",
+      "sub": "Japanese",
+      "source": "manual + wiki"
+    },
+    "Dr. Stone": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Kaiju No. 8": {
+      "hi": "Crunchyroll",
+      "en": "Official",
+      "sub": "Japanese",
+      "source": "manual + wiki"
+    },
+    "Lookism": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Chainsaw Man": {
+      "hi": "Crunchyroll",
+      "en": "Official",
+      "sub": "Japanese",
+      "source": "manual + wiki"
+    },
+    "Attack on Titan": {
+      "hi": "Crunchyroll / Muse India",
+      "en": "Official",
+      "sub": "Japanese",
+      "source": "manual + wiki"
+    },
+    "Wind Breaker": {
+      "hi": "Crunchyroll",
+      "en": "Official",
+      "sub": "Japanese",
+      "source": "manual + wiki"
+    },
+    "Classroom of the Elite": {
+      "hi": "Crunchyroll",
+      "en": "Official",
+      "sub": "Japanese",
+      "source": "manual + wiki"
+    },
+    "The Daily Life of the Immortal King": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Prison School": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "I Got a Cheat Skill in Another World": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Rent A Girlfriend": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Radiant": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Pokemon": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Your Name": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Suzume": {
+      "hi": null,
+      "en": "Crunchyroll",
+      "sub": "Japanese",
+      "source": "dubdb"
+    },
+    "Zom 100: Bucket List of the Dead": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "More Than a Married Couple, But Not Lovers": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Demon Slayer: Mugen Train": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Buddy Daddies": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Blue Lock The Movie: Episode Nagi": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "My Love Story with Yamada-kun at Lv999": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "My Hero Academia: World Heroes' Mission": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Erased": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Jujutsu Kaisen 0": {
+      "hi": null,
+      "en": "Crunchyroll",
+      "sub": "Japanese",
+      "source": "dubdb"
+    },
+    "Dororo": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Hell's Paradise": {
+      "hi": "Crunchyroll",
+      "en": "Official",
+      "sub": "Japanese",
+      "source": "manual + wiki"
+    },
+    "Alya Sometimes Hides Her Feelings in Russian": {
+      "hi": "Crunchyroll / Amazon Prime",
+      "en": "Crunchyroll",
+      "sub": "Japanese",
+      "source": "dubdb + hindi-dubbing wiki"
+    },
+    "Failure Frame": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Uzumaki": {
+      "hi": null,
+      "en": "Amazon Prime",
+      "sub": "Japanese",
+      "source": "dubdb"
+    },
+    "Trillion Game": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Fire Force": {
+      "hi": "Crunchyroll",
+      "en": "Official",
+      "sub": "Japanese",
+      "source": "manual + wiki"
+    },
+    "Tomo-chan Is a Girl!": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "My Tiny Senpai": {
+      "hi": "Sony YAY! / Crunchyroll / Amazon Prime",
+      "en": "Crunchyroll",
+      "sub": "Japanese",
+      "source": "dubdb + hindi-dubbing wiki"
+    },
+    "True Beauty": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Domestic Girlfriend": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Tying the Knot with an Amagami Sister": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Mechanical Arms": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "The Ossan Newbie Adventurer": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "I Parry Everything": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Wistoria: Wand and Sword": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Dandadan": {
+      "hi": "Crunchyroll",
+      "en": "Official",
+      "sub": "Japanese",
+      "source": "manual + wiki"
+    },
+    "The Kingdoms of Ruin": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Blood Lad": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Re:Zero - Starting Life in Another World": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "How Not to Summon a Demon Lord": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Mission: Yozakura Family": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Love Flops": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Hokkaido Gals Are Super Adorable!": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Code Geass": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Sakamoto Days": {
+      "hi": null,
+      "en": "Netflix",
+      "sub": "Japanese",
+      "source": "dubdb"
+    },
+    "Cyberpunk: Edgerunners": {
+      "hi": null,
+      "en": "Netflix",
+      "sub": "Japanese",
+      "source": "dubdb"
+    },
+    "Tower of God": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "My Happy Marriage": {
+      "hi": null,
+      "en": "Netflix",
+      "sub": "Japanese",
+      "source": "dubdb"
+    },
+    "Sword Art Online": {
+      "hi": null,
+      "en": "Crunchyroll",
+      "sub": "Japanese",
+      "source": "dubdb"
+    },
+    "The Apothecary Diaries": {
+      "hi": null,
+      "en": "Crunchyroll",
+      "sub": "Japanese",
+      "source": "dubdb"
+    },
+    "Overlord": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "That Time I Got Reincarnated as a Slime": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "No Game No Life": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Konosuba": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "The Ancient Magus Bride": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Mob Psycho 100": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "The Promised Neverland": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Banana Fish": {
+      "hi": null,
+      "en": "Netflix",
+      "sub": "Japanese",
+      "source": "dubdb"
+    },
+    "91 Days": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Given": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Sk8 the Infinity": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Yona of the Dawn": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Toilet-Bound Hanako-kun": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "The Case Study of Vanitas": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Moriarty the Patriot": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Noragami": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Seraph of the End": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Akame ga Kill!": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "The Seven Deadly Sins": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Sword Art Online: Alicization": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Fullmetal Alchemist (2003)": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Sword Art Online: Progressive": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "86 - Eighty Six": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Oshi no Ko": {
+      "hi": null,
+      "en": "HIDIVE",
+      "sub": "Japanese",
+      "source": "dubdb"
+    },
+    "Bocchi the Rock!": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Lycoris Recoil": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Engage Kiss": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Beast Tamer": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "World's End Harem": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Reincarnated as a Sword": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "The Fruit of Evolution": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Muv-Luv Alternative": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Trapped in a Dating Sim": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Love After World Domination": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Skeleton Knight in Another World": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Love is War": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Aharen-san wa Hakarenai": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Date A Live": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "The Eminence in Shadow Season 2": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Reincarnated as the Seventh Prince": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "The Strongest Tank's Labyrinth Raids": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Villainess Level 99": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "I Was Reincarnated as the 7th Prince": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Tsukimichi: Moonlit Fantasy": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Failure Frame Season 2": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Dungeon Meshi": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "A Sign of Affection": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Arknights: Perish in Frost": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Metallic Rouge": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Brave Bang Bravern!": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "The Wrong Way to Use Healing Magic": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Seirei Gensouki: Spirit Chronicles": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Goblin Slayer": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Is It Wrong to Try to Pick Up Girls in a Dungeon?": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Highschool DxD": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "The Hero is Overpowered but Overly Cautious": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Toradora!": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Clannad": {
+      "hi": null,
+      "en": "HIDIVE",
+      "sub": "Japanese",
+      "source": "dubdb"
+    },
+    "Angel Beats!": {
+      "hi": null,
+      "en": "HIDIVE",
+      "sub": "Japanese",
+      "source": "dubdb"
+    },
+    "Anohana": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Steins;Gate": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Violet Evergarden": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "A Silent Voice": {
+      "hi": null,
+      "en": "Official",
+      "sub": "Japanese",
+      "source": "dubdb"
+    },
+    "Grave of the Fireflies": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Made in Abyss": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Berserk (1997)": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Neon Genesis Evangelion": {
+      "hi": null,
+      "en": "Official",
+      "sub": "Japanese",
+      "source": "dubdb"
+    },
+    "Cowboy Bebop": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Trigun": {
+      "hi": null,
+      "en": "Crunchyroll",
+      "sub": "Japanese",
+      "source": "dubdb"
+    },
+    "Rurouni Kenshin": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Dragon Ball Z": {
+      "hi": "MX Player",
+      "en": "Official",
+      "sub": "Japanese",
+      "source": "manual + wiki"
+    },
+    "Sword Art Online: Gun Gale Online": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "The Time I Got Reincarnated as a Slime Movie": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Orient": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Gushing over Magical Girls": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Classroom of the Elite Season 2": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "The Dangers in My Heart": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "High Card": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "I'll Become a Villainess Who Goes Down in History": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Loner Life in Another World": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Shangri-La Frontier Season 2": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "The Unaware Atelier Master": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "The Magical Girl and the Evil Lieutenant Used to Be Archenemies": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "As a Reincarnated Aristocrat, I'll Use My Appraisal Skill to Rise in the World": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Robotics;Notes": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "My Unique Skill Makes Me OP Even at Level 1": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "TONIKAWA: Over the Moon for You": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Quality Assurance in Another World": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Nina the Starry Bride": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "KamiKatsu: Working for God in a Godless World": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Dead Mount Death Play": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "The Great Cleric": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "My Gift Level 9999 Unlimited Gacha": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Even Given the Worthless Appraiser Class, I'm Actually the Strongest": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Demon Lord, Retry!": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "After School Dice Club": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Heroines Run the Show": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Dekin no Mogura: The Earthbound Mole": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "New Saga": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Devil May Cry": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Shangri-La Frontier": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Lord of Mysteries": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Bye Bye, Earth": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Re:Monster": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "May I Ask for One Final Thing?": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Food Wars!: Shokugeki no Soma": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "My Status as an Assassin Obviously Exceeds the Hero's": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Clevatess": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Campfire Cooking in Another World with My Absurd Skill": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Ragna Crimson": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Frieren: Beyond Journey's End": {
+      "hi": "Crunchyroll",
+      "en": "Official",
+      "sub": "Japanese",
+      "source": "manual + wiki"
+    },
+    "Fujimoto 17-26": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Let's Play": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Reborn to Master the Blade": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "The Misfit of Demon King Academy": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "My Clueless First Friend": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "And You Thought There Is Never a Girl Online?": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "A Wild Last Boss Appeared!": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "The Red Ranger Becomes an Adventurer in Another World": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Kuroko's Basketball": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "The Eminence in Shadow": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "MF Ghost": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Gachiakuta": {
+      "hi": null,
+      "en": "Crunchyroll",
+      "sub": "Japanese",
+      "source": "dubdb"
+    },
+    "Mechanical Marie": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Tokyo Ghoul": {
+      "hi": null,
+      "en": "Crunchyroll",
+      "sub": "Japanese",
+      "source": "dubdb"
+    },
+    "An Adventurer's Daily Grind at Age 29": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "There Was a Cute Girl in the Hero's Party, So I Tried Confessing to Her": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "A Gatherer's Adventure in Isekai": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Kunon the Sorcerer Can See": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Hana-Kimi": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "You and I Are Polar Opposites": {
+      "hi": null,
+      "en": "Crunchyroll",
+      "sub": "Japanese",
+      "source": "dubdb"
+    },
+    "BOFURI: I Don't Want to Get Hurt, so I'll Max Out My Defense": {
+      "hi": null,
+      "en": "Crunchyroll",
+      "sub": "Japanese",
+      "source": "dubdb"
+    },
+    "Cells at Work!": {
+      "hi": null,
+      "en": "Crunchyroll",
+      "sub": "Japanese",
+      "source": "dubdb"
+    },
+    "The Rising of the Shield Hero": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "A Misanthrope Teaches a Class for Demi-Humans": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Jack-of-All-Trades, Party of None": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Summer Time Rendering": {
+      "hi": null,
+      "en": "Hotstar",
+      "sub": "Japanese",
+      "source": "dubdb"
+    },
+    "I'm Standing on a Million Lives": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Komi Can't Communicate": {
+      "hi": null,
+      "en": "Netflix",
+      "sub": "Japanese",
+      "source": "dubdb"
+    },
+    "To Be Hero X": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Gintama": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Chillin' in My 30s After Getting Fired From the Demon King's Army": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Your Lie in April": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Ranking of Kings": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Reign of the Seven Spellblades": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Black Summoner": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Yaiba: Samurai Legend": {
+      "hi": null,
+      "en": "Netflix",
+      "sub": "Japanese",
+      "source": "dubdb"
+    },
+    "Arifureta: From Commonplace to World's Strongest": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Miss Kuroitsu from the Monster Development Department": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Dandelion": {
+      "hi": null,
+      "en": "Netflix",
+      "sub": "Japanese",
+      "source": "dubdb"
+    },
+    "Fullmetal Alchemist: Brotherhood": {
+      "hi": "Netflix / Sony YAY! / Crunchyroll",
+      "en": "Official",
+      "sub": "Japanese",
+      "source": "manual + wiki"
+    },
+    "Sentenced to Be a Hero": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "She Professed Herself Pupil of the Wise Man": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Ultraviolet Code 044": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Yuri!!! on Ice": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "I Left My A-Rank Party to Help My Former Students Reach the Dungeon Depths!": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Daemons of the Shadow Realm": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "An Observation Log of My Fiancée Who Calls Herself a Villainess": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Witch Hat Atelier": {
+      "hi": "Netflix",
+      "en": "Crunchyroll",
+      "sub": "Japanese",
+      "source": "dubdb + hindi-dubbing wiki"
+    },
+    "The Warrior Princess and the Barbaric King": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "The Ramparts of Ice": {
+      "hi": null,
+      "en": "Netflix",
+      "sub": "Japanese",
+      "source": "dubdb"
+    },
+    "Scum of the Brave": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Marriage Toxin": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Liar Game": {
+      "hi": null,
+      "en": "Crunchyroll",
+      "sub": "Japanese",
+      "source": "dubdb"
+    },
+    "I Made Friends with the Second Prettiest Girl in My Class": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Eren the Southpaw": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "BlackRock Shooter Dawn Fall": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Devilman Crybaby": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Wise Man's Grandchild": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Blue Spring Ride": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Easygoing Territory Defense by the Optimistic Lord": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Terror in Resonance": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "UQ Holder!": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Problem Children Are Coming From Another World, Aren't They?": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "If My Favorite Pop Idol Made It to the Budokan, I Would Die": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Magic Maker: How to Make Magic in Another World": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Farming Life in Another World": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "The Strongest Sage With the Weakest Crest": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "BLACK TORCH": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "From Overshadowed to Overpowered: Second Reincarnation of a Talentless Sage": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Am I Actually the Strongest?": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Tomb Raider King": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Hanaori-san Still Wants to Fight in the Next Life": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "I Became a Legend After My 10 Year-Long Last Stand": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Rich Girl Caretaker: I'm Secretly the Caregiver of the Most Popular Girl in This Rich Kid School": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "The Exiled Heavy Knight Knows How to Game the System": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "The Laid-Off Cheat-Granting Mage Enjoys a Second Lease on Life": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Overgeared": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "The Villager of Level 999": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "KONOSUBA -An Explosion on This Wonderful World!": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Cinderella Chef": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Tamon's B-Side": {
+      "hi": "YouTube",
+      "en": "Crunchyroll",
+      "sub": "Japanese",
+      "source": "dubdb + hindi-dubbing wiki"
+    },
+    "Mobile Suit Gundam": {
+      "hi": null,
+      "en": "Crunchyroll",
+      "sub": "Japanese",
+      "source": "dubdb"
+    },
+    "Agents of the Four Seasons: Dance of Spring": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Gantz": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "The strongest job is apparently not a hero or a sage, but an appraiser (provisional)!": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Kusunoki's Garden of Gods": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Noble Reincarnation: Born Blessed, So I'll Obtain Ultimate Power": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "ROLL OVER AND DIE: I Will Fight for an Ordinary Life with My Love and Cursed Sword!": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "HELL MODE: The Hardcore Gamer Dominates in Another World with Garbage Balancing": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Quanqiu Gao Wu": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Plunderer": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "The King's Avatar": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "The First Order": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "Sword of the Demon Hunter: Kijin Gentosho": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "TRIGUN STARGAZE": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "The Frontier Lord Begins with Zero Subjects": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    },
+    "By the Grace of the Gods": {
+      "hi": null,
+      "en": null,
+      "sub": "Japanese",
+      "source": "none found"
+    }
   }
 }

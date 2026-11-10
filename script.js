@@ -1,3 +1,22 @@
+/* ── the tour guide's VRM is ~9 MB. Start pulling it down as early as the
+      connection allows, so Komi is already standing there when the tour
+      card pops up instead of arriving a couple of seconds later.
+      Skipped on data-saver and slow lines. ─────────────────────────────── */
+(function preloadGuideModel() {
+  try {
+    var c = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+    if (c && (c.saveData || /slow-2g|2g/.test(c.effectiveType || ''))) return;
+  } catch (e) {}
+  try {
+    if (!document.head) return;
+    var link = document.createElement('link');
+    link.rel = 'preload';
+    link.as = 'fetch';
+    link.href = 'Komi%20Shouko.vrm';
+    document.head.appendChild(link);
+  } catch (e) {}
+})();
+
 // === AUTO-GENERATED DATA (OTT, Studio, Rating) ===
 window.OTT_DATA = {"1":["Crunchyroll","Hulu","Netflix"],"3":["Hulu","Crunchyroll"],"4":["Crunchyroll","Hulu"],"5":["Crunchyroll","Hulu","Netflix"],"6":["Hulu"],"7":["Crunchyroll","Hulu"],"8":["Netflix"],"9":["Beta Series"],"10":["Crunchyroll"],"11":["Crunchyroll","Netflix"],"12":["Netflix","Hulu","Tubi","YouTube"],"13":["Amazon Prime","HiDive","Netflix","Crunchyroll"],"14":["Hulu","Crunchyroll"],"15":["Crunchyroll"],"16":["Crunchyroll"],"17":["Crunchyroll","Hulu","YouTube"],"18":["Crunchyroll"],"19":["Beta Series","Hulu","Netflix"],"20":["Crunchyroll"],"21":["Hulu","Crunchyroll","HiDive","Netflix"],"22":["Crunchyroll"],"23":["Hulu","Netflix","Tubi","Crunchyroll"],"24":["Crunchyroll","Hulu","Netflix"],"25":["Crunchyroll"],"26":["Crunchyroll"],"27":["Netflix"],"28":["Beta Series","Hulu"],"29":["Netflix","Hulu","Crunchyroll"],"30":["Crunchyroll"],"31":["Crunchyroll","YouTube"],"32":["Netflix"],"33":["Hulu"],"34":["Crunchyroll"],"35":["Crunchyroll"],"36":["Crunchyroll"],"37":["Hulu"],"38":[],"39":["Netflix"],"40":["Crunchyroll","Hulu"],"41":["Crunchyroll","YouTube"],"42":["Beta Series"],"43":["Crunchyroll"],"44":[],"45":["Crunchyroll"],"46":[],"47":[],"48":["Beta Series","Netflix"],"49":["Amazon Prime","HiDive"],"50":["Crunchyroll"],"51":["Crunchyroll"],"52":["Crunchyroll"],"53":[],"54":["Crunchyroll"],"55":["Crunchyroll","Hulu"],"56":["Crunchyroll"],"57":["Crunchyroll"],"58":[],"59":["HiDive","Crunchyroll"],"60":["Crunchyroll"],"61":[],"62":["Crunchyroll"],"63":["HiDive"],"64":["Crunchyroll"],"65":["Hulu","Netflix","Crunchyroll"],"66":["Crunchyroll"],"67":[],"68":["Crunchyroll"],"69":["Crunchyroll"],"70":["Hulu"],"71":["HiDive"],"72":["Crunchyroll"],"73":["Crunchyroll","Netflix"],"74":["Netflix"],"75":["Netflix"],"76":["Crunchyroll"],"77":["Netflix"],"78":["Crunchyroll"],"79":["Netflix"],"80":["Crunchyroll"],"81":["Netflix"],"82":["Crunchyroll"],"83":["Crunchyroll","Netflix"],"84":["Crunchyroll"],"85":["Hulu","Amazon Prime"],"86":["Crunchyroll"],"87":["Crunchyroll"],"88":["Crunchyroll","Netflix","Hulu"],"89":["Crunchyroll"],"90":["Crunchyroll"],"91":["Crunchyroll"],"92":["Hulu","Crunchyroll"],"93":["Crunchyroll"],"94":["Crunchyroll"],"95":["Crunchyroll"],"96":[],"97":["Netflix"],"98":["Netflix"],"99":["Hulu","Crunchyroll"],"100":["Amazon Prime","Hulu"],"101":["Crunchyroll","HiDive"],"103":["Crunchyroll"],"104":["Crunchyroll","Netflix"],"105":["Crunchyroll"],"106":["Hulu","Crunchyroll"],"107":[],"108":["Crunchyroll","Hulu"],"109":["Crunchyroll"],"110":["Beta Series"],"111":["Crunchyroll"],"112":["Crunchyroll"],"113":["Crunchyroll"],"114":["Crunchyroll"],"115":["Crunchyroll"],"116":["Crunchyroll","YouTube"],"117":["Crunchyroll"],"118":["Crunchyroll"],"119":["Crunchyroll"],"120":["Crunchyroll"],"121":["Crunchyroll"],"122":["Netflix"],"123":["Crunchyroll"],"124":["Crunchyroll"],"125":["Crunchyroll"],"127":["Crunchyroll"],"128":["Crunchyroll"],"129":["Netflix"],"130":["Crunchyroll"],"131":["Crunchyroll"],"132":["Crunchyroll"],"133":["Crunchyroll"],"134":["Crunchyroll"],"135":["Crunchyroll","Hulu","Netflix"],"136":["Crunchyroll"],"137":["Crunchyroll"],"138":["Crunchyroll"],"139":["Crunchyroll"],"140":["Crunchyroll"],"141":["Crunchyroll"],"142":["Crunchyroll"],"143":["Crunchyroll"],"144":["Crunchyroll"],"145":["Crunchyroll"],"146":["Netflix"],"147":["Crunchyroll"],"148":["Beta Series"],"149":["Crunchyroll"],"150":["Netflix","Crunchyroll","Hulu"],"151":["Crunchyroll","HiDive"],"152":["Netflix"],"153":["Crunchyroll"],"154":["Netflix"],"155":["Crunchyroll"],"156":["Crunchyroll"],"157":["Crunchyroll"],"158":["Beta Series"],"159":["Crunchyroll"],"160":["Crunchyroll"],"161":["Netflix"],"162":["Crunchyroll"],"163":["Crunchyroll"],"164":["Hulu","Crunchyroll"],"165":["Crunchyroll"],"166":["Crunchyroll"],"167":["Crunchyroll"],"168":["Crunchyroll"],"169":["Crunchyroll"],"170":["Crunchyroll"],"171":["Crunchyroll"],"172":[],"173":["HiDive"],"174":["Crunchyroll"],"175":["Hulu","Crunchyroll"],"176":["Hulu","Crunchyroll"],"177":["Beta Series"],"178":[],"180":["Hulu","Crunchyroll"],"181":["Crunchyroll"],"182":["Crunchyroll"],"183":["Crunchyroll"],"184":["Crunchyroll"],"185":["Crunchyroll"],"186":["Hulu","HiDive","Crunchyroll"],"187":["Crunchyroll"],"188":["Crunchyroll"],"189":["Crunchyroll"],"190":["HiDive"],"191":["Crunchyroll","Netflix"],"192":["Amazon Prime"],"194":["Crunchyroll"],"195":["Crunchyroll"],"196":["Crunchyroll"],"197":["Crunchyroll"],"198":[],"199":["Crunchyroll"],"200":["Crunchyroll","Netflix"],"201":["HiDive"],"202":["Crunchyroll"],"203":["Crunchyroll"],"204":[],"205":["Hulu","Crunchyroll"],"206":["Crunchyroll"],"207":["Crunchyroll"],"208":["Crunchyroll"],"209":["Crunchyroll"],"210":[],"211":["Crunchyroll"],"212":["Crunchyroll"],"213":["Crunchyroll","Netflix"],"214":["Crunchyroll"],"215":[],"216":["Crunchyroll"],"217":["Hulu"],"218":[],"219":["Netflix"],"220":["Crunchyroll"],"221":["Crunchyroll","Hulu"],"222":["Crunchyroll"],"223":["Hulu","Crunchyroll","Netflix"],"224":["Crunchyroll","Amazon Prime"],"225":["Crunchyroll"],"226":["Beta Series"],"227":["Hulu","Netflix"],"228":["Hulu","Crunchyroll"],"229":["Crunchyroll"],"230":["Netflix"],"231":["Hulu","Crunchyroll","Amazon Prime","Netflix"],"232":["Crunchyroll"],"233":["Crunchyroll"],"234":[],"235":["Crunchyroll"],"237":["Crunchyroll"],"238":["Crunchyroll"],"239":["Crunchyroll"],"240":["Crunchyroll"],"241":["Netflix"],"242":["Crunchyroll"],"243":["Crunchyroll"],"244":["Crunchyroll"],"245":["Crunchyroll"],"246":[],"247":["Hulu"],"248":["Netflix"],"249":["Amazon Prime","HiDive"],"250":["Crunchyroll"],"251":["HiDive","Amazon Prime"],"252":["Crunchyroll"],"253":["Crunchyroll","Amazon Prime"],"254":["Crunchyroll","Netflix","Funimation"],"255":["Crunchyroll","HiDive","Amazon Prime"],"256":["Crunchyroll"],"257":["Crunchyroll"],"258":["Crunchyroll"],"259":["Crunchyroll"],"261":["Crunchyroll"],"262":["Crunchyroll"],"263":["Crunchyroll"],"264":["Crunchyroll"],"265":["Crunchyroll"],"266":["Crunchyroll","YouTube"],"267":["Crunchyroll"],"268":["Crunchyroll"],"269":["Crunchyroll"],"270":["Crunchyroll","YouTube"],"271":["Crunchyroll","YouTube"],"272":["Crunchyroll"],"273":["Crunchyroll"],"274":["YouTube","Crunchyroll","Amazon Prime","Netflix"],"275":["YouTube","Netflix"],"276":["Crunchyroll","YouTube"],"277":["Netflix","Crunchyroll"],"279":["Netflix","Crunchyroll"],"280":["Crunchyroll"],"281":["Crunchyroll","YouTube"],"282":["Crunchyroll","YouTube"],"283":["Crunchyroll"],"284":["HiDive"],"285":[],"286":["Hulu","Crunchyroll"],"287":["YouTube","Crunchyroll"],"288":["YouTube"],"290":["Crunchyroll","YouTube"],"291":["Crunchyroll"],"291":["Crunchyroll"],"292":["Hulu","YouTube","Netflix","Crunchyroll"]};
 window.STUDIO_DATA = {"1":["Bones"],"3":["Studio Pierrot"],"4":["Toei Animation"],"5":["Studio Pierrot"],"6":[],"7":["A-1 Pictures","Bridge","CloverWorks"],"8":[],"9":[],"10":[],"11":["MAPPA"],"12":["Madhouse"],"13":["Wit Studio"],"14":["Lerche"],"15":[],"16":[],"17":["Madhouse"],"18":["Studio Bind"],"19":[],"20":[],"21":["Production I.G"],"22":[],"23":["Madhouse"],"24":["ufotable"],"25":["TMS Entertainment"],"26":[],"27":[],"28":[],"29":["Wit Studio"],"30":[],"31":["Lerche"],"32":["Haoliners Animation League"],"33":["J.C.Staff"],"34":[],"35":[],"36":["Lerche"],"37":[],"38":["CoMix Wave Films"],"39":[],"40":[],"41":[],"42":["ufotable"],"43":[],"44":[],"45":[],"46":[],"47":[],"48":[],"49":["MAPPA","Tezuka Productions"],"50":[],"51":[],"52":[],"53":["Production I.G"],"54":[],"55":["David Production"],"56":[],"57":[],"58":[],"59":["Diomedea"],"60":[],"61":["TriF Studio"],"62":[],"63":[],"64":[],"65":[],"66":[],"67":["Brain's Base"],"68":["White Fox"],"69":["Ajia-Do"],"70":[],"71":[],"72":[],"73":[],"74":[],"75":["Trigger"],"76":[],"77":[],"78":[],"79":[],"80":[],"81":[],"82":[],"83":[],"84":[],"85":[],"86":[],"87":[],"88":[],"89":[],"90":[],"91":[],"92":["Studio Gallop","Studio DEEN"],"93":[],"94":["MAPPA"],"95":[],"96":["Tsuchida Productions"],"97":[],"98":["Larx Entertainment"],"99":["Madhouse"],"100":[],"101":["Shin-Ei Animation"],"103":[],"104":["David Production"],"105":["8bit"],"106":["A-1 Pictures","Trigger","CLOVERWORKS"],"107":["J.C.Staff"],"108":["A-1 Pictures"],"109":[],"110":[],"111":[],"112":[],"113":[],"114":[],"115":[],"116":["White Fox"],"117":[],"118":[],"119":[],"120":[],"121":[],"122":[],"123":["Brain's Base"],"124":[],"125":["Bones"],"127":[],"128":[],"129":[],"130":[],"131":[],"132":[],"133":[],"134":["Bandai Namco Pictures"],"135":[],"136":[],"137":[],"138":[],"139":[],"140":["Bones"],"141":["Studio Pierrot"],"142":[],"143":[],"144":[],"145":[],"146":[],"147":[],"148":[],"149":[],"150":[],"151":[],"152":[],"153":[],"154":[],"155":[],"156":["Wit Studio"],"157":[],"158":[],"159":[],"160":[],"161":[],"162":[],"163":[],"164":[],"165":[],"166":[],"167":[],"168":[],"169":[],"170":[],"171":[],"172":["Lerche"],"173":[],"174":[],"175":["EKACHI EPILKA"],"176":["LIDENFILMS"],"177":[],"178":[],"180":["Madhouse"],"181":[],"182":[],"183":[],"184":[],"185":[],"186":["J.C.Staff"],"187":[],"188":[],"189":[],"190":[],"191":[],"192":[],"194":[],"195":[],"196":[],"197":[],"198":[],"199":[],"200":[],"201":[],"202":[],"203":[],"204":[],"205":["Studio Pierrot"],"206":[],"207":[],"208":[],"209":[],"210":[],"211":[],"212":["Silver Link"],"213":["David Production"],"214":["Kinema Citrus"],"215":[],"216":[],"217":[],"218":["Maho Film"],"219":[],"220":[],"221":[],"222":[],"223":[],"224":[],"225":[],"226":[],"227":[],"228":["White Fox","Asread"],"229":[],"230":[],"231":[],"232":[],"233":[],"234":["Madhouse"],"235":["MAPPA"],"237":[],"238":[],"239":[],"240":[],"241":[],"242":[],"243":[],"244":[],"245":[],"246":[],"247":[],"248":["Science SARU"],"249":["Kinema Citrus"],"250":["Silver Link"],"251":["Doga Kobo"],"252":["Production I.G"],"253":["NAZ"],"254":["MAPPA"],"255":["J.C.Staff"],"256":["Diomedéa"],"257":["8bit"],"258":["Studio Kai","HORNETS"],"259":["Studio Deen"],"261":[],"262":["TMS Entertainment"],"263":[],"264":["EMT Squared"],"265":["Staple Entertainment"],"266":["STUDIO EEK"],"267":["LIDENFILMS"],"268":["Gekkou"],"269":["Brain's Base"],"270":["GoHands"],"271":["P.A.WORKS"],"272":["J.C.STAFF"],"273":["Brain's Base"],"274":["Drive"],"275":["Wawayu Animation"],"276":["J.C.STAFF"],"277":["Sunrise"],"279":["GONZO"],"280":["Studio Flad"],"281":["JUVENAGE"],"282":["CompTown"],"283":["A.C.G.T."],"284":["Yokohama Animation Lab"],"285":["Wawayu Animation"],"286":["GEEKTOYS"],"287":["G.CMay Animation & Film"],"288":["Passion Paint Animation"],"290":["Orange"],"291":["animation studio42"],"291":["animation studio42"],"292":["Maho Film"]};
@@ -4953,6 +4972,29 @@ document.addEventListener('click', function(e) {
       .catch(function () { mascotLoading = null; });
   }
 
+  /* Pull the guide in while the page is idle, so clicking "Tour Guide"
+     shows Komi right away. Cheap lines and data-saver are skipped. */
+  function preloadMascotWhenIdle() {
+    try {
+      var c = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+      if (c && (c.saveData || /slow-2g|2g/.test(c.effectiveType || ''))) return;
+    } catch (e) {}
+    loadMascot();
+  }
+
+  /* Wait for the VRM (up to ticks*100ms) before opening the tour, so the
+     card and Komi appear together instead of the card showing up alone. */
+  function waitForMascot(ticks, done) {
+    var left = ticks || 0;
+    var go = function () {
+      if (tourActive) return;
+      if (mascot || left <= 0) { done(); return; }
+      left--;
+      setTimeout(go, 100);
+    };
+    setTimeout(go, 200);
+  }
+
   function enableMascotMode() {
     if (!tooltip || !mascot) return;
     tooltip.classList.add('tour-tooltip--mascot');
@@ -5551,17 +5593,31 @@ document.addEventListener('click', function(e) {
        is already there when the welcome card appears. */
     tourBtn.addEventListener('pointerenter', loadMascot, { passive: true });
     tourBtn.addEventListener('focus', loadMascot);
-    tourBtn.addEventListener('click', function (e) { e.preventDefault(); goHome(); setTimeout(startTour, 300); });
+    tourBtn.addEventListener('click', function (e) {
+      e.preventDefault();
+      goHome();
+      loadMascot();
+      /* give her a moment to materialise (the summoning ring shows meanwhile) */
+      waitForMascot(15, startTour);
+    });
   }
+
+  /* The VRM file itself is already being downloaded (the <link rel=preload>
+     in the head), so importing the guide module early costs almost nothing
+     and by the time anyone taps "Tour Guide" Komi is already there. */
+  setTimeout(preloadMascotWhenIdle, 700);
 
   var p = window.location.pathname.replace(/\/+$/, '');
   var forceTour = /[?&]tour=1\b/.test(window.location.search);
   if (forceTour) {
     localStorage.setItem('fardin_tour_done', '1');
-    setTimeout(startTour, 700);
+    loadMascot();
+    waitForMascot(30, startTour);
   } else if (!localStorage.getItem('fardin_tour_done') && (p.endsWith('/home') || p.endsWith('/my-anime-list') || p === '' || p === '/')) {
     localStorage.setItem('fardin_tour_done', '1');
-    setTimeout(startTour, 1000);
+    loadMascot();
+    /* the tour opens with Komi already standing there */
+    waitForMascot(30, startTour);
   }
 
   /* small public surface for debugging / manual replay */
