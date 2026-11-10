@@ -887,9 +887,34 @@ function clSupabase(path, options) {
 
 var lastCommitError = '';
 
+/* Plain-English reason for a failed commit - the history shows this so the
+   panel explains itself instead of only showing an HTTP code. */
+function explainCommitFailure(text) {
+  var s = String(text || '').toLowerCase();
+  if (!s) return '';
+  if (/401|bad credentials|authentication/.test(s))
+    return 'The GitHub token was rejected - it is wrong, expired or was revoked. Put a fresh PAT in the PAT tab.';
+  if (/rate limit|secondary rate/.test(s))
+    return 'GitHub is rate limiting the token - wait a minute and try again.';
+  if (/403|forbidden|write access|not allowed/.test(s))
+    return 'The token has no write access to the repo (it needs the "repo" scope), or the branch is protected.';
+  if (/404|not found/.test(s))
+    return 'GitHub could not find that file in the repo - the path may be wrong.';
+  if (/409|conflict/.test(s))
+    return 'Someone pushed to the repo first - pull the latest changes and commit again.';
+  if (/422|unprocessable|invalid/.test(s))
+    return 'GitHub rejected the content - the file is probably not valid JSON, or it is too large.';
+  if (/timeout|timed out|network|fetch failed|failed to fetch|aborted/.test(s))
+    return 'The request never reached GitHub - check the connection, the proxy or the token.';
+  return 'The commit did not go through - the raw error is in the log above.';
+}
+
 function saveCommitResult(kind, ok, detail) {
   var entry = { t: new Date().toISOString(), k: kind, ok: !!ok, d: detail || '' };
-  if (!ok && lastCommitError) entry.d += ' — ' + lastCommitError;
+  if (!ok && lastCommitError) {
+    entry.d += ' — ' + lastCommitError;
+    entry.why = explainCommitFailure(lastCommitError);
+  }
   // 1. local first — instant, never blocked by the network
   try {
     var log = [];
@@ -964,6 +989,7 @@ function renderHistoryTab() {
         '<div class="ad-hist-main">' +
           '<div class="ad-hist-kind">' + label + '</div>' +
           (row.d ? '<div class="ad-hist-detail">' + String(row.d).replace(/</g, '&lt;') + '</div>' : '') +
+          (row.why ? '<div class="ad-hist-why">' + String(row.why).replace(/</g, '&lt;') + '</div>' : '') +
         '</div>' +
         '<div class="ad-hist-when">' + fmtWhen(row.t) + '</div>' +
       '</div>';

@@ -62,6 +62,28 @@
     '}'
   ].join('\n');
 
+  /* A second query used to walk a franchise: AniList only returns the
+     DIRECT sequel of a title, so every following season has to be pulled in
+     with its own id (My Hero Academia S1 -> S2 -> S3 …). */
+  var CHAIN_QUERY = [
+    'query ($ids: [Int]) {',
+    '  Page(perPage: 50) {',
+    '    media(id_in: $ids, type: ANIME) {',
+    '      id',
+    '      format',
+    '      episodes',
+    '      title { english romaji }',
+    '      relations {',
+    '        edges {',
+    '          relationType',
+    '          node { id format episodes title { english romaji } }',
+    '        }',
+    '      }',
+    '    }',
+    '  }',
+    '}'
+  ].join('\n');
+
   /* The site's own filter vocabulary — anything else is dropped, because the
      genre filters only know these buckets. */
   var GENRE_VOCAB = [
@@ -487,67 +509,104 @@
       var score = typeof media.averageScore === 'number' ? media.averageScore : null;
       var display = titleOf(media) || name;
 
-      /* AniList returns one entry per season. Walk the direct SEQUEL /
-         PREQUEL / PARENT relations so a 2- or 3-season franchise is summed
-         into one card instead of showing only the season that matched. */
-      var tvIds = {};
-      var tvCount = 0;
-      var totalEps = 0;
-      var addTv = function (m) {
-        if (!m || m.format !== 'TV' || !m.id || tvIds[m.id]) return;
-        tvIds[m.id] = 1;
-        tvCount++;
-        if (typeof m.episodes === 'number') totalEps += m.episodes;
+      /* AniList returns one entry per season. Walk the whole franchise
+         (SEQUEL / PREQUEL / PARENT) so a multi-season show is summed into
+         one card instead of showing only the season that matched. */
+      var acc = { ids: {}, count: 0, eps: 0, titles: [] };
+      var collectTv = function (m) {
+        if (!m || m.format !== 'TV' || !m.id || acc.ids[m.id]) return false;
+        acc.ids[m.id] = 1;
+        acc.count++;
+        if (typeof m.episodes === 'number') acc.eps += m.episodes;
+        acc.titles.push(titleOf(m));
+        return true;
       };
-      if (media.format === 'TV') addTv(media);
-      var relEdges = (media.relations && media.relations.edges) || [];
-      relEdges.forEach(function (edge) {
-        if (!edge || !edge.node) return;
-        var rt = edge.relationType;
-        if (rt === 'SEQUEL' || rt === 'PREQUEL' || rt === 'PARENT' || rt === 'SIDE_STORY') {
-          addTv(edge.node);
-        }
-      });
-      var episodes = media.episodes || '';
-      var seasonLabel = 'Season-1';
-      if (tvCount > 1 && totalEps > 0) {
-        episodes = totalEps;
-        if (tvCount <= 3) {
-          var labels = [];
-          for (var si = 1; si <= tvCount; si++) labels.push(si);
-          seasonLabel = 'Season-' + labels.join(',');
-        } else {
-          seasonLabel = '__custom';
-        }
-      }
+      var nextIds = function (m) {
+        var out = [];
+        var edges = (m && m.relations && m.relations.edges) || [];
+        edges.forEach(function (edge) {
+          if (!edge || !edge.node) return;
+          var rt = edge.relationType;
+          if (rt !== 'SEQUEL' && rt !== 'PREQUEL' && rt !== 'PARENT') return;
+          if (!edge.node.id || acc.ids[edge.node.id]) return;
+          out.push(edge.node.id);
+        });
+        return out;
+      };
 
-      var data = {
-        id: media.id,
-        idMal: media.idMal,
-        title: display,
-        /* candidate names for the Anime-Planet slug (English, romaji, typed) */
-        apTitles: [display, (media.title && media.title.romaji) || '', (media.title && media.title.english) || '', name],
-        image: (media.coverImage && (media.coverImage.extraLarge || media.coverImage.large)) || '',
-        season: seasonOf(media.startDate),
-        episodes: episodes,
-        seasonLabel: seasonLabel,
-        seasonCount: tvCount || 1,
-        rating: score,
-        mal: null,
-        malEstimated: false,
-        genres: mapGenres(media),
-        studio: studio,
-        ott: mapOtt(media.externalLinks)
+      var frontier = [];
+      if (media.format === 'TV') {
+        collectTv(media);
+      } else {
+        /* a movie or OVA: its TV parent is the main line of the franchise */
+        frontier = nextIds(media).filter(function (id) { return true; });
+      }
+      var direct = nextIds(media);
+      direct.forEach(function (id) { if (frontier.indexOf(id) === -1) frontier.push(id); });
+
+      /* follow the chain (each round pulls the next ring of seasons) */
+      var walk = function (round) {
+        if (!frontier.length || round >= 10) return Promise.resolve(acc);
+        var ids = frontier.splice(0, frontier.length);
+        return fetchJson(ANILIST_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+          body: JSON.stringify({ query: CHAIN_QUERY, variables: { ids: ids } })
+        }, 12000).then(function (json) {
+          var page = json && json.data && json.data.Page;
+          var list = (page && page.media) || [];
+          list.forEach(function (m) {
+            var isNew = collectTv(m);
+            if (!isNew) return;
+            nextIds(m).forEach(function (id) {
+              if (frontier.indexOf(id) === -1 && !acc.ids[id]) frontier.push(id);
+            });
+          });
+          return walk(round + 1);
+        }).catch(function () { return acc; });
       };
-      return malScore(media.idMal).then(function (real) {
-        if (real !== null) {
-          data.mal = real;
-          data.malSource = malSource;
-        } else if (score !== null) {
-          data.mal = Math.round((MAL_FIT.slope * score + MAL_FIT.intercept) * 100) / 100;
-          data.malEstimated = true;
+
+      return walk(1).then(function (acc) {
+        var episodes = media.episodes || '';
+        var seasonLabel = 'Season-1';
+        if (acc.count > 1 && acc.eps > 0) {
+          episodes = acc.eps;
+          var labels = [];
+          for (var si = 1; si <= acc.count; si++) labels.push(si);
+          /* more than three seasons is not one of the presets - the admin
+             form then asks for a custom season label */
+          seasonLabel = 'Season-' + labels.join(',');
         }
-        return data;
+
+        var data = {
+          id: media.id,
+          idMal: media.idMal,
+          title: display,
+          /* candidate names for the Anime-Planet slug (English, romaji, typed) */
+          apTitles: [display, (media.title && media.title.romaji) || '', (media.title && media.title.english) || '', name],
+          image: (media.coverImage && (media.coverImage.extraLarge || media.coverImage.large)) || '',
+          season: seasonOf(media.startDate),
+          episodes: episodes,
+          seasonLabel: seasonLabel,
+          seasonCount: acc.count || 1,
+          seasonTitles: acc.titles,
+          rating: score,
+          mal: null,
+          malEstimated: false,
+          genres: mapGenres(media),
+          studio: studio,
+          ott: mapOtt(media.externalLinks)
+        };
+        return malScore(media.idMal).then(function (real) {
+          if (real !== null) {
+            data.mal = real;
+            data.malSource = malSource;
+          } else if (score !== null) {
+            data.mal = Math.round((MAL_FIT.slope * score + MAL_FIT.intercept) * 100) / 100;
+            data.malEstimated = true;
+          }
+          return data;
+        });
       });
     });
   }
