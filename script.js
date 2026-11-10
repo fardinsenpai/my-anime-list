@@ -264,26 +264,6 @@ const waifus = [
 { name:"Momo Ayase", anime:"Dandadan", first:"Episode 1", img:"https://i.pinimg.com/736x/ae/6d/f9/ae6df95dafb57dade126a75ba46ee9bb.jpg" },
 ];
 
-/* A&D → Anime: the duel arena. The duel only runs on the home page, so we
-   hop back home first when the visitor is somewhere else. */
-function openAnimeDuelHub() {
-  if (typeof closeMenu === 'function') closeMenu();
-  var link = document.getElementById('duel-nav-link');
-  if (!link) { goHome(); return; }
-  var p = (window.location.pathname || '').replace(/\/+$/, '');
-  var onHome = p === '' || p === '/' || /\/index\.html$/i.test(p) ||
-    /\/my-anime-list(\/home)?$/.test(p) || /\/home$/.test(p);
-  if (!onHome) {
-    goHome();
-    setTimeout(function () {
-      var l = document.getElementById('duel-nav-link');
-      if (l) l.click();
-    }, 900);
-    return;
-  }
-  link.click();
-}
-
 function openWaifus(){
   if (typeof closeMenu === 'function') closeMenu();
 

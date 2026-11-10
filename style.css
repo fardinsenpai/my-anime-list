@@ -8448,6 +8448,26 @@ body.duel-mode-active #nowStrip { display: none !important; }
   border-left-color: rgba(255, 105, 180, 0.35) !important;
 }
 .ad-group-item a svg { filter: drop-shadow(0 0 6px rgba(255, 105, 180, 0.35)); }
+/* the duel keeps its own link class - line it up with the rest of the group */
+.ad-group-item .duel-nav-link {
+  display: flex !important;
+  align-items: center !important;
+  gap: 14px !important;
+  padding: 14px 22px !important;
+  color: #b0d4f0 !important;
+  font-family: 'Exo 2', sans-serif !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  border-left: 3px solid transparent !important;
+  transition: all .2s !important;
+}
+.ad-group-item .duel-nav-link:hover {
+  background: rgba(0, 230, 255, 0.08) !important;
+  color: #ffd700 !important;
+  border-left-color: #ffd700 !important;
+  transform: translateX(4px) !important;
+}
+.ad-group-item .duel-status-badge { margin-left: auto !important; }
 .ad-group-tag {
   margin-left: auto !important;
   font-size: 8.5px !important;
