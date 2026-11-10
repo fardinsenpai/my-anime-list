@@ -2617,5 +2617,20 @@
                 "anilist": 68,
                 "title": "The Frontier Lord Begins with Zero Subjects",
                 "storyRating": 7
+        },
+        "292": {
+                "malScore": 6.95,
+                "characters": 7.9,
+                "animRating": 8.1,
+                "animePlanet": 3.9,
+                "anilist": 68,
+                "title": "By the Grace of the Gods",
+                "genres": [
+                        "Adventure",
+                        "Slice of Life",
+                        "Isekai",
+                        "Action"
+                ],
+                "storyRating": 7.9
         }
 }
