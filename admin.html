@@ -19,7 +19,7 @@
     if (f) document.documentElement.setAttribute('data-font', f);
   } catch (e) {}
 </script>
-<link rel="stylesheet" href="admin.css?v=20261110c">
+<link rel="stylesheet" href="admin.css?v=20261110d">
 </head>
 <body>
 
@@ -91,6 +91,7 @@
         <button class="admin-g-tab" data-tab="awards" onclick="switchAdminTab('awards')"><b>🏅</b> AWARDS<span>winners by year</span></button>
         <button class="admin-g-tab" data-tab="add"    onclick="switchAdminTab('add')"><b>➕</b> ADD<span>new anime</span></button>
         <button class="admin-g-tab" data-tab="edit"   onclick="switchAdminTab('edit')"><b>✏️</b> EDIT<span>anime info</span></button>
+<button class="admin-g-tab" data-tab="waifu"  onclick="switchAdminTab('waifu'); renderWaifuTab()"><b>WAIFU</b> WAIFU<span>add a waifu</span></button>
         <button class="admin-g-tab" data-tab="date"   onclick="switchAdminTab('date')"><b>📅</b> DATE<span>last updated</span></button>
         <button class="admin-g-tab" data-tab="stats"  onclick="switchAdminTab('stats')"><b>📊</b> STATS<span>counters</span></button>
         <button class="admin-g-tab" data-tab="ai"      onclick="switchAdminTab('ai')"><b>🤖</b> AI<span>chat model</span></button>
@@ -321,6 +322,39 @@
         </label>
         <button class="admin-g-btn" onclick="commitEditAnime()">▶ COMMIT EDIT</button>
         <div class="ad-note">Editing an anime rewrites its card in index.html and its genre list in script.js.</div>
+      </section>
+
+      <!-- WAIFU -->
+      <section class="admin-g-content" id="tabWaifu">
+        <h2 class="ad-h">// ADD A WAIFU //</h2>
+        <div class="ad-note" style="margin-bottom:12px;">A new waifu is added to the gallery in script.js — it shows up in the <b>A&amp;D → Waifu</b> section of the sidebar.</div>
+        <label class="ad-field">
+          <span>Waifu name</span>
+          <input type="text" id="adminWaifuName" class="admin-g-input" placeholder="Zero Two">
+        </label>
+        <label class="ad-field">
+          <span>Anime / series</span>
+          <input type="text" id="adminWaifuAnime" class="admin-g-input" placeholder="Darling in the FranXX">
+        </label>
+        <div class="ad-row">
+          <label class="ad-field">
+            <span>First appearance</span>
+            <input type="text" id="adminWaifuFirst" class="admin-g-input" placeholder="Episode 1">
+          </label>
+          <label class="ad-field">
+            <span>Image URL</span>
+            <input type="text" id="adminWaifuImg" class="admin-g-input" placeholder="https://…">
+          </label>
+        </div>
+        <div class="admin-g-label">Preview</div>
+        <div class="ad-card-preview">
+          <iframe id="adminWaifuPreview" title="Waifu preview" loading="lazy"></iframe>
+        </div>
+        <button class="admin-g-btn" onclick="commitWaifu()">▶ COMMIT WAIFU</button>
+        <div class="ad-latest" style="margin-top:16px;">
+          <div class="ad-latest-head">// WAIFUS ALREADY PUBLISHED //</div>
+          <div class="ad-latest-list" id="adminWaifuList"></div>
+        </div>
       </section>
 
       <!-- DATE -->
@@ -665,6 +699,6 @@
 </div>
 
 <script src="anime-fetch.js?v=20261110a"></script>
-<script src="admin.js?v=20261110d"></script>
+<script src="admin.js?v=20261110e"></script>
 </body>
 </html>

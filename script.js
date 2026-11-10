@@ -264,6 +264,26 @@ const waifus = [
 { name:"Momo Ayase", anime:"Dandadan", first:"Episode 1", img:"https://i.pinimg.com/736x/ae/6d/f9/ae6df95dafb57dade126a75ba46ee9bb.jpg" },
 ];
 
+/* A&D → Anime: the duel arena. The duel only runs on the home page, so we
+   hop back home first when the visitor is somewhere else. */
+function openAnimeDuelHub() {
+  if (typeof closeMenu === 'function') closeMenu();
+  var link = document.getElementById('duel-nav-link');
+  if (!link) { goHome(); return; }
+  var p = (window.location.pathname || '').replace(/\/+$/, '');
+  var onHome = p === '' || p === '/' || /\/index\.html$/i.test(p) ||
+    /\/my-anime-list(\/home)?$/.test(p) || /\/home$/.test(p);
+  if (!onHome) {
+    goHome();
+    setTimeout(function () {
+      var l = document.getElementById('duel-nav-link');
+      if (l) l.click();
+    }, 900);
+    return;
+  }
+  link.click();
+}
+
 function openWaifus(){
   if (typeof closeMenu === 'function') closeMenu();
 
@@ -5472,9 +5492,14 @@ document.addEventListener('click', function(e) {
         popover: { title: '\uD83C\uDFC5 Anime of the Year', description: 'See Crunchyroll\'s Anime of the Year winners from 2017 to 2026, filtered from Fardin\'s list.', side: 'right' }
       },
       {
+        element: '#adGroupHead',
+        guide: 'Zero Two',
+        popover: { title: 'A&D Section', description: '<strong>A&amp;D</strong> holds the two halves of the collection: <strong>Anime</strong> (the duel arena) and <strong>Waifu</strong> (the character gallery).', side: 'right' }
+      },
+      {
         element: 'nav.side-nav a[onclick*="openWaifus"]',
         guide: 'Momo Ayase',
-        popover: { title: '\uD83D\uDC95 Find Your Waifus', description: 'Browse a gallery of beloved anime waifus with flip cards. Search by name or series!', side: 'right' }
+        popover: { title: '\uD83D\uDC95 Find Your Waifus', description: 'The <strong>Waifu</strong> half of A&D — a gallery of beloved anime characters with flip cards. Search by name or series!', side: 'right' }
       },
       {
         element: '#wishlistBtn',
@@ -9062,6 +9087,129 @@ function wrapQuestName(name) {
   return lines.join('<br>');
 }
 
+/* ── THE VAULT: every anime you beat gets saved here ───────────────── */
+var QUEST_VAULT_KEY = 'aq_vault_v1';
+var _questStreak = 0;
+var _questBestStreak = 0;
+var _questRunSaves = [];
+var _questTimer = null;
+
+function aqEsc(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+function readQuestVault() {
+  try {
+    var raw = localStorage.getItem(QUEST_VAULT_KEY);
+    var v = raw ? JSON.parse(raw) : [];
+    return (v && typeof v === 'object' && v.length !== undefined) ? v : [];
+  } catch (e) { return []; }
+}
+
+function writeQuestVault(list) {
+  try { localStorage.setItem(QUEST_VAULT_KEY, JSON.stringify(list)); } catch (e) {}
+}
+
+/* Save one anime into the vault (it only grows, and it counts repeats). */
+function questSaveAnime(title) {
+  if (!title) return;
+  var list = readQuestVault();
+  var hit = null;
+  for (var i = 0; i < list.length; i++) {
+    if (list[i] && list[i].title === title) { hit = list[i]; break; }
+  }
+  if (hit) {
+    hit.count = (hit.count || 1) + 1;
+    hit.at = Date.now();
+  } else {
+    list.push({ title: title, count: 1, at: Date.now() });
+    _questRunSaves.push(title);
+  }
+  writeQuestVault(list);
+  renderQuestVault();
+}
+
+function renderQuestVault() {
+  var list = readQuestVault();
+  var countEl = document.getElementById('questVaultCount');
+  if (countEl) countEl.textContent = list.length;
+  var mini = document.getElementById('questVaultMini');
+  if (mini) {
+    if (!list.length) {
+      mini.innerHTML = '<span class="aq-vault-empty">Nothing saved yet — beat an anime to save it.</span>';
+    } else {
+      mini.innerHTML = list.slice(-14).reverse().map(function (v) {
+        return '<span class="aq-vault-chip">' + aqEsc(v.title) + (v.count > 1 ? ' ×' + v.count : '') + '</span>';
+      }).join('');
+    }
+  }
+  var run = document.getElementById('questVaultList');
+  if (run) {
+    if (!_questRunSaves.length) {
+      run.innerHTML = '<span class="aq-vault-empty">No anime saved in this run — get one right to save it.</span>';
+    } else {
+      run.innerHTML = _questRunSaves.map(function (t) {
+        return '<span class="aq-vault-chip">' + aqEsc(t) + '</span>';
+      }).join('');
+    }
+  }
+}
+
+/* Send the anime saved in this run to the signed-in visitor's Wish List. */
+function sendQuestSavesToWishList() {
+  if (!_questRunSaves.length) { msgFail('No anime saved in this run yet.'); return; }
+  if (typeof WL === 'undefined' || !WL || !WL.me) {
+    msgFail('Sign in first, then the saved anime can go on your Wish List.');
+    return;
+  }
+  if (typeof saveRow !== 'function') { msgFail('Wish List is not ready yet.'); return; }
+  var added = 0, skipped = 0;
+  _questRunSaves.forEach(function (title) {
+    var card = (typeof findAnimeCard === 'function') ? findAnimeCard(title) : null;
+    var numEl = card ? card.querySelector('.number') : null;
+    var num = numEl ? String(numEl.textContent || '').replace(/\D/g, '') : '';
+    if (!num) { skipped++; return; }
+    var already = false;
+    for (var i = 0; i < WL.rows.length; i++) {
+      if (String(WL.rows[i].anime_num) === num) { already = true; break; }
+    }
+    if (already) { skipped++; return; }
+    try {
+      saveRow({ num: num, title: title }, 'available');
+      added++;
+    } catch (e) { skipped++; }
+  });
+  if (added) msgOk(added + ' anime sent to your Wish List ⚡');
+  else msgFail('Nothing new to send — they are already on your Wish List.');
+  if (skipped) console.log('[quest] skipped', skipped);
+}
+
+/* the live HUD (progress, score, streak, clock) */
+function questUpdateHud() {
+  var total = _questQuestions.length || 10;
+  var fill = document.getElementById('questHudFill');
+  if (fill) fill.style.width = Math.round((_questIndex / total) * 100) + '%';
+  var scoreEl = document.getElementById('questHudScore');
+  if (scoreEl) scoreEl.textContent = _questScore;
+  var streakEl = document.getElementById('questHudStreak');
+  if (streakEl) streakEl.textContent = _questStreak;
+  var timeEl = document.getElementById('questHudTime');
+  if (timeEl && _questStartTime) {
+    var secs = Math.floor((Date.now() - _questStartTime) / 1000);
+    timeEl.textContent = Math.floor(secs / 60) + ':' + (secs % 60 < 10 ? '0' : '') + (secs % 60);
+  }
+}
+
+function questStartTimer() {
+  questStopTimer();
+  _questTimer = setInterval(questUpdateHud, 1000);
+}
+function questStopTimer() {
+  if (_questTimer) { clearInterval(_questTimer); _questTimer = null; }
+}
+
 function initQuest() {
   if (typeof QUEST_ANIME_LIST === 'undefined') return;
   _questSelected = [];
@@ -9088,7 +9236,10 @@ function initQuest() {
   });
   document.getElementById('questStartBtn').style.display = 'none';
   document.getElementById('questResetSelectBtn').style.display = 'none';
-  document.getElementById('questSelectedCount').textContent = 'Selected: 0';
+  document.getElementById('questSelectedCount').textContent = '0';
+  var diffLabel = document.getElementById('questDiffLabel');
+  if (diffLabel) diffLabel.textContent = 'Mixed';
+  renderQuestVault();
   var diffSel = document.getElementById('questDiffSelector');
   diffSel.innerHTML = '';
   QUEST_DIFFICULTIES.forEach(function(d) {
@@ -9107,6 +9258,9 @@ function selectQuestDifficulty(d) {
   _questDifficulty = d;
   var pills = document.querySelectorAll('#questDiffSelector .qd-pill');
   pills.forEach(function(p) { p.classList.toggle('selected', p.dataset.diff === d); });
+  var labels = { easy:'Easy', normal:'Normal', hard:'Hard', mixed:'Mixed' };
+  var labelEl = document.getElementById('questDiffLabel');
+  if (labelEl) labelEl.textContent = labels[d] || d;
 }
 
 function toggleQuestAnime(id) {
@@ -9117,7 +9271,7 @@ function toggleQuestAnime(id) {
   cards.forEach(function(c) {
     c.classList.toggle('selected', _questSelected.indexOf(c.dataset.id) !== -1);
   });
-  document.getElementById('questSelectedCount').textContent = 'Selected: ' + _questSelected.length;
+  document.getElementById('questSelectedCount').textContent = _questSelected.length;
   document.getElementById('questStartBtn').style.display = _questSelected.length > 0 ? 'inline-block' : 'none';
   document.getElementById('questResetSelectBtn').style.display = _questSelected.length > 0 ? 'inline-block' : 'none';
 }
@@ -9125,7 +9279,7 @@ function toggleQuestAnime(id) {
 function resetQuestSelection() {
   _questSelected = [];
   document.querySelectorAll('#questAnimeList .quest-anime-card').forEach(function(c) { c.classList.remove('selected'); });
-  document.getElementById('questSelectedCount').textContent = 'Selected: 0';
+  document.getElementById('questSelectedCount').textContent = '0';
   document.getElementById('questStartBtn').style.display = 'none';
   document.getElementById('questResetSelectBtn').style.display = 'none';
 }
@@ -9161,10 +9315,16 @@ function startQuest() {
   _questIndex = 0;
   _questScore = 0;
   _questAnswers = [];
+  _questStreak = 0;
+  _questBestStreak = 0;
+  _questRunSaves = [];
   _questStartTime = Date.now();
+  var fb = document.getElementById('questFeedback');
+  if (fb) { fb.textContent = ''; fb.className = 'aq-feedback'; }
   document.getElementById('questSelectPhase').style.display = 'none';
   document.getElementById('questQuizPhase').style.display = 'block';
   document.getElementById('questResultsPhase').style.display = 'none';
+  questStartTimer();
   showQuestQuestion();
 }
 
@@ -9172,7 +9332,8 @@ function showQuestQuestion() {
   if (_questIndex >= _questQuestions.length) { showQuestResults(); return; }
   var q = _questQuestions[_questIndex];
   document.getElementById('questProgress').textContent = 'Question ' + (_questIndex + 1) + ' / ' + _questQuestions.length;
-  document.getElementById('questQuestion').textContent = (_questIndex + 1) + '. ' + q.question;
+  document.getElementById('questQuestion').textContent = q.question;
+  questUpdateHud();
   var opts = document.getElementById('questOptions');
   opts.innerHTML = '';
   if (typeof q.options === 'undefined') {
@@ -9199,9 +9360,11 @@ function showQuestQuestion() {
     shuffleArray(indices);
     var displayedOptions = indices.map(function(i) { return q.options[i]; });
     var correctText = q.options[q.correct];
-    displayedOptions.forEach(function(text) {
+    var keys = ['A', 'B', 'C', 'D'];
+    displayedOptions.forEach(function(text, i) {
       var btn = document.createElement('button');
       btn.className = 'qo-btn';
+      btn.setAttribute('data-key', keys[i] || '?');
       btn.textContent = text;
       btn.onclick = function() { answerQuest(text, correctText); };
       opts.appendChild(btn);
@@ -9209,23 +9372,45 @@ function showQuestQuestion() {
   }
 }
 
+/* The green / red feedback line under the question. */
+function questFeedback(ok, text) {
+  var fb = document.getElementById('questFeedback');
+  if (!fb) return;
+  fb.textContent = text || '';
+  fb.className = 'aq-feedback ' + (ok ? 'ok' : 'no');
+  questUpdateHud();
+}
+
 function answerNum(value, correctNum) {
   var selected = value === null || value === '' ? 'Skipped' : value;
   var isCorrect = value !== null && value !== '' && Number(value) === correctNum;
-  if (isCorrect) _questScore++;
-  _questAnswers.push({ question: _questQuestions[_questIndex].question, correct: correctNum, userAnswer: selected, isCorrect: isCorrect, anime: _questQuestions[_questIndex].anime, difficulty: _questQuestions[_questIndex].difficulty });
-  document.querySelectorAll('#questOptions .qo-btn, #questOptions .qo-num-submit, #questOptions .qo-num-skip').forEach(function(b) { b.onclick = null; });
+  var q = _questQuestions[_questIndex];
+  _questAnswers.push({ question: q.question, correct: correctNum, userAnswer: selected, isCorrect: isCorrect, anime: q.anime, difficulty: q.difficulty });
+  document.querySelectorAll('#questOptions .qo-btn, #questOptions .qo-num-submit, #questOptions .qo-num-skip').forEach(function(b) { b.onclick = null; b.disabled = true; });
+  if (isCorrect) { _questScore++; _questStreak++; questSaveAnime(q.anime); }
+  else { _questStreak = 0; }
+  if (_questStreak > _questBestStreak) _questBestStreak = _questStreak;
+  questFeedback(isCorrect, isCorrect ? ('Correct — ' + q.anime + ' saved to your vault ⚡') : ('The answer was ' + correctNum));
   _questIndex++;
-  showQuestQuestion();
+  setTimeout(function () { showQuestQuestion(); }, 950);
 }
 
 function answerQuest(selected, correct) {
   var isCorrect = selected === correct;
-  if (isCorrect) _questScore++;
-  _questAnswers.push({ question: _questQuestions[_questIndex].question, correct: correct, userAnswer: selected, isCorrect: isCorrect, anime: _questQuestions[_questIndex].anime, difficulty: _questQuestions[_questIndex].difficulty });
-  document.querySelectorAll('#questOptions .qo-btn').forEach(function(b) { b.onclick = null; });
+  var q = _questQuestions[_questIndex];
+  _questAnswers.push({ question: q.question, correct: correct, userAnswer: selected, isCorrect: isCorrect, anime: q.anime, difficulty: q.difficulty });
+  document.querySelectorAll('#questOptions .qo-btn').forEach(function(b) {
+    b.onclick = null;
+    b.disabled = true;
+    if (b.textContent === correct) b.classList.add('qo-right');
+    else if (b.textContent === selected) b.classList.add('qo-wrong');
+  });
+  if (isCorrect) { _questScore++; _questStreak++; questSaveAnime(q.anime); }
+  else { _questStreak = 0; }
+  if (_questStreak > _questBestStreak) _questBestStreak = _questStreak;
+  questFeedback(isCorrect, isCorrect ? ('Correct! ' + q.anime + ' saved to your vault ⚡') : ('Nope — the answer was "' + correct + '"'));
   _questIndex++;
-  showQuestQuestion();
+  setTimeout(function () { showQuestQuestion(); }, 1150);
 }
 
 function getRankKey(s) {
@@ -9240,6 +9425,7 @@ function getRankKey(s) {
 }
 
 function showQuestResults() {
+  questStopTimer();
   document.getElementById('questQuizPhase').style.display = 'none';
   document.getElementById('questResultsPhase').style.display = 'block';
   var pct = Math.round((_questScore / _questQuestions.length) * 100);
@@ -9294,6 +9480,19 @@ function showQuestResults() {
     div.innerHTML = '<div class="qr-q">' + a.question + '</div><div class="qr-a">✓ ' + a.correct + '</div>' + (!a.isCorrect ? '<div class="qr-w">✗ You: ' + a.userAnswer + '</div>' : '');
     review.appendChild(div);
   });
+
+  /* the stat row + the vault */
+  var statScore = document.getElementById('aqStatScore');
+  if (statScore) statScore.textContent = pct + '%';
+  var statCorrect = document.getElementById('aqStatCorrect');
+  if (statCorrect) statCorrect.textContent = _questScore + '/' + _questQuestions.length;
+  var statStreak = document.getElementById('aqStatStreak');
+  if (statStreak) statStreak.textContent = _questBestStreak;
+  var statSaved = document.getElementById('aqStatSaved');
+  if (statSaved) statSaved.textContent = _questRunSaves.length;
+  renderQuestVault();
+  var saveBtn = document.getElementById('aqSaveToWish');
+  if (saveBtn) saveBtn.style.display = _questRunSaves.length ? '' : 'none';
 }
 
 function loadCertPhoto(file) {
@@ -9388,11 +9587,15 @@ function downloadCertificate() {
 }
 
 function resetQuest() {
+  questStopTimer();
   _questQuestions = [];
   _questIndex = 0;
   _questScore = 0;
   _questAnswers = [];
   _questStartTime = 0;
+  _questStreak = 0;
+  _questBestStreak = 0;
+  _questRunSaves = [];
   document.getElementById('questSelectPhase').style.display = 'block';
   document.getElementById('questQuizPhase').style.display = 'none';
   document.getElementById('questResultsPhase').style.display = 'none';
@@ -9400,7 +9603,7 @@ function resetQuest() {
   document.getElementById('qcAnimeName').textContent = '';
   document.getElementById('qcAnimeName').style.fontSize = '';
   document.getElementById('qcTime').textContent = '';
-  document.getElementById('questSelectedCount').textContent = 'Selected: ' + _questSelected.length;
+  document.getElementById('questSelectedCount').textContent = String(_questSelected.length);
   document.getElementById('questStartBtn').style.display = _questSelected.length > 0 ? 'inline-block' : 'none';
 }
 

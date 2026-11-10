@@ -1452,3 +1452,91 @@
   margin-bottom: 12px;
   font-family: 'Exo 2', sans-serif;
 }
+/* ══════════════════════════════════════════════════════════════════════
+   CROWN CONQUEST v2 — "ROYAL BRACKET"
+   Gold leaf, violet velvet and a slow banner sweep for the tournament.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.tourney-overlay {
+  background:
+    radial-gradient(1200px 640px at 50% -12%, rgba(255, 215, 0, .16), transparent 62%),
+    radial-gradient(900px 560px at 10% 110%, rgba(140, 60, 255, .18), transparent 62%),
+    radial-gradient(900px 560px at 90% 110%, rgba(255, 60, 120, .14), transparent 62%),
+    rgba(8, 4, 18, .97) !important;
+}
+
+.tourney-bg-effect::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(115deg, rgba(255, 215, 0, .035) 0 2px, transparent 2px 26px);
+  animation: tourneyRay 22s linear infinite;
+}
+@keyframes tourneyRay {
+  from { background-position: 0 0; }
+  to { background-position: 220px 0; }
+}
+
+.tourney-arena {
+  border: 1px solid rgba(255, 215, 0, .34) !important;
+  box-shadow:
+    0 50px 130px rgba(0, 0, 0, .9),
+    0 0 90px rgba(255, 215, 0, .10),
+    inset 0 0 110px rgba(120, 40, 200, .07) !important;
+}
+
+.tourney-header__title {
+  filter: drop-shadow(0 0 26px rgba(255, 215, 0, .45)) !important;
+  animation: tourneyCrown 7s ease-in-out infinite;
+}
+@keyframes tourneyCrown {
+  0%, 100% { filter: drop-shadow(0 0 20px rgba(255, 215, 0, .35)); }
+  50% { filter: drop-shadow(0 0 38px rgba(255, 215, 0, .65)); }
+}
+.tourney-header__icon {
+  animation: tourneyBob 3.4s ease-in-out infinite;
+}
+@keyframes tourneyBob {
+  0%, 100% { transform: translateY(0) rotate(-4deg); }
+  50% { transform: translateY(-6px) rotate(4deg); }
+}
+
+/* the genre tiles get a gold frame on hover */
+.tourney-pick-card {
+  transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease !important;
+}
+.tourney-pick-card:hover {
+  transform: translateY(-3px) !important;
+  border-color: rgba(255, 215, 0, .55) !important;
+  box-shadow: 0 12px 34px rgba(0, 0, 0, .6), 0 0 26px rgba(255, 215, 0, .22) !important;
+}
+
+/* the bracket itself */
+.tourney-round__label {
+  color: #ffd700 !important;
+  text-shadow: 0 0 16px rgba(255, 215, 0, .45);
+  letter-spacing: 2px;
+}
+.tourney-match {
+  position: relative;
+  border-radius: 12px !important;
+  background: linear-gradient(180deg, rgba(255, 215, 0, .05), rgba(255, 255, 255, .015)) !important;
+  border: 1px solid rgba(255, 215, 0, .16) !important;
+}
+.tourney-match--upset {
+  border-color: rgba(255, 60, 120, .55) !important;
+  box-shadow: 0 0 26px rgba(255, 60, 120, .28);
+}
+.tourney-round-banner {
+  background: linear-gradient(90deg, transparent, rgba(255, 215, 0, .18), transparent) !important;
+  border-top: 1px solid rgba(255, 215, 0, .3);
+  border-bottom: 1px solid rgba(255, 215, 0, .3);
+  color: #ffe9a8 !important;
+  letter-spacing: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tourney-bg-effect::after, .tourney-header__title, .tourney-header__icon { animation: none !important; }
+}

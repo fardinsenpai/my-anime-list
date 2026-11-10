@@ -156,6 +156,158 @@ function renderLatestAnime() {
   }).join('');
 }
 
+/* ── WAIFU module: the A&D → Waifu gallery lives in script.js ───────── */
+var WAIFU_DATA = [];
+
+function adEsc(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+/* Insert one entry at the end of `const NAME = [ … ];` inside a source file.
+   Returns the new source, or null when the array cannot be found. */
+function insertIntoArrayLiteral(src, name, entryText) {
+  var re = new RegExp('(?:window\\.|const |let |var )' + name + '\\s*=\\s*\\[');
+  var m = re.exec(src);
+  if (!m) return null;
+  var i = m.index + m[0].length;
+  var depth = 1, str = null, esc = false;
+  for (; i < src.length; i++) {
+    var ch = src.charAt(i);
+    if (str) {
+      if (esc) esc = false;
+      else if (ch === '\\') esc = true;
+      else if (ch === str) str = null;
+      continue;
+    }
+    if (ch === '"' || ch === "'" || ch === '`') { str = ch; continue; }
+    if (ch === '[') depth++;
+    else if (ch === ']') { depth--; if (depth <= 0) break; }
+  }
+  if (i >= src.length) return null;
+  var head = src.substring(0, i);
+  var tail = src.substring(i);
+  /* the previous entry already ends with a comma? then just add a new line */
+  var trimmed = head.replace(/\s+$/, '');
+  var sep = /,\s*$/.test(trimmed) ? '\n' : ',\n';
+  return trimmed + sep + entryText + ',\n' + tail.replace(/^\s*\n/, '\n');
+}
+
+function renderWaifuList() {
+  var host = document.getElementById('adminWaifuList');
+  if (!host) return;
+  if (!WAIFU_DATA || !WAIFU_DATA.length) {
+    host.innerHTML = '<div class="ad-status dim">// waiting for the data link …</div>';
+    return;
+  }
+  host.innerHTML = WAIFU_DATA.map(function (w, i) {
+    return '<div class="ad-latest-item">' +
+      '<span class="ad-latest-id">#' + (i + 1) + '</span>' +
+      '<span class="ad-latest-title">' + adEsc(w.name) + '</span>' +
+      '<span class="ad-latest-season">' + adEsc(w.anime) + '</span>' +
+      '</div>';
+  }).join('');
+}
+
+function renderWaifuPreview() {
+  var frame = document.getElementById('adminWaifuPreview');
+  if (!frame) return;
+  var val = function (id) {
+    var el = document.getElementById(id);
+    return el ? String(el.value || '').trim() : '';
+  };
+  var name = adEsc(val('adminWaifuName') || 'Waifu name');
+  var anime = adEsc(val('adminWaifuAnime') || 'Anime');
+  var first = adEsc(val('adminWaifuFirst') || 'Episode 1');
+  var img = adEsc(val('adminWaifuImg'));
+  var card =
+    '<div class="waifu-card"><div class="waifu-inner">' +
+      '<div class="waifu-front">' +
+        (img ? '<img src="' + img + '" alt="">' : '<div class="waifu-noimg"></div>') +
+        '<div class="waifu-badge">#1</div>' +
+        '<div class="waifu-info"><h3>' + name + '</h3></div>' +
+      '</div>' +
+      '<div class="waifu-back"><h3>' + anime + '</h3><p>' + first + '</p></div>' +
+    '</div></div>';
+  frame.srcdoc =
+    '<!doctype html><html><head><meta charset="utf-8">' +
+    '<link rel="stylesheet" href="style.css">' +
+    '<style>html,body{margin:0;min-height:100%;background:#07070c;}' +
+    'body{display:flex;align-items:center;justify-content:center;padding:22px;box-sizing:border-box;}' +
+    '.waifu-card{cursor:pointer;}</style></head><body>' + card +
+    '<script>document.addEventListener("click",function(e){var c=e.target.closest(".waifu-card");if(c)c.classList.toggle("flip");});<\/script>' +
+    '</body></html>';
+}
+
+function renderWaifuTab() {
+  renderWaifuList();
+  renderWaifuPreview();
+  if (window.__waifuPreviewWired) return;
+  window.__waifuPreviewWired = true;
+  var timer = null;
+  ['adminWaifuName', 'adminWaifuAnime', 'adminWaifuFirst', 'adminWaifuImg'].forEach(function (id) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    var repaint = function () {
+      clearTimeout(timer);
+      timer = setTimeout(renderWaifuPreview, 150);
+    };
+    el.addEventListener('input', repaint);
+    el.addEventListener('change', repaint);
+  });
+}
+
+async function commitWaifu() {
+  var val = function (id) {
+    var el = document.getElementById(id);
+    return el ? String(el.value || '').trim() : '';
+  };
+  var name = val('adminWaifuName');
+  var anime = val('adminWaifuAnime');
+  var first = val('adminWaifuFirst') || 'Episode 1';
+  var img = val('adminWaifuImg');
+  if (!name || !anime || !img) { msgFail('Name, anime and image URL are required'); return; }
+  showLoading();
+  adStep('fetching script.js…');
+  try {
+    var data = await githubFetch('script.js');
+    if (!data) {
+      hideLoading(); adStep('');
+      saveCommitResult('add-waifu', false, 'fetch failed');
+      msgFail('Failed to fetch script.js — check the PAT');
+      return;
+    }
+    var content = decodeURIComponent(escape(atob(data.content)));
+    var entry = '{ name:"' + name.replace(/"/g, '') + '", anime:"' + anime.replace(/"/g, '') +
+                '", first:"' + first.replace(/"/g, '') + '", img:"' + img.replace(/"/g, '') + '" }';
+    var updated = insertIntoArrayLiteral(content, 'waifus', entry);
+    if (!updated) {
+      hideLoading(); adStep('');
+      saveCommitResult('add-waifu', false, 'waifus array not found in script.js');
+      msgFail('Could not find the waifus list in script.js');
+      return;
+    }
+    adStep('committing script.js…');
+    var ok = await githubCommit('script.js', updated, 'admin: add waifu ' + name);
+    hideLoading();
+    adStep('');
+    saveCommitResult('add-waifu', ok, name + ' (' + anime + ')');
+    if (ok) {
+      WAIFU_DATA.push({ name: name, anime: anime, first: first, img: img });
+      renderWaifuList();
+      msgOk('Waifu ' + name + ' added to the gallery');
+    } else {
+      msgFail('Commit failed');
+    }
+  } catch (e) {
+    hideLoading();
+    adStep('');
+    saveCommitResult('add-waifu', false, 'exception: ' + ((e && e.message) || e));
+    msgFail('Commit threw: ' + ((e && e.message) || e));
+  }
+}
+
 /* Fetch the live site files once and hand the panel everything it needs. */
 async function loadAdminData() {
   try {
@@ -208,6 +360,8 @@ async function loadAdminData() {
     var avatars = grabLiteral(jsText, 'CHAT_AVATARS');
     if (avatars && typeof avatars === 'object') CHAT_AVATARS = avatars;
     GENRE_BY_ID = grabGenres(jsText);
+    var waifuList = grabLiteral(jsText, 'waifus');
+    WAIFU_DATA = (waifuList && typeof waifuList === 'object') ? waifuList : [];
 
     // current counter values: the season/episode counters are hardcoded numbers in
     // script.js, the anime counter is counted from the cards at runtime
@@ -221,6 +375,7 @@ async function loadAdminData() {
 
     refreshStatsPlaceholders();
     renderLatestAnime();
+    renderWaifuList();
 
     ADMIN_DATA_READY = true;
     var cards = ADMIN_STATS_BASE.anime;

@@ -38,11 +38,11 @@
     }
   }
   </script>
-  <link rel="stylesheet" href="style.css?v=20261110b">
+  <link rel="stylesheet" href="style.css?v=20261110f">
   <link rel="stylesheet" href="chat-styles.css?v=20261110b">
 <link rel="stylesheet" href="login-otp.css?v=20261024a">
-  <link rel="stylesheet" href="duel-system.css?v=20261107g">
-  <link rel="stylesheet" href="tournament.css?v=20261107g">
+  <link rel="stylesheet" href="duel-system.css?v=20261110b">
+  <link rel="stylesheet" href="tournament.css?v=20261110a">
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600;700&family=Exo+2:wght@400;600;700&family=Yuji+Syuku&family=Bangers&family=Poppins:wght@400;700&family=Cinzel+Decorative:wght@400;700&display=swap" rel="stylesheet">
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-Q2C92F1GEX"></script>
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
@@ -207,15 +207,35 @@
   </a>
 </li>
 
-<a href="javascript:void(0)" onclick="openWaifus()">
+<li class="side-group-head" id="adGroupHead">
+  <span class="side-group-title">A&amp;D</span>
+  <span class="side-group-sub">Anime &amp; Waifu</span>
+</li>
+
+<li id="ad-group-anime-item" class="ad-group-item">
+  <a href="javascript:void(0)" id="adAnimeLink" class="side-nav-link" onclick="openAnimeDuelHub()">
+    <svg width="32" height="32" viewBox="0 0 64 64" fill="none">
+  <polygon points="32,4 40,24 60,32 40,40 32,60 24,40 4,32 24,24"
+           fill="#FF4040"/>
+  <text x="32" y="38" text-anchor="middle" font-size="14" font-weight="bold" fill="white">VS</text>
+</svg>
+    <span>Anime</span>
+    <span class="ad-group-tag">DUEL</span>
+  </a>
+</li>
+
+<li id="ad-group-waifu-item" class="ad-group-item">
+  <a href="javascript:void(0)" id="adWaifuLink" class="side-nav-link" onclick="openWaifus()">
     <svg width="32" height="32" viewBox="0 0 64 64" fill="none">
   <path d="M32 54L10 32C4 26 4 16 12 10C18 6 26 8 32 14C38 8 46 6 52 10C60 16 60 26 54 32L32 54Z"
         stroke="#FF69B4" stroke-width="4"/>
   <circle cx="24" cy="26" r="3" fill="#00E5FF"/>
   <circle cx="40" cy="26" r="3" fill="#00E5FF"/>
 </svg>
-  Find Your Waifus
-</a>
+    <span>Waifu</span>
+    <span class="ad-group-tag">GALLERY</span>
+  </a>
+</li>
 
 <li>
   <a href="javascript:void(0)" id="wishlistBtn">
@@ -564,29 +584,84 @@
 <div class="body-anime-quest" id="animeQuestContainer" style="display:none;">
   <div class="analysis-heading"><svg class="aq-head-icon" width="28" height="28" viewBox="0 0 64 64"><circle cx="32" cy="20" r="10" stroke="#00f2fe" stroke-width="3" fill="none"/><text x="32" y="24" text-anchor="middle" font-size="14" fill="#00f2fe">?</text><path d="M16 50 L32 40 L48 50" stroke="#00f2fe" stroke-width="3" fill="none" stroke-linecap="round"/><circle cx="24" cy="18" r="2" fill="#00f2fe"/><circle cx="40" cy="18" r="2" fill="#00f2fe"/></svg><span class="heading-text">Anime Quest</span></div>
   <div id="questContent">
-    <div id="questSelectPhase">
-      <p style="color:#889;font-size:13px;margin-bottom:12px;">Select anime and difficulty, then click <b>Start Quest</b>.</p>
-      <div id="questAnimeList" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;margin-bottom:12px;"></div>
-      <div style="text-align:center;margin-bottom:10px;">
-        <span id="questSelectedCount" style="font-size:12px;color:#FFD700;">Selected: 0</span>
-        <br>
-        <button id="questStartBtn" class="admin-btn" style="display:none;" onclick="startQuest()">▶ Start Quest</button>
-        <button id="questResetSelectBtn" class="admin-btn" style="display:none;background:#800;" onclick="resetQuestSelection()">✖ Clear All</button>
-      </div>
-      <div style="text-align:center;border-top:1px solid rgba(0,255,65,0.08);padding-top:10px;">
-        <div style="font-size:11px;color:#889;margin-bottom:6px;">Difficulty</div>
-        <div id="questDiffSelector" style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap;"></div>
+
+    <!-- ══ STEP 1 · PICK YOUR ANIME ══ -->
+    <div id="questSelectPhase" class="aq-phase">
+      <ol class="aq-steps">
+        <li class="aq-step aq-step--active"><b>01</b> Pick your anime</li>
+        <li class="aq-step"><b>02</b> Answer the quest</li>
+        <li class="aq-step"><b>03</b> Collect your saves</li>
+      </ol>
+
+      <div class="aq-layout">
+        <div class="aq-main">
+          <p class="aq-hint">Choose the anime you want to be quizzed on, set the difficulty and start the quest. Every answer you get right <b>saves that anime</b> to your vault.</p>
+          <div id="questAnimeList" class="aq-anime-grid"></div>
+          <div class="aq-diff">
+            <div class="aq-diff-label">Difficulty</div>
+            <div id="questDiffSelector" class="aq-diff-list"></div>
+          </div>
+        </div>
+
+        <aside class="aq-brief">
+          <div class="aq-brief-head">QUEST BRIEF</div>
+          <div class="aq-brief-row"><span>Anime picked</span><b id="questSelectedCount">0</b></div>
+          <div class="aq-brief-row"><span>Difficulty</span><b id="questDiffLabel">Mixed</b></div>
+          <div class="aq-brief-row"><span>Questions</span><b>10</b></div>
+          <div class="aq-brief-row aq-brief-row--gold"><span>Anime saved</span><b id="questVaultCount">0</b></div>
+          <div class="aq-brief-actions">
+            <button id="questStartBtn" class="aq-btn aq-btn--go" style="display:none;" onclick="startQuest()">▶ Start Quest</button>
+            <button id="questResetSelectBtn" class="aq-btn aq-btn--ghost" style="display:none;" onclick="resetQuestSelection()">✖ Clear all</button>
+          </div>
+          <div class="aq-vault-mini">
+            <div class="aq-vault-head">SAVED SO FAR</div>
+            <div id="questVaultMini" class="aq-vault-chips"></div>
+          </div>
+        </aside>
       </div>
     </div>
-    <div id="questQuizPhase" style="display:none;">
-      <div id="questProgress" style="font-size:11px;color:#889;margin-bottom:4px;"></div>
-      <div id="questQuestion" style="font-size:16px;color:#fff;font-weight:600;margin-bottom:16px;min-height:40px;"></div>
-      <div id="questOptions" style="display:grid;gap:8px;"></div>
+
+    <!-- ══ STEP 2 · THE QUEST ══ -->
+    <div id="questQuizPhase" class="aq-phase" style="display:none;">
+      <div class="aq-hud">
+        <div class="aq-hud-track"><div id="questHudFill" class="aq-hud-fill"></div></div>
+        <div class="aq-hud-row">
+          <span id="questProgress" class="aq-hud-cell">Question 1 / 10</span>
+          <span class="aq-hud-cell">SCORE <b id="questHudScore">0</b></span>
+          <span class="aq-hud-cell">STREAK <b id="questHudStreak">0</b></span>
+          <span class="aq-hud-cell aq-hud-cell--time">TIME <b id="questHudTime">0:00</b></span>
+        </div>
+      </div>
+      <div class="aq-question-wrap">
+        <div id="questQuestion" class="aq-question"></div>
+        <div id="questFeedback" class="aq-feedback"></div>
+        <div id="questOptions" class="aq-options"></div>
+      </div>
     </div>
-    <div id="questResultsPhase" style="display:none;text-align:center;">
-      <div id="questScore" style="font-size:24px;color:#FFD700;margin-bottom:2px;"></div>
-      <div id="questTime" class="quest-time"></div>
-      <div id="questGrade" style="font-size:14px;color:#889;margin-bottom:16px;"></div>
+
+    <!-- ══ STEP 3 · THE RESULT ══ -->
+    <div id="questResultsPhase" class="aq-phase" style="display:none;">
+      <div class="aq-result-head">
+        <div id="questScore" class="aq-result-score"></div>
+        <div id="questGrade" class="aq-result-grade"></div>
+        <div id="questTime" class="aq-result-time"></div>
+      </div>
+
+      <div class="aq-stats">
+        <div class="aq-stat"><span>Score</span><b id="aqStatScore">0%</b></div>
+        <div class="aq-stat"><span>Correct</span><b id="aqStatCorrect">0/10</b></div>
+        <div class="aq-stat"><span>Best streak</span><b id="aqStatStreak">0</b></div>
+        <div class="aq-stat aq-stat--gold"><span>Saved</span><b id="aqStatSaved">0</b></div>
+      </div>
+
+      <div class="aq-saved">
+        <div class="aq-saved-head">
+          <span>SAVED THIS RUN</span>
+          <button class="aq-btn aq-btn--small" id="aqSaveToWish" onclick="sendQuestSavesToWishList()">＋ Send to Wish List</button>
+        </div>
+        <div id="questVaultList" class="aq-vault-chips aq-vault-chips--big"></div>
+      </div>
+
       <!-- Certificate -->
       <div id="questCertificate" class="qc-frame qc-sss" style="display:none;">
         <div class="qc-inner" id="qcInner">
@@ -613,10 +688,10 @@
         <button class="admin-btn" onclick="downloadCertificate()">⬇ Download Certificate</button>
       </div>
       <!-- Review -->
-      <div id="questReview" style="text-align:left;max-height:320px;overflow-y:auto;margin-bottom:12px;"></div>
-      <div style="display:flex;gap:8px;justify-content:center;">
-        <button class="admin-btn" onclick="resetQuest()">🔄 Play Again</button>
-        <button class="admin-btn" onclick="backToQuestSelect()">◀ New Selection</button>
+      <div id="questReview" class="aq-review"></div>
+      <div class="aq-result-actions">
+        <button class="aq-btn aq-btn--go" onclick="resetQuest()">↻ Play again</button>
+        <button class="aq-btn aq-btn--ghost" onclick="backToQuestSelect()">◀ New selection</button>
       </div>
     </div>
     <div style="text-align:center;margin-top:16px;padding-top:12px;border-top:1px solid rgba(0,255,65,0.12);font-size:14px;font-weight:700;color:#00ff41;text-shadow:0 0 10px rgba(0,255,65,0.3);">⚠️ Bro be Loyal. If you cheat You are a g@y!</div>
@@ -1615,7 +1690,7 @@
     </div>
   </div>
 
-  <script src="duel-system.js?v=20261107g"></script>
+  <script src="duel-system.js?v=20261110a"></script>
   <script src="tournament.js?v=20261024q"></script>
   <script src="quest-data.js?v=20261107g"></script>
     <!-- === 🔐 LOGIN / CREATE ACCOUNT — email or phone + password, or Google === -->
@@ -1750,7 +1825,7 @@
   <script src="https://accounts.google.com/gsi/client" async defer></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="anime-fetch.js?v=20261110a"></script>
-<script src="script.js?v=20261110f"></script>
+<script src="script.js?v=20261110i"></script>
 <script src="login-otp.js?v=20261024n"></script>
 <script src="wishlist.js?v=20261109a"></script>
 
