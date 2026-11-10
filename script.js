@@ -5472,14 +5472,9 @@ document.addEventListener('click', function(e) {
         popover: { title: '\uD83C\uDFC5 Anime of the Year', description: 'See Crunchyroll\'s Anime of the Year winners from 2017 to 2026, filtered from Fardin\'s list.', side: 'right' }
       },
       {
-        element: '#adGroupHead',
-        guide: 'Zero Two',
-        popover: { title: 'A&D Section', description: '<strong>A&amp;D</strong> holds the two halves of the collection: <strong>Anime</strong> (the duel arena) and <strong>Waifu</strong> (the character gallery).', side: 'right' }
-      },
-      {
         element: 'nav.side-nav a[onclick*="openWaifus"]',
         guide: 'Momo Ayase',
-        popover: { title: '\uD83D\uDC95 Find Your Waifus', description: 'The <strong>Waifu</strong> half of A&D — a gallery of beloved anime characters with flip cards. Search by name or series!', side: 'right' }
+        popover: { title: '\uD83D\uDC95 Find Your Waifus', description: 'A gallery of beloved anime characters with flip cards. Search by name or series!', side: 'right' }
       },
       {
         element: '#wishlistBtn',
