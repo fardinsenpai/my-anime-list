@@ -2705,6 +2705,8 @@ function needsAnimeList(msg) {
 
 /* Official/OTT dub data — loaded once, used only by the chat. */
 var DUB_DATA = null;
+var DUB_RE = /(hindi|english dub|\bdub\b|dubbed|subbed|subtitle|voice|audio)/i;
+var _dubAsked = false;   /* the dub table only joins the prompt once it is needed */
 function loadDubData() {
   if (DUB_DATA) return Promise.resolve(DUB_DATA);
   return fetch('anime-dubs.json', { cache: 'force-cache' })
@@ -2723,18 +2725,22 @@ function getSystemPrompt(visitorMsg) {
   const justIn = !!(who && authNameFresh);   // true for one reply only
   authNameFresh = false;
 
-  /* Compact dub table for the chat. Only official/OTT entries are here. */
+  /* Compact dub table for the chat. Only official/OTT entries are here.
+     The table is big, so it only rides along once the visitor has actually
+     asked about dubbing (or the chat already did). */
   let dubBlock = '';
   try {
-    if (DUB_DATA) {
-      const dubLines = Object.keys(DUB_DATA).map(function (k) {
+    if (DUB_DATA && _dubAsked) {
+      const dubLines = [];
+      Object.keys(DUB_DATA).forEach(function (k) {
         const d = DUB_DATA[k] || {};
-        return k + ' — Hindi: ' + (d.hi || 'no verified official dub') +
+        if (!d.hi && !d.en) return;   /* nothing verified for this title */
+        dubLines.push(k + ' — Hindi: ' + (d.hi || 'no verified official dub') +
           ' | English: ' + (d.en || 'no verified official dub') +
-          ' | Sub: ' + (d.sub || 'Japanese');
+          ' | Sub: ' + (d.sub || 'Japanese'));
       });
       if (dubLines.length) {
-        dubBlock = '\n\nDUB DATA (official/OTT releases only; "no verified official dub" means do not guess):\n' + dubLines.join('\n');
+        dubBlock = '\n\nDUB DATA (official/OTT releases only; only the titles listed below have verified dub info, "no verified official dub" means do not guess):\n' + dubLines.join('\n');
       }
     }
   } catch (e) {}
@@ -2936,6 +2942,9 @@ async function sendMessage() {
     chatInput.value = '';
 
     chatHistory.push({ role: 'user', content: message });
+
+    /* a dub question switches the dub table on for the rest of the chat */
+    if (DUB_RE.test(message)) _dubAsked = true;
 
     if (chatHistory.length > 9) {
       chatHistory = [chatHistory[0],...chatHistory.slice(-8)];

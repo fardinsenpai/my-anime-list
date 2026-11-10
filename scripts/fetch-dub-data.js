@@ -4,8 +4,10 @@
    Where the data comes from
    -------------------------
    1. The Dubbing Database (dubdb.fandom.com) - one wiki page per dub:
-        "<Title> (Hindi, Crunchyroll)"   ->  Hindi dub on Crunchyroll
-        "<Title> (English)"               ->  official English dub
+        "<Title> (Hindi, Crunchyroll)" / "<Title> (Hindi)"
+        "<Title> (English)"
+      The page infobox carries the platform:
+        |channel = Sony YAY!   |service = Crunchyroll   |service2 = Amazon Prime Video
    2. The Hindi Dubbing Wiki (hindi-dubbing.fandom.com) - the prose says
       which platform the Hindi dub premiered on, which catches the Indian
       channels (Sony YAY!, MX Player, Muse India, ...) the dub database does
@@ -15,6 +17,7 @@
 
    Run:  node scripts/fetch-dub-data.js          (needs internet)
    It writes: anime-dubs.json
+   Manual, hand-checked entries live in anime-dub-overrides.json and win.
    ───────────────────────────────────────────────────────────────────────── */
 const fs = require('fs');
 const path = require('path');
@@ -33,25 +36,30 @@ const PLATFORM_ALIASES = [
   [/netflix/i, 'Netflix'],
   [/sony\s*yay/i, 'Sony YAY!'],
   [/sonyliv/i, 'SonyLIV'],
-  [/sony/i, 'Sony'],
+  [/amazon\s*prime|prime\s*video/i, 'Amazon Prime'],
   [/mx\s*player/i, 'MX Player'],
   [/muse\s*india/i, 'Muse India'],
   [/hoichoi/i, 'Hoichoi'],
   [/jiocinema|jio\s*cinema/i, 'JioCinema'],
   [/zee5|zee\s*5/i, 'Zee5'],
   [/hoopla/i, 'Hoopla'],
-  [/amazon\s*prime/i, 'Amazon Prime'],
-  [/hotstar|disney\+/i, 'Hotstar'],
+  [/hotstar|disney\s*\+/i, 'Hotstar'],
   [/medialink/i, 'Medialink'],
   [/viki/i, 'Viki'],
   [/youtube/i, 'YouTube'],
-  [/prime\s*video/i, 'Prime Video']
+  [/hidive/i, 'HIDIVE'],
+  [/bilibili/i, 'Bilibili'],
+  [/tv\s*tokyo/i, 'TV Tokyo'],
+  [/european\s*español|latin\s*american/i, null],
+  [/italian|german|french|portuguese|spanish|russian|tamil|telugu|malay|indonesian|arabic|thai/i, null]
 ];
 
 function normalisePlatform(raw) {
-  const s = String(raw || '').replace(/\s+/g, ' ').trim();
+  const s = String(raw || '').replace(/\[\[[^\]]*\]\]/g, '').replace(/\{\{[^}]*\}\}/g, '').replace(/\s+/g, ' ').trim();
   if (!s) return null;
-  for (const [re, name] of PLATFORM_ALIASES) if (re.test(s)) return name;
+  for (const [re, name] of PLATFORM_ALIASES) {
+    if (re.test(s)) return name;      /* null = not an Indian/English platform */
+  }
   return null;
 }
 
@@ -78,33 +86,76 @@ async function api(url, tries = 3) {
   return null;
 }
 
-/* dubdb: "<Title> (Hindi, Platform)" / "<Title> (English)" */
+async function searchWiki(base, q, limit) {
+  const url = base + '?action=query&list=search&srsearch=' + encodeURIComponent(q) +
+    '&srlimit=' + (limit || 15) + '&format=json&formatversion=2';
+  const json = await api(url);
+  return json && json.query && json.query.search ? json.query.search.map((s) => s.title) : [];
+}
+
+async function pageText(base, page) {
+  const url = base + '?action=parse&page=' + encodeURIComponent(page) +
+    '&prop=wikitext&format=json&formatversion=2';
+  const json = await api(url);
+  return json && json.parse && json.parse.wikitext ? String(json.parse.wikitext) : '';
+}
+
+/* the infobox of a dub page: |channel = / |service = / |service2 = ... */
+function platformsFromInfobox(text) {
+  const out = [];
+  const re = /\|\s*(channel|service\d*|streaming|network)\s*=\s*([^\n|]+)/gi;
+  let m;
+  while ((m = re.exec(text))) {
+    const p = normalisePlatform(m[2]);
+    if (p && out.indexOf(p) === -1) out.push(p);
+  }
+  return out;
+}
+
+/* dubdb: "<Title> (Hindi, Platform)" and "<Title> (Hindi)" */
 async function fromDubDb(title) {
-  const out = { hi: [], en: false };
-  const search = async (q) => {
-    const url = DUBDB + '?action=query&list=search&srsearch=' + encodeURIComponent(q) +
-      '&srlimit=15&format=json&formatversion=2';
-    const json = await api(url);
-    return json && json.query && json.query.search ? json.query.search.map((s) => s.title) : [];
-  };
+  const out = { hi: [], en: false, enPlatform: null };
+  const base = title.trim().toLowerCase();
 
-  const hindi = await search('"' + title + '" Hindi');
+  const hindi = await searchWiki(DUBDB, '"' + title + '" Hindi');
+  const pages = [];
   hindi.forEach((page) => {
-    const m = page.match(/^(.+?)\s*\(([^()]*Hindi[^()]*)\)\s*$/i);
+    const m = page.match(/^(.+?)\s*\((Hindi[^()]*)\)\s*$/i);
     if (!m) return;
-    if (m[1].trim().toLowerCase() !== title.trim().toLowerCase()) return;
-    const parts = m[2].split(',').map((p) => p.trim());
-    const plat = parts.length > 1 ? normalisePlatform(parts.slice(1).join(',')) : null;
-    if (plat && out.hi.indexOf(plat) === -1) out.hi.push(plat);
+    if (m[1].trim().toLowerCase() !== base) return;
+    if (pages.indexOf(page) === -1) pages.push(page);
   });
+  for (const page of pages) {
+    const txt = await pageText(DUBDB, page);
+    const plats = platformsFromInfobox(txt);
+    /* the title itself may name the platform: "<Title> (Hindi, Crunchyroll)" */
+    const inline = page.match(/\((?:Hindi[^()]*)\)/i);
+    if (inline) {
+      const parts = page.replace(/^[^(]*\(/, '').replace(/\)\s*$/, '').split(',').slice(1).join(',');
+      const p = normalisePlatform(parts);
+      if (p && plats.indexOf(p) === -1) plats.push(p);
+    }
+    plats.forEach((p) => { if (out.hi.indexOf(p) === -1) out.hi.push(p); });
+    await sleep(120);
+  }
 
-  const eng = await search('"' + title + '" English');
+  const eng = await searchWiki(DUBDB, '"' + title + '" English');
+  const epages = [];
   eng.forEach((page) => {
     const m = page.match(/^(.+?)\s*\((English[^()]*)\)\s*$/i);
     if (!m) return;
-    if (m[1].trim().toLowerCase() !== title.trim().toLowerCase()) return;
-    out.en = true;
+    if (m[1].trim().toLowerCase() !== base) return;
+    if (epages.indexOf(page) === -1) epages.push(page);
   });
+  for (const page of epages) {
+    out.en = true;
+    if (!out.enPlatform) {
+      const txt = await pageText(DUBDB, page);
+      const plats = platformsFromInfobox(txt);
+      if (plats.length) out.enPlatform = plats[0];
+    }
+    await sleep(120);
+  }
 
   return out;
 }
@@ -112,21 +163,17 @@ async function fromDubDb(title) {
 /* the Hindi dubbing wiki: "A Hindi dub of the series premiered on <platform>." */
 async function fromHindiWiki(title) {
   const out = { hi: [], en: false };
-  const url = HINDI_WIKI + '?action=parse&page=' + encodeURIComponent(title) +
-    '&prop=wikitext&format=json&formatversion=2';
-  const json = await api(url);
-  if (!json || !json.parse || !json.parse.wikitext) return out;
-  const text = String(json.parse.wikitext);
-  const re = /Hindi dub[^\n.]{0,120}?premiered on ([^.,\n]{2,40})/gi;
+  const text = await pageText(HINDI_WIKI, title);
+  if (!text) return out;
   let m;
+  const re = /Hindi dub[^\n.]{0,140}?premiered on ([^.,\n]{2,40})/gi;
   while ((m = re.exec(text))) {
     const plat = normalisePlatform(m[1]);
     if (plat && out.hi.indexOf(plat) === -1) out.hi.push(plat);
   }
-  const re2 = /English dub[^\n.]{0,120}?premiered on ([^.,\n]{2,40})/gi;
+  const re2 = /English dub[^\n.]{0,140}?premiered on ([^.,\n]{2,40})/gi;
   while ((m = re2.exec(text))) {
-    const plat = normalisePlatform(m[1]);
-    if (plat) out.en = true;
+    if (normalisePlatform(m[1])) out.en = true;
   }
   if (/dubbed in English|English dub/i.test(text)) out.en = true;
   return out;
@@ -153,13 +200,13 @@ async function fromHindiWiki(title) {
 
     const ov = overrides[title] || {};
     const finalHi = ov.hi ? [ov.hi].concat(hi.filter((p) => p !== ov.hi)) : hi;
-    const finalEn = ov.en !== undefined ? ov.en : db.en || wiki.en;
+    const finalEn = ov.en !== undefined ? ov.en : (db.en || wiki.en);
 
     result[title] = {
       hi: finalHi.length ? finalHi.join(' / ') : null,
-      en: finalEn ? (ov.en === true ? 'Official' : 'Official') : null,
+      en: finalEn ? (db.enPlatform && !ov.en ? db.enPlatform : 'Official') : null,
       sub: 'Japanese',
-      source: ov.hi ? 'manual' : (finalHi.length ? 'dubdb + hindi-dubbing wiki' : 'none found')
+      source: ov.hi ? 'manual + wiki' : (finalHi.length ? 'dubdb + hindi-dubbing wiki' : (finalEn ? 'dubdb' : 'none found'))
     };
     if (finalHi.length) withHindi++;
     if (finalEn) withEnglish++;
@@ -167,7 +214,7 @@ async function fromHindiWiki(title) {
     if (done % 10 === 0 || done === titles.length) {
       console.log('  ' + done + '/' + titles.length + '  hindi: ' + withHindi + '  english: ' + withEnglish);
     }
-    await sleep(260);
+    await sleep(220);
   }
 
   const out = {
