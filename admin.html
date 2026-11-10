@@ -19,7 +19,7 @@
     if (f) document.documentElement.setAttribute('data-font', f);
   } catch (e) {}
 </script>
-<link rel="stylesheet" href="admin.css?v=202611081931">
+<link rel="stylesheet" href="admin.css?v=20261110c">
 </head>
 <body>
 
@@ -89,20 +89,22 @@
         <button class="admin-g-tab" data-tab="read"   onclick="switchAdminTab('read')"><b>📖</b> READ<span>currently reading</span></button>
         <button class="admin-g-tab" data-tab="top5"   onclick="switchAdminTab('top5')"><b>🏆</b> TOP 5<span>picks by genre</span></button>
         <button class="admin-g-tab" data-tab="awards" onclick="switchAdminTab('awards')"><b>🏅</b> AWARDS<span>winners by year</span></button>
+        <button class="admin-g-tab" data-tab="add"    onclick="switchAdminTab('add')"><b>➕</b> ADD<span>new anime</span></button>
         <button class="admin-g-tab" data-tab="edit"   onclick="switchAdminTab('edit')"><b>✏️</b> EDIT<span>anime info</span></button>
         <button class="admin-g-tab" data-tab="date"   onclick="switchAdminTab('date')"><b>📅</b> DATE<span>last updated</span></button>
         <button class="admin-g-tab" data-tab="stats"  onclick="switchAdminTab('stats')"><b>📊</b> STATS<span>counters</span></button>
-        <button class="admin-g-tab" data-tab="add"    onclick="switchAdminTab('add')"><b>➕</b> ADD<span>new anime</span></button>
         <button class="admin-g-tab" data-tab="ai"      onclick="switchAdminTab('ai')"><b>🤖</b> AI<span>chat model</span></button>
         <button class="admin-g-tab" data-tab="avatars" onclick="switchAdminTab('avatars'); renderAvatarsTab()"><b>🖼️</b> AVATARS<span>chat avatars</span></button>
         <button class="admin-g-tab" data-tab="notes"   onclick="switchAdminTab('notes'); renderNotesTab()"><b>📝</b> NOTES<span>private pad</span></button>
         <button class="admin-g-tab" data-tab="logo"    onclick="switchAdminTab('logo'); renderLogoTab()"><b>🎨</b> LOGO<span>panel identity</span></button>
         <button class="admin-g-tab" data-tab="reply"   onclick="switchAdminTab('reply'); renderReplyTab()"><b>💬</b> REPLY<span>avatar &amp; badge</span></button>
         <button class="admin-g-tab" data-tab="history" onclick="switchAdminTab('history'); renderHistoryTab()"><b>🕓</b> HISTORY<span>last 10 commits</span></button>
+        <button class="admin-g-tab ad-pat-tab" data-tab="pat" onclick="switchAdminTab('pat')"><b>🔑</b> PAT!<span>token</span></button>
       </nav>
       </div>
 
-      <div class="ad-side-block">
+      <div id="adPatSideSlot"></div>
+      <div class="ad-side-block" id="adPatBlock">
         <div class="ad-side-title">// GITHUB PAT //</div>
         <div class="ad-pat-status" id="adPatStatus">// PAT: -</div>
         <div class="ad-pat-row">
@@ -151,7 +153,16 @@
         <div class="ad-row">
           <label class="ad-field">
             <span>Season</span>
-            <input type="text" id="adminWatchSeason" class="admin-g-input" placeholder="Season 4">
+            <select id="adminWatchSeason" class="admin-g-input" onchange="syncSeasonCustom('adminWatchSeason','adminWatchSeasonCustom')">
+              <option value="Season-1">Season-1</option>
+              <option value="Season-1,2">Season-1,2</option>
+              <option value="Season-1,2,3">Season-1,2,3</option>
+              <option value="__custom">Custom…</option>
+            </select>
+          </label>
+          <label class="ad-field" id="adminWatchSeasonCustomWrap" style="display:none">
+            <span>Custom season</span>
+            <input type="text" id="adminWatchSeasonCustom" class="admin-g-input" placeholder="Season 4">
           </label>
         </div>
         <div class="ad-note" id="adminWatchProgressPreview">Progress is calculated automatically from current ÷ total episodes.</div>
@@ -259,8 +270,35 @@
         </label>
         <div class="ad-row">
           <label class="ad-field">
+            <span>Animation /10</span>
+            <input type="number" id="adminEditAnim" class="admin-g-input" placeholder="8.0" step="0.1" min="0" max="10">
+          </label>
+          <label class="ad-field">
+            <span>Characters /10</span>
+            <input type="number" id="adminEditChar" class="admin-g-input" placeholder="8.0" step="0.1" min="0" max="10">
+          </label>
+          <label class="ad-field">
+            <span>Story /10</span>
+            <input type="number" id="adminEditStory" class="admin-g-input" placeholder="8.0" step="0.1" min="0" max="10">
+          </label>
+          <label class="ad-field">
+            <span>Anime-Planet /5</span>
+            <input type="number" id="adminEditPlanet" class="admin-g-input" placeholder="4.1" step="0.1" min="0" max="5">
+          </label>
+        </div>
+        <div class="ad-row">
+          <label class="ad-field">
             <span>Total seasons</span>
-            <input type="text" id="adminEditSeasons" class="admin-g-input" placeholder="Season-1,2,3">
+            <select id="adminEditSeasons" class="admin-g-input" onchange="syncSeasonCustom('adminEditSeasons','adminEditSeasonsCustom')">
+              <option value="Season-1">Season-1</option>
+              <option value="Season-1,2">Season-1,2</option>
+              <option value="Season-1,2,3">Season-1,2,3</option>
+              <option value="__custom">Custom…</option>
+            </select>
+          </label>
+          <label class="ad-field" id="adminEditSeasonsCustomWrap" style="display:none">
+            <span>Custom seasons</span>
+            <input type="text" id="adminEditSeasonsCustom" class="admin-g-input" placeholder="Season-1,2,3,4">
           </label>
           <label class="ad-field">
             <span>Total episodes</span>
@@ -282,7 +320,7 @@
           </select>
         </label>
         <button class="admin-g-btn" onclick="commitEditAnime()">▶ COMMIT EDIT</button>
-        <div class="ad-note">Editing an anime rewrites its card in index.html and its genre list in script.js.  ghp_jdMFzDeqsfRbxIXnJ5efO4xL5q6J0S3UDUt0</div>
+        <div class="ad-note">Editing an anime rewrites its card in index.html and its genre list in script.js.</div>
       </section>
 
       <!-- DATE -->
@@ -327,6 +365,10 @@
       <!-- ADD -->
       <section class="admin-g-content" id="tabAdd">
         <h2 class="ad-h">// ADD NEW ANIME //</h2>
+        <div class="ad-latest" id="adLatestAnime">
+          <div class="ad-latest-head">// LATEST IN THE LIST //</div>
+          <div class="ad-latest-list" id="adLatestList"></div>
+        </div>
         <div class="ad-row" style="align-items:flex-end;">
           <label class="ad-field" style="flex:1 1 220px;">
             <span>Anime title</span>
@@ -342,12 +384,25 @@
         </label>
         <div class="ad-row">
           <label class="ad-field">
-            <span>Season</span>
+            <span>Season (air)</span>
             <input type="text" id="adminAddSeason" class="admin-g-input" placeholder="Spring 2024">
           </label>
           <label class="ad-field">
             <span>Episodes</span>
             <input type="number" id="adminAddEps" class="admin-g-input" placeholder="12">
+          </label>
+          <label class="ad-field">
+            <span>Seasons covered</span>
+            <select id="adminAddSeasonLabel" class="admin-g-input" onchange="syncSeasonCustom('adminAddSeasonLabel','adminAddSeasonCustom')">
+              <option value="Season-1">Season-1</option>
+              <option value="Season-1,2">Season-1,2</option>
+              <option value="Season-1,2,3">Season-1,2,3</option>
+              <option value="__custom">Custom…</option>
+            </select>
+          </label>
+          <label class="ad-field" id="adminAddSeasonCustomWrap" style="display:none">
+            <span>Custom seasons</span>
+            <input type="text" id="adminAddSeasonCustom" class="admin-g-input" placeholder="Season-1,2,3,4">
           </label>
         </div>
         <div class="ad-row" style="align-items:flex-end;">
@@ -372,15 +427,14 @@
             <input type="number" id="adminAddChar" class="admin-g-input" placeholder="8.0" step="0.1" min="0" max="10">
           </label>
           <label class="ad-field">
+            <span>Story /10</span>
+            <input type="number" id="adminAddStory" class="admin-g-input" placeholder="8.0" step="0.1" min="0" max="10">
+          </label>
+          <label class="ad-field">
             <span>Anime-Planet /5</span>
             <input type="number" id="adminAddPlanet" class="admin-g-input" placeholder="4.1" step="0.1" min="0" max="5">
           </label>
         </div>
-        <label class="ad-field">
-          <span>Season label</span>
-          <input type="text" id="adminAddSeasonLabel" class="admin-g-input" placeholder="Season-1">
-        </label>
-
         <div class="admin-g-label">OTT Platforms</div>
         <div class="admin-pill-container">
           <input type="text" class="admin-g-input" id="adminOttSearch" placeholder="Search OTT..." oninput="filterPills(this,'ott')">
@@ -397,6 +451,12 @@
           <div class="admin-pill-list" id="adminGenreList"></div>
         </div>
         <div class="admin-selected-pills" id="adminSelectedPills" style="display:none"></div>
+
+        <div class="admin-g-label">Live card preview</div>
+        <div class="ad-note" style="margin:-2px 0 8px;">The real card, rendered from the form — click it to flip, exactly like the site.</div>
+        <div class="ad-card-preview">
+          <iframe id="adminPreviewFrame" title="Anime card preview" loading="lazy"></iframe>
+        </div>
 
         <button class="admin-g-btn" onclick="commitAddAnime()">▶ COMMIT ADD</button>
         <div class="ad-note">The card goes to the end of index.html; OTT / studio / genre / rating data goes to script.js.</div>
@@ -577,6 +637,17 @@
         <div id="adHistoryList" class="ad-history"></div>
       </section>
 
+      <!-- PAT (mobile: the sidebar token block moves in here) -->
+      <section class="admin-g-content" id="tabPat">
+        <h2 class="ad-h">// GITHUB PAT //</h2>
+        <div class="ad-note">
+          The GitHub token is stored <b>in this browser only</b> and is never committed.
+          On desktop it also lives in the sidebar; on a phone it lives here so it stops
+          covering every module.
+        </div>
+        <div id="adPatHost" style="margin-top:14px;"></div>
+      </section>
+
     </main>
   </div>
 
@@ -593,7 +664,7 @@
   </div>
 </div>
 
-<script src="anime-fetch.js?v=202611081931"></script>
-<script src="admin.js?v=202611081931"></script>
+<script src="anime-fetch.js?v=20261110a"></script>
+<script src="admin.js?v=20261110d"></script>
 </body>
 </html>

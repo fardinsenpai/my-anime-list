@@ -51,6 +51,12 @@
     '      tags { name rank }',
     '      studios(isMain: true) { nodes { name } }',
     '      externalLinks { site }',
+    '      relations {',
+    '        edges {',
+    '          relationType',
+    '          node { id format episodes title { english romaji } }',
+    '        }',
+    '      }',
     '    }',
     '  }',
     '}'
@@ -480,6 +486,41 @@
       }
       var score = typeof media.averageScore === 'number' ? media.averageScore : null;
       var display = titleOf(media) || name;
+
+      /* AniList returns one entry per season. Walk the direct SEQUEL /
+         PREQUEL / PARENT relations so a 2- or 3-season franchise is summed
+         into one card instead of showing only the season that matched. */
+      var tvIds = {};
+      var tvCount = 0;
+      var totalEps = 0;
+      var addTv = function (m) {
+        if (!m || m.format !== 'TV' || !m.id || tvIds[m.id]) return;
+        tvIds[m.id] = 1;
+        tvCount++;
+        if (typeof m.episodes === 'number') totalEps += m.episodes;
+      };
+      if (media.format === 'TV') addTv(media);
+      var relEdges = (media.relations && media.relations.edges) || [];
+      relEdges.forEach(function (edge) {
+        if (!edge || !edge.node) return;
+        var rt = edge.relationType;
+        if (rt === 'SEQUEL' || rt === 'PREQUEL' || rt === 'PARENT' || rt === 'SIDE_STORY') {
+          addTv(edge.node);
+        }
+      });
+      var episodes = media.episodes || '';
+      var seasonLabel = 'Season-1';
+      if (tvCount > 1 && totalEps > 0) {
+        episodes = totalEps;
+        if (tvCount <= 3) {
+          var labels = [];
+          for (var si = 1; si <= tvCount; si++) labels.push(si);
+          seasonLabel = 'Season-' + labels.join(',');
+        } else {
+          seasonLabel = '__custom';
+        }
+      }
+
       var data = {
         id: media.id,
         idMal: media.idMal,
@@ -488,7 +529,9 @@
         apTitles: [display, (media.title && media.title.romaji) || '', (media.title && media.title.english) || '', name],
         image: (media.coverImage && (media.coverImage.extraLarge || media.coverImage.large)) || '',
         season: seasonOf(media.startDate),
-        episodes: media.episodes || '',
+        episodes: episodes,
+        seasonLabel: seasonLabel,
+        seasonCount: tvCount || 1,
         rating: score,
         mal: null,
         malEstimated: false,
@@ -616,9 +659,14 @@
     setOrClear('adminAddEps', data.episodes);
     setOrClear('adminAddRating', data.rating);
     setOrClear('adminAddMal', data.mal);
-    var seasonLabel = document.getElementById('adminAddSeasonLabel');
-    if (seasonLabel && !seasonLabel.value.trim()) seasonLabel.value = 'Season-1';
+    if (typeof setSeasonSelect === 'function') {
+      setSeasonSelect('adminAddSeasonLabel', 'adminAddSeasonCustom', data.seasonLabel || 'Season-1');
+    } else {
+      var seasonLabel = document.getElementById('adminAddSeasonLabel');
+      if (seasonLabel && !seasonLabel.value) seasonLabel.value = 'Season-1';
+    }
     applyPills(data);
+    if (typeof renderCardPreview === 'function') renderCardPreview();
     /* resolves with the stored entry (or null) */
     return new Promise(function (resolve) {
       var settled = false;
@@ -632,6 +680,7 @@
     var bits = [data.title];
     bits.push(data.season || 'season ?');
     bits.push((data.episodes || '?') + ' eps');
+    if (data.seasonCount > 1) bits.push(data.seasonCount + ' seasons');
     bits.push('AniList ' + (data.rating === null ? '?' : data.rating));
     if (data.mal === null) bits.push('MAL n/a');
     else bits.push('MAL ' + data.mal + (data.malEstimated ? ' (est.)' : ' (' + (data.malSource || 'MAL') + ')'));

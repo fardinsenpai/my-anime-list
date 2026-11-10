@@ -38,8 +38,8 @@
     }
   }
   </script>
-  <link rel="stylesheet" href="style.css?v=20261109a">
-  <link rel="stylesheet" href="chat-styles.css?v=20261024z">
+  <link rel="stylesheet" href="style.css?v=20261110b">
+  <link rel="stylesheet" href="chat-styles.css?v=20261110b">
 <link rel="stylesheet" href="login-otp.css?v=20261024a">
   <link rel="stylesheet" href="duel-system.css?v=20261107g">
   <link rel="stylesheet" href="tournament.css?v=20261107g">
@@ -1459,6 +1459,19 @@
         <button onclick="quickAction('When was this site last updated?')">📅 Last Updated</button>
         <button onclick="quickAction('Tell me about Fardin')">👤 Fardin</button>
       </div>
+      <!-- 10 more prompts that still answer with no connection -->
+      <div class="sb-chips" id="chatOfflineChips">
+        <button onclick="quickAction('Recommend a short anime')">⏱ Short</button>
+        <button onclick="quickAction('Recommend a long anime')">📚 Long</button>
+        <button onclick="quickAction('Which anime has the most episodes?')">📺 Most Eps</button>
+        <button onclick="quickAction('What is the newest anime in your list?')">🆕 Newest</button>
+        <button onclick="quickAction('Recommend a movie')">🎬 Movie</button>
+        <button onclick="quickAction('Recommend an underrated anime')">💎 Underrated</button>
+        <button onclick="quickAction('Recommend a sports anime')">🏅 Sports</button>
+        <button onclick="quickAction('Recommend a thriller anime')">🔪 Thriller</button>
+        <button onclick="quickAction('Recommend a fantasy anime')">🐉 Fantasy</button>
+        <button onclick="quickAction('Recommend a slice of life anime')">🌿 Slice of Life</button>
+      </div>
       <!-- row 2: one chip per genre — the four originals stay exactly as they were -->
       <div class="sb-chips sb-chips-genres" id="chatGenreChips">
         <button onclick="quickAction('Recommend me an isekai anime')">🎯 Isekai</button>
@@ -1732,8 +1745,8 @@
 
   <script src="https://accounts.google.com/gsi/client" async defer></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="anime-fetch.js?v=20261104c"></script>
-<script src="script.js?v=20261109e"></script>
+  <script src="anime-fetch.js?v=20261110a"></script>
+<script src="script.js?v=20261110f"></script>
 <script src="login-otp.js?v=20261024n"></script>
 <script src="wishlist.js?v=20261109a"></script>
 

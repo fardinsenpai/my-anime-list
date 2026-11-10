@@ -2667,6 +2667,7 @@ function animeListForPrompt() {
     GEN[g].nums.forEach(function (n) { (byNum[n] = byNum[n] || []).push(short); });
   });
   const lines = [];
+  const ratDb = (ratingsCache && typeof ratingsCache === 'object') ? ratingsCache : null;
   Array.prototype.forEach.call(document.querySelectorAll('#grid .card, .anime-card, .card'), function (c, i) {
     const titleEl = c.querySelector('.title');
     const title = titleEl ? String(titleEl.textContent || '').trim() : '';
@@ -2676,7 +2677,14 @@ function animeListForPrompt() {
     const tags = (byNum[num || (i + 1)] || [])
       .filter(function (g) { return GENRE_COMMON.indexOf(g) === -1; })
       .map(function (g) { return GENRE_CODES[g] || g; });
-    lines.push(title + (tags.length ? ' [' + tags.join(' ') + ']' : ''));
+    /* MAL score straight from anime-ratings.json (the same numbers the duel uses) */
+    let malTxt = '';
+    const entry = ratDb ? ratDb[num || (i + 1)] : null;
+    if (entry && entry.malScore !== undefined && entry.malScore !== null && entry.malScore !== '') {
+      const m = parseFloat(entry.malScore);
+      if (isFinite(m)) malTxt = ' (MAL ' + m.toFixed(1) + ')';
+    }
+    lines.push(title + malTxt + (tags.length ? ' [' + tags.join(' ') + ']' : ''));
   });
   return lines.join('\n');
 }
@@ -2695,12 +2703,42 @@ function needsAnimeList(msg) {
   return !SMALLTALK_RE.test(m);
 }
 
+/* Official/OTT dub data — loaded once, used only by the chat. */
+var DUB_DATA = null;
+function loadDubData() {
+  if (DUB_DATA) return Promise.resolve(DUB_DATA);
+  return fetch('anime-dubs.json', { cache: 'force-cache' })
+    .then(function (r) { return r.ok ? r.json() : null; })
+    .then(function (j) {
+      DUB_DATA = (j && j.titles) ? j.titles : {};
+      return DUB_DATA;
+    })
+    .catch(function () { DUB_DATA = {}; return DUB_DATA; });
+}
+
 function getSystemPrompt(visitorMsg) {
   const stats = getStats();
   // If the visitor is signed in (Google, email or phone), let the assistant call them by name.
   const who = signedInName();
   const justIn = !!(who && authNameFresh);   // true for one reply only
   authNameFresh = false;
+
+  /* Compact dub table for the chat. Only official/OTT entries are here. */
+  let dubBlock = '';
+  try {
+    if (DUB_DATA) {
+      const dubLines = Object.keys(DUB_DATA).map(function (k) {
+        const d = DUB_DATA[k] || {};
+        return k + ' — Hindi: ' + (d.hi || 'no verified official dub') +
+          ' | English: ' + (d.en || 'no verified official dub') +
+          ' | Sub: ' + (d.sub || 'Japanese');
+      });
+      if (dubLines.length) {
+        dubBlock = '\n\nDUB DATA (official/OTT releases only; "no verified official dub" means do not guess):\n' + dubLines.join('\n');
+      }
+    }
+  } catch (e) {}
+
   const whoRule = who
     ? '\n\nWHO YOU ARE TALKING TO (most important): this visitor is signed in and their name is "' + who + '". Use their name — that is exactly what it is for. Open your reply with it when you greet, hype or answer them (for example: "' + who + ', that is peak fiction ⚡" or "Nice pick, ' + who + '!"). Then use it naturally now and then. At most ONCE per reply — never twice — and do not force it into every sentence. Never invent, guess or use a different name, never say that a name was given to you, and never ask them for their name: you already know it.'
       + (justIn ? ' RIGHT NOW they have just signed in, so your very next reply MUST greet them by their name "' + who + '" in its first sentence.' : '')
@@ -2731,16 +2769,19 @@ ${listBlock}
 
 Rules:
 1. Reply in the same language the user uses. If user writes Bangla, reply in Bangla. If English, reply in English.
-2. Website features (if asked): Home (anime grid), Analysis (stats/charts), Top 5 (top anime by genre), Anime of the Year, Anime Duel (vote between two anime), Hot Takes (opinion polls), Currently Watching, Suggestion Box, Random Pick with Mood Picker, AI Chat (you), Duel Leaderboard, Tour Guide and Share button. Encourage Anime Duel — it's the most fun one.
+2. Website features (if asked): Home (anime grid), Analysis (stats/charts), Top 5 (top anime by genre), Anime of the Year, Anime Duel (vote between two anime), Hot Takes (opinion polls), Currently Watching, Suggestion Box, Random Pick with Mood Picker, AI Chat (you), Duel Leaderboard, Tour Guide and Share button. There is also a **Wish List** (tap the heart on any card to save it; sign in and open Wish List from the sidebar to see your own saved anime), an **Anime Quest**, and an **A&D** area for Anime and Waifu picks. Encourage Anime Duel — it's the most fun one. If someone asks how to save anime for later, tell them about the Wish List hearts.
 3. Keep answers short and punchy, and be hype — an anime-obsessed friend, not a robot ("absolute banger", "goated", "peak fiction"). ⚡ ✨ occasionally, never 🙏.
 4. Say "As-salamu alaykum" only on the very first message ever — never on a "Recommend a …" type question, never again after that. End that first reply with a fun fact about anime or Fardin's taste.
 5. Fardin (the owner): his full info is in the sidebar under "Owner Info". He loves diverse genres — action, comedy, romance, thriller — and rates good storytelling and character development above all. Hype him warmly if asked.
 6. Stats: don't volunteer his totals unless asked. If asked, give them in a fun way, then say "Explore the list and find your next watch!".
 7. NEVER guess or make up genres, episode counts, seasons or descriptions. The list at the top of this prompt is the COMPLETE list of Fardin's anime — use ONLY it for any anime-specific answer. General knowledge is fine for casual talk, never for anime facts.
+7b. When you suggest a "X vs Y" matchup, both anime MUST share at least one genre. If they have no common genre, do not suggest that duel — pick a different title that shares a genre. (Example: Blue Lock vs Vinland Saga has no common genre, so never suggest it.)
+7c. If asked about Hindi dub, English dub or sub availability, only answer from the dub data you are given. If the data does not list that title, say you do not have its dub info yet instead of guessing.
+7d. Every title in the list carries its MAL score in brackets, e.g. "Jujutsu Kaisen (MAL 8.6)". Those numbers come from the site's own ratings file — use them when the visitor asks how good or rated an anime is, and never invent a score for a title that has none.
 8. Turn every third reply into a signature line like "⚡ Stay weeb, stay deadly ⚡" or "🔥 Another day, another anime 🔥" — rotate them, don't repeat one twice in a row.
 11. If User Give Me Any Name, I will remember it and accept it. 
 9. If the user seems bored or asks what to watch, hype them up first ("Oh you haven't seen THIS yet??") before the recommendation, and now and then tease them with an underrated gem from the list.
-10. If user asks how to give feedback or suggest anime, point to the suggestion box in the sidebar.`;
+10. If user asks how to give feedback or suggest anime, point to the suggestion box in the sidebar.${dubBlock}`;
 }
 
 // ===== CHAT ELEMENTS =====
@@ -2748,6 +2789,19 @@ const chatBubble = document.getElementById('chatBubble');
 const chatBox = document.getElementById('chatBox');
 const chatMessages = document.getElementById('chatMessages');
 const chatInput = document.getElementById('chatInput');
+
+/* The chat header used to say "online" even with no connection. Paint the
+   real state, and repaint whenever the browser flips. */
+function paintChatOnline() {
+  const sub = document.querySelector('#chatBox .sb-sub');
+  if (!sub) return;
+  const on = navigator.onLine !== false;
+  sub.innerHTML = '<span class="sb-dot' + (on ? '' : ' off') + '"></span> ' +
+    (on ? 'online · ready to recommend' : 'offline · local answers only');
+}
+window.addEventListener('online', paintChatOnline);
+window.addEventListener('offline', paintChatOnline);
+paintChatOnline();
 
 // A phone (or anything touch-driven) must never have the keyboard shoved in its face.
 // Width alone is not enough: desktop-site mode and landscape report > 768px on phones.
@@ -2798,6 +2852,7 @@ function restoreChatFromStorage() {
 document.addEventListener('DOMContentLoaded', () => {
   loadMyAvatar();        // the visitor's own choice (if any) wins for their side
   restoreChatFromStorage();
+  loadDubData();         // tiny JSON; only the chat uses it
   repaintAllAvatars();   // the welcome line's avatar follows the published CHAT_AVATARS
   // v) the ratings repair pass is heavy (291 cards) — it waits for idle time
   hubOnIdle(injectCardMetaFromRatings);
@@ -2887,14 +2942,29 @@ async function sendMessage() {
     }
 
     typingDiv = addMessage('Typing...', 'bot typing');
+    /* refresh the system prompt so the dub table is present and small talk
+       does not carry the whole anime list */
+    try { chatHistory[0] = { role: 'system', content: getSystemPrompt(message) }; } catch (e) {}
     let messagesToSend = [...chatHistory];
 
-    const response = await fetchWithFallback({
-      messages: messagesToSend,
-      temperature: 0.8,
-      max_tokens: 1600,
-      stream: false
-    });
+    /* Offline: answer from the same local knowledge the quick chips use,
+       instead of waiting for a doomed network request. */
+    let response;
+    if (navigator.onLine === false) {
+      const local = await Promise.resolve(localQuickAnswer(message));
+      response = local || quickAiReply(
+        "You're offline right now, Senpai, so I can only use my saved answers. " +
+        "Try a ⚡ quick chip (Short, Long, Most Eps, Newest, Movie, Underrated, Sports, Thriller, Fantasy, Slice of Life) — " +
+        "or reconnect and ask me anything! ✨"
+      );
+    } else {
+      response = await fetchWithFallback({
+        messages: messagesToSend,
+        temperature: 0.8,
+        max_tokens: 1600,
+        stream: false
+      });
+    }
 
     const data = await response.json();
 
@@ -3156,13 +3226,17 @@ function siblingAnime(card, anime) {
     const sb = GEN[b] && GEN[b].nums ? GEN[b].nums.size : Infinity;
     return sa - sb;
   });
-  const wanted = mine[0];
+  /* Try the most specific genre first, then the next one — every candidate
+     still shares at least one real genre with this anime. */
   let best = null;
-  animeCardIndex().forEach(function (c, key) {
-    if (best) return;
-    if (cardTitleOf(c) === anime) return;
-    if (genresOfCard(c).indexOf(wanted) > -1) best = c;
-  });
+  for (let gi = 0; gi < mine.length && !best; gi++) {
+    const wanted = mine[gi];
+    animeCardIndex().forEach(function (c, key) {
+      if (best) return;
+      if (cardTitleOf(c) === anime) return;
+      if (genresOfCard(c).indexOf(wanted) > -1) best = c;
+    });
+  }
   return best ? cardTitleOf(best) : null;
 }
 
@@ -4201,8 +4275,10 @@ function overallScore(a) {
   return parseFloat(((mal * 0.25) + (story * 0.3) + (anim * 0.2) + (chars * 0.1) + (anilist * 0.15)).toFixed(2));
 }
 
-let ratingsCache = null;
-let ratingsLoading = null;
+/* The rich ratings file (MAL / Animation / Characters / Story / Anime-Planet).
+   Declared with var so the chat prompt can read it before this line runs. */
+var ratingsCache = null;
+var ratingsLoading = null;
 function loadRatings() {
   if (ratingsCache) return Promise.resolve(ratingsCache);
   if (!ratingsLoading) {
@@ -4392,6 +4468,28 @@ function sameGenrePicks(card, want) {
   return picked.map(cardFacts).filter(Boolean);
 }
 
+/* The ratings entry for a title, straight from anime-ratings.json (same file the duel uses) */
+function entryByTitle(db, title) {
+  const t = String(title || '').toLowerCase();
+  if (!t || !db) return null;
+  let hit = null;
+  Object.keys(db).forEach(function (k) {
+    const e = db[k];
+    const et = e && e.title ? String(e.title).toLowerCase() : '';
+    if (!et) return;
+    if (et === t) hit = e;
+    else if (!hit && (et.indexOf(t) > -1 || t.indexOf(et) > -1)) hit = e;
+  });
+  return hit;
+}
+
+function malScoreByTitle(db, title) {
+  const hit = entryByTitle(db, title);
+  if (!hit) return null;
+  const m = parseFloat(hit.malScore);
+  return isFinite(m) ? m : null;
+}
+
 function localQuickAnswer(userMsg) {
   const msg = String(userMsg || '');
   if (!msg) return null;
@@ -4422,6 +4520,12 @@ function localQuickAnswer(userMsg) {
       const cardB = (typeof findAnimeCard === 'function') ? findAnimeCard(parts[1].trim()) : null;
       const fa = cardFacts(cardA), fb = cardFacts(cardB);
       if (fa && fb) {
+        const ga = genresOfCard(cardA), gb = genresOfCard(cardB);
+        const shared = ga.filter(function (g) { return gb.indexOf(g) > -1; });
+        if (!shared.length) {
+          return quickAiReply('⚔️ **' + fa.title + '** vs **' + fb.title + '** is not a fair duel — they do not share a genre.\n\n' +
+            'Try a same-genre matchup instead, or open **Anime Duel** in the sidebar and pick two titles that actually have something in common ⚡');
+        }
         return loadRatings().then(function (r) {
           const scoreOf = function (title) {
             if (!r) return null;
@@ -4480,6 +4584,31 @@ function localQuickAnswer(userMsg) {
     }
   }
 
+  // 💬 "is X worth it?" / "tell me about X" — the card itself knows
+  if (/\b(worth it|worth watching|should i watch|should i start|tell me about|what'?s .* about|info (on|about)|more about)\b/i.test(msg)) {
+    const title = (typeof animeMentionedInText === 'function') ? animeMentionedInText(msg) : null;
+    const card = title && typeof findAnimeCard === 'function' ? findAnimeCard(title) : null;
+    if (card) {
+      const f = cardFacts(card);
+      const g = genresOfCard(card);
+      return loadRatings().then(function (r) {
+        const lines = [];
+        if (g && g.length) lines.push('🎭 Genres: ' + g.join(', '));
+        const eps = String(f.ep || '').replace(/[📺🎬]/g, '').replace('Total Episodes:', '').trim();
+        if (eps) lines.push('📺 Episodes: ' + eps);
+        if (f.seas) lines.push('🌸 Seasons: ' + String(f.seas).replace(/^[^\w]+/, ''));
+        const mal = malScoreByTitle(r, f.title);
+        if (mal !== null) lines.push('⭐ MAL: ' + mal.toFixed(1) + '/10');
+        const entry = entryByTitle(r, f.title);
+        const overall = entry ? overallScore(entry) : 0;
+        if (overall > 0) lines.push('⭐ Fardin\'s power score: ' + overall.toFixed(2) + '/10');
+        return quickAiReply('**' + f.title + '** is on Fardin\'s list:\n\n' +
+          (lines.length ? lines.join('\n') : 'Tap the name above to jump to its card') +
+          '\n\nTap the name above to jump to its card ⚡');
+      });
+    }
+  }
+
   // 🌙 tonight — a short one, so it fits in an evening
   if (/tonight/i.test(msg)) {
     const cards = localCards();
@@ -4519,6 +4648,102 @@ function localQuickAnswer(userMsg) {
       }).join('\n');
       return quickAiReply("Highest rated in Fardin's list (overall score):\n\n" + body +
         '\n\nWant the full head-to-head breakdown? Open **Anime Duel** and put two of them in the ring ⚔️');
+    });
+  }
+
+  /* ── Hindi / English / Sub availability (official/OTT only) ─────────── */
+  if (/hindi dub|english dub|\bdub\b|dubbed|subbed|subtitle|japanese audio|sub or dub|dub or sub/i.test(msg)) {
+    return loadDubData().then(function (db) {
+      db = db || {};
+      var keys = Object.keys(db);
+      var lower = msg.toLowerCase();
+      var key = keys.find(function (k) { return lower.indexOf(k.toLowerCase()) > -1; });
+      if (!key) {
+        var card = (typeof findAnimeCard === 'function') ? findAnimeCard(msg) : null;
+        var title = card ? cardTitleOf(card) : '';
+        if (title) key = keys.find(function (k) { return k.toLowerCase() === title.toLowerCase(); });
+      }
+      if (key) {
+        var d = db[key] || {};
+        return quickAiReply('**' + key + '** audio options (official/OTT only):\n\n' +
+          '🇮🇳 Hindi: ' + (d.hi ? '**' + d.hi + '**' : 'no verified official dub yet') + '\n' +
+          '🇬🇧 English: ' + (d.en ? '**' + d.en + '**' : 'no verified official dub yet') + '\n' +
+          '🇯🇵 Sub: ' + (d.sub ? '**' + d.sub + '** (Japanese audio + subtitles)' : '**Japanese**') + '\n\n' +
+          'Only official/OTT releases are listed — no fan dubs ⚡');
+      }
+      var hi = keys.filter(function (k) { return db[k] && db[k].hi; });
+      if (hi.length) {
+        return quickAiReply('Official Hindi dubs I can verify:\n\n' +
+          hi.slice(0, 14).map(function (k) { return '• **' + k + '** — ' + db[k].hi; }).join('\n') +
+          '\n\nAsk me about one title for its English/Sub details ⚡');
+      }
+      return quickAiReply('I do not have verified dub data for that title yet. I only list official/OTT releases (Crunchyroll, Netflix, Sony, MX Player, Muse India), so I will not guess ⚡');
+    });
+  }
+
+  /* ── extra offline-friendly prompts (the ⚡ chips) ─────────────────── */
+  const epCountOf = function (c) {
+    const f = cardFacts(c);
+    const n = f ? parseInt(String(f.ep).replace(/\D/g, ''), 10) : 0;
+    return isNaN(n) ? 0 : n;
+  };
+  const pickEp = function (test, intro) {
+    const pool = localCards().filter(function (c) { return test(epCountOf(c), c); });
+    if (!pool.length) return null;
+    const f = cardFacts(pool[Math.floor(Math.random() * pool.length)]);
+    if (!f) return null;
+    const meta = pickLine(f);
+    return quickAiReply(intro + '\n\n**' + f.title + '**' + (meta ? '\n' + meta : '') +
+      '\n\nWant another? Just ask ⚡');
+  };
+
+  if (/short anime|short series|quick watch|few episodes/i.test(msg)) {
+    return pickEp(function (n) { return n > 0 && n <= 26; },
+      'A short one from Fardin\'s list — perfect for a single sitting:');
+  }
+  if (/long anime|long series|longest series|many episodes/i.test(msg)) {
+    return pickEp(function (n) { return n >= 50; },
+      'A long ride from Fardin\'s list — clear your schedule:');
+  }
+  if (/most episodes|highest episode count|biggest series/i.test(msg)) {
+    const cards = localCards().slice().sort(function (a, b) { return epCountOf(b) - epCountOf(a); });
+    const f = cards.length ? cardFacts(cards[0]) : null;
+    if (f) return quickAiReply('The biggest one in Fardin\'s list:\n\n**' + f.title + '**' +
+      (pickLine(f) ? '\n' + pickLine(f) : '') + '\n\nA true marathon ⚡');
+  }
+  if (/newest|latest addition|recently added|last added/i.test(msg)) {
+    const cards = localCards().slice().sort(function (a, b) {
+      const num = function (c) {
+        const el = c.querySelector('.number');
+        return parseInt(String((el && el.textContent) || '').replace(/\D/g, '') || '0', 10) || 0;
+      };
+      return num(b) - num(a);
+    });
+    const f = cards.length ? cardFacts(cards[0]) : null;
+    if (f) return quickAiReply('The newest addition to Fardin\'s list:\n\n**' + f.title + '**' +
+      (pickLine(f) ? '\n' + pickLine(f) : '') + '\n\nFresh off the watchlist ⚡');
+  }
+  if (/\bmovie\b|\bfilm\b/i.test(msg)) {
+    return pickEp(function (n, c) {
+      return n === 1 || /movie|film/i.test(cardTitleOf(c) || '');
+    }, 'Movie-night pick from Fardin\'s list:');
+  }
+  if (/underrated|hidden gem|underappreciated/i.test(msg)) {
+    return loadRatings().then(function (r) {
+      const rows = [];
+      if (r) Object.keys(r).forEach(function (k) {
+        const a = r[k];
+        if (!a || !a.title) return;
+        const s = overallScore(a);
+        if (s > 0) rows.push({ title: String(a.title), score: s });
+      });
+      rows.sort(function (x, y) { return x.score - y.score; });
+      const pick = rows.find(function (t) { return t.score >= 7; }) || rows[0];
+      if (pick) {
+        return quickAiReply('An underrated gem from Fardin\'s list:\n\n**' + pick.title + '** — ' +
+          pick.score.toFixed(2) + ' 🌟\n\nGive it a shot — it deserves more love ⚡');
+      }
+      return null;
     });
   }
 
@@ -4679,7 +4904,7 @@ document.addEventListener('click', function(e) {
   var baseGaze = { x: 0, y: 0 };
   var mascot = null, mascotLoading = null, lastStepRect = null;
   var bubbleSide = -1;
-  var MASCOT_SRC = './guide-mascot.js?v=20261109h';
+  var MASCOT_SRC = './guide-mascot.js?v=20261110d';
 
   function applyGaze(x, y) {
     if (!guideEyes) return;
@@ -4745,6 +4970,7 @@ document.addEventListener('click', function(e) {
        points down toward her head. */
     if (vw < 768) {
       tooltip.classList.remove('tour-tooltip--below');
+      tooltip.classList.remove('tour-tooltip--side');
       var top = 74;
       if (lastStepRect && lastStepRect.top < vh * 0.3) {
         top = Math.min(vh * 0.44, lastStepRect.bottom + 12);
@@ -4757,6 +4983,22 @@ document.addEventListener('click', function(e) {
       tooltip.style.setProperty('--tail-x', Math.round(tail) + 'px');
       return;
     }
+
+    /* Sidebar steps: the menu is only 270px wide and the bubble is 380px,
+       so anchoring the bubble to her head always covers menu names. Keep
+       the bubble over the grid to the right of the menu, vertically centred
+       on the highlighted option, with its tail pointing left at the option. */
+    if (lastStepRect && lastStepRect.left < 300 && lastStepRect.width < 340) {
+      tooltip.classList.remove('tour-tooltip--below');
+      tooltip.classList.add('tour-tooltip--side');
+      var bx = Math.max(294, Math.min(vw - tw - 10, lastStepRect.right + 14));
+      var by = lastStepRect.top + lastStepRect.height / 2 - th / 2;
+      by = Math.max(10, Math.min(vh - th - 10, by));
+      tooltip.style.left = Math.round(bx) + 'px';
+      tooltip.style.top = Math.round(by) + 'px';
+      return;
+    }
+    tooltip.classList.remove('tour-tooltip--side');
 
     /* Desktop: keep the pointing arm visible — the bubble sits on the side
        away from whatever she is pointing at. When she has climbed up to a
@@ -4994,7 +5236,7 @@ document.addEventListener('click', function(e) {
       prevBtn.style.display = index === 0 ? 'none' : '';
       nextBtn.textContent = index === tourSteps.length - 1 ? '\uD83C\uDF89 Finish' : 'Next \u2192';
       skipBtn.style.display = index === 0 ? '' : 'none';
-      if (index === 0) { skipBtn.textContent = 'Skip 10'; autoCloseCount = 10; }
+      if (index === 0) { skipBtn.textContent = 'Skip 15'; autoCloseCount = 15; }
 
       clearInterval(autoCloseTimer);
       if (index === 0) {
@@ -5015,8 +5257,15 @@ document.addEventListener('click', function(e) {
       var bubbleH = tooltip.offsetHeight || 220;
 
       if (mascot) {
+        /* On a phone the bubble is pinned to the top, but for a target near
+           the top it is pushed down. Tell her the real bubble top so she
+           stops walking up into it. */
+        var bubbleTop = 74;
+        if (window.innerWidth < 768 && rect.top < window.innerHeight * 0.3) {
+          bubbleTop = Math.min(window.innerHeight * 0.44, rect.bottom + 12);
+        }
         mascot.show();
-        mascot.setStep(rect, bubbleSide, { greet: index === 0, bubbleH: bubbleH });
+        mascot.setStep(rect, bubbleSide, { greet: index === 0, bubbleH: bubbleH, bubbleTop: bubbleTop });
       }
 
       if (mascot && tooltip.classList.contains('tour-tooltip--mascot')) {
@@ -5041,8 +5290,13 @@ document.addEventListener('click', function(e) {
       }
     };
 
+    /* The slide-in sidebar is the only animated target: it takes ~300ms
+       to slide, and rAF may wait for the next frame, so measure after the
+       animation has finished. The highlight, the bubble side and where
+       she stands all come from this one rect — measuring mid-slide puts
+       Home off-screen and she ends up pointing off the left edge. */
     if (step.sidebarTransition) {
-      setTimeout(scheduleMeasure, 350);
+      setTimeout(scheduleMeasure, 500);
     } else {
       requestAnimationFrame(scheduleMeasure);
     }
@@ -5225,7 +5479,7 @@ document.addEventListener('click', function(e) {
       {
         element: '#wishlistBtn',
         guide: 'Alyssa',
-        popover: { title: '\uD83D\uDC96 Wish List', description: 'Log in, then tap the <strong>heart</strong> on any card to save it. Your list lives in <strong>Available, Ongoing, Pending</strong> and <strong>Re-watch</strong> \u2014 add anime by URL and track what to watch next!', side: 'right' }
+        popover: { title: 'Wish List', description: 'Log in, then tap the <strong>heart</strong> on any card to save it. Your list lives in <strong>Available, Ongoing, Pending</strong> and <strong>Re-watch</strong> \u2014 add anime by URL and track what to watch next!', side: 'right' }
       },
       {
         element: 'nav.side-nav a[onclick*="openRandomPick"]',

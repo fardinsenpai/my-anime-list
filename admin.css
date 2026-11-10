@@ -352,6 +352,7 @@ a { color: var(--accent); text-decoration: none; }
 .ad-side .ad-pat-status { margin: 0 4px 9px; font-size: 9.5px; }
 
 /* ───────────────  SIDEBAR MODULE BUTTONS  ─────────────── */
+.admin-g-tab.ad-pat-tab { display: none; }
 .admin-g-tab {
   position: relative;
   display: flex; flex-wrap: nowrap; align-items: center;
@@ -658,6 +659,29 @@ select.admin-g-input option { background: var(--panel); color: var(--ink); }
   color: var(--accent-ink); font-weight: 600;
 }
 .admin-selected-pills { display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 0 6px; }
+.ad-card-preview {
+  border: 1px solid var(--line); border-radius: var(--r-md);
+  background: #07070c; overflow: hidden; margin-bottom: 14px;
+}
+.ad-card-preview iframe {
+  display: block; width: 100%; height: 430px; border: 0; background: #07070c;
+}
+.ad-latest {
+  border: 1px solid var(--line); border-radius: var(--r-md);
+  background: var(--panel-2); padding: 10px 12px; margin-bottom: 14px;
+}
+.ad-latest-head {
+  font-size: 9px; letter-spacing: .16em; color: var(--ink-3);
+  margin-bottom: 8px; text-transform: uppercase;
+}
+.ad-latest-list { display: flex; flex-direction: column; gap: 5px; }
+.ad-latest-item {
+  display: flex; align-items: center; gap: 9px;
+  font-size: 11.5px; line-height: 1.35;
+}
+.ad-latest-id { color: var(--accent); font-weight: 700; min-width: 42px; font-variant-numeric: tabular-nums; }
+.ad-latest-title { flex: 1 1 auto; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--ink); }
+.ad-latest-season { flex: 0 0 auto; color: var(--ink-3); font-size: 9.5px; }
 .admin-g-selected-pill {
   font-size: 9.5px; padding: 5px 10px; border-radius: 999px;
   background: var(--accent-soft);
@@ -1026,7 +1050,9 @@ html.ad-no-transition *::after {
   .admin-g-tab.active::after { display: none; }
   .admin-g-tab.active { box-shadow: inset 0 -2px 0 var(--accent); }
 
-  /* PAT drawer */
+  /* PAT drawer — moved out of the module strip into its own PAT! tab */
+  .ad-side .ad-side-block { display: none; }
+  .admin-g-tab.ad-pat-tab { display: flex; }
   .ad-side-block {
     display: block;
     border-top: 1px solid var(--line);

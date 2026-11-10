@@ -1,0 +1,39 @@
+{
+  "_meta": {
+    "note": "Official/OTT audio only. hi = Hindi dub platform, en = official English dub, sub = Japanese audio with subtitles. A missing key means no verified data for that title — the chat must say so instead of guessing.",
+    "updated": "2026-11-10",
+    "platforms": ["Crunchyroll", "Netflix", "Sony", "MX Player", "Muse India"]
+  },
+  "titles": {
+    "Jujutsu Kaisen": { "hi": "Crunchyroll", "en": "Official", "sub": "Japanese" },
+    "Demon Slayer: Kimetsu no Yaiba": { "hi": "Crunchyroll", "en": "Official", "sub": "Japanese" },
+    "Attack on Titan": { "hi": "Crunchyroll", "en": "Official", "sub": "Japanese" },
+    "Chainsaw Man": { "hi": "Crunchyroll", "en": "Official", "sub": "Japanese" },
+    "Spy x Family": { "hi": "Crunchyroll", "en": "Official", "sub": "Japanese" },
+    "Blue Lock": { "hi": "Crunchyroll", "en": "Official", "sub": "Japanese" },
+    "Solo Leveling": { "hi": "Crunchyroll", "en": "Official", "sub": "Japanese" },
+    "Mashle: Magic and Muscles": { "hi": "Crunchyroll", "en": "Official", "sub": "Japanese" },
+    "Fire Force": { "hi": "Crunchyroll", "en": "Official", "sub": "Japanese" },
+    "Tokyo Revengers": { "hi": "Crunchyroll", "en": "Official", "sub": "Japanese" },
+    "My Hero Academia": { "hi": "Crunchyroll", "en": "Official", "sub": "Japanese" },
+    "Haikyuu!!": { "hi": "Crunchyroll", "en": "Official", "sub": "Japanese" },
+    "Black Clover": { "hi": "Crunchyroll", "en": "Official", "sub": "Japanese" },
+    "One Piece": { "hi": "Crunchyroll", "en": "Official", "sub": "Japanese" },
+    "Naruto": { "hi": "Sony YAY / Netflix", "en": "Official", "sub": "Japanese" },
+    "Naruto Shippuden": { "hi": "Sony YAY / Netflix", "en": "Official", "sub": "Japanese" },
+    "Death Note": { "hi": "Netflix", "en": "Official", "sub": "Japanese" },
+    "Fullmetal Alchemist: Brotherhood": { "hi": "Netflix", "en": "Official", "sub": "Japanese" },
+    "Vinland Saga": { "hi": "Netflix", "en": "Official", "sub": "Japanese" },
+    "Mushoku Tensei Jobless Reincarnation": { "hi": "Crunchyroll", "en": "Official", "sub": "Japanese" },
+    "Hunter x Hunter": { "hi": "Crunchyroll", "en": "Official", "sub": "Japanese" },
+    "Bleach": { "hi": "Crunchyroll", "en": "Official", "sub": "Japanese" },
+    "Dragon Ball Z": { "hi": "MX Player", "en": "Official", "sub": "Japanese" },
+    "Kaiju No. 8": { "hi": "Crunchyroll", "en": "Official", "sub": "Japanese" },
+    "Wind Breaker": { "hi": "Crunchyroll", "en": "Official", "sub": "Japanese" },
+    "Hell's Paradise": { "hi": "Crunchyroll", "en": "Official", "sub": "Japanese" },
+    "Dandadan": { "hi": "Crunchyroll", "en": "Official", "sub": "Japanese" },
+    "Frieren: Beyond Journey's End": { "hi": "Crunchyroll", "en": "Official", "sub": "Japanese" },
+    "Dr.Stone": { "hi": "Crunchyroll", "en": "Official", "sub": "Japanese" },
+    "Classroom of the Elite": { "hi": "Crunchyroll", "en": "Official", "sub": "Japanese" }
+  }
+}

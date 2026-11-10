@@ -100,6 +100,14 @@
 .sb-dot {
   width: 8px; height: 8px; background: #3dff8b; border-radius: 50%; box-shadow: 0 0 8px #3dff8b;
 }
+.sb-dot.off {
+  background: #ff5252; box-shadow: 0 0 8px #ff5252;
+  animation: sb-dot-off 1.6s ease-in-out infinite;
+}
+@keyframes sb-dot-off {
+  0%, 100% { opacity: 1; }
+  50% { opacity: .35; }
+}
 .chat-close {
   background: none; border: none; color: #ff9dbd; font-size: 20px; cursor: pointer;
   padding: 4px 8px; border-radius: 8px;

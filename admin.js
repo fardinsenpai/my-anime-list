@@ -20,6 +20,7 @@ var OTT_DATA = {};
 var STUDIO_DATA = {};
 var TOP_5_DATA = {};
 var RATING_DATA = {};
+var RATING_DETAIL = {};          // anime-ratings.json → { id: {malScore, characters, animRating, storyRating, animePlanet, anilist} }
 var AWARD_WINNERS = {};
 var GROQ_MODELS = [];
 var GROQ_API_KEYS = [];
@@ -127,17 +128,55 @@ function grabGenres(jsText) {
   return map;
 }
 
+/* The newest cards of the list - the "last content" of the collection.
+   Reads the hidden card host that loadAdminData() fills in. */
+function renderLatestAnime() {
+  var host = document.getElementById('adLatestList');
+  if (!host) return;
+  var cards = Array.prototype.slice.call(document.querySelectorAll('#grid .card'));
+  var latest = cards.slice(-5).reverse();
+  if (!latest.length) {
+    host.innerHTML = '<div class="ad-status dim">// waiting for the data link …</div>';
+    return;
+  }
+  var esc = function (s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  };
+  host.innerHTML = latest.map(function (c) {
+    var numEl = c.querySelector('.number');
+    var id = numEl ? String(numEl.textContent || '').replace(/\D/g, '') : '?';
+    var titleEl = c.querySelector('.title');
+    var seasonEl = c.querySelector('.back-season');
+    return '<div class="ad-latest-item">' +
+      '<span class="ad-latest-id">#' + esc(id) + '</span>' +
+      '<span class="ad-latest-title">' + esc(titleEl ? titleEl.textContent : '') + '</span>' +
+      '<span class="ad-latest-season">' + esc(seasonEl ? seasonEl.textContent.replace('🌸', '').trim() : '') + '</span>' +
+      '</div>';
+  }).join('');
+}
+
 /* Fetch the live site files once and hand the panel everything it needs. */
 async function loadAdminData() {
   try {
     bootLine('// OPENING DATA LINK → index.html + script.js …');
     var res = await Promise.all([
       fetch('index.html', { cache: 'no-store' }),
-      fetch('script.js', { cache: 'no-store' })
+      fetch('script.js', { cache: 'no-store' }),
+      fetch('anime-ratings.json', { cache: 'no-store' }).catch(function () { return null; })
     ]);
     if (!res[0].ok || !res[1].ok) throw new Error('HTTP ' + res[0].status + ' / ' + res[1].status);
     var htmlText = await res[0].text();
     var jsText = await res[1].text();
+
+    /* 0. the rich ratings file (MAL + Animation + Characters + Story + Planet) */
+    if (res[2] && res[2].ok) {
+      try {
+        var ratingsJson = await res[2].json();
+        var titles = (ratingsJson && ratingsJson.titles) ? ratingsJson.titles : ratingsJson;
+        if (titles && typeof titles === 'object') RATING_DETAIL = titles;
+      } catch (e) { /* the panel still works with the legacy ratings */ }
+    }
 
     // 1. the anime cards (+ the counters the STATS placeholders show) go into a
     //    hidden host, so every `#grid .card` lookup in the panel keeps working
@@ -181,6 +220,7 @@ async function loadAdminData() {
     };
 
     refreshStatsPlaceholders();
+    renderLatestAnime();
 
     ADMIN_DATA_READY = true;
     var cards = ADMIN_STATS_BASE.anime;
@@ -690,8 +730,11 @@ function clSupabase(path, options) {
   });
 }
 
+var lastCommitError = '';
+
 function saveCommitResult(kind, ok, detail) {
   var entry = { t: new Date().toISOString(), k: kind, ok: !!ok, d: detail || '' };
+  if (!ok && lastCommitError) entry.d += ' — ' + lastCommitError;
   // 1. local first — instant, never blocked by the network
   try {
     var log = [];
@@ -705,6 +748,7 @@ function saveCommitResult(kind, ok, detail) {
   try {
     clSupabase('commit_log', { method: 'POST', body: JSON.stringify(entry) }).catch(function () {});
   } catch (e) {}
+  lastCommitError = '';
 }
 
 /* ── HISTORY tab: the last 10 commit results, newest first ── */
@@ -801,13 +845,16 @@ async function githubFetch(path) {
   var res = await fetch('https://api.github.com/repos/' + GITHUB_OWNER + '/' + GITHUB_REPO + '/contents/' + path + '?ref=' + GITHUB_BRANCH, {
     headers: { 'Authorization': 'token ' + pat, 'Accept': 'application/vnd.github.v3+json' }
   });
-  if (!res.ok) return null;
+  if (!res.ok) {
+    if (res.status !== 404) lastCommitError = 'read ' + path + ': HTTP ' + res.status;
+    return null;
+  }
   return await res.json();
 }
 
 async function githubCommit(path, content, message) {
   var pat = getPat();
-  if (!pat) return false;
+  if (!pat) { lastCommitError = 'no GitHub PAT saved in this browser'; return false; }
   try {
     var existing = await githubFetch(path);
     var body = { message: message, content: btoa(unescape(encodeURIComponent(content))), branch: GITHUB_BRANCH };
@@ -816,7 +863,12 @@ async function githubCommit(path, content, message) {
       method: 'PUT', headers: { 'Authorization': 'token ' + pat, 'Accept': 'application/vnd.github.v3+json', 'Content-Type': 'application/json' },
       body: JSON.stringify(body)
     });
-    if (!res.ok) return false;
+    if (!res.ok) {
+      var why = '';
+      try { why = (await res.text()).slice(0, 260); } catch (e) {}
+      lastCommitError = path + ': HTTP ' + res.status + (why ? ' — ' + why : '');
+      return false;
+    }
     // After any successful commit, refresh the "last updated" date and re-stamp
     // the asset ?v= links so visitors see the change without a hard refresh.
     // Both are skipped for their own commits so they cannot loop.
@@ -826,7 +878,10 @@ async function githubCommit(path, content, message) {
     if (!isDateCommit) setTimeout(autoUpdateDate, 50);
     if (!isStampCommit) setTimeout(function () { stampAssetVersions(); }, 120);
     return true;
-  } catch(e) { return false; }
+  } catch(e) {
+    lastCommitError = path + ': ' + ((e && e.message) || e);
+    return false;
+  }
 }
 
 function switchAdminTab(tab) {
@@ -834,7 +889,57 @@ function switchAdminTab(tab) {
   document.querySelectorAll('.admin-g-content').forEach(function(c) { c.classList.toggle('active', c.id === 'tab' + tab.charAt(0).toUpperCase() + tab.slice(1)); });
   if (tab === 'add') { renderPills('ott', ''); renderPills('studio', ''); renderPills('genre', ''); }
   if (tab === 'ai') { updateAiStatus(); refreshAiModels(); renderAvatarPicker(); }
+  layoutPatForViewport();
 }
+
+/* ── season selects: Season-1 / Season-1,2 / Season-1,2,3 / Custom ── */
+function syncSeasonCustom(selId, customId) {
+  var sel = document.getElementById(selId);
+  var custom = document.getElementById(customId);
+  if (!sel || !custom) return;
+  var wrap = custom.parentNode;
+  var show = sel.value === '__custom';
+  if (wrap) wrap.style.display = show ? '' : 'none';
+  if (show) custom.focus();
+}
+function readSeasonSelect(selId, customId) {
+  var sel = document.getElementById(selId);
+  if (!sel) return '';
+  if (sel.value === '__custom') {
+    var c = document.getElementById(customId);
+    return c ? c.value.trim() : '';
+  }
+  return sel.value;
+}
+function setSeasonSelect(selId, customId, value) {
+  var sel = document.getElementById(selId);
+  if (!sel) return;
+  var v = String(value || '').trim();
+  var opt = Array.prototype.find.call(sel.options, function(o) { return o.value === v; });
+  if (opt) {
+    sel.value = v;
+  } else if (v) {
+    sel.value = '__custom';
+    var c = document.getElementById(customId);
+    if (c) c.value = v;
+  }
+  syncSeasonCustom(selId, customId);
+}
+
+/* ── mobile: keep the PAT block out of the module strip ── */
+function layoutPatForViewport() {
+  var block = document.getElementById('adPatBlock');
+  var slot = document.getElementById('adPatSideSlot');
+  var host = document.getElementById('adPatHost');
+  if (!block || !slot || !host) return;
+  if (window.innerWidth <= 820) {
+    if (block.parentNode !== host) host.appendChild(block);
+  } else if (block.parentNode !== slot) {
+    slot.appendChild(block);
+  }
+}
+window.addEventListener('resize', layoutPatForViewport);
+layoutPatForViewport();
 
 // ===== AI CHATBOT MODEL PICKER (admin — rewrites GROQ_MODELS in script.js on GitHub) =====
 var GROQ_MODELS_DEFAULT = ['openai/gpt-oss-120b', 'qwen/qwen3.8-27b', 'openai/gpt-oss-20b'];
@@ -1114,7 +1219,7 @@ function initAdminGui() {
   document.getElementById('adminAddSeason').value = '';
   document.getElementById('adminAddEps').value = '';
   document.getElementById('adminAddRating').value = '';
-  document.getElementById('adminAddSeasonLabel').value = '';
+  setSeasonSelect('adminAddSeasonLabel', 'adminAddSeasonCustom', 'Season-1');
   var today = new Date().toLocaleDateString('en-GB');
   var dateInput = document.getElementById('adminDateInput');
   if (dateInput) dateInput.value = today;
@@ -1593,7 +1698,17 @@ function selectEditCard(id) {
         var ms = malScoreOf(id);
         malField.value = ms === null ? '' : ms.toFixed(1);
       }
-      document.getElementById('adminEditSeasons').value = seasonEl ? seasonEl.textContent.replace(/[🌸📺]/g,'').trim() : '';
+      var editRating = (typeof RATING_DETAIL === 'object' && RATING_DETAIL) ? RATING_DETAIL[id] : null;
+      if (!editRating && typeof RATING_DATA === 'object' && RATING_DATA) editRating = RATING_DATA[id];
+      var setEditNum = function (fieldId, value) {
+        var el = document.getElementById(fieldId);
+        if (el) el.value = (value === undefined || value === null || value === '') ? '' : value;
+      };
+      setEditNum('adminEditAnim', editRating ? editRating.animRating : '');
+      setEditNum('adminEditChar', editRating ? editRating.characters : '');
+      setEditNum('adminEditStory', editRating ? editRating.storyRating : '');
+      setEditNum('adminEditPlanet', editRating ? editRating.animePlanet : '');
+      setSeasonSelect('adminEditSeasons', 'adminEditSeasonsCustom', seasonEl ? seasonEl.textContent.replace(/[🌸📺]/g,'').trim() : 'Season-1');
       document.getElementById('adminEditEps').value = epsEl ? epsEl.textContent.replace(/[📺🎬]/g,'').replace('Total Episodes:','').trim() : '';
       // Detect special card effect (from class or badge #)
       var specialSel = document.getElementById('adminEditSpecial');
@@ -1662,6 +1777,11 @@ function setRatingField(js, id, field, value) {
 
 // One MAL score for a card: explicit malScore wins, else the legacy 0-100 rating / 10.
 function malScoreOf(id) {
+  var detail = (typeof RATING_DETAIL === 'object' && RATING_DETAIL) ? RATING_DETAIL[id] : null;
+  if (detail && detail.malScore !== undefined && detail.malScore !== null && detail.malScore !== '') {
+    var dm = parseFloat(detail.malScore);
+    if (isFinite(dm)) return dm;
+  }
   var entry = (typeof RATING_DATA === 'object' && RATING_DATA) ? RATING_DATA[id] : null;
   if (!entry) return null;
   if (entry.malScore !== undefined && entry.malScore !== null && entry.malScore !== '') {
@@ -1678,7 +1798,7 @@ function malScoreOf(id) {
 async function commitEditAnime() {
   var name = document.getElementById('adminEditName').value.trim();
   var genre = document.getElementById('adminEditGenre').value.trim();
-  var seasons = document.getElementById('adminEditSeasons').value.trim();
+  var seasons = readSeasonSelect('adminEditSeasons', 'adminEditSeasonsCustom');
   var episodes = document.getElementById('adminEditEps').value.trim();
   if (!_editId || !name) { msgFail('Select anime and enter name'); return; }
   showLoading();
@@ -1686,9 +1806,11 @@ async function commitEditAnime() {
   try {
     var indexData = await githubFetch('index.html');
     var scriptData = await githubFetch('script.js');
+    var ratingsData = await githubFetch('anime-ratings.json');
     if (!indexData || !scriptData) { hideLoading(); adStep(''); saveCommitResult('edit-anime', false, 'fetch failed'); msgFail('Failed to fetch files'); return; }
     var indexContent = decodeURIComponent(escape(atob(indexData.content)));
     var scriptContent = decodeURIComponent(escape(atob(scriptData.content)));
+    var ratingsContent = ratingsData ? decodeURIComponent(escape(atob(ratingsData.content))) : '';
     var lines = indexContent.split('\n');
     var cardIdx = -1;
     for (var i = 0; i < lines.length; i++) {
@@ -1714,16 +1836,61 @@ async function commitEditAnime() {
     }
     var malInput = document.getElementById('adminEditMal');
     var malVal = malInput ? malInput.value.trim() : '';
+    var ratingPatch = {};
     if (malVal !== '' && isFinite(parseFloat(malVal))) {
-      scriptContent = setRatingField(scriptContent, _editId, 'malScore', parseFloat(malVal));
+      ratingPatch.malScore = parseFloat(malVal);
+      scriptContent = setRatingField(scriptContent, _editId, 'malScore', ratingPatch.malScore);
     }
-    adStep('committing index.html (1/2)…');
+    var readEditNum = function (fieldId) {
+      var el = document.getElementById(fieldId);
+      if (!el) return null;
+      var raw = String(el.value || '').trim();
+      if (raw === '') return null;
+      var n = parseFloat(raw);
+      return isFinite(n) ? n : null;
+    };
+    var animVal = readEditNum('adminEditAnim');
+    var charVal = readEditNum('adminEditChar');
+    var storyVal = readEditNum('adminEditStory');
+    var planetVal = readEditNum('adminEditPlanet');
+    if (animVal !== null) ratingPatch.animRating = animVal;
+    if (charVal !== null) ratingPatch.characters = charVal;
+    if (storyVal !== null) ratingPatch.storyRating = storyVal;
+    if (planetVal !== null) ratingPatch.animePlanet = planetVal;
+    var hasRatingPatch = Object.keys(ratingPatch).length > 0;
+    if (hasRatingPatch) {
+      var ratingsObj = {};
+      if (ratingsContent) {
+        try { ratingsObj = JSON.parse(ratingsContent) || {}; } catch (e) { ratingsObj = {}; }
+      }
+      if (!ratingsObj[_editId] || typeof ratingsObj[_editId] !== 'object') ratingsObj[_editId] = {};
+      Object.keys(ratingPatch).forEach(function (k) { ratingsObj[_editId][k] = ratingPatch[k]; });
+      ratingsObj[_editId].title = name;
+      ratingsContent = JSON.stringify(ratingsObj, null, 8);
+    }
+    var totalSteps = hasRatingPatch ? 3 : 2;
+    adStep('committing index.html (1/' + totalSteps + ')…');
     var ok1 = await githubCommit('index.html', indexContent, 'admin: edit anime #' + _editId + ' - ' + name);
-    adStep('committing script.js (2/2)…');
+    adStep('committing script.js (2/' + totalSteps + ')…');
     var ok2 = await githubCommit('script.js', scriptContent, 'admin: edit genres for #' + _editId);
+    var ok3 = true;
+    if (hasRatingPatch) {
+      adStep('committing anime-ratings.json (3/3)…');
+      ok3 = await githubCommit('anime-ratings.json', ratingsContent, 'admin: ratings for anime #' + _editId + ' - ' + name);
+    }
     hideLoading();
     adStep('');
-    var ok = ok1 && ok2;
+    var ok = ok1 && ok2 && ok3;
+    if (ok && hasRatingPatch) {
+      try {
+        RATING_DATA[_editId] = RATING_DATA[_editId] || {};
+        Object.keys(ratingPatch).forEach(function (k) { RATING_DATA[_editId][k] = ratingPatch[k]; });
+        RATING_DATA[_editId].title = name;
+        RATING_DETAIL[_editId] = RATING_DETAIL[_editId] || {};
+        Object.keys(ratingPatch).forEach(function (k) { RATING_DETAIL[_editId][k] = ratingPatch[k]; });
+        RATING_DETAIL[_editId].title = name;
+      } catch (e) {}
+    }
     saveCommitResult('edit-anime', ok, 'anime #' + _editId + ' - ' + name);
     if (ok) { msgOk('Anime #' + _editId + ' updated'); }
     else msgFail('Commit failed');
@@ -1882,7 +2049,7 @@ async function commitWatching() {
   if (!_watchId) { msgFail('Search and select an anime first'); return; }
   var curEps = document.getElementById('adminWatchCurEps').value.trim();
   var totalEps = document.getElementById('adminWatchTotalEps').value.trim();
-  var season = document.getElementById('adminWatchSeason').value.trim();
+  var season = readSeasonSelect('adminWatchSeason', 'adminWatchSeasonCustom');
   if (!curEps) { msgFail('Enter current episode'); return; }
   var watchId = _watchId;
   var eps = totalEps ? 'Episode ' + curEps + ' / ' + totalEps : 'Episode ' + curEps;
@@ -2044,6 +2211,82 @@ function adDupHint() {
     adEsc(hit.title) + '”. A second card is blocked; edit that card instead.';
 }
 
+/* ── live card preview: the real site card, in an isolated iframe ────── */
+function adEscHtml(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+function renderCardPreview() {
+  var frame = document.getElementById('adminPreviewFrame');
+  if (!frame) return;
+  var val = function (id) {
+    var el = document.getElementById(id);
+    return el ? String(el.value || '').trim() : '';
+  };
+  var title = val('adminAddTitle') || 'Anime title';
+  var img = val('adminAddImg');
+  var eps = val('adminAddEps') || '?';
+  var season = (typeof readSeasonSelect === 'function')
+    ? readSeasonSelect('adminAddSeasonLabel', 'adminAddSeasonCustom')
+    : val('adminAddSeasonLabel');
+  season = season || 'Season-1';
+  var nextId = ((typeof ADMIN_STATS_BASE === 'object' && ADMIN_STATS_BASE && ADMIN_STATS_BASE.anime)
+    ? ADMIN_STATS_BASE.anime : 0) + 1;
+
+  var t = adEscHtml(title), im = adEscHtml(img), se = adEscHtml(season), ep = adEscHtml(eps);
+  var card =
+    '<div class="card">' +
+      '<div class="card-inner">' +
+        '<div class="card-front">' +
+          '<div class="poster-wrap">' +
+            (img ? '<img src="' + im + '" alt="' + t + '" loading="lazy"/>' : '') +
+            '<span class="badge">#' + nextId + '</span>' +
+          '</div>' +
+          '<div class="info"><div class="number">NO. ' + nextId + '</div><div class="title">' + t + '</div></div>' +
+        '</div>' +
+        '<div class="card-back"><div class="back-content">' +
+          '<div class="back-title">' + t + '</div>' +
+          '<div class="back-season">🌸 ' + se + '</div>' +
+          '<div class="back-episodes">📺 Total Episodes: ' + ep + '</div>' +
+          '<div class="back-tap-hint">click to flip back</div>' +
+        '</div></div>' +
+      '</div>' +
+    '</div>';
+
+  var doc =
+    '<!doctype html><html><head><meta charset="utf-8">' +
+    '<link rel="stylesheet" href="style.css">' +
+    '<style>' +
+      'html,body{margin:0;min-height:100%;background:#07070c;}' +
+      'body{display:flex;align-items:center;justify-content:center;padding:22px;box-sizing:border-box;}' +
+      '#grid{display:block!important;grid-template-columns:none!important;}' +
+      '.card{cursor:pointer;}' +
+    '</style></head><body>' +
+    '<div class="grid" id="grid">' + card + '</div>' +
+    '<script>document.addEventListener("click",function(e){var c=e.target.closest(".card");if(c)c.classList.toggle("flipped");});<\/script>' +
+    '</body></html>';
+
+  frame.srcdoc = doc;
+}
+
+(function wireCardPreview() {
+  var ids = ['adminAddTitle', 'adminAddImg', 'adminAddEps', 'adminAddSeason', 'adminAddSeasonCustom'];
+  var timer = null;
+  var repaint = function () {
+    clearTimeout(timer);
+    timer = setTimeout(renderCardPreview, 140);
+  };
+  ids.forEach(function (id) {
+    var el = document.getElementById(id);
+    if (el) { el.addEventListener('input', repaint); el.addEventListener('change', repaint); }
+  });
+  var sel = document.getElementById('adminAddSeasonLabel');
+  if (sel) sel.addEventListener('change', repaint);
+  renderCardPreview();
+})();
+
 async function commitAddAnime() {
   var title = document.getElementById('adminAddTitle').value.trim();
   var img = document.getElementById('adminAddImg').value.trim();
@@ -2053,11 +2296,12 @@ async function commitAddAnime() {
   var mal = parseFloat(document.getElementById('adminAddMal').value);
   var anim = parseFloat(document.getElementById('adminAddAnim').value);
   var char = parseFloat(document.getElementById('adminAddChar').value);
+  var story = parseFloat(document.getElementById('adminAddStory').value);
   var planet = parseFloat(document.getElementById('adminAddPlanet').value);
   var ott = _selectedOtt.join(', ');
   var studio = _selectedStudio.join(', ');
   var genre = _selectedGenre.join(', ');
-  var seasonLabel = document.getElementById('adminAddSeasonLabel').value.trim() || 'Season-1';
+  var seasonLabel = readSeasonSelect('adminAddSeasonLabel', 'adminAddSeasonCustom') || 'Season-1';
   if (!title || !img) { msgFail('Title and Image URL required'); return; }
   var dupLocal = adFindExistingAnime(title);
   if (dupLocal) {
@@ -2127,18 +2371,7 @@ async function commitAddAnime() {
     var duelChar = isFinite(char) ? char : Math.round(duelMal * 2) / 2;
     var duelPlanet = isFinite(planet) ? planet : Math.round((duelMal / 2) * 10) / 10;
     var duelAnilist = rating || 0;
-    var duelStory = isFinite(char) ? char : Math.round(duelMal * 2) / 2;
-    var derived = { mal: duelMal, chars: duelChar, anim: duelAnim, planet: duelPlanet, anilist: duelAnilist, story: duelStory };
-    // If any duel data is missing / unsure (e.g. no Anime Planet), let the admin enter it manually.
-    var manual = await showDuelRatingPopup(title, derived);
-    if (manual) {
-      if (manual.mal != null) duelMal = manual.mal;
-      if (manual.chars != null) duelChar = manual.chars;
-      if (manual.anim != null) duelAnim = manual.anim;
-      if (manual.planet != null) duelPlanet = manual.planet;
-      if (manual.anilist != null) duelAnilist = manual.anilist;
-      if (manual.story != null) duelStory = manual.story;
-    }
+    var duelStory = isFinite(story) ? story : (isFinite(char) ? char : Math.round(duelMal * 2) / 2);
     var addGenres = genre ? genre.split(/[,·]/).map(function(g) { return g.trim(); }).filter(Boolean) : [];
     var duelEntry = '\n    "' + nextId + '": {\n' +
       '        "malScore": ' + duelMal + ',\n' +
@@ -2177,7 +2410,7 @@ async function commitAddAnime() {
     var ok = ok1 && ok2 && ok3;
     saveCommitResult('add-anime', ok, 'anime #' + nextId + ' - ' + title);
     if (ok) msgOk('Anime #' + nextId + ' added: ' + title + ' (duel data included)');
-    else msgFail('One or more commits failed — check the commit log');
+    else msgFail('Commit failed — ' + (lastCommitError || 'check the commit log'));
   } catch (e) {
     hideLoading();
     adStep('');
@@ -2654,7 +2887,6 @@ function fillEditExtras() {
     if (drop) v = v.replace(drop, '');
     el.value = v.replace(/\s+/g, ' ').trim();
   };
-  clean(document.getElementById('adminEditSeasons'));
   clean(document.getElementById('adminEditEps'), /Total Episodes:/i);
 }
 

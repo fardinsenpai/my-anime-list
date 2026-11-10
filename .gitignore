@@ -1,0 +1,8 @@
+# stray copy of the repo (downloaded by accident) - never commit it
+my-anime-list-main/
+
+# OS / editor noise
+Thumbs.db
+.DS_Store
+*.tmp
+*.log

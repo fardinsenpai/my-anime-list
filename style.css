@@ -3956,6 +3956,21 @@ body.tour-mascot-on .guide-mascot-canvas { display: block; }
   border-top: 2.5px solid #14181f;
   border-radius: 7px 0 0 0;
 }
+/* Sidebar steps: bubble sits to the right of the menu, so its tail must
+   point left toward the highlighted option instead of down to her. */
+.tour-tooltip--mascot.tour-tooltip--side .tour-tooltip-inner::after {
+  left: -15px;
+  bottom: auto;
+  top: 50%;
+  margin-left: 0;
+  margin-top: -12px;
+  border-right: 0;
+  border-bottom: 0;
+  border-left: 2.5px solid #14181f;
+  border-top: 2.5px solid #14181f;
+  border-radius: 7px 0 0 0;
+  transform: rotate(45deg) skew(4deg, 4deg);
+}
 @keyframes tourBubbleIn {
   from { opacity: 0; transform: rotate(-0.6deg) translateY(10px) scale(.96); }
   to   { opacity: 1; transform: rotate(-0.6deg) translateY(0) scale(1); }

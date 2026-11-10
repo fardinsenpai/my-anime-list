@@ -86,6 +86,12 @@ export async function createGuide(hooks = {}) {
   const body = new THREE.Group();
   root.add(body);
 
+  /* The procedural chibi is only a fallback. While the real VRM is being
+     checked/loaded we hide it, so visitors never see the old model pop in
+     first and then get replaced by Komi. */
+  const chibi = new THREE.Group();
+  body.add(chibi);
+
   /* shadow puddle */
   const shadowTex = (() => {
     const c = document.createElement('canvas');
@@ -109,6 +115,17 @@ export async function createGuide(hooks = {}) {
   shadow.position.y = 0.004;
   root.add(shadow);
 
+  /* Summoning ring shown while the VRM is on its way. It keeps the spot
+     alive instead of flashing the fallback chibi first. */
+  const summon = new THREE.Mesh(
+    new THREE.RingGeometry(0.26, 0.34, 40),
+    new THREE.MeshBasicMaterial({ color: 0xffd166, transparent: true, opacity: 0.6, side: THREE.DoubleSide, depthWrite: false })
+  );
+  summon.rotation.x = -Math.PI / 2;
+  summon.position.y = 0.02;
+  summon.visible = false;
+  root.add(summon);
+
   /* legs */
   const legGeo = new THREE.CapsuleGeometry(0.058, 0.4, 6, 12);
   const shoeGeo = new THREE.BoxGeometry(0.125, 0.07, 0.2);
@@ -122,32 +139,32 @@ export async function createGuide(hooks = {}) {
     const shoe = new THREE.Mesh(shoeGeo, toon(SHOE));
     shoe.position.set(0, -0.52, 0.035);
     leg.add(shoe);
-    body.add(leg);
+    chibi.add(leg);
   });
 
   /* skirt */
   const skirt = new THREE.Mesh(new THREE.ConeGeometry(0.3, 0.3, 26, 1, true), toon(NAVY));
   skirt.position.y = 0.66;
-  body.add(skirt);
+  chibi.add(skirt);
   const skirtTrim = new THREE.Mesh(new THREE.TorusGeometry(0.295, 0.012, 6, 26), toon(NAVY_L));
   skirtTrim.rotation.x = Math.PI / 2;
   skirtTrim.position.y = 0.52;
-  body.add(skirtTrim);
+  chibi.add(skirtTrim);
 
   /* torso */
   const torso = new THREE.Mesh(new THREE.CapsuleGeometry(0.155, 0.24, 8, 18), toon(NAVY));
   torso.position.y = 0.97;
-  body.add(torso);
+  chibi.add(torso);
 
   const shirt = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.27, 0.03), toon(SHIRT));
   shirt.position.set(0, 1.0, 0.135);
-  body.add(shirt);
+  chibi.add(shirt);
 
   [-1, 1].forEach((s) => {
     const lapel = new THREE.Mesh(new THREE.BoxGeometry(0.055, 0.2, 0.02), toon(NAVY_L));
     lapel.position.set(s * 0.075, 1.05, 0.15);
     lapel.rotation.z = s * 0.3;
-    body.add(lapel);
+    chibi.add(lapel);
   });
 
   const ribbonGeo = new THREE.ConeGeometry(0.055, 0.11, 6);
@@ -155,15 +172,15 @@ export async function createGuide(hooks = {}) {
     const wing = new THREE.Mesh(ribbonGeo, toon(RED));
     wing.position.set(s * 0.05, 1.13, 0.165);
     wing.rotation.z = s * 1.25;
-    body.add(wing);
+    chibi.add(wing);
   });
   const knot = new THREE.Mesh(new THREE.SphereGeometry(0.03, 12, 10), toon(0x8f1f2c));
   knot.position.set(0, 1.13, 0.175);
-  body.add(knot);
+  chibi.add(knot);
 
   const pin = new THREE.Mesh(new THREE.SphereGeometry(0.016, 10, 8), toon(0xe8b23a));
   pin.position.set(-0.1, 1.085, 0.16);
-  body.add(pin);
+  chibi.add(pin);
 
   /* arms */
   const armGeo = new THREE.CapsuleGeometry(0.043, 0.4, 6, 10);
@@ -182,7 +199,7 @@ export async function createGuide(hooks = {}) {
     finger.position.y = -0.58;
     finger.rotation.x = Math.PI;
     arm.add(finger);
-    body.add(arm);
+    chibi.add(arm);
   });
 
   /* pointing stick + fingertip glow (only while pointing).
@@ -222,12 +239,12 @@ export async function createGuide(hooks = {}) {
   /* neck */
   const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.052, 0.058, 0.1, 12), toon(SKIN));
   neck.position.y = 1.21;
-  body.add(neck);
+  chibi.add(neck);
 
   /* head group pivots at the neck so it can look around */
   const head = new THREE.Group();
   head.position.y = 1.29;
-  body.add(head);
+  chibi.add(head);
 
   const headSphere = new THREE.Mesh(new THREE.SphereGeometry(0.3, 32, 26), toon(SKIN));
   headSphere.position.y = 0.17;
@@ -334,10 +351,12 @@ export async function createGuide(hooks = {}) {
     spawn: 1,
     greetT: 0,         // >0 while she waves hello
     bubbleH: 240,
+    bubbleTop: 74,
     rect: null,
     model: null,
     rig: null,
-    modelPointer: null
+    modelPointer: null,
+    modelPending: true
   };
 
   const baseQuatR = new THREE.Quaternion();
@@ -391,6 +410,7 @@ export async function createGuide(hooks = {}) {
     if (side != null) state.side = side;
     if (opts) {
       if (opts.bubbleH) state.bubbleH = opts.bubbleH;
+      if (opts.bubbleTop != null) state.bubbleTop = opts.bubbleTop;
       if (opts.greet != null) state.greetT = opts.greet ? 2.8 : 0;
     }
     if (!rect) { state.pointing = false; return; }
@@ -403,10 +423,23 @@ export async function createGuide(hooks = {}) {
        swaps to the opposite edge so sidebar names stay readable. */
     let standX;
     if (vw < 768) {
-      standX = state.side < 0 ? vw * 0.24 : vw * 0.76;
+      /* Phones: keep her at the very edge, not over the middle of a card or
+         the Currently Watching info box. Sidebar options always leave her on
+         the right, so the menu names stay readable. */
+      if (rect.left < 300 && rect.width < 340) {
+        standX = vw * 0.88;
+      } else {
+        standX = state.side < 0 ? vw * 0.12 : vw * 0.88;
+      }
     } else {
       const off = Math.min(300, vw * 0.24);
-      standX = cx + (state.side < 0 ? -off : off);
+      if (rect.left < 300 && rect.width < 340) {
+        /* A sidebar option: the 380px tour bubble sits to the right of the
+           270px menu, so stand clear of the bubble instead of behind it. */
+        standX = Math.max(rect.right + 430, vw * 0.72);
+      } else {
+        standX = cx + (state.side < 0 ? -off : off);
+      }
     }
     state.targetX = Math.max(-maxX, Math.min(maxX, pxToWorldX(standX)));
 
@@ -419,7 +452,11 @@ export async function createGuide(hooks = {}) {
     const maxFeet = vh - 8;
     let feet;
     if (vw < 768) {
-      const minFeet = Math.min(maxFeet, Math.max(vh - 210, 76 + bubbleH + 16 + charHpx));
+      /* Use the bubble's real top: near the top of the page the bubble is
+         pushed down under the target, and a fixed 76px assumption made her
+         head walk straight into it. */
+      const bubbleTop = state.bubbleTop != null ? state.bubbleTop : 76;
+      const minFeet = Math.min(maxFeet, Math.max(vh - 210, bubbleTop + bubbleH + 16 + charHpx));
       const wantFeet = cy + charHpx * 0.5;
       feet = Math.min(maxFeet, Math.max(minFeet, wantFeet));
     } else {
@@ -442,6 +479,13 @@ export async function createGuide(hooks = {}) {
   function tick(dt) {
     if (!state.visible) return;
     clock += dt;
+
+    /* loading ring while the real model is being fetched */
+    summon.visible = !!state.modelPending;
+    if (summon.visible) {
+      summon.rotation.z += dt * 1.8;
+      summon.material.opacity = 0.35 + Math.sin(clock * 4) * 0.18;
+    }
 
     /* spawn pop */
     if (state.spawn < 1) {
@@ -608,6 +652,7 @@ export async function createGuide(hooks = {}) {
     state.greetT = 0;
     root.position.y = baseY;
     state.targetX = Math.max(-maxX, Math.min(maxX, state.targetX));
+    chibi.visible = !state.modelPending && !state.model;
     last = performance.now();
     document.body.classList.add('tour-mascot-on');
     renderNow(0.016);
@@ -699,6 +744,7 @@ export async function createGuide(hooks = {}) {
 
   async function tryModel() {
     let url = null;
+    state.modelPending = true;
     window.__guideModelPhase = 'head';
     for (let i = 0; i < MODEL_CANDIDATES.length; i++) {
       try {
@@ -707,7 +753,13 @@ export async function createGuide(hooks = {}) {
       } catch (e) { /* keep looking */ }
     }
     window.__guideModelUrl = url;
-    if (!url) { window.__guideModelPhase = 'none'; return; }
+    if (!url) {
+      window.__guideModelPhase = 'none';
+      state.modelPending = false;
+      chibi.visible = true;
+      summon.visible = false;
+      return;
+    }
     try {
       window.__guideModelPhase = 'import';
       const { GLTFLoader } = await import('three/addons/loaders/GLTFLoader.js');
@@ -754,6 +806,9 @@ export async function createGuide(hooks = {}) {
         state.modelPointer = mp;
       }
 
+      state.modelPending = false;
+      chibi.visible = false;
+      summon.visible = false;
       if (hooks.onModel) hooks.onModel(url);
       window.__guideModelPhase = 'ok';
     } catch (e) {
@@ -761,6 +816,9 @@ export async function createGuide(hooks = {}) {
       window.__guideModelError = String(e && (e.message || e));
       window.__guideModelStack = String(e && e.stack || '').slice(0, 1200);
       /* keep the built-in figure */
+      state.modelPending = false;
+      chibi.visible = true;
+      summon.visible = false;
     }
   }
 
@@ -777,8 +835,10 @@ export async function createGuide(hooks = {}) {
     }
   });
 
-  /* check for a dropped-in model after first paint, never on page load */
-  setTimeout(tryModel, 1200);
+  /* Start the model check immediately. The module is only loaded when the
+     tour is about to start (or the Tour Guide button is hovered), so this
+     does not download the VRM on an ordinary page view. */
+  tryModel();
 
   const api = {
     show: show,
@@ -809,6 +869,8 @@ export async function createGuide(hooks = {}) {
         greetT: state.greetT,
         pointerVis: pointer.visible,
         hasModel: !!state.model,
+        modelPending: !!state.modelPending,
+        chibiVisible: chibi.visible,
         modelPointerVis: !!(state.modelPointer && state.modelPointer.visible),
         camZ: camera.position.z,
         visH: visH,
