@@ -8480,3 +8480,139 @@ body.duel-mode-active #nowStrip { display: none !important; }
   border: 1px solid rgba(255, 105, 180, 0.45) !important;
   white-space: nowrap !important;
 }
+
+/* ══════════════════════════════════════════════════════════════════════
+   SPECIAL CARD STAMPS v2 — four new types, each with its own shape so
+   they never look like one another:
+     EPIC          hexagon, ember orange
+     LEGENDARY     crest, royal gold
+     OP            shield, crimson
+     ISEKAI KING   pentagon, void violet
+   ══════════════════════════════════════════════════════════════════════ */
+
+.special-stamp {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  line-height: 1.05;
+  font-weight: 800;
+  letter-spacing: .5px;
+  padding: 6px;
+}
+
+/* ── EPIC · hexagon · ember orange ── */
+.card-stamp-epic {
+  width: 86px; height: 94px;
+  border-radius: 12px;
+  background:
+    linear-gradient(150deg, #ffb347 0%, #ff6a00 42%, #b33c00 100%);
+  border: 2px solid #ffcf8a;
+  clip-path: polygon(50% 0%, 93% 25%, 93% 75%, 50% 100%, 7% 75%, 7% 25%);
+  color: #2a1200;
+  text-shadow: 0 1px 0 rgba(255, 235, 200, .55);
+  box-shadow: 0 0 16px rgba(255, 122, 0, .6), 0 0 34px rgba(255, 90, 0, .35);
+  font-size: 13px;
+}
+.card-stamp-epic::after {
+  content: 'EPIC';
+  position: absolute;
+  bottom: -13px;
+  font-size: 9px;
+  letter-spacing: 3px;
+  color: #ffb347;
+  text-shadow: 0 0 10px rgba(255, 122, 0, .8);
+}
+
+/* ── LEGENDARY · crest · royal gold ── */
+.card-stamp-legendary {
+  width: 92px; height: 92px;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 34% 28%, #fff6cf 0%, #ffd75e 28%, #d99a10 68%, #6b4300 100%);
+  border: 3px double #fff0b8;
+  color: #4a2d00;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, .6);
+  box-shadow: 0 0 18px rgba(255, 215, 0, .75), 0 0 44px rgba(255, 170, 0, .45);
+  font-size: 9px;
+  letter-spacing: .6px;
+  white-space: nowrap;
+}
+.card-stamp-legendary::before {
+  border-color: rgba(120, 80, 0, .55) !important;
+  border-style: solid !important;
+}
+.card-stamp-legendary::after {
+  content: '★';
+  position: absolute;
+  bottom: -15px;
+  font-size: 13px;
+  color: #ffd75e;
+  text-shadow: 0 0 12px rgba(255, 215, 0, .9);
+}
+
+/* ── OP · shield · crimson ── */
+.card-stamp-op {
+  width: 88px; height: 92px;
+  background: linear-gradient(160deg, #ff4d7d 0%, #e3123f 45%, #6b0018 100%);
+  border: 2px solid #ff9ab5;
+  clip-path: polygon(50% 0%, 100% 16%, 100% 62%, 50% 100%, 0% 62%, 0% 16%);
+  color: #fff;
+  text-shadow: 0 0 8px rgba(255, 0, 60, .9);
+  box-shadow: 0 0 18px rgba(227, 18, 63, .7), 0 0 40px rgba(255, 0, 60, .35);
+  font-size: 20px;
+  letter-spacing: 2px;
+}
+.card-stamp-op::after {
+  content: 'OVER POWER';
+  position: absolute;
+  bottom: -13px;
+  font-size: 8px;
+  letter-spacing: 2.4px;
+  color: #ff6b8f;
+  text-shadow: 0 0 10px rgba(227, 18, 63, .9);
+}
+
+/* ── ISEKAI KING · pentagon · void violet ── */
+.card-stamp-isekaiking {
+  width: 90px; height: 92px;
+  background: linear-gradient(155deg, #b79cff 0%, #7b4dff 40%, #2b0f63 100%);
+  border: 2px solid #d9c7ff;
+  clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%);
+  color: #f3ecff;
+  text-shadow: 0 0 9px rgba(123, 77, 255, .95);
+  box-shadow: 0 0 18px rgba(123, 77, 255, .65), 0 0 42px rgba(90, 40, 200, .4);
+  font-size: 11px;
+  letter-spacing: 1px;
+  line-height: 1.15;
+  padding-bottom: 12px;
+}
+.card-stamp-isekaiking::after {
+  content: '♛';
+  position: absolute;
+  bottom: -14px;
+  font-size: 13px;
+  color: #c4adff;
+  text-shadow: 0 0 12px rgba(123, 77, 255, .95);
+}
+
+/* the little label on the back of the card */
+.back-special-label--epic { color: #ffb347; text-shadow: 0 0 12px rgba(255, 122, 0, .7); }
+.back-special-label--legendary { color: #ffd75e; text-shadow: 0 0 12px rgba(255, 215, 0, .7); }
+.back-special-label--op { color: #ff6b8f; text-shadow: 0 0 12px rgba(227, 18, 63, .7); }
+.back-special-label--isekaiking { color: #c4adff; text-shadow: 0 0 12px rgba(123, 77, 255, .7); }
+
+/* a slow shine over the new stamps */
+.card-stamp-epic,
+.card-stamp-legendary,
+.card-stamp-op,
+.card-stamp-isekaiking {
+  animation: stampShine 3.6s ease-in-out infinite;
+}
+@keyframes stampShine {
+  0%, 100% { filter: brightness(1) saturate(1); }
+  50% { filter: brightness(1.18) saturate(1.25); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .card-stamp-epic, .card-stamp-legendary, .card-stamp-op, .card-stamp-isekaiking { animation: none !important; }
+}

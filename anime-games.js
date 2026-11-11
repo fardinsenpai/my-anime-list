@@ -263,7 +263,12 @@
       max_score: maxScore || 5,
       played_at: new Date().toISOString()
     };
-    return sb(SCORES, { method: 'POST', body: JSON.stringify(row) })
+    /* one row per player per game - a new score replaces the old one */
+    return sb(SCORES + '?on_conflict=user_id,game_key', {
+      method: 'POST',
+      headers: { Prefer: 'resolution=merge-duplicates,return=minimal' },
+      body: JSON.stringify(row)
+    })
       .then(function (res) {
         if (!res.ok) throw new Error('save failed');
         return true;

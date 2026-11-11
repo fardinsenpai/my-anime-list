@@ -2003,7 +2003,7 @@ async function commitEditAnime() {
     var epsText = episodes ? '📺 Total Episodes: ' + episodes : '';
     var specialSel = document.getElementById('adminEditSpecial');
     var special = specialSel ? specialSel.value : '';
-    var stampMap = { burning: 'Fire Type', frozen: 'Frozen Type', wind: 'Wind Type', black: 'Black Type', lightning: 'Lightning Type', healing: 'Healing Type', earth: 'Earth Type', speed: 'Speed Type' };
+    var stampMap = { burning: 'Fire Type', frozen: 'Frozen Type', wind: 'Wind Type', black: 'Black Type', lightning: 'Lightning Type', healing: 'Healing Type', earth: 'Earth Type', speed: 'Speed Type', epic: 'EPIC', legendary: 'LEGENDARY', op: 'OP', isekaiking: 'ISEKAI KING' };
     var stamp = stampMap[special] || '';
     var specialClass = special ? ' card-' + special : '';
     var stampHtml = stamp ? '<div class="special-stamp card-stamp-' + special + '">' + stamp + '</div>' : '';
@@ -2417,9 +2417,17 @@ function renderCardPreview() {
     ? ADMIN_STATS_BASE.anime : 0) + 1;
 
   var t = adEscHtml(title), im = adEscHtml(img), se = adEscHtml(season), ep = adEscHtml(eps);
+  var specialSel = document.getElementById('adminAddSpecial');
+  var special = specialSel ? specialSel.value : '';
+  var stampMap = { burning: 'Fire Type', frozen: 'Frozen Type', wind: 'Wind Type', black: 'Black Type', lightning: 'Lightning Type', healing: 'Healing Type', earth: 'Earth Type', speed: 'Speed Type', epic: 'EPIC', legendary: 'LEGENDARY', op: 'OP', isekaiking: 'ISEKAI KING' };
+  var stampLabel = stampMap[special] || '';
+  var stampHtml = stampLabel ? '<div class="special-stamp card-stamp-' + special + '">' + stampLabel + '</div>' : '';
+  var backLabelHtml = stampLabel ? '<div class="back-special-label back-special-label--' + special + '">✦ Special Card ✦</div>' : '';
+  var specialClass = special ? ' card-' + special : '';
   var card =
-    '<div class="card">' +
+    '<div class="card' + specialClass + '">' +
       '<div class="card-inner">' +
+        stampHtml +
         '<div class="card-front">' +
           '<div class="poster-wrap">' +
             (img ? '<img src="' + im + '" alt="' + t + '" loading="lazy"/>' : '') +
@@ -2428,6 +2436,7 @@ function renderCardPreview() {
           '<div class="info"><div class="number">NO. ' + nextId + '</div><div class="title">' + t + '</div></div>' +
         '</div>' +
         '<div class="card-back"><div class="back-content">' +
+          backLabelHtml +
           '<div class="back-title">' + t + '</div>' +
           '<div class="back-season">🌸 ' + se + '</div>' +
           '<div class="back-episodes">📺 Total Episodes: ' + ep + '</div>' +
@@ -2454,7 +2463,7 @@ function renderCardPreview() {
 }
 
 (function wireCardPreview() {
-  var ids = ['adminAddTitle', 'adminAddImg', 'adminAddEps', 'adminAddSeason', 'adminAddSeasonCustom'];
+  var ids = ['adminAddTitle', 'adminAddImg', 'adminAddEps', 'adminAddSeason', 'adminAddSeasonCustom', 'adminAddSpecial'];
   var timer = null;
   var repaint = function () {
     clearTimeout(timer);
@@ -2521,9 +2530,10 @@ async function commitAddAnime() {
     if (badgeMax) badgeMax.forEach(function(m) { var n = parseInt(m.replace(/\D/g,'')); if (n > maxId) maxId = n; });
     if (typeof RATING_DATA === 'object') Object.keys(RATING_DATA).forEach(function(k) { var n = parseInt(k); if (n > maxId) maxId = n; });
     var nextId = maxId + 1;
-    // Special card effects are edit-only; new cards start without one.
-    var special = '';
-    var stampMap = { burning: 'Fire Type', frozen: 'Frozen Type', wind: 'Wind Type', black: 'Black Type', lightning: 'Lightning Type', healing: 'Healing Type', earth: 'Earth Type', speed: 'Speed Type' };
+    // Special cards: the admin can give a new anime a stamp as well.
+    var specialSel = document.getElementById('adminAddSpecial');
+    var special = specialSel ? specialSel.value : '';
+    var stampMap = { burning: 'Fire Type', frozen: 'Frozen Type', wind: 'Wind Type', black: 'Black Type', lightning: 'Lightning Type', healing: 'Healing Type', earth: 'Earth Type', speed: 'Speed Type', epic: 'EPIC', legendary: 'LEGENDARY', op: 'OP', isekaiking: 'ISEKAI KING' };
     var stamp = stampMap[special] || '';
     var specialClass = special ? ' card-' + special : '';
     var stampHtml = stamp ? '<div class="special-stamp card-stamp-' + special + '">' + stamp + '</div>' : '';

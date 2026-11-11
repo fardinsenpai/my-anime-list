@@ -19,7 +19,7 @@
     if (f) document.documentElement.setAttribute('data-font', f);
   } catch (e) {}
 </script>
-<link rel="stylesheet" href="admin.css?v=20261110f">
+<link rel="stylesheet" href="admin.css?v=20261111a">
 </head>
 <body>
 
@@ -318,6 +318,10 @@
             <option value="healing">Healing Card</option>
             <option value="earth">Earth Type</option>
             <option value="speed">Speed Type</option>
+            <option value="epic">Epic</option>
+            <option value="legendary">Legendary</option>
+            <option value="op">OP (Over Power)</option>
+            <option value="isekaiking">Isekai King</option>
           </select>
         </label>
         <button class="admin-g-btn" onclick="commitEditAnime()">▶ COMMIT EDIT</button>
@@ -487,10 +491,30 @@
         <div class="admin-selected-pills" id="adminSelectedPills" style="display:none"></div>
 
         <div class="admin-g-label">Live card preview</div>
-        <div class="ad-note" style="margin:-2px 0 8px;">The real card, rendered from the form — click it to flip, exactly like the site.</div>
+        <div class="ad-note" style="margin:-2px 0 8px;">The real card, rendered from the form - click it to flip, exactly like the site.</div>
         <div class="ad-card-preview">
           <iframe id="adminPreviewFrame" title="Anime card preview" loading="lazy"></iframe>
         </div>
+
+        <div class="admin-g-label">Special card</div>
+        <label class="ad-field" style="flex:0 1 260px;">
+          <span>Stamp (optional)</span>
+          <select id="adminAddSpecial" class="admin-g-input">
+            <option value="">None</option>
+            <option value="epic">Epic</option>
+            <option value="legendary">Legendary</option>
+            <option value="op">OP (Over Power)</option>
+            <option value="isekaiking">Isekai King</option>
+            <option value="burning">Fire Type</option>
+            <option value="frozen">Frozen Type</option>
+            <option value="wind">Wind Type</option>
+            <option value="black">Black Type</option>
+            <option value="lightning">Lightning Type</option>
+            <option value="healing">Healing Type</option>
+            <option value="earth">Earth Type</option>
+            <option value="speed">Speed Type</option>
+          </select>
+        </label>
 
         <button class="admin-g-btn" onclick="commitAddAnime()">▶ COMMIT ADD</button>
         <div class="ad-note">The card goes to the end of index.html; OTT / studio / genre / rating data goes to script.js.</div>
@@ -699,6 +723,6 @@
 </div>
 
 <script src="anime-fetch.js?v=20261110c"></script>
-<script src="admin.js?v=20261110g"></script>
+<script src="admin.js?v=20261111a"></script>
 </body>
 </html>

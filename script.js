@@ -2962,6 +2962,9 @@ async function sendMessage() {
 
     chatHistory.push({ role: 'user', content: message });
 
+    /* signed-in visitors keep the conversation in the cloud too */
+    try { if (window.ChatCloud) window.ChatCloud.push('user', message); } catch (e) {}
+
     /* a dub question switches the dub table on for the rest of the chat */
     if (DUB_RE.test(message)) _dubAsked = true;
 
@@ -3016,6 +3019,8 @@ async function sendMessage() {
         const starters = isGreeting(message) ? greetingStarterRows() : null;
         scheduleSuggestions(msgDiv, animeMentionedInText(botReply), starters);
       });
+
+      try { if (window.ChatCloud) window.ChatCloud.push('assistant', botReply); } catch (e) {}
 
       saveChatToStorage();
     } else {
@@ -7790,7 +7795,7 @@ document.addEventListener('click', function(e) {
 // === Service Worker Registration ===
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function() {
-    navigator.serviceWorker.register('sw.js');
+    navigator.serviceWorker.register('sw.js').catch(function () { });
   });
 }
 
