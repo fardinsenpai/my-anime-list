@@ -636,6 +636,34 @@
   }
 
   /* ── Guess the Anime Character ─────────────────────────────────── */
+  /* Only keep the characters whose picture really loads - a broken image
+     would be an unplayable round. Resolves as soon as there are enough
+     good ones, so the game never waits for the slowest poster. */
+  function usableCharacters(pool, cb) {
+    var out = [];
+    var test = pool.slice(0, 30);
+    if (!test.length) return cb(out);
+    var left = test.length;
+    var finished = false;
+    var finish = function () {
+      if (finished) return;
+      finished = true;
+      cb(out);
+    };
+    var done = function () {
+      left--;
+      if (out.length >= 12) finish();
+      else if (left <= 0) finish();
+    };
+    test.forEach(function (c) {
+      var im = new Image();
+      var timer = setTimeout(done, 2500);
+      im.onload = function () { clearTimeout(timer); out.push(c); done(); };
+      im.onerror = function () { clearTimeout(timer); done(); };
+      im.src = c.img;
+    });
+  }
+
   function buildCharacterGame(api) {
     api.stage.innerHTML =
       '<div class="ag-start">' +
@@ -647,7 +675,11 @@
       api.pool = characterPool();
       api.round = 0;
       api.score = 0;
-      nextCharRound(api);
+      api.stage.innerHTML = '<div class="ag-start"><div class="ag-start-title">Loading the cast…</div></div>';
+      usableCharacters(api.pool, function (good) {
+        api.pool = good.length >= 4 ? good : api.pool;
+        nextCharRound(api);
+      });
     };
   }
 
@@ -659,7 +691,10 @@
     var c = pick(pool);
     api.stage.innerHTML = roundHead(api, 'Shadow of a character') +
       '<div class="ag-shadow">' +
-        '<img src="' + esc(c.img) + '" alt="">' +
+        '<div class="ag-shadow-frame">' +
+          '<img src="' + esc(c.img) + '" alt="" onerror="this.style.display=\'none\'">' +
+          '<div class="ag-shadow-mark">?</div>' +
+        '</div>' +
         '<div class="ag-shadow-hint">Who is this?</div>' +
       '</div>';
     var names = pool.map(function (x) { return x.name; });

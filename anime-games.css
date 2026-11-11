@@ -202,16 +202,40 @@
 .ag-option--wrong { border-color: rgba(255, 107, 107, .8); background: rgba(255, 107, 107, .16); color: #fff; }
 
 /* ── the shadow (character game) ── */
-.ag-shadow { text-align: center; margin-bottom: 14px; }
+.ag-shadow { text-align: center; margin-bottom: 14px; position: relative; }
+.ag-shadow-frame {
+  position: relative;
+  display: inline-block;
+  border-radius: 18px;
+  padding: 8px;
+  background: radial-gradient(circle at 50% 40%, rgba(0, 242, 254, .16), transparent 68%);
+}
 .ag-shadow img {
-  width: min(280px, 70vw);
+  display: block;
+  width: min(260px, 64vw);
   aspect-ratio: 3 / 4;
   object-fit: cover;
-  border-radius: 16px;
-  filter: brightness(.12) contrast(1.5) drop-shadow(0 0 26px rgba(0, 242, 254, .45));
-  border: 1px solid rgba(0, 242, 254, .22);
+  border-radius: 14px;
+  /* a dark silhouette, but you can still read the shape */
+  filter: grayscale(1) brightness(.42) contrast(1.35)
+          drop-shadow(0 0 24px rgba(0, 242, 254, .55));
+  border: 1px solid rgba(0, 242, 254, .35);
+  box-shadow: 0 0 34px rgba(0, 242, 254, .28), inset 0 0 60px rgba(0, 0, 0, .55);
 }
-.ag-shadow-hint { margin-top: 8px; font-size: 12px; letter-spacing: 2px; color: rgba(255, 255, 255, .45); text-transform: uppercase; }
+.ag-shadow-mark {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Orbitron', sans-serif;
+  font-size: clamp(3rem, 14vw, 5.4rem);
+  font-weight: 900;
+  color: rgba(0, 242, 254, .85);
+  text-shadow: 0 0 22px rgba(0, 242, 254, .8), 0 0 60px rgba(0, 242, 254, .5);
+  pointer-events: none;
+}
+.ag-shadow-hint { margin-top: 10px; font-size: 12px; letter-spacing: 2px; color: rgba(255, 255, 255, .5); text-transform: uppercase; }
 
 /* ── emoji game ── */
 .ag-emoji {
