@@ -8481,138 +8481,168 @@ body.duel-mode-active #nowStrip { display: none !important; }
   white-space: nowrap !important;
 }
 
-/* ══════════════════════════════════════════════════════════════════════
-   SPECIAL CARD STAMPS v2 — four new types, each with its own shape so
-   they never look like one another:
-     EPIC          hexagon, ember orange
-     LEGENDARY     crest, royal gold
-     OP            shield, crimson
-     ISEKAI KING   pentagon, void violet
-   ══════════════════════════════════════════════════════════════════════ */
 
+
+/* ══════════════════════════════════════════════════════════════════
+   SPECIAL CARD STAMPS — the official seal
+   Every stamp is the same wax-seal shape, only the colour changes:
+   a scalloped edge, a double ring and OFFICIAL around the rim.
+   ══════════════════════════════════════════════════════════════════ */
 .special-stamp {
+  position: absolute;
+  top: -16px;
+  left: -16px;
+  z-index: 99;
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
   display: flex;
   align-items: center;
   justify-content: center;
   text-align: center;
-  line-height: 1.05;
   font-weight: 800;
-  letter-spacing: .5px;
-  padding: 6px;
-}
-
-/* ── EPIC · hexagon · ember orange ── */
-.card-stamp-epic {
-  width: 86px; height: 94px;
-  border-radius: 12px;
-  background:
-    linear-gradient(150deg, #ffb347 0%, #ff6a00 42%, #b33c00 100%);
-  border: 2px solid #ffcf8a;
-  clip-path: polygon(50% 0%, 93% 25%, 93% 75%, 50% 100%, 7% 75%, 7% 25%);
-  color: #2a1200;
-  text-shadow: 0 1px 0 rgba(255, 235, 200, .55);
-  box-shadow: 0 0 16px rgba(255, 122, 0, .6), 0 0 34px rgba(255, 90, 0, .35);
-  font-size: 13px;
-}
-.card-stamp-epic::after {
-  content: 'EPIC';
-  position: absolute;
-  bottom: -13px;
-  font-size: 9px;
-  letter-spacing: 3px;
-  color: #ffb347;
-  text-shadow: 0 0 10px rgba(255, 122, 0, .8);
-}
-
-/* ── LEGENDARY · crest · royal gold ── */
-.card-stamp-legendary {
-  width: 92px; height: 92px;
-  border-radius: 50%;
-  background:
-    radial-gradient(circle at 34% 28%, #fff6cf 0%, #ffd75e 28%, #d99a10 68%, #6b4300 100%);
-  border: 3px double #fff0b8;
-  color: #4a2d00;
-  text-shadow: 0 1px 0 rgba(255, 255, 255, .6);
-  box-shadow: 0 0 18px rgba(255, 215, 0, .75), 0 0 44px rgba(255, 170, 0, .45);
-  font-size: 9px;
-  letter-spacing: .6px;
-  white-space: nowrap;
-}
-.card-stamp-legendary::before {
-  border-color: rgba(120, 80, 0, .55) !important;
-  border-style: solid !important;
-}
-.card-stamp-legendary::after {
-  content: '★';
-  position: absolute;
-  bottom: -15px;
-  font-size: 13px;
-  color: #ffd75e;
-  text-shadow: 0 0 12px rgba(255, 215, 0, .9);
-}
-
-/* ── OP · shield · crimson ── */
-.card-stamp-op {
-  width: 88px; height: 92px;
-  background: linear-gradient(160deg, #ff4d7d 0%, #e3123f 45%, #6b0018 100%);
-  border: 2px solid #ff9ab5;
-  clip-path: polygon(50% 0%, 100% 16%, 100% 62%, 50% 100%, 0% 62%, 0% 16%);
-  color: #fff;
-  text-shadow: 0 0 8px rgba(255, 0, 60, .9);
-  box-shadow: 0 0 18px rgba(227, 18, 63, .7), 0 0 40px rgba(255, 0, 60, .35);
-  font-size: 20px;
-  letter-spacing: 2px;
-}
-.card-stamp-op::after {
-  content: 'OVER POWER';
-  position: absolute;
-  bottom: -13px;
-  font-size: 8px;
-  letter-spacing: 2.4px;
-  color: #ff6b8f;
-  text-shadow: 0 0 10px rgba(227, 18, 63, .9);
-}
-
-/* ── ISEKAI KING · pentagon · void violet ── */
-.card-stamp-isekaiking {
-  width: 90px; height: 92px;
-  background: linear-gradient(155deg, #b79cff 0%, #7b4dff 40%, #2b0f63 100%);
-  border: 2px solid #d9c7ff;
-  clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%);
-  color: #f3ecff;
-  text-shadow: 0 0 9px rgba(123, 77, 255, .95);
-  box-shadow: 0 0 18px rgba(123, 77, 255, .65), 0 0 42px rgba(90, 40, 200, .4);
   font-size: 11px;
-  letter-spacing: 1px;
-  line-height: 1.15;
-  padding-bottom: 12px;
+  letter-spacing: .6px;
+  line-height: 1.05;
+  padding: 26px 16px 0;
+  pointer-events: none;
+  color: #fff;
+  text-shadow: 0 1px 3px rgba(0,0,0,.95), 0 0 10px rgba(0,0,0,.6);
 }
-.card-stamp-isekaiking::after {
-  content: '♛';
+.special-stamp::before {
+  content: '';
   position: absolute;
-  bottom: -14px;
-  font-size: 13px;
-  color: #c4adff;
-  text-shadow: 0 0 12px rgba(123, 77, 255, .95);
+  inset: 0;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 100% 100%;
+  pointer-events: none;
 }
-
-/* the little label on the back of the card */
-.back-special-label--epic { color: #ffb347; text-shadow: 0 0 12px rgba(255, 122, 0, .7); }
-.back-special-label--legendary { color: #ffd75e; text-shadow: 0 0 12px rgba(255, 215, 0, .7); }
-.back-special-label--op { color: #ff6b8f; text-shadow: 0 0 12px rgba(227, 18, 63, .7); }
-.back-special-label--isekaiking { color: #c4adff; text-shadow: 0 0 12px rgba(123, 77, 255, .7); }
-
-/* a slow shine over the new stamps */
-.card-stamp-epic,
-.card-stamp-legendary,
-.card-stamp-op,
-.card-stamp-isekaiking {
-  animation: stampShine 3.6s ease-in-out infinite;
+.card-stamp-burning { color: #ff7a52 !important; }
+.card-stamp-burning::before {
+  background-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%20200%20200%27%3E%3Cdefs%3E%3Cpath%20id%3D%27r%27%20d%3D%27M100%2C100%20m-77%2C0%20a77%2C77%200%201%2C1%20154%2C0%20a77%2C77%200%201%2C1%20-154%2C0%27%2F%3E%3C%2Fdefs%3E%3Ccircle%20cx%3D%27100%27%20cy%3D%27100%27%20r%3D%2791%27%20fill%3D%27none%27%20stroke%3D%27%23c41c00%27%20stroke-width%3D%2713%27%20stroke-dasharray%3D%277%205.5%27%20stroke-linecap%3D%27round%27%2F%3E%3Ccircle%20cx%3D%27100%27%20cy%3D%27100%27%20r%3D%2781%27%20fill%3D%27none%27%20stroke%3D%27%23ff7a52%27%20stroke-width%3D%274.5%27%2F%3E%3Ccircle%20cx%3D%27100%27%20cy%3D%27100%27%20r%3D%2758%27%20fill%3D%27none%27%20stroke%3D%27%23ff7a52%27%20stroke-width%3D%273.5%27%2F%3E%3Ccircle%20cx%3D%27100%27%20cy%3D%27100%27%20r%3D%2751%27%20fill%3D%27none%27%20stroke%3D%27%23c41c00%27%20stroke-width%3D%271.6%27%20stroke-dasharray%3D%274%204%27%2F%3E%3Ctext%20font-family%3D%27Arial%20Black%2CArial%2Csans-serif%27%20font-size%3D%2715%27%20font-weight%3D%27bold%27%20fill%3D%27%23ff7a52%27%20letter-spacing%3D%271%27%3E%3CtextPath%20href%3D%27%23r%27%20startOffset%3D%273%27%3EOFFICIAL%20%C2%B7%20OFFICIAL%20%C2%B7%20OFFICIAL%20%C2%B7%20OFFICIAL%20%C2%B7%3C%2FtextPath%3E%3C%2Ftext%3E%3C%2Fsvg%3E");
+  filter: drop-shadow(0 0 5px rgba(255,90,40,.75)) drop-shadow(0 0 13px rgba(255,90,40,.75));
+  animation: sealPulse 2.6s ease-in-out infinite;
 }
-@keyframes stampShine {
-  0%, 100% { filter: brightness(1) saturate(1); }
-  50% { filter: brightness(1.18) saturate(1.25); }
+.card-stamp-frozen { color: #7ad4ff !important; }
+.card-stamp-frozen::before {
+  background-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%20200%20200%27%3E%3Cdefs%3E%3Cpath%20id%3D%27r%27%20d%3D%27M100%2C100%20m-77%2C0%20a77%2C77%200%201%2C1%20154%2C0%20a77%2C77%200%201%2C1%20-154%2C0%27%2F%3E%3C%2Fdefs%3E%3Ccircle%20cx%3D%27100%27%20cy%3D%27100%27%20r%3D%2791%27%20fill%3D%27none%27%20stroke%3D%27%230077cc%27%20stroke-width%3D%2713%27%20stroke-dasharray%3D%277%205.5%27%20stroke-linecap%3D%27round%27%2F%3E%3Ccircle%20cx%3D%27100%27%20cy%3D%27100%27%20r%3D%2781%27%20fill%3D%27none%27%20stroke%3D%27%237ad4ff%27%20stroke-width%3D%274.5%27%2F%3E%3Ccircle%20cx%3D%27100%27%20cy%3D%27100%27%20r%3D%2758%27%20fill%3D%27none%27%20stroke%3D%27%237ad4ff%27%20stroke-width%3D%273.5%27%2F%3E%3Ccircle%20cx%3D%27100%27%20cy%3D%27100%27%20r%3D%2751%27%20fill%3D%27none%27%20stroke%3D%27%230077cc%27%20stroke-width%3D%271.6%27%20stroke-dasharray%3D%274%204%27%2F%3E%3Ctext%20font-family%3D%27Arial%20Black%2CArial%2Csans-serif%27%20font-size%3D%2715%27%20font-weight%3D%27bold%27%20fill%3D%27%237ad4ff%27%20letter-spacing%3D%271%27%3E%3CtextPath%20href%3D%27%23r%27%20startOffset%3D%273%27%3EOFFICIAL%20%C2%B7%20OFFICIAL%20%C2%B7%20OFFICIAL%20%C2%B7%20OFFICIAL%20%C2%B7%3C%2FtextPath%3E%3C%2Ftext%3E%3C%2Fsvg%3E");
+  filter: drop-shadow(0 0 5px rgba(51,170,255,.75)) drop-shadow(0 0 13px rgba(51,170,255,.75));
+  animation: sealPulse 2.6s ease-in-out infinite;
 }
+.card-stamp-wind { color: #8affc0 !important; }
+.card-stamp-wind::before {
+  background-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%20200%20200%27%3E%3Cdefs%3E%3Cpath%20id%3D%27r%27%20d%3D%27M100%2C100%20m-77%2C0%20a77%2C77%200%201%2C1%20154%2C0%20a77%2C77%200%201%2C1%20-154%2C0%27%2F%3E%3C%2Fdefs%3E%3Ccircle%20cx%3D%27100%27%20cy%3D%27100%27%20r%3D%2791%27%20fill%3D%27none%27%20stroke%3D%27%231f9e52%27%20stroke-width%3D%2713%27%20stroke-dasharray%3D%277%205.5%27%20stroke-linecap%3D%27round%27%2F%3E%3Ccircle%20cx%3D%27100%27%20cy%3D%27100%27%20r%3D%2781%27%20fill%3D%27none%27%20stroke%3D%27%238affc0%27%20stroke-width%3D%274.5%27%2F%3E%3Ccircle%20cx%3D%27100%27%20cy%3D%27100%27%20r%3D%2758%27%20fill%3D%27none%27%20stroke%3D%27%238affc0%27%20stroke-width%3D%273.5%27%2F%3E%3Ccircle%20cx%3D%27100%27%20cy%3D%27100%27%20r%3D%2751%27%20fill%3D%27none%27%20stroke%3D%27%231f9e52%27%20stroke-width%3D%271.6%27%20stroke-dasharray%3D%274%204%27%2F%3E%3Ctext%20font-family%3D%27Arial%20Black%2CArial%2Csans-serif%27%20font-size%3D%2715%27%20font-weight%3D%27bold%27%20fill%3D%27%238affc0%27%20letter-spacing%3D%271%27%3E%3CtextPath%20href%3D%27%23r%27%20startOffset%3D%273%27%3EOFFICIAL%20%C2%B7%20OFFICIAL%20%C2%B7%20OFFICIAL%20%C2%B7%20OFFICIAL%20%C2%B7%3C%2FtextPath%3E%3C%2Ftext%3E%3C%2Fsvg%3E");
+  filter: drop-shadow(0 0 5px rgba(75,224,138,.75)) drop-shadow(0 0 13px rgba(75,224,138,.75));
+  animation: sealPulse 2.6s ease-in-out infinite;
+}
+.card-stamp-black { color: #d8d8d8 !important; }
+.card-stamp-black::before {
+  background-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%20200%20200%27%3E%3Cdefs%3E%3Cpath%20id%3D%27r%27%20d%3D%27M100%2C100%20m-77%2C0%20a77%2C77%200%201%2C1%20154%2C0%20a77%2C77%200%201%2C1%20-154%2C0%27%2F%3E%3C%2Fdefs%3E%3Ccircle%20cx%3D%27100%27%20cy%3D%27100%27%20r%3D%2791%27%20fill%3D%27none%27%20stroke%3D%27%233a3a3a%27%20stroke-width%3D%2713%27%20stroke-dasharray%3D%277%205.5%27%20stroke-linecap%3D%27round%27%2F%3E%3Ccircle%20cx%3D%27100%27%20cy%3D%27100%27%20r%3D%2781%27%20fill%3D%27none%27%20stroke%3D%27%23d8d8d8%27%20stroke-width%3D%274.5%27%2F%3E%3Ccircle%20cx%3D%27100%27%20cy%3D%27100%27%20r%3D%2758%27%20fill%3D%27none%27%20stroke%3D%27%23d8d8d8%27%20stroke-width%3D%273.5%27%2F%3E%3Ccircle%20cx%3D%27100%27%20cy%3D%27100%27%20r%3D%2751%27%20fill%3D%27none%27%20stroke%3D%27%233a3a3a%27%20stroke-width%3D%271.6%27%20stroke-dasharray%3D%274%204%27%2F%3E%3Ctext%20font-family%3D%27Arial%20Black%2CArial%2Csans-serif%27%20font-size%3D%2715%27%20font-weight%3D%27bold%27%20fill%3D%27%23d8d8d8%27%20letter-spacing%3D%271%27%3E%3CtextPath%20href%3D%27%23r%27%20startOffset%3D%273%27%3EOFFICIAL%20%C2%B7%20OFFICIAL%20%C2%B7%20OFFICIAL%20%C2%B7%20OFFICIAL%20%C2%B7%3C%2FtextPath%3E%3C%2Ftext%3E%3C%2Fsvg%3E");
+  filter: drop-shadow(0 0 5px rgba(190,190,190,.7)) drop-shadow(0 0 13px rgba(190,190,190,.7));
+  animation: sealPulse 2.6s ease-in-out infinite;
+}
+.card-stamp-lightning { color: #ffe066 !important; }
+.card-stamp-lightning::before {
+  background-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%20200%20200%27%3E%3Cdefs%3E%3Cpath%20id%3D%27r%27%20d%3D%27M100%2C100%20m-77%2C0%20a77%2C77%200%201%2C1%20154%2C0%20a77%2C77%200%201%2C1%20-154%2C0%27%2F%3E%3C%2Fdefs%3E%3Ccircle%20cx%3D%27100%27%20cy%3D%27100%27%20r%3D%2791%27%20fill%3D%27none%27%20stroke%3D%27%23c98f00%27%20stroke-width%3D%2713%27%20stroke-dasharray%3D%277%205.5%27%20stroke-linecap%3D%27round%27%2F%3E%3Ccircle%20cx%3D%27100%27%20cy%3D%27100%27%20r%3D%2781%27%20fill%3D%27none%27%20stroke%3D%27%23ffe066%27%20stroke-width%3D%274.5%27%2F%3E%3Ccircle%20cx%3D%27100%27%20cy%3D%27100%27%20r%3D%2758%27%20fill%3D%27none%27%20stroke%3D%27%23ffe066%27%20stroke-width%3D%273.5%27%2F%3E%3Ccircle%20cx%3D%27100%27%20cy%3D%27100%27%20r%3D%2751%27%20fill%3D%27none%27%20stroke%3D%27%23c98f00%27%20stroke-width%3D%271.6%27%20stroke-dasharray%3D%274%204%27%2F%3E%3Ctext%20font-family%3D%27Arial%20Black%2CArial%2Csans-serif%27%20font-size%3D%2715%27%20font-weight%3D%27bold%27%20fill%3D%27%23ffe066%27%20letter-spacing%3D%271%27%3E%3CtextPath%20href%3D%27%23r%27%20startOffset%3D%273%27%3EOFFICIAL%20%C2%B7%20OFFICIAL%20%C2%B7%20OFFICIAL%20%C2%B7%20OFFICIAL%20%C2%B7%3C%2FtextPath%3E%3C%2Ftext%3E%3C%2Fsvg%3E");
+  filter: drop-shadow(0 0 5px rgba(255,204,0,.8)) drop-shadow(0 0 13px rgba(255,204,0,.8));
+  animation: sealPulse 2.6s ease-in-out infinite;
+}
+.card-stamp-healing { color: #aaff66 !important; }
+.card-stamp-healing::before {
+  background-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%20200%20200%27%3E%3Cdefs%3E%3Cpath%20id%3D%27r%27%20d%3D%27M100%2C100%20m-77%2C0%20a77%2C77%200%201%2C1%20154%2C0%20a77%2C77%200%201%2C1%20-154%2C0%27%2F%3E%3C%2Fdefs%3E%3Ccircle%20cx%3D%27100%27%20cy%3D%27100%27%20r%3D%2791%27%20fill%3D%27none%27%20stroke%3D%27%232f8f10%27%20stroke-width%3D%2713%27%20stroke-dasharray%3D%277%205.5%27%20stroke-linecap%3D%27round%27%2F%3E%3Ccircle%20cx%3D%27100%27%20cy%3D%27100%27%20r%3D%2781%27%20fill%3D%27none%27%20stroke%3D%27%23aaff66%27%20stroke-width%3D%274.5%27%2F%3E%3Ccircle%20cx%3D%27100%27%20cy%3D%27100%27%20r%3D%2758%27%20fill%3D%27none%27%20stroke%3D%27%23aaff66%27%20stroke-width%3D%273.5%27%2F%3E%3Ccircle%20cx%3D%27100%27%20cy%3D%27100%27%20r%3D%2751%27%20fill%3D%27none%27%20stroke%3D%27%232f8f10%27%20stroke-width%3D%271.6%27%20stroke-dasharray%3D%274%204%27%2F%3E%3Ctext%20font-family%3D%27Arial%20Black%2CArial%2Csans-serif%27%20font-size%3D%2715%27%20font-weight%3D%27bold%27%20fill%3D%27%23aaff66%27%20letter-spacing%3D%271%27%3E%3CtextPath%20href%3D%27%23r%27%20startOffset%3D%273%27%3EOFFICIAL%20%C2%B7%20OFFICIAL%20%C2%B7%20OFFICIAL%20%C2%B7%20OFFICIAL%20%C2%B7%3C%2FtextPath%3E%3C%2Ftext%3E%3C%2Fsvg%3E");
+  filter: drop-shadow(0 0 5px rgba(102,221,68,.75)) drop-shadow(0 0 13px rgba(102,221,68,.75));
+  animation: sealPulse 2.6s ease-in-out infinite;
+}
+.card-stamp-earth { color: #e0b183 !important; }
+.card-stamp-earth::before {
+  background-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%20200%20200%27%3E%3Cdefs%3E%3Cpath%20id%3D%27r%27%20d%3D%27M100%2C100%20m-77%2C0%20a77%2C77%200%201%2C1%20154%2C0%20a77%2C77%200%201%2C1%20-154%2C0%27%2F%3E%3C%2Fdefs%3E%3Ccircle%20cx%3D%27100%27%20cy%3D%27100%27%20r%3D%2791%27%20fill%3D%27none%27%20stroke%3D%27%238a5a2b%27%20stroke-width%3D%2713%27%20stroke-dasharray%3D%277%205.5%27%20stroke-linecap%3D%27round%27%2F%3E%3Ccircle%20cx%3D%27100%27%20cy%3D%27100%27%20r%3D%2781%27%20fill%3D%27none%27%20stroke%3D%27%23e0b183%27%20stroke-width%3D%274.5%27%2F%3E%3Ccircle%20cx%3D%27100%27%20cy%3D%27100%27%20r%3D%2758%27%20fill%3D%27none%27%20stroke%3D%27%23e0b183%27%20stroke-width%3D%273.5%27%2F%3E%3Ccircle%20cx%3D%27100%27%20cy%3D%27100%27%20r%3D%2751%27%20fill%3D%27none%27%20stroke%3D%27%238a5a2b%27%20stroke-width%3D%271.6%27%20stroke-dasharray%3D%274%204%27%2F%3E%3Ctext%20font-family%3D%27Arial%20Black%2CArial%2Csans-serif%27%20font-size%3D%2715%27%20font-weight%3D%27bold%27%20fill%3D%27%23e0b183%27%20letter-spacing%3D%271%27%3E%3CtextPath%20href%3D%27%23r%27%20startOffset%3D%273%27%3EOFFICIAL%20%C2%B7%20OFFICIAL%20%C2%B7%20OFFICIAL%20%C2%B7%20OFFICIAL%20%C2%B7%3C%2FtextPath%3E%3C%2Ftext%3E%3C%2Fsvg%3E");
+  filter: drop-shadow(0 0 5px rgba(200,140,90,.7)) drop-shadow(0 0 13px rgba(200,140,90,.7));
+  animation: sealPulse 2.6s ease-in-out infinite;
+}
+.card-stamp-speed { color: #d8a6ff !important; }
+.card-stamp-speed::before {
+  background-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%20200%20200%27%3E%3Cdefs%3E%3Cpath%20id%3D%27r%27%20d%3D%27M100%2C100%20m-77%2C0%20a77%2C77%200%201%2C1%20154%2C0%20a77%2C77%200%201%2C1%20-154%2C0%27%2F%3E%3C%2Fdefs%3E%3Ccircle%20cx%3D%27100%27%20cy%3D%27100%27%20r%3D%2791%27%20fill%3D%27none%27%20stroke%3D%27%237b2ff7%27%20stroke-width%3D%2713%27%20stroke-dasharray%3D%277%205.5%27%20stroke-linecap%3D%27round%27%2F%3E%3Ccircle%20cx%3D%27100%27%20cy%3D%27100%27%20r%3D%2781%27%20fill%3D%27none%27%20stroke%3D%27%23d8a6ff%27%20stroke-width%3D%274.5%27%2F%3E%3Ccircle%20cx%3D%27100%27%20cy%3D%27100%27%20r%3D%2758%27%20fill%3D%27none%27%20stroke%3D%27%23d8a6ff%27%20stroke-width%3D%273.5%27%2F%3E%3Ccircle%20cx%3D%27100%27%20cy%3D%27100%27%20r%3D%2751%27%20fill%3D%27none%27%20stroke%3D%27%237b2ff7%27%20stroke-width%3D%271.6%27%20stroke-dasharray%3D%274%204%27%2F%3E%3Ctext%20font-family%3D%27Arial%20Black%2CArial%2Csans-serif%27%20font-size%3D%2715%27%20font-weight%3D%27bold%27%20fill%3D%27%23d8a6ff%27%20letter-spacing%3D%271%27%3E%3CtextPath%20href%3D%27%23r%27%20startOffset%3D%273%27%3EOFFICIAL%20%C2%B7%20OFFICIAL%20%C2%B7%20OFFICIAL%20%C2%B7%20OFFICIAL%20%C2%B7%3C%2FtextPath%3E%3C%2Ftext%3E%3C%2Fsvg%3E");
+  filter: drop-shadow(0 0 5px rgba(168,85,247,.75)) drop-shadow(0 0 13px rgba(168,85,247,.75));
+  animation: sealPulse 2.6s ease-in-out infinite;
+}
+.card-stamp-epic { color: #ffb347 !important; }
+.card-stamp-epic::before {
+  background-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%20200%20200%27%3E%3Cdefs%3E%3Cpath%20id%3D%27r%27%20d%3D%27M100%2C100%20m-77%2C0%20a77%2C77%200%201%2C1%20154%2C0%20a77%2C77%200%201%2C1%20-154%2C0%27%2F%3E%3C%2Fdefs%3E%3Ccircle%20cx%3D%27100%27%20cy%3D%27100%27%20r%3D%2791%27%20fill%3D%27none%27%20stroke%3D%27%23d95f00%27%20stroke-width%3D%2713%27%20stroke-dasharray%3D%277%205.5%27%20stroke-linecap%3D%27round%27%2F%3E%3Ccircle%20cx%3D%27100%27%20cy%3D%27100%27%20r%3D%2781%27%20fill%3D%27none%27%20stroke%3D%27%23ffb347%27%20stroke-width%3D%274.5%27%2F%3E%3Ccircle%20cx%3D%27100%27%20cy%3D%27100%27%20r%3D%2758%27%20fill%3D%27none%27%20stroke%3D%27%23ffb347%27%20stroke-width%3D%273.5%27%2F%3E%3Ccircle%20cx%3D%27100%27%20cy%3D%27100%27%20r%3D%2751%27%20fill%3D%27none%27%20stroke%3D%27%23d95f00%27%20stroke-width%3D%271.6%27%20stroke-dasharray%3D%274%204%27%2F%3E%3Ctext%20font-family%3D%27Arial%20Black%2CArial%2Csans-serif%27%20font-size%3D%2715%27%20font-weight%3D%27bold%27%20fill%3D%27%23ffb347%27%20letter-spacing%3D%271%27%3E%3CtextPath%20href%3D%27%23r%27%20startOffset%3D%273%27%3EOFFICIAL%20%C2%B7%20OFFICIAL%20%C2%B7%20OFFICIAL%20%C2%B7%20OFFICIAL%20%C2%B7%3C%2FtextPath%3E%3C%2Ftext%3E%3C%2Fsvg%3E");
+  filter: drop-shadow(0 0 5px rgba(255,138,31,.8)) drop-shadow(0 0 13px rgba(255,138,31,.8));
+  animation: sealPulse 2.6s ease-in-out infinite;
+}
+.card-stamp-legendary { color: #ffd75e !important; }
+.card-stamp-legendary { font-size: 8.5px !important; letter-spacing: .2px !important; white-space: nowrap; }
+.card-stamp-isekaiking { font-size: 9px !important; letter-spacing: .2px !important; }
+.card-stamp-legendary::before {
+  background-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%20200%20200%27%3E%3Cdefs%3E%3Cpath%20id%3D%27r%27%20d%3D%27M100%2C100%20m-77%2C0%20a77%2C77%200%201%2C1%20154%2C0%20a77%2C77%200%201%2C1%20-154%2C0%27%2F%3E%3C%2Fdefs%3E%3Ccircle%20cx%3D%27100%27%20cy%3D%27100%27%20r%3D%2791%27%20fill%3D%27none%27%20stroke%3D%27%23b8860b%27%20stroke-width%3D%2713%27%20stroke-dasharray%3D%277%205.5%27%20stroke-linecap%3D%27round%27%2F%3E%3Ccircle%20cx%3D%27100%27%20cy%3D%27100%27%20r%3D%2781%27%20fill%3D%27none%27%20stroke%3D%27%23ffd75e%27%20stroke-width%3D%274.5%27%2F%3E%3Ccircle%20cx%3D%27100%27%20cy%3D%27100%27%20r%3D%2758%27%20fill%3D%27none%27%20stroke%3D%27%23ffd75e%27%20stroke-width%3D%273.5%27%2F%3E%3Ccircle%20cx%3D%27100%27%20cy%3D%27100%27%20r%3D%2751%27%20fill%3D%27none%27%20stroke%3D%27%23b8860b%27%20stroke-width%3D%271.6%27%20stroke-dasharray%3D%274%204%27%2F%3E%3Ctext%20font-family%3D%27Arial%20Black%2CArial%2Csans-serif%27%20font-size%3D%2715%27%20font-weight%3D%27bold%27%20fill%3D%27%23ffd75e%27%20letter-spacing%3D%271%27%3E%3CtextPath%20href%3D%27%23r%27%20startOffset%3D%273%27%3EOFFICIAL%20%C2%B7%20OFFICIAL%20%C2%B7%20OFFICIAL%20%C2%B7%20OFFICIAL%20%C2%B7%3C%2FtextPath%3E%3C%2Ftext%3E%3C%2Fsvg%3E");
+  filter: drop-shadow(0 0 5px rgba(255,215,0,.85)) drop-shadow(0 0 13px rgba(255,215,0,.85));
+  animation: sealPulse 2.6s ease-in-out infinite;
+}
+.card-stamp-op { color: #ff6b8f !important; }
+.card-stamp-op::before {
+  background-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%20200%20200%27%3E%3Cdefs%3E%3Cpath%20id%3D%27r%27%20d%3D%27M100%2C100%20m-77%2C0%20a77%2C77%200%201%2C1%20154%2C0%20a77%2C77%200%201%2C1%20-154%2C0%27%2F%3E%3C%2Fdefs%3E%3Ccircle%20cx%3D%27100%27%20cy%3D%27100%27%20r%3D%2791%27%20fill%3D%27none%27%20stroke%3D%27%23c4002b%27%20stroke-width%3D%2713%27%20stroke-dasharray%3D%277%205.5%27%20stroke-linecap%3D%27round%27%2F%3E%3Ccircle%20cx%3D%27100%27%20cy%3D%27100%27%20r%3D%2781%27%20fill%3D%27none%27%20stroke%3D%27%23ff6b8f%27%20stroke-width%3D%274.5%27%2F%3E%3Ccircle%20cx%3D%27100%27%20cy%3D%27100%27%20r%3D%2758%27%20fill%3D%27none%27%20stroke%3D%27%23ff6b8f%27%20stroke-width%3D%273.5%27%2F%3E%3Ccircle%20cx%3D%27100%27%20cy%3D%27100%27%20r%3D%2751%27%20fill%3D%27none%27%20stroke%3D%27%23c4002b%27%20stroke-width%3D%271.6%27%20stroke-dasharray%3D%274%204%27%2F%3E%3Ctext%20font-family%3D%27Arial%20Black%2CArial%2Csans-serif%27%20font-size%3D%2715%27%20font-weight%3D%27bold%27%20fill%3D%27%23ff6b8f%27%20letter-spacing%3D%271%27%3E%3CtextPath%20href%3D%27%23r%27%20startOffset%3D%273%27%3EOFFICIAL%20%C2%B7%20OFFICIAL%20%C2%B7%20OFFICIAL%20%C2%B7%20OFFICIAL%20%C2%B7%3C%2FtextPath%3E%3C%2Ftext%3E%3C%2Fsvg%3E");
+  filter: drop-shadow(0 0 5px rgba(255,45,99,.8)) drop-shadow(0 0 13px rgba(255,45,99,.8));
+  animation: sealPulse 2.6s ease-in-out infinite;
+}
+.card-stamp-isekaiking { color: #c4adff !important; }
+.card-stamp-isekaiking::before {
+  background-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%20200%20200%27%3E%3Cdefs%3E%3Cpath%20id%3D%27r%27%20d%3D%27M100%2C100%20m-77%2C0%20a77%2C77%200%201%2C1%20154%2C0%20a77%2C77%200%201%2C1%20-154%2C0%27%2F%3E%3C%2Fdefs%3E%3Ccircle%20cx%3D%27100%27%20cy%3D%27100%27%20r%3D%2791%27%20fill%3D%27none%27%20stroke%3D%27%236a2fd6%27%20stroke-width%3D%2713%27%20stroke-dasharray%3D%277%205.5%27%20stroke-linecap%3D%27round%27%2F%3E%3Ccircle%20cx%3D%27100%27%20cy%3D%27100%27%20r%3D%2781%27%20fill%3D%27none%27%20stroke%3D%27%23c4adff%27%20stroke-width%3D%274.5%27%2F%3E%3Ccircle%20cx%3D%27100%27%20cy%3D%27100%27%20r%3D%2758%27%20fill%3D%27none%27%20stroke%3D%27%23c4adff%27%20stroke-width%3D%273.5%27%2F%3E%3Ccircle%20cx%3D%27100%27%20cy%3D%27100%27%20r%3D%2751%27%20fill%3D%27none%27%20stroke%3D%27%236a2fd6%27%20stroke-width%3D%271.6%27%20stroke-dasharray%3D%274%204%27%2F%3E%3Ctext%20font-family%3D%27Arial%20Black%2CArial%2Csans-serif%27%20font-size%3D%2715%27%20font-weight%3D%27bold%27%20fill%3D%27%23c4adff%27%20letter-spacing%3D%271%27%3E%3CtextPath%20href%3D%27%23r%27%20startOffset%3D%273%27%3EOFFICIAL%20%C2%B7%20OFFICIAL%20%C2%B7%20OFFICIAL%20%C2%B7%20OFFICIAL%20%C2%B7%3C%2FtextPath%3E%3C%2Ftext%3E%3C%2Fsvg%3E");
+  filter: drop-shadow(0 0 5px rgba(138,92,255,.8)) drop-shadow(0 0 13px rgba(138,92,255,.8));
+  animation: sealPulse 2.6s ease-in-out infinite;
+}
+@keyframes sealPulse {
+  0%, 100% { transform: rotate(-2deg) scale(1); opacity: .95; }
+  50% { transform: rotate(2deg) scale(1.05); opacity: 1; }
+}
+/* epic */
+@keyframes epicGlow {
+  0%, 100% { box-shadow: 0 0 8px 2px rgba(255,120,20,.55), 0 0 18px 4px rgba(255,90,0,.32), 0 0 30px 8px rgba(255,120,0,.18); border-color: rgba(255,138,31,.85); }
+  50% { box-shadow: 0 0 16px 4px rgba(255,120,20,.55), 0 0 34px 8px rgba(255,90,0,.32), 0 0 52px 16px rgba(255,120,0,.18); border-color: #ffb347; }
+}
+.card-epic .card-inner, .card-epic .card-inner::before { animation: epicGlow 2.4s ease-in-out infinite !important; }
+.card-epic .card-inner { border: 2px solid rgba(255,138,31,.85) !important; border-radius: 12px !important; }
+.card-epic .card-inner::before { content: ''; position: absolute; inset: -4px; border-radius: 16px; border: 1.5px solid rgba(255,170,70,.4); pointer-events: none; z-index: 10; }
+.card-epic .badge { background: linear-gradient(135deg,#ffb347,#ff6a00) !important; border-color: #ff6a00 !important; box-shadow: 0 0 8px rgba(255,138,31,.8), 0 0 4px #ff6a00 !important; color: #2a1200 !important; text-shadow: none; }
+.card-epic .back-genre, .card-epic .back-mal, .card-epic .back-mal-score { text-shadow: 0 0 6px rgba(255,138,31,.8) !important; color: #ffd9b0 !important; }
+.back-special-label--epic { color: #ffb347 !important; text-shadow: 0 0 12px rgba(255,138,31,.8) !important; }
+/* legendary */
+@keyframes legendaryGlow {
+  0%, 100% { box-shadow: 0 0 8px 2px rgba(255,200,0,.6), 0 0 18px 4px rgba(255,160,0,.36), 0 0 30px 8px rgba(255,190,0,.2); border-color: rgba(255,215,0,.85); }
+  50% { box-shadow: 0 0 16px 4px rgba(255,200,0,.6), 0 0 34px 8px rgba(255,160,0,.36), 0 0 52px 16px rgba(255,190,0,.2); border-color: #ffd75e; }
+}
+.card-legendary .card-inner, .card-legendary .card-inner::before { animation: legendaryGlow 2.4s ease-in-out infinite !important; }
+.card-legendary .card-inner { border: 2px solid rgba(255,215,0,.85) !important; border-radius: 12px !important; }
+.card-legendary .card-inner::before { content: ''; position: absolute; inset: -4px; border-radius: 16px; border: 1.5px solid rgba(255,235,140,.45); pointer-events: none; z-index: 10; }
+.card-legendary .badge { background: linear-gradient(135deg,#ffe9a8,#d9a300) !important; border-color: #d9a300 !important; box-shadow: 0 0 8px rgba(255,215,0,.85), 0 0 4px #d9a300 !important; color: #3a2600 !important; text-shadow: none; }
+.card-legendary .back-genre, .card-legendary .back-mal, .card-legendary .back-mal-score { text-shadow: 0 0 6px rgba(255,215,0,.85) !important; color: #fff3c4 !important; }
+.back-special-label--legendary { color: #ffd75e !important; text-shadow: 0 0 12px rgba(255,215,0,.85) !important; }
+/* op */
+@keyframes opGlow {
+  0%, 100% { box-shadow: 0 0 8px 2px rgba(255,45,99,.6), 0 0 18px 4px rgba(200,0,60,.36), 0 0 30px 8px rgba(255,45,99,.2); border-color: rgba(255,45,99,.85); }
+  50% { box-shadow: 0 0 16px 4px rgba(255,45,99,.6), 0 0 34px 8px rgba(200,0,60,.36), 0 0 52px 16px rgba(255,45,99,.2); border-color: #ff6b8f; }
+}
+.card-op .card-inner, .card-op .card-inner::before { animation: opGlow 2.4s ease-in-out infinite !important; }
+.card-op .card-inner { border: 2px solid rgba(255,45,99,.85) !important; border-radius: 12px !important; }
+.card-op .card-inner::before { content: ''; position: absolute; inset: -4px; border-radius: 16px; border: 1.5px solid rgba(255,140,170,.45); pointer-events: none; z-index: 10; }
+.card-op .badge { background: linear-gradient(135deg,#ff6b8f,#e3123f) !important; border-color: #e3123f !important; box-shadow: 0 0 8px rgba(255,45,99,.8), 0 0 4px #e3123f !important; color: #fff !important; text-shadow: none; }
+.card-op .back-genre, .card-op .back-mal, .card-op .back-mal-score { text-shadow: 0 0 6px rgba(255,45,99,.8) !important; color: #ffd0da !important; }
+.back-special-label--op { color: #ff6b8f !important; text-shadow: 0 0 12px rgba(255,45,99,.8) !important; }
+/* isekaiking */
+@keyframes isekaikingGlow {
+  0%, 100% { box-shadow: 0 0 8px 2px rgba(138,92,255,.6), 0 0 18px 4px rgba(100,40,220,.36), 0 0 30px 8px rgba(138,92,255,.2); border-color: rgba(138,92,255,.85); }
+  50% { box-shadow: 0 0 16px 4px rgba(138,92,255,.6), 0 0 34px 8px rgba(100,40,220,.36), 0 0 52px 16px rgba(138,92,255,.2); border-color: #c4adff; }
+}
+.card-isekaiking .card-inner, .card-isekaiking .card-inner::before { animation: isekaikingGlow 2.4s ease-in-out infinite !important; }
+.card-isekaiking .card-inner { border: 2px solid rgba(138,92,255,.85) !important; border-radius: 12px !important; }
+.card-isekaiking .card-inner::before { content: ''; position: absolute; inset: -4px; border-radius: 16px; border: 1.5px solid rgba(190,160,255,.45); pointer-events: none; z-index: 10; }
+.card-isekaiking .badge { background: linear-gradient(135deg,#c4adff,#7b4dff) !important; border-color: #7b4dff !important; box-shadow: 0 0 8px rgba(138,92,255,.8), 0 0 4px #7b4dff !important; color: #fff !important; text-shadow: none; }
+.card-isekaiking .back-genre, .card-isekaiking .back-mal, .card-isekaiking .back-mal-score { text-shadow: 0 0 6px rgba(138,92,255,.8) !important; color: #e6dcff !important; }
+.back-special-label--isekaiking { color: #c4adff !important; text-shadow: 0 0 12px rgba(138,92,255,.8) !important; }
 @media (prefers-reduced-motion: reduce) {
-  .card-stamp-epic, .card-stamp-legendary, .card-stamp-op, .card-stamp-isekaiking { animation: none !important; }
+  .special-stamp::before { animation: none !important; }
 }
