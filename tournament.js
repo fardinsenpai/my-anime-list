@@ -1345,7 +1345,7 @@
         '<div class="tourney-header">' +
           '<div class="tourney-header__title">' +
             '<span class="tourney-header__icon">🏆</span>' +
-            '<h2>CROWN CONQUEST</h2>' +
+            '<h2>ANIME TOURNAMENT</h2>' +
             '<span class="tourney-header__icon">🏆</span>' +
           '</div>' +
           '<div class="tourney-header__sub">Draft your roster · conquer the bracket · claim the crown</div>' +

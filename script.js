@@ -5508,9 +5508,14 @@ document.addEventListener('click', function(e) {
         popover: { title: '\uD83D\uDD25 Hot Takes', description: 'Share your hot takes on any anime! Post comments and see what others think in real-time.', side: 'right' }
       },
       {
+        element: '#gamesHubLink',
+        guide: 'Raphtalia',
+        popover: { title: '🎮 Anime Web Games', description: 'Eight anime games built from this very list - guess the card from clues, name the shadowed character, read the emojis, and climb the leaderboards!', side: 'right' }
+      },
+      {
         element: '#tournament-nav-link',
         guide: 'Kaguya Shinomiya',
-        popover: { title: '🏆 Crown Conquest', description: 'Enter the tournament arena! Pick a genre, draft your roster, and auto-simulate a bracket to crown a champion. Full power-based matchups!', side: 'right' }
+        popover: { title: '🏆 Anime Tournament', description: 'Enter the tournament arena! Pick a genre, draft your roster, and auto-simulate a bracket to crown a champion. Full power-based matchups!', side: 'right' }
       },
       {
         element: '#animeQuestBtn',
