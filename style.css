@@ -8640,3 +8640,177 @@ body.duel-mode-active #nowStrip { display: none !important; }
   font-size: 13px !important;
   white-space: nowrap !important;
 }
+
+/* ══════════════════════════════════════════════════════════════════════
+   THE SAKURA THEME — the login page
+   Cherry blossom pink instead of gold, a branch in the corner, petals
+   drifting down and the whole card lit like a spring evening.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.lg-overlay {
+  background:
+    radial-gradient(900px 520px at 18% 8%, rgba(255, 105, 180, .18), transparent 62%),
+    radial-gradient(760px 520px at 84% 92%, rgba(196, 77, 255, .16), transparent 62%),
+    radial-gradient(600px 420px at 50% 50%, rgba(255, 182, 213, .08), transparent 70%),
+    rgba(10, 5, 14, .9) !important;
+  -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+  overflow-x: hidden;
+}
+
+/* the drifting petals */
+.lg-overlay::before,
+.lg-overlay::after {
+  content: '';
+  position: fixed;
+  top: -12vh;
+  width: 260%;
+  height: 60vh;
+  pointer-events: none;
+  opacity: .75;
+  background-image:
+    radial-gradient(9px 7px at 20% 30%, rgba(255, 175, 210, .95), transparent 60%),
+    radial-gradient(7px 9px at 60% 60%, rgba(255, 200, 225, .7), transparent 60%),
+    radial-gradient(10px 8px at 40% 80%, rgba(255, 140, 195, .55), transparent 60%),
+    radial-gradient(6px 6px at 80% 20%, rgba(255, 220, 235, .8), transparent 60%),
+    radial-gradient(8px 7px at 10% 70%, rgba(255, 160, 205, .6), transparent 60%);
+  background-size: 260px 260px;
+  animation: lgPetals linear infinite;
+}
+.lg-overlay::before { left: -30%; animation-duration: 22s; }
+.lg-overlay::after { left: -10%; animation-duration: 34s; opacity: .45; background-size: 340px 340px; }
+@keyframes lgPetals {
+  from { transform: translate3d(0, -20vh, 0) rotate(0deg); }
+  to { transform: translate3d(6vw, 120vh, 0) rotate(320deg); }
+}
+
+.lg-card {
+  border: 1px solid rgba(255, 138, 190, .38) !important;
+  background:
+    radial-gradient(circle at 12% 0%, rgba(255, 120, 180, .16), transparent 52%),
+    radial-gradient(circle at 92% 8%, rgba(180, 120, 255, .14), transparent 50%),
+    linear-gradient(180deg, #1c0f1c 0%, #120a16 55%, #0d0710 100%) !important;
+  box-shadow:
+    0 30px 80px rgba(0, 0, 0, .8),
+    0 0 60px -18px rgba(255, 105, 180, .55),
+    inset 0 0 60px -30px rgba(255, 182, 213, .35) !important;
+  overflow: hidden;
+}
+/* a blossom in the top corner of the card */
+.lg-card::before {
+  content: '';
+  position: absolute;
+  top: -34px; right: -30px;
+  width: 150px; height: 150px;
+  pointer-events: none;
+  opacity: .5;
+  background:
+    radial-gradient(circle at 50% 50%, rgba(255, 210, 232, .5) 0 12%, transparent 13%),
+    conic-gradient(from 0deg at 50% 50%,
+      rgba(255, 150, 200, .38) 0deg 60deg, transparent 60deg 72deg,
+      rgba(255, 150, 200, .38) 72deg 132deg, transparent 132deg 144deg,
+      rgba(255, 150, 200, .38) 144deg 204deg, transparent 204deg 216deg,
+      rgba(255, 150, 200, .38) 216deg 276deg, transparent 276deg 288deg,
+      rgba(255, 150, 200, .38) 288deg 348deg, transparent 348deg 360deg);
+  -webkit-mask: radial-gradient(circle at 50% 50%, #000 0 42%, transparent 43%);
+  mask: radial-gradient(circle at 50% 50%, #000 0 42%, transparent 43%);
+  animation: lgBloom 14s ease-in-out infinite;
+}
+@keyframes lgBloom {
+  0%, 100% { transform: rotate(0deg) scale(1); }
+  50% { transform: rotate(14deg) scale(1.05); }
+}
+
+.lg-brand {
+  color: #ff9ec9 !important;
+  letter-spacing: 3px;
+  display: flex; align-items: center; gap: 8px;
+  text-shadow: 0 0 14px rgba(255, 120, 180, .6);
+}
+.lg-brand::before {
+  content: '🌸';
+  font-size: 13px;
+  filter: drop-shadow(0 0 8px rgba(255, 120, 180, .8));
+}
+.lg-title {
+  font-family: 'Orbitron', 'Segoe UI', sans-serif;
+  font-size: 1.32rem; font-weight: 900; color: #fff !important;
+  text-shadow: 0 0 22px rgba(255, 120, 180, .45);
+}
+.lg-sub { color: #d8b8cc !important; }
+.lg-tabs {
+  background: rgba(255, 120, 180, .07) !important;
+  border: 1px solid rgba(255, 138, 190, .22) !important;
+}
+.lg-tab { color: #d9bdd0 !important; }
+.lg-tab:hover { color: #fff !important; }
+.lg-tab.on {
+  background: linear-gradient(180deg, rgba(255, 105, 180, .3), rgba(255, 105, 180, .14)) !important;
+  border-color: rgba(255, 138, 190, .65) !important;
+  color: #fff !important;
+  box-shadow: 0 0 18px -4px rgba(255, 105, 180, .7);
+}
+.lg-lab { color: #c79ab6 !important; }
+.lg-field input {
+  background: rgba(20, 8, 18, .55) !important;
+  border: 1px solid rgba(255, 138, 190, .2) !important;
+  color: #fff !important;
+}
+.lg-field input::placeholder { color: #8d6c81 !important; }
+.lg-field input:focus {
+  border-color: rgba(255, 138, 190, .75) !important;
+  box-shadow: 0 0 0 3px rgba(255, 105, 180, .16) !important;
+}
+.lg-eye { color: #b98aa8 !important; }
+.lg-eye:hover { color: #ff9ec9 !important; }
+.lg-submit {
+  border: 1px solid rgba(255, 138, 190, .6) !important;
+  background: linear-gradient(180deg, rgba(255, 105, 180, .38), rgba(255, 60, 140, .2)) !important;
+  color: #fff !important;
+  box-shadow: 0 12px 30px -18px rgba(255, 105, 180, .9);
+}
+.lg-submit:hover { background: linear-gradient(180deg, rgba(255, 120, 190, .5), rgba(255, 70, 150, .28)) !important; }
+.lg-msg {
+  background: rgba(255, 138, 190, .08) !important;
+  color: #f0d5e4 !important;
+}
+.lg-msg.bad { background: rgba(255, 70, 70, .14) !important; border-color: rgba(255, 70, 70, .4) !important; }
+.lg-msg.good { background: rgba(255, 105, 180, .14) !important; border: 1px solid rgba(255, 138, 190, .45) !important; color: #ffc4de !important; }
+.lg-or { color: #a97f9a !important; }
+.lg-or::before, .lg-or::after { background: linear-gradient(90deg, transparent, rgba(255, 138, 190, .35), transparent) !important; }
+.lg-x {
+  background: rgba(255, 138, 190, .08) !important;
+  border: 1px solid rgba(255, 138, 190, .3) !important;
+  color: #ffb9d6 !important;
+}
+.lg-x:hover { background: rgba(255, 105, 180, .18) !important; color: #fff !important; }
+.lg-note { color: #9d7a91 !important; }
+.lg-otp-box {
+  background: rgba(20, 8, 18, .55) !important;
+  border: 1px solid rgba(255, 138, 190, .22) !important;
+  color: #fff !important;
+}
+.lg-otp-captcha { border-color: rgba(255, 138, 190, .25) !important; }
+
+/* the cloudflare box keeps its own look, but the frame around it joins in */
+#lgTurnstile, .lg-otp-turn {
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.lg-branch {
+  position: absolute;
+  left: -20px; bottom: -26px;
+  width: 190px;
+  height: 120px;
+  pointer-events: none;
+  opacity: .28;
+  filter: drop-shadow(0 0 14px rgba(255, 105, 180, .45));
+  z-index: 0;
+  animation: lgBranchSway 7s ease-in-out infinite;
+  transform-origin: 12% 90%;
+}
+@keyframes lgBranchSway {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(1.6deg) translateY(-2px); }
+}
+.lg-card > *:not(.lg-branch) { position: relative; z-index: 1; }
