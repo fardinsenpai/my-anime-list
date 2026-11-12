@@ -33,11 +33,37 @@ function initCounterBoxes() {
     }, index * 200); // staggered entry (optional)
   });
 
-  // Counter start
-  const stats = getStats();
-counterUp("animeCount", stats.animeCount, duration);  
-  counterUp("seasonCount", 396, duration);
-  counterUp("episodeCount", 7267, duration);
+  /* The counting must start when the boxes are actually on screen - before
+     that the numbers would race behind the reveal. */
+  const startCounting = () => {
+    const stats = getStats();
+    counterUp("animeCount", stats.animeCount, duration);
+    counterUp("seasonCount", 396, duration);
+    counterUp("episodeCount", 7267, duration);
+  };
+
+  let started = false;
+  const go = () => {
+    if (started) return;
+    started = true;
+    startCounting();
+  };
+
+  const first = boxes[0];
+  if (first && typeof IntersectionObserver === 'function') {
+    /* wait until the counter row scrolls into view */
+    const io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) { go(); io.disconnect(); }
+      });
+    }, { threshold: 0.15 });
+    io.observe(first);
+    /* a safety net: if the observer never fires (old browser, weird layout)
+       the counters still start after the reveal */
+    setTimeout(go, 2500);
+  } else {
+    setTimeout(go, 400);
+  }
 }
 
 if (document.readyState === 'loading') {
@@ -1896,9 +1922,9 @@ function createSakura() {
     // Never build petals while the tab is hidden or the counter is animating.
     if (document.hidden) return;
     if (hubCounting()) return;
-    var MAX_PETALS = (typeof window.__lightDevice !== 'undefined' && window.__lightDevice) ? 6 : 18;
-    // iii) Very few sakura will drop when the web is starting — 3 for 8s
-    if (Date.now() < hubSakuraQuietUntil) MAX_PETALS = Math.min(MAX_PETALS, 3);
+    var MAX_PETALS = (typeof window.__lightDevice !== 'undefined' && window.__lightDevice) ? 2 : 6;
+    // iii) Very few sakura will drop when the web is starting — 2 for 8s
+    if (Date.now() < hubSakuraQuietUntil) MAX_PETALS = Math.min(MAX_PETALS, 2);
     if (document.querySelectorAll('.sakura').length >= MAX_PETALS) return;
     const sakura = document.createElement("div");
     sakura.classList.add("sakura");
@@ -1948,7 +1974,8 @@ function createSakura() {
 // Periodic petal regeneration for continuous effect.
 // One interval, one budget — createSakura() itself throttles the first 8s and
 // returns instantly while the counter animates or the tab is hidden.
-var sakuraInterval = setInterval(createSakura, 550);
+// A petal every 1.4s keeps the rain light (it used to be every 0.55s).
+var sakuraInterval = setInterval(createSakura, 1400);
 window.__perfSakuraInterval = sakuraInterval;
 
 /* === FARDIN'S OTAKU LIST - PREMIUM SAKURA CHAT JS === */
@@ -2243,7 +2270,9 @@ if (canvas) {
   }
 
   function nextGap() {
-    return Math.random() < 0.18 ? 600 + Math.random() * 900 : 2600 + Math.random() * 6000;
+    /* thunder is decoration, not the main event: a rare quick flash, and a
+       long calm gap in between */
+    return Math.random() < 0.10 ? 1400 + Math.random() * 1600 : 9000 + Math.random() * 14000;
   }
 
   function scheduleNext(ms) {
@@ -4366,22 +4395,22 @@ function localCards() {
 /* The 16 special card kinds. The name is printed on the BACK of the card and
    every kind has its own colour (see style.css). */
 const SPECIAL_CARD_TYPES = {
-  legendary:  'Legendary Card',
-  epic:       'Epic Card',
-  op:         'Over Powered Card',
-  isekaiking: 'Isekai Lord Card',
-  burning:    'Fire Card',
-  earth:      'Earth Card',
-  black:      'Cursed Card',
-  wind:       'Wind Card',
-  lightning:  'Thunder Card',
-  speed:      'Speed Card',
-  frozen:     'Frozen Card',
-  healing:    'Healing Card',
-  science:    'Science Card',
-  romance:    'Romance Card',
-  psychic:    'Psychic Card',
-  levelup:    'Level Up Card'
+  legendary:  { t: 'LEGENDARY',    s: 'MYTHIC TIER' },
+  epic:       { t: 'EPIC',         s: 'SAVAGE TIER' },
+  op:         { t: 'OVER POWERED', s: 'ABSOLUTE FORCE' },
+  isekaiking: { t: 'ISEKAI LORD',  s: 'OTHER WORLD' },
+  burning:    { t: 'FIRE',         s: 'BLAZING SOUL' },
+  earth:      { t: 'EARTH',        s: 'UNSHAKEN' },
+  black:      { t: 'CURSED',       s: 'BLACK SOUL' },
+  wind:       { t: 'WIND',         s: 'STORM RIDER' },
+  lightning:  { t: 'THUNDER',      s: 'STORM CALLER' },
+  speed:      { t: 'SPEED',        s: 'FLASH STEP' },
+  frozen:     { t: 'FROZEN',       s: 'ICE HEART' },
+  healing:    { t: 'HEALING',      s: 'LIFE BRINGER' },
+  science:    { t: 'SCIENCE',      s: 'THE GENIUS' },
+  romance:    { t: 'ROMANCE',      s: 'SWEET HEART' },
+  psychic:    { t: 'PSYCHIC',      s: 'MIND READER' },
+  levelup:    { t: 'LEVEL UP',     s: 'RISING STAR' }
 };
 window.SPECIAL_CARD_TYPES = SPECIAL_CARD_TYPES;
 
@@ -4396,7 +4425,7 @@ function applyBurningCard() {
       if (m && SPECIAL_CARD_TYPES[m[1]]) { special = m[1]; break; }
     }
     if (!special) return;
-    var name = SPECIAL_CARD_TYPES[special];
+    var kind = SPECIAL_CARD_TYPES[special];
     var backContent = card.querySelector('.back-content');
     if (!backContent) return;
     var label = backContent.querySelector('.back-special-label');
@@ -4405,7 +4434,7 @@ function applyBurningCard() {
       backContent.insertBefore(label, backContent.firstChild);
     }
     label.className = 'back-special-label back-special-label--' + special;
-    label.textContent = name;
+    label.innerHTML = '<b>' + kind.t + '</b><i>' + kind.s + '</i>';
     /* no stamp on the front any more */
     var old = card.querySelector('.special-stamp');
     if (old && old.parentNode) old.parentNode.removeChild(old);

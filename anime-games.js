@@ -3,8 +3,9 @@
    Fourteen games built from the site's own list (and from AniList for the
    character art), so the hub works offline too.
 
-   Every game asks a signed-in visitor for a player name once, saves the
-   score to Supabase and shows its own top three.
+   Every game asks a signed-in visitor for a player name once, keeps the
+   score locally and only sends it to Supabase when it breaks into the top
+   three of that game.
    ══════════════════════════════════════════════════════════════════════ */
 (function () {
   'use strict';
@@ -18,7 +19,6 @@
   var overlay = null;
   var db = null;
   var player = null;
-  var state = null;
   var charPool = null;
 
   /* ─────────────────────────────────────────── helpers */
@@ -41,10 +41,6 @@
     return a;
   }
   function pick(a) { return a[Math.floor(Math.random() * a.length)]; }
-  function sleep(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
-  function toast(msg, kind) {
-    if (typeof msgOk === 'function') { kind === 'err' ? msgFail(msg) : msgOk(msg); }
-  }
 
   /* ── answers are judged kindly: spaces, punctuation and small spelling
         mistakes never lose a point ───────────────────────────────────── */
@@ -70,10 +66,10 @@
     }
     return prev[b.length];
   }
-  function answerMatches(input, accepted) {
+  function answerMatches(input, accepted, alt) {
     var a = norm(input);
     if (!a) return false;
-    var list = [accepted].concat((arguments.length > 2 && arguments[2]) ? arguments[2] : []);
+    var list = [accepted].concat(alt || []);
     for (var i = 0; i < list.length; i++) {
       var b = norm(list[i]);
       if (!b) continue;
@@ -119,6 +115,24 @@
   ];
   var GAME_BY_KEY = {};
   GAMES.forEach(function (g) { GAME_BY_KEY[g.key] = g; });
+
+  /* how to play - the same block on every game */
+  var HOWTO = {
+    quest: ['Pick the anime you want to be quizzed on.', 'Choose a difficulty and start.', 'Answer 10 questions - each right answer is a point.', 'Your rank (F to SSS) and certificate are yours.'],
+    tournament: ['Pick the genre for your bracket.', 'Draft your roster - the stronger the pick, the better.', 'The bracket is simulated round by round.', 'The last one standing is the champion.'],
+    card: ['You start with 10 points and one very hard clue.', 'Type the title and press SUBMIT whenever you are sure.', 'Need another clue? It costs points (-1, -1.5, -2, -2.5).', 'A wrong answer costs 2 points and shows the answer.'],
+    character: ['A portrait appears as a dark silhouette.', 'Type the character name - spelling is forgiving.', 'A wrong guess shows you who it was.', 'Five characters, one point each.'],
+    emoji: ['Three emoji stand in for a series.', 'Type the anime title.', 'A wrong guess shows you the answer.', 'Five rounds, five points.'],
+    truefalse: ['Read the statement carefully.', 'Decide whether it is TRUE or FALSE.', 'Half of the statements are lies.', 'Ten statements, one point each.'],
+    wordle: ['Guess the title in six tries.', 'Green means the letter is right and in place.', 'Yellow means the letter is in the title somewhere else.', 'Grey means it is not in the title at all.'],
+    scramble: ['The title comes back in pieces.', 'Type the title in the right order.', 'A wrong guess shows you the answer.', 'Five rounds, five points.'],
+    initials: ['You get the first letters and one hint.', 'Type the full anime title.', 'A wrong guess shows you the answer.', 'Five rounds, five points.'],
+    memory: ['Twelve cards, six pairs of anime.', 'Turn two cards at a time.', 'Find every pair in as few moves as you can.', 'The fewer moves, the higher the score.'],
+    timeline: ['Five anime, no years shown.', 'Put them from the oldest to the newest.', 'Lock the order when you are sure.', 'Each correct position is a point.'],
+    fight: ['Pick your fighter for the round.', 'Watch the power bar and press HIT in the green window.', 'A perfect hit scores, a miss does not.', 'Five rounds, one champion.'],
+    power: ['Two anime face each other.', 'Pick the one you think is stronger.', 'A wrong pick shows you who really wins.', 'Ten rounds of bracket action.'],
+    genre: ['A poster appears with no title.', 'Pick the genre it belongs to.', 'A wrong pick shows you the genre.', 'Ten cards, ten chances.']
+  };
 
   /* ─────────────────────────────────────────── the data the games use */
   function buildDb() {
@@ -171,7 +185,6 @@
     db = list;
     return db;
   }
-
   function famousPool() {
     var list = buildDb();
     var withData = list.filter(function (a) { return a.eps > 0 && a.year > 1980; });
@@ -224,24 +237,30 @@
   }
   function writePlayer(p) { try { localStorage.setItem(PLAYER_KEY, JSON.stringify(p)); } catch (e) {} }
 
-  function saveScore(gameKey, score, maxScore) {
-    if (!player) return Promise.resolve(false);
-    var row = {
-      user_id: player.id, user_name: player.name, avatar: player.avatar || '',
-      game_key: gameKey, score: score, max_score: maxScore || 5,
-      played_at: new Date().toISOString()
-    };
-    return sb(SCORES + '?on_conflict=user_id,game_key', {
-      method: 'POST',
-      headers: { Prefer: 'resolution=merge-duplicates,return=minimal' },
-      body: JSON.stringify(row)
-    }).then(function (res) { return res.ok; }).catch(function () { return false; });
-  }
+  /* the board of one game */
   function topScores(gameKey, limit) {
     var q = SCORES + '?select=*&game_key=eq.' + encodeURIComponent(gameKey) +
       '&order=score.desc,played_at.asc&limit=' + (limit || 3);
     return sb(q, { method: 'GET' }).then(function (res) { return res.ok ? res.json() : []; })
       .catch(function () { return []; });
+  }
+  /* only a score that breaks into the top three is sent to the cloud */
+  function saveScore(gameKey, score, maxScore) {
+    if (!player) return Promise.resolve(false);
+    return topScores(gameKey, 3).then(function (rows) {
+      var best = rows.length ? (rows[rows.length - 1].score || 0) : 0;
+      if (rows.length >= 3 && score <= best) return false;   /* not good enough for the board */
+      var row = {
+        user_id: player.id, user_name: player.name, avatar: player.avatar || '',
+        game_key: gameKey, score: score, max_score: maxScore || 5,
+        played_at: new Date().toISOString()
+      };
+      return sb(SCORES + '?on_conflict=user_id,game_key', {
+        method: 'POST',
+        headers: { Prefer: 'resolution=merge-duplicates,return=minimal' },
+        body: JSON.stringify(row)
+      }).then(function (res) { return res.ok; }).catch(function () { return false; });
+    });
   }
   function allScores() {
     return sb(SCORES + '?select=*&order=score.desc&limit=200', { method: 'GET' })
@@ -284,23 +303,21 @@
 
   /* ─────────────────────────────────────────── the name gate */
   function askPlayerName(cb) {
+    /* the visitor is already signed in: never ask again */
+    var saved = readPlayer();
+    if (saved && saved.id) { player = saved; cb(); return; }
     signedIn().then(function (ok) {
       if (!ok) {
         openGate('Sign in to play', 'The games keep a leaderboard with your name, so you need to sign in first.', null, function () {
-          toast('Sign in to play the games', 'err');
+          if (typeof toast === 'function') toast('Sign in to play the games', 'err');
         });
         return;
       }
-      var saved = readPlayer();
-      if (saved && saved.id) { player = saved; cb(); return; }
       openGate('Confirm your player name', 'This name goes on the leaderboards. You only have to do it once.', profileName(), function (name) {
         var p = { id: 'u-' + ((window.AUTH_USER && window.AUTH_USER.id) || 'local'), name: name, avatar: profileAvatar() };
         try { if (window.AUTH_USER && window.AUTH_USER.id) p.id = window.AUTH_USER.id; } catch (e) {}
         writePlayer(p);
         player = p;
-        sb(PLAYERS, { method: 'POST', body: JSON.stringify({
-          user_id: p.id, user_name: p.name, avatar: p.avatar || '', confirmed_at: new Date().toISOString()
-        }) }).catch(function () {});
         cb();
       });
     });
@@ -322,7 +339,9 @@
     var input = m.querySelector('#agPlayerName');
     var ok = m.querySelector('#agGateOk');
     var cancel = m.querySelector('#agGateCancel');
-    setTimeout(function () { try { input.focus(); } catch (e) {} }, 60);
+    ['pointerdown', 'touchstart', 'click'].forEach(function (ev) {
+      input.addEventListener(ev, function () { setTimeout(function () { try { input.focus(); } catch (e) {} }, 0); });
+    });
     function close() { m.remove(); }
     ok.onclick = function () {
       var v = String(input.value || '').trim();
@@ -368,6 +387,15 @@
         '<div class="ag-head-sub">' + GAMES.length + ' games built from Fardin\'s own list - play, score, climb the board.</div>' +
         '<button class="ag-close" id="agHubClose" aria-label="Close">✕</button>' +
       '</header>' +
+      '<div class="ag-howto ag-howto--hub">' +
+        '<div class="ag-howto-title">HOW TO PLAY</div>' +
+        '<ol class="ag-howto-list">' +
+          '<li>Sign in and confirm your player name once.</li>' +
+          '<li>Pick a game - every one of them explains itself before you start.</li>' +
+          '<li>Only a score that breaks into the top three is saved to the cloud.</li>' +
+        '</ol>' +
+        '<div class="ag-howto-duel">⚔️ DUEL GAMES: play against the bot or invite your friends - the same board works for all of them.</div>' +
+      '</div>' +
       '<div class="ag-grid" id="agGameGrid"></div>' +
       '<section class="ag-overall">' +
         '<div class="ag-section-title">OVERALL LEADERBOARD <span>points across every game</span></div>' +
@@ -397,20 +425,18 @@
   function startGame(key) {
     var g = GAME_BY_KEY[key];
     if (!g) return;
-    if (key === 'quest') {
-      askPlayerName(function () {
+    askPlayerName(function () {
+      if (key === 'quest') {
         var b = document.getElementById('animeQuestBtn');
         if (b) b.click();
-      });
-      return;
-    }
-    if (key === 'tournament') {
-      askPlayerName(function () {
+        return;
+      }
+      if (key === 'tournament') {
         if (typeof window.openTournament === 'function') window.openTournament();
-      });
-      return;
-    }
-    askPlayerName(function () { openGameScreen(key); });
+        return;
+      }
+      openGameScreen(key);
+    });
   }
 
   function openGameScreen(key) {
@@ -437,7 +463,6 @@
       stage: stage, wrap: wrap, key: key, score: 0, round: 0, rounds: 5,
       finish: function (score, max) { finishGame(key, score, wrap, max); }
     };
-    state = api;
 
     topScores(key, 3).then(function (rows) {
       var host = wrap.querySelector('#agGameBoard');
@@ -454,6 +479,68 @@
       '<span class="ag-round-score">SCORE <b>' + api.score + '</b></span>' +
       (extra ? '<span class="ag-round-score">POINTS <b>' + extra + '</b></span>' : '') +
       '<span class="ag-round-label">' + esc(label || '') + '</span></div>';
+  }
+  function howToBlock(key) {
+    var steps = HOWTO[key] || [];
+    return '<div class="ag-howto">' +
+      '<div class="ag-howto-title">HOW TO PLAY</div>' +
+      '<ol class="ag-howto-list">' + steps.map(function (s) { return '<li>' + esc(s) + '</li>'; }).join('') + '</ol>' +
+      '<div class="ag-howto-duel">⚔️ DUEL GAMES: play against the bot or invite your friends - the same board works for all of them.</div>' +
+    '</div>';
+  }
+  function startScreen(api, key, title, note, btnId, onStart) {
+    api.stage.innerHTML =
+      '<div class="ag-start">' +
+        '<div class="ag-start-title">' + esc(title) + '</div>' +
+        '<p class="ag-start-note">' + esc(note) + '</p>' +
+        howToBlock(key) +
+        '<button class="ag-btn ag-btn--go ag-btn--big" id="' + btnId + '">START ▸</button>' +
+      '</div>';
+    var b = api.stage.querySelector('#' + btnId);
+    if (b) b.onclick = onStart;
+  }
+  /* the answer box: no auto focus, tap or click to open the keyboard,
+     empty submits are ignored, and there is an optional skip button */
+  function answerRow(api, id, placeholder, onSubmit, withSkip) {
+    api.stage.insertAdjacentHTML('beforeend',
+      '<div class="ag-answer-row">' +
+        '<input class="ag-answer-input" id="' + id + '" type="text" placeholder="' + esc(placeholder) + '" autocomplete="off" spellcheck="false" enterkeyhint="go">' +
+        '<button class="ag-btn ag-btn--go" id="' + id + 'Go">SUBMIT</button>' +
+        (withSkip ? '<button class="ag-btn ag-btn--ghost" id="' + id + 'Skip">I DON\'T KNOW</button>' : '') +
+      '</div>');
+    var input = api.stage.querySelector('#' + id);
+    var go = api.stage.querySelector('#' + id + 'Go');
+    var skip = withSkip ? api.stage.querySelector('#' + id + 'Skip') : null;
+    ['pointerdown', 'touchstart', 'click'].forEach(function (ev) {
+      input.addEventListener(ev, function () {
+        setTimeout(function () { try { input.focus(); } catch (e) {} }, 0);
+      });
+    });
+    function submit() {
+      var v = String(input.value || '').trim();
+      if (!v) {
+        input.classList.add('ag-answer-empty');
+        setTimeout(function () { input.classList.remove('ag-answer-empty'); }, 700);
+        return;
+      }
+      go.disabled = true;
+      input.disabled = true;
+      if (skip) skip.disabled = true;
+      onSubmit(v);
+    }
+    go.onclick = submit;
+    input.onkeydown = function (e) { if (e.key === 'Enter') { e.preventDefault(); submit(); } };
+    if (skip) skip.onclick = function () {
+      go.disabled = true; input.disabled = true; skip.disabled = true;
+      onSubmit(null);
+    };
+    return input;
+  }
+  /* a wrong answer shows the right one and moves on */
+  function wrongAnswer(api, right, nextFn) {
+    api.stage.insertAdjacentHTML('beforeend',
+      '<div class="ag-verdict no">Nope - it was <b>' + esc(right) + '</b></div>');
+    setTimeout(function () { nextFn(api); }, 1900);
   }
   function optionsHtml(items, correct, onPick, cssClass) {
     var box = el('div', 'ag-options');
@@ -483,31 +570,21 @@
     }
     return out;
   }
-  function startScreen(api, title, note, btnId, onStart) {
-    api.stage.innerHTML =
-      '<div class="ag-start">' +
-        '<div class="ag-start-title">' + esc(title) + '</div>' +
-        '<p class="ag-start-note">' + esc(note) + '</p>' +
-        '<button class="ag-btn ag-btn--go ag-btn--big" id="' + btnId + '">START ▸</button>' +
-      '</div>';
-    var b = api.stage.querySelector('#' + btnId);
-    if (b) b.onclick = onStart;
-  }
 
   /* ══════════════════════════════════════════════════════════════════════
      1. GUESS THE ANIME - five clues, ten points, every clue costs
      ══════════════════════════════════════════════════════════════════════ */
-  var CLUE_COST = [1, 1.5, 2, 2.5];   /* the price of revealing the next clue */
+  var CLUE_COST = [1, 1.5, 2, 2.5];
 
   function buildCardGame(api) {
     var clues = (window.GUESS_CLUES || {});
     var names = Object.keys(clues);
-    startScreen(api, 'GUESS THE ANIME',
+    startScreen(api, 'card', 'GUESS THE ANIME',
       'Ten points to start. Reveal a clue, answer what you can - each extra clue costs points, and the first one is nearly impossible.',
       'agCardStart', function () {
         api.names = names;
-        api.points = 10;
         api.round = 0;
+        api.score = 0;
         nextCardRound(api);
       });
   }
@@ -525,59 +602,39 @@
     api.clues = set.slice(0, 5);
     api.clueIndex = 0;
     api.points = 10;
-    api.wrong = 0;
     drawClue(api);
   }
 
   function drawClue(api) {
-    var cost = api.clueIndex === 0 ? 0 : CLUE_COST[api.clueIndex - 1];
     var nextCost = api.clueIndex < api.clues.length - 1 ? CLUE_COST[api.clueIndex] : 0;
     api.stage.innerHTML = roundHead(api, 'Clue ' + (api.clueIndex + 1) + ' of ' + api.clues.length, api.points) +
       '<div class="ag-clue-box">' +
         '<div class="ag-clue-no">CLUE ' + (api.clueIndex + 1) + '</div>' +
         '<div class="ag-clue-text">' + esc(api.clues[api.clueIndex]) + '</div>' +
-      '</div>' +
-      '<div class="ag-answer-row">' +
-        '<input class="ag-answer-input" id="agAnswerInput" type="text" placeholder="Type the anime title…" autocomplete="off" spellcheck="false">' +
-        '<button class="ag-btn ag-btn--go" id="agAnswerGo">SUBMIT</button>' +
-      '</div>' +
-      (nextCost
-        ? '<button class="ag-next-clue" id="agNextClue">Need another clue? <b>−' + nextCost + ' points</b></button>'
-        : '<div class="ag-last-clue">This is the last clue.</div>');
-
-    var input = api.stage.querySelector('#agAnswerInput');
-    var go = api.stage.querySelector('#agAnswerGo');
-    var next = api.stage.querySelector('#agNextClue');
-    setTimeout(function () { try { input.focus(); } catch (e) {} }, 60);
-    function submit() {
-      var v = input.value;
+      '</div>';
+    answerRow(api, 'agCardInput', 'Type the anime title…', function (v) {
       var ok = answerMatches(v, api.answer, api.alt);
-      go.disabled = true;
-      if (next) next.disabled = true;
-      input.disabled = true;
       if (ok) {
         api.score += Math.max(0, Math.round(api.points * 10) / 10);
         api.stage.insertAdjacentHTML('beforeend',
-          '<div class="ag-verdict ok">Correct! <b>' + esc(api.answer) + '</b> — ' + api.points + ' points banked ⚡</div>');
-        setTimeout(function () { nextCardRound(api); }, 1600);
+          '<div class="ag-verdict ok">Correct! <b>' + esc(api.answer) + '</b> - ' + api.points + ' points banked ⚡</div>');
+        setTimeout(function () { nextCardRound(api); }, 1700);
       } else {
-        api.wrong++;
         api.points = Math.max(0, api.points - 2);
-        api.stage.insertAdjacentHTML('beforeend',
-          '<div class="ag-verdict no">Not quite — <b>−2 points</b>. You still have ' + api.points + '. Try again!</div>');
-        input.disabled = false;
-        go.disabled = false;
-        if (next) next.disabled = false;
-        setTimeout(function () { try { input.focus(); } catch (e) {} }, 60);
+        wrongAnswer(api, api.answer, nextCardRound);
       }
+    }, true);
+    if (nextCost) {
+      api.stage.insertAdjacentHTML('beforeend',
+        '<button class="ag-next-clue" id="agNextClue">NEXT CLUE <b>-' + nextCost + ' points</b></button>');
+      api.stage.querySelector('#agNextClue').onclick = function () {
+        api.points = Math.max(0, api.points - nextCost);
+        api.clueIndex++;
+        drawClue(api);
+      };
+    } else {
+      api.stage.insertAdjacentHTML('beforeend', '<div class="ag-last-clue">This is the last clue.</div>');
     }
-    go.onclick = submit;
-    input.onkeydown = function (e) { if (e.key === 'Enter') { e.preventDefault(); submit(); } };
-    if (next) next.onclick = function () {
-      api.points = Math.max(0, api.points - nextCost);
-      api.clueIndex++;
-      drawClue(api);
-    };
   }
 
   /* ══════════════════════════════════════════════════════════════════════
@@ -619,12 +676,7 @@
               var anime = (media.title && (media.title.english || media.title.romaji)) || name;
               (media.characters.edges || []).forEach(function (e) {
                 if (!e.node || !e.node.image || !e.node.image.large) return;
-                out.push({
-                  name: e.node.name.full,
-                  anime: anime,
-                  role: e.role || '',
-                  img: e.node.image.large
-                });
+                out.push({ name: e.node.name.full, anime: anime, role: e.role || '', img: e.node.image.large });
               });
             });
           }
@@ -636,7 +688,7 @@
   }
 
   function buildCharacterGame(api) {
-    startScreen(api, 'GUESS THE CHARACTER',
+    startScreen(api, 'character', 'GUESS THE CHARACTER',
       'A face in the dark - type the name. The portraits come straight from AniList, so every character is a real one.',
       'agCharStart', function () {
         api.stage.innerHTML = '<div class="ag-start"><div class="ag-start-title">Loading the cast…</div></div>';
@@ -668,42 +720,27 @@
           '<div class="ag-shadow-mark">?</div>' +
         '</div>' +
         '<div class="ag-shadow-hint">' + esc(c.anime) + ' · ' + esc(c.role) + '</div>' +
-      '</div>' +
-      '<div class="ag-answer-row">' +
-        '<input class="ag-answer-input" id="agCharInput" type="text" placeholder="Type the character name…" autocomplete="off" spellcheck="false">' +
-        '<button class="ag-btn ag-btn--go" id="agCharGo">SUBMIT</button>' +
       '</div>';
-    var input = api.stage.querySelector('#agCharInput');
-    var go = api.stage.querySelector('#agCharGo');
-    setTimeout(function () { try { input.focus(); } catch (e) {} }, 60);
-    function submit() {
-      var ok = answerMatches(input.value, api.answer, api.alt);
-      go.disabled = true;
-      input.disabled = true;
+    answerRow(api, 'agCharInput', 'Type the character name…', function (v) {
+      var ok = answerMatches(v, api.answer, api.alt);
       if (ok) {
         api.score++;
         api.stage.insertAdjacentHTML('beforeend',
           '<div class="ag-verdict ok">Correct! <b>' + esc(api.answer) + '</b> (' + esc(c.anime) + ')</div>');
-        setTimeout(function () { nextCharRound(api); }, 1300);
+        setTimeout(function () { nextCharRound(api); }, 1400);
       } else {
-        api.stage.insertAdjacentHTML('beforeend',
-          '<div class="ag-verdict no">Not that one - try again!</div>');
-        input.disabled = false;
-        go.disabled = false;
-        setTimeout(function () { try { input.focus(); } catch (e) {} }, 60);
+        wrongAnswer(api, api.answer + ' (' + c.anime + ')', nextCharRound);
       }
-    }
-    go.onclick = submit;
-    input.onkeydown = function (e) { if (e.key === 'Enter') { e.preventDefault(); submit(); } };
+    }, true);
   }
 
   /* ══════════════════════════════════════════════════════════════════════
-     3. EMOJI ANIME - type the answer
+     3. EMOJI ANIME
      ══════════════════════════════════════════════════════════════════════ */
   function buildEmojiGame(api) {
     var sets = window.EMOJI_SETS || {};
     var names = Object.keys(sets);
-    startScreen(api, 'EMOJI ANIME',
+    startScreen(api, 'emoji', 'EMOJI ANIME',
       'Three pictures, one series. Type the anime title - spelling is forgiving.',
       'agEmojiStart', function () {
         api.names = names;
@@ -722,41 +759,25 @@
     api.answer = title;
     api.alt = [];
     api.stage.innerHTML = roundHead(api, 'What is this anime?') +
-      '<div class="ag-emoji">' + (sets[title] || []).map(function (x) { return '<span>' + x + '</span>'; }).join('') + '</div>' +
-      '<div class="ag-answer-row">' +
-        '<input class="ag-answer-input" id="agEmojiInput" type="text" placeholder="Type the anime title…" autocomplete="off" spellcheck="false">' +
-        '<button class="ag-btn ag-btn--go" id="agEmojiGo">SUBMIT</button>' +
-      '</div>';
-    var input = api.stage.querySelector('#agEmojiInput');
-    var go = api.stage.querySelector('#agEmojiGo');
-    setTimeout(function () { try { input.focus(); } catch (e) {} }, 60);
-    function submit() {
-      var ok = answerMatches(input.value, api.answer, api.alt);
-      go.disabled = true;
-      input.disabled = true;
+      '<div class="ag-emoji">' + (sets[title] || []).map(function (x) { return '<span>' + x + '</span>'; }).join('') + '</div>';
+    answerRow(api, 'agEmojiInput', 'Type the anime title…', function (v) {
+      var ok = answerMatches(v, api.answer, api.alt);
       if (ok) {
         api.score++;
-        api.stage.insertAdjacentHTML('beforeend',
-          '<div class="ag-verdict ok">Correct! <b>' + esc(api.answer) + '</b></div>');
-        setTimeout(function () { nextEmojiRound(api); }, 1200);
+        api.stage.insertAdjacentHTML('beforeend', '<div class="ag-verdict ok">Correct! <b>' + esc(api.answer) + '</b></div>');
+        setTimeout(function () { nextEmojiRound(api); }, 1300);
       } else {
-        api.stage.insertAdjacentHTML('beforeend',
-          '<div class="ag-verdict no">Not it - have another go!</div>');
-        input.disabled = false;
-        go.disabled = false;
-        setTimeout(function () { try { input.focus(); } catch (e) {} }, 60);
+        wrongAnswer(api, api.answer, nextEmojiRound);
       }
-    }
-    go.onclick = submit;
-    input.onkeydown = function (e) { if (e.key === 'Enter') { e.preventDefault(); submit(); } };
+    }, true);
   }
 
   /* ══════════════════════════════════════════════════════════════════════
-     4. TRUE OR FALSE - 500+ statements
+     4. TRUE OR FALSE
      ══════════════════════════════════════════════════════════════════════ */
   function buildTrueFalseGame(api) {
     var facts = window.TF_FACTS || [];
-    startScreen(api, 'TRUE OR FALSE',
+    startScreen(api, 'truefalse', 'TRUE OR FALSE',
       'Ten statements about the list - five of them are lies. Read carefully and call it.',
       'agTfStart', function () {
         api.facts = shuffle(facts.slice()).slice(0, 10);
@@ -771,9 +792,6 @@
     api.round++;
     var f = api.facts[(api.round - 1) % api.facts.length];
     if (!f) return api.finish(api.score, api.rounds);
-    /* half of the statements are shown as their opposite */
-    var claim = Math.random() < 0.5;
-    api.claim = claim;
     api.truth = !!f[1];
     api.stage.innerHTML = roundHead(api, 'True or false?') +
       '<div class="ag-tf-claim">' + esc(f[0]) + '</div>' +
@@ -786,9 +804,8 @@
       if (ok) api.score++;
       api.stage.insertAdjacentHTML('beforeend',
         '<div class="ag-verdict ' + (ok ? 'ok' : 'no') + '">' +
-          (ok ? 'Correct!' : 'False - it ' + (api.truth ? 'is' : 'is not') + ' true.') +
-        '</div>');
-      setTimeout(function () { nextTfRound(api); }, ok ? 1000 : 1800);
+          (ok ? 'Correct!' : 'False - it ' + (api.truth ? 'is' : 'is not') + ' true.') + '</div>');
+      setTimeout(function () { nextTfRound(api); }, ok ? 1000 : 1900);
     }
     api.stage.querySelector('#agTfTrue').onclick = function () { answered(true); };
     api.stage.querySelector('#agTfFalse').onclick = function () { answered(false); };
@@ -798,7 +815,7 @@
      5. ANIME WORDLE
      ══════════════════════════════════════════════════════════════════════ */
   function buildWordleGame(api) {
-    startScreen(api, 'ANIME WORDLE',
+    startScreen(api, 'wordle', 'ANIME WORDLE',
       'Six guesses, ten letters. Green means the letter is in the right place, yellow means it is in the word somewhere else.',
       'agWordleStart', function () {
         var pool = famousPool().filter(function (a) { return /^[a-z ]+$/i.test(a.title) && a.title.length >= 4; });
@@ -830,45 +847,34 @@
       rows += '<div class="ag-wl-row">' + cells + '</div>';
     }
     api.stage.innerHTML = roundHead(api, 'Guess the title') +
-      '<div class="ag-wordle">' + rows + '</div>' +
-      '<div class="ag-answer-row">' +
-        '<input class="ag-answer-input" id="agWordleInput" type="text" placeholder="Type the title…" autocomplete="off" spellcheck="false">' +
-        '<button class="ag-btn ag-btn--go" id="agWordleGo">SUBMIT</button>' +
-      '</div>';
-    var input = api.stage.querySelector('#agWordleInput');
-    var go = api.stage.querySelector('#agWordleGo');
-    setTimeout(function () { try { input.focus(); } catch (e) {} }, 60);
-    function submit() {
-      var v = norm(input.value);
-      if (!v) return;
-      var g = v.replace(/ /g, '');
-      if (g.length !== w.replace(/ /g, '').length) {
-        api.stage.insertAdjacentHTML('beforeend', '<div class="ag-verdict no">Wrong number of letters - the title has ' + w.replace(/ /g, '').length + '.</div>');
+      '<div class="ag-wordle">' + rows + '</div>';
+    answerRow(api, 'agWordleInput', 'Type the title…', function (v) {
+      var g = norm(v);
+      if (!g) return;
+      if (g.replace(/ /g, '').length !== w.replace(/ /g, '').length) {
+        api.stage.insertAdjacentHTML('beforeend',
+          '<div class="ag-verdict no">Wrong number of letters - the title has ' + w.replace(/ /g, '').length + '.</div>');
         return;
       }
-      api.guesses.push(v);
-      var win = v === w;
+      api.guesses.push(g);
+      var win = g === w;
       api.stage.insertAdjacentHTML('beforeend',
         '<div class="ag-verdict ' + (win ? 'ok' : 'no') + '">' +
           (win ? 'Solved in ' + api.guesses.length + '!' : (api.guesses.length >= 6 ? 'Out of guesses - it was ' + esc(api.word) : 'Keep going…')) +
         '</div>');
-      input.disabled = true;
-      go.disabled = true;
       if (win || api.guesses.length >= 6) {
-        setTimeout(function () { api.finish(win ? 1 : 0, 1); }, 1600);
+        setTimeout(function () { api.finish(win ? 1 : 0, 1); }, 1700);
       } else {
         setTimeout(function () { drawWordle(api); }, 900);
       }
-    }
-    go.onclick = submit;
-    input.onkeydown = function (e) { if (e.key === 'Enter') { e.preventDefault(); submit(); } };
+    });
   }
 
   /* ══════════════════════════════════════════════════════════════════════
      6. TITLE SCRAMBLE
      ══════════════════════════════════════════════════════════════════════ */
   function buildScrambleGame(api) {
-    startScreen(api, 'TITLE SCRAMBLE',
+    startScreen(api, 'scramble', 'TITLE SCRAMBLE',
       'The anime title comes back in pieces. Put it back together - spelling is forgiving.',
       'agScrambleStart', function () {
         var pool = famousPool().filter(function (a) { return a.title.replace(/[^a-z0-9]/gi, '').length >= 5; });
@@ -892,36 +898,24 @@
     }
     if (mixed.join('') === letters.join('')) mixed.reverse();
     api.stage.innerHTML = roundHead(api, 'Unscramble the title') +
-      '<div class="ag-scramble">' + mixed.map(function (c) { return '<span>' + esc(c === ' ' ? '·' : c) + '</span>'; }).join('') + '</div>' +
-      '<div class="ag-answer-row">' +
-        '<input class="ag-answer-input" id="agScrambleInput" type="text" placeholder="Type the title…" autocomplete="off" spellcheck="false">' +
-        '<button class="ag-btn ag-btn--go" id="agScrambleGo">SUBMIT</button>' +
-      '</div>';
-    var input = api.stage.querySelector('#agScrambleInput');
-    var go = api.stage.querySelector('#agScrambleGo');
-    setTimeout(function () { try { input.focus(); } catch (e) {} }, 60);
-    function submit() {
-      var ok = answerMatches(input.value, api.answer, api.alt);
-      go.disabled = true;
+      '<div class="ag-scramble">' + mixed.map(function (c) { return '<span>' + esc(c === ' ' ? '·' : c) + '</span>'; }).join('') + '</div>';
+    answerRow(api, 'agScrambleInput', 'Type the title…', function (v) {
+      var ok = answerMatches(v, api.answer, api.alt);
       if (ok) {
         api.score++;
         api.stage.insertAdjacentHTML('beforeend', '<div class="ag-verdict ok">Correct! <b>' + esc(api.answer) + '</b></div>');
-        setTimeout(function () { nextScrambleRound(api); }, 1200);
+        setTimeout(function () { nextScrambleRound(api); }, 1300);
       } else {
-        api.stage.insertAdjacentHTML('beforeend', '<div class="ag-verdict no">Not it - try again!</div>');
-        go.disabled = false;
-        setTimeout(function () { try { input.focus(); } catch (e) {} }, 60);
+        wrongAnswer(api, api.answer, nextScrambleRound);
       }
-    }
-    go.onclick = submit;
-    input.onkeydown = function (e) { if (e.key === 'Enter') { e.preventDefault(); submit(); } };
+    }, true);
   }
 
   /* ══════════════════════════════════════════════════════════════════════
      7. INITIALS CHALLENGE
      ══════════════════════════════════════════════════════════════════════ */
   function buildInitialsGame(api) {
-    startScreen(api, 'INITIALS CHALLENGE',
+    startScreen(api, 'initials', 'INITIALS CHALLENGE',
       'The first letters of the title, one hint and nothing else. Type the anime.',
       'agInitialsStart', function () {
         var pool = famousPool().filter(function (a) { return a.title.replace(/[^a-z0-9 ]/gi, '').length >= 6; });
@@ -941,36 +935,24 @@
     var hint = (a.genres && a.genres.length ? a.genres[0] : 'Anime') + (a.year ? ' · ' + a.year : '');
     api.stage.innerHTML = roundHead(api, 'Name the anime') +
       '<div class="ag-initials">' + esc(initials) + '</div>' +
-      '<div class="ag-hint">' + esc(hint) + '</div>' +
-      '<div class="ag-answer-row">' +
-        '<input class="ag-answer-input" id="agInitialsInput" type="text" placeholder="Type the anime title…" autocomplete="off" spellcheck="false">' +
-        '<button class="ag-btn ag-btn--go" id="agInitialsGo">SUBMIT</button>' +
-      '</div>';
-    var input = api.stage.querySelector('#agInitialsInput');
-    var go = api.stage.querySelector('#agInitialsGo');
-    setTimeout(function () { try { input.focus(); } catch (e) {} }, 60);
-    function submit() {
-      var ok = answerMatches(input.value, api.answer, api.alt);
-      go.disabled = true;
+      '<div class="ag-hint">' + esc(hint) + '</div>';
+    answerRow(api, 'agInitialsInput', 'Type the anime title…', function (v) {
+      var ok = answerMatches(v, api.answer, api.alt);
       if (ok) {
         api.score++;
         api.stage.insertAdjacentHTML('beforeend', '<div class="ag-verdict ok">Correct! <b>' + esc(api.answer) + '</b></div>');
-        setTimeout(function () { nextInitialsRound(api); }, 1200);
+        setTimeout(function () { nextInitialsRound(api); }, 1300);
       } else {
-        api.stage.insertAdjacentHTML('beforeend', '<div class="ag-verdict no">Not it - have another go!</div>');
-        go.disabled = false;
-        setTimeout(function () { try { input.focus(); } catch (e) {} }, 60);
+        wrongAnswer(api, api.answer, nextInitialsRound);
       }
-    }
-    go.onclick = submit;
-    input.onkeydown = function (e) { if (e.key === 'Enter') { e.preventDefault(); submit(); } };
+    }, true);
   }
 
   /* ══════════════════════════════════════════════════════════════════════
-     8. ANIME MEMORY - match the pairs
+     8. ANIME MEMORY
      ══════════════════════════════════════════════════════════════════════ */
   function buildMemoryGame(api) {
-    startScreen(api, 'ANIME MEMORY',
+    startScreen(api, 'memory', 'ANIME MEMORY',
       'Twelve cards, six pairs of anime. Turn two at a time and find every pair before the clock runs out.',
       'agMemoryStart', function () {
         var pool = famousPool().filter(function (a) { return a.poster; });
@@ -1014,7 +996,7 @@
             if (!left) {
               api.stage.insertAdjacentHTML('beforeend',
                 '<div class="ag-verdict ok">All pairs found in ' + api.moves + ' moves!</div>');
-              setTimeout(function () { api.finish(Math.max(1, 13 - api.moves), 12); }, 1200);
+              setTimeout(function () { api.finish(Math.max(1, 13 - api.moves), 12); }, 1300);
               return;
             }
           } else {
@@ -1030,10 +1012,10 @@
   }
 
   /* ══════════════════════════════════════════════════════════════════════
-     9. TIMELINE RUSH - order five anime by year
+     9. TIMELINE RUSH
      ══════════════════════════════════════════════════════════════════════ */
   function buildTimelineGame(api) {
-    startScreen(api, 'TIMELINE RUSH',
+    startScreen(api, 'timeline', 'TIMELINE RUSH',
       'Five anime, one order. Put them from the oldest to the newest.',
       'agTimelineStart', function () {
         var pool = famousPool().filter(function (a) { return a.year > 1980; });
@@ -1052,33 +1034,32 @@
       '<div class="ag-timeline" id="agTimeline">' + five.map(function (a, i) {
         return '<div class="ag-tl-item" data-i="' + i + '"><span class="ag-tl-pos">' + (i + 1) + '</span>' +
           '<span class="ag-tl-title">' + esc(a.title) + '</span>' +
-          '<span class="ag-tl-year">' + a.year + '</span></div>';
+          '<span class="ag-tl-year">?</span></div>';
       }).join('') + '</div>' +
-      '<button class="ag-btn ag-btn--go ag-btn--big" id="agTimelineGo">LOCK THE ORDER</button>';
+      '<button class="ag-btn ag-btn--go ag-btn--big" id="agTimelineGo">LOCK THE ORDER</button>' +
+      '<button class="ag-btn ag-btn--ghost ag-btn--skip" id="agTimelineSkip">I DON\'T KNOW</button>';
     api.stage.querySelector('#agTimelineGo').onclick = function () {
-      var right = 0;
-      api.stage.querySelectorAll('.ag-tl-item').forEach(function (el) {
-        var i = parseInt(el.getAttribute('data-i'), 10);
-        var correct = (api.five[i].year === api.five[0].year ? false : true);
-      });
-      /* the years are hidden, so the player can only guess by memory - the
-         order is checked against the real years */
       var order = api.stage.querySelectorAll('.ag-tl-item');
-      var years = order.map(function (el) { return api.five[parseInt(el.getAttribute('data-i'), 10)].year; });
-      for (var i = 1; i < years.length; i++) if (years[i] >= years[i - 1]) right++;
-      right = Math.max(0, right - 1);
+      var years = order.map(function (el2) { return api.five[parseInt(el2.getAttribute('data-i'), 10)].year; });
+      var right = 0;
+      for (var i = 1; i < years.length; i++) if (years[i] > years[i - 1]) right++;
       api.score += right;
       api.stage.insertAdjacentHTML('beforeend',
         '<div class="ag-verdict ' + (right >= 3 ? 'ok' : 'no') + '">' + right + ' of 4 positions correct.</div>');
-      setTimeout(function () { nextTimelineRound(api); }, 1800);
+      setTimeout(function () { nextTimelineRound(api); }, 1900);
+    };
+    api.stage.querySelector('#agTimelineSkip').onclick = function () {
+      api.stage.insertAdjacentHTML('beforeend',
+        '<div class="ag-verdict no">The order was: ' + esc(api.five.map(function (a) { return a.title + ' (' + a.year + ')'; }).join(' → ')) + '</div>');
+      setTimeout(function () { nextTimelineRound(api); }, 2200);
     };
   }
 
   /* ══════════════════════════════════════════════════════════════════════
-     10. ANIME DUEL RUSH - a timing fight
+     10. ANIME DUEL RUSH
      ══════════════════════════════════════════════════════════════════════ */
   function buildFightGame(api) {
-    startScreen(api, 'ANIME DUEL RUSH',
+    startScreen(api, 'fight', 'ANIME DUEL RUSH',
       'Pick your fighter, watch the power bar and hit inside the green window. Five rounds, one champion.',
       'agFightStart', function () {
         api.pool = famousPool();
@@ -1095,7 +1076,6 @@
     api.mine = mine;
     api.foe = foe;
     api.hit = false;
-    var power = 60 + Math.random() * 40;
     api.stage.innerHTML = roundHead(api, 'Round ' + api.round + ' · ' + mine.title + ' vs ' + foe.title) +
       '<div class="ag-fight">' +
         '<div class="ag-fighter ag-fighter--me"><div class="ag-fighter-name">' + esc(mine.title) + '</div>' +
@@ -1124,15 +1104,15 @@
       if (good) api.score++;
       api.stage.insertAdjacentHTML('beforeend',
         '<div class="ag-verdict ' + (good ? 'ok' : 'no') + '">' + (good ? 'PERFECT HIT!' : 'Missed the window…') + '</div>');
-      setTimeout(function () { nextFightRound(api); }, 1200);
+      setTimeout(function () { nextFightRound(api); }, 1300);
     };
   }
 
   /* ══════════════════════════════════════════════════════════════════════
-     11. STRONGEST ROUND - pick the stronger of two
+     11. STRONGEST ROUND
      ══════════════════════════════════════════════════════════════════════ */
   function buildPowerGame(api) {
-    startScreen(api, 'STRONGEST ROUND',
+    startScreen(api, 'power', 'STRONGEST ROUND',
       'Two anime head to head. Pick the one you think is stronger - ten rounds of bracket action.',
       'agPowerStart', function () {
         api.pool = famousPool().filter(function (a) { return a.mal > 0; });
@@ -1147,7 +1127,6 @@
     var pair = shuffle(api.pool).slice(0, 2);
     if (pair.length < 2) return api.finish(api.score, api.rounds);
     var strong = pair[0].mal >= pair[1].mal ? pair[0] : pair[1];
-    var weak = strong === pair[0] ? pair[1] : pair[0];
     api.stage.innerHTML = roundHead(api, 'Who is stronger?') +
       '<div class="ag-versus">' +
         '<button class="ag-vs-card" id="agVsA"><img src="' + esc(pair[0].poster) + '" alt=""><span>' + esc(pair[0].title) + '</span>' +
@@ -1155,24 +1134,30 @@
         '<div class="ag-vs-mid">VS</div>' +
         '<button class="ag-vs-card" id="agVsB"><img src="' + esc(pair[1].poster) + '" alt=""><span>' + esc(pair[1].title) + '</span>' +
           '<small>MAL ' + (pair[1].mal || '?') + ' · ' + (pair[1].genres[0] || 'Anime') + '</small></button>' +
-      '</div>';
+      '</div>' +
+      '<button class="ag-btn ag-btn--ghost ag-btn--skip" id="agPowerSkip">I DON\'T KNOW</button>';
     function answer(chosen) {
       var ok = chosen === strong;
       if (ok) api.score++;
       api.stage.insertAdjacentHTML('beforeend',
         '<div class="ag-verdict ' + (ok ? 'ok' : 'no') + '">' +
           (ok ? 'Correct!' : 'It was <b>' + esc(strong.title) + '</b>') + '</div>');
-      setTimeout(function () { nextPowerRound(api); }, 1500);
+      setTimeout(function () { nextPowerRound(api); }, 1600);
     }
     api.stage.querySelector('#agVsA').onclick = function () { answer(pair[0]); };
     api.stage.querySelector('#agVsB').onclick = function () { answer(pair[1]); };
+    api.stage.querySelector('#agPowerSkip').onclick = function () {
+      api.stage.insertAdjacentHTML('beforeend',
+        '<div class="ag-verdict no">It was <b>' + esc(strong.title) + '</b> (MAL ' + strong.mal + ')</div>');
+      setTimeout(function () { nextPowerRound(api); }, 1900);
+    };
   }
 
   /* ══════════════════════════════════════════════════════════════════════
-     12. GENRE RUSH - fifteen seconds a card
+     12. GENRE RUSH
      ══════════════════════════════════════════════════════════════════════ */
   function buildGenreGame(api) {
-    startScreen(api, 'GENRE RUSH',
+    startScreen(api, 'genre', 'GENRE RUSH',
       'Fifteen seconds a card. Which genre does this anime belong to? Ten cards, ten chances.',
       'agGenreStart', function () {
         api.pool = famousPool().filter(function (a) { return a.genres && a.genres.length; });
@@ -1192,11 +1177,11 @@
     api.stage.innerHTML = roundHead(api, 'Which genre?') +
       '<div class="ag-poster"><img src="' + esc(a.poster) + '" alt=""></div>' +
       '<div class="ag-q">' + esc(a.title) + '</div>';
-    var box = optionsHtml(wrong, right, function (ok, t) {
+    var box = optionsHtml(wrong, right, function (ok) {
       if (ok) api.score++;
       api.stage.insertAdjacentHTML('beforeend',
         '<div class="ag-verdict ' + (ok ? 'ok' : 'no') + '">' + (ok ? 'Correct!' : 'It is ' + esc(right)) + '</div>');
-      setTimeout(function () { nextGenreRound(api); }, ok ? 1000 : 1700);
+      setTimeout(function () { nextGenreRound(api); }, ok ? 1000 : 1800);
     });
     api.stage.appendChild(box);
   }
@@ -1205,11 +1190,13 @@
   function finishGame(key, score, wrap, max) {
     var g = GAME_BY_KEY[key];
     max = max || 5;
-    saveScore(key, score, max).then(function () {
-      topScores(key, 3).then(function (rows) {
-        var host = wrap.querySelector('#agGameBoard');
-        if (host) host.innerHTML = boardHtml(rows, 'No scores yet - be the first!');
-      });
+    var saved = false;
+    saveScore(key, score, max).then(function (ok) {
+      saved = ok;
+      return topScores(key, 3);
+    }).then(function (rows) {
+      var host = wrap.querySelector('#agGameBoard');
+      if (host) host.innerHTML = boardHtml(rows, 'No scores yet - be the first!');
     });
     var best = '–';
     try {
@@ -1226,11 +1213,21 @@
         '<div class="ag-result-score">' + score + ' / ' + max + '</div>' +
         '<div class="ag-result-rank">' + rankOf(score, max) + '</div>' +
         '<div class="ag-result-best">Your best here: ' + best + '</div>' +
+        '<div class="ag-saved-note" id="agSavedNote">Checking the board…</div>' +
         '<div class="ag-result-actions">' +
           '<button class="ag-btn ag-btn--go" id="agAgain">PLAY AGAIN</button>' +
           '<button class="ag-btn ag-btn--ghost" id="agBackHub">ALL GAMES</button>' +
         '</div>' +
       '</div>';
+    setTimeout(function () {
+      var note = wrap.querySelector('#agSavedNote');
+      if (note) {
+        note.textContent = saved
+          ? '🏆 Saved to the cloud - you are in the top three!'
+          : 'Kept on this device - only a top three score reaches the cloud.';
+        note.className = 'ag-saved-note ' + (saved ? 'ag-saved-note--yes' : '');
+      }
+    }, 900);
     wrap.querySelector('#agAgain').onclick = function () { openGameScreen(key); };
     wrap.querySelector('#agBackHub').onclick = function () { renderHub(); };
   }
@@ -1239,7 +1236,7 @@
     var pct = max ? score / max : 0;
     if (pct >= 1) return 'PERFECT - you know this list inside out 🏆';
     if (pct >= 0.8) return 'Excellent run 🔥';
-    if (pct >= 0.6) return 'Solid - three out of five 👌';
+    if (pct >= 0.6) return 'Solid work 👌';
     if (pct >= 0.4) return 'Getting there 💪';
     if (pct > 0) return 'One more run and you have it 😅';
     return 'Zero this time - the list wins today 😤';
@@ -1255,12 +1252,11 @@
     scramble: buildScrambleGame,
     initials: buildInitialsGame,
     memory: buildMemoryGame,
-    timeline: buildTimelineRoundFallback,
+    timeline: buildTimelineGame,
     fight: buildFightGame,
     power: buildPowerGame,
     genre: buildGenreGame
   };
-  function buildTimelineRoundFallback(api) { buildTimelineGame(api); }
 
   window.openGamesHub = openGamesHub;
   window.AnimeGames = {

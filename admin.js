@@ -23,7 +23,24 @@ var RATING_DATA = {};
 var RATING_DETAIL = {};          // anime-ratings.json → { id: {malScore, characters, animRating, storyRating, animePlanet, anilist} }
 /* the 16 special card kinds the site knows about */
 var SPECIAL_CARD_KINDS = ['legendary', 'epic', 'op', 'isekaiking', 'burning', 'earth', 'black', 'wind', 'lightning', 'speed', 'frozen', 'healing', 'science', 'romance', 'psychic', 'levelup'];
-var SPECIAL_CARD_NAMES = { legendary: 'Legendary Card', epic: 'Epic Card', op: 'Over Powered Card', isekaiking: 'Isekai Lord Card', burning: 'Fire Card', earth: 'Earth Card', black: 'Cursed Card', wind: 'Wind Card', lightning: 'Thunder Card', speed: 'Speed Card', frozen: 'Frozen Card', healing: 'Healing Card', science: 'Science Card', romance: 'Romance Card', psychic: 'Psychic Card', levelup: 'Level Up Card' };
+var SPECIAL_CARD_NAMES = {
+  legendary:  { t: 'LEGENDARY',    s: 'MYTHIC TIER' },
+  epic:       { t: 'EPIC',         s: 'SAVAGE TIER' },
+  op:         { t: 'OVER POWERED', s: 'ABSOLUTE FORCE' },
+  isekaiking: { t: 'ISEKAI LORD',  s: 'OTHER WORLD' },
+  burning:    { t: 'FIRE',         s: 'BLAZING SOUL' },
+  earth:      { t: 'EARTH',        s: 'UNSHAKEN' },
+  black:      { t: 'CURSED',       s: 'BLACK SOUL' },
+  wind:       { t: 'WIND',         s: 'STORM RIDER' },
+  lightning:  { t: 'THUNDER',      s: 'STORM CALLER' },
+  speed:      { t: 'SPEED',        s: 'FLASH STEP' },
+  frozen:     { t: 'FROZEN',       s: 'ICE HEART' },
+  healing:    { t: 'HEALING',      s: 'LIFE BRINGER' },
+  science:    { t: 'SCIENCE',      s: 'THE GENIUS' },
+  romance:    { t: 'ROMANCE',      s: 'SWEET HEART' },
+  psychic:    { t: 'PSYCHIC',      s: 'MIND READER' },
+  levelup:    { t: 'LEVEL UP',     s: 'RISING STAR' }
+};
 var AWARD_WINNERS = {};
 var GROQ_MODELS = [];
 var GROQ_API_KEYS = [];
@@ -1986,10 +2003,10 @@ async function commitEditAnime() {
     var epsText = episodes ? '📺 Total Episodes: ' + episodes : '';
     var specialSel = document.getElementById('adminEditSpecial');
     var special = specialSel ? specialSel.value : '';
-    var stamp = stampMap[special] || '';
+    var stamp = stampMap[special] || null;
     var specialClass = special ? ' card-' + special : '';
     var stampHtml = '';
-    var backLabelHtml = stamp ? '<div class="back-special-label back-special-label--' + special + '">' + stamp + '</div>' : '';
+    var backLabelHtml = stamp ? '<div class="back-special-label back-special-label--' + special + '"><b>' + stamp.t + '</b><i>' + stamp.s + '</i></div>' : '';
     var newCard = '<div class="card' + specialClass + '"><div class="card-inner">' + stampHtml + '<div class="card-front"><div class="poster-wrap"><img src="' + img.replace(/"/g,'&quot;') + '" alt="' + name.replace(/"/g,'&quot;') + '" loading="lazy"/><span class="badge">#' + _editId + '</span></div><div class="info"><div class="number">NO. ' + _editId + '</div><div class="title">' + name + '</div></div></div><div class="card-back"><div class="back-content">' + backLabelHtml + '<div class="back-title">' + name + '</div><div class="back-season">' + seasonText + '</div><div class="back-episodes">' + epsText + '</div><div class="back-tap-hint">click to flip back</div></div></div></div></div>';
     lines[cardIdx] = newCard;
     indexContent = lines.join('\n');
@@ -2402,9 +2419,9 @@ function renderCardPreview() {
   var specialSel = document.getElementById('adminAddSpecial');
   var special = specialSel ? specialSel.value : '';
   var stampMap = SPECIAL_CARD_NAMES;
-  var stampLabel = stampMap[special] || '';
+  var stampLabel = stampMap[special] || null;
   var stampHtml = '';
-  var backLabelHtml = stampLabel ? '<div class="back-special-label back-special-label--' + special + '">' + stamp + '</div>' : '';
+  var backLabelHtml = stampLabel ? '<div class="back-special-label back-special-label--' + special + '"><b>' + stampLabel.t + '</b><i>' + stampLabel.s + '</i></div>' : '';
   var specialClass = special ? ' card-' + special : '';
   var card =
     '<div class="card' + specialClass + '">' +
@@ -2516,10 +2533,10 @@ async function commitAddAnime() {
     var specialSel = document.getElementById('adminAddSpecial');
     var special = specialSel ? specialSel.value : '';
     var stampMap = SPECIAL_CARD_NAMES;
-    var stamp = stampMap[special] || '';
+    var stamp = stampMap[special] || null;
     var specialClass = special ? ' card-' + special : '';
     var stampHtml = '';
-    var backLabelHtml = stamp ? '<div class="back-special-label back-special-label--' + special + '">' + stamp + '</div>' : '';
+    var backLabelHtml = stamp ? '<div class="back-special-label back-special-label--' + special + '"><b>' + stamp.t + '</b><i>' + stamp.s + '</i></div>' : '';
     var cardHtml = '\n\n<div class="card' + specialClass + '"><div class="card-inner">' + stampHtml + '<div class="card-front"><div class="poster-wrap"><img src="' + img.replace(/"/g,'&quot;') + '" alt="' + title.replace(/"/g,'&quot;') + '" loading="lazy"/><span class="badge">#' + nextId + '</span></div><div class="info"><div class="number">NO. ' + nextId + '</div><div class="title">' + title + '</div></div></div><div class="card-back"><div class="back-content">' + backLabelHtml + '<div class="back-title">' + title + '</div><div class="back-season">🌸 ' + seasonLabel + '</div><div class="back-episodes">📺 Total Episodes: ' + eps + '</div><div class="back-tap-hint">click to flip back</div></div></div></div></div>';
     indexContent = indexContent.replace(/<!-- === GRID END === -->/, cardHtml + '\n\n<!-- === GRID END === -->');
     scriptContent = scriptContent.replace(/counterUp\("seasonCount",\s*(\d+)/, function(m, c) { return 'counterUp("seasonCount", ' + (parseInt(c) + 1); });

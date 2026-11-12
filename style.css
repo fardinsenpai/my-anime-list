@@ -1570,9 +1570,10 @@ body.duel-mode-active .now-strip { display: none !important; }
   --sc-soft: rgba(255, 215, 0, 0.2);
   position: relative;
   display: inline-flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 5px;
+  gap: 1px;
   font-family: 'Orbitron', sans-serif;
   font-size: 9px;
   font-weight: 900;
@@ -1593,6 +1594,20 @@ body.duel-mode-active .now-strip { display: none !important; }
   margin-bottom: 2px;
   overflow: hidden;
   animation: specialLabelPulse 2.4s ease-in-out infinite;
+}
+.back-special-label b {
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 3px;
+  line-height: 1;
+}
+.back-special-label i {
+  font-style: normal;
+  font-size: 7px;
+  font-weight: 700;
+  letter-spacing: 2.4px;
+  opacity: .72;
+  line-height: 1;
 }
 .back-special-label::before {
   content: '';
@@ -8507,3 +8522,121 @@ body.duel-mode-active #nowStrip { display: none !important; }
 .card-levelup .badge { background: linear-gradient(135deg,#ffd873,#f09f10) !important; border-color: #ffbe2b !important; box-shadow: 0 0 8px rgba(255,190,43,.85), 0 0 4px #b36a00 !important; color: #3a2400 !important; text-shadow: none; }
 .card-levelup .back-genre, .card-levelup .back-mal, .card-levelup .back-mal-score, .card-levelup .back-season, .card-levelup .back-episodes { text-shadow: 0 0 6px rgba(255,190,43,.85) !important; color: #ffeec2 !important; }
 .back-special-label--levelup { color: #ffbe2b !important; text-shadow: 0 0 14px rgba(255,190,43,.85) !important; }
+
+.back-special-label--legendary { --sc: #eaf2ff; --sc-soft: rgba(190,215,255,.22); }
+.back-special-label--epic { --sc: #ff8a2b; --sc-soft: rgba(255,138,43,.22); }
+.back-special-label--op { --sc: #ff4fa3; --sc-soft: rgba(255,79,163,.22); }
+.back-special-label--isekaiking { --sc: #8a6cff; --sc-soft: rgba(138,108,255,.22); }
+.back-special-label--burning { --sc: #ff4a3d; --sc-soft: rgba(255,74,61,.22); }
+.back-special-label--earth { --sc: #c08a44; --sc-soft: rgba(192,138,68,.22); }
+.back-special-label--black { --sc: #a9a9c2; --sc-soft: rgba(169,169,194,.22); }
+.back-special-label--wind { --sc: #3fd97a; --sc-soft: rgba(63,217,122,.22); }
+.back-special-label--lightning { --sc: #ffe94d; --sc-soft: rgba(255,233,77,.24); }
+.back-special-label--speed { --sc: #2ae6c0; --sc-soft: rgba(42,230,192,.22); }
+.back-special-label--frozen { --sc: #57d2ff; --sc-soft: rgba(87,210,255,.22); }
+.back-special-label--healing { --sc: #a8e63c; --sc-soft: rgba(168,230,60,.22); }
+.back-special-label--science { --sc: #4d8cff; --sc-soft: rgba(77,140,255,.22); }
+.back-special-label--romance { --sc: #ff7ec9; --sc-soft: rgba(255,126,201,.24); }
+.back-special-label--psychic { --sc: #c07bff; --sc-soft: rgba(192,123,255,.22); }
+.back-special-label--levelup { --sc: #ffbe2b; --sc-soft: rgba(255,190,43,.22); }
+
+
+/* ══════════════════════════════════════════════════════════════════════
+   THE WEB GAMES BLOCK IN THE SIDEBAR
+   A little arcade cabinet: a lit header, neon rails on the rows and a
+   pulsing play badge.
+   ══════════════════════════════════════════════════════════════════════ */
+.side-group-head--games {
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  gap: 3px !important;
+  margin: 18px 16px 8px !important;
+  padding: 10px 12px 9px !important;
+  border: 1px solid rgba(0, 242, 254, .3) !important;
+  border-radius: 12px !important;
+  background:
+    linear-gradient(135deg, rgba(0, 242, 254, .16), rgba(138, 92, 255, .12) 45%, rgba(255, 45, 120, .14)),
+    rgba(0, 0, 0, .25) !important;
+  box-shadow: 0 0 22px -8px rgba(0, 242, 254, .55), inset 0 0 18px -10px rgba(138, 92, 255, .8) !important;
+  overflow: hidden;
+}
+.side-group-head--games::before {
+  content: '' !important;
+  position: absolute !important;
+  inset: 0 !important;
+  height: 2px !important; width: auto !important;
+  background: linear-gradient(90deg, transparent, #00f2fe, #8a5cff, #ff2d78, transparent) !important;
+  animation: gamesRail 3.4s linear infinite !important;
+}
+@keyframes gamesRail {
+  0% { transform: translateX(-60%); opacity: .2; }
+  50% { opacity: 1; }
+  100% { transform: translateX(60%); opacity: .2; }
+}
+.side-group-head--games .side-group-title {
+  font-size: 11px !important;
+  letter-spacing: 3.4px !important;
+  white-space: nowrap !important;
+  background: linear-gradient(90deg, #00f2fe, #8a5cff 50%, #ff2d78) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  text-shadow: none !important;
+}
+.side-group-head--games .side-group-sub {
+  color: rgba(0, 242, 254, .75) !important;
+  font-size: 8px !important;
+  letter-spacing: 1.8px !important;
+  text-align: left;
+  white-space: nowrap !important;
+}
+.side-game-item a {
+  border-left: 2px solid rgba(0, 242, 254, .25) !important;
+  background: linear-gradient(90deg, rgba(0, 242, 254, .07), transparent 70%) !important;
+}
+.side-game-item a svg { filter: drop-shadow(0 0 7px rgba(0, 242, 254, .45)); transition: filter .2s; }
+.side-game-item a:hover {
+  border-left-color: #00f2fe !important;
+  background: linear-gradient(90deg, rgba(0, 242, 254, .16), transparent 80%) !important;
+  box-shadow: inset 3px 0 0 #00f2fe, -12px 0 30px -18px rgba(0, 242, 254, .8) !important;
+}
+.side-game-item a:hover svg { filter: drop-shadow(0 0 12px rgba(0, 242, 254, .9)); }
+.side-game-item .ad-group-tag {
+  color: #9ff2ff !important;
+  background: rgba(0, 242, 254, .12) !important;
+  border-color: rgba(0, 242, 254, .45) !important;
+  box-shadow: 0 0 12px -4px rgba(0, 242, 254, .7);
+  animation: gamesTagPulse 2.6s ease-in-out infinite;
+}
+@keyframes gamesTagPulse {
+  0%, 100% { opacity: .75; }
+  50% { opacity: 1; }
+}
+#gamesHubLink {
+  position: relative;
+  overflow: hidden;
+}
+#gamesHubLink::after {
+  content: '14 GAMES';
+  position: absolute;
+  right: 12px; bottom: 6px;
+  font-size: 8px; letter-spacing: 2px;
+  color: rgba(0, 242, 254, .55);
+}
+
+.side-game-item a > span:not(.ad-group-tag):not(.duel-status-badge) {
+  white-space: nowrap !important;
+}
+.side-game-item a {
+  gap: 12px !important;
+  padding-left: 18px !important;
+  padding-right: 18px !important;
+}
+.side-game-item a svg,
+.side-game-item .duel-nav-icon {
+  flex: 0 0 auto !important;
+}
+.side-game-item .duel-nav-text {
+  font-size: 13px !important;
+  white-space: nowrap !important;
+}
