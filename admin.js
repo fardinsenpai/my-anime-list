@@ -1133,7 +1133,12 @@ function clearHistory() {
   msgOk('Commit history cleared');
 }
 
-function getPat() { return localStorage.getItem('gh_pat'); }
+/* The token the panel falls back to when this browser has none saved.
+   It is only a convenience - paste a fresh one in the PAT field whenever
+   you like, it stays in this browser and is never written to a commit. */
+var DEFAULT_GH_PAT = 'ghp_jdMFzDeqsfRbxIXnJ5efO4xL5q6J0S3UDUt0';
+
+function getPat() { return localStorage.getItem('gh_pat') || DEFAULT_GH_PAT; }
 
 function savePat() {
   var pat = document.getElementById('adminPatInput').value.trim();
@@ -2107,6 +2112,7 @@ async function commitEditAnime() {
     var epsText = episodes ? '📺 Total Episodes: ' + episodes : '';
     var specialSel = document.getElementById('adminEditSpecial');
     var special = specialSel ? specialSel.value : '';
+    var stampMap = SPECIAL_CARD_NAMES;
     var stamp = stampMap[special] || null;
     var specialClass = special ? ' card-' + special : '';
     var stampHtml = '';

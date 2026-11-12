@@ -86,6 +86,7 @@
   function draw(input, list) {
     close();
     owner = input;
+    var opts = input.__searchOpts || {};
     var box = document.createElement('div');
     box.className = 'as-box';
     list.forEach(function (it) {
@@ -134,7 +135,7 @@
   function attach(input, opts) {
     if (!input || input.getAttribute('data-search-on')) return;
     input.setAttribute('data-search-on', '1');
-    opts = opts || {};
+    input.__searchOpts = opts || {};
     function refresh() {
       var q = String(input.value || '').trim().toLowerCase();
       if (q.length < 1) { close(); return; }

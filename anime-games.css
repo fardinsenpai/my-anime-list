@@ -692,3 +692,24 @@
 .ag-arcade-frame iframe { display: block; width: 100%; border: 0; }
 .ag-arcade-actions { display: flex; gap: 10px; justify-content: center; margin-top: 14px; flex-wrap: wrap; }
 .ag-arcade-actions a { text-decoration: none; }
+
+.ag-game-icon { display: inline-flex; align-items: center; justify-content: center; color: #00f2fe; }
+.ag-game-icon svg { width: 30px; height: 30px; filter: drop-shadow(0 0 8px rgba(0, 242, 254, .55)); }
+.ag-head--game .ag-head-title {
+  display: flex; align-items: center; justify-content: center; gap: 12px;
+  background: none !important;
+  -webkit-background-clip: initial !important;
+  background-clip: initial !important;
+  -webkit-text-fill-color: currentColor !important;
+  color: #fff;
+}
+.ag-head--game .ag-head-title svg {
+  width: 30px; height: 30px; color: #ffd700; flex: 0 0 auto;
+  filter: drop-shadow(0 0 10px rgba(255, 215, 0, .55));
+}
+.ag-head--game .ag-head-title span {
+  background: linear-gradient(100deg, #00f2fe, #8a5cff 45%, #ff2d78);
+  -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+}
+.ag-result-icon { display: flex; align-items: center; justify-content: center; color: #ffd700; }
+.ag-result-icon svg { width: 52px; height: 52px; filter: drop-shadow(0 0 14px rgba(255, 215, 0, .6)); }

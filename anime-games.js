@@ -96,7 +96,7 @@
       desc: 'Three little pictures stand in for a whole series. Type the anime.' },
     { key: 'truefalse', title: 'True or False', icon: '⚖️', tag: 'FACTS',
       desc: 'Ten statements about the list - half of them are lies. Spot every one.' },
-    { key: 'wordle', title: 'Anime Wordle', icon: '🟩', tag: 'WORD',
+    { key: 'wordle', title: 'Guess the Title', icon: '🟩', tag: 'WORD',
       desc: 'Six guesses, green and yellow tiles. The title is longer than you think.' },
     { key: 'scramble', title: 'Title Scramble', icon: '🔀', tag: 'SCRAMBLE',
       desc: 'The anime title comes back in pieces. Put it back together.' },
@@ -115,6 +115,25 @@
     { key: 'arcade', title: 'Action Arcade', icon: '🕹️', tag: 'ITCH.IO',
       desc: 'Real action and anime games from itch.io, playable right here. Some come with their source code.' }
   ];
+  /* every game gets a drawn logo instead of an emoji */
+  var GAME_ICONS = {
+    quest: '<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="16" cy="16" r="12"/><circle cx="16" cy="16" r="6"/><path d="M13.6 12.6a2.6 2.6 0 1 1 3.4 2.5c-.7.5-1 1-1 1.8"/><circle cx="16" cy="21" r=".9" fill="currentColor" stroke="none"/></svg>',
+    tournament: '<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4h14v6a7 7 0 0 1-14 0z"/><path d="M9 6H6v2a4 4 0 0 0 4 4"/><path d="M23 6h3v2a4 4 0 0 1-4 4"/><path d="M16 17v5"/><path d="M11 26h10"/><path d="M13 22h6"/></svg>',
+    card: '<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="7" width="13" height="18" rx="2.5"/><path d="M8 12h5M8 16h3.5"/><circle cx="22" cy="20" r="5.5"/><path d="M26 24l3 3"/></svg>',
+    character: '<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="16" cy="9.5" r="5"/><path d="M6 27a10 10 0 0 1 20 0"/><path d="M12.5 12c1 1.8 6 1.8 7 0" opacity=".5"/></svg>',
+    emoji: '<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="16" cy="16" r="12"/><path d="M10.5 19.5a6.5 6.5 0 0 0 11 0"/><circle cx="12" cy="12.5" r="1.4" fill="currentColor" stroke="none"/><circle cx="20" cy="12.5" r="1.4" fill="currentColor" stroke="none"/></svg>',
+    truefalse: '<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M16 5v21"/><path d="M7 9h18"/><path d="M6 9l-2.5 7h5z"/><path d="M26 9l-2.5 7h5z"/><path d="M11 26h10"/></svg>',
+    wordle: '<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="11" height="11" rx="2"/><rect x="17" y="5" width="11" height="11" rx="2" fill="currentColor" opacity=".28"/><rect x="4" y="18" width="11" height="11" rx="2"/><rect x="17" y="18" width="11" height="11" rx="2"/></svg>',
+    scramble: '<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9h7M6 9l3.5 3.5"/><path d="M26 9h-7M26 9l-3.5 3.5"/><path d="M6 23h7M6 23l3.5-3.5"/><path d="M26 23h-7M26 23l-3.5-3.5"/></svg>',
+    initials: '<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 23l4-14 4 14"/><path d="M7.2 18h5.6"/><path d="M18 23V9h3a4 4 0 0 1 0 8h-3"/></svg>',
+    memory: '<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="8" width="12" height="16" rx="2.5"/><rect x="16" y="8" width="12" height="16" rx="2.5"/></svg>',
+    timeline: '<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="16" cy="16" r="12"/><path d="M16 9v7l5 3"/></svg>',
+    fight: '<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M19 3L9 15h6l-3 10 11-13h-6z"/><path d="M6 24l3 3M26 24l-3 3"/></svg>',
+    power: '<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 10v12M23 10v12M12 16h8"/><path d="M5 11v10M27 11v10"/></svg>',
+    genre: '<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14L14 4l12 12-10 10z"/><circle cx="11.5" cy="10.5" r="1.7" fill="currentColor" stroke="none"/></svg>',
+    arcade: '<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="12" width="25" height="16" rx="4"/><path d="M12 16v4M10 18h4"/><circle cx="21" cy="18" r="2.6"/></svg>'
+  };
+
   var GAME_BY_KEY = {};
   GAMES.forEach(function (g) { GAME_BY_KEY[g.key] = g; });
 
@@ -301,7 +320,7 @@
         : '<span class="ag-board-ava ag-board-ava--none">' + esc((r.name || '?').charAt(0).toUpperCase()) + '</span>';
       return '<div class="ag-board-row">' +
         '<span class="ag-board-rank">' + medal + '</span>' + av +
-        '<span class="ag-board-name">' + esc(r.name || 'Player') + '</span>' +
+        '<span class="ag-board-name">' + esc(r.name || r.user_name || 'Player') + '</span>' +
         '<span class="ag-board-score">' + (r.score != null ? r.score : (r.points != null ? r.points : 0)) + '</span>' +
         '</div>';
     }).join('');
@@ -412,7 +431,7 @@
     GAMES.forEach(function (g) {
       var card = el('button', 'ag-game');
       card.innerHTML =
-        '<span class="ag-game-icon">' + g.icon + '</span>' +
+        '<span class="ag-game-icon">' + (GAME_ICONS[g.key] || g.icon) + '</span>' +
         '<span class="ag-game-title">' + esc(g.title) + '</span>' +
         '<span class="ag-game-tag">' + esc(g.tag) + '</span>' +
         '<span class="ag-game-desc">' + esc(g.desc) + '</span>' +
@@ -453,7 +472,7 @@
     var wrap = el('div', 'ag-wrap ag-wrap--game');
     wrap.innerHTML =
       '<header class="ag-head ag-head--game">' +
-        '<div class="ag-head-title">' + g.icon + ' ' + esc(g.title) + '</div>' +
+        '<div class="ag-head-title">' + (GAME_ICONS[g.key] || g.icon) + ' <span>' + esc(g.title) + '</span></div>' +
         '<button class="ag-close" id="agGameClose" aria-label="Back">✕</button>' +
       '</header>' +
       '<div class="ag-stage" id="agStage"></div>' +
@@ -1088,11 +1107,11 @@
     if (!host) return;
     host.innerHTML = api.order.map(function (a, i) {
       return '<div class="ag-tl-item" data-i="' + i + '">' +
-        '<button class="ag-tl-move" data-dir="-1" ↑</button>' +
+        '<button class="ag-tl-move" data-dir="-1" title="Move up">&#9650;</button>' +
         '<span class="ag-tl-pos">' + (i + 1) + '</span>' +
         '<span class="ag-tl-title">' + esc(a.title) + '</span>' +
         '<span class="ag-tl-year">?</span>' +
-        '<button class="ag-tl-move" data-dir="1">↓</button>' +
+        '<button class="ag-tl-move" data-dir="1" title="Move down">&#9660;</button>' +
         '</div>';
     }).join('');
     host.querySelectorAll('.ag-tl-move').forEach(function (b) {
@@ -1275,7 +1294,7 @@
     } catch (e) {}
     wrap.querySelector('#agStage').innerHTML =
       '<div class="ag-result">' +
-        '<div class="ag-result-icon">' + g.icon + '</div>' +
+        '<div class="ag-result-icon">' + (GAME_ICONS[g.key] || g.icon) + '</div>' +
         '<div class="ag-result-score">' + score + ' / ' + max + '</div>' +
         '<div class="ag-result-rank">' + rankOf(score, max) + '</div>' +
         '<div class="ag-result-best">Your best here: ' + best + '</div>' +
