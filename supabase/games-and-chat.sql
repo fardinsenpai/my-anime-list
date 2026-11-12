@@ -1,21 +1,30 @@
 -- ═════════════════════════════════════════════════════════════════════════
---  FARDIN'S ANIME HUB · Supabase schema
---  Paste this into  Supabase Dashboard → SQL Editor → New query → Run
+--  FARDIN'S ANIME HUB · games, leaderboards and cloud chat history
+--  Supabase Dashboard → SQL Editor → New query → paste → Run
+--  Project: ldzlefdklcgvqcbqibtt
 --
---  It creates:
---    1. game_players   - the confirmed player name (asked once, per visitor)
---    2. game_scores    - every finished game (one row per player + game)
+--  Creates:
+--    1. game_players   - the player name a visitor confirms once
+--    2. game_scores    - one row per player per game (their best score)
 --    3. chat_messages  - the AI chat history of signed-in visitors
---  …and the row level security policies that keep them private.
+--  …plus the row level security that keeps every row private.
 --
---  Free plan limits (July 2026):
---    database  500 MB      rows per table   unlimited (soft limit ~1 M rows
---                                   in practice, keep tables tidy)
---    storage   1 GB       API requests    500 000 / month (project wide)
---    bandwidth 5 GB/month egress   MAU  50 000
---    Auth       50 000 MAU free        email OTPs 100 / hour
---  See "how much can each table take" at the bottom of this file.
+--  The game keys used by the hub:
+--    quest · tournament · card · character · emoji · truefalse · wordle
+--    scramble · initials · memory · timeline · fight · power · genre
+--
+--  FREE PLAN LIMITS (Supabase free, 500 MB database per project):
+--    game_players  ~120 bytes/row  ≈ 4 000 000 rows
+--    game_scores   ~160 bytes/row  ≈ 3 000 000 rows
+--    chat_messages ~400 bytes/row  ≈ 1 200 000 rows
+--    API requests 500 000 / month · storage 1 GB · egress 5 GB / month
+--    Auth          50 000 monthly active users
+--  Realistic: 5 000 players × 14 games = 70 000 score rows ≈ 11 MB.
+--  The chat table is the one to watch (600 000 rows ≈ 240 MB) - the cleanup
+--  query at the bottom of this file keeps it small.
 -- ═════════════════════════════════════════════════════════════════════════
+
+create extension if not exists pgcrypto;
 
 -- ───────────────────────────────────────────── 1. the players
 create table if not exists public.game_players (
@@ -33,16 +42,16 @@ create table if not exists public.game_scores (
   user_id    uuid not null references auth.users (id) on delete cascade,
   user_name  text not null,
   avatar     text default '',
-  game_key   text not null,             -- 'quest' | 'tournament' | 'card' | …
+  game_key   text not null,
   score      int  not null default 0,
   max_score  int  not null default 5,
   played_at  timestamptz not null default now()
 );
 
-create index if not exists game_scores_game_idx  on public.game_scores (game_key, score desc);
-create index if not exists game_scores_user_idx  on public.game_scores (user_id);
+create index if not exists game_scores_game_idx on public.game_scores (game_key, score desc);
+create index if not exists game_scores_user_idx on public.game_scores (user_id);
 
--- one row per player per game: the best score wins
+-- one row per player per game: a new score replaces the old one
 create unique index if not exists game_scores_best_idx
   on public.game_scores (user_id, game_key);
 
@@ -60,21 +69,19 @@ create index if not exists chat_messages_user_idx
 
 -- ═════════════════════════════════════════════════════════════════════════
 --  ROW LEVEL SECURITY
---  Every table is private: a row belongs to the signed-in visitor who wrote
---  it. The leaderboards are read through the same policies, so only your
---  own rows and the public score fields are visible.
+--  A row belongs to the signed-in visitor who wrote it. The leaderboards are
+--  the only thing everybody may read.
 -- ═════════════════════════════════════════════════════════════════════════
 alter table public.game_players enable row level security;
 alter table public.game_scores  enable row level security;
 alter table public.chat_messages enable row level security;
 
--- players: you may read/write only your own row
+-- players: you may read and write only your own row
 drop policy if exists "players own" on public.game_players;
 create policy "players own" on public.game_players
   for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
 
--- scores: you may read every score (that is the leaderboard) but only
--- write your own
+-- scores: everybody may read them (that is the leaderboard), only you may write
 drop policy if exists "scores read" on public.game_scores;
 create policy "scores read" on public.game_scores
   for select using (true);
@@ -93,32 +100,7 @@ create policy "chat own" on public.chat_messages
   for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
 
 -- ═════════════════════════════════════════════════════════════════════════
---  HOW MUCH CAN EACH TABLE TAKE ON THE FREE PLAN?
+--  HOUSEKEEPING (run from the SQL editor or as a cron job)
+--  Keeps the chat history small without touching the leaderboards.
 -- ═════════════════════════════════════════════════════════════════════════
---  The free plan gives 500 MB of database per project. The tables are tiny:
---
---  ┌──────────────────┬──────────────┬───────────────┬──────────────────┐
---  │ table            │ row size     │ rows in 500MB │ what that means │
---  ├──────────────────┼──────────────┼───────────────┼──────────────────┤
---  │ game_players     │ ~120 bytes   │ ≈ 4 000 000   │ every visitor    │
---  │                  │              │               │ who ever played  │
---  │ game_scores      │ ~160 bytes   │ ≈ 3 000 000   │ 8 games × every │
---  │                  │              │               │ player, one row │
---  │                  │              │               │ each (best score)│
---  │ chat_messages    │ ~400 bytes   │ ≈ 1 200 000   │ ~120 messages per │
---  │                  │ (avg text)   │               │ visitor         │
---  │ wishlist         │ ~200 bytes   │ ≈ 2 500 000   │ the existing one │
---  └──────────────────┴──────────────┴───────────────┴──────────────────┘
---
---  Realistic use: 5 000 players × 8 games = 40 000 score rows ≈ 6 MB.
---  5 000 players × 120 messages = 600 000 chat rows ≈ 240 MB → that is
---  the one to watch. A cron that deletes chat rows older than 90 days
---  keeps it tiny (add this if you ever need it):
---
---    delete from public.chat_messages where created_at < now() - interval '90 days';
---
---  Watch the API usage too: every leaderboard view is a REST call.
---  The free plan allows 500 000 requests / month, and the hub uses roughly
---  1 request per page view + 1 per game start, so ~100 000 page views a
---  month stay well inside the limit.
--- ═════════════════════════════════════════════════════════════════════════
+--  delete from public.chat_messages where created_at < now() - interval '90 days';
