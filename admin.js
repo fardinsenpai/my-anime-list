@@ -21,6 +21,9 @@ var STUDIO_DATA = {};
 var TOP_5_DATA = {};
 var RATING_DATA = {};
 var RATING_DETAIL = {};          // anime-ratings.json → { id: {malScore, characters, animRating, storyRating, animePlanet, anilist} }
+/* the 16 special card kinds the site knows about */
+var SPECIAL_CARD_KINDS = ['legendary', 'epic', 'op', 'isekaiking', 'burning', 'earth', 'black', 'wind', 'lightning', 'speed', 'frozen', 'healing', 'science', 'romance', 'psychic', 'levelup'];
+var SPECIAL_CARD_NAMES = { legendary: 'Legendary Card', epic: 'Epic Card', op: 'Over Powered Card', isekaiking: 'Isekai Lord Card', burning: 'Fire Card', earth: 'Earth Card', black: 'Cursed Card', wind: 'Wind Card', lightning: 'Thunder Card', speed: 'Speed Card', frozen: 'Frozen Card', healing: 'Healing Card', science: 'Science Card', romance: 'Romance Card', psychic: 'Psychic Card', levelup: 'Level Up Card' };
 var AWARD_WINNERS = {};
 var GROQ_MODELS = [];
 var GROQ_API_KEYS = [];
@@ -1983,8 +1986,6 @@ async function commitEditAnime() {
     var epsText = episodes ? '📺 Total Episodes: ' + episodes : '';
     var specialSel = document.getElementById('adminEditSpecial');
     var special = specialSel ? specialSel.value : '';
-    var SPECIAL_CARD_KINDS = ['legendary', 'epic', 'op', 'isekaiking', 'burning', 'earth', 'black', 'wind', 'lightning', 'speed', 'frozen', 'healing', 'science', 'romance', 'psychic', 'levelup'];
-var stampMap = { legendary: 'Legendary Card', epic: 'Epic Card', op: 'Over Powered Card', isekaiking: 'Isekai Lord Card', burning: 'Fire Card', earth: 'Earth Card', black: 'Cursed Card', wind: 'Wind Card', lightning: 'Thunder Card', speed: 'Speed Card', frozen: 'Frozen Card', healing: 'Healing Card', science: 'Science Card', romance: 'Romance Card', psychic: 'Psychic Card', levelup: 'Level Up Card' };
     var stamp = stampMap[special] || '';
     var specialClass = special ? ' card-' + special : '';
     var stampHtml = '';
@@ -2400,7 +2401,7 @@ function renderCardPreview() {
   var t = adEscHtml(title), im = adEscHtml(img), se = adEscHtml(season), ep = adEscHtml(eps);
   var specialSel = document.getElementById('adminAddSpecial');
   var special = specialSel ? specialSel.value : '';
-  var stampMap = { legendary: 'Legendary Card', epic: 'Epic Card', op: 'Over Powered Card', isekaiking: 'Isekai Lord Card', burning: 'Fire Card', earth: 'Earth Card', black: 'Cursed Card', wind: 'Wind Card', lightning: 'Thunder Card', speed: 'Speed Card', frozen: 'Frozen Card', healing: 'Healing Card', science: 'Science Card', romance: 'Romance Card', psychic: 'Psychic Card', levelup: 'Level Up Card' };
+  var stampMap = SPECIAL_CARD_NAMES;
   var stampLabel = stampMap[special] || '';
   var stampHtml = '';
   var backLabelHtml = stampLabel ? '<div class="back-special-label back-special-label--' + special + '">' + stamp + '</div>' : '';
@@ -2514,7 +2515,7 @@ async function commitAddAnime() {
     // Special cards: the admin can give a new anime a stamp as well.
     var specialSel = document.getElementById('adminAddSpecial');
     var special = specialSel ? specialSel.value : '';
-    var stampMap = { legendary: 'Legendary Card', epic: 'Epic Card', op: 'Over Powered Card', isekaiking: 'Isekai Lord Card', burning: 'Fire Card', earth: 'Earth Card', black: 'Cursed Card', wind: 'Wind Card', lightning: 'Thunder Card', speed: 'Speed Card', frozen: 'Frozen Card', healing: 'Healing Card', science: 'Science Card', romance: 'Romance Card', psychic: 'Psychic Card', levelup: 'Level Up Card' };
+    var stampMap = SPECIAL_CARD_NAMES;
     var stamp = stampMap[special] || '';
     var specialClass = special ? ' card-' + special : '';
     var stampHtml = '';
