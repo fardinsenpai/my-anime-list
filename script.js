@@ -23,7 +23,7 @@ window.STUDIO_DATA = {"1":["Bones"],"3":["Studio Pierrot"],"4":["Toei Animation"
 window.RATING_DATA = {"1":{"rating":94,"season":"Spring 2016"},"2":{"rating":79.6,"season":"Fall 2002"},"3":{"rating":84.06,"season":"Winter 2007"},"4":{"rating":83.99,"season":"Fall 1999"},"5":{"rating":78.49,"season":"Fall 2017"},"6":{"rating":77.34,"season":"Fall 2004"},"7":{"rating":82.14,"season":"Fall 2018"},"8":{"rating":77.3,"season":"Summer 2021"},"9":{"rating":81.32,"season":"Fall 2022"},"10":{"rating":82.99,"season":"Winter 2024"},"11":{"rating":85.9,"season":"Fall 2020"},"12":{"rating":83.12,"season":"Fall 2006"},"13":{"rating":82.71,"season":"Summer 2019"},"14":{"rating":83.12,"season":"Winter 2016"},"15":{"rating":77.46,"season":"Spring 2023"},"16":{"rating":73.31,"season":"Spring 2024"},"17":{"rating":84.17,"season":"Fall 2011","malScore":8.4},"18":{"rating":82.23,"season":"Winter 2021"},"19":{"rating":85.16,"season":"Spring 2022"},"20":{"rating":80.54,"season":"Summer 2016"},"21":{"rating":82.91,"season":"Spring 2014"},"22":{"rating":81.89,"season":"Spring 2021"},"23":{"rating":83.47,"season":"Fall 2015"},"24":{"rating":86.24,"season":"Spring 2019"},"25":{"rating":82.16,"season":"Summer 2019"},"26":{"rating":83.71,"season":"Spring 2024"},"27":{"rating":75.26,"season":"Fall 2022"},"28":{"rating":84.17,"season":"Fall 2022"},"29":{"rating":84.5,"season":"Spring 2013"},"30":{"rating":78.17,"season":"Spring 2024"},"31":{"rating":78,"season":"Summer 2017"},"32":{"rating":74.1,"season":"Winter 2020"},"33":{"rating":76.42,"season":"Summer 2015"},"34":{"rating":64.96,"season":"Spring 2023"},"35":{"rating":71.19,"season":"Summer 2020"},"36":{"rating":68.51,"season":"Fall 2018"},"37":{"rating":72.86,"season":"Spring 1997"},"38":{"rating":83.32,"season":"Summer 2016"},"39":{"rating":81.94,"season":"Fall 2022"},"40":{"rating":78.62,"season":"Summer 2023"},"41":{"rating":75.48,"season":"Fall 2022"},"42":{"rating":86.64,"season":"Fall 2020"},"43":{"rating":81.12,"season":"Winter 2023"},"44":{"rating":null,"season":null},"45":{"rating":78.93,"season":"Spring 2023"},"46":{"rating":82.55,"season":"Summer 2021"},"47":{"rating":82.13,"season":"Winter 2016"},"48":{"rating":83.04,"season":"Fall 2021"},"49":{"rating":82.11,"season":"Winter 2019"},"50":{"rating":81.36,"season":"Spring 2023"},"51":{"rating":76.76,"season":"Summer 2024"},"52":{"rating":65.11,"season":"Summer 2024"},"53":{"rating":58.48,"season":"Summer 2024"},"54":{"rating":73.38,"season":"Fall 2024"},"55":{"rating":78.54,"season":"Summer 2019"},"56":{"rating":78.36,"season":"Winter 2023"},"57":{"rating":69.8,"season":"Summer 2023"},"58":{"rating":68.23,"season":"Summer 2024"},"59":{"rating":67.23,"season":"Winter 2019"},"60":{"rating":73.43,"season":"Fall 2024"},"61":{"rating":68.53,"season":"Summer 2018"},"62":{"rating":74.05,"season":"Summer 2024"},"63":{"rating":69.84,"season":"Summer 2024"},"64":{"rating":79.39,"season":"Summer 2024"},"65":{"rating":85.47,"season":"Fall 2024"},"66":{"rating":63.42,"season":"Fall 2023"},"67":{"rating":73.18,"season":"Summer 2013"},"68":{"rating":82.07,"season":"Spring 2016"},"69":{"rating":70.48,"season":"Summer 2018"},"70":{"rating":74.35,"season":"Spring 2024"},"71":{"rating":67.91,"season":"Fall 2022"},"72":{"rating":71.61,"season":"Winter 2024"},"73":{"rating":82.33,"season":"Fall 2006"},"74":{"rating":77.11,"season":"Winter 2025"},"75":{"rating":82.92,"season":"Summer 2022"},"76":{"rating":76.42,"season":"Spring 2020"},"77":{"rating":78.56,"season":"Summer 2023"},"78":{"rating":63.78,"season":"Winter 2022"},"79":{"rating":70.3,"season":"Spring 2024"},"80":{"rating":63.05,"season":"Summer 2021"},"81":{"rating":80.93,"season":"Spring 2023"},"82":{"rating":74.01,"season":"Fall 2023"},"83":{"rating":81.79,"season":"Winter 2022"},"84":{"rating":80.98,"season":"Summer 2024"},"85":{"rating":76.84,"season":"Spring 1989"},"86":{"rating":77.98,"season":"Summer 2024"},"87":{"rating":72.32,"season":"Fall 2024"},"88":{"rating":86.88,"season":"Fall 2023"},"89":{"rating":73.98,"season":"Fall 2021"},"90":{"rating":63.2,"season":"Spring 2023"},"91":{"rating":69.56,"season":"Winter 2025"},"92":{"rating":81.68,"season":"Winter 1996"},"93":{"rating":77.8,"season":"Summer 2021"},"94":{"rating":71.88,"season":"Summer 2020"},"95":{"rating":76.56,"season":"Spring 2022"},"96":{"rating":72.38,"season":"Fall 1983"},"97":{"rating":68.39,"season":"Spring 2021"},"98":{"rating":69.59,"season":"Summer 2019"},"99":{"rating":79.85,"season":"Summer 2015","malScore":8},"100":{"rating":null,"season":"Fall 2019"},"101":{"rating":75.95,"season":"Winter 2014"},"103":{"rating":78.32,"season":"Winter 2023"},"104":{"rating":80.35,"season":"Fall 2012"},"105":{"rating":82.19,"season":"Fall 2018"},"106":{"rating":73.81,"season":"Winter 2018"},"107":{"rating":61.89,"season":"Summer 1987"},"108":{"rating":82.21,"season":"Winter 2019"},"109":{"rating":82.1,"season":"Winter 2021"},"110":{"rating":80.88,"season":"Spring 2022"},"111":{"rating":71.67,"season":"Winter 2025"},"112":{"rating":69.09,"season":"Spring 2022"},"113":{"rating":68.22,"season":"Spring 2024"},"114":{"rating":68.53,"season":"Fall 2023"},"115":{"rating":71.99,"season":"Summer 2024"},"116":{"rating":74.44,"season":"Fall 2018"},"117":{"rating":70.56,"season":"Spring 2021"},"118":{"rating":64.37,"season":"Winter 2023"},"119":{"rating":76.31,"season":"Winter 2022"},"120":{"rating":66.7,"season":"Fall 2023"},"121":{"rating":73.89,"season":"Spring 2024"},"122":{"rating":75.46,"season":"Spring 2020"},"123":{"rating":81.79,"season":"Winter 2018"},"124":{"rating":68.22,"season":"Fall 2023"},"125":{"rating":81.85,"season":"Winter 2021"},"127":{"rating":72.31,"season":"Winter 2023"},"128":{"rating":68.49,"season":"Winter 2025"},"129":{"rating":70.33,"season":"Spring 2024"},"130":{"rating":64.57,"season":"Summer 2024"},"131":{"rating":72.93,"season":"Summer 2024"},"132":{"rating":72.47,"season":"Spring 2025"},"133":{"rating":64.58,"season":"Fall 2024"},"134":{"rating":79.13,"season":"Fall 2019"},"135":{"rating":73.59,"season":"Summer 2012"},"136":{"rating":62.87,"season":"Spring 2024"},"137":{"rating":75.53,"season":"Spring 2024"},"138":{"rating":71.12,"season":"Fall 2024"},"139":{"rating":77.15,"season":"Winter 2024"},"140":{"rating":82.37,"season":"Summer 2016"},"141":{"rating":76.41,"season":"Fall 2020"},"142":{"rating":74.93,"season":"Spring 2024"},"143":{"rating":71.57,"season":"Spring 2025"},"144":{"rating":66.48,"season":"Spring 2025"},"145":{"rating":71.27,"season":"Spring 2025"},"146":{"rating":82.99,"season":"Fall 2023"},"147":{"rating":71.78,"season":"Spring 2025"},"148":{"rating":66.36,"season":"Summer 2022"},"149":{"rating":61.65,"season":"Winter 2024"},"150":{"rating":73.09,"season":"Spring 2025"},"151":{"rating":75.54,"season":"Spring 2016"},"152":{"rating":69.65,"season":"Winter 2021"},"153":{"rating":74.31,"season":"Summer 2024"},"154":{"rating":85.24,"season":"Winter 2024"},"155":{"rating":74.76,"season":"Winter 2023"},"156":{"rating":81.81,"season":"Fall 2017"},"157":{"rating":73.2,"season":"Spring 2024"},"158":{"rating":79.35,"season":"Summer 2021"},"159":{"rating":63.49,"season":"Spring 2024"},"160":{"rating":70.15,"season":"Fall 2021"},"161":{"rating":72.34,"season":"Spring 2015"},"162":{"rating":76.02,"season":"Summer 2024"},"163":{"rating":71.64,"season":"Spring 2024"},"164":{"rating":72.55,"season":"Fall 2012"},"165":{"rating":64.32,"season":"Summer 2023"},"166":{"rating":79.59,"season":"Fall 2020"},"167":{"rating":65.42,"season":"Summer 2024"},"168":{"rating":72.88,"season":"Fall 2024"},"169":{"rating":67.19,"season":"Spring 2023"},"170":{"rating":74.19,"season":"Spring 2023"},"171":{"rating":71.54,"season":"Summer 2023"},"172":{"rating":81.83,"season":"Winter 2020"},"173":{"rating":72.54,"season":"Fall 2025"},"174":{"rating":65.4,"season":"Winter 2025"},"175":{"rating":64.8,"season":"Summer 2019"},"176":{"rating":67.58,"season":"Fall 2019"},"177":{"rating":72.72,"season":"Spring 2022"},"178":{"rating":71.35,"season":"Summer 2025"},"180":{"rating":67.22,"season":"Spring 2007"},"181":{"rating":81.42,"season":"Fall 2023"},"182":{"rating":83.67,"season":"Spring 2025"},"183":{"rating":63.04,"season":"Summer 2024"},"184":{"rating":66.51,"season":"Spring 2024"},"185":{"rating":75.62,"season":"Fall 2025"},"186":{"rating":82.05,"season":"Spring 2015"},"187":{"rating":68.38,"season":"Fall 2025"},"188":{"rating":79.97,"season":"Summer 2025"},"189":{"rating":77.49,"season":"Winter 2023"},"190":{"rating":74.93,"season":"Fall 2023"},"191":{"rating":88.76,"season":"Summer 2023"},"192":{"rating":80.42,"season":"Fall 2025"},"194":{"rating":67.02,"season":"Winter 2023"},"195":{"rating":74.76,"season":"Summer 2020"},"196":{"rating":75.34,"season":"Spring 2023"},"197":{"rating":67.63,"season":"Spring 2016"},"198":{"rating":null,"season":null},"199":{"rating":69.09,"season":"Winter 2025"},"200":{"rating":81.91,"season":"Spring 2012"},"201":{"rating":82.12,"season":"Fall 2022"},"202":{"rating":76.07,"season":"Fall 2023"},"203":{"rating":82.72,"season":"Summer 2025"},"204":{"rating":70.58,"season":"Fall 2025"},"205":{"rating":80.14,"season":"Summer 2014"},"206":{"rating":69.46,"season":"Winter 2026"},"207":{"rating":66.01,"season":"Winter 2026"},"208":{"rating":63.65,"season":"Summer 2025"},"209":{"rating":69.73,"season":"Winter 2026"},"210":{"rating":72.38,"season":"Winter 2026"},"211":{"rating":83.87,"season":"Winter 2026"},"212":{"rating":76.28,"season":"Winter 2020"},"213":{"rating":77.11,"season":"Summer 2018"},"214":{"rating":81.45,"season":"Winter 2019"},"215":{"rating":69.22,"season":"Winter 2026"},"216":{"rating":69.11,"season":"Winter 2026"},"217":{"rating":82.66,"season":"Spring 2022"},"218":{"rating":65.59,"season":"Fall 2020"},"219":{"rating":80.32,"season":"Fall 2021"},"220":{"rating":84.58,"season":"Spring 2025"},"221":{"rating":82.14,"season":"Spring 2006"},"222":{"rating":71.15,"season":"Winter 2023"},"223":{"rating":82.29,"season":"Fall 2014"},"224":{"rating":82.16,"season":"Fall 2021"},"225":{"rating":65.95,"season":"Summer 2023"},"226":{"rating":71.52,"season":"Summer 2022"},"227":{"rating":73.95,"season":"Spring 2025"},"228":{"rating":67.16,"season":"Summer 2019"},"229":{"rating":66,"season":"Winter 2022"},"230":{"rating":null,"season":"Spring 2026"},"231":{"rating":83.03,"season":"Spring 2009"},"232":{"rating":81.25,"season":"Winter 2026"},"233":{"rating":61.99,"season":"Winter 2022"},"234":{"rating":62.63,"season":"Summer 2008"},"235":{"rating":81.79,"season":"Fall 2016"},"237":{"rating":79.37,"season":"Spring 2026"},"238":{"rating":76.26,"season":"Spring 2026"},"239":{"rating":87.07,"season":"Spring 2026"},"240":{"rating":73.84,"season":"Spring 2026"},"241":{"rating":79.09,"season":"Spring 2026"},"242":{"rating":68.43,"season":"Winter 2026"},"243":{"rating":75.71,"season":"Spring 2026"},"244":{"rating":70.89,"season":"Spring 2026"},"245":{"rating":79.1,"season":"Spring 2026"},"246":{"rating":null,"season":"Spring 2026"},"247":{"rating":60.55,"season":"Spring 2022"},"248":{"rating":78.21,"season":"Winter 2018"},"249":{"rating":82.23,"season":"Summer 2017"},"250":{"rating":72,"season":"Spring 2019"},"251":{"rating":87,"season":"Spring 2023"},"252":{"rating":76,"season":"Fall 2014"},"253":{"rating":72,"season":"Winter 2026"},"254":{"rating":81,"season":"Summer 2014"},"255":{"rating":69,"season":"Fall 2017"},"256":{"rating":75.48,"season":"Winter 2013"},"257":{"rating":73.87,"season":"Winter 2020"},"258":{"rating":72.68,"season":"Spring 2022"},"259":{"rating":68.75,"season":"Winter 2025"},"260":{"rating":75,"season":"Winter 2023"},"261":{"rating":70,"season":"Summer 2025"},"262":{"rating":69,"season":"Summer 2021"},"263":{"rating":69,"season":"Summer 2026"},"264":{"rating":62,"season":"Summer 2026","malScore":6.18},"265":{"rating":63,"season":"Summer 2023","malScore":6.83},"266":{"rating":68,"season":"Summer 2026","malScore":7.19},"267":{"rating":73,"season":"Summer 2026","malScore":7.56},"268":{"rating":62,"season":"Summer 2026","malScore":6.76},"269":{"rating":69,"season":"Summer 2026","malScore":6.99},"270":{"rating":67,"season":"Summer 2026","malScore":7.12},"271":{"rating":73,"season":"Fall 2026","malScore":6.89},"272":{"rating":76,"season":"Summer 2026","malScore":7.77},"273":{"rating":61,"season":"Summer 2026","malScore":6.2},"274":{"rating":74,"season":"Spring 2023","malScore":7.56},"275":{"rating":71,"season":"Fall 2018","malScore":7.24},"276":{"rating":78,"season":"Winter 2026","malScore":7.78},"277":{"rating":77,"season":"Spring 1979","malScore":7.85},"279":{"rating":64,"season":"Spring 2004","malScore":6.9},"280":{"rating":57,"season":"Spring 2026","malScore":6.4},"281":{"rating":71,"season":"Spring 2026","malScore":7.4},"282":{"rating":66,"season":"Winter 2026","malScore":7.05},"283":{"rating":64,"season":"Winter 2026","malScore":6.9},"284":{"rating":72,"season":"Winter 2026","malScore":7.48},"285":{"rating":64,"season":"Fall 2024","malScore":6.9},"286":{"rating":63,"season":"Winter 2020","malScore":6.83},"287":{"rating":75,"season":"Spring 2017","malScore":7.7},"288":{"rating":69,"season":"Summer 2023","malScore":7.63},"290":{"rating":67,"season":"Winter 2026","malScore":6.76},"291":{"rating":68,"season":"Summer 2026","malScore":6.83},"291":{"rating":68,"season":"Summer 2026","malScore":6.83},"292":{"rating":68,"season":"Fall 2020","malScore":6.95}};
 
 function initCounterBoxes() {
-  const duration = 3500; // 7 seconds until everything ends
+  const duration = 4000; // 4 seconds for the counters to count up
   const boxes = document.querySelectorAll(".counter-box");
 
   // Fade + Slide animation trigger
@@ -4363,54 +4363,52 @@ function localCards() {
 }
 
 // Special burning glow for card #7 (Fairy Tail)
+/* The 16 special card kinds. The name is printed on the BACK of the card and
+   every kind has its own colour (see style.css). */
+const SPECIAL_CARD_TYPES = {
+  legendary:  'Legendary Card',
+  epic:       'Epic Card',
+  op:         'Over Powered Card',
+  isekaiking: 'Isekai Lord Card',
+  burning:    'Fire Card',
+  earth:      'Earth Card',
+  black:      'Cursed Card',
+  wind:       'Wind Card',
+  lightning:  'Thunder Card',
+  speed:      'Speed Card',
+  frozen:     'Frozen Card',
+  healing:    'Healing Card',
+  science:    'Science Card',
+  romance:    'Romance Card',
+  psychic:    'Psychic Card',
+  levelup:    'Level Up Card'
+};
+window.SPECIAL_CARD_TYPES = SPECIAL_CARD_TYPES;
+
+/* The special kind comes from the card's own class (card-<kind>). There is no
+   stamp on the front any more - only the name on the back and the glow. */
 function applyBurningCard() {
-  var stampMap = { burning: 'Fire Type', frozen: 'Frozen Type', wind: 'Wind Type', black: 'Black Type', lightning: 'Lightning Type', healing: 'Healing Type', earth: 'Earth Type', speed: 'Speed Type' };
-  document.querySelectorAll('.card').forEach(function(card) {
-    var badge = card.querySelector('.badge');
-    if (!badge) return;
-    var text = String(badge.textContent || '').trim();
+  document.querySelectorAll('.card').forEach(function (card) {
+    var cls = String(card.className || '').split(/\s+/);
     var special = '';
-    // 1) If the card already has a stamp, use its type — fixes cards whose
-    //    class attribute was written incorrectly by the old admin code.
-    var existingStamp = card.querySelector('.special-stamp');
-    if (existingStamp) {
-      for (var t in stampMap) {
-        if (existingStamp.classList.contains('card-stamp-' + t)) { special = t; break; }
-      }
+    for (var i = 0; i < cls.length; i++) {
+      var m = /^card-(.+)$/.exec(cls[i]);
+      if (m && SPECIAL_CARD_TYPES[m[1]]) { special = m[1]; break; }
     }
-    // 2) Fallback by badge number for the built-in special cards.
-    if (!special) {
-      if (text === '#7') special = 'burning';
-      else if (text === '#5') special = 'black';
-      else if (text === '#24') special = 'lightning';
-      else if (text === '#118') special = 'frozen';
-      else if (text === '#191') special = 'wind';
-      else if (text === '#139') special = 'healing';
-      else if (text === '#102') special = 'earth';
-      else if (text === '#23') special = 'speed';
+    if (!special) return;
+    var name = SPECIAL_CARD_TYPES[special];
+    var backContent = card.querySelector('.back-content');
+    if (!backContent) return;
+    var label = backContent.querySelector('.back-special-label');
+    if (!label) {
+      label = document.createElement('div');
+      backContent.insertBefore(label, backContent.firstChild);
     }
-    if (special) {
-      card.classList.add('card-' + special);
-      // inject stamp if not already present
-      var inner = card.querySelector('.card-inner');
-      if (inner && !inner.querySelector('.special-stamp')) {
-        var stamp = document.createElement('div');
-        stamp.className = 'special-stamp card-stamp-' + special;
-        stamp.textContent = stampMap[special];
-        inner.appendChild(stamp);
-      }
-      // inject "SPECIAL CARD" label at the top of the back (type-colored)
-      var backContent = card.querySelector('.back-content');
-      if (backContent) {
-        var label = backContent.querySelector('.back-special-label');
-        if (!label) {
-          label = document.createElement('div');
-          label.textContent = '✦ Special Card ✦';
-          backContent.insertBefore(label, backContent.firstChild);
-        }
-        label.className = 'back-special-label back-special-label--' + special;
-      }
-    }
+    label.className = 'back-special-label back-special-label--' + special;
+    label.textContent = name;
+    /* no stamp on the front any more */
+    var old = card.querySelector('.special-stamp');
+    if (old && old.parentNode) old.parentNode.removeChild(old);
   });
 }
 

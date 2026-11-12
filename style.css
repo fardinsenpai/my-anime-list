@@ -5206,198 +5206,6 @@ body.tour-mascot-on .guide-mascot-canvas { display: block; }
 }
 .perf-popup__close:hover { color: #ffd6e8; }
 
-.card-burning .back-genre,
-.card-burning .back-mal,
-.card-burning .back-mal-score {
-  text-shadow: 0 0 6px rgba(255,160,60,.7) !important;
-  color: #ffd6a0 !important;
-}
-
-/* === Red stamp for special cards === */
-.special-stamp {
-  position: absolute;
-  top: -18px;
-  left: -18px;
-  z-index: 99;
-  width: 82px;
-  height: 82px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 35% 35%, #ff3333 0%, #aa0000 70%, #330000 100%);
-  border: 3px solid #ff3333;
-  box-shadow: 0 0 14px #ff3333, 0 0 28px rgba(255,51,51,.45), inset 0 0 8px rgba(255,255,255,.25);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  pointer-events: none;
-  font-family: 'Orbitron', sans-serif;
-  font-weight: 900;
-  font-size: 8px;
-  line-height: 1.15;
-  letter-spacing: .4px;
-  padding: 0 10px;
-  color: #fff;
-  text-shadow: 0 0 4px #ff3333, 0 0 8px #aa0000, 0 0 2px #330000;
-  text-transform: uppercase;
-  word-break: break-word;
-  overflow: hidden;
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-}
-.special-stamp::before {
-  content: '';
-  position: absolute;
-  inset: 3px;
-  border-radius: 50%;
-  border: 1.5px dashed rgba(255,230,150,.6);
-  pointer-events: none;
-}
-.poster-wrap {
-  position: relative;
-}
-.card-stamp-burning { background: radial-gradient(circle at 35% 35%, #ff5a3a 0%, #cc1100 70%, #440000 100%); border: 2px solid #ff6666; box-shadow: 0 0 10px #ff3333, 0 0 20px rgba(255,51,51,.5); text-shadow: 0 0 4px #ff3333, 0 0 8px #aa0000; }
-.card-stamp-frozen { background: radial-gradient(circle at 35% 35%, #66ccff 0%, #0077cc 70%, #002244 100%); border: 2px solid #66ccff; box-shadow: 0 0 10px #33aaff, 0 0 20px rgba(51,170,255,.5); text-shadow: 0 0 4px #33aaff, 0 0 8px #0066aa; }
-.card-stamp-wind { background: radial-gradient(circle at 35% 35%, #b9ffd0 0%, #35b56a 70%, #0a3318 100%); border: 2px solid #9cffc0; box-shadow: 0 0 10px #4be08a, 0 0 20px rgba(75,224,138,.55); color: #062b14; text-shadow: 0 0 3px rgba(255,255,255,.85), 0 0 6px rgba(120,255,180,.7); }
-.card-stamp-black { background: radial-gradient(circle at 35% 35%, #777777 0%, #222222 70%, #000000 100%); border: 2px solid #aaaaaa; box-shadow: 0 0 10px #888888, 0 0 20px rgba(120,120,120,.5); color: #fff; text-shadow: 0 0 4px #999, 0 0 8px #444; }
-.card-stamp-lightning { background: radial-gradient(circle at 35% 35%, #ffee66 0%, #ffb300 70%, #664400 100%); border: 2px solid #ffe066; box-shadow: 0 0 10px #ffcc00, 0 0 20px rgba(255,204,0,.55); color: #221a00; text-shadow: 0 0 3px rgba(255,255,255,.85), 0 0 6px rgba(255,230,120,.7); }
-.card-stamp-healing { background: radial-gradient(circle at 35% 35%, #99ee66 0%, #33aa11 70%, #113300 100%); border: 2px solid #99ee66; box-shadow: 0 0 10px #66dd44, 0 0 20px rgba(102,221,68,.5); color: #062b14; text-shadow: 0 0 4px #66dd44, 0 0 8px #338811; }
-.card-stamp-earth { background: radial-gradient(circle at 35% 35%, #c89b6a 0%, #8a5a2b 70%, #2b1607 100%); border: 2px solid #d4a373; box-shadow: 0 0 10px #a9713f, 0 0 20px rgba(169,113,63,.55); color: #fff4e6; text-shadow: 0 0 4px #8a5a2b, 0 0 8px #4a2a10; }
-.card-stamp-speed { background: radial-gradient(circle at 35% 35%, #d8a6ff 0%, #7b2ff7 70%, #22004d 100%); border: 2px solid #c78bff; box-shadow: 0 0 10px #a855f7, 0 0 20px rgba(168,85,247,.55); color: #f3e8ff; text-shadow: 0 0 4px #a855f7, 0 0 8px #6b21a8; }
-
-/* === SPECIAL EFFECT CARDS === */
-@keyframes frozenGlow {
-  0% { box-shadow: 0 0 8px 2px rgba(0,180,255,.55), 0 0 18px 4px rgba(0,140,220,.35), 0 0 30px 8px rgba(0,200,255,.18); border-color: rgba(0,200,255,.7); }
-  25% { box-shadow: 0 0 14px 4px rgba(0,190,255,.75), 0 0 28px 10px rgba(0,160,230,.45), 0 0 45px 16px rgba(0,220,255,.28); border-color: rgba(0,215,255,.9); }
-  50% { box-shadow: 0 0 8px 2px rgba(0,180,255,.55), 0 0 18px 4px rgba(0,140,220,.35), 0 0 30px 8px rgba(0,200,255,.18); border-color: rgba(0,200,255,.7); }
-  75% { box-shadow: 0 0 12px 3px rgba(0,190,255,.65), 0 0 22px 6px rgba(0,170,240,.4), 0 0 38px 14px rgba(0,210,255,.22); border-color: rgba(0,205,255,.85); }
-  100% { box-shadow: 0 0 8px 2px rgba(0,180,255,.55), 0 0 18px 4px rgba(0,140,220,.35), 0 0 30px 8px rgba(0,200,255,.18); border-color: rgba(0,200,255,.7); }
-}
-@keyframes windGlow {
-  0% { box-shadow: 0 0 8px 2px rgba(90,230,150,.55), 0 0 18px 4px rgba(50,190,110,.35), 0 0 30px 8px rgba(140,255,190,.18); border-color: rgba(120,240,170,.7); }
-  25% { box-shadow: 0 0 14px 4px rgba(100,240,160,.8), 0 0 28px 10px rgba(60,200,120,.5), 0 0 45px 16px rgba(150,255,200,.28); border-color: rgba(130,255,180,.95); }
-  50% { box-shadow: 0 0 8px 2px rgba(90,230,150,.55), 0 0 18px 4px rgba(50,190,110,.35), 0 0 30px 8px rgba(140,255,190,.18); border-color: rgba(120,240,170,.7); }
-  75% { box-shadow: 0 0 12px 3px rgba(100,240,160,.7), 0 0 22px 6px rgba(60,200,120,.42), 0 0 38px 14px rgba(150,255,200,.22); border-color: rgba(130,250,175,.9); }
-  100% { box-shadow: 0 0 8px 2px rgba(90,230,150,.55), 0 0 18px 4px rgba(50,190,110,.35), 0 0 30px 8px rgba(140,255,190,.18); border-color: rgba(120,240,170,.7); }
-}
-@keyframes blackMagicGlow {
-  0% { box-shadow: 0 0 8px 2px rgba(160,160,160,.55), 0 0 18px 4px rgba(120,120,120,.35), 0 0 30px 8px rgba(180,180,180,.18); border-color: rgba(180,180,180,.7); }
-  25% { box-shadow: 0 0 14px 4px rgba(180,180,180,.75), 0 0 28px 10px rgba(140,140,140,.45), 0 0 45px 16px rgba(200,200,200,.28); border-color: rgba(200,200,200,.9); }
-  50% { box-shadow: 0 0 8px 2px rgba(160,160,160,.55), 0 0 18px 4px rgba(120,120,120,.35), 0 0 30px 8px rgba(180,180,180,.18); border-color: rgba(180,180,180,.7); }
-  75% { box-shadow: 0 0 12px 3px rgba(180,180,180,.65), 0 0 22px 6px rgba(140,140,140,.4), 0 0 38px 14px rgba(190,190,190,.22); border-color: rgba(190,190,190,.85); }
-  100% { box-shadow: 0 0 8px 2px rgba(160,160,160,.55), 0 0 18px 4px rgba(120,120,120,.35), 0 0 30px 8px rgba(180,180,180,.18); border-color: rgba(180,180,180,.7); }
-}
-@keyframes lightningGlow {
-  0% { box-shadow: 0 0 8px 2px rgba(255,215,0,.55), 0 0 18px 4px rgba(255,180,0,.35), 0 0 30px 8px rgba(255,220,50,.18); border-color: rgba(255,215,0,.7); }
-  25% { box-shadow: 0 0 14px 4px rgba(255,215,0,.85), 0 0 28px 10px rgba(255,160,0,.55), 0 0 45px 16px rgba(255,230,80,.30); border-color: rgba(255,215,0,.95); }
-  50% { box-shadow: 0 0 8px 2px rgba(255,215,0,.55), 0 0 18px 4px rgba(255,180,0,.35), 0 0 30px 8px rgba(255,220,50,.18); border-color: rgba(255,215,0,.7); }
-  75% { box-shadow: 0 0 12px 3px rgba(255,215,0,.75), 0 0 22px 6px rgba(255,190,0,.45), 0 0 38px 14px rgba(255,225,60,.22); border-color: rgba(255,215,0,.9); }
-  100% { box-shadow: 0 0 8px 2px rgba(255,215,0,.55), 0 0 18px 4px rgba(255,180,0,.35), 0 0 30px 8px rgba(255,220,50,.18); border-color: rgba(255,215,0,.7); }
-}
-@keyframes healingGlow {
-  0% { box-shadow: 0 0 8px 2px rgba(140,220,60,.55), 0 0 18px 4px rgba(100,190,40,.35), 0 0 30px 8px rgba(160,240,80,.18); border-color: rgba(160,240,80,.7); }
-  25% { box-shadow: 0 0 14px 4px rgba(120,215,50,.75), 0 0 28px 10px rgba(80,170,30,.45), 0 0 45px 16px rgba(140,230,70,.28); border-color: rgba(130,230,60,.9); }
-  50% { box-shadow: 0 0 8px 2px rgba(140,220,60,.55), 0 0 18px 4px rgba(100,190,40,.35), 0 0 30px 8px rgba(160,240,80,.18); border-color: rgba(160,240,80,.7); }
-  75% { box-shadow: 0 0 12px 3px rgba(120,215,50,.65), 0 0 22px 6px rgba(90,180,40,.4), 0 0 38px 14px rgba(140,220,60,.22); border-color: rgba(130,220,50,.85); }
-  100% { box-shadow: 0 0 8px 2px rgba(140,220,60,.55), 0 0 18px 4px rgba(100,190,40,.35), 0 0 30px 8px rgba(160,240,80,.18); border-color: rgba(160,240,80,.7); }
-}
-@keyframes earthGlow {
-  0% { box-shadow: 0 0 8px 2px rgba(160,110,60,.55), 0 0 18px 4px rgba(120,80,40,.35), 0 0 30px 8px rgba(190,140,90,.18); border-color: rgba(180,130,80,.7); }
-  25% { box-shadow: 0 0 14px 4px rgba(180,125,70,.8), 0 0 28px 10px rgba(140,95,50,.5), 0 0 45px 16px rgba(205,155,100,.28); border-color: rgba(200,150,95,.95); }
-  50% { box-shadow: 0 0 8px 2px rgba(160,110,60,.55), 0 0 18px 4px rgba(120,80,40,.35), 0 0 30px 8px rgba(190,140,90,.18); border-color: rgba(180,130,80,.7); }
-  75% { box-shadow: 0 0 12px 3px rgba(180,125,70,.7), 0 0 22px 6px rgba(140,95,50,.42), 0 0 38px 14px rgba(200,150,95,.22); border-color: rgba(195,145,90,.9); }
-  100% { box-shadow: 0 0 8px 2px rgba(160,110,60,.55), 0 0 18px 4px rgba(120,80,40,.35), 0 0 30px 8px rgba(190,140,90,.18); border-color: rgba(180,130,80,.7); }
-}
-@keyframes speedGlow {
-  0% { box-shadow: 0 0 8px 2px rgba(170,90,255,.55), 0 0 18px 4px rgba(130,50,220,.35), 0 0 30px 8px rgba(200,130,255,.18); border-color: rgba(190,120,255,.7); }
-  25% { box-shadow: 0 0 14px 4px rgba(185,105,255,.85), 0 0 28px 10px rgba(145,65,235,.5), 0 0 45px 16px rgba(215,145,255,.3); border-color: rgba(205,135,255,.95); }
-  50% { box-shadow: 0 0 8px 2px rgba(170,90,255,.55), 0 0 18px 4px rgba(130,50,220,.35), 0 0 30px 8px rgba(200,130,255,.18); border-color: rgba(190,120,255,.7); }
-  75% { box-shadow: 0 0 12px 3px rgba(185,105,255,.75), 0 0 22px 6px rgba(145,65,235,.45), 0 0 38px 14px rgba(210,140,255,.24); border-color: rgba(200,130,255,.9); }
-  100% { box-shadow: 0 0 8px 2px rgba(170,90,255,.55), 0 0 18px 4px rgba(130,50,220,.35), 0 0 30px 8px rgba(200,130,255,.18); border-color: rgba(190,120,255,.7); }
-}
-.card-frozen .card-inner,
-.card-frozen .card-inner::before { animation: frozenGlow 2.2s ease-in-out infinite !important; }
-.card-frozen .card-inner { border: 2px solid rgba(0,200,255,.8) !important; border-radius: 12px !important; }
-.card-frozen .card-inner::before { content: ''; position: absolute; inset: -4px; border-radius: 16px; border: 1.5px solid rgba(0,215,255,.35); pointer-events: none; z-index: 10; }
-.card-frozen .badge { background: linear-gradient(135deg,#00b0ff,#0090dd) !important; border-color: #00b0ff !important; box-shadow: 0 0 8px #00b0ff, 0 0 4px #0090dd !important; color: #fff !important; text-shadow: 0 0 4px #00b0ff; }
-.card-frozen .back-genre, .card-frozen .back-mal, .card-frozen .back-mal-score { text-shadow: 0 0 6px rgba(0,200,255,.7) !important; color: #cceeff !important; }
-
-.card-wind .card-inner, .card-wind .card-inner::before { animation: windGlow 2.4s ease-in-out infinite !important; }
-.card-wind .card-inner { border: 2px solid rgba(120,240,170,.8) !important; border-radius: 12px !important; }
-.card-wind .card-inner::before { content: ''; position: absolute; inset: -4px; border-radius: 16px; border: 1.5px solid rgba(120,240,170,.35); pointer-events: none; z-index: 10; }
-.card-wind .badge { background: linear-gradient(135deg,#7dffb0,#2ecc71) !important; border-color: #4be08a !important; box-shadow: 0 0 8px #4be08a, 0 0 4px #2ecc71 !important; color: #062b14 !important; text-shadow: none; }
-.card-wind .back-genre, .card-wind .back-mal, .card-wind .back-mal-score { text-shadow: 0 0 6px rgba(90,230,150,.7) !important; color: #d4ffe4 !important; }
-
-.card-black .card-inner, .card-black .card-inner::before { animation: blackMagicGlow 2.2s ease-in-out infinite !important; }
-.card-black .card-inner { border: 2px solid rgba(200,200,200,.8) !important; border-radius: 12px !important; }
-.card-black .card-inner::before { content: ''; position: absolute; inset: -4px; border-radius: 16px; border: 1.5px solid rgba(200,200,200,.35); pointer-events: none; z-index: 10; }
-.card-black .badge { background: linear-gradient(135deg,#333,#777) !important; border-color: #555 !important; box-shadow: 0 0 8px #999, 0 0 4px #bbb !important; color: #fff !important; text-shadow: 0 0 4px #ddd; }
-.card-black .back-genre, .card-black .back-mal, .card-black .back-mal-score { text-shadow: 0 0 6px rgba(200,200,200,.7) !important; color: #e8e8e8 !important; }
-
-.card-lightning .card-inner, .card-lightning .card-inner::before { animation: lightningGlow 2.2s ease-in-out infinite !important; }
-.card-lightning .card-inner { border: 2px solid rgba(255,215,0,.8) !important; border-radius: 12px !important; }
-.card-lightning .card-inner::before { content: ''; position: absolute; inset: -4px; border-radius: 16px; border: 1.5px solid rgba(255,215,0,.35); pointer-events: none; z-index: 10; }
-.card-lightning .badge { background: linear-gradient(135deg,#ffd700,#ffab00) !important; border-color: #ffd700 !important; box-shadow: 0 0 8px #ffd700, 0 0 4px #ff9900 !important; color: #222 !important; text-shadow: none; }
-.card-lightning .back-genre, .card-lightning .back-mal, .card-lightning .back-mal-score { text-shadow: 0 0 6px rgba(255,215,0,.7) !important; color: #ffeaa7 !important; }
-
-/* Healing — green */
-.card-healing .card-inner, .card-healing .card-inner::before { animation: healingGlow 2.2s ease-in-out infinite !important; }
-.card-healing .card-inner { border: 2px solid rgba(160,240,80,.8) !important; border-radius: 12px !important; }
-.card-healing .card-inner::before { content: ''; position: absolute; inset: -4px; border-radius: 16px; border: 1.5px solid rgba(160,240,80,.35); pointer-events: none; z-index: 10; }
-.card-healing .badge { background: linear-gradient(135deg,#aaff55,#66cc33) !important; border-color: #66cc33 !important; box-shadow: 0 0 8px #66cc33, 0 0 4px #44aa22 !important; color: #fff !important; text-shadow: 0 0 4px #66cc33; }
-.card-healing .back-genre, .card-healing .back-mal, .card-healing .back-mal-score { text-shadow: 0 0 6px rgba(140,220,60,.7) !important; color: #d0f8c8 !important; }
-
-/* Earth — brown */
-.card-earth .card-inner, .card-earth .card-inner::before { animation: earthGlow 2.6s ease-in-out infinite !important; }
-.card-earth .card-inner { border: 2px solid rgba(190,140,90,.8) !important; border-radius: 12px !important; }
-.card-earth .card-inner::before { content: ''; position: absolute; inset: -4px; border-radius: 16px; border: 1.5px solid rgba(190,140,90,.35); pointer-events: none; z-index: 10; }
-.card-earth .badge { background: linear-gradient(135deg,#c89b6a,#8a5a2b) !important; border-color: #a9713f !important; box-shadow: 0 0 8px #a9713f, 0 0 4px #6b3f1d !important; color: #fff4e6 !important; text-shadow: 0 0 4px #4a2a10; }
-.card-earth .back-genre, .card-earth .back-mal, .card-earth .back-mal-score { text-shadow: 0 0 6px rgba(180,125,70,.7) !important; color: #f0d5b8 !important; }
-
-/* Speed — cosmic violet */
-.card-speed .card-inner, .card-speed .card-inner::before { animation: speedGlow 2.2s ease-in-out infinite !important; }
-.card-speed .card-inner { border: 2px solid rgba(190,120,255,.8) !important; border-radius: 12px !important; }
-.card-speed .card-inner::before { content: ''; position: absolute; inset: -4px; border-radius: 16px; border: 1.5px solid rgba(190,120,255,.35); pointer-events: none; z-index: 10; }
-.card-speed .badge { background: linear-gradient(135deg,#c78bff,#7b2ff7) !important; border-color: #a855f7 !important; box-shadow: 0 0 8px #a855f7, 0 0 4px #6b21a8 !important; color: #f3e8ff !important; text-shadow: 0 0 4px #6b21a8; }
-.card-speed .back-genre, .card-speed .back-mal, .card-speed .back-mal-score { text-shadow: 0 0 6px rgba(170,90,255,.7) !important; color: #e9d5ff !important; }
-
-/* === SPECIAL BURNING CARD (#7 — Fairy Tail) === */
-@keyframes fireGlow {
-  0% { box-shadow: 0 0 8px 2px rgba(255,90,20,.55), 0 0 18px 4px rgba(255,60,0,.35), 0 0 30px 8px rgba(255,140,30,.18); border-color: rgba(255,160,60,.7); }
-  25% { box-shadow: 0 0 14px 4px rgba(255,130,30,.75), 0 0 28px 10px rgba(255,80,10,.45), 0 0 45px 16px rgba(255,160,40,.28); border-color: rgba(255,180,70,.9); }
-  50% { box-shadow: 0 0 8px 2px rgba(255,90,20,.55), 0 0 18px 4px rgba(255,60,0,.35), 0 0 30px 8px rgba(255,140,30,.18); border-color: rgba(255,160,60,.7); }
-  75% { box-shadow: 0 0 12px 3px rgba(255,130,30,.65), 0 0 22px 6px rgba(255,100,20,.4), 0 0 38px 14px rgba(255,150,40,.22); border-color: rgba(255,170,65,.85); }
-  100% { box-shadow: 0 0 8px 2px rgba(255,90,20,.55), 0 0 18px 4px rgba(255,60,0,.35), 0 0 30px 8px rgba(255,140,30,.18); border-color: rgba(255,160,60,.7); }
-}
-.card-burning .card-inner,
-.card-burning .card-inner::before {
-  animation: fireGlow 2.2s ease-in-out infinite !important;
-}
-.card-burning .card-inner {
-  border: 2px solid rgba(255,160,60,.8) !important;
-  border-radius: 12px !important;
-}
-.card-burning .card-inner::before {
-  content: '';
-  position: absolute;
-  inset: -4px;
-  border-radius: 16px;
-  border: 1.5px solid rgba(255,200,100,.35);
-  pointer-events: none;
-  z-index: 10;
-}
-.card-burning .badge {
-  background: linear-gradient(135deg,#ff5a14,#ff8a3a) !important;
-  border-color: #ff5a14 !important;
-  box-shadow: 0 0 8px #ff5a14, 0 0 4px #ffa500 !important;
-  color: #fff !important;
-  text-shadow: 0 0 4px #ff5a14;
-}
-.card-burning .back-genre,
-.card-burning .back-mal,
-.card-burning .back-mal-score {
-  text-shadow: 0 0 6px rgba(255,160,60,.7) !important;
-  color: #ffd6a0 !important;
-}
 /* ---- Performance body classes ---- */
 body.perf-no-thunder #lightningCanvas { display: none !important; }
 body.perf-no-counter-anim .counter-box { transition: none !important; }
@@ -8489,161 +8297,213 @@ body.duel-mode-active #nowStrip { display: none !important; }
 
 
 
+
 /* ══════════════════════════════════════════════════════════════════
-   SPECIAL CARD STAMPS — the official seal
-   Every stamp is the same wax-seal shape, only the colour changes:
-   a scalloped edge, a double ring and OFFICIAL around the rim.
+   SPECIAL CARD TYPES - 16 kinds, 16 different colours.
+   The name sits on the BACK of the card, the glow wraps the whole
+   card and the genre / season / episode text picks up the colour.
    ══════════════════════════════════════════════════════════════════ */
-.special-stamp {
-  position: absolute;
-  top: -16px;
-  left: -16px;
-  z-index: 99;
-  width: 106px;
-  height: 106px;
-  border-radius: 50%;
-  background: transparent !important;
-  border: 0 !important;
-  box-shadow: none !important;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  overflow: hidden;
-  font-weight: 900;
-  font-size: 10px;
-  line-height: 1.08;
-  letter-spacing: .3px;
-  padding: 26px 15px;
-  pointer-events: none;
-  text-shadow: 0 1px 2px rgba(0,0,0,.55);
+
+.back-special-label {
+  font-family: 'Exo 2', sans-serif;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid currentColor;
+  opacity: .95;
 }
-.special-stamp::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: 100% 100%;
-  pointer-events: none;
-  z-index: -1;
-}
-.card-stamp-burning { color: #fff6f0 !important; font-size: 8.5px !important; }
-.card-stamp-burning::before {
-  background-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%20200%20200%27%3E%3Cdefs%3E%3Cpath%20id%3D%27r%27%20d%3D%27M100%2C100%20m-77%2C0%20a77%2C77%200%201%2C1%20154%2C0%20a77%2C77%200%201%2C1%20-154%2C0%27%2F%3E%3C%2Fdefs%3E%3Ccircle%20cx%3D%27100%27%20cy%3D%27100%27%20r%3D%2791%27%20fill%3D%27none%27%20stroke%3D%27%23c41c00%27%20stroke-width%3D%2713%27%20stroke-dasharray%3D%277%205.5%27%20stroke-linecap%3D%27round%27%2F%3E%3Ccircle%20cx%3D%27100%27%20cy%3D%27100%27%20r%3D%2781%27%20fill%3D%27none%27%20stroke%3D%27%23ff7a52%27%20stroke-width%3D%274.5%27%2F%3E%3Ccircle%20cx%3D%27100%27%20cy%3D%27100%27%20r%3D%2757%27%20fill%3D%27%23ff7a52%27%20fill-opacity%3D%27.93%27%2F%3E%3Ccircle%20cx%3D%27100%27%20cy%3D%27100%27%20r%3D%2758%27%20fill%3D%27none%27%20stroke%3D%27%23c41c00%27%20stroke-width%3D%273.5%27%2F%3E%3Ccircle%20cx%3D%27100%27%20cy%3D%27100%27%20r%3D%2748%27%20fill%3D%27none%27%20stroke%3D%27%23c41c00%27%20stroke-width%3D%271.6%27%20stroke-dasharray%3D%274%204%27%2F%3E%3Ctext%20font-family%3D%27Arial%20Black%2CArial%2Csans-serif%27%20font-size%3D%2715%27%20font-weight%3D%27bold%27%20fill%3D%27%23ff7a52%27%20letter-spacing%3D%271%27%3E%3CtextPath%20href%3D%27%23r%27%20startOffset%3D%273%27%3EOFFICIAL%20%C2%B7%20OFFICIAL%20%C2%B7%20OFFICIAL%20%C2%B7%20OFFICIAL%20%C2%B7%3C%2FtextPath%3E%3C%2Ftext%3E%3C%2Fsvg%3E");
-  filter: drop-shadow(0 0 5px rgba(255,90,40,.75)) drop-shadow(0 0 13px rgba(255,90,40,.75));
-  animation: sealPulse 2.6s ease-in-out infinite;
-}
-.card-stamp-frozen { color: #04364f !important; font-size: 8.5px !important; }
-.card-stamp-frozen::before {
-  background-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%20200%20200%27%3E%3Cdefs%3E%3Cpath%20id%3D%27r%27%20d%3D%27M100%2C100%20m-77%2C0%20a77%2C77%200%201%2C1%20154%2C0%20a77%2C77%200%201%2C1%20-154%2C0%27%2F%3E%3C%2Fdefs%3E%3Ccircle%20cx%3D%27100%27%20cy%3D%27100%27%20r%3D%2791%27%20fill%3D%27none%27%20stroke%3D%27%230077cc%27%20stroke-width%3D%2713%27%20stroke-dasharray%3D%277%205.5%27%20stroke-linecap%3D%27round%27%2F%3E%3Ccircle%20cx%3D%27100%27%20cy%3D%27100%27%20r%3D%2781%27%20fill%3D%27none%27%20stroke%3D%27%237ad4ff%27%20stroke-width%3D%274.5%27%2F%3E%3Ccircle%20cx%3D%27100%27%20cy%3D%27100%27%20r%3D%2757%27%20fill%3D%27%237ad4ff%27%20fill-opacity%3D%27.93%27%2F%3E%3Ccircle%20cx%3D%27100%27%20cy%3D%27100%27%20r%3D%2758%27%20fill%3D%27none%27%20stroke%3D%27%230077cc%27%20stroke-width%3D%273.5%27%2F%3E%3Ccircle%20cx%3D%27100%27%20cy%3D%27100%27%20r%3D%2748%27%20fill%3D%27none%27%20stroke%3D%27%230077cc%27%20stroke-width%3D%271.6%27%20stroke-dasharray%3D%274%204%27%2F%3E%3Ctext%20font-family%3D%27Arial%20Black%2CArial%2Csans-serif%27%20font-size%3D%2715%27%20font-weight%3D%27bold%27%20fill%3D%27%237ad4ff%27%20letter-spacing%3D%271%27%3E%3CtextPath%20href%3D%27%23r%27%20startOffset%3D%273%27%3EOFFICIAL%20%C2%B7%20OFFICIAL%20%C2%B7%20OFFICIAL%20%C2%B7%20OFFICIAL%20%C2%B7%3C%2FtextPath%3E%3C%2Ftext%3E%3C%2Fsvg%3E");
-  filter: drop-shadow(0 0 5px rgba(51,170,255,.75)) drop-shadow(0 0 13px rgba(51,170,255,.75));
-  animation: sealPulse 2.6s ease-in-out infinite;
-}
-.card-stamp-wind { color: #06301a !important; font-size: 8.5px !important; }
-.card-stamp-wind::before {
-  background-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%20200%20200%27%3E%3Cdefs%3E%3Cpath%20id%3D%27r%27%20d%3D%27M100%2C100%20m-77%2C0%20a77%2C77%200%201%2C1%20154%2C0%20a77%2C77%200%201%2C1%20-154%2C0%27%2F%3E%3C%2Fdefs%3E%3Ccircle%20cx%3D%27100%27%20cy%3D%27100%27%20r%3D%2791%27%20fill%3D%27none%27%20stroke%3D%27%231f9e52%27%20stroke-width%3D%2713%27%20stroke-dasharray%3D%277%205.5%27%20stroke-linecap%3D%27round%27%2F%3E%3Ccircle%20cx%3D%27100%27%20cy%3D%27100%27%20r%3D%2781%27%20fill%3D%27none%27%20stroke%3D%27%238affc0%27%20stroke-width%3D%274.5%27%2F%3E%3Ccircle%20cx%3D%27100%27%20cy%3D%27100%27%20r%3D%2757%27%20fill%3D%27%238affc0%27%20fill-opacity%3D%27.93%27%2F%3E%3Ccircle%20cx%3D%27100%27%20cy%3D%27100%27%20r%3D%2758%27%20fill%3D%27none%27%20stroke%3D%27%231f9e52%27%20stroke-width%3D%273.5%27%2F%3E%3Ccircle%20cx%3D%27100%27%20cy%3D%27100%27%20r%3D%2748%27%20fill%3D%27none%27%20stroke%3D%27%231f9e52%27%20stroke-width%3D%271.6%27%20stroke-dasharray%3D%274%204%27%2F%3E%3Ctext%20font-family%3D%27Arial%20Black%2CArial%2Csans-serif%27%20font-size%3D%2715%27%20font-weight%3D%27bold%27%20fill%3D%27%238affc0%27%20letter-spacing%3D%271%27%3E%3CtextPath%20href%3D%27%23r%27%20startOffset%3D%273%27%3EOFFICIAL%20%C2%B7%20OFFICIAL%20%C2%B7%20OFFICIAL%20%C2%B7%20OFFICIAL%20%C2%B7%3C%2FtextPath%3E%3C%2Ftext%3E%3C%2Fsvg%3E");
-  filter: drop-shadow(0 0 5px rgba(75,224,138,.75)) drop-shadow(0 0 13px rgba(75,224,138,.75));
-  animation: sealPulse 2.6s ease-in-out infinite;
-}
-.card-stamp-black { color: #161616 !important; font-size: 8.5px !important; }
-.card-stamp-black::before {
-  background-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%20200%20200%27%3E%3Cdefs%3E%3Cpath%20id%3D%27r%27%20d%3D%27M100%2C100%20m-77%2C0%20a77%2C77%200%201%2C1%20154%2C0%20a77%2C77%200%201%2C1%20-154%2C0%27%2F%3E%3C%2Fdefs%3E%3Ccircle%20cx%3D%27100%27%20cy%3D%27100%27%20r%3D%2791%27%20fill%3D%27none%27%20stroke%3D%27%233a3a3a%27%20stroke-width%3D%2713%27%20stroke-dasharray%3D%277%205.5%27%20stroke-linecap%3D%27round%27%2F%3E%3Ccircle%20cx%3D%27100%27%20cy%3D%27100%27%20r%3D%2781%27%20fill%3D%27none%27%20stroke%3D%27%23d8d8d8%27%20stroke-width%3D%274.5%27%2F%3E%3Ccircle%20cx%3D%27100%27%20cy%3D%27100%27%20r%3D%2757%27%20fill%3D%27%23d8d8d8%27%20fill-opacity%3D%27.93%27%2F%3E%3Ccircle%20cx%3D%27100%27%20cy%3D%27100%27%20r%3D%2758%27%20fill%3D%27none%27%20stroke%3D%27%233a3a3a%27%20stroke-width%3D%273.5%27%2F%3E%3Ccircle%20cx%3D%27100%27%20cy%3D%27100%27%20r%3D%2748%27%20fill%3D%27none%27%20stroke%3D%27%233a3a3a%27%20stroke-width%3D%271.6%27%20stroke-dasharray%3D%274%204%27%2F%3E%3Ctext%20font-family%3D%27Arial%20Black%2CArial%2Csans-serif%27%20font-size%3D%2715%27%20font-weight%3D%27bold%27%20fill%3D%27%23d8d8d8%27%20letter-spacing%3D%271%27%3E%3CtextPath%20href%3D%27%23r%27%20startOffset%3D%273%27%3EOFFICIAL%20%C2%B7%20OFFICIAL%20%C2%B7%20OFFICIAL%20%C2%B7%20OFFICIAL%20%C2%B7%3C%2FtextPath%3E%3C%2Ftext%3E%3C%2Fsvg%3E");
-  filter: drop-shadow(0 0 5px rgba(190,190,190,.7)) drop-shadow(0 0 13px rgba(190,190,190,.7));
-  animation: sealPulse 2.6s ease-in-out infinite;
-}
-.card-stamp-lightning { color: #3a2a00 !important; font-size: 8.5px !important; }
-.card-stamp-lightning::before {
-  background-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%20200%20200%27%3E%3Cdefs%3E%3Cpath%20id%3D%27r%27%20d%3D%27M100%2C100%20m-77%2C0%20a77%2C77%200%201%2C1%20154%2C0%20a77%2C77%200%201%2C1%20-154%2C0%27%2F%3E%3C%2Fdefs%3E%3Ccircle%20cx%3D%27100%27%20cy%3D%27100%27%20r%3D%2791%27%20fill%3D%27none%27%20stroke%3D%27%23c98f00%27%20stroke-width%3D%2713%27%20stroke-dasharray%3D%277%205.5%27%20stroke-linecap%3D%27round%27%2F%3E%3Ccircle%20cx%3D%27100%27%20cy%3D%27100%27%20r%3D%2781%27%20fill%3D%27none%27%20stroke%3D%27%23ffe066%27%20stroke-width%3D%274.5%27%2F%3E%3Ccircle%20cx%3D%27100%27%20cy%3D%27100%27%20r%3D%2757%27%20fill%3D%27%23ffe066%27%20fill-opacity%3D%27.93%27%2F%3E%3Ccircle%20cx%3D%27100%27%20cy%3D%27100%27%20r%3D%2758%27%20fill%3D%27none%27%20stroke%3D%27%23c98f00%27%20stroke-width%3D%273.5%27%2F%3E%3Ccircle%20cx%3D%27100%27%20cy%3D%27100%27%20r%3D%2748%27%20fill%3D%27none%27%20stroke%3D%27%23c98f00%27%20stroke-width%3D%271.6%27%20stroke-dasharray%3D%274%204%27%2F%3E%3Ctext%20font-family%3D%27Arial%20Black%2CArial%2Csans-serif%27%20font-size%3D%2715%27%20font-weight%3D%27bold%27%20fill%3D%27%23ffe066%27%20letter-spacing%3D%271%27%3E%3CtextPath%20href%3D%27%23r%27%20startOffset%3D%273%27%3EOFFICIAL%20%C2%B7%20OFFICIAL%20%C2%B7%20OFFICIAL%20%C2%B7%20OFFICIAL%20%C2%B7%3C%2FtextPath%3E%3C%2Ftext%3E%3C%2Fsvg%3E");
-  filter: drop-shadow(0 0 5px rgba(255,204,0,.8)) drop-shadow(0 0 13px rgba(255,204,0,.8));
-  animation: sealPulse 2.6s ease-in-out infinite;
-}
-.card-stamp-healing { color: #0d3a08 !important; font-size: 8.5px !important; }
-.card-stamp-healing::before {
-  background-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%20200%20200%27%3E%3Cdefs%3E%3Cpath%20id%3D%27r%27%20d%3D%27M100%2C100%20m-77%2C0%20a77%2C77%200%201%2C1%20154%2C0%20a77%2C77%200%201%2C1%20-154%2C0%27%2F%3E%3C%2Fdefs%3E%3Ccircle%20cx%3D%27100%27%20cy%3D%27100%27%20r%3D%2791%27%20fill%3D%27none%27%20stroke%3D%27%232f8f10%27%20stroke-width%3D%2713%27%20stroke-dasharray%3D%277%205.5%27%20stroke-linecap%3D%27round%27%2F%3E%3Ccircle%20cx%3D%27100%27%20cy%3D%27100%27%20r%3D%2781%27%20fill%3D%27none%27%20stroke%3D%27%23aaff66%27%20stroke-width%3D%274.5%27%2F%3E%3Ccircle%20cx%3D%27100%27%20cy%3D%27100%27%20r%3D%2757%27%20fill%3D%27%23aaff66%27%20fill-opacity%3D%27.93%27%2F%3E%3Ccircle%20cx%3D%27100%27%20cy%3D%27100%27%20r%3D%2758%27%20fill%3D%27none%27%20stroke%3D%27%232f8f10%27%20stroke-width%3D%273.5%27%2F%3E%3Ccircle%20cx%3D%27100%27%20cy%3D%27100%27%20r%3D%2748%27%20fill%3D%27none%27%20stroke%3D%27%232f8f10%27%20stroke-width%3D%271.6%27%20stroke-dasharray%3D%274%204%27%2F%3E%3Ctext%20font-family%3D%27Arial%20Black%2CArial%2Csans-serif%27%20font-size%3D%2715%27%20font-weight%3D%27bold%27%20fill%3D%27%23aaff66%27%20letter-spacing%3D%271%27%3E%3CtextPath%20href%3D%27%23r%27%20startOffset%3D%273%27%3EOFFICIAL%20%C2%B7%20OFFICIAL%20%C2%B7%20OFFICIAL%20%C2%B7%20OFFICIAL%20%C2%B7%3C%2FtextPath%3E%3C%2Ftext%3E%3C%2Fsvg%3E");
-  filter: drop-shadow(0 0 5px rgba(102,221,68,.75)) drop-shadow(0 0 13px rgba(102,221,68,.75));
-  animation: sealPulse 2.6s ease-in-out infinite;
-}
-.card-stamp-earth { color: #2a1a0c !important; font-size: 8.5px !important; }
-.card-stamp-earth::before {
-  background-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%20200%20200%27%3E%3Cdefs%3E%3Cpath%20id%3D%27r%27%20d%3D%27M100%2C100%20m-77%2C0%20a77%2C77%200%201%2C1%20154%2C0%20a77%2C77%200%201%2C1%20-154%2C0%27%2F%3E%3C%2Fdefs%3E%3Ccircle%20cx%3D%27100%27%20cy%3D%27100%27%20r%3D%2791%27%20fill%3D%27none%27%20stroke%3D%27%238a5a2b%27%20stroke-width%3D%2713%27%20stroke-dasharray%3D%277%205.5%27%20stroke-linecap%3D%27round%27%2F%3E%3Ccircle%20cx%3D%27100%27%20cy%3D%27100%27%20r%3D%2781%27%20fill%3D%27none%27%20stroke%3D%27%23e0b183%27%20stroke-width%3D%274.5%27%2F%3E%3Ccircle%20cx%3D%27100%27%20cy%3D%27100%27%20r%3D%2757%27%20fill%3D%27%23e0b183%27%20fill-opacity%3D%27.93%27%2F%3E%3Ccircle%20cx%3D%27100%27%20cy%3D%27100%27%20r%3D%2758%27%20fill%3D%27none%27%20stroke%3D%27%238a5a2b%27%20stroke-width%3D%273.5%27%2F%3E%3Ccircle%20cx%3D%27100%27%20cy%3D%27100%27%20r%3D%2748%27%20fill%3D%27none%27%20stroke%3D%27%238a5a2b%27%20stroke-width%3D%271.6%27%20stroke-dasharray%3D%274%204%27%2F%3E%3Ctext%20font-family%3D%27Arial%20Black%2CArial%2Csans-serif%27%20font-size%3D%2715%27%20font-weight%3D%27bold%27%20fill%3D%27%23e0b183%27%20letter-spacing%3D%271%27%3E%3CtextPath%20href%3D%27%23r%27%20startOffset%3D%273%27%3EOFFICIAL%20%C2%B7%20OFFICIAL%20%C2%B7%20OFFICIAL%20%C2%B7%20OFFICIAL%20%C2%B7%3C%2FtextPath%3E%3C%2Ftext%3E%3C%2Fsvg%3E");
-  filter: drop-shadow(0 0 5px rgba(200,140,90,.7)) drop-shadow(0 0 13px rgba(200,140,90,.7));
-  animation: sealPulse 2.6s ease-in-out infinite;
-}
-.card-stamp-speed { color: #f6f0ff !important; font-size: 8.5px !important; }
-.card-stamp-speed::before {
-  background-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%20200%20200%27%3E%3Cdefs%3E%3Cpath%20id%3D%27r%27%20d%3D%27M100%2C100%20m-77%2C0%20a77%2C77%200%201%2C1%20154%2C0%20a77%2C77%200%201%2C1%20-154%2C0%27%2F%3E%3C%2Fdefs%3E%3Ccircle%20cx%3D%27100%27%20cy%3D%27100%27%20r%3D%2791%27%20fill%3D%27none%27%20stroke%3D%27%237b2ff7%27%20stroke-width%3D%2713%27%20stroke-dasharray%3D%277%205.5%27%20stroke-linecap%3D%27round%27%2F%3E%3Ccircle%20cx%3D%27100%27%20cy%3D%27100%27%20r%3D%2781%27%20fill%3D%27none%27%20stroke%3D%27%23d8a6ff%27%20stroke-width%3D%274.5%27%2F%3E%3Ccircle%20cx%3D%27100%27%20cy%3D%27100%27%20r%3D%2757%27%20fill%3D%27%23d8a6ff%27%20fill-opacity%3D%27.93%27%2F%3E%3Ccircle%20cx%3D%27100%27%20cy%3D%27100%27%20r%3D%2758%27%20fill%3D%27none%27%20stroke%3D%27%237b2ff7%27%20stroke-width%3D%273.5%27%2F%3E%3Ccircle%20cx%3D%27100%27%20cy%3D%27100%27%20r%3D%2748%27%20fill%3D%27none%27%20stroke%3D%27%237b2ff7%27%20stroke-width%3D%271.6%27%20stroke-dasharray%3D%274%204%27%2F%3E%3Ctext%20font-family%3D%27Arial%20Black%2CArial%2Csans-serif%27%20font-size%3D%2715%27%20font-weight%3D%27bold%27%20fill%3D%27%23d8a6ff%27%20letter-spacing%3D%271%27%3E%3CtextPath%20href%3D%27%23r%27%20startOffset%3D%273%27%3EOFFICIAL%20%C2%B7%20OFFICIAL%20%C2%B7%20OFFICIAL%20%C2%B7%20OFFICIAL%20%C2%B7%3C%2FtextPath%3E%3C%2Ftext%3E%3C%2Fsvg%3E");
-  filter: drop-shadow(0 0 5px rgba(168,85,247,.75)) drop-shadow(0 0 13px rgba(168,85,247,.75));
-  animation: sealPulse 2.6s ease-in-out infinite;
-}
-.card-stamp-epic { color: #2a1200 !important; font-size: 13px !important; }
-.card-stamp-epic::before {
-  background-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%20200%20200%27%3E%3Cdefs%3E%3Cpath%20id%3D%27r%27%20d%3D%27M100%2C100%20m-77%2C0%20a77%2C77%200%201%2C1%20154%2C0%20a77%2C77%200%201%2C1%20-154%2C0%27%2F%3E%3C%2Fdefs%3E%3Ccircle%20cx%3D%27100%27%20cy%3D%27100%27%20r%3D%2791%27%20fill%3D%27none%27%20stroke%3D%27%23d95f00%27%20stroke-width%3D%2713%27%20stroke-dasharray%3D%277%205.5%27%20stroke-linecap%3D%27round%27%2F%3E%3Ccircle%20cx%3D%27100%27%20cy%3D%27100%27%20r%3D%2781%27%20fill%3D%27none%27%20stroke%3D%27%23ffb347%27%20stroke-width%3D%274.5%27%2F%3E%3Ccircle%20cx%3D%27100%27%20cy%3D%27100%27%20r%3D%2757%27%20fill%3D%27%23ffb347%27%20fill-opacity%3D%27.93%27%2F%3E%3Ccircle%20cx%3D%27100%27%20cy%3D%27100%27%20r%3D%2758%27%20fill%3D%27none%27%20stroke%3D%27%23d95f00%27%20stroke-width%3D%273.5%27%2F%3E%3Ccircle%20cx%3D%27100%27%20cy%3D%27100%27%20r%3D%2748%27%20fill%3D%27none%27%20stroke%3D%27%23d95f00%27%20stroke-width%3D%271.6%27%20stroke-dasharray%3D%274%204%27%2F%3E%3Ctext%20font-family%3D%27Arial%20Black%2CArial%2Csans-serif%27%20font-size%3D%2715%27%20font-weight%3D%27bold%27%20fill%3D%27%23ffb347%27%20letter-spacing%3D%271%27%3E%3CtextPath%20href%3D%27%23r%27%20startOffset%3D%273%27%3EOFFICIAL%20%C2%B7%20OFFICIAL%20%C2%B7%20OFFICIAL%20%C2%B7%20OFFICIAL%20%C2%B7%3C%2FtextPath%3E%3C%2Ftext%3E%3C%2Fsvg%3E");
-  filter: drop-shadow(0 0 5px rgba(255,138,31,.8)) drop-shadow(0 0 13px rgba(255,138,31,.8));
-  animation: sealPulse 2.6s ease-in-out infinite;
-}
-.card-stamp-legendary { color: #3a2600 !important; font-size: 7px !important; }
-.card-stamp-legendary::before {
-  background-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%20200%20200%27%3E%3Cdefs%3E%3Cpath%20id%3D%27r%27%20d%3D%27M100%2C100%20m-77%2C0%20a77%2C77%200%201%2C1%20154%2C0%20a77%2C77%200%201%2C1%20-154%2C0%27%2F%3E%3C%2Fdefs%3E%3Ccircle%20cx%3D%27100%27%20cy%3D%27100%27%20r%3D%2791%27%20fill%3D%27none%27%20stroke%3D%27%23b8860b%27%20stroke-width%3D%2713%27%20stroke-dasharray%3D%277%205.5%27%20stroke-linecap%3D%27round%27%2F%3E%3Ccircle%20cx%3D%27100%27%20cy%3D%27100%27%20r%3D%2781%27%20fill%3D%27none%27%20stroke%3D%27%23ffd75e%27%20stroke-width%3D%274.5%27%2F%3E%3Ccircle%20cx%3D%27100%27%20cy%3D%27100%27%20r%3D%2757%27%20fill%3D%27%23ffd75e%27%20fill-opacity%3D%27.93%27%2F%3E%3Ccircle%20cx%3D%27100%27%20cy%3D%27100%27%20r%3D%2758%27%20fill%3D%27none%27%20stroke%3D%27%23b8860b%27%20stroke-width%3D%273.5%27%2F%3E%3Ccircle%20cx%3D%27100%27%20cy%3D%27100%27%20r%3D%2748%27%20fill%3D%27none%27%20stroke%3D%27%23b8860b%27%20stroke-width%3D%271.6%27%20stroke-dasharray%3D%274%204%27%2F%3E%3Ctext%20font-family%3D%27Arial%20Black%2CArial%2Csans-serif%27%20font-size%3D%2715%27%20font-weight%3D%27bold%27%20fill%3D%27%23ffd75e%27%20letter-spacing%3D%271%27%3E%3CtextPath%20href%3D%27%23r%27%20startOffset%3D%273%27%3EOFFICIAL%20%C2%B7%20OFFICIAL%20%C2%B7%20OFFICIAL%20%C2%B7%20OFFICIAL%20%C2%B7%3C%2FtextPath%3E%3C%2Ftext%3E%3C%2Fsvg%3E");
-  filter: drop-shadow(0 0 5px rgba(255,215,0,.85)) drop-shadow(0 0 13px rgba(255,215,0,.85));
-  animation: sealPulse 2.6s ease-in-out infinite;
-}
-.card-stamp-op { color: #fff2f5 !important; font-size: 13px !important; }
-.card-stamp-op::before {
-  background-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%20200%20200%27%3E%3Cdefs%3E%3Cpath%20id%3D%27r%27%20d%3D%27M100%2C100%20m-77%2C0%20a77%2C77%200%201%2C1%20154%2C0%20a77%2C77%200%201%2C1%20-154%2C0%27%2F%3E%3C%2Fdefs%3E%3Ccircle%20cx%3D%27100%27%20cy%3D%27100%27%20r%3D%2791%27%20fill%3D%27none%27%20stroke%3D%27%23c4002b%27%20stroke-width%3D%2713%27%20stroke-dasharray%3D%277%205.5%27%20stroke-linecap%3D%27round%27%2F%3E%3Ccircle%20cx%3D%27100%27%20cy%3D%27100%27%20r%3D%2781%27%20fill%3D%27none%27%20stroke%3D%27%23ff6b8f%27%20stroke-width%3D%274.5%27%2F%3E%3Ccircle%20cx%3D%27100%27%20cy%3D%27100%27%20r%3D%2757%27%20fill%3D%27%23ff6b8f%27%20fill-opacity%3D%27.93%27%2F%3E%3Ccircle%20cx%3D%27100%27%20cy%3D%27100%27%20r%3D%2758%27%20fill%3D%27none%27%20stroke%3D%27%23c4002b%27%20stroke-width%3D%273.5%27%2F%3E%3Ccircle%20cx%3D%27100%27%20cy%3D%27100%27%20r%3D%2748%27%20fill%3D%27none%27%20stroke%3D%27%23c4002b%27%20stroke-width%3D%271.6%27%20stroke-dasharray%3D%274%204%27%2F%3E%3Ctext%20font-family%3D%27Arial%20Black%2CArial%2Csans-serif%27%20font-size%3D%2715%27%20font-weight%3D%27bold%27%20fill%3D%27%23ff6b8f%27%20letter-spacing%3D%271%27%3E%3CtextPath%20href%3D%27%23r%27%20startOffset%3D%273%27%3EOFFICIAL%20%C2%B7%20OFFICIAL%20%C2%B7%20OFFICIAL%20%C2%B7%20OFFICIAL%20%C2%B7%3C%2FtextPath%3E%3C%2Ftext%3E%3C%2Fsvg%3E");
-  filter: drop-shadow(0 0 5px rgba(255,45,99,.8)) drop-shadow(0 0 13px rgba(255,45,99,.8));
-  animation: sealPulse 2.6s ease-in-out infinite;
-}
-.card-stamp-isekaiking { color: #f4efff !important; font-size: 7px !important; }
-.card-stamp-isekaiking::before {
-  background-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%20200%20200%27%3E%3Cdefs%3E%3Cpath%20id%3D%27r%27%20d%3D%27M100%2C100%20m-77%2C0%20a77%2C77%200%201%2C1%20154%2C0%20a77%2C77%200%201%2C1%20-154%2C0%27%2F%3E%3C%2Fdefs%3E%3Ccircle%20cx%3D%27100%27%20cy%3D%27100%27%20r%3D%2791%27%20fill%3D%27none%27%20stroke%3D%27%236a2fd6%27%20stroke-width%3D%2713%27%20stroke-dasharray%3D%277%205.5%27%20stroke-linecap%3D%27round%27%2F%3E%3Ccircle%20cx%3D%27100%27%20cy%3D%27100%27%20r%3D%2781%27%20fill%3D%27none%27%20stroke%3D%27%23c4adff%27%20stroke-width%3D%274.5%27%2F%3E%3Ccircle%20cx%3D%27100%27%20cy%3D%27100%27%20r%3D%2757%27%20fill%3D%27%23c4adff%27%20fill-opacity%3D%27.93%27%2F%3E%3Ccircle%20cx%3D%27100%27%20cy%3D%27100%27%20r%3D%2758%27%20fill%3D%27none%27%20stroke%3D%27%236a2fd6%27%20stroke-width%3D%273.5%27%2F%3E%3Ccircle%20cx%3D%27100%27%20cy%3D%27100%27%20r%3D%2748%27%20fill%3D%27none%27%20stroke%3D%27%236a2fd6%27%20stroke-width%3D%271.6%27%20stroke-dasharray%3D%274%204%27%2F%3E%3Ctext%20font-family%3D%27Arial%20Black%2CArial%2Csans-serif%27%20font-size%3D%2715%27%20font-weight%3D%27bold%27%20fill%3D%27%23c4adff%27%20letter-spacing%3D%271%27%3E%3CtextPath%20href%3D%27%23r%27%20startOffset%3D%273%27%3EOFFICIAL%20%C2%B7%20OFFICIAL%20%C2%B7%20OFFICIAL%20%C2%B7%20OFFICIAL%20%C2%B7%3C%2FtextPath%3E%3C%2Ftext%3E%3C%2Fsvg%3E");
-  filter: drop-shadow(0 0 5px rgba(138,92,255,.8)) drop-shadow(0 0 13px rgba(138,92,255,.8));
-  animation: sealPulse 2.6s ease-in-out infinite;
-}
-@keyframes sealPulse {
-  0%, 100% { transform: rotate(-2deg) scale(1); opacity: .95; }
-  50% { transform: rotate(2deg) scale(1.05); opacity: 1; }
-}
-@keyframes epicGlow {
-  0%, 100% { box-shadow: 0 0 8px 2px rgba(255,120,20,.55), 0 0 18px 4px rgba(255,90,0,.32), 0 0 30px 8px rgba(255,120,0,.18); border-color: rgba(255,138,31,.85); }
-  50% { box-shadow: 0 0 16px 4px rgba(255,120,20,.55), 0 0 34px 8px rgba(255,90,0,.32), 0 0 52px 16px rgba(255,120,0,.18); border-color: #ffb347; }
-}
-.card-epic .card-inner, .card-epic .card-inner::before { animation: epicGlow 2.4s ease-in-out infinite !important; }
-.card-epic .card-inner { border: 2px solid rgba(255,138,31,.85) !important; border-radius: 12px !important; }
-.card-epic .card-inner::before { content: ''; position: absolute; inset: -4px; border-radius: 16px; border: 1.5px solid rgba(255,170,70,.4); pointer-events: none; z-index: 10; }
-.card-epic .badge { background: linear-gradient(135deg,#ffb347,#ff6a00) !important; border-color: #ff6a00 !important; box-shadow: 0 0 8px rgba(255,120,20,.55), 0 0 4px #ff6a00 !important; color: #2a1200 !important; text-shadow: none; }
-.card-epic .back-genre, .card-epic .back-mal, .card-epic .back-mal-score { text-shadow: 0 0 6px rgba(255,120,20,.55) !important; }
-.back-special-label--epic { text-shadow: 0 0 12px rgba(255,120,20,.55) !important; }
+
+/* legendary - Legendary Card */
 @keyframes legendaryGlow {
-  0%, 100% { box-shadow: 0 0 8px 2px rgba(255,200,0,.6), 0 0 18px 4px rgba(255,160,0,.36), 0 0 30px 8px rgba(255,190,0,.2); border-color: rgba(255,215,0,.85); }
-  50% { box-shadow: 0 0 16px 4px rgba(255,200,0,.6), 0 0 34px 8px rgba(255,160,0,.36), 0 0 52px 16px rgba(255,190,0,.2); border-color: #ffe9a8; }
+  0%, 100% { box-shadow: 0 0 8px 2px rgba(190,215,255,.30), 0 0 18px 4px rgba(190,215,255,.18), 0 0 30px 8px rgba(190,215,255,.10); border-color: #8fa8c8 !important; }
+  50% { box-shadow: 0 0 16px 4px rgba(190,215,255,.85), 0 0 34px 8px rgba(190,215,255,.38), 0 0 52px 16px rgba(190,215,255,.20); border-color: #eaf2ff !important; }
 }
 .card-legendary .card-inner, .card-legendary .card-inner::before { animation: legendaryGlow 2.4s ease-in-out infinite !important; }
-.card-legendary .card-inner { border: 2px solid rgba(255,215,0,.85) !important; border-radius: 12px !important; }
-.card-legendary .card-inner::before { content: ''; position: absolute; inset: -4px; border-radius: 16px; border: 1.5px solid rgba(255,235,140,.45); pointer-events: none; z-index: 10; }
-.card-legendary .badge { background: linear-gradient(135deg,#ffe9a8,#d9a300) !important; border-color: #d9a300 !important; box-shadow: 0 0 8px rgba(255,200,0,.6), 0 0 4px #d9a300 !important; color: #3a2600 !important; text-shadow: none; }
-.card-legendary .back-genre, .card-legendary .back-mal, .card-legendary .back-mal-score { text-shadow: 0 0 6px rgba(255,200,0,.6) !important; }
-.back-special-label--legendary { text-shadow: 0 0 12px rgba(255,200,0,.6) !important; }
+.card-legendary .card-inner { border: 2px solid #8fa8c8 !important; border-radius: 12px !important; }
+.card-legendary .card-inner::before { content: ''; position: absolute; inset: -4px; border-radius: 16px; border: 1.5px solid #eaf2ff55; pointer-events: none; z-index: 10; }
+.card-legendary .badge { background: linear-gradient(135deg,#f4f9ff,#b9cde6) !important; border-color: #eaf2ff !important; box-shadow: 0 0 8px rgba(190,215,255,.85), 0 0 4px #8fa8c8 !important; color: #1b2436 !important; text-shadow: none; }
+.card-legendary .back-genre, .card-legendary .back-mal, .card-legendary .back-mal-score, .card-legendary .back-season, .card-legendary .back-episodes { text-shadow: 0 0 6px rgba(190,215,255,.85) !important; color: #e8f1ff !important; }
+.back-special-label--legendary { color: #eaf2ff !important; text-shadow: 0 0 14px rgba(190,215,255,.85) !important; }
+
+/* epic - Epic Card */
+@keyframes epicGlow {
+  0%, 100% { box-shadow: 0 0 8px 2px rgba(255,138,43,.30), 0 0 18px 4px rgba(255,138,43,.18), 0 0 30px 8px rgba(255,138,43,.10); border-color: #c24a00 !important; }
+  50% { box-shadow: 0 0 16px 4px rgba(255,138,43,.85), 0 0 34px 8px rgba(255,138,43,.38), 0 0 52px 16px rgba(255,138,43,.20); border-color: #ff8a2b !important; }
+}
+.card-epic .card-inner, .card-epic .card-inner::before { animation: epicGlow 2.4s ease-in-out infinite !important; }
+.card-epic .card-inner { border: 2px solid #c24a00 !important; border-radius: 12px !important; }
+.card-epic .card-inner::before { content: ''; position: absolute; inset: -4px; border-radius: 16px; border: 1.5px solid #ff8a2b55; pointer-events: none; z-index: 10; }
+.card-epic .badge { background: linear-gradient(135deg,#ffb066,#ff6a00) !important; border-color: #ff8a2b !important; box-shadow: 0 0 8px rgba(255,138,43,.85), 0 0 4px #c24a00 !important; color: #2a1200 !important; text-shadow: none; }
+.card-epic .back-genre, .card-epic .back-mal, .card-epic .back-mal-score, .card-epic .back-season, .card-epic .back-episodes { text-shadow: 0 0 6px rgba(255,138,43,.85) !important; color: #ffe0c2 !important; }
+.back-special-label--epic { color: #ff8a2b !important; text-shadow: 0 0 14px rgba(255,138,43,.85) !important; }
+
+/* op - Over Powered Card */
 @keyframes opGlow {
-  0%, 100% { box-shadow: 0 0 8px 2px rgba(255,45,99,.6), 0 0 18px 4px rgba(200,0,60,.36), 0 0 30px 8px rgba(255,45,99,.2); border-color: rgba(255,45,99,.85); }
-  50% { box-shadow: 0 0 16px 4px rgba(255,45,99,.6), 0 0 34px 8px rgba(200,0,60,.36), 0 0 52px 16px rgba(255,45,99,.2); border-color: #ff6b8f; }
+  0%, 100% { box-shadow: 0 0 8px 2px rgba(255,79,163,.30), 0 0 18px 4px rgba(255,79,163,.18), 0 0 30px 8px rgba(255,79,163,.10); border-color: #b8006b !important; }
+  50% { box-shadow: 0 0 16px 4px rgba(255,79,163,.85), 0 0 34px 8px rgba(255,79,163,.38), 0 0 52px 16px rgba(255,79,163,.20); border-color: #ff4fa3 !important; }
 }
 .card-op .card-inner, .card-op .card-inner::before { animation: opGlow 2.4s ease-in-out infinite !important; }
-.card-op .card-inner { border: 2px solid rgba(255,45,99,.85) !important; border-radius: 12px !important; }
-.card-op .card-inner::before { content: ''; position: absolute; inset: -4px; border-radius: 16px; border: 1.5px solid rgba(255,140,170,.45); pointer-events: none; z-index: 10; }
-.card-op .badge { background: linear-gradient(135deg,#ff6b8f,#e3123f) !important; border-color: #e3123f !important; box-shadow: 0 0 8px rgba(255,45,99,.6), 0 0 4px #e3123f !important; color: #fff !important; text-shadow: none; }
-.card-op .back-genre, .card-op .back-mal, .card-op .back-mal-score { text-shadow: 0 0 6px rgba(255,45,99,.6) !important; }
-.back-special-label--op { text-shadow: 0 0 12px rgba(255,45,99,.6) !important; }
+.card-op .card-inner { border: 2px solid #b8006b !important; border-radius: 12px !important; }
+.card-op .card-inner::before { content: ''; position: absolute; inset: -4px; border-radius: 16px; border: 1.5px solid #ff4fa355; pointer-events: none; z-index: 10; }
+.card-op .badge { background: linear-gradient(135deg,#ff8ec4,#e3123f) !important; border-color: #ff4fa3 !important; box-shadow: 0 0 8px rgba(255,79,163,.85), 0 0 4px #b8006b !important; color: #fff !important; text-shadow: none; }
+.card-op .back-genre, .card-op .back-mal, .card-op .back-mal-score, .card-op .back-season, .card-op .back-episodes { text-shadow: 0 0 6px rgba(255,79,163,.85) !important; color: #ffd6ec !important; }
+.back-special-label--op { color: #ff4fa3 !important; text-shadow: 0 0 14px rgba(255,79,163,.85) !important; }
+
+/* isekaiking - Isekai Lord Card */
 @keyframes isekaikingGlow {
-  0%, 100% { box-shadow: 0 0 8px 2px rgba(138,92,255,.6), 0 0 18px 4px rgba(100,40,220,.36), 0 0 30px 8px rgba(138,92,255,.2); border-color: rgba(138,92,255,.85); }
-  50% { box-shadow: 0 0 16px 4px rgba(138,92,255,.6), 0 0 34px 8px rgba(100,40,220,.36), 0 0 52px 16px rgba(138,92,255,.2); border-color: #c4adff; }
+  0%, 100% { box-shadow: 0 0 8px 2px rgba(138,108,255,.30), 0 0 18px 4px rgba(138,108,255,.18), 0 0 30px 8px rgba(138,108,255,.10); border-color: #4a1fd0 !important; }
+  50% { box-shadow: 0 0 16px 4px rgba(138,108,255,.85), 0 0 34px 8px rgba(138,108,255,.38), 0 0 52px 16px rgba(138,108,255,.20); border-color: #8a6cff !important; }
 }
 .card-isekaiking .card-inner, .card-isekaiking .card-inner::before { animation: isekaikingGlow 2.4s ease-in-out infinite !important; }
-.card-isekaiking .card-inner { border: 2px solid rgba(138,92,255,.85) !important; border-radius: 12px !important; }
-.card-isekaiking .card-inner::before { content: ''; position: absolute; inset: -4px; border-radius: 16px; border: 1.5px solid rgba(190,160,255,.45); pointer-events: none; z-index: 10; }
-.card-isekaiking .badge { background: linear-gradient(135deg,#c4adff,#7b4dff) !important; border-color: #7b4dff !important; box-shadow: 0 0 8px rgba(138,92,255,.6), 0 0 4px #7b4dff !important; color: #fff !important; text-shadow: none; }
-.card-isekaiking .back-genre, .card-isekaiking .back-mal, .card-isekaiking .back-mal-score { text-shadow: 0 0 6px rgba(138,92,255,.6) !important; }
-.back-special-label--isekaiking { text-shadow: 0 0 12px rgba(138,92,255,.6) !important; }
-@media (prefers-reduced-motion: reduce) {
-  .special-stamp::before { animation: none !important; }
+.card-isekaiking .card-inner { border: 2px solid #4a1fd0 !important; border-radius: 12px !important; }
+.card-isekaiking .card-inner::before { content: ''; position: absolute; inset: -4px; border-radius: 16px; border: 1.5px solid #8a6cff55; pointer-events: none; z-index: 10; }
+.card-isekaiking .badge { background: linear-gradient(135deg,#b9a4ff,#6a5cff) !important; border-color: #8a6cff !important; box-shadow: 0 0 8px rgba(138,108,255,.85), 0 0 4px #4a1fd0 !important; color: #fff !important; text-shadow: none; }
+.card-isekaiking .back-genre, .card-isekaiking .back-mal, .card-isekaiking .back-mal-score, .card-isekaiking .back-season, .card-isekaiking .back-episodes { text-shadow: 0 0 6px rgba(138,108,255,.85) !important; color: #e2d8ff !important; }
+.back-special-label--isekaiking { color: #8a6cff !important; text-shadow: 0 0 14px rgba(138,108,255,.85) !important; }
+
+/* burning - Fire Card */
+@keyframes burningGlow {
+  0%, 100% { box-shadow: 0 0 8px 2px rgba(255,74,61,.30), 0 0 18px 4px rgba(255,74,61,.18), 0 0 30px 8px rgba(255,74,61,.10); border-color: #b31205 !important; }
+  50% { box-shadow: 0 0 16px 4px rgba(255,74,61,.85), 0 0 34px 8px rgba(255,74,61,.38), 0 0 52px 16px rgba(255,74,61,.20); border-color: #ff4a3d !important; }
 }
+.card-burning .card-inner, .card-burning .card-inner::before { animation: burningGlow 2.4s ease-in-out infinite !important; }
+.card-burning .card-inner { border: 2px solid #b31205 !important; border-radius: 12px !important; }
+.card-burning .card-inner::before { content: ''; position: absolute; inset: -4px; border-radius: 16px; border: 1.5px solid #ff4a3d55; pointer-events: none; z-index: 10; }
+.card-burning .badge { background: linear-gradient(135deg,#ff7a6b,#d6200f) !important; border-color: #ff4a3d !important; box-shadow: 0 0 8px rgba(255,74,61,.85), 0 0 4px #b31205 !important; color: #fff !important; text-shadow: none; }
+.card-burning .back-genre, .card-burning .back-mal, .card-burning .back-mal-score, .card-burning .back-season, .card-burning .back-episodes { text-shadow: 0 0 6px rgba(255,74,61,.85) !important; color: #ffd2cc !important; }
+.back-special-label--burning { color: #ff4a3d !important; text-shadow: 0 0 14px rgba(255,74,61,.85) !important; }
+
+/* earth - Earth Card */
+@keyframes earthGlow {
+  0%, 100% { box-shadow: 0 0 8px 2px rgba(192,138,68,.30), 0 0 18px 4px rgba(192,138,68,.18), 0 0 30px 8px rgba(192,138,68,.10); border-color: #7a5220 !important; }
+  50% { box-shadow: 0 0 16px 4px rgba(192,138,68,.8), 0 0 34px 8px rgba(192,138,68,.38), 0 0 52px 16px rgba(192,138,68,.20); border-color: #c08a44 !important; }
+}
+.card-earth .card-inner, .card-earth .card-inner::before { animation: earthGlow 2.4s ease-in-out infinite !important; }
+.card-earth .card-inner { border: 2px solid #7a5220 !important; border-radius: 12px !important; }
+.card-earth .card-inner::before { content: ''; position: absolute; inset: -4px; border-radius: 16px; border: 1.5px solid #c08a4455; pointer-events: none; z-index: 10; }
+.card-earth .badge { background: linear-gradient(135deg,#d9a869,#8a5a2b) !important; border-color: #c08a44 !important; box-shadow: 0 0 8px rgba(192,138,68,.8), 0 0 4px #7a5220 !important; color: #fff4e6 !important; text-shadow: none; }
+.card-earth .back-genre, .card-earth .back-mal, .card-earth .back-mal-score, .card-earth .back-season, .card-earth .back-episodes { text-shadow: 0 0 6px rgba(192,138,68,.8) !important; color: #f6e2c6 !important; }
+.back-special-label--earth { color: #c08a44 !important; text-shadow: 0 0 14px rgba(192,138,68,.8) !important; }
+
+/* black - Cursed Card */
+@keyframes blackGlow {
+  0%, 100% { box-shadow: 0 0 8px 2px rgba(169,169,194,.30), 0 0 18px 4px rgba(169,169,194,.18), 0 0 30px 8px rgba(169,169,194,.10); border-color: #3a3a4a !important; }
+  50% { box-shadow: 0 0 16px 4px rgba(169,169,194,.75), 0 0 34px 8px rgba(169,169,194,.38), 0 0 52px 16px rgba(169,169,194,.20); border-color: #a9a9c2 !important; }
+}
+.card-black .card-inner, .card-black .card-inner::before { animation: blackGlow 2.4s ease-in-out infinite !important; }
+.card-black .card-inner { border: 2px solid #3a3a4a !important; border-radius: 12px !important; }
+.card-black .card-inner::before { content: ''; position: absolute; inset: -4px; border-radius: 16px; border: 1.5px solid #a9a9c255; pointer-events: none; z-index: 10; }
+.card-black .badge { background: linear-gradient(135deg,#9a9ab5,#4a4a5c) !important; border-color: #a9a9c2 !important; box-shadow: 0 0 8px rgba(169,169,194,.75), 0 0 4px #3a3a4a !important; color: #f2f2ff !important; text-shadow: none; }
+.card-black .back-genre, .card-black .back-mal, .card-black .back-mal-score, .card-black .back-season, .card-black .back-episodes { text-shadow: 0 0 6px rgba(169,169,194,.75) !important; color: #e2e2f0 !important; }
+.back-special-label--black { color: #a9a9c2 !important; text-shadow: 0 0 14px rgba(169,169,194,.75) !important; }
+
+/* wind - Wind Card */
+@keyframes windGlow {
+  0%, 100% { box-shadow: 0 0 8px 2px rgba(63,217,122,.30), 0 0 18px 4px rgba(63,217,122,.18), 0 0 30px 8px rgba(63,217,122,.10); border-color: #148a44 !important; }
+  50% { box-shadow: 0 0 16px 4px rgba(63,217,122,.85), 0 0 34px 8px rgba(63,217,122,.38), 0 0 52px 16px rgba(63,217,122,.20); border-color: #3fd97a !important; }
+}
+.card-wind .card-inner, .card-wind .card-inner::before { animation: windGlow 2.4s ease-in-out infinite !important; }
+.card-wind .card-inner { border: 2px solid #148a44 !important; border-radius: 12px !important; }
+.card-wind .card-inner::before { content: ''; position: absolute; inset: -4px; border-radius: 16px; border: 1.5px solid #3fd97a55; pointer-events: none; z-index: 10; }
+.card-wind .badge { background: linear-gradient(135deg,#7dffb0,#2ecc71) !important; border-color: #3fd97a !important; box-shadow: 0 0 8px rgba(63,217,122,.85), 0 0 4px #148a44 !important; color: #062b14 !important; text-shadow: none; }
+.card-wind .back-genre, .card-wind .back-mal, .card-wind .back-mal-score, .card-wind .back-season, .card-wind .back-episodes { text-shadow: 0 0 6px rgba(63,217,122,.85) !important; color: #d4ffe4 !important; }
+.back-special-label--wind { color: #3fd97a !important; text-shadow: 0 0 14px rgba(63,217,122,.85) !important; }
+
+/* lightning - Thunder Card */
+@keyframes lightningGlow {
+  0%, 100% { box-shadow: 0 0 8px 2px rgba(255,233,77,.30), 0 0 18px 4px rgba(255,233,77,.18), 0 0 30px 8px rgba(255,233,77,.10); border-color: #c9a000 !important; }
+  50% { box-shadow: 0 0 16px 4px rgba(255,233,77,.9), 0 0 34px 8px rgba(255,233,77,.38), 0 0 52px 16px rgba(255,233,77,.20); border-color: #ffe94d !important; }
+}
+.card-lightning .card-inner, .card-lightning .card-inner::before { animation: lightningGlow 2.4s ease-in-out infinite !important; }
+.card-lightning .card-inner { border: 2px solid #c9a000 !important; border-radius: 12px !important; }
+.card-lightning .card-inner::before { content: ''; position: absolute; inset: -4px; border-radius: 16px; border: 1.5px solid #ffe94d55; pointer-events: none; z-index: 10; }
+.card-lightning .badge { background: linear-gradient(135deg,#fff08a,#e6c400) !important; border-color: #ffe94d !important; box-shadow: 0 0 8px rgba(255,233,77,.9), 0 0 4px #c9a000 !important; color: #3a2a00 !important; text-shadow: none; }
+.card-lightning .back-genre, .card-lightning .back-mal, .card-lightning .back-mal-score, .card-lightning .back-season, .card-lightning .back-episodes { text-shadow: 0 0 6px rgba(255,233,77,.9) !important; color: #fff3b8 !important; }
+.back-special-label--lightning { color: #ffe94d !important; text-shadow: 0 0 14px rgba(255,233,77,.9) !important; }
+
+/* speed - Speed Card */
+@keyframes speedGlow {
+  0%, 100% { box-shadow: 0 0 8px 2px rgba(42,230,192,.30), 0 0 18px 4px rgba(42,230,192,.18), 0 0 30px 8px rgba(42,230,192,.10); border-color: #00806a !important; }
+  50% { box-shadow: 0 0 16px 4px rgba(42,230,192,.85), 0 0 34px 8px rgba(42,230,192,.38), 0 0 52px 16px rgba(42,230,192,.20); border-color: #2ae6c0 !important; }
+}
+.card-speed .card-inner, .card-speed .card-inner::before { animation: speedGlow 2.4s ease-in-out infinite !important; }
+.card-speed .card-inner { border: 2px solid #00806a !important; border-radius: 12px !important; }
+.card-speed .card-inner::before { content: ''; position: absolute; inset: -4px; border-radius: 16px; border: 1.5px solid #2ae6c055; pointer-events: none; z-index: 10; }
+.card-speed .badge { background: linear-gradient(135deg,#6ff2d8,#12bfa0) !important; border-color: #2ae6c0 !important; box-shadow: 0 0 8px rgba(42,230,192,.85), 0 0 4px #00806a !important; color: #00382f !important; text-shadow: none; }
+.card-speed .back-genre, .card-speed .back-mal, .card-speed .back-mal-score, .card-speed .back-season, .card-speed .back-episodes { text-shadow: 0 0 6px rgba(42,230,192,.85) !important; color: #c9fff4 !important; }
+.back-special-label--speed { color: #2ae6c0 !important; text-shadow: 0 0 14px rgba(42,230,192,.85) !important; }
+
+/* frozen - Frozen Card */
+@keyframes frozenGlow {
+  0%, 100% { box-shadow: 0 0 8px 2px rgba(87,210,255,.30), 0 0 18px 4px rgba(87,210,255,.18), 0 0 30px 8px rgba(87,210,255,.10); border-color: #0a6ea8 !important; }
+  50% { box-shadow: 0 0 16px 4px rgba(87,210,255,.85), 0 0 34px 8px rgba(87,210,255,.38), 0 0 52px 16px rgba(87,210,255,.20); border-color: #57d2ff !important; }
+}
+.card-frozen .card-inner, .card-frozen .card-inner::before { animation: frozenGlow 2.4s ease-in-out infinite !important; }
+.card-frozen .card-inner { border: 2px solid #0a6ea8 !important; border-radius: 12px !important; }
+.card-frozen .card-inner::before { content: ''; position: absolute; inset: -4px; border-radius: 16px; border: 1.5px solid #57d2ff55; pointer-events: none; z-index: 10; }
+.card-frozen .badge { background: linear-gradient(135deg,#8fdfff,#1f9fd8) !important; border-color: #57d2ff !important; box-shadow: 0 0 8px rgba(87,210,255,.85), 0 0 4px #0a6ea8 !important; color: #04364f !important; text-shadow: none; }
+.card-frozen .back-genre, .card-frozen .back-mal, .card-frozen .back-mal-score, .card-frozen .back-season, .card-frozen .back-episodes { text-shadow: 0 0 6px rgba(87,210,255,.85) !important; color: #d3f0ff !important; }
+.back-special-label--frozen { color: #57d2ff !important; text-shadow: 0 0 14px rgba(87,210,255,.85) !important; }
+
+/* healing - Healing Card */
+@keyframes healingGlow {
+  0%, 100% { box-shadow: 0 0 8px 2px rgba(168,230,60,.30), 0 0 18px 4px rgba(168,230,60,.18), 0 0 30px 8px rgba(168,230,60,.10); border-color: #4f9000 !important; }
+  50% { box-shadow: 0 0 16px 4px rgba(168,230,60,.85), 0 0 34px 8px rgba(168,230,60,.38), 0 0 52px 16px rgba(168,230,60,.20); border-color: #a8e63c !important; }
+}
+.card-healing .card-inner, .card-healing .card-inner::before { animation: healingGlow 2.4s ease-in-out infinite !important; }
+.card-healing .card-inner { border: 2px solid #4f9000 !important; border-radius: 12px !important; }
+.card-healing .card-inner::before { content: ''; position: absolute; inset: -4px; border-radius: 16px; border: 1.5px solid #a8e63c55; pointer-events: none; z-index: 10; }
+.card-healing .badge { background: linear-gradient(135deg,#c8f58a,#66cc33) !important; border-color: #a8e63c !important; box-shadow: 0 0 8px rgba(168,230,60,.85), 0 0 4px #4f9000 !important; color: #0d3a08 !important; text-shadow: none; }
+.card-healing .back-genre, .card-healing .back-mal, .card-healing .back-mal-score, .card-healing .back-season, .card-healing .back-episodes { text-shadow: 0 0 6px rgba(168,230,60,.85) !important; color: #e6ffcb !important; }
+.back-special-label--healing { color: #a8e63c !important; text-shadow: 0 0 14px rgba(168,230,60,.85) !important; }
+
+/* science - Science Card */
+@keyframes scienceGlow {
+  0%, 100% { box-shadow: 0 0 8px 2px rgba(77,140,255,.30), 0 0 18px 4px rgba(77,140,255,.18), 0 0 30px 8px rgba(77,140,255,.10); border-color: #0a3ea8 !important; }
+  50% { box-shadow: 0 0 16px 4px rgba(77,140,255,.85), 0 0 34px 8px rgba(77,140,255,.38), 0 0 52px 16px rgba(77,140,255,.20); border-color: #4d8cff !important; }
+}
+.card-science .card-inner, .card-science .card-inner::before { animation: scienceGlow 2.4s ease-in-out infinite !important; }
+.card-science .card-inner { border: 2px solid #0a3ea8 !important; border-radius: 12px !important; }
+.card-science .card-inner::before { content: ''; position: absolute; inset: -4px; border-radius: 16px; border: 1.5px solid #4d8cff55; pointer-events: none; z-index: 10; }
+.card-science .badge { background: linear-gradient(135deg,#8fb6ff,#2f6fe0) !important; border-color: #4d8cff !important; box-shadow: 0 0 8px rgba(77,140,255,.85), 0 0 4px #0a3ea8 !important; color: #eaf2ff !important; text-shadow: none; }
+.card-science .back-genre, .card-science .back-mal, .card-science .back-mal-score, .card-science .back-season, .card-science .back-episodes { text-shadow: 0 0 6px rgba(77,140,255,.85) !important; color: #d6e6ff !important; }
+.back-special-label--science { color: #4d8cff !important; text-shadow: 0 0 14px rgba(77,140,255,.85) !important; }
+
+/* romance - Romance Card */
+@keyframes romanceGlow {
+  0%, 100% { box-shadow: 0 0 8px 2px rgba(255,126,201,.30), 0 0 18px 4px rgba(255,126,201,.18), 0 0 30px 8px rgba(255,126,201,.10); border-color: #c4007a !important; }
+  50% { box-shadow: 0 0 16px 4px rgba(255,126,201,.85), 0 0 34px 8px rgba(255,126,201,.38), 0 0 52px 16px rgba(255,126,201,.20); border-color: #ff7ec9 !important; }
+}
+.card-romance .card-inner, .card-romance .card-inner::before { animation: romanceGlow 2.4s ease-in-out infinite !important; }
+.card-romance .card-inner { border: 2px solid #c4007a !important; border-radius: 12px !important; }
+.card-romance .card-inner::before { content: ''; position: absolute; inset: -4px; border-radius: 16px; border: 1.5px solid #ff7ec955; pointer-events: none; z-index: 10; }
+.card-romance .badge { background: linear-gradient(135deg,#ffb0dd,#e84aa8) !important; border-color: #ff7ec9 !important; box-shadow: 0 0 8px rgba(255,126,201,.85), 0 0 4px #c4007a !important; color: #3a0a26 !important; text-shadow: none; }
+.card-romance .back-genre, .card-romance .back-mal, .card-romance .back-mal-score, .card-romance .back-season, .card-romance .back-episodes { text-shadow: 0 0 6px rgba(255,126,201,.85) !important; color: #ffdcf0 !important; }
+.back-special-label--romance { color: #ff7ec9 !important; text-shadow: 0 0 14px rgba(255,126,201,.85) !important; }
+
+/* psychic - Psychic Card */
+@keyframes psychicGlow {
+  0%, 100% { box-shadow: 0 0 8px 2px rgba(192,123,255,.30), 0 0 18px 4px rgba(192,123,255,.18), 0 0 30px 8px rgba(192,123,255,.10); border-color: #6a00c8 !important; }
+  50% { box-shadow: 0 0 16px 4px rgba(192,123,255,.85), 0 0 34px 8px rgba(192,123,255,.38), 0 0 52px 16px rgba(192,123,255,.20); border-color: #c07bff !important; }
+}
+.card-psychic .card-inner, .card-psychic .card-inner::before { animation: psychicGlow 2.4s ease-in-out infinite !important; }
+.card-psychic .card-inner { border: 2px solid #6a00c8 !important; border-radius: 12px !important; }
+.card-psychic .card-inner::before { content: ''; position: absolute; inset: -4px; border-radius: 16px; border: 1.5px solid #c07bff55; pointer-events: none; z-index: 10; }
+.card-psychic .badge { background: linear-gradient(135deg,#d9b0ff,#9c4ae0) !important; border-color: #c07bff !important; box-shadow: 0 0 8px rgba(192,123,255,.85), 0 0 4px #6a00c8 !important; color: #2a0a3d !important; text-shadow: none; }
+.card-psychic .back-genre, .card-psychic .back-mal, .card-psychic .back-mal-score, .card-psychic .back-season, .card-psychic .back-episodes { text-shadow: 0 0 6px rgba(192,123,255,.85) !important; color: #f0dcff !important; }
+.back-special-label--psychic { color: #c07bff !important; text-shadow: 0 0 14px rgba(192,123,255,.85) !important; }
+
+/* levelup - Level Up Card */
+@keyframes levelupGlow {
+  0%, 100% { box-shadow: 0 0 8px 2px rgba(255,190,43,.30), 0 0 18px 4px rgba(255,190,43,.18), 0 0 30px 8px rgba(255,190,43,.10); border-color: #b36a00 !important; }
+  50% { box-shadow: 0 0 16px 4px rgba(255,190,43,.85), 0 0 34px 8px rgba(255,190,43,.38), 0 0 52px 16px rgba(255,190,43,.20); border-color: #ffbe2b !important; }
+}
+.card-levelup .card-inner, .card-levelup .card-inner::before { animation: levelupGlow 2.4s ease-in-out infinite !important; }
+.card-levelup .card-inner { border: 2px solid #b36a00 !important; border-radius: 12px !important; }
+.card-levelup .card-inner::before { content: ''; position: absolute; inset: -4px; border-radius: 16px; border: 1.5px solid #ffbe2b55; pointer-events: none; z-index: 10; }
+.card-levelup .badge { background: linear-gradient(135deg,#ffd873,#f09f10) !important; border-color: #ffbe2b !important; box-shadow: 0 0 8px rgba(255,190,43,.85), 0 0 4px #b36a00 !important; color: #3a2400 !important; text-shadow: none; }
+.card-levelup .back-genre, .card-levelup .back-mal, .card-levelup .back-mal-score, .card-levelup .back-season, .card-levelup .back-episodes { text-shadow: 0 0 6px rgba(255,190,43,.85) !important; color: #ffeec2 !important; }
+.back-special-label--levelup { color: #ffbe2b !important; text-shadow: 0 0 14px rgba(255,190,43,.85) !important; }
