@@ -5,7 +5,7 @@
    the first time they are seen. API calls (the AI chat, Supabase, AniList)
    always go to the network - when there is none, the site still runs.
    ══════════════════════════════════════════════════════════════════════ */
-var VERSION = 'fardin-hub-v4';
+var VERSION = 'fardin-hub-v5';
 var IMG_VERSION = 'fardin-img-v1';
 var CORE = [
   './',
@@ -27,6 +27,7 @@ var CORE = [
   './guide-mascot.js',
   './anime-ratings.json',
   './anime-dubs.json',
+  './itch-games.json',
   './manifest.json',
   './logo.png'
 ];
@@ -81,17 +82,22 @@ self.addEventListener('fetch', function (e) {
     return;
   }
 
-  /* a page: network first, the cached shell when there is no network */
+  /* a page: network first, the cached copy when there is no network.
+     IMPORTANT: the response is cached under the URL that was requested -
+     caching every navigation under './index.html' would poison the app
+     shell with the admin page the moment somebody opens it. */
   if (req.mode === 'navigate') {
     e.respondWith(
       fetch(req).then(function (res) {
         try {
           var copy = res.clone();
-          caches.open(VERSION).then(function (c) { c.put('./index.html', copy); });
+          caches.open(VERSION).then(function (c) { c.put(req, copy); });
         } catch (err) { }
         return res;
       }).catch(function () {
-        return caches.match('./index.html').then(function (hit) { return hit || caches.match('./'); });
+        return caches.match(req).then(function (hit) {
+          return hit || caches.match('./index.html');
+        });
       })
     );
     return;

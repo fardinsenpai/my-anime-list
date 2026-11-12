@@ -649,3 +649,46 @@
   margin-top: 8px; font-size: 11.5px; color: rgba(255, 255, 255, .45);
 }
 .ag-saved-note--yes { color: #ffd700; }
+
+/* ── memory + timeline bits ── */
+.ag-memstats {
+  text-align: center; font-size: 11px; letter-spacing: 2px;
+  color: rgba(255,255,255,.45); margin-bottom: 12px; text-transform: uppercase;
+}
+.ag-memstats b { color: #00f2fe; font-size: 14px; margin: 0 3px; }
+.ag-tl-hint {
+  text-align: center; font-size: 12px; color: rgba(255,255,255,.5);
+  margin-bottom: 12px;
+}
+.ag-tl-move {
+  width: 26px; height: 26px; flex: 0 0 auto;
+  border-radius: 8px; cursor: pointer;
+  border: 1px solid rgba(0,242,254,.3);
+  background: rgba(0,242,254,.08);
+  color: #9ff2ff; font-size: 13px; line-height: 1;
+}
+.ag-tl-move:hover { background: rgba(0,242,254,.2); color: #fff; }
+.ag-tl-item .ag-tl-year { min-width: 42px; text-align: right; }
+
+/* ── the itch.io arcade ── */
+.ag-arcade { max-width: 780px; margin: 0 auto; }
+.ag-arcade-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 6px; }
+.ag-arcade-title { color: #fff; font-size: 16px; font-weight: 700; text-decoration: none; }
+.ag-arcade-title:hover { color: #00f2fe; }
+.ag-arcade-src, .ag-arcade-tag {
+  font-size: 8.5px; font-weight: 800; letter-spacing: 1.4px;
+  padding: 3px 9px; border-radius: 999px;
+  color: #9ff2ff; background: rgba(0,242,254,.12);
+  border: 1px solid rgba(0,242,254,.35);
+}
+.ag-arcade-src { color: #ffe9a8; background: rgba(255,215,0,.12); border-color: rgba(255,215,0,.4); }
+.ag-arcade-desc { font-size: 12.5px; color: rgba(255,255,255,.55); margin: 0 0 12px; line-height: 1.6; }
+.ag-arcade-frame {
+  border-radius: 14px; overflow: hidden;
+  border: 1px solid rgba(255,255,255,.12);
+  background: #05050c;
+  box-shadow: 0 20px 50px -26px rgba(0,0,0,.9);
+}
+.ag-arcade-frame iframe { display: block; width: 100%; border: 0; }
+.ag-arcade-actions { display: flex; gap: 10px; justify-content: center; margin-top: 14px; flex-wrap: wrap; }
+.ag-arcade-actions a { text-decoration: none; }

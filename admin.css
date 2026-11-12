@@ -1144,3 +1144,20 @@ html.ad-no-transition *::after {
   .ad-pin-row { gap: 6px; }
   .ad-pin-row input { width: 40px; height: 50px; font-size: 19px; }
 }
+
+.ad-special-legend { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+.ad-special-chip {
+  font-size: 8.5px; font-weight: 800; letter-spacing: 1.2px;
+  padding: 4px 9px; border-radius: 999px;
+  color: var(--k); background: color-mix(in srgb, var(--k) 16%, transparent);
+  border: 1px solid color-mix(in srgb, var(--k) 45%, transparent);
+}
+.ad-special-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; max-height: 46vh; overflow-y: auto; }
+.ad-special-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 7px 10px; border-radius: 10px;
+  border: 1px solid var(--line); background: var(--panel-2);
+}
+.ad-special-id { color: var(--accent); font-weight: 700; min-width: 42px; font-size: 11px; }
+.ad-special-name { flex: 1; font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ad-special-sel { flex: 0 0 190px; margin: 0; height: 32px; }

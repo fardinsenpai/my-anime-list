@@ -141,6 +141,7 @@ window.TF_FACTS = [
   ['Light\'s father is a police detective.', true],
   ['Near is a rival detective who never appears on screen until the end.', false],
   ['A Death Note is thirteen pages.', false],
+  ['Writing a name in pencil still kills the person.', false],
   ['The rule is that a heart must beat for 40 seconds or the death is void.', true],
 
   /* ── Fullmetal Alchemist Brotherhood ── */

@@ -87,6 +87,7 @@
       <nav class="ad-nav">
         <button class="admin-g-tab ad-pat-tab" data-tab="pat" onclick="switchAdminTab('pat')"><b>🔑</b> PAT!<span>token</span></button>
         <button class="admin-g-tab" data-tab="add"    onclick="switchAdminTab('add')"><b>➕</b> ADD<span>new anime</span></button>
+        <button class="admin-g-tab" data-tab="special" onclick="switchAdminTab('special'); renderSpecialCards()"><b>✦</b> SPECIAL<span>card kinds</span></button>
         <button class="admin-g-tab" data-tab="edit"   onclick="switchAdminTab('edit')"><b>✏️</b> EDIT<span>anime info</span></button>
         <button class="admin-g-tab active" data-tab="watch"  onclick="switchAdminTab('watch')"><b>🎬</b> WATCH<span>currently watching</span></button>
         <button class="admin-g-tab" data-tab="read"   onclick="switchAdminTab('read')"><b>📖</b> READ<span>currently reading</span></button>
@@ -330,6 +331,19 @@
         </label>
         <button class="admin-g-btn" onclick="commitEditAnime()">▶ COMMIT EDIT</button>
         <div class="ad-note">Editing an anime rewrites its card in index.html and its genre list in script.js.</div>
+      </section>
+
+      <!-- SPECIAL CARDS -->
+      <section class="admin-g-content" id="tabSpecial">
+        <h2 class="ad-h">// SPECIAL CARDS //</h2>
+        <div class="ad-note" style="margin-bottom:12px;">Give an anime a special card kind. The kind is written on the back of the card and gives it its own colour and glow.</div>
+        <label class="ad-field">
+          <span>Find an anime</span>
+          <input type="text" id="adminSpecialSearch" class="admin-g-input" placeholder="Type a title..." oninput="renderSpecialCards(this.value)">
+        </label>
+        <div class="ad-special-legend" id="adminSpecialLegend"></div>
+        <div class="ad-special-list" id="adminSpecialList"></div>
+        <button class="admin-g-btn" onclick="commitSpecialCards()">▶ COMMIT SPECIAL CARDS</button>
       </section>
 
       <!-- WAIFU -->
@@ -731,6 +745,6 @@
 </div>
 
 <script src="anime-fetch.js?v=20261110c"></script>
-<script src="admin.js?v=20261112c"></script>
+<script src="admin.js?v=20261112e"></script>
 </body>
 </html>

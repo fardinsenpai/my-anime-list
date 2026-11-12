@@ -18,8 +18,16 @@
   var flushing = false;
   var loadedFor = null;
 
+  /* the id of the LIVE session - the row level security of Supabase
+     compares it with the token, so it has to be the real one */
   function userId() {
     try { return (window.AUTH_USER && window.AUTH_USER.id) || null; } catch (e) { return null; }
+  }
+  function liveUserId() {
+    return readSession().then(function (s) {
+      if (s && s.user && s.user.id) return s.user.id;
+      return userId();
+    });
   }
 
   function token() {
@@ -49,12 +57,13 @@
 
   /* ── write ── */
   function push(role, content) {
-    var uid = userId();
-    if (!uid) return;
     var text = String(content || '').slice(0, MAX_LEN);
     if (!text) return;
-    pending.push({ user_id: uid, role: role, content: text, created_at: new Date().toISOString() });
-    flush();
+    liveUserId().then(function (uid) {
+      if (!uid || String(uid).indexOf('u-') === 0) return;
+      pending.push({ user_id: uid, role: role, content: text, created_at: new Date().toISOString() });
+      flush();
+    });
   }
 
   function flush() {

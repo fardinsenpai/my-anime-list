@@ -1,0 +1,59 @@
+/* ══════════════════════════════════════════════════════════════════════
+   ANIME SEARCH SUGGESTIONS - the dropdown
+   ══════════════════════════════════════════════════════════════════════ */
+.as-box {
+  position: fixed;
+  z-index: 100010;
+  min-width: 260px;
+  max-height: 320px;
+  overflow-y: auto;
+  padding: 6px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 138, 190, .38);
+  background: linear-gradient(165deg, #22102099, #140a1699);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 22px 50px -18px rgba(0, 0, 0, .9), 0 0 30px -14px rgba(255, 105, 180, .5);
+  animation: asIn .16s ease both;
+}
+@keyframes asIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: none; }
+}
+.as-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  text-align: left;
+  padding: 7px 9px;
+  border: 0;
+  border-radius: 10px;
+  background: none;
+  color: #f4e3ef;
+  font-family: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background .15s, color .15s;
+}
+.as-item:hover,
+.as-item:focus {
+  background: rgba(255, 105, 180, .18);
+  color: #fff;
+  outline: none;
+}
+.as-poster {
+  width: 30px; height: 40px;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, .14);
+  flex: 0 0 auto;
+  background: rgba(255, 255, 255, .06);
+}
+.as-poster--none {
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px;
+}
+.as-title { flex: 1; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.as-num { font-size: 10px; color: rgba(255, 255, 255, .4); font-variant-numeric: tabular-nums; }
+.as-empty { padding: 10px 11px; font-size: 12px; color: rgba(255, 255, 255, .45); }

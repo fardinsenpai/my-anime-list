@@ -409,6 +409,109 @@ async function loadAdminData() {
   }
 }
 
+/* the anime search suggests the titles of the list in the search fields */
+function attachAnimeSearch() {
+  if (!window.AnimeSearch) return;
+  var el = document.getElementById('adminEditSearch');
+  if (el) {
+    el.setAttribute('data-search-clear', '0');
+    window.AnimeSearch.attach(el, { clear: false });
+  }
+}
+
+/* ══ SPECIAL CARDS - pick the kind of a card and commit it ══ */
+var SPECIAL_KIND_COLORS = {
+  legendary: '#eaf2ff', epic: '#ff8a2b', op: '#ff4fa3', isekaiking: '#8a6cff',
+  burning: '#ff4a3d', earth: '#c08a44', black: '#a9a9c2', wind: '#3fd97a',
+  lightning: '#ffe94d', speed: '#2ae6c0', frozen: '#57d2ff', healing: '#a8e63c',
+  science: '#4d8cff', romance: '#ff7ec9', psychic: '#c07bff', levelup: '#ffbe2b'
+};
+
+function renderSpecialCards(filter) {
+  var host = document.getElementById('adminSpecialList');
+  if (!host) return;
+  var q = String(filter || '').trim().toLowerCase();
+  var cards = document.querySelectorAll('#adminDataHost #grid .card');
+  var rows = [];
+  Array.prototype.forEach.call(cards, function (c) {
+    var t = c.querySelector('.title');
+    var title = t ? String(t.textContent || '').trim() : '';
+    if (!title) return;
+    if (q && title.toLowerCase().indexOf(q) === -1) return;
+    var b = c.querySelector('.badge');
+    var id = b ? String(b.textContent || '').replace(/\D/g, '') : '';
+    if (!id) return;
+    var current = '';
+    var cls = String(c.className || '').split(/\s+/);
+    for (var i = 0; i < cls.length; i++) {
+      if (cls[i].indexOf('card-') === 0 && SPECIAL_KIND_COLORS[cls[i].replace('card-', '')]) current = cls[i].replace('card-', '');
+    }
+    rows.push({ id: id, title: title, kind: current });
+    if (rows.length >= 60) return;
+  });
+  var legend = document.getElementById('adminSpecialLegend');
+  if (legend && !legend.innerHTML) {
+    legend.innerHTML = Object.keys(SPECIAL_KIND_COLORS).map(function (k) {
+      var name = (SPECIAL_CARD_NAMES[k] && SPECIAL_CARD_NAMES[k].t) || k;
+      return '<span class="ad-special-chip" style="--k:' + SPECIAL_KIND_COLORS[k] + '">' + adEsc(name) + '</span>';
+    }).join('');
+  }
+  host.innerHTML = rows.map(function (r) {
+    var opts = '<option value="">None</option>' + Object.keys(SPECIAL_CARD_NAMES).map(function (k) {
+      return '<option value="' + k + '"' + (r.kind === k ? ' selected' : '') + '>' +
+        adEsc(SPECIAL_CARD_NAMES[k].t) + '</option>';
+    }).join('');
+    return '<div class="ad-special-row" data-id="' + r.id + '">' +
+      '<span class="ad-special-id">#' + r.id + '</span>' +
+      '<span class="ad-special-name">' + adEsc(r.title) + '</span>' +
+      '<select class="admin-g-input ad-special-sel">' + opts + '</select></div>';
+  }).join('') || '<div class="ad-status dim">// nothing matches that title</div>';
+}
+
+async function commitSpecialCards() {
+  var picks = {};
+  document.querySelectorAll('#adminSpecialList .ad-special-row').forEach(function (row) {
+    var id = row.getAttribute('data-id');
+    var sel = row.querySelector('select');
+    if (id && sel) picks[id] = sel.value;
+  });
+  if (!Object.keys(picks).length) { msgFail('Nothing to save'); return; }
+  showLoading();
+  adStep('fetching index.html...');
+  try {
+    var data = await githubFetch('index.html');
+    if (!data) { hideLoading(); adStep(''); saveCommitResult('special-cards', false, 'fetch failed'); msgFail('Failed to fetch index.html'); return; }
+    var content = decodeURIComponent(escape(atob(data.content)));
+    var lines = content.split('\n');
+    var changed = 0;
+    lines.forEach(function (line, i) {
+      var m = line.match(/<span class="badge">#(\d+)<\/span>/);
+      if (!m) return;
+      var id = m[1];
+      if (!(id in picks)) return;
+      var kind = picks[id];
+      var before = line;
+      lines[i] = line.replace(/class="card([^"]*)"/, function (mm, rest) {
+        var c = String(rest).replace(/\s*card-(legendary|epic|op|isekaiking|burning|earth|black|wind|lightning|speed|frozen|healing|science|romance|psychic|levelup)/g, '');
+        return 'class="card' + c.replace(/\s+/g, ' ').trim() + (kind ? ' card-' + kind : '') + '"';
+      });
+      if (lines[i] !== before) changed++;
+    });
+    adStep('committing index.html...');
+    var ok = await githubCommit('index.html', lines.join('\n'), 'admin: special cards');
+    hideLoading();
+    adStep('');
+    saveCommitResult('special-cards', ok, changed + ' cards');
+    if (ok) { msgOk(changed + ' special cards saved'); renderSpecialCards(); }
+    else msgFail('Commit failed');
+  } catch (e) {
+    hideLoading();
+    adStep('');
+    saveCommitResult('special-cards', false, 'exception: ' + ((e && e.message) || e));
+    msgFail('Commit threw: ' + ((e && e.message) || e));
+  }
+}
+
 /* ══ ▼▼ from here down: avatar + admin code copied verbatim from script.js ▼▼ ══ */
 /* ── BEGIN AVATAR / CHARACTER BLOCK (script.js, message-avatars section) ── */
 
@@ -1086,6 +1189,7 @@ async function githubCommit(path, content, message) {
 }
 
 function switchAdminTab(tab) {
+  if (tab === 'edit' || tab === 'add') attachAnimeSearch();
   document.querySelectorAll('.admin-g-tab').forEach(function(t) { t.classList.toggle('active', t.dataset.tab === tab); });
   document.querySelectorAll('.admin-g-content').forEach(function(c) { c.classList.toggle('active', c.id === 'tab' + tab.charAt(0).toUpperCase() + tab.slice(1)); });
   if (tab === 'add') { renderPills('ott', ''); renderPills('studio', ''); renderPills('genre', ''); }
