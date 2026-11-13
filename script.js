@@ -8188,6 +8188,38 @@ function saveCommitResult(kind, ok, detail) {
   } catch (e) { /* localStorage full — never block the UI */ }
 }
 
+/* ── the PAT vault: paste once, it stays ─────────────────────────── */
+function initPatVault() {
+  var input = document.getElementById('adminPatInput');
+  if (!input) return;
+  try {
+    var saved = localStorage.getItem('gh_pat') || '';
+    if (saved && !input.value) input.value = saved;
+  } catch (e) {}
+  if (input._patWired) return;
+  input._patWired = true;
+  var timer = null;
+  function store() {
+    var v = input.value.trim();
+    if (!v) return;
+    try { localStorage.setItem('gh_pat', v); } catch (e) {}
+    if (typeof paintPatStatus === 'function') paintPatStatus();
+  }
+  input.addEventListener('input', function () {
+    clearTimeout(timer);
+    timer = setTimeout(store, 500);
+  });
+  input.addEventListener('change', store);
+  input.addEventListener('blur', store);
+  /* the status line tells the visitor right away that a PAT is remembered */
+  if (typeof paintPatStatus === 'function') paintPatStatus();
+}
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initPatVault);
+} else {
+  initPatVault();
+}
+
 function getPat() { return localStorage.getItem('gh_pat'); }
 
 function savePat() {
@@ -8212,14 +8244,23 @@ async function githubCommit(path, content, message) {
   var pat = getPat();
   if (!pat) return false;
   try {
-    var existing = await githubFetch(path);
-    var body = { message: message, content: btoa(unescape(encodeURIComponent(content))), branch: GITHUB_BRANCH };
-    if (existing && existing.sha) body.sha = existing.sha;
-    var res = await fetch('https://api.github.com/repos/' + GITHUB_OWNER + '/' + GITHUB_REPO + '/contents/' + path, {
-      method: 'PUT', headers: { 'Authorization': 'token ' + pat, 'Accept': 'application/vnd.github.v3+json', 'Content-Type': 'application/json' },
-      body: JSON.stringify(body)
-    });
-    if (!res.ok) return false;
+    var attempt = 0;
+    while (attempt < 3) {
+      var existing = await githubFetch(path);
+      var body = { message: message, content: btoa(unescape(encodeURIComponent(content))), branch: GITHUB_BRANCH };
+      if (existing && existing.sha) body.sha = existing.sha;
+      var res = await fetch('https://api.github.com/repos/' + GITHUB_OWNER + '/' + GITHUB_REPO + '/contents/' + path, {
+        method: 'PUT', headers: { 'Authorization': 'token ' + pat, 'Accept': 'application/vnd.github.v3+json', 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      if (res.ok) break;
+      if (res.status === 409 && attempt < 2) {
+        attempt++;
+        await new Promise(function (r) { setTimeout(r, 600 * attempt); });
+        continue;
+      }
+      return false;
+    }
     return true;
   } catch(e) { return false; }
 }
