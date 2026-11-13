@@ -38,7 +38,7 @@ function initCounterBoxes() {
   const startCounting = () => {
     const stats = getStats();
     counterUp("animeCount", 292, duration);
-    counterUp("seasonCount", 443, duration);
+    counterUp("seasonCount", 431, duration);
     counterUp("episodeCount", 10253, duration);
   };
 
