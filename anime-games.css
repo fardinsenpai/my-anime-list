@@ -713,3 +713,22 @@
 }
 .ag-result-icon { display: flex; align-items: center; justify-content: center; color: #ffd700; }
 .ag-result-icon svg { width: 52px; height: 52px; filter: drop-shadow(0 0 14px rgba(255, 215, 0, .6)); }
+
+/* ══════════════════════════════════════════════════════════════════════
+   THE GAMES PAGE (a page of the site, not a floating overlay)
+   ══════════════════════════════════════════════════════════════════════ */
+.body-games {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 20px 18px 60px;
+  font-family: 'Exo 2', system-ui, sans-serif;
+  animation: agPageIn .35s ease both;
+}
+@keyframes agPageIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: none; }
+}
+.body-games .ag-head {
+  margin-top: 4px;
+}
+.body-games .ag-wrap { max-width: 100%; }

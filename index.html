@@ -44,7 +44,7 @@
   <link rel="stylesheet" href="duel-system.css?v=20261110b">
   <link rel="stylesheet" href="tournament.css?v=20261110a">
 <link rel="stylesheet" href="search-suggest.css?v=20261112a">
-<link rel="stylesheet" href="anime-games.css?v=20261112c">
+<link rel="stylesheet" href="anime-games.css?v=20261113d">
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600;700&family=Exo+2:wght@400;600;700&family=Yuji+Syuku&family=Bangers&family=Poppins:wght@400;700&family=Cinzel+Decorative:wght@400;700&display=swap" rel="stylesheet">
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-Q2C92F1GEX"></script>
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
@@ -152,11 +152,6 @@
   </a>
 </li>
 
-<li class="side-group-head side-group-head--games" id="gamesGroupHead">
-  <span class="side-group-title">WEB GAMES</span>
-  <span class="side-group-sub">Anime Web Games</span>
-</li>
-
 <li class="ad-group-item side-game-item">
   <a href="javascript:void(0)" id="gamesHubLink" class="side-nav-link" onclick="openGamesHub(); return false;">
     <svg width="32" height="32" viewBox="0 0 64 64" fill="none">
@@ -181,22 +176,6 @@
     </svg>
     <span>Anime Quest</span>
     <span class="ad-group-tag">TRIVIA</span>
-  </a>
-</li>
-
-<li id="tournament-nav-item" class="ad-group-item side-game-item">
-  <a href="javascript:void(0)" id="tournament-nav-link" class="duel-nav-link ad-group-link" onclick="window.openTournament()">
-    <span class="duel-nav-icon"><svg width="32" height="32" viewBox="0 0 64 64" fill="none">
-  <path d="M20 8H44V20C44 30 38 36 32 36C26 36 20 30 20 20V8Z"
-        fill="#FFD700"/>
-  <path d="M24 40H40V45H24V40Z" fill="#FFD700"/>
-  <path d="M18 45H46V51H18V45Z" fill="#FFD700"/>
-  <path d="M20 12H10C10 22 15 26 20 26" stroke="#FFD700" stroke-width="3.5"/>
-  <path d="M44 12H54C54 22 49 26 44 26" stroke="#FFD700" stroke-width="3.5"/>
-  <circle cx="32" cy="24" r="3" fill="#0a0a12"/>
-</svg></span>
-    <span class="duel-nav-text" style="color:#FFD700;">Anime Tournament</span>
-    <span class="duel-status-badge" id="tournament-status-badge" style="background:#FFD700;color:#0a0a12;">NEW</span>
   </a>
 </li>
 
@@ -701,6 +680,20 @@
     </div>
     <div style="text-align:center;margin-top:16px;padding-top:12px;border-top:1px solid rgba(0,255,65,0.12);font-size:14px;font-weight:700;color:#00ff41;text-shadow:0 0 10px rgba(0,255,65,0.3);">⚠️ Bro be Loyal. If you cheat You are a g@y!</div>
   </div>
+</div>
+
+<!-- ══ ANIME WEB GAMES ══ a real page, not a floating overlay ══ -->
+<div class="body-games" id="gamesHubContainer" style="display:none;">
+  <div class="analysis-heading">
+    <svg class="ag-head-icon" width="28" height="28" viewBox="0 0 64 64" fill="none">
+      <rect x="6" y="18" width="52" height="30" rx="8" stroke="#00E5FF" stroke-width="3"/>
+      <path d="M22 27v10M17 32h10" stroke="#FFD700" stroke-width="3" stroke-linecap="round"/>
+      <circle cx="42" cy="31" r="4" fill="#FF69B4"/>
+      <circle cx="48" cy="39" r="3" fill="#8A5CFF"/>
+    </svg>
+    <span class="heading-text">Anime Web Games</span>
+  </div>
+  <div id="gamesHubBody"></div>
 </div>
 
 <!-- hidden data source for the home-page Now Strip + the admin Update Watching/Reading tabs -->
@@ -1701,7 +1694,7 @@
   <script src="game-data-extra.js?v=20261112a"></script>
   <script src="game-data-facts.js?v=20261112a"></script>
   <script src="anime-search.js?v=20261112b"></script>
-  <script src="anime-games.js?v=20261112h"></script>
+  <script src="anime-games.js?v=20261113d"></script>
   <script src="quest-data.js?v=20261107g"></script>
     <!-- === 🔐 LOGIN / CREATE ACCOUNT — email or phone + password, or Google === -->
     <div class="lg-overlay" id="loginPage" hidden>
@@ -1856,9 +1849,9 @@
   <script src="https://accounts.google.com/gsi/client" async defer></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="anime-fetch.js?v=20261110c"></script>
-<script src="script.js?v=20261112b"></script>
+<script src="script.js?v=20261113d"></script>
 <script src="login-otp.js?v=20261024n"></script>
-<script src="wishlist.js?v=20261109a"></script>
+<script src="wishlist.js?v=20261113b"></script>
 <script src="chat-cloud.js?v=20261111b"></script>
 
 <!-- === 💖 WISH LIST === -->

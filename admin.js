@@ -1184,8 +1184,10 @@ async function githubCommit(path, content, message) {
     var msg = message || '';
     var isDateCommit = path === 'index.html' && /update date/i.test(msg);
     var isStampCommit = /refresh asset cache stamp/i.test(msg);
+    var isCounterCommit = /update the season and episode totals/i.test(msg);
     if (!isDateCommit) setTimeout(autoUpdateDate, 50);
-    if (!isStampCommit) setTimeout(function () { stampAssetVersions(); }, 120);
+    if (!isStampCommit && !isCounterCommit) setTimeout(function () { stampAssetVersions(); }, 120);
+    if (!isCounterCommit && !isStampCommit) setTimeout(autoUpdateCounters, 220);
     return true;
   } catch(e) {
     lastCommitError = path + ': ' + ((e && e.message) || e);
@@ -2218,6 +2220,54 @@ async function commitDate(dateStr) {
 /* Quietly refresh the "last updated" date on the site after any admin commit,
    so the date never lags behind the data without a manual step. */
 var _dateAutoPending = false;
+/* the totals of the site are counted from the cards themselves, so they
+   can never drift: every card prints its episodes and its season list on the
+   back, and this adds them up */
+function totalsFromCards(html) {
+  var lines = String(html || '').split('\n');
+  var anime = 0, seasons = 0, episodes = 0;
+  lines.forEach(function (line) {
+    if (line.indexOf('class="card') === -1) return;
+    if (line.indexOf('badge">#') === -1) return;
+    anime++;
+    var epM = line.match(/back-episodes">([^<]*)</);
+    if (epM) {
+      var n = epM[1].replace(/[^\d]/g, '');
+      if (n) episodes += parseInt(n, 10);
+    }
+    var seM = line.match(/back-season">([^<]*)</);
+    if (seM) {
+      var nums = seM[1].match(/\d+/g);
+      if (nums && nums.length) seasons += nums.length;
+    }
+  });
+  return { anime: anime, seasons: seasons, episodes: episodes };
+}
+
+function patchCounters(js, totals) {
+  return String(js)
+    .replace(/counterUp\("animeCount",\s*[^,]+,/, 'counterUp("animeCount", ' + totals.anime + ',')
+    .replace(/counterUp\("seasonCount",\s*\d+/, 'counterUp("seasonCount", ' + totals.seasons)
+    .replace(/counterUp\("episodeCount",\s*\d+/, 'counterUp("episodeCount", ' + totals.episodes);
+}
+
+var _counterAutoPending = false;
+async function autoUpdateCounters() {
+  if (_counterAutoPending) return;
+  _counterAutoPending = true;
+  try {
+    var res = await Promise.all([githubFetch('index.html'), githubFetch('script.js')]);
+    if (!res[0] || !res[1]) return;
+    var html = decodeURIComponent(escape(atob(res[0].content)));
+    var jsText = decodeURIComponent(escape(atob(res[1].content)));
+    var totals = totalsFromCards(html);
+    var patched = patchCounters(jsText, totals);
+    if (patched === jsText) return;
+    await githubCommit('script.js', patched, 'admin: update the season and episode totals');
+  } catch (e) { /* silent - the counters are best effort */ }
+  finally { _counterAutoPending = false; }
+}
+
 async function autoUpdateDate() {
   if (_dateAutoPending) return;
   _dateAutoPending = true;

@@ -16,7 +16,6 @@
   var PLAYERS = 'game_players';
   var PLAYER_KEY = 'game_player_v1';
 
-  var overlay = null;
   var db = null;
   var player = null;
   var charPool = null;
@@ -379,32 +378,41 @@
   }
 
   /* ─────────────────────────────────────────── the hub */
-  function ensureOverlay() {
-    if (overlay) return overlay;
-    overlay = el('div', 'ag-overlay');
-    overlay.style.display = 'none';
-    overlay.addEventListener('click', function (e) { if (e.target === overlay) closeGames(); });
-    document.body.appendChild(overlay);
-    return overlay;
+  /* the games are a page of the site - the same place as the quest */
+  function gamesHost() {
+    return document.getElementById('gamesHubBody');
   }
+
   function openGamesHub() {
     if (typeof closeMenu === 'function') closeMenu();
     if (typeof closeFloatingOverlays === 'function') { try { closeFloatingOverlays(); } catch (e) {} }
-    ['analysisContainer', 'topSecretsContainer', 'hotTakesContainer', 'topFiveDropdown', 'animeQuestContainer'].forEach(function (id) {
+    var ids = ['analysisContainer', 'topSecretsContainer', 'hotTakesContainer', 'topFiveDropdown', 'animeQuestContainer'];
+    ids.forEach(function (id) {
       var e = document.getElementById(id);
       if (e) e.style.display = 'none';
     });
+    /* the games are a page of their own - the home content steps aside */
+    if (typeof hideAllSections === 'function') {
+      try { hideAllSections(); } catch (e) {}
+    }
+    var page = document.getElementById('gamesHubContainer');
+    if (page) page.style.display = 'block';
+    var page = document.getElementById('gamesHubContainer');
+    if (page) page.style.display = 'block';
     try { history.pushState(null, '', 'anime-games'); } catch (e) {}
-    ensureOverlay();
-    overlay.style.display = 'flex';
     renderHub();
+    try { window.scrollTo({ top: 0, behavior: 'auto' }); } catch (e) {}
   }
+
   function closeGames() {
-    if (overlay) overlay.style.display = 'none';
+    var page = document.getElementById('gamesHubContainer');
+    if (page) page.style.display = 'none';
     try { history.pushState(null, '', 'home'); } catch (e) {}
   }
   function renderHub() {
-    overlay.innerHTML = '';
+    var host = gamesHost();
+    if (!host) return;
+    host.innerHTML = '';
     var wrap = el('div', 'ag-wrap');
     wrap.innerHTML =
       '<header class="ag-head">' +
@@ -426,7 +434,7 @@
         '<div class="ag-section-title">OVERALL LEADERBOARD <span>points across every game</span></div>' +
         '<div class="ag-board" id="agOverallBoard"><div class="ag-board-empty">Loading…</div></div>' +
       '</section>';
-    overlay.appendChild(wrap);
+    host.appendChild(wrap);
     var grid = wrap.querySelector('#agGameGrid');
     GAMES.forEach(function (g) {
       var card = el('button', 'ag-game');
@@ -466,9 +474,9 @@
 
   function openGameScreen(key) {
     var g = GAME_BY_KEY[key];
-    ensureOverlay();
-    overlay.style.display = 'flex';
-    overlay.innerHTML = '';
+    var host = gamesHost();
+    if (!host) return;
+    host.innerHTML = '';
     var wrap = el('div', 'ag-wrap ag-wrap--game');
     wrap.innerHTML =
       '<header class="ag-head ag-head--game">' +
@@ -480,7 +488,7 @@
         '<div class="ag-section-title">TOP THREE <span>' + esc(g.title) + '</span></div>' +
         '<div class="ag-board" id="agGameBoard"><div class="ag-board-empty">Loading…</div></div>' +
       '</section>';
-    overlay.appendChild(wrap);
+    host.appendChild(wrap);
     wrap.querySelector('#agGameClose').onclick = function () { renderHub(); };
     var stage = wrap.querySelector('#agStage');
 

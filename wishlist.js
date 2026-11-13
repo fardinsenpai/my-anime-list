@@ -679,6 +679,9 @@
     var btn = $('wishlistBtn');
     if (btn) btn.addEventListener('click', function (e) {
       e.preventDefault();
+      /* the sidebar must not stay open behind the panel */
+      if (typeof closeMenu === 'function') closeMenu();
+      if (typeof closeFloatingOverlays === 'function') { try { closeFloatingOverlays(); } catch (err) {} }
       openPanel();
     });
 

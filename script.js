@@ -37,9 +37,9 @@ function initCounterBoxes() {
      that the numbers would race behind the reveal. */
   const startCounting = () => {
     const stats = getStats();
-    counterUp("animeCount", stats.animeCount, duration);
-    counterUp("seasonCount", 396, duration);
-    counterUp("episodeCount", 7267, duration);
+    counterUp("animeCount", 292, duration);
+    counterUp("seasonCount", 443, duration);
+    counterUp("episodeCount", 10253, duration);
   };
 
   let started = false;
@@ -525,7 +525,7 @@ function goHome() {
   closeWaifus();
   closeFloatingOverlays();
 
-  var ids = ['analysisContainer', 'topSecretsContainer', 'hotTakesContainer', 'topFiveDropdown', 'animeQuestContainer'];
+  var ids = ['analysisContainer', 'topSecretsContainer', 'hotTakesContainer', 'topFiveDropdown', 'animeQuestContainer', 'gamesHubContainer'];
   ids.forEach(function(id) {
     var el = document.getElementById(id);
     if (el) el.style.display = 'none';
@@ -2097,7 +2097,8 @@ searchBox.addEventListener('input', function () {
     var meta = txt(card.querySelector('.stats-bar-meta'));
     var eps = txt(card.querySelector('.stats-bar-eps'));
     var fill = card.querySelector('.stats-bar-fill');
-    var prog = fill ? (parseInt(fill.style.width, 10) || 0) : 0;
+    var prog = fill ? (parseFloat(fill.style.width) || 0) : 0;
+    var progTxt = prog.toFixed(2);
     if (!title) return;
     var reading = label.indexOf('Reading') > -1;
     html += '<div class="now-card ' + (reading ? 'now-reading' : 'now-watching') + '">' +
@@ -2107,7 +2108,7 @@ searchBox.addEventListener('input', function () {
           '<div class="now-ring-fill"></div>' +
           '<div class="now-poster">' + (imgEl ? '<img src="' + imgEl.src + '" alt="' + title + '" loading="lazy">' : '') + '</div>' +
         '</div>' +
-        '<div class="now-pct">' + prog + '%</div>' +
+        '<div class="now-pct">' + progTxt + '%</div>' +
       '</div>' +
       '<div class="now-info">' +
         '<div class="now-label">' + label.replace(/^[^\w]+/, '').trim() + '</div>' +
@@ -2469,6 +2470,25 @@ function scrollToEnd() {
   }
 
   var ticking = false;
+  var scrolling = false;
+  var dockHover = false;
+  var scrollIdleTimer = null;
+
+  /* while the page moves the dock shrinks to a soft ghost, the moment the
+     scrolling stops it comes back at full size */
+  function markScrolling() {
+    scrolling = true;
+    clearTimeout(scrollIdleTimer);
+    scrollIdleTimer = setTimeout(function () {
+      scrolling = false;
+      paint();
+    }, 240);
+    paint();
+  }
+
+  dock.addEventListener('mouseenter', function () { dockHover = true; paint(); });
+  dock.addEventListener('mouseleave', function () { dockHover = false; paint(); });
+
   function paint() {
     ticking = false;
     var doc = document.documentElement;
@@ -2487,8 +2507,9 @@ function scrollToEnd() {
     // keep the dock on screen for nearly the whole page — it's the main
     // way to jump between top and bottom now
     var show = isScrollButtonSection() && p > 0.04 && p < 0.995 && !shortList;
-    dock.style.opacity = show ? '1' : '0';
-    dock.style.transform = show ? 'translateY(0) scale(1)' : 'translateY(18px) scale(.92)';
+    var ghost = show && scrolling && !dockHover;
+    dock.style.opacity = show ? (ghost ? '0.22' : '1') : '0';
+    dock.style.transform = (show ? 'translateY(0) scale(1)' : 'translateY(18px) scale(.92)') + (ghost ? ' scale(.8)' : '');
     dock.style.pointerEvents = show ? 'auto' : 'none';
     topBtn.style.opacity = y > 40 ? '1' : '.42';
     // END is meaningless (and blocked) while a genre filter narrows the list
@@ -2496,6 +2517,7 @@ function scrollToEnd() {
     endBtn.style.pointerEvents = window.__genreFilterActive ? 'none' : '';
   }
   function onScroll() {
+    markScrolling();
     if (ticking) return;
     ticking = true;
     // requestAnimationFrame stops in a background tab, so a plain timer
@@ -5543,11 +5565,6 @@ document.addEventListener('click', function(e) {
         element: '#gamesHubLink',
         guide: 'Raphtalia',
         popover: { title: '🎮 Anime Web Games', description: 'Eight anime games built from this very list - guess the card from clues, name the shadowed character, read the emojis, and climb the leaderboards!', side: 'right' }
-      },
-      {
-        element: '#tournament-nav-link',
-        guide: 'Kaguya Shinomiya',
-        popover: { title: '🏆 Anime Tournament', description: 'Enter the tournament arena! Pick a genre, draft your roster, and auto-simulate a bracket to crown a champion. Full power-based matchups!', side: 'right' }
       },
       {
         element: '#animeQuestBtn',
