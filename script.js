@@ -2788,6 +2788,99 @@ function loadDubData() {
     .catch(function () { DUB_DATA = {}; return DUB_DATA; });
 }
 
+/* ══════════════════════════════════════════════════════════════════════
+   SITE KNOWLEDGE
+   The AI does not answer from memory - it reads the files of this website
+   first. The card rows come straight from the live DOM (never stale), the
+   genre map from the site's own genre table, the ratings from
+   anime-ratings.json and everything else (quest questions, clue sets,
+   true/false statements, the dub table) from site-knowledge.json, which
+   scripts/build-site-knowledge.js writes from the real files.
+   ══════════════════════════════════════════════════════════════════════ */
+var knowledgeReady = null;
+
+function knowledgeRowsFromDom() {
+  var GEN = window.ANIME_GENRES || {};
+  var byNum = {};
+  Object.keys(GEN).forEach(function (g) {
+    if (g === 'All' || !GEN[g] || !GEN[g].nums) return;
+    GEN[g].nums.forEach(function (num) { (byNum[num] = byNum[num] || []).push(g); });
+  });
+  var ratDb = (ratingsCache && typeof ratingsCache === 'object') ? ratingsCache : null;
+  var rows = [];
+  document.querySelectorAll('#grid .card').forEach(function (c) {
+    var titleEl = c.querySelector('.title');
+    var title = titleEl ? String(titleEl.textContent || '').trim() : '';
+    if (!title) return;
+    var numEl = c.querySelector('.number');
+    var num = numEl ? parseInt(String(numEl.textContent || '').replace(/\D/g, ''), 10) : 0;
+    var back = c.querySelector('.card-back');
+    var seasonEl = back ? back.querySelector('.back-season') : null;
+    var epEl = back ? back.querySelector('.back-episodes') : null;
+    var seasons = seasonEl ? String(seasonEl.textContent || '').replace(/^[^\w([{<]+/u, '').replace(/\s+/g, ' ').trim() : '';
+    /* the same season rule the counters use: a list of numbers counts them,
+       a line without numbers ("Movie", "Ongoing") counts as one */
+    var seasonCount = 0;
+    if (seasons) {
+      var nums = seasons.match(/\d+/g);
+      seasonCount = (nums && nums.length) ? nums.length : 1;
+    }
+    var eps = null;
+    if (epEl) {
+      var digits = String(epEl.textContent || '').replace(/[^\d]/g, '');
+      eps = digits ? parseInt(digits, 10) : null;
+    }
+    var special = '';
+    /* only a real kind counts - the site also puts "card-live" on a card */
+    var kinds = window.SPECIAL_CARD_TYPES || {};
+    String(c.className || '').split(/\s+/).forEach(function (cl) {
+      if (cl.indexOf('card-') !== 0) return;
+      var kind = cl.slice(5);
+      if (kinds[kind]) special = kind;
+    });
+    var row = { n: num, title: title, genres: byNum[num] || [], seasons: seasons, seasonCount: seasonCount, episodes: eps, special: special };
+    var entry = ratDb ? ratDb[num] : null;
+    if (entry) {
+      if (entry.malScore !== undefined && entry.malScore !== null && entry.malScore !== '') {
+        var m = parseFloat(entry.malScore);
+        if (isFinite(m)) row.mal = m;
+      }
+      row.ratings = {
+        malScore: entry.malScore, characters: entry.characters, animRating: entry.animRating,
+        animePlanet: entry.animePlanet, anilist: entry.anilist, storyRating: entry.storyRating
+      };
+    }
+    rows.push(row);
+  });
+  return rows;
+}
+
+/* loads the bundle once, then keeps the rows in sync with the DOM */
+function ensureKnowledge() {
+  if (!window.SiteKnowledge) return Promise.resolve(null);
+  if (knowledgeReady) return knowledgeReady;
+  knowledgeReady = Promise.all([
+    window.SiteKnowledge.load('site-knowledge.json'),
+    loadRatings()
+  ]).then(function () {
+    var data = window.SiteKnowledge.data() || {};
+    var rows = knowledgeRowsFromDom();
+    var byTitle = {};
+    (data.anime || []).forEach(function (r) { if (r && r.title) byTitle[r.title] = r; });
+    rows.forEach(function (row) {
+      var extra = byTitle[row.title];
+      if (!extra) return;
+      if (extra.alt) row.alt = extra.alt;
+      if (row.mal == null && extra.mal != null) row.mal = extra.mal;
+      if (!row.ratings && extra.ratings) row.ratings = extra.ratings;
+    });
+    window.SiteKnowledge.setRows(rows);
+    if (data.specialTypes) window.SiteKnowledge.setSpecial(data.specialTypes);
+    return data;
+  }).catch(function () { return null; });
+  return knowledgeReady;
+}
+
 function getSystemPrompt(visitorMsg) {
   const stats = getStats();
   // If the visitor is signed in (Google, email or phone), let the assistant call them by name.
@@ -2834,6 +2927,17 @@ THE TWO RULES YOU MUST NEVER BREAK:
 2. When a title is not on that list (the visitor names it, or asks for something the list cannot give): say plainly that it is not in Fardin's list yet, ask them to drop it in the Suggestion Box in the sidebar ("That one isn't in Fardin's list yet — put it in the Suggestion Box in the sidebar and Fardin might watch it! ⚡"), then offer the closest anime FROM THE LIST. For facts (episodes, seasons, plot) about such a title, never guess.`
     : `FARDIN'S LIST IS NOT LOADED for this message (plain small talk). Do NOT name any specific anime at all here — not one title, not even Fardin's. If the visitor does want a recommendation, tell them to ask you for one and you will pull up the list.`;
 
+  /* The files of the website, read for THIS question only - the rows that
+     matter are pulled out of the site's own data, so every number in the
+     answer is a real number from the site. Small talk skips this, so the
+     prompt stays cheap. */
+  let filesBlock = '';
+  try {
+    if (window.SiteKnowledge && window.SiteKnowledge.data() && needsAnimeList(visitorMsg || 'anime')) {
+      filesBlock = window.SiteKnowledge.block(visitorMsg || '', { maxChars: 1200 });
+    }
+  } catch (e) {}
+
   return `You are Fardin's personal anime assistant on "Fardin's Anime Hub" website. You are fun, friendly and knowledgeable.${whoRule}
 
 Website Stats:
@@ -2842,6 +2946,7 @@ Website Stats:
 - Total Episodes: ${stats.episodeCount}
 
 ${listBlock}
+${filesBlock}
 
 Rules:
 1. Reply in the same language the user uses. If user writes Bangla, reply in Bangla. If English, reply in English.
@@ -2851,6 +2956,7 @@ Rules:
 5. Fardin (the owner): his full info is in the sidebar under "Owner Info". He loves diverse genres — action, comedy, romance, thriller — and rates good storytelling and character development above all. Hype him warmly if asked.
 6. Stats: don't volunteer his totals unless asked. If asked, give them in a fun way, then say "Explore the list and find your next watch!".
 7. NEVER guess or make up genres, episode counts, seasons or descriptions. The list at the top of this prompt is the COMPLETE list of Fardin's anime — use ONLY it for any anime-specific answer. General knowledge is fine for casual talk, never for anime facts.
+7a. The FILES READ block holds the exact rows pulled out of the website's own files for this question (card number, genres, seasons, episodes, MAL score, the site's own ratings, the dub table, the special card tier and the on-file facts). When a number is in that block, it IS the number - quote it, never round it and never argue with it. If a title is not in the block, say you do not have its file data instead of inventing a number.
 7b. When you suggest a "X vs Y" matchup, both anime MUST share at least one genre. If they have no common genre, do not suggest that duel — pick a different title that shares a genre. (Example: Blue Lock vs Vinland Saga has no common genre, so never suggest it.)
 7c. If asked about Hindi dub, English dub or sub availability, only answer from the dub data you are given. If the data does not list that title, say you do not have its dub info yet instead of guessing.
 7d. Every title in the list carries its MAL score in brackets, e.g. "Jujutsu Kaisen (MAL 8.6)". Those numbers come from the site's own ratings file — use them when the visitor asks how good or rated an anime is, and never invent a score for a title that has none.
@@ -2945,6 +3051,8 @@ function setChatOpen(open) {
   var isMobile = window.matchMedia('(max-width: 768px)').matches;
   if (isMobile) document.body.style.overflow = open ? 'hidden' : '';
   if (open) {
+    /* read the site's files in the background so the first answer is instant */
+    try { ensureKnowledge(); } catch (e) {}
     // only a real desktop gets the caret — a touch device would pop the keyboard open
     if (!isTouchyDevice()) chatInput.focus();
     if (typeof closeMenu === 'function') closeMenu();
@@ -3022,6 +3130,9 @@ async function sendMessage() {
     if (chatHistory.length > 9) {
       chatHistory = [chatHistory[0],...chatHistory.slice(-8)];
     }
+
+    /* the files of the site are read before the answer is written */
+    try { await ensureKnowledge(); } catch (e) {}
 
     typingDiv = addMessage('Typing...', 'bot typing');
     /* refresh the system prompt so the dub table is present and small talk
@@ -4981,7 +5092,12 @@ document.addEventListener('click', function(e) {
   var currentStep = 0;
   var tourSteps;
   var overlay, highlight, tooltip, arrow, autoCloseTimer, autoCloseCount;
-  var closeBtn, titleEl, descEl, progressEl, prevBtn, nextBtn, skipBtn;
+  var closeBtn, titleEl, descEl, progressEl, prevBtn, nextBtn, skipBtn, autoBtn;
+  /* the auto walk: when the visitor wants it, the guide moves on by himself */
+  var autoTour = false;
+  var autoTimer = null;
+  var AUTO_DELAY = 3500;
+  var AUTO_KEY = 'fardin_tour_auto';
   var guideDoll, guideEyes, guideForm, barEl;
   var baseGaze = { x: 0, y: 0 };
   var mascot = null, mascotLoading = null, lastStepRect = null;
@@ -5201,6 +5317,7 @@ document.addEventListener('click', function(e) {
         '<div class="tour-footer">' +
           '<span class="tour-progress"></span>' +
           '<div class="tour-buttons">' +
+            '<button class="tour-btn tour-btn-auto" title="Let the guide walk by himself (3.5s per stop)">&#9654; AUTO</button>' +
             '<button class="tour-btn tour-btn-skip">Skip</button>' +
             '<button class="tour-btn tour-btn-prev">\u2190 Back</button>' +
             '<button class="tour-btn tour-btn-next">Next \u2192</button>' +
@@ -5222,6 +5339,7 @@ document.addEventListener('click', function(e) {
     prevBtn = tooltip.querySelector('.tour-btn-prev');
     nextBtn = tooltip.querySelector('.tour-btn-next');
     skipBtn = tooltip.querySelector('.tour-btn-skip');
+    autoBtn = tooltip.querySelector('.tour-btn-auto');
     guideDoll = tooltip.querySelector('.tour-doll');
     guideEyes = tooltip.querySelector('.td-eyes');
     guideForm = tooltip.querySelector('.tour-guide-form');
@@ -5254,6 +5372,12 @@ document.addEventListener('click', function(e) {
       else { finishTour(); }
     });
     skipBtn.addEventListener('click', function () { clearInterval(autoCloseTimer); endTour(); });
+    if (autoBtn) {
+      autoBtn.addEventListener('click', function () {
+        setAutoTour(!autoTour);
+        if (autoTour) scheduleAutoStep();
+      });
+    }
   }
 
   /* Rapayel's body is a single fixed 3D figure — Alisa Mikhailovna Kujou.
@@ -5344,13 +5468,18 @@ document.addEventListener('click', function(e) {
       if (index === 0) { skipBtn.textContent = 'Skip 15'; autoCloseCount = 15; }
 
       clearInterval(autoCloseTimer);
-      if (index === 0) {
+      /* the welcome card counts down to a skip - not in the auto walk,
+         the guide is on his own there */
+      if (index === 0 && !autoTour) {
         autoCloseTimer = setInterval(function () {
           autoCloseCount--;
           if (autoCloseCount <= 0) { clearInterval(autoCloseTimer); endTour(); return; }
           skipBtn.textContent = 'Skip ' + autoCloseCount;
         }, 1000);
       }
+
+      /* the next stop arrives on its own when the auto walk is on */
+      scheduleAutoStep();
 
       lastStepRect = rect;
       var targetCx = rect.left + rect.width / 2;
@@ -5475,8 +5604,48 @@ document.addEventListener('click', function(e) {
     tt.style.top = Math.round(top) + 'px';
   }
 
+  /* ── the auto walk ──────────────────────────────────────────────
+     The visitor can let the guide walk by himself: every stop gets 3.5
+     seconds and then the next one starts on its own. The choice is
+     remembered, so the next tour walks by itself too. */
+  function clearAutoStep() {
+    if (autoTimer) { clearTimeout(autoTimer); autoTimer = null; }
+    if (autoBtn) autoBtn.classList.remove('is-running');
+  }
+
+  function scheduleAutoStep() {
+    clearAutoStep();
+    if (!autoTour || !tourActive || !tourSteps) return;
+    if (autoBtn) {
+      autoBtn.classList.remove('is-running');
+      void autoBtn.offsetWidth;      /* restart the little countdown sweep */
+      autoBtn.classList.add('is-running');
+    }
+    autoTimer = setTimeout(function () {
+      autoTimer = null;
+      if (!tourActive || !autoTour) return;
+      if (currentStep < tourSteps.length - 1) showStep(currentStep + 1);
+      else finishTour();
+    }, AUTO_DELAY);
+  }
+
+  function setAutoTour(on) {
+    autoTour = !!on;
+    try { localStorage.setItem(AUTO_KEY, autoTour ? '1' : '0'); } catch (e) {}
+    if (autoBtn) {
+      autoBtn.classList.toggle('is-on', autoTour);
+      autoBtn.innerHTML = autoTour ? '&#10073;&#10073; AUTO' : '&#9654; AUTO';
+      autoBtn.title = autoTour
+        ? 'The guide walks by himself - click to stop him'
+        : 'Let the guide walk by himself (3.5s per stop)';
+    }
+    if (autoTour) scheduleAutoStep();
+    else clearAutoStep();
+  }
+
   function endTour() {
     tourActive = false;
+    clearAutoStep();
     overlay.style.display = 'none';
     highlight.style.display = 'none';
     tooltip.style.display = 'none';
@@ -5488,7 +5657,16 @@ document.addEventListener('click', function(e) {
 
   function startTour() {
     if (!tooltip) initTour();
+    var wasActive = tourActive;
     tourActive = true;
+    /* the visitor's choice from last time: the guide walks by himself.
+       A restart while the tour is already running keeps the current choice. */
+    if (!wasActive) {
+      var storedAuto = false;
+      try { storedAuto = localStorage.getItem(AUTO_KEY) === '1'; } catch (e) {}
+      autoTour = false;
+      setAutoTour(storedAuto);
+    }
     currentStep = 0;
     tourSteps = initSteps();
     closeMenu();
@@ -5678,6 +5856,8 @@ document.addEventListener('click', function(e) {
   window.__tour = {
     start: startTour,
     end: endTour,
+    auto: function (on) { setAutoTour(on === undefined ? !autoTour : !!on); if (autoTour) scheduleAutoStep(); return autoTour; },
+    isAuto: function () { return autoTour; },
     next: function () { if (tourActive && currentStep < tourSteps.length - 1) showStep(currentStep + 1); },
     prev: function () { if (tourActive && currentStep > 0) showStep(currentStep - 1); }
   };

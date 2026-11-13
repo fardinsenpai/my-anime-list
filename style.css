@@ -3847,6 +3847,40 @@ body.perf-no-counter-anim .td-base i { animation: none !important; }
   background: rgba(255,255,255,0.14);
   color: #fff;
 }
+.tour-btn-auto {
+  background: rgba(0,229,255,0.10);
+  color: #7fe9ff;
+  border: 1px solid rgba(0,229,255,0.32);
+  font-size: 11px;
+  padding: 7px 11px;
+  position: relative;
+  overflow: hidden;
+}
+.tour-btn-auto:hover {
+  background: rgba(0,229,255,0.22);
+  border-color: rgba(0,229,255,0.6);
+  color: #eafcff;
+}
+.tour-btn-auto.is-on {
+  background: linear-gradient(135deg, rgba(0,229,255,0.32), rgba(122,92,255,0.28));
+  border-color: rgba(0,229,255,0.75);
+  color: #eafcff;
+  box-shadow: 0 0 14px rgba(0,229,255,0.35);
+}
+/* the little sweep that shows how long is left of the 3.5 seconds */
+.tour-btn-auto.is-running::after {
+  content: '';
+  position: absolute;
+  left: 0; bottom: 0; height: 2px;
+  width: 100%;
+  background: linear-gradient(90deg,#00e5ff,#9d7cff);
+  transform-origin: left center;
+  animation: tourAutoSweep 3.5s linear forwards;
+}
+@keyframes tourAutoSweep {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
 .tour-btn-skip {
   background: rgba(255,50,50,0.12);
   color: #ff7a7a;
