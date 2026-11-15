@@ -5686,6 +5686,11 @@ document.addEventListener('click', function(e) {
         popover: { title: '\uD83D\uDC4B I\'m Rapayel', description: 'Welcome to <strong>Fardin\'s Anime Hub</strong> \u2014 your personal anime collection dashboard. I\'m Rapayel, your guide. I\'ll walk beside every feature and point at it with my stick.<br><br>You can replay this tour anytime from <strong>sidebar \u2192 Tour Guide</strong>.', side: 'bottom' }
       },
       {
+        element: '#accountBtn',
+        guide: 'Komi',
+        popover: { title: '🔐 Sign in (optional)', description: 'Tap <strong>Sign in</strong> here to log in with Google, or with an email and password. An account is what saves things to the cloud: <strong>your wish list, your game scores and the leaderboards, hot takes and the AI chat history</strong>.<br><br>Browsing, searching, the tour and every game screen work without it — but a score only reaches the board when you are signed in.', side: 'bottom' }
+      },
+      {
         element: '#nowStrip',
         guide: 'Frieren',
         popover: { title: '\u25B6 Currently Watching & Reading', description: 'This strip shows what Fardin is watching and reading right now, pulled from his own tracker.', side: 'bottom' }

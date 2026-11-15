@@ -366,29 +366,22 @@
 }
 .ag-admin-name { flex: 1; font-size: 13px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .ag-admin-when { font-size: 10.5px; color: rgba(255, 255, 255, .35); letter-spacing: .6px; }
-.ag-admin-key {
-  border: 1px dashed rgba(255, 215, 0, .3); border-radius: 14px;
-  padding: 12px 14px; margin-bottom: 14px; background: rgba(255, 215, 0, .04);
+.ag-admin-group--removed { border-color: rgba(255, 77, 109, .28); background: rgba(255, 77, 109, .05); }
+.ag-admin-group--removed .ag-admin-game { color: #ff4d6d; }
+.ag-admin-row--gone { opacity: .42; }
+.ag-admin-row--gone .ag-admin-name { text-decoration: line-through; }
+.ag-admin-gone {
+  font-size: 9px; letter-spacing: 1.6px; font-weight: 800; color: #ff4d6d;
+  border: 1px solid rgba(255, 77, 109, .35); border-radius: 6px; padding: 3px 7px;
 }
-.ag-admin-key-note { font-size: 11.5px; line-height: 1.55; color: rgba(255, 255, 255, .5); margin-bottom: 10px; }
-.ag-admin-key-row { display: flex; gap: 8px; flex-wrap: wrap; }
-.ag-admin-key-input {
-  flex: 1; min-width: 200px; box-sizing: border-box;
-  padding: 9px 12px; border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, .14); background: rgba(0, 0, 0, .35);
-  color: #fff; font-size: 12.5px; outline: none;
+.ag-admin-undo {
+  padding: 4px 10px; border-radius: 8px;
+  border: 1px solid rgba(0, 242, 254, .4); background: rgba(0, 242, 254, .1);
+  color: #00f2fe; font-size: 9.5px; letter-spacing: 1.6px; font-weight: 700; cursor: pointer;
+  transition: .18s;
 }
-.ag-admin-key-input:focus { border-color: rgba(255, 215, 0, .5); }
-.ag-admin-key-btn {
-  padding: 9px 14px; border-radius: 10px; border: 1px solid rgba(255, 215, 0, .5);
-  background: rgba(255, 215, 0, .14); color: #ffd700;
-  font-size: 10.5px; letter-spacing: 1.8px; font-weight: 700; cursor: pointer; transition: .18s;
-}
-.ag-admin-key-btn:hover { background: rgba(255, 215, 0, .3); color: #fff; }
-.ag-admin-key-btn--ghost { border-color: rgba(255, 255, 255, .16); background: rgba(255, 255, 255, .04); color: rgba(255, 255, 255, .6); }
-.ag-admin-key-btn--ghost:hover { background: rgba(255, 255, 255, .12); color: #fff; }
-.ag-admin-key-state { margin-top: 8px; font-size: 10.5px; letter-spacing: 1.1px; color: rgba(255, 255, 255, .4); }
-.ag-admin-key-state.ok { color: #7cfc9b; }
+.ag-admin-undo:hover { background: rgba(0, 242, 254, .25); color: #04121a; }
+.ag-admin-undo:disabled { opacity: .35; cursor: wait; }
 .ag-pin-err { min-height: 16px; margin-top: 8px; font-size: 11px; letter-spacing: 1.2px; color: #ff4d6d; text-align: center; }
 
 /* ── the name gate ── */
@@ -802,3 +795,401 @@
   margin-top: 4px;
 }
 .body-games .ag-wrap { max-width: 100%; }
+
+/* ══════════════════════════════════════════════════════════════════════
+   THE ARCADE SKIN
+   A console look for the games page: an ambient glow behind everything,
+   glass panels, a neon rail on the clue card, a HUD strip for the round,
+   a shine sweep on the main buttons and a soft pulse on the clue chip.
+   Only the shared chrome is touched, so every game keeps its own layout.
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* ── the room the games live in ── */
+.body-games { position: relative; isolation: isolate; }
+.body-games::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(900px 540px at 50% -10%, rgba(0, 242, 254, .11), transparent 62%),
+    radial-gradient(720px 500px at 2% 108%, rgba(255, 45, 120, .10), transparent 60%),
+    radial-gradient(720px 500px at 98% 108%, rgba(138, 92, 255, .11), transparent 60%);
+}
+.body-games::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: .55;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, .03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, .03) 1px, transparent 1px);
+  background-size: 46px 46px;
+  -webkit-mask-image: radial-gradient(circle at 50% 28%, #000 0%, transparent 74%);
+  mask-image: radial-gradient(circle at 50% 28%, #000 0%, transparent 74%);
+}
+
+/* ── the heading ── */
+.ag-head-title {
+  letter-spacing: 6px;
+  filter: drop-shadow(0 0 24px rgba(0, 242, 254, .35));
+}
+.ag-head::after {
+  content: '';
+  position: absolute;
+  left: 12%;
+  right: 12%;
+  bottom: -2px;
+  height: 2px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, transparent, #00f2fe, #ff2d78, #8a5cff, transparent);
+  box-shadow: 0 0 18px rgba(0, 242, 254, .7);
+  animation: agHeadSweep 6s ease-in-out infinite;
+}
+@keyframes agHeadSweep {
+  0%, 100% { opacity: .55; transform: scaleX(.92); }
+  50% { opacity: 1; transform: scaleX(1); }
+}
+.ag-head-sub {
+  display: inline-block;
+  margin-top: 10px;
+  padding: 5px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, .09);
+  background: rgba(255, 255, 255, .03);
+  font-size: 11.5px;
+}
+
+/* ── the console panel around a game ── */
+.ag-wrap--game {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 2px 22px 26px;
+  border-radius: 26px;
+  border: 1px solid rgba(255, 255, 255, .07);
+  background:
+    radial-gradient(760px 340px at 50% -14%, rgba(0, 242, 254, .09), transparent 62%),
+    linear-gradient(180deg, rgba(17, 19, 38, .74), rgba(7, 7, 15, .86));
+  box-shadow: 0 44px 100px -56px rgba(0, 0, 0, 1), inset 0 1px 0 rgba(255, 255, 255, .05);
+  backdrop-filter: blur(6px);
+}
+.ag-head--game { border-bottom: 0; padding-bottom: 6px; margin-bottom: 10px; }
+.ag-head--game::after { left: 20%; right: 20%; }
+.ag-stage { animation: agStageIn .4s ease both; }
+@keyframes agStageIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* ── the round strip: a HUD, not a box ── */
+.ag-round {
+  position: relative;
+  padding: 12px 20px;
+  border: 0;
+  border-radius: 0;
+  background: linear-gradient(90deg, rgba(0, 242, 254, .13), rgba(138, 92, 255, .09) 55%, rgba(255, 45, 120, .13));
+  clip-path: polygon(16px 0, 100% 0, 100% calc(100% - 16px), calc(100% - 16px) 100%, 0 100%, 0 16px);
+  font-weight: 700;
+  letter-spacing: 2px;
+  overflow: hidden;
+}
+.ag-round::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 40%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .12), transparent);
+  transform: translateX(-140%);
+  animation: agRoundSweep 5.5s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes agRoundSweep {
+  0%, 60% { transform: translateX(-140%); }
+  100% { transform: translateX(320%); }
+}
+.ag-round-score b {
+  font-family: 'Orbitron', sans-serif;
+  color: #00f2fe;
+  text-shadow: 0 0 16px rgba(0, 242, 254, .65);
+}
+.ag-round-label { color: #ffd700; text-shadow: 0 0 14px rgba(255, 215, 0, .5); }
+
+/* ── the clue card: a terminal with a neon rail ── */
+.ag-clue-box {
+  position: relative;
+  padding: 18px 20px 18px 26px;
+  border-radius: 16px;
+  border: 1px solid rgba(0, 242, 254, .18);
+  background:
+    linear-gradient(180deg, rgba(0, 242, 254, .07), rgba(0, 242, 254, .015)),
+    rgba(5, 9, 17, .58);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .05), 0 26px 50px -38px rgba(0, 242, 254, .85);
+  overflow: hidden;
+}
+.ag-clue-box::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 12px;
+  bottom: 12px;
+  width: 3px;
+  border-radius: 3px;
+  background: linear-gradient(180deg, #00f2fe, #8a5cff);
+  box-shadow: 0 0 18px rgba(0, 242, 254, .85);
+}
+.ag-clue-box::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(180deg, transparent, rgba(0, 242, 254, .07), transparent);
+  transform: translateY(-110%);
+  animation: agScan 5s ease-in-out infinite;
+}
+@keyframes agScan {
+  0%, 55% { transform: translateY(-110%); }
+  100% { transform: translateY(110%); }
+}
+.ag-clue-no {
+  display: inline-block;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 9.5px;
+  letter-spacing: 3px;
+  font-weight: 800;
+  color: #04121a;
+  background: linear-gradient(135deg, #00f2fe, #7ef9ff);
+  padding: 4px 11px;
+  border-radius: 999px;
+  box-shadow: 0 0 18px rgba(0, 242, 254, .55);
+  animation: agChip 2.8s ease-in-out infinite;
+}
+@keyframes agChip {
+  0%, 100% { box-shadow: 0 0 14px rgba(0, 242, 254, .45); }
+  50% { box-shadow: 0 0 28px rgba(0, 242, 254, .9); }
+}
+.ag-clue-text {
+  margin-top: 10px;
+  font-size: clamp(15px, 2.2vw, 17.5px);
+  line-height: 1.6;
+  color: #eaf9ff;
+  font-weight: 500;
+}
+
+/* ── the answer row ── */
+.ag-answer-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: stretch; }
+.ag-answer-input {
+  flex: 1 1 200px;
+  min-width: 0;
+  padding: 14px 18px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, .1);
+  background: rgba(3, 7, 13, .72);
+  color: #fff;
+  font-family: inherit;
+  font-size: 15px;
+  box-shadow: inset 0 2px 12px rgba(0, 0, 0, .55);
+  transition: border-color .18s, box-shadow .18s, background .18s;
+}
+.ag-answer-input::placeholder { color: rgba(255, 255, 255, .3); letter-spacing: .4px; }
+.ag-answer-input:focus {
+  outline: none;
+  border-color: rgba(0, 242, 254, .65);
+  background: rgba(5, 13, 21, .88);
+  box-shadow: 0 0 0 3px rgba(0, 242, 254, .12), 0 0 34px -8px rgba(0, 242, 254, .7), inset 0 2px 12px rgba(0, 0, 0, .55);
+}
+
+/* ── the buttons: a shine sweep and a real glow ── */
+.ag-btn { position: relative; overflow: hidden; }
+.ag-btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(110deg, transparent 32%, rgba(255, 255, 255, .45) 50%, transparent 68%);
+  transform: translateX(-140%);
+  transition: transform .6s ease;
+  pointer-events: none;
+}
+.ag-btn:hover::after { transform: translateX(140%); }
+.ag-btn--go {
+  background: linear-gradient(135deg, #00f2fe, #0a8cff 58%, #8a5cff);
+  color: #04121a;
+  letter-spacing: 2px;
+  box-shadow: 0 16px 36px -18px rgba(0, 242, 254, .95), inset 0 1px 0 rgba(255, 255, 255, .55);
+}
+.ag-btn--go:hover {
+  box-shadow: 0 20px 46px -16px rgba(0, 242, 254, 1), inset 0 1px 0 rgba(255, 255, 255, .7);
+}
+.ag-btn--big { letter-spacing: 2.6px; }
+.ag-next-clue {
+  display: block;
+  width: 100%;
+  margin-top: 12px;
+  padding: 13px 18px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 215, 0, .45);
+  background: linear-gradient(180deg, rgba(255, 215, 0, .12), rgba(255, 45, 120, .07));
+  color: #ffe98a;
+  font-family: inherit;
+  font-size: 11.5px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  cursor: pointer;
+  transition: border-color .2s, box-shadow .2s, transform .2s;
+}
+.ag-next-clue b { color: #ffd700; }
+.ag-next-clue:hover {
+  border-color: #ffd700;
+  box-shadow: 0 0 34px -8px rgba(255, 215, 0, .65);
+  transform: translateY(-1px);
+}
+
+/* ── the boards: glass rows, a gold first place ── */
+.ag-board-row {
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, .06);
+  background: linear-gradient(90deg, rgba(255, 255, 255, .045), rgba(255, 255, 255, .012));
+  transition: border-color .2s, transform .2s;
+}
+.ag-board-row:hover { border-color: rgba(0, 242, 254, .32); transform: translateX(3px); }
+.ag-board-row:first-child {
+  border-color: rgba(255, 215, 0, .32);
+  background: linear-gradient(90deg, rgba(255, 215, 0, .13), rgba(255, 215, 0, .02));
+  box-shadow: 0 0 34px -16px rgba(255, 215, 0, .9);
+}
+.ag-board-rank { filter: drop-shadow(0 0 8px rgba(255, 215, 0, .55)); }
+.ag-board-score { text-shadow: 0 0 16px rgba(255, 215, 0, .45); }
+
+/* ── the hub cards ── */
+.ag-game { border-radius: 20px; }
+.ag-game::before {
+  content: '';
+  position: absolute;
+  width: 150px;
+  height: 150px;
+  right: -56px;
+  top: -64px;
+  background: radial-gradient(circle, rgba(0, 242, 254, .22), transparent 65%);
+  opacity: 0;
+  transition: opacity .28s;
+  pointer-events: none;
+}
+.ag-game:hover::before { opacity: 1; }
+.ag-game-icon {
+  filter: drop-shadow(0 0 14px rgba(0, 242, 254, .35));
+  transition: filter .25s, transform .25s;
+}
+.ag-game:hover .ag-game-icon {
+  filter: drop-shadow(0 0 22px rgba(0, 242, 254, .85));
+  transform: scale(1.08);
+}
+.ag-game-go { letter-spacing: 2.6px; }
+
+/* ── the result screen ── */
+.ag-result-icon svg { filter: drop-shadow(0 0 20px rgba(255, 215, 0, .7)); }
+.ag-result-score { text-shadow: 0 0 34px rgba(255, 215, 0, .5); }
+
+/* ── respect the visitors who ask for less motion ── */
+@media (prefers-reduced-motion: reduce) {
+  .ag-head::after, .ag-round::after, .ag-clue-box::after, .ag-clue-no,
+  .ag-stage, .ag-btn::after, .ag-game::before, .ag-game-icon { animation: none !important; transition: none !important; }
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   THE ARCADE SKIN, PART TWO
+   The small things: a HUD frame around a game, a chip for the section
+   titles, a real skip button and wordle tiles with depth.
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* ── a quiet inner ring around the console ── */
+.ag-wrap--game { position: relative; }
+.ag-wrap--game::before {
+  content: '';
+  position: absolute;
+  inset: 7px;
+  border-radius: 21px;
+  border: 1px solid rgba(255, 255, 255, .045);
+  pointer-events: none;
+}
+
+/* ── a section title: a chip, then a fading rule ── */
+.ag-section-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 11px;
+  letter-spacing: 3px;
+  color: #00f2fe;
+  text-shadow: 0 0 16px rgba(0, 242, 254, .5);
+}
+.ag-section-title::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(0, 242, 254, .45), transparent);
+}
+.ag-section-title span { color: rgba(255, 255, 255, .38); letter-spacing: 1.6px; }
+
+/* ── the "I don't know" button ── */
+.ag-btn--skip {
+  border: 1px solid rgba(255, 255, 255, .14);
+  background: rgba(255, 255, 255, .04);
+  color: rgba(255, 255, 255, .72);
+  letter-spacing: 1.6px;
+  transition: border-color .18s, color .18s, background .18s, box-shadow .18s;
+}
+.ag-btn--skip:hover {
+  border-color: rgba(255, 45, 120, .6);
+  background: rgba(255, 45, 120, .1);
+  color: #fff;
+  box-shadow: 0 0 32px -10px rgba(255, 45, 120, .85);
+}
+
+/* ── the wordle tiles ── */
+.ag-wl-cell {
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, .09);
+  background: linear-gradient(180deg, rgba(255, 255, 255, .05), rgba(255, 255, 255, .012));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .05);
+  transition: border-color .18s, box-shadow .18s, transform .18s;
+}
+.ag-wl-cell:empty { border-color: rgba(255, 255, 255, .06); }
+.ag-wl--right {
+  box-shadow: 0 0 24px -8px rgba(74, 222, 128, .85), inset 0 1px 0 rgba(255, 255, 255, .14);
+}
+.ag-wl--wrong {
+  box-shadow: 0 0 24px -8px rgba(255, 215, 0, .75), inset 0 1px 0 rgba(255, 255, 255, .14);
+}
+.ag-wl--miss { opacity: .72; }
+
+/* ── an empty board should still look alive ── */
+.ag-board-empty {
+  padding: 14px 4px;
+  font-size: 12px;
+  letter-spacing: 1.2px;
+  color: rgba(255, 255, 255, .35);
+}
+.ag-board-empty::before { content: '\25C7  '; color: rgba(0, 242, 254, .6); }
+
+/* ══════════════════════════════════════════════════════════════════════
+   THE ARCADE SKIN ON A PHONE
+   Tighten the console, keep the title clear of the close button and let
+   the answer row breathe.
+   ══════════════════════════════════════════════════════════════════════ */
+@media (max-width: 620px) {
+  .ag-wrap--game { padding: 2px 13px 20px; border-radius: 20px; }
+  .ag-wrap--game::before { inset: 5px; border-radius: 16px; }
+  .ag-head--game { padding: 16px 50px 8px; margin-bottom: 8px; }
+  .ag-head-title { letter-spacing: 2px; font-size: clamp(1.05rem, 5vw, 1.45rem); }
+  .ag-close { width: 32px; height: 32px; right: 10px; border-radius: 10px; }
+  .ag-round { padding: 10px 14px; font-size: 10.5px; letter-spacing: 1.4px; }
+  .ag-clue-box { padding: 15px 15px 15px 20px; }
+  .ag-clue-text { font-size: 15px; }
+  .ag-answer-row .ag-btn { flex: 1 1 auto; }
+  .ag-btn--go { min-width: 108px; }
+  .ag-board-row { gap: 8px; }
+}
