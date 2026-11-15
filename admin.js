@@ -1108,7 +1108,10 @@ function syncCommitLogFromSupabase() {
     .then(function (r) { if (!r.ok) throw new Error('status ' + r.status); return r.json(); })
     .then(function (rows) {
       if (!Array.isArray(rows)) return;
-      var merged = rows.map(function (x) { return { t: x.t, k: x.k, ok: x.ok, d: x.d || '' }; });
+      /* the games board keeper writes its markers in this table too - they
+         are not commits, so the history leaves them out */
+      var merged = rows.filter(function (x) { return x.k !== 'games-score-removed'; })
+        .map(function (x) { return { t: x.t, k: x.k, ok: x.ok, d: x.d || '' }; });
       // keep any local-only rows (offline commits) that Supabase does not know yet
       var seen = {};
       merged.forEach(function (m) { seen[m.t + '|' + m.k] = 1; });

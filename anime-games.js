@@ -259,10 +259,16 @@
 
   /* the board of one game */
   function topScores(gameKey, limit) {
+    var n = limit || 3;
     var q = SCORES + '?select=*&game_key=eq.' + encodeURIComponent(gameKey) +
-      '&order=score.desc,played_at.asc&limit=' + (limit || 3);
+      '&order=score.desc,played_at.asc&limit=' + (n + 10);
     return sb(q, { method: 'GET' }).then(function (res) { return res.ok ? res.json() : []; })
-      .catch(function () { return []; });
+      .catch(function () { return []; })
+      .then(function (rows) {
+        return readRemoved().then(function (rm) {
+          return (rows || []).filter(function (r) { return !isRemoved(r, rm); }).slice(0, n);
+        });
+      });
   }
   /* only a score that breaks into the top three is sent to the cloud */
   function saveScore(gameKey, score, maxScore) {
@@ -291,10 +297,11 @@
       .then(function (res) { return res.ok ? res.json() : []; }).catch(function () { return []; });
   }
   function overallBoard() {
-    return allScores().then(function (rows) {
+    return readRemoved().then(function (rm) {
+      return allScores().then(function (rows) {
       var byUser = {};
       rows.forEach(function (r) {
-        if (!r || !r.user_id) return;
+        if (!r || !r.user_id || isRemoved(r, rm)) return;
         var u = byUser[r.user_id] || (byUser[r.user_id] = {
           id: r.user_id, name: r.user_name || 'Player', avatar: r.avatar || '', points: 0, games: {}
         });
@@ -308,6 +315,7 @@
       });
       list.sort(function (a, b) { return b.points - a.points || a.name.localeCompare(b.name); });
       return list.slice(0, 10);
+      });
     });
   }
   /* mode 'player' removes a player from the whole board, mode 'row'
@@ -386,64 +394,24 @@
 
   /* ─────────────────────────────────────────── the board keeper (admin)
      The same idea as the Hot Takes admin: tap the heading three times, type
-     the PIN and every score on the board grows a remove button. Nothing is
-     removed without the PIN, and the boards are read from the cloud again
-     after every change, so a stale row can never stay on screen. */
+     the PIN and every score on the board grows a remove button.
+
+     How a result leaves the board
+     The games table has no rule that lets anybody delete a row - the cloud
+     would answer "nothing happened" and keep the score. So the board
+     keeper writes a small marker in the admin log (the very table the panel
+     writes its commits to) and every board leaves those results out. No key
+     and no database work is needed for that. If the owner ever adds a
+     delete rule to the table, the panel sees that the row really went and
+     leaves the marker alone. */
   var AG_ADMIN_PIN = '112233';
   var agAdmin = false;
   var agGameKey = '';
+  var REMOVED_K = 'games-score-removed';
 
-  /* ─────────────────────────────────────────── the key
-     The cloud only lets a signed-in player remove their own score, so the
-     board keeper needs a stronger key to clear anybody's result:
-       1. the Supabase service key, pasted once into the panel below
-          (it stays in this browser and is never part of the site), or
-       2. the owner's own signed-in session, when the database lets the
-          owner delete every row.
-     Without one of those the cloud quietly refuses, so every removal is
-     checked afterwards - the panel never says "removed" when nothing went. */
-  var SERVICE_KEY_STORE = 'sb_service_key';
-  function serviceKey() {
-    try { return localStorage.getItem(SERVICE_KEY_STORE) || ''; } catch (e) { return ''; }
-  }
-  function saveServiceKey(v) {
-    try {
-      if (v) localStorage.setItem(SERVICE_KEY_STORE, v);
-      else localStorage.removeItem(SERVICE_KEY_STORE);
-    } catch (e) {}
-  }
-  function sbAdmin(path, opts) {
-    opts = opts || {};
-    return token().then(function (t) {
-      var key = serviceKey() || t || SUPABASE_KEY;
-      var headers = Object.assign({
-        apikey: key,
-        Authorization: 'Bearer ' + key,
-        'Content-Type': 'application/json',
-        Prefer: 'return=representation'
-      }, opts.headers || {});
-      return fetch(SUPABASE_URL + '/rest/v1/' + path, Object.assign({}, opts, { headers: headers }));
-    });
-  }
-  /* a removal only counts when the cloud hands the row back - an empty
-     answer means the rules of the database stopped it */
-  function removalLanded(res) {
-    if (!res || !res.ok) return false;
-    return res.json().then(function (rows) {
-      return Array.isArray(rows) && rows.length > 0;
-    }).catch(function () { return false; });
-  }
-  function removeScoreRow(id) {
-    return sbAdmin(SCORES + '?id=eq.' + encodeURIComponent(id), { method: 'DELETE' })
-      .then(removalLanded).catch(function () { return false; });
-  }
-  function removePlayerRows(userId) {
-    return sbAdmin(SCORES + '?user_id=eq.' + encodeURIComponent(userId), { method: 'DELETE' })
-      .then(removalLanded).catch(function () { return false; });
-  }
-  function wipeGameRows(gameKey) {
-    return sbAdmin(SCORES + '?game_key=eq.' + encodeURIComponent(gameKey), { method: 'DELETE' })
-      .then(removalLanded).catch(function () { return false; });
+  /* a short word on screen - the site already has a toast */
+  function agSay(title, msg, type) {
+    if (typeof showToast === 'function') showToast(title, msg, type);
   }
   function whenText(ts) {
     if (!ts) return '';
@@ -452,11 +420,91 @@
     var mon = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][d.getMonth()];
     return d.getDate() + ' ' + mon + ' ' + d.getFullYear();
   }
-  function agSay(title, msg, type) {
-    if (typeof showToast === 'function') showToast(title, msg, type);
+
+  /* ── the markers ────────────────────────────────────────────────────── */
+  function readRemoved() {
+    var out = { ids: {}, users: {}, games: {}, list: [] };
+    return fetch(SUPABASE_URL + '/rest/v1/commit_log?select=id,t,d&k=eq.' + REMOVED_K + '&order=t.desc&limit=200', {
+      headers: { apikey: SUPABASE_KEY, Authorization: 'Bearer ' + SUPABASE_KEY }
+    }).then(function (res) { return res.ok ? res.json() : []; })
+      .catch(function () { return []; })
+      .then(function (rows) {
+        (rows || []).forEach(function (r) {
+          var d = String(r.d || '');
+          var m = /^([a-z]+):(.+)$/.exec(d);
+          if (!m) return;
+          out.list.push({ id: r.id, d: d });
+          if (m[1] === 'id') out.ids[m[2]] = true;
+          else if (m[1] === 'user') out.users[m[2]] = true;
+          else if (m[1] === 'game') out.games[m[2]] = true;
+        });
+        return out;
+      });
+  }
+  function writeMarker(kind, value) {
+    return fetch(SUPABASE_URL + '/rest/v1/commit_log', {
+      method: 'POST',
+      headers: {
+        apikey: SUPABASE_KEY, Authorization: 'Bearer ' + SUPABASE_KEY,
+        'Content-Type': 'application/json', Prefer: 'return=minimal'
+      },
+      body: JSON.stringify({ t: new Date().toISOString(), k: REMOVED_K, ok: true, d: kind + ':' + value })
+    }).then(function (res) { return res.ok; }).catch(function () { return false; });
+  }
+  function undoMarker(id) {
+    return fetch(SUPABASE_URL + '/rest/v1/commit_log?id=eq.' + encodeURIComponent(id), {
+      method: 'DELETE',
+      headers: { apikey: SUPABASE_KEY, Authorization: 'Bearer ' + SUPABASE_KEY }
+    }).then(function (res) { return res.ok; }).catch(function () { return false; });
+  }
+  /* a result is out of the board when a marker says so */
+  function isRemoved(r, rm) {
+    if (!r || !rm) return false;
+    if (r.id != null && rm.ids[String(r.id)]) return true;
+    if (r.user_id && rm.users[String(r.user_id)]) return true;
+    if (r.id != null && rm.users[String(r.id)]) return true;
+    if (r.game_key && rm.games[String(r.game_key)]) return true;
+    return false;
+  }
+  function removedLabel(d) {
+    if (d.indexOf('user:') === 0) return 'the whole player ' + d.slice(5);
+    if (d.indexOf('game:') === 0) {
+      var k = d.slice(5);
+      return 'every score of ' + (GAME_BY_KEY[k] ? GAME_BY_KEY[k].title : k);
+    }
+    return 'score #' + d.slice(3);
   }
 
-  /* the PIN box - the same six digits as the Hot Takes admin */
+  /* ── the removals ─────────────────────────────────────────────────────
+     A real delete is tried first - when the table has the rule for it the
+     row is gone for good. Otherwise the marker takes the result off the
+     board, and the panel says so instead of pretending. */
+  function removalLanded(res) {
+    if (!res || !res.ok) return false;
+    return res.json().then(function (rows) {
+      return Array.isArray(rows) && rows.length > 0;
+    }).catch(function () { return false; });
+  }
+  function removeScoreRow(id) {
+    return sb(SCORES + '?id=eq.' + encodeURIComponent(id), { method: 'DELETE' })
+      .then(removalLanded)
+      .then(function (landed) { return landed ? true : writeMarker('id', id); })
+      .catch(function () { return writeMarker('id', id); });
+  }
+  function removePlayerRows(userId) {
+    return sb(SCORES + '?user_id=eq.' + encodeURIComponent(userId), { method: 'DELETE' })
+      .then(removalLanded)
+      .then(function (landed) { return landed ? true : writeMarker('user', userId); })
+      .catch(function () { return writeMarker('user', userId); });
+  }
+  function wipeGameRows(gameKey) {
+    return sb(SCORES + '?game_key=eq.' + encodeURIComponent(gameKey), { method: 'DELETE' })
+      .then(removalLanded)
+      .then(function (landed) { return landed ? true : writeMarker('game', gameKey); })
+      .catch(function () { return writeMarker('game', gameKey); });
+  }
+
+  /* ── the PIN box - the same six digits as the Hot Takes admin ───────── */
   function agAskPin(onOk) {
     var old = document.getElementById('agPinOverlay');
     if (old && old.parentNode) old.parentNode.removeChild(old);
@@ -482,7 +530,11 @@
     function close() { if (m.parentNode) m.remove(); }
     function submit() {
       var v = String(input.value || '').replace(/\D/g, '');
-      if (v === AG_ADMIN_PIN) { close(); try { onOk(); } catch (e) {} return; }
+      if (v === AG_ADMIN_PIN) {
+        close();
+        try { onOk(); } catch (e) { if (window.console) console.error('board keeper:', e); }
+        return;
+      }
       err.textContent = v ? 'WRONG PIN - TRY AGAIN' : 'ENTER THE 6-DIGIT PIN';
       input.value = '';
       input.focus();
@@ -525,44 +577,60 @@
     });
   }
 
-  /* every score on the cloud, grouped by game */
+  /* every score on the cloud, grouped by game, and what was removed */
   function renderAdminList() {
     var host = document.getElementById('agAdminList');
     if (!host) return;
-    allScores().then(function (rows) {
-      if (!host.isConnected) return;
-      if (!rows || !rows.length) {
-        host.innerHTML = '<div class="ag-board-empty">The board is empty - there is nothing to remove.</div>';
-        return;
-      }
-      var byGame = {};
-      rows.forEach(function (r) {
-        var k = r.game_key || 'other';
-        (byGame[k] = byGame[k] || []).push(r);
+    readRemoved().then(function (rm) {
+      return allScores().then(function (rows) {
+        if (!host.isConnected) return;
+        var removedHtml = rm.list.length
+          ? '<div class="ag-admin-group ag-admin-group--removed">' +
+              '<div class="ag-admin-game"><span>REMOVED RESULTS</span></div>' +
+              rm.list.map(function (m) {
+                return '<div class="ag-admin-row">' +
+                  '<span class="ag-admin-name">' + esc(removedLabel(m.d)) + '</span>' +
+                  '<button class="ag-admin-undo" data-ag-undo="' + esc(String(m.id)) + '">UNDO</button>' +
+                '</div>';
+              }).join('') +
+            '</div>'
+          : '';
+        if (!rows || !rows.length) {
+          host.innerHTML = removedHtml || '<div class="ag-board-empty">The board is empty - there is nothing to remove.</div>';
+          return;
+        }
+        var byGame = {};
+        rows.forEach(function (r) {
+          var k = r.game_key || 'other';
+          (byGame[k] = byGame[k] || []).push(r);
+        });
+        var keys = Object.keys(byGame).sort(function (a, b) { return a.localeCompare(b); });
+        host.innerHTML = removedHtml + keys.map(function (k) {
+          var g = GAME_BY_KEY[k];
+          var title = g ? g.title : k;
+          var list = byGame[k].slice().sort(function (a, b) { return (b.score || 0) - (a.score || 0); });
+          return '<div class="ag-admin-group">' +
+            '<div class="ag-admin-game"><span>' + esc(title) + '</span>' +
+              '<button class="ag-admin-wipe" data-ag-wipe="' + esc(k) + '">WIPE</button></div>' +
+            list.map(function (r) {
+              var gone = isRemoved(r, rm);
+              return '<div class="ag-admin-row' + (gone ? ' ag-admin-row--gone' : '') + '">' +
+                '<span class="ag-board-ava ag-board-ava--none">' + esc((r.user_name || '?').charAt(0).toUpperCase()) + '</span>' +
+                '<span class="ag-admin-name">' + esc(r.user_name || 'Player') + '</span>' +
+                '<span class="ag-admin-when">' + esc(whenText(r.played_at)) + '</span>' +
+                '<span class="ag-board-score">' + (r.score || 0) + '</span>' +
+                (gone
+                  ? '<span class="ag-admin-gone">REMOVED</span>'
+                  : '<button class="ag-board-del" data-ag-del="row" data-ag-id="' + esc(String(r.id)) + '" title="Remove this result" aria-label="Remove this result">✕</button>') +
+              '</div>';
+            }).join('') +
+          '</div>';
+        }).join('');
       });
-      var keys = Object.keys(byGame).sort(function (a, b) { return a.localeCompare(b); });
-      host.innerHTML = keys.map(function (k) {
-        var g = GAME_BY_KEY[k];
-        var title = g ? g.title : k;
-        var list = byGame[k].slice().sort(function (a, b) { return (b.score || 0) - (a.score || 0); });
-        return '<div class="ag-admin-group">' +
-          '<div class="ag-admin-game"><span>' + esc(title) + '</span>' +
-            '<button class="ag-admin-wipe" data-ag-wipe="' + esc(k) + '">WIPE</button></div>' +
-          list.map(function (r) {
-            return '<div class="ag-admin-row">' +
-              '<span class="ag-board-ava ag-board-ava--none">' + esc((r.user_name || '?').charAt(0).toUpperCase()) + '</span>' +
-              '<span class="ag-admin-name">' + esc(r.user_name || 'Player') + '</span>' +
-              '<span class="ag-admin-when">' + esc(whenText(r.played_at)) + '</span>' +
-              '<span class="ag-board-score">' + (r.score || 0) + '</span>' +
-              '<button class="ag-board-del" data-ag-del="row" data-ag-id="' + esc(String(r.id)) + '" title="Remove this result" aria-label="Remove this result">✕</button>' +
-            '</div>';
-          }).join('') +
-        '</div>';
-      }).join('');
     });
   }
 
-  /* the boards are re-read from the cloud after a removal */
+  /* the boards are read from the cloud again after a removal */
   function refreshBoards() {
     var overall = document.getElementById('agOverallBoard');
     if (overall) {
@@ -586,6 +654,19 @@
   document.addEventListener('click', function (e) {
     var t = e.target;
     if (!t || !t.closest || !agAdmin) return;
+    var undo = t.closest('[data-ag-undo]');
+    if (undo) {
+      e.preventDefault();
+      var mid = undo.getAttribute('data-ag-undo');
+      undo.disabled = true;
+      undoMarker(mid).then(function (ok) {
+        agSay(ok ? 'Result is back' : 'Could not undo that',
+          ok ? 'That score is on the board again.' : 'The cloud refused the request.',
+          ok ? undefined : 'warning');
+        refreshBoards();
+      });
+      return;
+    }
     var wipe = t.closest('[data-ag-wipe]');
     if (wipe) {
       e.preventDefault();
@@ -595,9 +676,9 @@
       if (!window.confirm('Remove EVERY score of "' + wname + '"? The whole board of that game goes.')) return;
       wipe.disabled = true;
       wipeGameRows(wk).then(function (ok) {
-        agSay(ok ? 'Game cleared' : 'The cloud refused that',
-          ok ? 'Every score of ' + wname + ' is gone.'
-             : 'Nothing was cleared. Paste the Supabase service key above, or sign in as the owner.',
+        agSay(ok ? 'Game cleared' : 'Could not clear that game',
+          ok ? 'Every score of ' + wname + ' is off the board.'
+             : 'Nothing changed. Try again in a moment.',
           ok ? undefined : 'warning');
         refreshBoards();
       });
@@ -608,48 +689,17 @@
       e.preventDefault();
       var kind = del.getAttribute('data-ag-del');
       var id = del.getAttribute('data-ag-id');
-      var job = kind === 'player' ? removePlayerRows(id) : removeScoreRow(id);
       del.disabled = true;
+      var job = kind === 'player' ? removePlayerRows(id) : removeScoreRow(id);
       job.then(function (ok) {
-        agSay(ok ? 'Result removed' : 'The cloud refused that',
+        agSay(ok ? 'Result removed' : 'Nothing changed',
           ok ? (kind === 'player' ? 'That player is off the board.' : 'That score is off the board.')
-             : 'Nothing was removed. Paste the Supabase service key above, or sign in as the owner.',
+             : 'The board did not change. Try again in a moment.',
           ok ? undefined : 'warning');
         refreshBoards();
       });
     }
   });
-
-  /* the key box: paste once, it stays in this browser */
-  function wireServiceKeyBox(wrap) {
-    var input = wrap.querySelector('#agServiceKey');
-    var state = wrap.querySelector('#agServiceKeyState');
-    var save = wrap.querySelector('#agServiceKeySave');
-    var clear = wrap.querySelector('#agServiceKeyClear');
-    if (!input) return;
-    input.value = serviceKey();
-    function paint() {
-      if (!state) return;
-      var k = serviceKey();
-      state.textContent = k
-        ? 'KEY SAVED - removals are allowed.'
-        : 'NO KEY - the cloud will refuse removals until the owner signs in.';
-      state.className = 'ag-admin-key-state' + (k ? ' ok' : '');
-    }
-    paint();
-    if (save) save.onclick = function () {
-      saveServiceKey(String(input.value || '').trim());
-      input.value = serviceKey();
-      paint();
-      agSay('Key saved', 'It stays in this browser only.', undefined);
-    };
-    if (clear) clear.onclick = function () {
-      saveServiceKey('');
-      input.value = '';
-      paint();
-      agSay('Key cleared', 'Removals fall back to the signed-in session.', 'warning');
-    };
-  }
 
   /* ─────────────────────────────────────────── the hub */
   /* the games are a page of the site - the same place as the quest */
@@ -714,15 +764,6 @@
         '<section class="ag-admin">' +
           '<div class="ag-section-title">BOARD KEEPER <span>admin - remove any result</span></div>' +
           '<div class="ag-admin-note">Every score on the cloud. The cross removes one result, WIPE empties a whole game.</div>' +
-          '<div class="ag-admin-key">' +
-            '<div class="ag-admin-key-note">The cloud only lets a player remove their own score. To remove anybody\'s result, paste the Supabase service key here - it stays in this browser and is never part of the site. Without it the owner\'s own signed-in session is used.</div>' +
-            '<div class="ag-admin-key-row">' +
-              '<input class="ag-admin-key-input" id="agServiceKey" type="password" placeholder="supabase service key (optional)" autocomplete="off">' +
-              '<button class="ag-admin-key-btn" id="agServiceKeySave">SAVE</button>' +
-              '<button class="ag-admin-key-btn ag-admin-key-btn--ghost" id="agServiceKeyClear">CLEAR</button>' +
-            '</div>' +
-            '<div class="ag-admin-key-state" id="agServiceKeyState"></div>' +
-          '</div>' +
           '<div class="ag-admin-list" id="agAdminList"><div class="ag-board-empty">Loading…</div></div>' +
         '</section>' : '');
     host.appendChild(wrap);
@@ -743,7 +784,6 @@
     wireAgAdminUnlock(wrap.querySelector('.ag-head-title'));
     var badge = wrap.querySelector('#agAdminBadge');
     if (badge) badge.onclick = function () { setAgAdmin(false); };
-    wireServiceKeyBox(wrap);
     if (agAdmin) renderAdminList();
     overallBoard().then(function (rows) {
       var host = wrap.querySelector('#agOverallBoard');

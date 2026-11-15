@@ -1,21 +1,27 @@
 -- ═══════════════════════════════════════════════════════════════════════
---  LEADERBOARD ADMIN - letting the owner remove a result
---  Run this once in Supabase -> SQL Editor -> New query -> Run.
+--  LEADERBOARD ADMIN - optional extra
+--  (the board keeper already works without any of this)
 -- ═══════════════════════════════════════════════════════════════════════
 --
---  WHY THIS IS NEEDED
---  The games keep their boards in the table `public.game_scores`. The table
---  has rules (RLS) that only let a signed-in player ADD their own score -
---  there is no rule for removing anything, so the cloud answers "nothing
---  happened" even when the panel asked it to delete a row.
+--  HOW THE BOARD KEEPER REMOVES A RESULT TODAY
+--  Open the games page, tap "ANIME WEB GAMES" three times, type the admin
+--  PIN (112233) and every score grows a cross. Pressing it takes the
+--  result off every leaderboard of the site, right away - no key, no
+--  database work. The panel writes a small marker in the admin log table
+--  (commit_log) and the boards leave the marked results out. UNDO in the
+--  board keeper panel puts a result back.
 --
---  Two ways to give the owner that power. Pick ONE.
+--  The result itself stays in the games table (game_scores) because that
+--  table has no rule that lets anybody delete a row. If you want the row
+--  gone for good, run the statement below once in
+--  Supabase -> SQL Editor -> New query -> Run.
 --
 -- ───────────────────────────────────────────────────────────────────────
---  OPTION 1 - the owner alone may remove a result (the safe one)
+--  OPTION - let the owner delete a row for real
 --  Put your own login email (the one you sign in with) where it says
---  YOUR_EMAIL below, run it, and the board keeper in the games page works
---  as soon as you are signed in. Nobody else can remove a score.
+--  YOUR_EMAIL below. After that the board keeper deletes the row in the
+--  database instead of only marking it, and no other player can remove
+--  anything.
 -- ───────────────────────────────────────────────────────────────────────
 --
 -- DROP POLICY IF EXISTS "owner removes game scores" ON public.game_scores;
@@ -24,22 +30,7 @@
 --   USING (lower(auth.jwt() ->> 'email') = lower('YOUR_EMAIL'));
 --
 -- ───────────────────────────────────────────────────────────────────────
---  OPTION 2 - no rule at all: the panel uses a service key
---  Leave the rules as they are and paste the Supabase service key into the
---  board keeper (Games -> Anime Web Games -> tap the heading three times ->
---  type the PIN -> the key box). The key stays in that browser only, it is
---  never part of the site, and a service key skips these rules.
---  You find it here: Supabase -> Project Settings -> API -> service_role.
---
---  (service keys are secret: never paste one into a file that goes to
---   GitHub, and never send it to anybody.)
---
--- ───────────────────────────────────────────────────────────────────────
 --  CHECKING THAT IT WORKS
---  Open the games page, tap "ANIME WEB GAMES" three times, type the admin
---  PIN, and press the cross on any score. If the row disappears, it works.
---  If the panel says "The cloud refused that", the rule did not match - the
---  email in the policy has to be the exact one you sign in with.
+--  The board keeper notices on its own: when the row really goes, no
+--  marker is written and the result is simply gone.
 --
---  (A score that is already in the table from an earlier test can be
---   removed with the same panel, so nothing has to be cleaned up by hand.)
