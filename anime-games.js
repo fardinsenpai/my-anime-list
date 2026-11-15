@@ -730,6 +730,12 @@
 
   function closeGames() {
     agGameKey = '';
+    /* opening the games hides the home content (the grid, the search, the
+       counters). closing them has to put all of that back - goHome does
+       exactly that, and it is the same road the sidebar's Home takes. */
+    if (typeof goHome === 'function') {
+      try { goHome(); return; } catch (e) { if (window.console) console.error('games close:', e); }
+    }
     var page = document.getElementById('gamesHubContainer');
     if (page) page.style.display = 'none';
     try { history.pushState(null, '', 'home'); } catch (e) {}
