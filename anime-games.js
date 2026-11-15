@@ -759,7 +759,7 @@
           '<li>Pick a game - every one of them explains itself before you start.</li>' +
           '<li>Only a score that breaks into the top three is saved to the cloud.</li>' +
         '</ol>' +
-        '<div class="ag-howto-duel">⚔️ DUEL GAMES: play against the bot or invite your friends - the same board works for all of them.</div>' +
+        '<div class="ag-howto-duel"><span class="ag-duel-vs">VS</span><span class="ag-duel-text"><b>Duel games</b> \u2014 play against the bot or invite your friends. The same board works for all of them.</span></div>' +
       '</div>' +
       '<div class="ag-grid" id="agGameGrid"></div>' +
       '<section class="ag-overall">' +
@@ -862,7 +862,7 @@
     return '<div class="ag-howto">' +
       '<div class="ag-howto-title">HOW TO PLAY</div>' +
       '<ol class="ag-howto-list">' + steps.map(function (s) { return '<li>' + esc(s) + '</li>'; }).join('') + '</ol>' +
-      '<div class="ag-howto-duel">⚔️ DUEL GAMES: play against the bot or invite your friends - the same board works for all of them.</div>' +
+      '<div class="ag-howto-duel"><span class="ag-duel-vs">VS</span><span class="ag-duel-text"><b>Duel games</b> \u2014 play against the bot or invite your friends. The same board works for all of them.</span></div>' +
     '</div>';
   }
   function startScreen(api, key, title, note, btnId, onStart) {
