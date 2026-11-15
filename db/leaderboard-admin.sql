@@ -1,0 +1,45 @@
+-- ═══════════════════════════════════════════════════════════════════════
+--  LEADERBOARD ADMIN - letting the owner remove a result
+--  Run this once in Supabase -> SQL Editor -> New query -> Run.
+-- ═══════════════════════════════════════════════════════════════════════
+--
+--  WHY THIS IS NEEDED
+--  The games keep their boards in the table `public.game_scores`. The table
+--  has rules (RLS) that only let a signed-in player ADD their own score -
+--  there is no rule for removing anything, so the cloud answers "nothing
+--  happened" even when the panel asked it to delete a row.
+--
+--  Two ways to give the owner that power. Pick ONE.
+--
+-- ───────────────────────────────────────────────────────────────────────
+--  OPTION 1 - the owner alone may remove a result (the safe one)
+--  Put your own login email (the one you sign in with) where it says
+--  YOUR_EMAIL below, run it, and the board keeper in the games page works
+--  as soon as you are signed in. Nobody else can remove a score.
+-- ───────────────────────────────────────────────────────────────────────
+--
+-- DROP POLICY IF EXISTS "owner removes game scores" ON public.game_scores;
+-- CREATE POLICY "owner removes game scores" ON public.game_scores
+--   FOR DELETE
+--   USING (lower(auth.jwt() ->> 'email') = lower('YOUR_EMAIL'));
+--
+-- ───────────────────────────────────────────────────────────────────────
+--  OPTION 2 - no rule at all: the panel uses a service key
+--  Leave the rules as they are and paste the Supabase service key into the
+--  board keeper (Games -> Anime Web Games -> tap the heading three times ->
+--  type the PIN -> the key box). The key stays in that browser only, it is
+--  never part of the site, and a service key skips these rules.
+--  You find it here: Supabase -> Project Settings -> API -> service_role.
+--
+--  (service keys are secret: never paste one into a file that goes to
+--   GitHub, and never send it to anybody.)
+--
+-- ───────────────────────────────────────────────────────────────────────
+--  CHECKING THAT IT WORKS
+--  Open the games page, tap "ANIME WEB GAMES" three times, type the admin
+--  PIN, and press the cross on any score. If the row disappears, it works.
+--  If the panel says "The cloud refused that", the rule did not match - the
+--  email in the policy has to be the exact one you sign in with.
+--
+--  (A score that is already in the table from an earlier test can be
+--   removed with the same panel, so nothing has to be cleaned up by hand.)
