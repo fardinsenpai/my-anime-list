@@ -9,7 +9,7 @@ permissions:
   id-token: write
 concurrency:
   group: pages
-  cancel-in-progress: false
+  cancel-in-progress: true
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -27,6 +27,9 @@ jobs:
           sed -i "s/GROQ_KEY_1/${KEY1}/g" script.js
           sed -i "s/GROQ_KEY_2/${KEY2}/g" script.js
           sed -i "s/GROQ_KEY_3/${KEY3}/g" script.js
+      - name: Write the build stamp
+        run: |
+          echo "{\"build\":\"${GITHUB_SHA}\",\"at\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"}" > version.json
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:

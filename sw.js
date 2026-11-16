@@ -65,6 +65,15 @@ self.addEventListener('fetch', function (e) {
   try { url = new URL(req.url); } catch (err) { return; }
   if (isApi(url)) return;                    /* always live */
 
+  /* the build stamp is how the page learns a new deploy landed - it has to
+     come from the network, never from a cache */
+  if (/\/version\.json$/.test(url.pathname)) {
+    e.respondWith(fetch(req, { cache: 'no-store' }).catch(function () {
+      return new Response('{}', { headers: { 'Content-Type': 'application/json' } });
+    }));
+    return;
+  }
+
   /* images from the CDN: keep the ones we have seen */
   if (url.origin !== self.location.origin) {
     if (!/\.(png|jpe?g|webp|gif|svg|avif)$/i.test(url.pathname)) return;
@@ -90,7 +99,7 @@ self.addEventListener('fetch', function (e) {
      shell with the admin page the moment somebody opens it. */
   if (req.mode === 'navigate') {
     e.respondWith(
-      fetch(req).then(function (res) {
+      fetch(req, { cache: 'no-cache' }).then(function (res) {
         try {
           var copy = res.clone();
           caches.open(VERSION).then(function (c) { c.put(req, copy); });

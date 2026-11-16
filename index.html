@@ -2194,5 +2194,30 @@
     </div>
   </div>
 </div>
+<!-- GitHub Pages hands every file a 10 minute browser cache, so a fresh deploy
+     can sit invisible behind it. Ask for the build stamp with no cache, and if
+     this page is older than the deploy, reload once on a fresh URL. -->
+<script>
+(function () {
+  try {
+    var KEY = 'fardin_build';
+    fetch('version.json', { cache: 'no-store' }).then(function (r) {
+      return r.ok ? r.json() : null;
+    }).then(function (v) {
+      if (!v || !v.build) return;
+      var seen = '';
+      try { seen = localStorage.getItem(KEY) || ''; } catch (e) {}
+      try { localStorage.setItem(KEY, v.build); } catch (e) {}
+      if (!seen || seen === v.build) return;
+      try {
+        if (sessionStorage.getItem('fardin_build_reload') === v.build) return;
+        sessionStorage.setItem('fardin_build_reload', v.build);
+      } catch (e) {}
+      var u = location.href.replace(/[?&]b=[^&]*/g, '');
+      location.replace(u + (u.indexOf('?') > -1 ? '&' : '?') + 'b=' + encodeURIComponent(v.build));
+    }).catch(function () {});
+  } catch (e) {}
+})();
+</script>
 </body>
 </html>

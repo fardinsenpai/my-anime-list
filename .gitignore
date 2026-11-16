@@ -1,6 +1,9 @@
 # stray copy of the repo (downloaded by accident) - never commit it
 my-anime-list-main/
 
+# written by the deploy workflow - never commit it
+version.json
+
 # OS / editor noise
 Thumbs.db
 .DS_Store
