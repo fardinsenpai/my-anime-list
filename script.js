@@ -7458,30 +7458,44 @@ document.addEventListener('click', function(e) {
   }
 
   /* ── WATCH ANIME — open streaming sites ──
-     hianime.dk resolves /<title-slug> straight to the anime page (with or
-     without the trailing number), so no search page and no extra clicks.
-     type:'slug' builds that path; type:'search' uses the site's search box. */
+     hianime.dk and 9anime both resolve a title slug straight to the anime
+     page, so the button lands on the show instead of a search result.
+     type:'slug' builds that path; type:'search' uses the site's search box.
+     9anime carries no page for a handful of titles — watch-links.js lists
+     them, and those open the search box instead of a dead link. */
   var WATCH_SITES = [
     { name: 'Hianime', tag: 'SUB', type: 'slug', url: 'https://hianime.dk/', icon: 'H', color: '#6ee7ff' },
-    { name: '9anime', tag: 'SUB', type: 'search', url: 'https://9anime.or.at/?s=', icon: '9', color: '#ff8a3d' },
+    { name: '9anime', tag: 'SUB', type: 'slug', url: 'https://9anime.org.lv/anime/', suffix: '/', search: 'https://9anime.org.lv/?s=', icon: '9', color: '#ff8a3d' },
     { name: 'AniDisk', tag: 'HINDI', type: 'slug', url: 'https://anidisk.org/anime/', icon: 'AD', color: '#ffd700' },
     { name: 'AnimeWorld', tag: 'HINDI', type: 'slug', url: 'https://watchanimeworld.one/series/', icon: 'AW', color: '#7cf29b' },
     { name: 'AnimeVilla', tag: 'HINDI', type: 'slug', url: 'https://animevilla.org/anime/', suffix: '-hindi-dubbed/', icon: 'AV', color: '#ff6b9d' }
   ];
 
-  /* "Naruto Shippuden" -> "naruto-shippuden"; drops punctuation/accents. */
+  /* "Naruto Shippuden" -> "naruto-shippuden"; drops punctuation/accents.
+     Apostrophes vanish rather than become a dash: "Hell's Paradise" is
+     hells-paradise on both sites, never hell-s-paradise. */
   function watchSlug(title) {
     return String(title || '')
       .toLowerCase()
       .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
       .replace(/&/g, ' and ')
+      .replace(/['\u2018\u2019`]/g, '')
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/^-+|-+$/g, '');
   }
 
   function buildWatchUrl(site, title) {
-    if (site.type === 'slug') return site.url + watchSlug(title) + (site.suffix || '');
-    return site.url + encodeURIComponent(title.trim());
+    var clean = String(title || '').trim();
+    if (site.type !== 'slug') return site.url + encodeURIComponent(clean);
+
+    var slug = watchSlug(clean);
+    var links = window.NINEANIME_LINKS;
+    if (site.search && links && Object.prototype.hasOwnProperty.call(links, slug)) {
+      /* "" means 9anime has no page for this one; a value is its real slug */
+      if (!links[slug]) return site.search + encodeURIComponent(clean);
+      slug = links[slug];
+    }
+    return site.url + slug + (site.suffix || '');
   }
 
   function injectWatchButtons() {
