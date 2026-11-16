@@ -478,6 +478,8 @@ function showAllAwardWinners() {
   history.pushState(null, '', 'aoy');
   closeWaifus();
   hideAllSections();
+  var _awTitle = document.querySelector('.header h1');
+  if (_awTitle) _awTitle.style.display = '';
   const grid = document.getElementById('grid');
   if (grid) grid.style.display = 'grid';
   const cards = Array.from(document.querySelectorAll('.card'));
@@ -488,6 +490,7 @@ function showAllAwardWinners() {
   });
 
   const mainTitle = document.querySelector('.header h1');
+  if (mainTitle) mainTitle.style.display = '';
   if (mainTitle) {
     mainTitle.textContent = 'Crunchyroll Anime of the Year Winners';
     mainTitle.setAttribute('data-text', 'Crunchyroll Anime of the Year Winners');
@@ -568,6 +571,7 @@ function goHome() {
 
   var mainTitle = document.querySelector('.header h1');
   if (mainTitle) {
+    mainTitle.style.display = '';
     mainTitle.textContent = "Let's See What Anime I Have Watched:-";
     mainTitle.setAttribute('data-text', "Let's See What Anime I Have Watched:-");
     mainTitle.style.fontSize = '';
@@ -619,6 +623,7 @@ window.addEventListener('popstate', function () {
       hideAllSections();
       analysisContainer.style.display = 'block';
       const mainTitle = document.querySelector('.header h1');
+      if (mainTitle) mainTitle.style.display = '';
       if (mainTitle) {
         mainTitle.textContent = 'Analysis';
         mainTitle.setAttribute('data-text', 'Analysis');
@@ -674,6 +679,7 @@ window.addEventListener('popstate', function () {
       hideAllSections();
       topSecretsContainer.style.display = 'block';
       const mainTitle = document.querySelector('.header h1');
+      if (mainTitle) mainTitle.style.display = '';
       if (mainTitle) {
         mainTitle.textContent = ' Top Secrets';
         mainTitle.setAttribute('data-text', ' Top Secrets');
@@ -693,6 +699,7 @@ window.addEventListener('popstate', function () {
       hideAllSections();
       hotTakesContainer.style.display = 'block';
       const mainTitle = document.querySelector('.header h1');
+      if (mainTitle) mainTitle.style.display = '';
       if (mainTitle) {
         mainTitle.textContent = ' Hot Takes';
         mainTitle.setAttribute('data-text', ' Hot Takes');
@@ -712,6 +719,7 @@ window.addEventListener('popstate', function () {
       hideAllSections();
       animeQuestContainer.style.display = 'block';
       const mainTitle = document.querySelector('.header h1');
+      if (mainTitle) mainTitle.style.display = '';
       if (mainTitle) {
         mainTitle.innerHTML = '<span class="h1-emoji">🎮</span> Anime Quest';
         mainTitle.setAttribute('data-text', '🎮 Anime Quest');

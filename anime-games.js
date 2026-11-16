@@ -719,6 +719,10 @@
     if (typeof hideAllSections === 'function') {
       try { hideAllSections(); } catch (e) {}
     }
+    /* the big collection title belongs to the collection - the games page
+       has its own heading, and goHome brings this one back */
+    var siteTitle = document.querySelector('.header h1');
+    if (siteTitle) siteTitle.style.display = 'none';
     var page = document.getElementById('gamesHubContainer');
     if (page) page.style.display = 'block';
     var page = document.getElementById('gamesHubContainer');
@@ -920,11 +924,16 @@
     };
     return input;
   }
+  /* how long a verdict stays on screen before the next round:
+     long enough to read the answer, short enough to keep the game moving */
+  var HOLD_RIGHT = 1900;
+  var HOLD_WRONG = 3800;
+
   /* a wrong answer shows the right one and moves on */
   function wrongAnswer(api, right, nextFn) {
     api.stage.insertAdjacentHTML('beforeend',
       '<div class="ag-verdict no">Nope - it was <b>' + esc(right) + '</b></div>');
-    setTimeout(function () { nextFn(api); }, 1900);
+    setTimeout(function () { nextFn(api); }, HOLD_WRONG);
   }
   function optionsHtml(items, correct, onPick, cssClass) {
     var box = el('div', 'ag-options');
@@ -1002,7 +1011,7 @@
         api.score += Math.max(0, Math.round(api.points * 10) / 10);
         api.stage.insertAdjacentHTML('beforeend',
           '<div class="ag-verdict ok">Correct! <b>' + esc(api.answer) + '</b> - ' + api.points + ' points banked ⚡</div>');
-        setTimeout(function () { nextCardRound(api); }, 1700);
+        setTimeout(function () { nextCardRound(api); }, HOLD_RIGHT);
       } else {
         api.points = Math.max(0, api.points - 2);
         wrongAnswer(api, api.answer, nextCardRound);
@@ -1111,7 +1120,7 @@
         api.score++;
         api.stage.insertAdjacentHTML('beforeend',
           '<div class="ag-verdict ok">Correct! <b>' + esc(api.answer) + '</b> (' + esc(c.anime) + ')</div>');
-        setTimeout(function () { nextCharRound(api); }, 1400);
+        setTimeout(function () { nextCharRound(api); }, HOLD_RIGHT);
       } else {
         wrongAnswer(api, api.answer + ' (' + c.anime + ')', nextCharRound);
       }
@@ -1149,7 +1158,7 @@
       if (ok) {
         api.score++;
         api.stage.insertAdjacentHTML('beforeend', '<div class="ag-verdict ok">Correct! <b>' + esc(api.answer) + '</b></div>');
-        setTimeout(function () { nextEmojiRound(api); }, 1300);
+        setTimeout(function () { nextEmojiRound(api); }, HOLD_RIGHT);
       } else {
         wrongAnswer(api, api.answer, nextEmojiRound);
       }
@@ -1189,7 +1198,7 @@
       api.stage.insertAdjacentHTML('beforeend',
         '<div class="ag-verdict ' + (ok ? 'ok' : 'no') + '">' +
           (ok ? 'Correct!' : 'False - it ' + (api.truth ? 'is' : 'is not') + ' true.') + '</div>');
-      setTimeout(function () { nextTfRound(api); }, ok ? 1000 : 1900);
+      setTimeout(function () { nextTfRound(api); }, ok ? HOLD_RIGHT : HOLD_WRONG);
     }
     api.stage.querySelector('#agTfTrue').onclick = function () { answered(true); };
     api.stage.querySelector('#agTfFalse').onclick = function () { answered(false); };
@@ -1258,7 +1267,7 @@
             (api.guesses.length >= 6 ? 'Out of guesses - it was ' + esc(api.answer) : 'Keep going...')) +
         '</div>');
       if (win || api.guesses.length >= 6) {
-        setTimeout(function () { api.finish(win ? 1 : 0, 1); }, 1700);
+        setTimeout(function () { api.finish(win ? 1 : 0, 1); }, HOLD_WRONG);
       } else {
         setTimeout(function () { drawWordle(api); }, 900);
       }
@@ -1297,7 +1306,7 @@
       if (ok) {
         api.score++;
         api.stage.insertAdjacentHTML('beforeend', '<div class="ag-verdict ok">Correct! <b>' + esc(api.answer) + '</b></div>');
-        setTimeout(function () { nextScrambleRound(api); }, 1300);
+        setTimeout(function () { nextScrambleRound(api); }, HOLD_RIGHT);
       } else {
         wrongAnswer(api, api.answer, nextScrambleRound);
       }
@@ -1334,7 +1343,7 @@
       if (ok) {
         api.score++;
         api.stage.insertAdjacentHTML('beforeend', '<div class="ag-verdict ok">Correct! <b>' + esc(api.answer) + '</b></div>');
-        setTimeout(function () { nextInitialsRound(api); }, 1300);
+        setTimeout(function () { nextInitialsRound(api); }, HOLD_RIGHT);
       } else {
         wrongAnswer(api, api.answer, nextInitialsRound);
       }
@@ -1444,13 +1453,13 @@
         var tag = el2.querySelector('.ag-tl-year');
         if (tag) tag.textContent = y;
       });
-      setTimeout(function () { nextTimelineRound(api); }, 2200);
+      setTimeout(function () { nextTimelineRound(api); }, HOLD_RIGHT);
     };
     api.stage.querySelector('#agTimelineSkip').onclick = function () {
       api.stage.insertAdjacentHTML('beforeend',
         '<div class="ag-verdict no">The order was: ' +
           esc(api.five ? api.five.map(function (a) { return a.title + ' (' + a.year + ')'; }).join(' → ') : '') + '</div>');
-      setTimeout(function () { nextTimelineRound(api); }, 2400);
+      setTimeout(function () { nextTimelineRound(api); }, HOLD_WRONG);
     };
   }
 
@@ -1527,7 +1536,7 @@
       if (good) api.score++;
       api.stage.insertAdjacentHTML('beforeend',
         '<div class="ag-verdict ' + (good ? 'ok' : 'no') + '">' + (good ? 'PERFECT HIT!' : 'Missed the window…') + '</div>');
-      setTimeout(function () { nextFightRound(api); }, 1300);
+      setTimeout(function () { nextFightRound(api); }, good ? HOLD_RIGHT : HOLD_WRONG);
     };
   }
 
@@ -1581,14 +1590,14 @@
       api.stage.insertAdjacentHTML('beforeend',
         '<div class="ag-verdict ' + (ok ? 'ok' : 'no') + '">' +
           (ok ? 'Correct!' : 'It was <b>' + esc(strong.a.title) + '</b>') + '</div>');
-      setTimeout(function () { nextPowerRound(api); }, 1700);
+      setTimeout(function () { nextPowerRound(api); }, HOLD_RIGHT);
     }
     api.stage.querySelector('#agVsA').onclick = function () { answer(pair[0]); };
     api.stage.querySelector('#agVsB').onclick = function () { answer(pair[1]); };
     api.stage.querySelector('#agPowerSkip').onclick = function () {
       api.stage.insertAdjacentHTML('beforeend',
         '<div class="ag-verdict no">It was <b>' + esc(strong.a.title) + '</b></div>');
-      setTimeout(function () { nextPowerRound(api); }, 2000);
+      setTimeout(function () { nextPowerRound(api); }, HOLD_WRONG);
     };
   }
 
@@ -1618,7 +1627,7 @@
       if (ok) api.score++;
       api.stage.insertAdjacentHTML('beforeend',
         '<div class="ag-verdict ' + (ok ? 'ok' : 'no') + '">' + (ok ? 'Correct!' : 'It is ' + esc(right)) + '</div>');
-      setTimeout(function () { nextGenreRound(api); }, ok ? 1000 : 1800);
+      setTimeout(function () { nextGenreRound(api); }, ok ? HOLD_RIGHT : HOLD_WRONG);
     });
     api.stage.appendChild(box);
   }
