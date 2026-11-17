@@ -2106,7 +2106,8 @@ searchBox.addEventListener('input', function () {
     var eps = txt(card.querySelector('.stats-bar-eps'));
     var fill = card.querySelector('.stats-bar-fill');
     var prog = fill ? (parseFloat(fill.style.width) || 0) : 0;
-    var progTxt = prog.toFixed(2);
+    /* 68 -> "68", 68.5 -> "68.5": decimals only show when there is one */
+    var progTxt = String(Math.round(prog * 100) / 100);
     if (!title) return;
     var reading = label.indexOf('Reading') > -1;
     html += '<div class="now-card ' + (reading ? 'now-reading' : 'now-watching') + '">' +

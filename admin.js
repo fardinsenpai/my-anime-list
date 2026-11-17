@@ -86,7 +86,9 @@ function paintProgressPreview(elId, curId, totId, unit) {
     el.textContent = 'Progress is calculated automatically from current ÷ total ' + unit + '.';
     return;
   }
-  el.textContent = 'Auto progress: ' + calcProgress(c, t).toFixed(2) + '%  (' + c + ' of ' + t + ')';
+  /* 68 -> "68", 68.5 -> "68.5": decimals only show when there is one */
+  var pct = Math.round(calcProgress(c, t) * 100) / 100;
+  el.textContent = 'Auto progress: ' + pct + '%  (' + c + ' of ' + t + ')';
 }
 
 /* ── the PAT vault: paste once, it stays ─────────────────────────── */
