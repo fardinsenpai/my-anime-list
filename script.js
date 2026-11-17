@@ -5988,6 +5988,7 @@ document.addEventListener('click', function(e) {
     try { arr = JSON.parse(localStorage.getItem(LS_KEY)) || []; }
     catch(e) { arr = []; }
     if (!Array.isArray(arr)) arr = [];
+    arr = arr.filter(function (c) { return !htIsGone(c); });
     arr.sort(htOrder);
     return arr;
   }
@@ -6040,6 +6041,46 @@ document.addEventListener('click', function(e) {
     htToast('Not saved', 'The takes table is read-only right now, so that change could not be saved.', 'warning');
   }
 
+  /* ── a take that will not delete ──
+     The table only lets a device delete the rows it wrote itself, and the admin
+     has to be able to remove anyone's. When the row survives the DELETE, a
+     marker in the admin log hides it from every visitor - the same trick the
+     game boards use, so no service key and no database work is needed. */
+  var HT_REMOVED_K = 'take-removed';
+  var htRemoved = null;               /* {"22": true} once the markers are read */
+
+  function htReadRemoved() {
+    if (htRemoved) return Promise.resolve(htRemoved);
+    return fetch(SUPABASE_URL + '/rest/v1/commit_log?select=id,d&k=eq.' + HT_REMOVED_K + '&order=t.desc&limit=500', {
+      headers: { apikey: SUPABASE_KEY, Authorization: 'Bearer ' + SUPABASE_KEY }
+    }).then(function (res) { return res.ok ? res.json() : []; })
+      .catch(function () { return []; })
+      .then(function (rows) {
+        var out = {};
+        (rows || []).forEach(function (r) {
+          var m = /^id:(.+)$/.exec(String(r.d || ''));
+          if (m) out[m[1]] = true;
+        });
+        htRemoved = out;
+        return out;
+      });
+  }
+
+  function htMarkRemoved(id) {
+    return fetch(SUPABASE_URL + '/rest/v1/commit_log', {
+      method: 'POST',
+      headers: {
+        apikey: SUPABASE_KEY, Authorization: 'Bearer ' + SUPABASE_KEY,
+        'Content-Type': 'application/json', Prefer: 'return=minimal'
+      },
+      body: JSON.stringify({ t: new Date().toISOString(), k: HT_REMOVED_K, ok: true, d: 'id:' + id })
+    }).then(function (res) { return res.ok; }).catch(function () { return false; });
+  }
+
+  function htIsGone(row) {
+    return !!(row && row.id != null && htRemoved && htRemoved[String(row.id)]);
+  }
+
   // PATCH one take. Returns false when the row was not actually written - the
   // table being read-only used to fail silently while the screen still showed
   // the change, then quietly reverted 15 seconds later.
@@ -6084,7 +6125,16 @@ document.addEventListener('click', function(e) {
     supabaseFetchWithRetry('hot_takes?id=eq.' + take.id, { method: 'DELETE' }, 1)
       .then(function(r) { return r.json().catch(function() { return null; }); })
       .then(function(rows) {
-        if (Array.isArray(rows) && rows.length === 0) throw new Error('row still there');
+        /* the row really went - this device wrote it */
+        if (Array.isArray(rows) && rows.length > 0) return true;
+        /* it is somebody else's take: hide it with a marker instead */
+        return htMarkRemoved(take.id);
+      })
+      .then(function(ok) {
+        if (!ok) throw new Error('take still there');
+        if (!htRemoved) htRemoved = {};
+        htRemoved[String(take.id)] = true;
+        htToast('Deleted', 'That take is gone from the feed.', 'info');
       })
       .catch(function(err) {
         console.warn('Supabase delete error:', err);
@@ -6874,11 +6924,13 @@ document.addEventListener('click', function(e) {
   // to pull the whole table every 15 seconds for every visitor, open or not.
   function syncFromSupabase(force) {
     if (!force && (!htOpen() || document.hidden)) return Promise.resolve();
-    return supabaseFetchWithRetry('hot_takes?order=createdAt.desc&select=*', {}, 1)
+    return htReadRemoved().then(function () {
+      return supabaseFetchWithRetry('hot_takes?order=createdAt.desc&select=*', {}, 1);
+    })
       .then(function(r) { return r.json(); })
       .then(function(data) {
         if (!Array.isArray(data)) return;
-        var mapped = data.map(function(row) {
+        var mapped = data.filter(function(row) { return !htIsGone(row); }).map(function(row) {
           row._ts = row.createdAt ? new Date(row.createdAt).getTime() : 0;
           return row;
         });
