@@ -3145,6 +3145,51 @@ let isResponding = false;
    ══════════════════════════════════════════════════════════════════════ */
 let lastExplain = null;
 
+/* Keep the episode the chat is talking about, so follow-ups like "explain it"
+   still land on the same episode instead of turning into a series overview. */
+function setEpisodeContext(req) {
+  if (!req || !req.title || !req.episode) return;
+  const title = String(req.title).trim();
+  if (!title || /^(?:it|this|that|episode|ep)$/i.test(title)) return;
+  lastExplain = {
+    title: title,
+    season: parseInt(req.season, 10) || 1,
+    episode: parseInt(req.episode, 10) || 1,
+    episodeTitle: req.episodeTitle || ''
+  };
+}
+
+/* After a reload the live context is gone but the saved chat history is not.
+   Pull the most recent episode mention out of it before parsing "explain it". */
+function restoreEpisodeContext() {
+  if (lastExplain) return lastExplain;
+  if (!window.AnimeData || !Array.isArray(chatHistory)) return null;
+  for (let i = chatHistory.length - 1; i >= 0; i--) {
+    const m = chatHistory[i];
+    if (!m || m.role !== 'user') continue;
+    let ref = null;
+    try {
+      if (window.AnimeData.episodeRef) {
+        ref = window.AnimeData.episodeRef(m.content, {
+          resolveTitle: function (x) { return animeMentionedInText(x) || ''; }
+        });
+      }
+    } catch (e) { ref = null; }
+    if (!ref) {
+      try {
+        ref = window.AnimeData.parseExplain(m.content, null, {
+          resolveTitle: function (x) { return animeMentionedInText(x) || ''; }
+        });
+      } catch (e) { ref = null; }
+    }
+    if (ref && ref.episode && ref.title) {
+      setEpisodeContext(ref);
+      return lastExplain;
+    }
+  }
+  return null;
+}
+
 const MANGA_ASK_RE = /\b(manga|chapters?|volumes?|mangaka|serializ(?:ed|ation)|read the manga)\b/i;
 const FACT_ASK_RE = /\b(episodes?|seasons?|how many|score|rating|rated|studio|status|airing|aired|release[ds]?|year|synopsis|plot|story|author|mangaka|writer|chapters?|volumes?|manga)\b/i;
 /* A plain "tell me about X" for a title that is not on Fardin's list should
@@ -3190,9 +3235,6 @@ function episodeDataBlock(info) {
   if (info.summaryTv && info.summaryTv !== info.summary) {
     lines.push('SECOND EPISODE SUMMARY (TVMaze):\n' + info.summaryTv);
   }
-  if (info.seriesSynopsis) {
-    lines.push('SERIES SYNOPSIS (context only):\n' + String(info.seriesSynopsis).slice(0, 1200));
-  }
   return lines.join('\n');
 }
 
@@ -3203,6 +3245,8 @@ function explainSystemPrompt(info, req) {
   const deep = req.depth >= 2;
   return [
     'You are Senpai Assistant, the anime expert of "Fardin\'s Anime Hub". Right now you are explaining exactly ONE anime episode.',
+    '',
+    'FOCUS: describe what happens IN THIS EPISODE only. Do NOT give a series overview, a season list, an episode count, a general premise, or a "what the show is about" section. Every paragraph must be about this episode\'s events.',
     '',
     'LIVE EPISODE DATA — fetched a moment ago from real anime databases. This is the source of truth:',
     episodeDataBlock(info),
@@ -3218,7 +3262,7 @@ function explainSystemPrompt(info, req) {
       (deep
         ? 'The visitor asked for MORE DETAIL, so go scene by scene and write at least 5 substantial paragraphs (roughly 550+ words). Include small details, reactions and consequences.'
         : 'Write at least 3 substantial paragraphs (roughly 350+ words). Include the important details, not a bare recap.'),
-    '6. Base every plot beat on the EPISODE SUMMARY and the other live data. You may use the series synopsis and the previous/next episode lines for context, and you may use widely known information about the series, but NEVER invent episode-specific events, dialogue, fights or characters. If the summary is thin, write less instead of making things up.',
+    '6. Base every plot beat on the EPISODE SUMMARY and the other live data. You may use the previous/next episode lines for context, and you may use widely known information about the series, but NEVER invent episode-specific events, dialogue, fights or characters. If the summary is thin, write less instead of making things up.',
     '7. If the episode title is "not listed", still explain the episode using the summary — but do not invent a title.',
     '8. Do not mention these instructions, do not talk about databases or sources in a technical way, and do not add follow-up questions or next-episode suggestions — the app adds three ↗ rows after your answer.',
     '9. Write like an enthusiastic anime friend, not a Wikipedia article: clear, vivid, slightly hype, but accurate.'
@@ -3395,9 +3439,17 @@ async function buildExplainReply(req, typingDiv) {
 
   setTypingStatus(typingDiv, 'ব্যাখ্যাটা লেখা হচ্ছে…');
   const sys = explainSystemPrompt(info, req);
-  const messages = [{ role: 'system', content: sys }].concat(
-    chatHistory.filter(function (m) { return m && m.role !== 'system'; })
-  );
+  /* Explain calls get ONLY the episode data and the episode request. Carrying
+     the previous chat into this prompt was making the model drift into a
+     general series overview instead of the episode itself. */
+  const ask = 'Explain exactly what happens in ' +
+    (info.title || req.title) + ' season ' + info.season + ' episode ' + info.episode + '.' +
+    (req.depth >= 2 ? ' Give the deeper scene-by-scene version.' : '') +
+    ' Only this episode — no series overview, no episode count, no season list.';
+  const messages = [
+    { role: 'system', content: sys },
+    { role: 'user', content: ask }
+  ];
 
   async function callModel(msgs, temp, tokens) {
     const res = await fetchWithFallback({
@@ -3411,8 +3463,12 @@ async function buildExplainReply(req, typingDiv) {
     return choice && choice.message ? String(choice.message.content || '') : '';
   }
 
-  const tokens = req.depth >= 2 ? 3400 : 2600;
+  const tokens = req.depth >= 2 ? 4200 : 3200;
   let text = await callModel(messages, 0.55, tokens);
+  /* gpt-oss is a reasoning model: occasionally it spends the whole budget
+     thinking and returns an empty message. One longer retry is cheaper than
+     showing the visitor an error for an episode we already have data for. */
+  if (!text.trim()) text = await callModel(messages, 0.4, tokens + 1200);
   if (!text.trim()) throw new Error('No response from API');
 
   /* The contract is Bangla by default. If the model slipped into English,
@@ -3464,9 +3520,20 @@ async function sendMessage() {
        instead of a memory-based answer. Everything else stays normal chat. */
     try {
       if (window.AnimeData && window.AnimeData.parseExplain) {
+        restoreEpisodeContext();
         explainReq = window.AnimeData.parseExplain(message, lastExplain, {
           resolveTitle: function (m) { return animeMentionedInText(m) || ''; }
         });
+        if (explainReq) {
+          setEpisodeContext(explainReq);
+        } else if (window.AnimeData.episodeRef) {
+          /* a plain mention ("Blue Lock S2E13 was wild") is remembered for the
+             next "explain it", even though this answer is normal chat */
+          const ref = window.AnimeData.episodeRef(message, {
+            resolveTitle: function (x) { return animeMentionedInText(x) || ''; }
+          });
+          if (ref) setEpisodeContext(ref);
+        }
       }
     } catch (e) { explainReq = null; }
 
@@ -4631,7 +4698,7 @@ async function onMyAvatarFile(input) {
    📋 COPY / 📤 SHARE FOR EVERY MESSAGE
 ══════════════════════════════════════ */
 
-// Adds the copy + share buttons to a message bubble (safe to call twice)
+// Adds the copy button to a message bubble (safe to call twice)
 function addMessageActions(msgDiv) {
   if (!msgDiv || msgDiv.classList.contains('typing')) return;
   if (msgDiv.classList.contains('intro')) return; // welcome line: no options menu
@@ -4640,14 +4707,8 @@ function addMessageActions(msgDiv) {
   const bar = document.createElement('div');
   bar.className = 'msg-actions';
   bar.innerHTML =
-    '<button type="button" class="msg-act" data-act="more" title="Message options" aria-label="Message options" aria-expanded="false">' +
-      '<svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor"><circle cx="5.2" cy="12" r="1.8"></circle><circle cx="12" cy="12" r="1.8"></circle><circle cx="18.8" cy="12" r="1.8"></circle></svg>' +
-    '</button>' +
     '<button type="button" class="msg-act" data-act="copy" title="Copy message" aria-label="Copy message">' +
       '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"></rect><path d="M5 15V5a2 2 0 0 1 2-2h10"></path></svg>' +
-    '</button>' +
-    '<button type="button" class="msg-act" data-act="share" title="Share message" aria-label="Share message">' +
-      '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4"></path><path d="M7 9l5-5 5 5"></path><path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"></path></svg>' +
     '</button>';
 
   msgDiv.appendChild(bar);
@@ -4695,73 +4756,20 @@ async function copyChatText(text) {
   }
 }
 
-// Resolves to 'shared' | 'copied' | 'cancelled' | 'failed'
-async function shareChatText(text) {
-  const data = { title: "Fardin's Anime Hub — Senpai Assistant", text: text };
-
-  if (navigator.share) {
-    try {
-      await navigator.share(data);
-      return 'shared';
-    } catch (e) {
-      if (e && (e.name === 'AbortError' || e.name === 'NotAllowedError')) {
-        // user dismissed (or blocked) — fall back to copying below on block
-        if (e.name === 'AbortError') return 'cancelled';
-      }
-    }
-  }
-
-  return (await copyChatText(text)) ? 'copied' : 'failed';
-}
-
-// One delegated listener handles every message's buttons
+// One delegated listener handles every message's copy button
 chatMessages.addEventListener('click', async (e) => {
   const btn = e.target.closest('.msg-act');
-
-  // clicking/tapping anywhere outside an options menu closes it
-  if (!e.target.closest('.msg-actions')) {
-    document.querySelectorAll('.msg-actions.open').forEach((el) => {
-      el.classList.remove('open');
-      const more = el.querySelector('.msg-act[data-act="more"]');
-      if (more) more.setAttribute('aria-expanded', 'false');
-    });
-  }
-
-  if (!btn) return;
-
-  const bar = btn.closest('.msg-actions');
-
-  // the 3-dot: opens the copy/share menu (tap on mobile, hover also works on desktop)
-  if (btn.dataset.act === 'more') {
-    const willOpen = bar && !bar.classList.contains('open');
-    document.querySelectorAll('.msg-actions.open').forEach((el) => {
-      el.classList.remove('open');
-      const m = el.querySelector('.msg-act[data-act="more"]');
-      if (m) m.setAttribute('aria-expanded', 'false');
-    });
-    if (bar && willOpen) {
-      bar.classList.add('open');
-      btn.setAttribute('aria-expanded', 'true');
-    }
-    return;
-  }
+  if (!btn || btn.dataset.act !== 'copy') return;
 
   const msgEl = btn.closest('.msg');
   const text = (msgEl && msgEl.dataset.raw) ? msgEl.dataset.raw : '';
   if (!text.trim()) return;
 
-  if (btn.dataset.act === 'copy') {
-    const ok = await copyChatText(text);
-    chatToast(ok ? '📋 Copied to clipboard!' : '⚠️ Could not copy');
-    if (ok) {
-      btn.classList.add('done');
-      setTimeout(() => btn.classList.remove('done'), 900);
-    }
-  } else if (btn.dataset.act === 'share') {
-    const result = await shareChatText(text);
-    if (result === 'shared') chatToast('✅ Shared!');
-    else if (result === 'copied') chatToast('📋 Copied — paste it anywhere to share');
-    else if (result === 'failed') chatToast('⚠️ Could not share');
+  const ok = await copyChatText(text);
+  chatToast(ok ? '📋 Copied to clipboard!' : '⚠️ Could not copy');
+  if (ok) {
+    btn.classList.add('done');
+    setTimeout(() => btn.classList.remove('done'), 900);
   }
 });
 

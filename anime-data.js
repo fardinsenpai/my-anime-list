@@ -1021,6 +1021,10 @@
   /* ─────────────────────────────────────────────── intent parsing */
   var EXPLAIN_RE = /\b(explain|explained|explanation|summar(?:y|ise|ize|ised|ized)|recap|describe|breakdown|what happens|what happened|what will happen|tell me (?:what happens|about)|details?)\b/i;
   var BANGLA_EXPLAIN_RE = /ব্যাখ্যা|বুঝিয়ে|বুঝাই|কি হয়|কী হয়|কী ঘটে|কি ঘটে|পর্ব|এপিসোড|বিস্তারিত/;
+  /* "explain it", "explain this episode", "explain again" — a follow-up with
+     no title or episode number of its own. It must reuse the episode the
+     previous answer was about instead of falling back to a series overview. */
+  var EPISODE_FOLLOWUP_RE = /\bexplain\s+(?:it|this|that|this one|that one|(?:the\s+)?(?:same\s+)?(?:episode|ep))\b|\b(?:this|that|the same)\s+(?:episode|ep)\b|\bexplain\s+again\b|এটা|এটি|এই\s*(?:পর্ব|এপ)|ওই\s*(?:পর্ব|এপ)|সেই\s*(?:পর্ব|এপ)/i;
 
   function stripNoise(text) {
     var t = asciiDigits(text)
@@ -1067,6 +1071,12 @@
     m = text.match(/\bs\s*(\d{1,2})\s*[x\-–]?\s*e\s*(\d{1,4})\b/i);
     if (m) { season = parseInt(m[1], 10); ep = parseInt(m[2], 10); }
 
+    /* 2x13 / 02x013 */
+    if (!ep) {
+      m = text.match(/\b(\d{1,2})\s*x\s*(\d{1,4})\b/i);
+      if (m) { season = parseInt(m[1], 10); ep = parseInt(m[2], 10); }
+    }
+
     /* season 1 episode 13 / season 1, ep 13 */
     if (!ep) {
       m = text.match(/\b(?:season|part)\s*(\d{1,2})[^\d]{0,16}(?:episode|ep|e)\s*(\d{1,4})\b/i);
@@ -1102,7 +1112,7 @@
       } else if (wantsPrev) {
         ep = Math.max(1, (parseInt(last.episode, 10) || 1) - 1);
         season = last.season || 1;
-      } else if (depth >= 2) {
+      } else if (depth >= 2 || EPISODE_FOLLOWUP_RE.test(text)) {
         ep = parseInt(last.episode, 10) || 1;
         season = last.season || 1;
       } else {
@@ -1120,7 +1130,7 @@
     if (title && last && norm(title) === norm(last.title)) {
       title = last.title;
     }
-    var followUp = wantsNext || wantsPrev || depth >= 2;
+    var followUp = wantsNext || wantsPrev || depth >= 2 || EPISODE_FOLLOWUP_RE.test(text);
     if (!title || !meaningfulTitle(title)) {
       var cleaned = stripNoise(text);
       if (followUp && last) title = last.title;
@@ -1148,11 +1158,25 @@
     };
   }
 
+  /* Remember an episode mentioned in a normal sentence ("Blue Lock season 2
+     episode 13 was crazy") so a later "explain it" has something to point
+     at. Returns null when the message has no concrete episode number. */
+  function episodeRef(message, opts) {
+    var text = asciiDigits(String(message || ''));
+    if (!/\b(?:episode|ep)\s*\d{1,4}\b|\bs\s*\d{1,2}\s*[x\-–]?\s*e\s*\d{1,4}\b|\b\d{1,2}\s*x\s*\d{1,4}\b/i.test(text)) {
+      return null;
+    }
+    var req = parseExplain('Explain ' + text, null, opts || {});
+    if (!req || !req.episode || !req.title) return null;
+    return { title: req.title, season: req.season || 1, episode: req.episode };
+  }
+
   window.AnimeData = {
     episode: episode,
     anime: anime,
     manga: manga,
     parseExplain: parseExplain,
+    episodeRef: episodeRef,
     episodeHeading: episodeHeading,
     titleOf: titleOf,
     normalise: norm,
