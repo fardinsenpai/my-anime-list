@@ -2949,10 +2949,17 @@ function getSystemPrompt(visitorMsg, liveBlock) {
       + (justIn ? ' RIGHT NOW they have just signed in, so your very next reply MUST greet them by their name "' + who + '" in its first sentence.' : '')
     : '';
 
-  // The list is the single biggest block of this prompt, so it is only carried when the
-  // message could actually involve anime.
-  const withList = arguments.length > 0 ? needsAnimeList(visitorMsg) : true;
-  const listBlock = withList
+  // The roster (~4.8k tokens) is only worth sending when the visitor actually
+  // needs it to choose something (recommendations, comparisons, top lists).
+  const needsRoster = arguments.length > 0 ? needsAnimeList(visitorMsg) : false;
+  const m = String(visitorMsg || '');
+  const hasAnimeContext = !!m && (
+    needsRoster ||
+    /\b(?:anime|manga|episode|episodes|season|seasons|title|score|rating|studio|dub|sub|story|plot|genre|genres|synopsis|watched|watch|recommend|suggest|best|top|worst|list|roster|collection|how many|what is|who is|tell me|describe|info|information|explain|summary|chapter|volumes?|aired|format|status)\b/i.test(m) ||
+    (typeof animeMentionedInText === 'function' && animeMentionedInText(m))
+  );
+
+  const listBlock = needsRoster
     ? `FARDIN'S LIST — the anime Fardin has watched (one per line). These are the titles you recommend from by default:
 Action, Adventure and Comedy are common in this list, so they are not repeated below; assume a title may have them.
 Codes: SoL=Slice of Life, HS=High School, DH=Dark / Horror, Psy=Psychological, Hist=Historical — ALWAYS write genres out in full when you talk to a visitor, never the codes.
@@ -2969,7 +2976,7 @@ THE RULES FOR TITLES:
      prompt stays cheap. */
   let filesBlock = '';
   try {
-    if (window.SiteKnowledge && window.SiteKnowledge.data() && needsAnimeList(visitorMsg || 'anime')) {
+    if (window.SiteKnowledge && window.SiteKnowledge.data() && hasAnimeContext) {
       filesBlock = window.SiteKnowledge.block(visitorMsg || '', { maxChars: 1200 });
     }
   } catch (e) {}
