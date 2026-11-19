@@ -3452,12 +3452,22 @@ async function buildExplainReply(req, typingDiv) {
   ];
 
   async function callModel(msgs, temp, tokens) {
-    const res = await fetchWithFallback({
-      messages: msgs,
-      temperature: temp,
-      max_tokens: tokens,
-      stream: false
-    });
+    /* Tell the global Groq interceptor this is an episode call. The
+       interceptor normally rewrites the system prompt for normal chat and
+       answers quick chips locally — both would destroy the explain prompt. */
+    const prevExplainCall = window.__FARDIN_EXPLAIN_CALL;
+    window.__FARDIN_EXPLAIN_CALL = true;
+    let res;
+    try {
+      res = await fetchWithFallback({
+        messages: msgs,
+        temperature: temp,
+        max_tokens: tokens,
+        stream: false
+      });
+    } finally {
+      window.__FARDIN_EXPLAIN_CALL = prevExplainCall;
+    }
     const data = await res.json();
     const choice = data && data.choices && data.choices[0];
     return choice && choice.message ? String(choice.message.content || '') : '';
@@ -4831,18 +4841,6 @@ document.addEventListener('click', (e) => {
     ? (inPath(chatBox) || inPath(chatBubble))
     : (target instanceof Element && (chatBox.contains(target) || chatBubble.contains(target)));
 
-  // any click outside an options menu dismisses it
-  const insideMenu = path.length
-    ? path.some((el) => el instanceof Element && el.classList && el.classList.contains('msg-actions'))
-    : (target instanceof Element && !!target.closest('.msg-actions'));
-  if (!insideMenu) {
-    document.querySelectorAll('.msg-actions.open').forEach((el) => {
-      el.classList.remove('open');
-      const more = el.querySelector('.msg-act[data-act="more"]');
-      if (more) more.setAttribute('aria-expanded', 'false');
-    });
-  }
-
   if (!insideChat && chatBox.classList.contains('open')) setChatOpen(false);
 });
 
@@ -5396,6 +5394,16 @@ window.fetch = function(...args) {
 
   // Intercept Groq API call
   if (url.includes('groq.com') && options?.body) {
+    let isExplainCall = !!window.__FARDIN_EXPLAIN_CALL;
+    if (!isExplainCall) {
+      try {
+        const probe = JSON.parse(options.body);
+        const sys = probe && probe.messages && probe.messages[0] && probe.messages[0].content;
+        isExplainCall = /explaining exactly ONE anime episode/i.test(String(sys || ''));
+      } catch (e) {}
+    }
+    if (isExplainCall) return originalFetch.apply(this, args);
+
     console.log('Interceptor fired');
     try {
       const body = JSON.parse(options.body);
