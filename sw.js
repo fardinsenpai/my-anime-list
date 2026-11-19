@@ -5,7 +5,7 @@
    the first time they are seen. API calls (the AI chat, Supabase, AniList)
    always go to the network - when there is none, the site still runs.
    ══════════════════════════════════════════════════════════════════════ */
-var VERSION = 'fardin-hub-v9';
+var VERSION = 'fardin-hub-v10';
 var IMG_VERSION = 'fardin-img-v1';
 var CORE = [
   './',
@@ -27,6 +27,7 @@ var CORE = [
   './guide-mascot.js',
   './site-knowledge.js',
   './site-knowledge.json',
+  './anime-data.js',
   './watch-links.js',
   './anime-ratings.json',
   './anime-dubs.json',
@@ -56,7 +57,7 @@ self.addEventListener('activate', function (e) {
 });
 
 function isApi(url) {
-  return /supabase\.co|anilist\.co|groq\.com|openai|jikan|r\.jina\.ai|mxplayer|museindia/.test(url.hostname);
+  return /supabase\.co|anilist\.co|groq\.com|openai|jikan|kitsu\.io|tvmaze\.com|wikipedia\.org|r\.jina\.ai|mxplayer|museindia/.test(url.hostname);
 }
 
 self.addEventListener('fetch', function (e) {

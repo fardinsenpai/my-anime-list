@@ -1,8 +1,9 @@
 /* ══════════════════════════════════════════════════════════════════════
    EMOJI SETS  +  TRUE / FALSE FACTS
    Emoji sets: three or four pictures that stand in for a series.
-   True/False: 500+ statements about the anime in the list - half of them
-   are lies, so the player has to know the show.
+   True/False: 500+ statements about the anime in the list. The pool carries
+   both truths and deliberate lies; the game builds every round with exactly
+   five TRUE and five FALSE statements (balancedFactRound in anime-games.js).
    ══════════════════════════════════════════════════════════════════════ */
 window.EMOJI_SETS = {
   'My Hero Academia': ['🦸', '💥', '🏫'],
@@ -670,5 +671,78 @@ window.TF_FACTS = [
   ['Megumi Tadokoro is the small chef with huge knives.', true],
   ['The story is based on a manga with a lot of food porn.', true],
   ['Soma has to cook blindfolded at some point.', true],
-  ['Every arc is a new cuisine and a new challenge.', true]
+  ['Every arc is a new cuisine and a new challenge.', true],
+
+  /* ── extra FALSE statements ─────────────────────────────────────────
+     The original file was almost all TRUE claims, which made a ten-round
+     game feel rigged. These are deliberate lies (each one contradicts a
+     well-known fact), so balancedFactRound() can build a true 50/50 round. */
+  ['Izuku Midoriya was born with a quirk.', false],
+  ['Katsuki Bakugo\'s hero name is Ground Zero.', false],
+  ['Shoto Todoroki can only use his ice side.', false],
+  ['Naruto Uzumaki is the son of the Third Hokage.', false],
+  ['Sasuke Uchiha is a member of the Hyuga clan.', false],
+  ['Kakashi Hatake\'s Sharingan is in his right eye.', false],
+  ['Sakura Haruno is a member of Team 8.', false],
+  ['Monkey D. Luffy\'s Devil Fruit is the Mera Mera no Mi.', false],
+  ['Roronoa Zoro fights with a single sword.', false],
+  ['Nami is the doctor of the Straw Hat Pirates.', false],
+  ['Zenitsu Agatsuma uses Water Breathing.', false],
+  ['Muzan Kibutsuji is the leader of the Demon Slayer Corps.', false],
+  ['Giyu Tomioka is the Wind Hashira.', false],
+  ['Nobara Kugisaki fights with a katana.', false],
+  ['Maki Zenin is a cursed spirit.', false],
+  ['Eren Yeager\'s Titan is the Colossal Titan.', false],
+  ['Levi Ackerman is the commander of the Survey Corps.', false],
+  ['Armin Arlert inherits the Beast Titan.', false],
+  ['Ryuk is a Shinigami who hates apples.', false],
+  ['Light Yagami is the detective known as L from the very start.', false],
+  ['Roy Mustang uses water alchemy.', false],
+  ['The Philosopher\'s Stone is made from gold.', false],
+  ['Kurapika is a member of the Phantom Troupe.', false],
+  ['Saitama is an S-Class hero.', false],
+  ['Mumen Rider is an S-Class hero.', false],
+  ['Denji\'s dream is to become the Prime Minister.', false],
+  ['Cha Hae-In is a mage-type hunter.', false],
+  ['Meguru Bachira is a goalkeeper.', false],
+  ['Rin Itoshi is the older brother of Sae Itoshi.', false],
+  ['Blue Lock is a training camp for defenders only.', false],
+  ['Anya Forger is Loid\'s biological daughter.', false],
+  ['Bond is the Forger family\'s cat.', false],
+  ['Tobio Kageyama is a wing spiker.', false],
+  ['Karasuno\'s team colours are blue and white.', false],
+  ['Asuna is the creator of Sword Art Online.', false],
+  ['Thorfinn\'s father is a blacksmith.', false],
+  ['Reigen Arataka is a real psychic.', false],
+  ['Fern is a warrior.', false],
+  ['Kafka Hibino is the captain of the Third Division.', false],
+  ['Furin High is a school for musicians.', false],
+  ['Ayanokoji is the class representative of Class D.', false],
+  ['Shinra Kusakabe\'s ability is ice.', false],
+  ['Yuno is Asta\'s biological brother.', false],
+  ['Asta\'s grimoire is a four-leaf clover.', false],
+  ['Rudeus Greyrat is a swordsman with no magic.', false],
+  ['Senku Ishigami is the strongest fighter in the village.', false],
+  ['Miyamura is a loud, popular extrovert at school.', false],
+  ['Kaguya Shinomiya is the student council president.', false],
+  ['Nazarick is a human kingdom.', false],
+  ['Wang Ling is a demon king.', false],
+  ['Touka Kirishima is a human.', false],
+  ['Lucy Heartfilia is a Dragon Slayer.', false],
+  ['Rukia Kuchiki is a Quincy.', false],
+  ['Emilia is a human.', false],
+  ['Puck is a dog.', false],
+  ['Lelouch pilots the Lancelot.', false],
+  ['Suzaku Kururugi is the prince of Britannia.', false],
+  ['Jonathan Joestar\'s Stand is The World.', false],
+  ['Your Name is set only in Tokyo.', false],
+  ['Reg is an ordinary human boy.', false],
+  ['Devilman Crybaby is a comedy about school life.', false],
+  ['Yuri!!! on Ice is about ice hockey.', false],
+  ['Oshi no Ko is about a sports team.', false],
+  ['Baki Hanma is a chef.', false],
+  ['Koro-sensei is an ordinary human teacher.', false],
+  ['Witch Hat Atelier follows a boy who wants to become a knight.', false],
+  ['Food Wars is a basketball series.', false],
+  ['Erina Nakiri is the main protagonist of Food Wars.', false]
 ];

@@ -41,6 +41,35 @@
   }
   function pick(a) { return a[Math.floor(Math.random() * a.length)]; }
 
+  /* True or False is only a game when the truth is split down the middle.
+     The facts file is mostly true statements, so shuffling it and taking ten
+     used to hand the player a run of nearly all TRUE claims. This builder
+     draws half TRUE and half FALSE from two separate pools and only then
+     shuffles the round. */
+  function balancedFactRound(all, n) {
+    n = n || 10;
+    var truths = [], lies = [], seen = {};
+    (all || []).forEach(function (f) {
+      if (!f || !f[0]) return;
+      var key = String(f[0]).trim().toLowerCase();
+      if (seen[key]) return;
+      seen[key] = 1;
+      (f[1] ? truths : lies).push(f);
+    });
+    var wantFalse = Math.ceil(n / 2);
+    var out = lies.length
+      ? shuffle(lies.slice()).slice(0, Math.min(wantFalse, lies.length))
+      : [];
+    var wantTrue = n - out.length;
+    out = out.concat(shuffle(truths.slice()).slice(0, Math.min(wantTrue, truths.length)));
+    /* a tiny pool could still leave the round short — top it up from either side */
+    if (out.length < n) {
+      var rest = shuffle(truths.concat(lies).filter(function (f) { return out.indexOf(f) === -1; }));
+      out = out.concat(rest.slice(0, n - out.length));
+    }
+    return shuffle(out);
+  }
+
   /* ── answers are judged kindly: spaces, punctuation and small spelling
         mistakes never lose a point ───────────────────────────────────── */
   function norm(s) {
@@ -881,8 +910,11 @@
     if (b) b.onclick = onStart;
   }
   /* the answer box: no auto focus, tap or click to open the keyboard,
-     empty submits are ignored, and there is an optional skip button */
-  function answerRow(api, id, placeholder, onSubmit, withSkip) {
+     empty submits are ignored, and there is an optional skip button.
+     opts.search === false keeps the anime suggestion list away (Guess the
+     Character asks for a person's name, not an anime title). */
+  function answerRow(api, id, placeholder, onSubmit, withSkip, opts) {
+    opts = opts || {};
     api.stage.insertAdjacentHTML('beforeend',
       '<div class="ag-answer-row">' +
         '<input class="ag-answer-input" id="' + id + '" type="text" placeholder="' + esc(placeholder) + '" autocomplete="off" spellcheck="false" enterkeyhint="go">' +
@@ -892,11 +924,9 @@
     var input = api.stage.querySelector('#' + id);
     var go = api.stage.querySelector('#' + id + 'Go');
     var skip = withSkip ? api.stage.querySelector('#' + id + 'Skip') : null;
-    /* the anime search suggests the titles of the list - a pick fills the box
-       and submits it right away */
-    if (window.AnimeSearch && input) {
-      input.setAttribute('data-search-submit', id + 'Go');
-      input.setAttribute('data-search-clear', '1');
+    /* the anime search suggests the titles of the list. A pick fills the box
+       and the player presses SUBMIT (it must never empty the box behind them). */
+    if (window.AnimeSearch && input && opts.search !== false) {
       window.AnimeSearch.attach(input, {});
     }
     ['pointerdown', 'touchstart', 'click'].forEach(function (ev) {
@@ -1124,7 +1154,7 @@
       } else {
         wrongAnswer(api, api.answer + ' (' + c.anime + ')', nextCharRound);
       }
-    }, true);
+    }, true, { search: false });
   }
 
   /* ══════════════════════════════════════════════════════════════════════
@@ -1171,11 +1201,15 @@
   function buildTrueFalseGame(api) {
     var facts = window.TF_FACTS || [];
     startScreen(api, 'truefalse', 'TRUE OR FALSE',
-      'Ten statements about the list - five of them are lies. Read carefully and call it.',
+      'Ten statements - exactly five are true and five are lies. Read carefully and call it.',
       'agTfStart', function () {
-        api.facts = shuffle(facts.slice()).slice(0, 10);
+        api.facts = balancedFactRound(facts, 10);
         api.round = 0;
         api.score = 0;
+        /* ten statements, not the default five: the round builder hands back
+           exactly five truths and five lies, so the whole set has to be played
+           or the "five and five" promise on the start screen is a lie too. */
+        api.rounds = 10;
         nextTfRound(api);
       });
   }

@@ -2890,7 +2890,7 @@ function ensureKnowledge() {
   return knowledgeReady;
 }
 
-function getSystemPrompt(visitorMsg) {
+function getSystemPrompt(visitorMsg, liveBlock) {
   const stats = getStats();
   // If the visitor is signed in (Google, email or phone), let the assistant call them by name.
   const who = signedInName();
@@ -2956,6 +2956,7 @@ Website Stats:
 
 ${listBlock}
 ${filesBlock}
+${liveBlock || ''}
 
 Rules:
 1. Reply in the same language the user uses. If user writes Bangla, reply in Bangla. If English, reply in English.
@@ -2969,6 +2970,8 @@ Rules:
 7b. When you suggest a "X vs Y" matchup, both anime MUST share at least one genre. If they have no common genre, do not suggest that duel — pick a different title that shares a genre. (Example: Blue Lock vs Vinland Saga has no common genre, so never suggest it.)
 7c. If asked about Hindi dub, English dub or sub availability, only answer from the dub data you are given. If the data does not list that title, say you do not have its dub info yet instead of guessing.
 7d. Every title in the list carries its MAL score in brackets, e.g. "Jujutsu Kaisen (MAL 8.6)". Those numbers come from the site's own ratings file — use them when the visitor asks how good or rated an anime is, and never invent a score for a title that has none.
+7e. When a "LIVE ANIME DATA" or "LIVE MANGA DATA" block is present, it was fetched from AniList / TVMaze / Jikan / Wikipedia a moment ago. It is the source of truth for that title: quote its exact numbers, say which source they came from, and never contradict it. If the block says two sources disagree, say so instead of picking a number. If a field says "not listed", say it is not listed — never fill the gap from memory.
+7f. Manga questions: use the LIVE MANGA DATA block for chapters, volumes, status and scores. Never convert anime episodes into a chapter count and never guess a chapter/volume number.
 8. Turn every third reply into a signature line like "⚡ Stay weeb, stay deadly ⚡" or "🔥 Another day, another anime 🔥" — rotate them, don't repeat one twice in a row.
 11. If User Give Me Any Name, I will remember it and accept it. 
 9. If the user seems bored or asks what to watch, hype them up first ("Oh you haven't seen THIS yet??") before the recommendation, and now and then tease them with an underrated gem from the list.
@@ -3113,6 +3116,299 @@ document.addEventListener('keydown', (e) => {
 
 let isResponding = false;
 
+/* ══════════════════════════════════════════════════════════════════════
+   EPISODE EXPLANATIONS (AniList + TVMaze + Jikan + Wikipedia + Groq)
+
+   "Explain Blue Lock season 1 episode 13" is not answered from memory:
+   anime-data.js fetches the episode from the live databases first, the
+   model writes Bangla around that data, and the app always puts the real
+   episode name at the very top. Two sections follow — spoiler-free, then
+   the full detailed one — and three ↗ follow-up rows are offered after.
+   ══════════════════════════════════════════════════════════════════════ */
+let lastExplain = null;
+
+const MANGA_ASK_RE = /\b(manga|chapters?|volumes?|mangaka|serializ(?:ed|ation)|read the manga)\b/i;
+const FACT_ASK_RE = /\b(episodes?|seasons?|how many|score|rating|rated|studio|status|airing|aired|release[ds]?|year|synopsis|plot|story|author|mangaka|writer|chapters?|volumes?|manga)\b/i;
+
+function hasBangla(text) {
+  return /[\u0980-\u09FF]/.test(String(text || ''));
+}
+
+function setTypingStatus(div, text) {
+  if (!div) return;
+  const label = div.querySelector('.typing-label');
+  if (!label) return;
+  label.textContent = text || '';
+  label.style.display = text ? '' : 'none';
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+function episodeDataBlock(info) {
+  const lines = [];
+  lines.push('ANIME: ' + (info.title || info.requestedTitle || ''));
+  lines.push('SEASON: ' + info.season + '   EPISODE: ' + info.episode);
+  lines.push('EPISODE TITLE (English): ' + (info.episodeTitle || 'not listed in any database'));
+  if (info.episodeTitleAlt && info.episodeTitleAlt !== info.episodeTitle) {
+    lines.push('EPISODE TITLE (alternate): ' + info.episodeTitleAlt);
+  }
+  if (info.episodeTitleJapanese) lines.push('EPISODE TITLE (Japanese): ' + info.episodeTitleJapanese);
+  if (info.aired) lines.push('AIR DATE: ' + info.aired);
+  lines.push('TOTAL EPISODES IN THIS SEASON: ' + (info.totalEpisodes || 'not listed'));
+  if (info.prev) {
+    lines.push('PREVIOUS EPISODE: ' + info.prev.number + (info.prev.title ? ' — ' + info.prev.title : ''));
+  }
+  if (info.next) {
+    lines.push('NEXT EPISODE: ' + info.next.number + (info.next.title ? ' — ' + info.next.title : ''));
+  }
+  lines.push('DATA SOURCES: ' + ((info.sources && info.sources.length) ? info.sources.join(', ') : 'none') +
+    (info.verified ? ' (episode title cross-checked)' : ' (episode title not cross-checked)'));
+  if (info.summary) {
+    lines.push('EPISODE SUMMARY (from ' + (info.summarySource || 'the database') + '):\n' + info.summary);
+  }
+  if (info.summaryTv && info.summaryTv !== info.summary) {
+    lines.push('SECOND EPISODE SUMMARY (TVMaze):\n' + info.summaryTv);
+  }
+  if (info.seriesSynopsis) {
+    lines.push('SERIES SYNOPSIS (context only):\n' + String(info.seriesSynopsis).slice(0, 1200));
+  }
+  return lines.join('\n');
+}
+
+function explainSystemPrompt(info, req) {
+  const lang = req.english
+    ? 'English'
+    : 'Bangla (Bengali script, natural Bangla — NOT transliterated English)';
+  const deep = req.depth >= 2;
+  return [
+    'You are Senpai Assistant, the anime expert of "Fardin\'s Anime Hub". Right now you are explaining exactly ONE anime episode.',
+    '',
+    'LIVE EPISODE DATA — fetched a moment ago from real anime databases. This is the source of truth:',
+    episodeDataBlock(info),
+    '',
+    'HOW TO WRITE THE ANSWER:',
+    '1. LANGUAGE: write the whole answer in ' + lang + '. A visitor who writes English still gets Bangla unless they explicitly asked for English. Keep every anime title, episode title, character name, studio name and song name in English (Latin script) — never transliterate them into Bangla.',
+    '2. The app puts the episode heading (episode name first) above your text. Do NOT write a heading or repeat the title at the top. Start directly with the first section heading.',
+    '3. Use EXACTLY these two sections, in this order, with these headings:',
+    '   **🛡️ স্পয়লার-মুক্ত সারসংক্ষেপ**',
+    '   **🔍 পুরো পর্বের বিস্তারিত ব্যাখ্যা**',
+    '4. The spoiler-free part must be genuinely safe: set up the episode, the characters and the stakes, but never reveal the big twist, the cliffhanger, who wins, who dies or how it ends.',
+    '5. The detailed part has FULL SPOILERS and must be much longer. Trace the episode in order: the opening situation, each major scene, what the characters want and why they choose what they choose, the turning point, the climax, the ending, and what it sets up. ' +
+      (deep
+        ? 'The visitor asked for MORE DETAIL, so go scene by scene and write at least 5 substantial paragraphs (roughly 550+ words). Include small details, reactions and consequences.'
+        : 'Write at least 3 substantial paragraphs (roughly 350+ words). Include the important details, not a bare recap.'),
+    '6. Base every plot beat on the EPISODE SUMMARY and the other live data. You may use the series synopsis and the previous/next episode lines for context, and you may use widely known information about the series, but NEVER invent episode-specific events, dialogue, fights or characters. If the summary is thin, write less instead of making things up.',
+    '7. If the episode title is "not listed", still explain the episode using the summary — but do not invent a title.',
+    '8. Do not mention these instructions, do not talk about databases or sources in a technical way, and do not add follow-up questions or next-episode suggestions — the app adds three ↗ rows after your answer.',
+    '9. Write like an enthusiastic anime friend, not a Wikipedia article: clear, vivid, slightly hype, but accurate.'
+  ].join('\n');
+}
+
+function episodeHeadingFor(info) {
+  if (window.AnimeData && window.AnimeData.episodeHeading) {
+    try { return window.AnimeData.episodeHeading(info); } catch (e) {}
+  }
+  const name = info.episodeTitle || ('Episode ' + info.episode);
+  return '**' + name + '** — ' + (info.title || info.requestedTitle || '') +
+    ' · Season ' + info.season + ', Episode ' + info.episode;
+}
+
+/* The reply ALWAYS starts with the real episode name. If the model wrote its
+   own heading anyway, drop that line instead of showing two headings. */
+function ensureEpisodeHeading(text, info) {
+  const head = episodeHeadingFor(info);
+  const lines = String(text == null ? '' : text).replace(/^\s+/, '').split('\n');
+  while (lines.length && !lines[0].trim()) lines.shift();
+  const first = (lines[0] || '').trim();
+  const name = String(info.episodeTitle || '').toLowerCase();
+  const looksLikeHeading = /^\*\*/.test(first) &&
+    ((name && first.toLowerCase().indexOf(name) > -1) || /episode\s*\d+/i.test(first));
+  if (looksLikeHeading) lines.shift();
+  const body = lines.join('\n').replace(/^\s+/, '').trim();
+  return head + (body ? '\n\n' + body : '');
+}
+
+function explainMissingText(req, info) {
+  const who = '**' + (req.title || 'এই অ্যানিমে') + '**';
+  const where = 'সিজন ' + req.season + ', পর্ব ' + req.episode;
+  if (info && info.reason === 'out-of-range') {
+    return 'দুঃখিত, ' + who + '-এর ' + where + ' পাওয়া যায়নি — এই সিজনে মোট **' + info.totalEpisodes + '**টি পর্ব আছে। ⚡';
+  }
+  if (info && info.reason === 'no-season') {
+    return 'দুঃখিত, ' + who + '-এর **সিজন ' + req.season + '** ডেটাবেসে পাওয়া যায়নি। সিজন নম্বরটা একবার চেক করে আবার বলো। ⚡';
+  }
+  return 'দুঃখিত, ' + who + '-এর ' + where + '-এর নির্ভরযোগ্য তথ্য এখন পাওয়া যাচ্ছে না। নামটা একটু অন্যভাবে লিখে আবার চেষ্টা করো। ⚡';
+}
+
+function explainStarterRows(info, req) {
+  const title = info.requestedTitle || info.title || req.title;
+  const season = info.season || req.season;
+  const ep = info.episode || req.episode;
+  const rows = [
+    {
+      arrow: '↗',
+      label: 'Wanna know what will happen on the next ep?',
+      run: function () { quickAction('Explain ' + title + ' season ' + season + ' episode ' + (ep + 1)); }
+    },
+    {
+      arrow: '↗',
+      label: 'Explain the ep in more details.',
+      run: function () { quickAction('Explain ' + title + ' season ' + season + ' episode ' + ep + ' in more details'); }
+    }
+  ];
+  if (ep > 1) {
+    rows.push({
+      arrow: '↗',
+      label: 'Explain the previous ep.',
+      run: function () { quickAction('Explain ' + title + ' season ' + season + ' episode ' + (ep - 1)); }
+    });
+  } else {
+    rows.push({
+      arrow: '↗',
+      label: 'What should I watch after this anime?',
+      run: function () { quickAction('What should I watch after ' + title + '?'); }
+    });
+  }
+  return rows;
+}
+
+/* Pull a probably-title out of a normal question ("How many chapters does
+   Solo Leveling have?"). Card titles are resolved elsewhere; this is only a
+   fallback for titles that are not on Fardin's list. */
+function cleanFactTitle(msg) {
+  let t = String(msg || '')
+    .replace(/\b(?:how many|how much|what is|what's|whats|tell me about|do you know|can you tell me|does|do|did|has|have|is|are|was|were|who|whom|whose)\b/ig, ' ')
+    .replace(/\b(?:episodes?|seasons?|chapters?|volumes?|manga|anime|score|rating|rated|studio|status|airing|aired|release[ds]?|year|synopsis|plot|story|author|mangaka|writer|wrote|written|created|creator|mal|myanimelist|anilist|imdb)\b/ig, ' ')
+    .replace(/\b(?:of|for|about|in|on|by|from|with|and)\b/ig, ' ')
+    .replace(/[?।!.,:;"'“”‘’()\[\]]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+  t = t.replace(/^(?:the|a|an)\s+/i, '').replace(/\s+(?:the|a|an)$/i, '').trim();
+  return t;
+}
+
+function mangaDataBlock(m) {
+  const chaptersAsOf = m.chaptersAsOf ? ' (as of ' + m.chaptersAsOf + ')' : '';
+  const volumesAsOf = m.volumesAsOf ? ' (as of ' + m.volumesAsOf + ')' : '';
+  const lines = [
+    'LIVE MANGA DATA — fetched now, cross-checked where possible. Quote these exact numbers.',
+    'TITLE: ' + m.title,
+    'CHAPTERS: ' + (m.chapters != null ? m.chapters + ' [' + (m.chaptersSource || 'source') + chaptersAsOf + ']' : 'not listed'),
+    'VOLUMES: ' + (m.volumes != null ? m.volumes + ' [' + (m.volumesSource || 'source') + volumesAsOf + ']' : 'not listed'),
+    'STATUS: ' + (m.status || 'not listed'),
+    'ANILIST SCORE: ' + (m.score != null ? m.score + '/100' : 'not listed'),
+    'STARTED: ' + (m.startYear || 'not listed'),
+    'SOURCES: ' + ((m.sources && m.sources.length) ? m.sources.join(', ') : 'none')
+  ];
+  if (m.chaptersAgree === false || m.volumesAgree === false) {
+    lines.push('WARNING: the databases DISAGREE on the chapter/volume count. Tell the visitor the sources disagree; do not pick one as fact.');
+  }
+  if (m.chapters == null && m.volumes == null) {
+    lines.push('NOTE: no database lists a chapter or volume count for this ongoing manga. Say it is not listed — never estimate it from the anime episode count.');
+  }
+  if (m.synopsis) lines.push('SYNOPSIS:\n' + String(m.synopsis).slice(0, 800));
+  return '\n\n' + lines.join('\n');
+}
+
+function animeDataBlock(a) {
+  const lines = [
+    'LIVE ANIME DATA — fetched now from AniList. Quote these exact numbers.',
+    'TITLE: ' + a.title + (a.romaji && a.romaji !== a.title ? ' (' + a.romaji + ')' : ''),
+    'FORMAT: ' + (a.format || 'not listed'),
+    'EPISODES: ' + (a.episodes != null ? a.episodes : 'not listed'),
+    'STATUS: ' + (a.status || 'not listed'),
+    'FIRST AIRED: ' + (a.seasonYear || 'not listed'),
+    'ANILIST SCORE: ' + (a.score != null ? a.score + '/100' : 'not listed'),
+    'STUDIO: ' + (a.studio || 'not listed'),
+    'GENRES: ' + ((a.genres && a.genres.length) ? a.genres.join(', ') : 'not listed')
+  ];
+  if (a.synopsis) lines.push('SYNOPSIS:\n' + String(a.synopsis).slice(0, 800));
+  return '\n\n' + lines.join('\n');
+}
+
+/* Live facts for the normal chat: manga counts always, and anime facts for a
+   title that is not on Fardin's list (for list titles the site's own files are
+   already the source of truth). */
+async function buildLiveBlock(message) {
+  if (!window.AnimeData) return '';
+  const msg = String(message || '');
+  const wantsManga = MANGA_ASK_RE.test(msg);
+  const wantsFacts = FACT_ASK_RE.test(msg);
+  if (!wantsManga && !wantsFacts) return '';
+
+  let known = '';
+  try { known = animeMentionedInText(msg) || ''; } catch (e) { known = ''; }
+  let title = known || cleanFactTitle(msg);
+  if (!title || title.length < 3) return '';
+  if (!known) {
+    const words = title.split(/\s+/).filter(Boolean);
+    if (words.length > 8) return '';
+  }
+
+  try {
+    if (wantsManga) {
+      const m = await window.AnimeData.manga(title);
+      if (m && (known || m.matchScore >= 1.9)) return mangaDataBlock(m);
+      return '';
+    }
+    if (known) return '';            // the site's own row already covers a list title
+    const a = await window.AnimeData.anime(title);
+    if (a && a.matchScore >= 1.9) return animeDataBlock(a);
+  } catch (e) { /* the normal prompt still works without live data */ }
+  return '';
+}
+
+async function buildExplainReply(req, typingDiv) {
+  setTypingStatus(typingDiv, 'পর্বের তথ্য আনা হচ্ছে…');
+  let info = null;
+  try {
+    if (window.AnimeData && window.AnimeData.episode) {
+      info = await window.AnimeData.episode(req.title, req.season, req.episode);
+    }
+  } catch (e) { info = null; }
+
+  if (!info || !info.found) {
+    return { text: explainMissingText(req, info), info: null, req: req };
+  }
+
+  setTypingStatus(typingDiv, 'ব্যাখ্যাটা লেখা হচ্ছে…');
+  const sys = explainSystemPrompt(info, req);
+  const messages = [{ role: 'system', content: sys }].concat(
+    chatHistory.filter(function (m) { return m && m.role !== 'system'; })
+  );
+
+  async function callModel(msgs, temp, tokens) {
+    const res = await fetchWithFallback({
+      messages: msgs,
+      temperature: temp,
+      max_tokens: tokens,
+      stream: false
+    });
+    const data = await res.json();
+    const choice = data && data.choices && data.choices[0];
+    return choice && choice.message ? String(choice.message.content || '') : '';
+  }
+
+  const tokens = req.depth >= 2 ? 3400 : 2600;
+  let text = await callModel(messages, 0.55, tokens);
+  if (!text.trim()) throw new Error('No response from API');
+
+  /* The contract is Bangla by default. If the model slipped into English,
+     ask once more — a second call is cheaper than a wrong-language answer. */
+  if (!req.english && !hasBangla(text)) {
+    try {
+      const retry = messages.concat([
+        { role: 'assistant', content: text.slice(0, 1500) },
+        { role: 'user', content: 'Rewrite the whole explanation in Bangla (Bengali script) only. Keep every anime title, episode title and character name in English. Start directly with the first section heading, no title line.' }
+      ]);
+      const again = await callModel(retry, 0.4, tokens);
+      if (again.trim() && hasBangla(again)) text = again;
+    } catch (e) { /* keep the first answer */ }
+  }
+
+  return { text: text, info: info, req: req };
+}
+
+
 // ===== SEND MESSAGE =====
 async function sendMessage() {
   if (isResponding) return;
@@ -3123,6 +3419,7 @@ async function sendMessage() {
   chatInput.disabled = true;
 
   let typingDiv = null;
+  let explainReq = null;
 
   try {
     addMessage(message, 'user');
@@ -3140,18 +3437,45 @@ async function sendMessage() {
       chatHistory = [chatHistory[0],...chatHistory.slice(-8)];
     }
 
+    /* "explain <anime> season 1 episode 13" gets the live episode pipeline
+       instead of a memory-based answer. Everything else stays normal chat. */
+    try {
+      if (window.AnimeData && window.AnimeData.parseExplain) {
+        explainReq = window.AnimeData.parseExplain(message, lastExplain, {
+          resolveTitle: function (m) { return animeMentionedInText(m) || ''; }
+        });
+      }
+    } catch (e) { explainReq = null; }
+
     /* the files of the site are read before the answer is written */
     try { await ensureKnowledge(); } catch (e) {}
 
     typingDiv = addMessage('Typing...', 'bot typing');
+
+    let liveBlock = '';
+    if (explainReq) {
+      setTypingStatus(typingDiv, 'পর্বের তথ্য আনা হচ্ছে…');
+    } else {
+      if (FACT_ASK_RE.test(message) || MANGA_ASK_RE.test(message)) {
+        setTypingStatus(typingDiv, 'লেটেস্ট ডেটা চেক করা হচ্ছে…');
+      }
+      try { liveBlock = await buildLiveBlock(message); } catch (e) { liveBlock = ''; }
+    }
+
     /* refresh the system prompt so the dub table is present and small talk
        does not carry the whole anime list */
-    try { chatHistory[0] = { role: 'system', content: getSystemPrompt(message) }; } catch (e) {}
+    try {
+      chatHistory[0] = {
+        role: 'system',
+        content: explainReq ? 'Episode explanation mode.' : getSystemPrompt(message, liveBlock)
+      };
+    } catch (e) {}
     let messagesToSend = [...chatHistory];
 
     /* Offline: answer from the same local knowledge the quick chips use,
        instead of waiting for a doomed network request. */
     let response;
+    let explainPayload = null;
     if (navigator.onLine === false) {
       const local = await Promise.resolve(localQuickAnswer(message));
       response = local || quickAiReply(
@@ -3159,6 +3483,9 @@ async function sendMessage() {
         "Try a ⚡ quick chip (Short, Long, Most Eps, Newest, Movie, Underrated, Sports, Thriller, Fantasy, Slice of Life) — " +
         "or reconnect and ask me anything! ✨"
       );
+    } else if (explainReq) {
+      explainPayload = await buildExplainReply(explainReq, typingDiv);
+      response = quickAiReply(explainPayload.text);
     } else {
       response = await fetchWithFallback({
         messages: messagesToSend,
@@ -3180,12 +3507,28 @@ async function sendMessage() {
         botReply = 'Sorry, my brain glitched for a second 😅 Ask me that again?';
       }
 
+      /* the real episode name always opens the answer, and the follow-up
+         context is remembered for "next ep" / "more details" taps */
+      if (explainPayload && explainPayload.info) {
+        botReply = ensureEpisodeHeading(botReply, explainPayload.info);
+        lastExplain = {
+          title: explainPayload.info.requestedTitle || explainPayload.info.title,
+          season: explainPayload.info.season,
+          episode: explainPayload.info.episode,
+          episodeTitle: explainPayload.info.episodeTitle
+        };
+      }
+
       chatHistory.push({
         role: 'assistant',
         content: botReply
       });
 
       addMessage(botReply, 'bot', true, function (msgDiv) {
+        if (explainPayload && explainPayload.info) {
+          scheduleSuggestions(msgDiv, null, explainStarterRows(explainPayload.info, explainPayload.req), { expand: true, delay: 350 });
+          return;
+        }
         // a plain hello deserves a welcome, not anime rows: friendly openers instead
         const starters = isGreeting(message) ? greetingStarterRows() : null;
         scheduleSuggestions(msgDiv, animeMentionedInText(botReply), starters);
@@ -3200,11 +3543,16 @@ async function sendMessage() {
   } catch (error) {
     if (typingDiv) typingDiv.remove();
     const errText = error.message || '';
-    const msg = errText.includes('429')
-      ? 'Too many requests right now, Senpai! 🥺 Give me a few seconds and ask me again.'
-      : (errText.includes('401')
-        ? 'The AI service is currently unavailable. Please try again later! ✨'
-        : 'I worked Too Much Today, Try Again After a While! Till then, Enjoy many features from SideBar! ✨');
+    let msg;
+    if (explainReq) {
+      msg = 'দুঃখিত, ব্যাখ্যাটা এখন তৈরি করা যাচ্ছে না। ইন্টারনেট বা AI সার্ভিসে সমস্যা থাকতে পারে — একটু পরে আবার চেষ্টা করো। ⚡';
+    } else {
+      msg = errText.includes('429')
+        ? 'Too many requests right now, Senpai! 🥺 Give me a few seconds and ask me again.'
+        : (errText.includes('401')
+          ? 'The AI service is currently unavailable. Please try again later! ✨'
+          : 'I worked Too Much Today, Try Again After a While! Till then, Enjoy many features from SideBar! ✨');
+    }
     addMessage(msg, 'bot');
     console.error('Chat Error:', error);
   }
@@ -3489,16 +3837,17 @@ function suggestRowsFor(anime) {
 // Draw them under this reply — only the newest answer keeps its suggestions. They slide
 // in one by one, 3s after the answer ended, and the chat scrolls so they can be seen.
 let _suggestsToken = 0;
-const SUGGEST_DELAY_MS = 2000;
+const SUGGEST_DELAY_MS = 600;
 
-function scheduleSuggestions(msgDiv, anime, starters) {
+function scheduleSuggestions(msgDiv, anime, starters, opts) {
   if (!msgDiv) return;
+  const delay = (opts && typeof opts.delay === 'number') ? opts.delay : SUGGEST_DELAY_MS;
   setTimeout(function () {
     // a newer answer may have arrived in the meantime — only the newest keeps them
     const bots = chatMessages.querySelectorAll('.msg.bot');
     if (!bots.length || bots[bots.length - 1] !== msgDiv) return;
-    renderSuggestions(msgDiv, anime, starters);
-  }, SUGGEST_DELAY_MS);
+    renderSuggestions(msgDiv, anime, starters, opts);
+  }, delay);
 }
 
 // The rows the visitor just tapped through — never offered again by the answer that follows.
@@ -3510,7 +3859,7 @@ function makeSuggestRow(r) {
   b.className = 'msg-suggest';
   const arrow = document.createElement('span');
   arrow.className = 'sg-arrow';
-  arrow.textContent = '↘';
+  arrow.textContent = r.arrow || '↘';
   const txt = document.createElement('span');
   txt.className = 'sg-text';
   txt.textContent = r.label;
@@ -3524,7 +3873,7 @@ function makeSuggestRow(r) {
     if (box) {
       // every row this answer offered — including the ones still behind "See more..."
       lastSuggestSet = box._allLabels ? box._allLabels.slice() : Array.prototype.map.call(box.querySelectorAll('.msg-suggest'), function (el) {
-        return String(el.textContent || '').replace(/^\s*↘\s*/, '').trim();
+        return String(el.textContent || '').replace(/^\s*[↘↗]\s*/, '').trim();
       });
       box.remove();
     } else {
@@ -3544,21 +3893,26 @@ function scrollChatToSuggestions() {
 }
 
 // One visible row, the rest behind a green "See more..." that unveils them one by one.
-function renderSuggestions(msgDiv, anime, starters) {
+// opts.expand = true shows every row straight away (used by episode explanations,
+// which have exactly three ↗ follow-ups the visitor should see immediately).
+function renderSuggestions(msgDiv, anime, starters, opts) {
   if (!msgDiv || !msgDiv.parentNode) return;
   const myToken = ++_suggestsToken;
   chatMessages.querySelectorAll('.msg-suggests').forEach(function (el) { el.remove(); });
   let rows = (starters && starters.length) ? starters.slice() : suggestRowsFor(anime);
-  // one-shot: never repeat a row from the block the visitor just tapped through
+  // one-shot: never repeat a row from the block the visitor just tapped through.
+  // Episode explanations are the exception: their three ↗ rows are a fixed menu
+  // and must all come back after every episode.
   const used = lastSuggestSet;
   lastSuggestSet = [];
-  if (used.length) rows = rows.filter(function (r) { return used.indexOf(r.label) === -1; });
+  const expand = !!(opts && opts.expand);
+  if (used.length && !expand) rows = rows.filter(function (r) { return used.indexOf(r.label) === -1; });
   if (!rows.length) return;
   const box = document.createElement('div');
   box.className = 'msg-suggests';
   box._allLabels = rows.map(function (r) { return r.label; });
   box.appendChild(makeSuggestRow(rows[0]));
-  if (rows.length > 1) {
+  if (rows.length > 1 && !expand) {
     const more = document.createElement('button');
     more.type = 'button';
     more.className = 'msg-suggest-more';
@@ -3570,6 +3924,8 @@ function renderSuggestions(msgDiv, anime, starters) {
       scrollChatToSuggestions();
     });
     box.appendChild(more);
+  } else if (expand) {
+    rows.slice(1).forEach(function (r) { box.appendChild(makeSuggestRow(r)); });
   }
   if (myToken !== _suggestsToken) return;
   msgDiv.parentNode.insertBefore(box, msgDiv.nextSibling);
@@ -3626,11 +3982,11 @@ function addMessage(text, type, shouldSave = true, onTyped = null) {
       if (typeof onTyped === 'function') onTyped(msgDiv);   // e.g. draw the ↘ suggestions
     }
 
-    // Type it in visibly — but keep the total time predictable, so a one-liner feels like the
-    // assistant is writing and a long answer never holds the visitor hostage.
-    const duration = Math.min(2800, Math.max(750, text.length * 16));
-    const STEP = 22;                                   // ms between chunks
-    const steps = Math.max(8, Math.round(duration / STEP));
+    // Reveal it quickly — the old 2.8s crawl made a long answer feel stuck. The whole
+    // reveal is now capped at ~650ms, no matter how long the reply is.
+    const duration = Math.min(650, Math.max(140, text.length * 2.5));
+    const STEP = 16;                                   // ms between chunks
+    const steps = Math.max(5, Math.round(duration / STEP));
     const CHUNK = Math.max(1, Math.ceil(text.length / steps));
 
     // never flash a half-written ** while the bold markers are still being typed out
@@ -3657,7 +4013,7 @@ function addMessage(text, type, shouldSave = true, onTyped = null) {
     } else {
       pendingTypers.add(finish); // reveal the full answer at once if the tab gets hidden
       msgDiv.classList.add('typing-live');          // shows the blinking caret
-      timer = setTimeout(typeChunk, 220);
+      timer = setTimeout(typeChunk, 24);
     }
   }
 
@@ -3670,6 +4026,7 @@ function addMessage(text, type, shouldSave = true, onTyped = null) {
           <span></span>
           <span></span>
         </div>
+        <div class="typing-label" style="display:none"></div>
       </div>
     `;
   }

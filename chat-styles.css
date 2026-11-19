@@ -349,7 +349,15 @@
   color: #fff; border: none; border-radius: 14px 4px 14px 14px; font-weight: 500;
   box-shadow: 0 4px 16px rgba(255,45,85,.28);
 }
-.chat-messages .msg.typing .msg-bubble { padding: 11px 14px; }
+.chat-messages .msg.typing .msg-bubble {
+  padding: 11px 14px;
+  display: flex; align-items: center; gap: 8px;
+}
+.chat-messages .msg.typing .typing-animation { padding: 0; }
+.chat-messages .msg .typing-label {
+  font-size: 12px; line-height: 1.25; color: #9d9db0;
+  white-space: normal;
+}
 /* while the assistant is writing, a caret blinks at the end of the text */
 .chat-messages .msg.bot.typing-live .msg-bubble::after {
   content: '';

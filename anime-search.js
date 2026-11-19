@@ -1,9 +1,9 @@
 /* ══════════════════════════════════════════════════════════════════════
    ANIME SEARCH SUGGESTIONS
    Any text box can ask for anime: type and the list of the site's own cards
-   comes back as live suggestions. Pick one and the box empties again so the
-   visitor can keep typing (in the games the pick is submitted straight
-   away, because the answer IS the title).
+   comes back as live suggestions. Picking one writes that title into the box
+   and fires the normal input/change events, so a filtering box filters and a
+   game answer box stays filled for the player to submit.
    ══════════════════════════════════════════════════════════════════════ */
 (function () {
   'use strict';
@@ -11,6 +11,10 @@
   var index = [];          /* [{title, poster, id}] */
   var openBox = null;
   var owner = null;
+  /* Set while a pick is being written into the box. The synthetic input /
+     focus events we fire would otherwise re-open the suggestion list on the
+     title we just picked. */
+  var suppress = false;
 
   function esc(s) {
     return String(s == null ? '' : s)
@@ -86,7 +90,6 @@
   function draw(input, list) {
     close();
     owner = input;
-    var opts = input.__searchOpts || {};
     var box = document.createElement('div');
     box.className = 'as-box';
     list.forEach(function (it) {
@@ -97,24 +100,39 @@
         (it.poster ? '<img class="as-poster" src="' + esc(it.poster) + '" alt="">' : '<span class="as-poster as-poster--none">🎴</span>') +
         '<span class="as-title">' + esc(it.title) + '</span>' +
         (it.id ? '<span class="as-num">#' + esc(it.id) + '</span>' : '');
+      /* keep the text box focused while the row is clicked - a blur would
+         close the list before the click ever lands */
+      row.onmousedown = function (e) { e.preventDefault(); };
       row.onclick = function () {
         var pickTitle = it.title;
+        suppress = true;
         close();
-        /* the box empties after a pick - the games submit it right away */
+        /* A pick WRITES the title into the box and leaves it there. The old
+           code emptied the box again a moment later, which is why the game
+           answer inputs looked like a select box that had swallowed the text. */
         input.value = pickTitle;
-        input.dispatchEvent(new Event('input', { bubbles: true }));
-        /* the pick has to be visible for the field that filters on input */
-        if (opts && opts.clear === false) input.value = pickTitle;
-        if (input.getAttribute('data-search-submit') === '1') {
-          var btn = document.getElementById(input.getAttribute('data-search-submit'));
-          if (btn) btn.click();
+        try { input.dispatchEvent(new Event('input', { bubbles: true })); } catch (e) {}
+        /* optional submit hook: data-search-submit holds the id of the button
+           that should be pressed (not the string "1") */
+        var submitId = input.getAttribute('data-search-submit');
+        if (submitId && submitId !== '0' && submitId !== '1') {
+          var btn = document.getElementById(submitId);
+          if (btn) {
+            suppress = false;
+            try { btn.click(); } catch (e) {}
+            return;
+          }
         }
-        /* the box empties after a pick - unless the field wants to keep it
-           (the admin search filters while you type) */
-        var clearIt = (opts && opts.clear === false) ? false : true;
-        if (input.getAttribute('data-search-clear') === '0') clearIt = false;
-        if (clearIt) input.value = '';
-        input.dispatchEvent(new Event('change', { bubbles: true }));
+        try { input.dispatchEvent(new Event('change', { bubbles: true })); } catch (e) {}
+        suppress = false;
+        /* focus, but do not let that focus re-open the dropdown */
+        try {
+          suppress = true;
+          input.focus({ preventScroll: true });
+        } catch (e) {
+          try { input.focus(); } catch (e2) {}
+        }
+        suppress = false;
       };
       box.appendChild(row);
     });
@@ -137,6 +155,7 @@
     input.setAttribute('data-search-on', '1');
     input.__searchOpts = opts || {};
     function refresh() {
+      if (suppress) return;
       var q = String(input.value || '').trim().toLowerCase();
       if (q.length < 1) { close(); return; }
       draw(input, matches(q));
