@@ -315,7 +315,7 @@
   <h1 onclick="window.location.reload()" style="cursor:pointer;" title="Click to refresh" class="heading-glitch" data-text="Let's See What Anime I Have Watched:-">Let's See What Anime I Have Watched:-</h1>
 </div>
   <div class="search-wrap">
-    <input type="text" id="searchBox" placeholder="🔍 Search anime..." oninput="filterCards()"/>
+    <input type="text" id="searchBox" placeholder="🔍 Search anime..." oninput="filterCards()" autocomplete="off" spellcheck="false"/>
     <button class="perf-settings__icon" id="perfToggle" aria-label="Performance Settings">⚙️</button>
   </div>
 
@@ -1571,7 +1571,7 @@
             <circle cx="50" cy="50" r="6" fill="#ff2200"/>
           </svg>
         </div>
-        <div class="msg-bubble">🤖 Hello! Welcome to Fardin's Anime Hub! I'm Fardin's personal anime assistant. Ask me anything about episodes, seasons, random picks, or genre recommendations!</div>
+        <div class="msg-bubble">🤖 Hello! Welcome to Fardin's Anime Hub! I'm Fardin's personal anime assistant. Ask me anything about episodes, seasons, random picks, genre recommendations — or any anime, even one that isn't on Fardin's list yet!</div>
       </div>
     </div>
 
@@ -1693,7 +1693,7 @@
   <script src="game-data.js?v=20261112a"></script>
   <script src="game-data-extra.js?v=20261112a"></script>
   <script src="game-data-facts.js?v=20261118a"></script>
-  <script src="anime-search.js?v=20261118a"></script>
+  <script src="anime-search.js?v=20261119a"></script>
   <script src="anime-games.js?v=20261118a"></script>
   <script src="quest-data.js?v=20261107g"></script>
     <!-- === 🔐 LOGIN / CREATE ACCOUNT — email or phone + password, or Google === -->
@@ -1850,9 +1850,9 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="anime-fetch.js?v=20261110c"></script>
 <script src="site-knowledge.js?v=20261113a"></script>
-<script src="anime-data.js?v=20261118a"></script>
+<script src="anime-data.js?v=20261119a"></script>
 <script src="watch-links.js?v=20261116a"></script>
-<script src="script.js?v=20261118a"></script>
+<script src="script.js?v=20261119a"></script>
 <script src="login-otp.js?v=20261024n"></script>
 <script src="wishlist.js?v=20261113b"></script>
 <script src="chat-cloud.js?v=20261111b"></script>

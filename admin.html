@@ -553,9 +553,11 @@
         <div class="ad-status dim" id="aiModelListStatus"></div>
         <div class="ad-row wrap">
           <button class="admin-g-btn tight" onclick="refreshAiModels()">⟳ REFRESH LIST</button>
+          <button class="admin-g-btn tight" onclick="testAiKeys()">🔑 TEST ALL 3 KEYS</button>
           <button class="admin-g-btn tight" onclick="saveAiModel()">⬆ UPDATE ON GITHUB</button>
           <button class="admin-g-btn tight danger" onclick="resetAiModel()">↺ DEFAULT CHAIN</button>
         </div>
+        <div class="ad-status dim" id="aiKeyTestStatus"></div>
         <div class="ad-note">UPDATE ON GITHUB rewrites the GROQ_MODELS line in script.js (the picked model first,
           the older ones stay as fallbacks). Needs your PAT. Live for everyone in ~1 minute.</div>
       </section>
@@ -745,6 +747,6 @@
 </div>
 
 <script src="anime-fetch.js?v=202611161328"></script>
-<script src="admin.js?v=20261117a"></script>
+<script src="admin.js?v=20261119a"></script>
 </body>
 </html>

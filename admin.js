@@ -1314,13 +1314,77 @@ function updateAiStatus() {
   if (el) el.textContent = 'current in script.js: ' + GROQ_MODELS[0] + '  (+ ' + (GROQ_MODELS.length - 1) + ' fallbacks)';
 }
 
+/* The live script.js holds all three Groq keys. Try them in order so one
+   exhausted free-tier key never blocks the model list. */
+async function groqGet(path, init) {
+  var keys = (GROQ_API_KEYS || []).filter(Boolean);
+  if (!keys.length) throw new Error('No Groq keys found in the deployed script.js');
+  var lastError = null;
+  for (var i = 0; i < keys.length; i++) {
+    try {
+      var headers = Object.assign({}, (init && init.headers) || {}, {
+        'Authorization': 'Bearer ' + keys[i]
+      });
+      var res = await fetch('https://api.groq.com/openai/v1' + path,
+        Object.assign({}, init || {}, { headers: headers }));
+      if (res.ok) return res;
+      lastError = new Error('HTTP ' + res.status + ' (key ' + (i + 1) + ')');
+      /* a real request error (400, 404, …) will not improve with another key */
+      if (res.status !== 401 && res.status !== 403 && res.status !== 429 && res.status < 500) return res;
+    } catch (e) {
+      lastError = e;
+    }
+  }
+  throw lastError || new Error('All Groq keys failed');
+}
+
+/* Diagnostic for the three free-tier keys: each one is tested on its own, so
+   the panel says exactly which key is good, invalid or rate-limited. */
+async function testAiKeys() {
+  var status = document.getElementById('aiKeyTestStatus');
+  if (!status) return;
+  var keys = (GROQ_API_KEYS || []).filter(Boolean);
+  if (!keys.length) {
+    status.textContent = 'No Groq keys found — the data link is still loading, or script.js on the server has no keys.';
+    return;
+  }
+  if (keys.some(function (k) { return /^GROQ_KEY_/.test(k); })) {
+    status.textContent = 'The deployed script.js still has GROQ_KEY_1/2/3 placeholders. The GitHub Actions secret injection did not run.';
+    return;
+  }
+  status.textContent = 'testing ' + keys.length + ' key(s)…';
+  var lines = [];
+  for (var i = 0; i < keys.length; i++) {
+    try {
+      var res = await fetch('https://api.groq.com/openai/v1/models', {
+        headers: { 'Authorization': 'Bearer ' + keys[i] }
+      });
+      if (res.ok) {
+        var data = await res.json();
+        lines.push('KEY ' + (i + 1) + ': OK — ' + ((data.data || []).length) + ' models');
+      } else if (res.status === 401 || res.status === 403) {
+        lines.push('KEY ' + (i + 1) + ': INVALID / REVOKED (HTTP ' + res.status + ')');
+      } else if (res.status === 429) {
+        lines.push('KEY ' + (i + 1) + ': RATE-LIMITED (HTTP 429) — the other keys will still be used');
+      } else {
+        lines.push('KEY ' + (i + 1) + ': HTTP ' + res.status);
+      }
+    } catch (e) {
+      lines.push('KEY ' + (i + 1) + ': network error — ' + (e.message || 'could not reach Groq'));
+    }
+  }
+  status.innerHTML = lines.map(function (line) {
+    return line.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }).join('<br>');
+}
+
 async function refreshAiModels() {
   var sel = document.getElementById('aiModelSelect');
   var status = document.getElementById('aiModelListStatus');
   if (!sel || !status) return;
   status.textContent = 'fetching Groq model list...';
   try {
-    var res = await fetch('https://api.groq.com/openai/v1/models', { headers: { 'Authorization': 'Bearer ' + GROQ_API_KEYS[0] } });
+    var res = await groqGet('/models');
     if (!res.ok) throw new Error('HTTP ' + res.status);
     var data = await res.json();
     var deny = /prompt-guard|safeguard|whisper|orpheus|tts|embed|stable-diffusion/i;

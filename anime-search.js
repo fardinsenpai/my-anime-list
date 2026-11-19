@@ -152,6 +152,8 @@
 
   function attach(input, opts) {
     if (!input || input.getAttribute('data-search-on')) return;
+    /* callers can opt out even if they reach attach() by mistake */
+    if (opts && opts.search === false) return;
     input.setAttribute('data-search-on', '1');
     input.__searchOpts = opts || {};
     function refresh() {
@@ -181,9 +183,9 @@
     extra: extraTitles
   };
 
-  document.addEventListener('DOMContentLoaded', function () {
-    /* the main search box of the site */
-    var main = document.getElementById('searchBox');
-    if (main) attach(main, {});
-  });
+  /* The main search box is a plain live filter (#searchBox oninput), not a
+     picker. Attaching the suggestion list here made it behave like the
+     "select the anime" box from Guess the Anime, so it is deliberately left
+     alone. Games that want suggestions call AnimeSearch.attach() themselves;
+     Guess the Character passes { search: false } and gets no list at all. */
 })();

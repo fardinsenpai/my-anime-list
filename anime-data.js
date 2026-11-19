@@ -35,8 +35,12 @@
   var WIKI = 'https://en.wikipedia.org/w/api.php';
 
   var CACHE_PREFIX = 'fardin_anime_data_v2:';
-  var TTL_SEARCH = 30 * 24 * 60 * 60 * 1000;   /* a month — titles rarely change */
-  var TTL_EPISODE = 14 * 24 * 60 * 60 * 1000;  /* two weeks */
+  /* Short-lived on purpose: the answer is fetched live, and a long cache made
+     a just-aired episode or a fresh manga chapter look "not listed" for days. */
+  var TTL_SEARCH = 12 * 60 * 60 * 1000;   /* title / episode-count metadata: 12 h */
+  var TTL_EPISODE = 6 * 60 * 60 * 1000;   /* episode title + summary: 6 h */
+  var TTL_MANGA = 24 * 60 * 60 * 1000;    /* ongoing chapter / volume counts: 24 h */
+  var TTL_EPISODE_SEARCH = 60 * 60 * 1000; /* re-check an ongoing show's episode list hourly */
   var mem = {};
   var inflight = {};
   var jikanDownUntil = 0;   /* circuit breaker for a blocked Jikan host */
@@ -79,21 +83,29 @@
   }
 
   function cacheGet(key, ttl) {
-    if (mem[key]) return mem[key];
+    var maxAge = ttl || TTL_EPISODE;
+    var now = Date.now();
+    /* the memory copy must expire too — otherwise a long-lived tab ignores
+       the TTL and keeps serving an old episode count until a reload */
+    if (mem[key]) {
+      if (mem[key].t && (now - mem[key].t) <= maxAge) return mem[key].v;
+      delete mem[key];
+    }
     try {
       var raw = localStorage.getItem(CACHE_PREFIX + key);
       if (!raw) return null;
       var box = JSON.parse(raw);
-      if (!box || !box.t || (Date.now() - box.t) > (ttl || TTL_EPISODE)) return null;
-      mem[key] = box.v;
+      if (!box || !box.t || (now - box.t) > maxAge) return null;
+      mem[key] = { t: box.t, v: box.v };
       return box.v;
     } catch (e) { return null; }
   }
 
   function cacheSet(key, value) {
-    mem[key] = value;
+    var box = { t: Date.now(), v: value };
+    mem[key] = box;
     try {
-      localStorage.setItem(CACHE_PREFIX + key, JSON.stringify({ t: Date.now(), v: value }));
+      localStorage.setItem(CACHE_PREFIX + key, JSON.stringify(box));
     } catch (e) { /* private mode / quota — the in-memory cache still works */ }
   }
 
@@ -231,9 +243,10 @@
     return best;
   }
 
-  function searchAniList(title, type) {
+  function searchAniList(title, type, opts) {
     var key = 'al:' + (type || 'ANIME') + ':' + norm(title);
-    var cached = cacheGet(key, TTL_SEARCH);
+    var maxAge = opts && opts.maxAge != null ? opts.maxAge : TTL_SEARCH;
+    var cached = cacheGet(key, maxAge);
     if (cached) return Promise.resolve(cached);
     return once(key, function () {
       return fetchJson(ANILIST, {
@@ -760,7 +773,9 @@
     if (cached) return Promise.resolve(cached);
 
     return once(key, function () {
-      return searchAniList(title, 'ANIME').then(function (root) {
+      /* an ongoing show's episode count changes every week, so the episode
+         path refuses a search result older than an hour */
+      return searchAniList(title, 'ANIME', { maxAge: TTL_EPISODE_SEARCH }).then(function (root) {
         if (!root) {
           return { found: false, requestedTitle: title, season: s, episode: ep, reason: 'no-match' };
         }
@@ -895,7 +910,10 @@
               verified: winnerCount >= 2,
               checkedAt: Date.now()
             };
-            cacheSet(key, info);
+            /* A just-aired episode often has no summary yet. Do not freeze
+               that empty answer: ask the databases again next time so the
+               summary can appear. */
+            if (info.summary) cacheSet(key, info);
             return info;
           });
         });
@@ -939,10 +957,10 @@
      null — it is never replaced with a guess. */
   function manga(title) {
     var key = 'manga:' + norm(title);
-    var cached = cacheGet(key, TTL_SEARCH);
+    var cached = cacheGet(key, TTL_MANGA);
     if (cached) return Promise.resolve(cached);
     return Promise.all([
-      searchAniList(title, 'MANGA'),
+      searchAniList(title, 'MANGA', { maxAge: TTL_MANGA }),
       withTimeout(kitsuSearch(title, 'manga'), 4500, null),
       withTimeout(wikiManga(title), 6500, null)
     ]).then(function (bundle) {

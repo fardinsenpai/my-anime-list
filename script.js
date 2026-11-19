@@ -2579,6 +2579,10 @@ const GROQ_API_KEYS = [
 ];
 let currentKeyIndex = 0;
 
+/* A key that answered 401/403 is not coming back during this page load.
+   Remember it so every later request does not waste a round-trip on it. */
+const GROQ_DEAD_KEYS = new Set();
+
 // Groq retires models occasionally — keep a fallback chain so the bot
 // never dies on "model_not_found" (404) again.
 let GROQ_MODELS = ['openai/gpt-oss-120b', 'qwen/qwen3.8-27b', 'openai/gpt-oss-20b'];
@@ -2600,9 +2604,18 @@ async function fetchWithFallback(body) {
   let attempts = 0;
   let rateLimitHits = 0;
   const maxAttempts = GROQ_API_KEYS.length * GROQ_MODELS.length;
-  const failedKeys = new Set();   // keys that have already refused this request
+  /* keys already rejected by an earlier request count as failed here too,
+     so the loop does not spend its attempt budget re-trying a dead key */
+  const failedKeys = new Set(GROQ_DEAD_KEYS);
 
   while (attempts < maxAttempts) {
+    /* skip a key this page already knows is invalid */
+    if (GROQ_DEAD_KEYS.has(currentKeyIndex)) {
+      if (GROQ_DEAD_KEYS.size >= GROQ_API_KEYS.length) break;
+      getNextKeyIndex();
+      attempts++;
+      continue;
+    }
     const keyIndex = currentKeyIndex;
     const key = GROQ_API_KEYS[keyIndex];
     const model = GROQ_MODELS[currentModelIndex % GROQ_MODELS.length];
@@ -2627,8 +2640,13 @@ async function fetchWithFallback(body) {
         attempts++;
         continue;
       }
-      if (res.status === 429 || res.status === 401 || res.status >= 500) {
+      if (res.status === 429 || res.status === 401 || res.status === 403 || res.status >= 500) {
         lastError = new Error('Groq API error: ' + res.status);
+        if (res.status === 401 || res.status === 403) {
+          // invalid/revoked key: stop retrying it until the page reloads
+          GROQ_DEAD_KEYS.add(keyIndex);
+          try { console.warn('Groq key ' + (keyIndex + 1) + ' was rejected; switching to key ' + ((keyIndex + 1) % GROQ_API_KEYS.length + 1) + '.'); } catch (e) {}
+        }
         // Rate limited: keys share a free-tier quota, so hammering the next key
         // instantly just burns it too. Wait a moment before the next attempt.
         if (res.status === 429) {
@@ -2926,14 +2944,14 @@ function getSystemPrompt(visitorMsg, liveBlock) {
   // message could actually involve anime.
   const withList = arguments.length > 0 ? needsAnimeList(visitorMsg) : true;
   const listBlock = withList
-    ? `FARDIN'S LIST — these are the ONLY anime that exist for you (one per line):
+    ? `FARDIN'S LIST — the anime Fardin has watched (one per line). These are the titles you recommend from by default:
 Action, Adventure and Comedy are common in this list, so they are not repeated below; assume a title may have them.
 Codes: SoL=Slice of Life, HS=High School, DH=Dark / Horror, Psy=Psychological, Hist=Historical — ALWAYS write genres out in full when you talk to a visitor, never the codes.
 ${animeListForPrompt()}
 
-THE TWO RULES YOU MUST NEVER BREAK:
-1. You only ever recommend, compare, mention or talk about anime from the list above. NEVER name an anime that is not on it, never invent a title, and never recommend a "similar" show that is not on the list.
-2. When a title is not on that list (the visitor names it, or asks for something the list cannot give): say plainly that it is not in Fardin's list yet, ask them to drop it in the Suggestion Box in the sidebar ("That one isn't in Fardin's list yet — put it in the Suggestion Box in the sidebar and Fardin might watch it! ⚡"), then offer the closest anime FROM THE LIST. For facts (episodes, seasons, plot) about such a title, never guess.`
+THE RULES FOR TITLES:
+1. Recommendations, comparisons and "what should I watch" answers should come from the list above. Do not invent a title or recommend a made-up "similar" show.
+2. If the visitor names an anime that is NOT on the list, do not pretend it is there. Say plainly that it is not in Fardin's list yet and, when it fits, point to the Suggestion Box in the sidebar. If they asked for information or an explanation, you may still answer about that off-list anime when a LIVE ANIME DATA / LIVE MANGA DATA block is present, or when the fact is widely known and you are sure of it. Never guess episode/season/chapter numbers, plot events or scores. If you do not have reliable data, say so instead of inventing it.`
     : `FARDIN'S LIST IS NOT LOADED for this message (plain small talk). Do NOT name any specific anime at all here — not one title, not even Fardin's. If the visitor does want a recommendation, tell them to ask you for one and you will pull up the list.`;
 
   /* The files of the website, read for THIS question only - the rows that
@@ -2965,8 +2983,8 @@ Rules:
 4. Say "As-salamu alaykum" only on the very first message ever — never on a "Recommend a …" type question, never again after that. End that first reply with a fun fact about anime or Fardin's taste.
 5. Fardin (the owner): his full info is in the sidebar under "Owner Info". He loves diverse genres — action, comedy, romance, thriller — and rates good storytelling and character development above all. Hype him warmly if asked.
 6. Stats: don't volunteer his totals unless asked. If asked, give them in a fun way, then say "Explore the list and find your next watch!".
-7. NEVER guess or make up genres, episode counts, seasons or descriptions. The list at the top of this prompt is the COMPLETE list of Fardin's anime — use ONLY it for any anime-specific answer. General knowledge is fine for casual talk, never for anime facts.
-7a. The FILES READ block holds the exact rows pulled out of the website's own files for this question (card number, genres, seasons, episodes, MAL score, the site's own ratings, the dub table, the special card tier and the on-file facts). When a number is in that block, it IS the number - quote it, never round it and never argue with it. If a title is not in the block, say you do not have its file data instead of inventing a number.
+7. NEVER guess or make up genres, episode counts, seasons, chapter counts or descriptions. For a title on Fardin's list, the list/files are the source of truth. For a title NOT on the list, answer only from a LIVE ANIME DATA / LIVE MANGA DATA block or from a widely known fact you are sure of; otherwise say you do not have reliable data. Never invent a number to fill a gap.
+7a. The FILES READ block holds the exact rows pulled out of the website's own files for this question (card number, genres, seasons, episodes, MAL score, the site's own ratings, the dub table, the special card tier and the on-file facts). When a number is in that block, it IS the number - quote it, never round it and never argue with it. If a list title is not in the block and no LIVE block covers it, say you do not have its file data instead of inventing a number.
 7b. When you suggest a "X vs Y" matchup, both anime MUST share at least one genre. If they have no common genre, do not suggest that duel — pick a different title that shares a genre. (Example: Blue Lock vs Vinland Saga has no common genre, so never suggest it.)
 7c. If asked about Hindi dub, English dub or sub availability, only answer from the dub data you are given. If the data does not list that title, say you do not have its dub info yet instead of guessing.
 7d. Every title in the list carries its MAL score in brackets, e.g. "Jujutsu Kaisen (MAL 8.6)". Those numbers come from the site's own ratings file — use them when the visitor asks how good or rated an anime is, and never invent a score for a title that has none.
@@ -3129,6 +3147,10 @@ let lastExplain = null;
 
 const MANGA_ASK_RE = /\b(manga|chapters?|volumes?|mangaka|serializ(?:ed|ation)|read the manga)\b/i;
 const FACT_ASK_RE = /\b(episodes?|seasons?|how many|score|rating|rated|studio|status|airing|aired|release[ds]?|year|synopsis|plot|story|author|mangaka|writer|chapters?|volumes?|manga)\b/i;
+/* A plain "tell me about X" for a title that is not on Fardin's list should
+   still get the live AniList block instead of a guess from memory. Kept
+   specific so "what is your name?" does not search for the film Your Name. */
+const INFO_ASK_RE = /\b(?:tell me about|describe|info(?:rmation)? (?:about|on)|what(?:'s| is) [^?.!]{1,60} about|give me (?:info|information) (?:about|on))\b/i;
 
 function hasBangla(text) {
   return /[\u0980-\u09FF]/.test(String(text || ''));
@@ -3333,7 +3355,8 @@ async function buildLiveBlock(message) {
   const msg = String(message || '');
   const wantsManga = MANGA_ASK_RE.test(msg);
   const wantsFacts = FACT_ASK_RE.test(msg);
-  if (!wantsManga && !wantsFacts) return '';
+  const wantsInfo = INFO_ASK_RE.test(msg);
+  if (!wantsManga && !wantsFacts && !wantsInfo) return '';
 
   let known = '';
   try { known = animeMentionedInText(msg) || ''; } catch (e) { known = ''; }
@@ -3456,7 +3479,7 @@ async function sendMessage() {
     if (explainReq) {
       setTypingStatus(typingDiv, 'পর্বের তথ্য আনা হচ্ছে…');
     } else {
-      if (FACT_ASK_RE.test(message) || MANGA_ASK_RE.test(message)) {
+      if (FACT_ASK_RE.test(message) || MANGA_ASK_RE.test(message) || INFO_ASK_RE.test(message)) {
         setTypingStatus(typingDiv, 'লেটেস্ট ডেটা চেক করা হচ্ছে…');
       }
       try { liveBlock = await buildLiveBlock(message); } catch (e) { liveBlock = ''; }
