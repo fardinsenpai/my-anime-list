@@ -18,6 +18,21 @@
   var flushing = false;
   var loadedFor = null;
 
+  /* This file is its own IIFE, so it cannot borrow the readSession()
+     helper that lives inside wishlist.js / anime-games.js. It needs
+     its own copy, otherwise every cloud save dies with a ReferenceError. */
+  function readSession() {
+    return new Promise(function (resolve) {
+      try {
+        var c = (typeof window.authClient === 'function') ? window.authClient() : null;
+        if (!c) return resolve(null);
+        c.auth.getSession().then(function (r) {
+          resolve(r && r.data ? r.data.session : null);
+        }).catch(function () { resolve(null); });
+      } catch (e) { resolve(null); }
+    });
+  }
+
   /* the id of the LIVE session - the row level security of Supabase
      compares it with the token, so it has to be the real one */
   function userId() {

@@ -5,7 +5,7 @@
    the first time they are seen. API calls (the AI chat, Supabase, AniList)
    always go to the network - when there is none, the site still runs.
    ══════════════════════════════════════════════════════════════════════ */
-var VERSION = 'fardin-hub-v11';
+var VERSION = 'fardin-hub-v12';
 var IMG_VERSION = 'fardin-img-v1';
 var CORE = [
   './',
@@ -16,9 +16,14 @@ var CORE = [
   './tournament.css',
   './anime-games.css',
   './login-otp.css',
+  './search-suggest.css',
   './script.js',
   './duel-system.js',
   './tournament.js',
+  './game-data.js',
+  './game-data-extra.js',
+  './game-data-facts.js',
+  './anime-search.js',
   './anime-games.js',
   './chat-cloud.js',
   './wishlist.js',
@@ -33,8 +38,23 @@ var CORE = [
   './anime-dubs.json',
   './itch-games.json',
   './manifest.json',
-  './logo.png'
+  './logo.png',
+  './logo-2.png',
+  './login-otp.js',
+  './privacy.html',
+  './terms.html'
 ];
+
+/* Versioned URLs (script.js?v=…) must still find the unversioned copy
+   that install() puts in the cache. Without this, every asset looked
+   missing offline even though the whole app shell had been cached. */
+function cacheMatch(req) {
+  return caches.match(req, { ignoreSearch: true });
+}
+
+function staticKey(url) {
+  return new Request(url.origin + url.pathname);
+}
 
 self.addEventListener('install', function (e) {
   e.waitUntil(
@@ -81,7 +101,7 @@ self.addEventListener('fetch', function (e) {
     if (!/\.(png|jpe?g|webp|gif|svg|avif)$/i.test(url.pathname)) return;
     e.respondWith(
       caches.open(IMG_VERSION).then(function (cache) {
-        return cache.match(req).then(function (hit) {
+        return cache.match(req, { ignoreSearch: true }).then(function (hit) {
           if (hit) return hit;
           return fetch(req).then(function (res) {
             if (res && (res.ok || res.type === 'opaque')) {
@@ -108,27 +128,30 @@ self.addEventListener('fetch', function (e) {
         } catch (err) { }
         return res;
       }).catch(function () {
-        return caches.match(req).then(function (hit) {
-          return hit || caches.match('./index.html');
+        return cacheMatch(req).then(function (hit) {
+          return hit || cacheMatch('./index.html');
         });
       })
     );
     return;
   }
 
-  /* everything else: the cache first, refreshed in the background */
+  /* everything else: the cache first, refreshed in the background.
+     Store under the path without ?v=… so a version bump REPLACES the old
+     copy instead of leaving several stale ones behind. */
+  var key = staticKey(url);
   e.respondWith(
-    caches.match(req).then(function (cached) {
+    cacheMatch(key).then(function (hit) {
       var net = fetch(req).then(function (res) {
         if (res && res.ok) {
           try {
             var copy = res.clone();
-            caches.open(VERSION).then(function (c) { c.put(req, copy); });
+            caches.open(VERSION).then(function (c) { c.put(key, copy); });
           } catch (err) { }
         }
         return res;
-      }).catch(function () { return cached; });
-      return cached || net;
+      }).catch(function () { return hit; });
+      return hit || net;
     })
   );
 });

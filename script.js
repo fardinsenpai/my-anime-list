@@ -3470,19 +3470,33 @@ async function sendMessage() {
       }
     } catch (e) { explainReq = null; }
 
-    /* the files of the site are read before the answer is written */
-    try { await ensureKnowledge(); } catch (e) {}
-
-    typingDiv = addMessage('Typing...', 'bot typing');
+    /* Quick chips and simple "from my list" questions are answered from the
+       cards before any network call. This is what keeps Random / Tonight /
+       Top Rated / Last Updated / genre chips working offline instead of
+       waiting for a doomed Groq request. */
+    let localFirst = null;
+    if (!explainReq) {
+      try { localFirst = await Promise.resolve(localQuickAnswer(message)); }
+      catch (e) { localFirst = null; }
+    }
 
     let liveBlock = '';
-    if (explainReq) {
-      setTypingStatus(typingDiv, 'পর্বের তথ্য আনা হচ্ছে…');
-    } else {
-      if (FACT_ASK_RE.test(message) || MANGA_ASK_RE.test(message) || INFO_ASK_RE.test(message)) {
-        setTypingStatus(typingDiv, 'লেটেস্ট ডেটা চেক করা হচ্ছে…');
+    if (!localFirst) {
+      /* the files of the site are read before the answer is written */
+      try { await ensureKnowledge(); } catch (e) {}
+
+      typingDiv = addMessage('Typing...', 'bot typing');
+
+      if (explainReq) {
+        setTypingStatus(typingDiv, 'পর্বের তথ্য আনা হচ্ছে…');
+      } else if (navigator.onLine !== false) {
+        if (FACT_ASK_RE.test(message) || MANGA_ASK_RE.test(message) || INFO_ASK_RE.test(message)) {
+          setTypingStatus(typingDiv, 'লেটেস্ট ডেটা চেক করা হচ্ছে…');
+        }
+        try { liveBlock = await buildLiveBlock(message); } catch (e) { liveBlock = ''; }
       }
-      try { liveBlock = await buildLiveBlock(message); } catch (e) { liveBlock = ''; }
+    } else {
+      typingDiv = addMessage('Typing...', 'bot typing');
     }
 
     /* refresh the system prompt so the dub table is present and small talk
@@ -3495,15 +3509,14 @@ async function sendMessage() {
     } catch (e) {}
     let messagesToSend = [...chatHistory];
 
-    /* Offline: answer from the same local knowledge the quick chips use,
-       instead of waiting for a doomed network request. */
     let response;
     let explainPayload = null;
-    if (navigator.onLine === false) {
-      const local = await Promise.resolve(localQuickAnswer(message));
-      response = local || quickAiReply(
+    if (localFirst) {
+      response = localFirst;
+    } else if (navigator.onLine === false) {
+      response = quickAiReply(
         "You're offline right now, Senpai, so I can only use my saved answers. " +
-        "Try a ⚡ quick chip (Short, Long, Most Eps, Newest, Movie, Underrated, Sports, Thriller, Fantasy, Slice of Life) — " +
+        "Try a ⚡ quick chip (Random, Tonight, Top Rated, Last Updated, Short, Long, Most Eps, Newest, Movie, Underrated, Sports, Thriller, Fantasy, Slice of Life) — " +
         "or reconnect and ask me anything! ✨"
       );
     } else if (explainReq) {
@@ -5327,6 +5340,39 @@ function localQuickAnswer(userMsg) {
       }
       return null;
     });
+  }
+
+  /* ── Random / genre chips, answered from the cards themselves ─────────
+     This is also what makes the ⚡ Random / genre chips work with no
+     connection: no API request is needed for a pick from Fardin's list. */
+  const named = (typeof animeMentionedInText === 'function') ? animeMentionedInText(msg) : null;
+  const unknown = (typeof namesUnknownAnime === 'function') ? namesUnknownAnime(msg) : false;
+  if (!named && !unknown && /random|surprise me|suggest|recommend|pick|give me/i.test(msg)) {
+    const genreKey = genreFromMessage(msg);
+    const cards = localCards();
+    let pool = cards;
+
+    if (genreKey && window.ANIME_GENRES && window.ANIME_GENRES[genreKey] && window.ANIME_GENRES[genreKey].nums) {
+      const nums = window.ANIME_GENRES[genreKey].nums;
+      pool = cards.filter(function (c) {
+        const el = c.querySelector('.number');
+        const n = parseInt(String((el && el.textContent) || '').replace(/\D/g, ''), 10);
+        return n && nums.has(n);
+      });
+    }
+
+    if (!pool.length) pool = cards;
+    const f = pool.length ? cardFacts(pool[Math.floor(Math.random() * pool.length)]) : null;
+    if (f) {
+      const genre = genreKey ? stripEmoji(genreKey) : '';
+      const art = genre ? (/^[aeiou]/i.test(genre) ? 'an ' : 'a ') : '';
+      const meta = pickLine(f);
+      return quickAiReply(
+        (genre ? 'Here\'s ' + art + genre + ' anime from Fardin\'s list:' : 'Here\'s a random pick from Fardin\'s list:') +
+        '\n\n**' + f.title + '**' + (meta ? '\n' + meta : '') +
+        '\n\nWant another? Tap the chip again ⚡'
+      );
+    }
   }
 
   return null;
@@ -10541,6 +10587,22 @@ function authNotify(message) {
   setTimeout(function() { btn.classList.remove('account-flash'); }, 1700);
 }
 
+// A successful sign-in / sign-out changes what the whole page should show
+// (topbar, chat, wishlist, games, comments). Refresh once so every section
+// starts from the new session instead of half-updating in place.
+// Only explicit actions call this: restoring a saved session on page load and
+// token refreshes never trigger a reload.
+var AUTH_RELOADING = false;
+function authReloadAfterChange() {
+  if (AUTH_RELOADING) return;
+  AUTH_RELOADING = true;
+  // give Supabase a moment to persist the new session before the reload
+  window.setTimeout(function() {
+    try { window.location.reload(); }
+    catch (e) { AUTH_RELOADING = false; }
+  }, 250);
+}
+
 function renderAccountUI() {
   var btn = document.getElementById('accountBtn');
   if (!btn) return;
@@ -10678,6 +10740,7 @@ async function signOutOfGoogle() {
   renderAccountUI();
   applyAuthToChat();
   authNotify('Signed out 👋');
+  authReloadAfterChange();
 }
 
 // Google sends the visitor back with ?code=… — hide it once it has been exchanged,
@@ -10902,6 +10965,7 @@ async function gsiOnCredential(response) {
     }
     gsiRawNonce = '';
     gsiClosePop();   // the existing onAuthStateChange listener finishes the job
+    authReloadAfterChange();   // then refresh the whole page with the new session
   } catch (e) {
     if (note) note.textContent = 'Google sign-in failed — use basic sign-in below.';
   }
@@ -11317,6 +11381,7 @@ async function lgDoSubmit(ev) {
 
   lgBusy(true);
   lgSetMsg('');
+  var signedInNow = false;
   try {
     if (up) {
       var meta = { first_name: first, last_name: last, full_name: (first + ' ' + last).trim() };
@@ -11325,7 +11390,8 @@ async function lgDoSubmit(ev) {
       if (loginIsPhone(ident)) meta.phone = String(ident).replace(/[\s\-().]/g, '');
       var res = await c.auth.signUp({ email: email, password: pass, options: { data: meta } });
       if (res && res.error) { lgSetMsg(loginErrText(res.error.message), 'bad'); lgBusy(false); return; }
-      if (!(res && res.data && res.data.session)) {
+      signedInNow = !!(res && res.data && res.data.session);
+      if (!signedInNow) {
         // only happens if "Confirm email" is still ON in Supabase
         lgSetMsg('Account created - now log in with the same email/phone and password.', 'good');
         setLoginMode('in');
@@ -11336,6 +11402,7 @@ async function lgDoSubmit(ev) {
     } else {
       var r2 = await c.auth.signInWithPassword({ email: email, password: pass });
       if (r2 && r2.error) { lgSetMsg(loginErrText(r2.error.message), 'bad'); lgBusy(false); return; }
+      signedInNow = true;
     }
   } catch (e) {
     lgSetMsg('Something went wrong. Check your internet and try again.', 'bad');
@@ -11343,6 +11410,7 @@ async function lgDoSubmit(ev) {
     return;
   }
   lgBusy(false);
+  if (signedInNow) authReloadAfterChange();
 }
 
 (function loginPageWire() {

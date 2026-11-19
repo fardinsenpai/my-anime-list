@@ -354,6 +354,11 @@
           if (window.AUTH_USER) window.AUTH_USER.confirmed = true;
           document.dispatchEvent(new CustomEvent('fardin:auth-changed'));
         } catch (e) {}
+        // the code has been exchanged for a real session - refresh the page so
+        // every signed-in area starts clean, exactly like the password flow
+        try {
+          if (typeof window.authReloadAfterChange === 'function') window.authReloadAfterChange();
+        } catch (e) {}
         return res;
       });
   }
