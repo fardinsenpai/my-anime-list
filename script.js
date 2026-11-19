@@ -2786,18 +2786,27 @@ function animeListForPrompt() {
   return lines.join('\n');
 }
 
-// Pure small talk does not need the 260-title roster (~2.5k tokens on every request), so
-// it is left out for greetings and thanks. Anything that could touch anime keeps the list.
-const SMALLTALK_RE = /^(?:hi+|hey+|hello+|yo+|sup|hola|salam|assalamu?[a-z\s]*|good (?:morning|afternoon|evening|night)|thanks?(?: you| a lot)?|thank u|ok(?:ay)?|k|cool|nice|great|wow|lol|lmao|haha+|bye+|see ya|see you|gn|gm|what'?s up|how are you|how'?s it going|who are you|what can you do)(?:[\s,]+(?:bro|bruh|man|dude|mate|fardin|senpai|buddy|bhai|vai|boss))?[\s!.,?]*$/i;
-const ANIME_HINT_RE = /\b(anime|manga|watch|watching|watched|episode|episodes|season|seasons|recommend|suggest|suggestion|best|top|worst|list|similar|like|vs|versus|favourite|favorite|rewatch|character|characters|story|plot|genre|genres|studio|dub|sub|arc|movie|opening|ending|otaku|weeb|show|series|ranking|rank|rated|rating|score|duel|mood|ep)\b/i;
+// Pure small talk does not need the 292-title roster, so it is left out.
+
+/* The roster is ~4.8k prompt tokens. It is only worth sending when the
+   visitor actually needs the roster to choose something (recommendations,
+   comparisons, top lists). A named-title question already gets its own row in
+   the FILES READ block, so the whole list would be wasted tokens. */
+const LIST_INTENT_RE = /\b(?:recommend|suggest(?:ion)?|what should i watch|what to watch|watch next|similar|like|vs|versus|better|compare|best|top|worst|rank(?:ing)?|underrated|hidden gem|favourite|favorite|roster|collection|how many anime|which anime|anime should i)\b/i;
 
 function needsAnimeList(msg) {
   const m = String(msg || '').trim();
-  if (!m) return true;
-  if (ANIME_HINT_RE.test(m)) return true;
-  if (typeof animeMentionedInText === 'function' && animeMentionedInText(m)) return true;
-  if (m.split(/\s+/).length > 7) return true;
-  return !SMALLTALK_RE.test(m);
+  if (!m) return false;
+
+  const named = (typeof animeMentionedInText === 'function') ? animeMentionedInText(m) : '';
+  if (named) {
+    /* "Blue Lock vs Naruto" / "anime like Blue Lock" needs the roster;
+       "how many episodes does Blue Lock have?" is answered by its files row. */
+    return /\b(?:vs|versus|better|compare|similar|recommend|suggest|like)\b/i.test(m);
+  }
+
+  if (/\b(?:anime|manga|list|roster)\b/i.test(m) && LIST_INTENT_RE.test(m)) return true;
+  return LIST_INTENT_RE.test(m);
 }
 
 /* Official/OTT dub data — loaded once, used only by the chat. */
@@ -2952,7 +2961,7 @@ ${animeListForPrompt()}
 THE RULES FOR TITLES:
 1. Recommendations, comparisons and "what should I watch" answers should come from the list above. Do not invent a title or recommend a made-up "similar" show.
 2. If the visitor names an anime that is NOT on the list, do not pretend it is there. Say plainly that it is not in Fardin's list yet and, when it fits, point to the Suggestion Box in the sidebar. If they asked for information or an explanation, you may still answer about that off-list anime when a LIVE ANIME DATA / LIVE MANGA DATA block is present, or when the fact is widely known and you are sure of it. Never guess episode/season/chapter numbers, plot events or scores. If you do not have reliable data, say so instead of inventing it.`
-    : `FARDIN'S LIST IS NOT LOADED for this message (plain small talk). Do NOT name any specific anime at all here — not one title, not even Fardin's. If the visitor does want a recommendation, tell them to ask you for one and you will pull up the list.`;
+    : `FARDIN'S FULL LIST IS NOT LOADED for this message. Only the FILES READ block (if present) tells you which rows are on Fardin's list. Do not invent titles, genres, scores or counts, and do not claim a title is on Fardin's list unless that block includes its row. If a title is not in the block, treat it as off-list and answer only from a LIVE ANIME DATA / LIVE MANGA DATA block or from a widely known fact you are sure of.`;
 
   /* The files of the website, read for THIS question only - the rows that
      matter are pulled out of the site's own data, so every number in the
