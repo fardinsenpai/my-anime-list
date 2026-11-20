@@ -974,75 +974,70 @@ body.duel-mode-active .now-strip { display: none !important; }
    SEARCH BOX ANIMATION
 -------------------------------------- */
 
-/* Fade in from top */
+/* --- Search bar: glass pill with a soft gradient edge and magnifier --- */
 .search-wrap {
   display: flex;
   align-items: center;
-  justify-content: center;
-  animation: searchFadeDown 0.8s ease-out forwards;
-  opacity: 0;
+  gap: 10px;
+  width: 100%;
+  max-width: 520px;
+  margin: 0 auto 40px;
+  padding: 6px 8px 6px 16px;
+  border-radius: 50px;
+  background: linear-gradient(135deg, rgba(30, 8, 48, .88), rgba(20, 6, 32, .92));
+  border: 1px solid rgba(255, 107, 157, .22);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, .45), inset 0 1px 0 rgba(255, 255, 255, .06);
+  backdrop-filter: blur(10px);
+  animation: searchFadeDown .6s ease-out both;
+  transition: border-color .3s ease, box-shadow .3s ease, transform .3s ease;
 }
-
+.search-wrap:focus-within {
+  border-color: rgba(255, 107, 157, .65);
+  box-shadow: 0 0 0 1px rgba(255, 107, 157, .25),
+              0 12px 38px rgba(255, 107, 157, .22),
+              0 0 24px rgba(255, 107, 157, .18);
+  transform: translateY(-1px);
+}
+.search-magnifier {
+  flex: 0 0 auto;
+  color: #ff8fc0;
+  opacity: .75;
+  transition: opacity .3s ease, transform .3s ease;
+}
+.search-wrap:focus-within .search-magnifier {
+  opacity: 1;
+  transform: scale(1.08);
+}
+.search-wrap input {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 12px 4px;
+  border: 0;
+  background: transparent;
+  color: #fff;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: .4px;
+  outline: none;
+}
+.search-wrap input::placeholder {
+  color: #8b7d9b;
+  font-weight: 600;
+}
+.search-wrap .perf-settings__icon {
+  flex: 0 0 auto;
+  margin-left: auto;
+}
 @keyframes searchFadeDown {
   0% {
     opacity: 0;
-    transform: translateY(-30px);
+    transform: translateY(-18px);
   }
   100% {
     opacity: 1;
     transform: translateY(0);
   }
-}
-
-/* Glowing border pulse when focused */
-.search-wrap input {
-  transition: all 0.4s ease;
-  box-shadow: 0 0 0px rgba(255, 107, 157, 0);
-}
-
-.search-wrap input {
-  border-color: #ff6b9d !important;
-  box-shadow: 0 0 15px rgba(255, 107, 157, 0.4),
-              0 0 30px rgba(255, 107, 157, 0.2) !important;
-  animation: searchGlow 2s ease-in-out infinite;
-}
-
-.search-wrap input:focus {
-  box-shadow: 0 0 25px rgba(255, 107, 157, 0.7),
-              0 0 50px rgba(255, 107, 157, 0.35) !important;
-  transform: scale(1.02);
-}
-
-@keyframes searchGlow {
-  0%, 100% {
-    box-shadow: 0 0 15px rgba(255, 107, 157, 0.4),
-                0 0 30px rgba(255, 107, 157, 0.2);
-  }
-  50% {
-    box-shadow: 0 0 25px rgba(255, 107, 157, 0.65),
-                0 0 45px rgba(255, 107, 157, 0.3);
-  }
-}
-
-/* Shimmer effect on search box */
-.search-wrap input::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 50%;
-  height: 100%;
-  background: linear-gradient(
-    to right,
-    rgba(255,255,255,0) 0%,
-    rgba(255,255,255,0.1) 100%
-  );
-  animation: searchShimmer 3s infinite;
-}
-
-@keyframes searchShimmer {
-  0% { left: -100%; }
-  100% { left: 200%; }
 }
 
 
