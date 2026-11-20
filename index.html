@@ -38,7 +38,7 @@
     }
   }
   </script>
-  <link rel="stylesheet" href="style.css?v=20261113a">
+  <link rel="stylesheet" href="style.css?v=20261119h">
   <link rel="stylesheet" href="chat-styles.css?v=20261119c">
 <link rel="stylesheet" href="login-otp.css?v=20261024a">
   <link rel="stylesheet" href="duel-system.css?v=20261110b">
@@ -315,7 +315,11 @@
   <h1 onclick="window.location.reload()" style="cursor:pointer;" title="Click to refresh" class="heading-glitch" data-text="Let's See What Anime I Have Watched:-">Let's See What Anime I Have Watched:-</h1>
 </div>
   <div class="search-wrap">
-    <input type="text" id="searchBox" placeholder="🔍 Search anime..." oninput="filterCards()" autocomplete="off" spellcheck="false"/>
+    <svg class="search-magnifier" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+      <circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2.2"/>
+      <path d="M21 21l-4.3-4.3" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+    </svg>
+    <input type="text" id="searchBox" placeholder="Search anime..." oninput="filterCards()" autocomplete="off" spellcheck="false"/>
     <button class="perf-settings__icon" id="perfToggle" aria-label="Performance Settings">⚙️</button>
   </div>
 
