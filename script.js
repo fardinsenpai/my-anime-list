@@ -1,6 +1,16 @@
 /* ── the tour guide's VRM is ~9 MB. Start pulling it down as early as the
       connection allows, so Komi is already standing there when the tour
       card pops up instead of arriving a couple of seconds later.
+      {
+        element: '#tierNavBtn',
+        guide: 'Momo Ayase',
+        popover: { title: '🅢 Tier List Maker', description: 'Rank every anime into S/A/B/C/D tiers. Drag titles, rename tiers, auto-rank by rating, and export a shareable PNG.', side: 'right' }
+      },
+      {
+        element: '.sn-section',
+        guide: 'Momo Ayase',
+        popover: { title: 'Airing Now', description: 'See what is airing next with local-time countdowns. Click the brain icon to ask the AI about any show.', side: 'bottom' }
+      },
       Skipped on data-saver and slow lines. ─────────────────────────────── */
 (function preloadGuideModel() {
   try {
@@ -6230,6 +6240,26 @@ document.addEventListener('click', function(e) {
         element: 'nav.side-nav a[onclick*="openWaifus"]',
         guide: 'Momo Ayase',
         popover: { title: '\uD83D\uDC95 Find Your Waifus', description: 'A gallery of beloved anime characters with flip cards. Search by name or series!', side: 'right' }
+      },
+      {
+        element: '#tierNavBtn',
+        guide: 'Momo Ayase',
+        popover: { title: '🅢 Tier List Maker', description: 'Rank every anime into S/A/B/C/D tiers. Drag titles, rename tiers, auto-rank by rating, and export a shareable PNG.', side: 'right' }
+      },
+      {
+        element: '.sn-section',
+        guide: 'Momo Ayase',
+        popover: { title: 'Airing Now', description: 'See what is airing next with local-time countdowns. Click the brain icon to ask the AI about any show.', side: 'bottom' }
+      },
+      {
+        element: '#tierNavBtn',
+        guide: 'Momo Ayase',
+        popover: { title: '🅢 Tier List Maker', description: 'Rank every anime into S/A/B/C/D tiers. Drag titles, rename tiers, auto-rank by rating, and export a shareable PNG.', side: 'right' }
+      },
+      {
+        element: '.sn-section',
+        guide: 'Momo Ayase',
+        popover: { title: '📡 Airing Now', description: 'See what is airing next with local-time countdowns. Click the brain icon to ask the AI about any show.', side: 'bottom' }
       },
       {
         element: '#wishlistBtn',
