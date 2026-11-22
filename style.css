@@ -8843,3 +8843,27 @@ body.duel-mode-active #nowStrip { display: none !important; }
   50% { transform: rotate(1.6deg) translateY(-2px); }
 }
 .lg-card > *:not(.lg-branch) { position: relative; z-index: 1; }
+
+/* anime search: close button */
+.as-close {
+  position: absolute; top: 6px; right: 6px; z-index: 2;
+  width: 24px; height: 24px; border-radius: 50%;
+  border: 1px solid rgba(255,255,255,.15);
+  background: rgba(255,255,255,.08); color: #fff;
+  font-size: 1rem; line-height: 1; cursor: pointer;
+  display: grid; place-items: center;
+}
+.as-close:hover { background: rgba(255, 90, 90, .3); }
+.as-box { position: relative; }
+
+/* stickmen sidebar controls */
+.sm-ctrl { padding: 8px 10px; display: flex; flex-direction: column; gap: 6px; }
+.sm-ctrl-title { font-family: 'Orbitron', sans-serif; font-size: .62rem; letter-spacing: .14em; color: #a99cd6; text-transform: uppercase; }
+.sm-ctrl-row { display: flex; align-items: center; gap: 8px; font-size: .72rem; color: #e9e2f5; }
+.sm-ctrl-row label { flex: 1; display: flex; align-items: center; gap: 6px; }
+.sm-ctrl-row input[type="range"] { flex: 1; accent-color: #ff4d7d; }
+.sm-ctrl-colors { display: flex; gap: 6px; flex-wrap: wrap; }
+.sm-color { width: 22px; height: 22px; border-radius: 50%; border: 2px solid rgba(255,255,255,.3); cursor: pointer; transition: transform .15s ease; }
+.sm-color:hover { transform: scale(1.15); }
+.sm-toggle { min-height: 32px; padding: 0 12px; border-radius: 8px; border: 1px solid rgba(255,107,157,.4); background: rgba(255,77,125,.15); color: #ffd6e8; font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: .72rem; cursor: pointer; }
+.sm-toggle:hover { background: rgba(255,77,125,.3); }

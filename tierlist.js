@@ -321,57 +321,155 @@
   }
 
   /* ---- export ---- */
-  function exportPng() {
-    var W = 1080, rowH = 180, H = 120 + rowH * state.order.length + 80;
+  function loadImage(src) {
+    return new Promise(function (resolve) {
+      if (!src) return resolve(null);
+      var img = new Image();
+      img.crossOrigin = 'anonymous';
+      var done = false;
+      var t = setTimeout(function () { if (!done) { done = true; resolve(null); } }, 4000);
+      img.onload = function () { if (done) return; done = true; clearTimeout(t); resolve(img); };
+      img.onerror = function () { if (done) return; done = true; clearTimeout(t); resolve(null); };
+      img.src = src;
+    });
+  }
+  function loadImage(src) {
+    return new Promise(function (resolve) {
+      if (!src) return resolve(null);
+      var img = new Image();
+      img.crossOrigin = 'anonymous';
+      var done = false;
+      var t = setTimeout(function () { if (!done) { done = true; resolve(null); } }, 5000);
+      img.onload = function () { if (done) return; done = true; clearTimeout(t); resolve(img); };
+      img.onerror = function () { if (done) return; done = true; clearTimeout(t); resolve(null); };
+      img.src = src;
+    });
+  }
+  async function exportPng() {
+    var W = 1080, rowH = 200, H = 150 + rowH * state.order.length + 90;
     var cv = document.createElement('canvas');
     cv.width = W; cv.height = H;
     var ctx = cv.getContext('2d');
-    var bg = ctx.createLinearGradient(0, 0, 0, H);
-    bg.addColorStop(0, '#140519'); bg.addColorStop(1, '#07030d');
+
+    // sakura-themed background
+    var bg = ctx.createLinearGradient(0, 0, W, H);
+    bg.addColorStop(0, '#1a0a24'); bg.addColorStop(0.5, '#2d1140'); bg.addColorStop(1, '#0d0418');
     ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
-    ctx.fillStyle = '#ffffff';
-    ctx.font = '800 46px "Orbitron", "Segoe UI", sans-serif';
-    ctx.fillText('MY ANIME TIER LIST', 48, 76);
-    ctx.fillStyle = 'rgba(255,179,205,.75)';
-    ctx.font = '600 22px "Rajdhani", "Segoe UI", sans-serif';
-    ctx.fillText("Fardin's Anime Hub", 50, 108);
+
+    // sakura petals
+    var petals = [
+      [120, 90, 14, 0.35], [340, 60, 10, 0.28], [720, 110, 16, 0.32], [980, 70, 12, 0.25],
+      [200, 300, 13, 0.22], [560, 260, 11, 0.3], [900, 320, 15, 0.26], [150, 520, 12, 0.24],
+      [480, 480, 14, 0.28], [820, 500, 11, 0.22], [1020, 460, 13, 0.3], [60, 700, 10, 0.2],
+      [400, 720, 15, 0.25], [760, 700, 12, 0.28], [1000, 740, 11, 0.22], [300, 900, 14, 0.24],
+      [650, 920, 12, 0.26], [950, 900, 10, 0.2]
+    ];
+    petals.forEach(function (p) {
+      ctx.save(); ctx.translate(p[0], p[1]); ctx.rotate(Math.random() * Math.PI);
+      ctx.fillStyle = 'rgba(255, 182, 210, ' + p[3] + ')';
+      ctx.beginPath(); ctx.ellipse(0, 0, p[2], p[2] * 0.6, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.restore();
+    });
+
+    // title in sky color
+    ctx.fillStyle = '#87ceeb';
+    ctx.font = '900 52px "Orbitron", "Segoe UI", sans-serif';
+    ctx.textAlign = 'left';
+    ctx.shadowColor = 'rgba(135, 206, 235, 0.6)'; ctx.shadowBlur = 18;
+    ctx.fillText('MY ANIME TIER LIST', 48, 84);
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = 'rgba(207, 228, 255, .85)';
+    ctx.font = '600 24px "Rajdhani", "Segoe UI", sans-serif';
+    ctx.fillText("Fardin's Anime Hub", 50, 118);
+
+    // logo top-right
+    var logo = await loadImage('logo.png');
+    if (logo) { ctx.drawImage(logo, W - 140, 20, 110, 110); }
+
+    // preload all posters for this board
+    var allIds = [];
+    state.order.forEach(function (t) { (state.tiers[t] || []).slice(0, 6).forEach(function (id) { allIds.push(id); }); });
+    var imgMap = {};
+    await Promise.all(allIds.map(function (id) {
+      var c = cards[id] || {};
+      return loadImage(c.poster).then(function (img) { imgMap[id] = img; });
+    }));
+
+    // rows
+    var y0 = 150;
     state.order.forEach(function (t, i) {
       var col = colorFor(t);
-      var y = 132 + i * rowH;
+      var y = y0 + i * rowH;
+      // tier tag
       ctx.fillStyle = col;
-      ctx.fillRect(40, y, 104, rowH - 24);
+      ctx.shadowColor = col; ctx.shadowBlur = 16;
+      ctx.fillRect(44, y, 112, rowH - 28);
+      ctx.shadowBlur = 0;
       ctx.fillStyle = '#0b0412';
-      ctx.font = '800 34px "Orbitron", "Segoe UI", sans-serif';
+      ctx.font = '900 40px "Orbitron", "Segoe UI", sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText(state.names[t].slice(0, 4), 92, y + rowH / 2 + 6);
+      ctx.fillText(String(state.names[t]).slice(0, 4), 100, y + rowH / 2 + 8);
       ctx.textAlign = 'left';
-      ctx.fillStyle = 'rgba(255,255,255,.04)';
-      ctx.fillRect(154, y, W - 194, rowH - 24);
-      var items = (state.tiers[t] || []).slice(0, 9).map(function (id) { return (cards[id] || {}).title || ''; });
-      ctx.fillStyle = 'rgba(255,255,255,.9)';
-      ctx.font = '600 20px "Rajdhani", "Segoe UI", sans-serif';
-      items.forEach(function (title, k) {
+
+      // drop zone bg
+      ctx.fillStyle = 'rgba(255,255,255,.05)';
+      ctx.fillRect(166, y, W - 206, rowH - 28);
+      ctx.strokeStyle = 'rgba(255,255,255,.08)';
+      ctx.strokeRect(166, y, W - 206, rowH - 28);
+
+      var items = (state.tiers[t] || []).slice(0, 6);
+      items.forEach(function (id, k) {
         var col2 = k % 3, row = Math.floor(k / 3);
-        var x = 170 + col2 * 300;
-        var ty = y + 42 + row * 42;
-        var txt = title.length > 24 ? title.slice(0, 23) + '…' : title;
-        ctx.fillText(txt, x, ty);
+        var cx = 180 + col2 * 300;
+        var cy = y + 14 + row * 82;
+        var c = cards[id] || { title: '#' + id, poster: '' };
+        // poster thumbnail
+        var img = imgMap[id];
+        if (img) {
+          ctx.save();
+          ctx.beginPath();
+          ctx.rect(cx, cy, 52, 68);
+          ctx.clip();
+          ctx.drawImage(img, cx, cy, 52, 68);
+          ctx.restore();
+          // border
+          ctx.strokeStyle = 'rgba(255,255,255,.25)';
+          ctx.strokeRect(cx, cy, 52, 68);
+        } else {
+          ctx.fillStyle = 'rgba(255,255,255,.08)';
+          ctx.fillRect(cx, cy, 52, 68);
+          ctx.fillStyle = 'rgba(255,255,255,.3)';
+          ctx.font = '600 20px "Rajdhani", sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText('?', cx + 26, cy + 40);
+          ctx.textAlign = 'left';
+        }
+        // title
+        ctx.fillStyle = 'rgba(255,255,255,.92)';
+        ctx.font = '600 17px "Rajdhani", "Segoe UI", sans-serif';
+        var txt = (c.title || '').length > 22 ? (c.title || '').slice(0, 21) + '...' : (c.title || '');
+        ctx.fillText(txt, cx + 60, cy + 22);
+        ctx.fillStyle = 'rgba(255,179,205,.55)';
+        ctx.font = '500 13px "Rajdhani", "Segoe UI", sans-serif';
+        ctx.fillText('NO. ' + id, cx + 60, cy + 42);
       });
       if (!items.length) {
         ctx.fillStyle = 'rgba(255,255,255,.25)';
-        ctx.fillText('—', 172, y + 52);
+        ctx.font = '600 20px "Rajdhani", "Segoe UI", sans-serif';
+        ctx.fillText('—', 184, y + 52);
       }
     });
-    ctx.fillStyle = 'rgba(255,179,205,.5)';
-    ctx.font = '600 20px "Rajdhani", "Segoe UI", sans-serif';
-    ctx.fillText('fardinsenpai.github.io/my-anime-list', 48, H - 26);
+
+    // footer
+    ctx.fillStyle = 'rgba(207, 228, 255, .55)';
+    ctx.font = '600 18px "Rajdhani", "Segoe UI", sans-serif';
+    ctx.fillText('fardinsenpai.github.io/my-anime-list', 48, H - 24);
+
     var a = document.createElement('a');
     a.download = 'anime-tier-list.png';
     a.href = cv.toDataURL('image/png');
     document.body.appendChild(a); a.click(); a.remove();
-  }
-
-  /* ---- shell ---- */
+  }  /* ---- shell ---- */
   function build() {
     overlay = document.createElement('div');
     overlay.className = 'tl-overlay';

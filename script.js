@@ -8562,6 +8562,10 @@ document.addEventListener('click', function(e) {
       showAllAwardWinners();
     } else if (p.endsWith('/waifus') && typeof openWaifus === 'function') {
       openWaifus();
+    } else if (p.indexOf('/games/') > -1) {
+      var gname = decodeURIComponent(p.split('/games/')[1] || '').replace(/\/+$/, '');
+      if (typeof openGamesHub === 'function') openGamesHub();
+      if (gname && window.AnimeGames && typeof window.AnimeGames._openGameScreen === 'function') { setTimeout(function () { try { window.AnimeGames._openGameScreen(gname); } catch (e) {} }, 120); }
     } else if (p.endsWith('/hot-takes')) {
       var btn = document.getElementById('hotTakesBtn');
       if (btn) btn.click();

@@ -162,11 +162,23 @@
     '</article>';
   }
 
+  function isMainPage() {
+    var p = (location.pathname || '').toLowerCase();
+    return p === '/' || p === '' || p.endsWith('/index.html') || p.endsWith('/my-anime-list') || p.endsWith('/my-anime-list/') || p.endsWith('/home');
+  }
+  function shouldShow() {
+    if (!isMainPage()) return false;
+    if (document.documentElement.classList.contains('subpage') || document.body.classList.contains('subpage')) return false;
+    if (document.body.classList.contains('duel-mode-active')) return false;
+    var box = $('searchBox');
+    if (box && String(box.value || '').trim() !== '') return false;
+    return true;
+  }
   function paint(rows) {
     var sec = ensureShell();
     if (!sec) return;
     var track = $('snTrack');
-    if (!rows.length) { sec.hidden = true; return; }
+    if (!rows.length || !shouldShow()) { sec.hidden = true; return; }
     sec.hidden = false;
     track.innerHTML = rows.map(renderCard).join('');
   }
@@ -201,6 +213,17 @@
     }, 280);
   });
 
+  function recomputeVisibility() {
+    var sec = $('airingSection');
+    if (!sec) return;
+    if (!shouldShow()) { sec.hidden = true; return; }
+    if (sec.querySelector('.sn-card')) sec.hidden = false;
+  }
+  document.addEventListener('input', function (e) {
+    if (e.target && e.target.id === 'searchBox') recomputeVisibility();
+  });
+  var mo = new MutationObserver(function () { recomputeVisibility(); });
+  try { mo.observe(document.body, { attributes: true, attributeFilter: ['class'] }); } catch (e) {}
   function boot() {
     if (readCache()) render(false);
     // wait for the list/grid to exist, then fetch in the background
@@ -217,5 +240,5 @@
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
   else boot();
 
-  window.AiringNow = { refresh: function () { render(true); } };
+  window.AiringNow = { refresh: function () { render(true); }, recompute: recomputeVisibility };
 })()

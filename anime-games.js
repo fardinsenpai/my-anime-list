@@ -853,6 +853,7 @@
     var host = gamesHost();
     if (!host) return;
     agGameKey = key;
+    try { history.pushState({game:key}, '', '/my-anime-list/games/' + encodeURIComponent(key)); } catch (e) {}
     host.innerHTML = '';
     var wrap = el('div', 'ag-wrap ag-wrap--game');
     wrap.innerHTML =
@@ -924,6 +925,7 @@
     var input = api.stage.querySelector('#' + id);
     var go = api.stage.querySelector('#' + id + 'Go');
     var skip = withSkip ? api.stage.querySelector('#' + id + 'Skip') : null;
+    if (skip) { skip.style.display = 'none'; setTimeout(function () { if (skip) skip.style.display = ''; }, 3500); }
     /* the anime search suggests the titles of the list. A pick fills the box
        and the player presses SUBMIT (it must never empty the box behind them). */
     if (window.AnimeSearch && input && opts.search !== false) {
@@ -949,6 +951,7 @@
     go.onclick = submit;
     input.onkeydown = function (e) { if (e.key === 'Enter') { e.preventDefault(); submit(); } };
     if (skip) skip.onclick = function () {
+      api._skipped = true;
       go.disabled = true; input.disabled = true; skip.disabled = true;
       onSubmit(null);
     };
@@ -961,8 +964,15 @@
 
   /* a wrong answer shows the right one and moves on */
   function wrongAnswer(api, right, nextFn) {
+    var msg;
+    if (api._skipped) {
+      msg = 'Yeah! I got you, this is <b>' + esc(right) + '</b>. Next is coming in ' + Math.ceil(HOLD_WRONG / 1000) + 's.';
+      api._skipped = false;
+    } else {
+      msg = 'Nope - it was <b>' + esc(right) + '</b>';
+    }
     api.stage.insertAdjacentHTML('beforeend',
-      '<div class="ag-verdict no">Nope - it was <b>' + esc(right) + '</b></div>');
+      '<div class="ag-verdict no">' + msg + '</div>');
     setTimeout(function () { nextFn(api); }, HOLD_WRONG);
   }
   function optionsHtml(items, correct, onPick, cssClass) {
@@ -1046,7 +1056,7 @@
         api.points = Math.max(0, api.points - 2);
         wrongAnswer(api, api.answer, nextCardRound);
       }
-    }, true);
+    }, true, { exclude: api.answer });
     if (nextCost) {
       api.stage.insertAdjacentHTML('beforeend',
         '<button class="ag-next-clue" id="agNextClue">NEXT CLUE <b>-' + nextCost + ' points</b></button>');
@@ -1181,8 +1191,27 @@
     var title = pick(names);
     api.answer = title;
     api.alt = [];
+    var genre = '';
+    var year = '';
+    var cardNum = null;
+    Array.prototype.forEach.call(document.querySelectorAll('#grid .card'), function (c) {
+      var t = c.querySelector('.title');
+      if (t && t.textContent.trim() === title && cardNum === null) {
+        var n = c.querySelector('.number');
+        cardNum = n ? n.textContent.replace(/\D/g, '') : null;
+      }
+    });
+    if (cardNum && window.ANIME_GENRES) {
+      Object.keys(window.ANIME_GENRES).forEach(function (k) {
+        if (k === 'All' || !window.ANIME_GENRES[k] || !window.ANIME_GENRES[k].nums) return;
+        if ((window.ANIME_GENRES[k].nums || []).indexOf(cardNum) > -1 && !genre) genre = k;
+      });
+    }
+    var r = (window.RATING_DATA && cardNum) ? window.RATING_DATA[cardNum] : null;
+    if (r && r.season) { var m = String(r.season).match(/(19|20)\d{2}/); if (m) year = m[0]; }
     api.stage.innerHTML = roundHead(api, 'What is this anime?') +
-      '<div class="ag-emoji">' + (sets[title] || []).map(function (x) { return '<span>' + x + '</span>'; }).join('') + '</div>';
+      '<div class="ag-emoji">' + (sets[title] || []).map(function (x) { return '<span>' + x + '</span>'; }).join('') + '</div>' +
+      '<div class="ag-emoji-meta">' + (genre ? '<span class="ag-emoji-genre">' + esc(genre) + '</span>' : '') + (year ? '<span class="ag-emoji-year">' + year + '</span>' : '') + '</div>';
     answerRow(api, 'agEmojiInput', 'Type the anime title…', function (v) {
       var ok = answerMatches(v, api.answer, api.alt);
       if (ok) {
@@ -1192,7 +1221,7 @@
       } else {
         wrongAnswer(api, api.answer, nextEmojiRound);
       }
-    }, true);
+    }, true, { exclude: api.answer });
   }
 
   /* ══════════════════════════════════════════════════════════════════════
@@ -1344,7 +1373,7 @@
       } else {
         wrongAnswer(api, api.answer, nextScrambleRound);
       }
-    }, true);
+    }, true, { exclude: api.answer });
   }
 
   /* ══════════════════════════════════════════════════════════════════════
@@ -1381,7 +1410,7 @@
       } else {
         wrongAnswer(api, api.answer, nextInitialsRound);
       }
-    }, true);
+    }, true, { exclude: api.answer });
   }
 
   /* ══════════════════════════════════════════════════════════════════════
@@ -1440,12 +1469,16 @@
             setTimeout(function () { api.finish(Math.max(1, 13 - api.moves), 12); }, 1400);
           }
         } else {
+          var b0 = api.stage.querySelector('.ag-mem[data-i="' + api.flipped[0] + '"]');
+          var b1 = api.stage.querySelector('.ag-mem[data-i="' + api.flipped[1] + '"]');
+          if (b0) b0.classList.add('ag-mem--shake');
+          if (b1) b1.classList.add('ag-mem--shake');
           setTimeout(function () {
             a.face = 'back';
             c.face = 'back';
             api.flipped = [];
             drawMemory(api);
-          }, 850);
+          }, 700);
         }
       };
     });

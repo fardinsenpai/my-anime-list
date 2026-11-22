@@ -1315,3 +1315,26 @@
   .ag-game-title { font-size: 13px; }
   .ag-game-desc { font-size: 11px; }
 }
+
+/* memory: shake on wrong pair */
+.ag-mem--shake { animation: agShake .45s ease; }
+@keyframes agShake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-6px) rotate(-2deg); }
+  40% { transform: translateX(6px) rotate(2deg); }
+  60% { transform: translateX(-4px) rotate(-1deg); }
+  80% { transform: translateX(4px) rotate(1deg); }
+}
+
+/* smaller "I don't know" button */
+.ag-btn--ghost { font-size: .72rem; padding: 6px 10px; min-height: 30px; opacity: .85; }
+.ag-btn--ghost:hover { opacity: 1; }
+
+/* emoji game: genre + year under emojis */
+.ag-emoji-meta { display: flex; gap: 8px; justify-content: center; margin-top: 6px; flex-wrap: wrap; }
+.ag-emoji-genre, .ag-emoji-year {
+  padding: 3px 10px; border-radius: 99px; font-size: .7rem; font-weight: 700;
+  font-family: 'Rajdhani', sans-serif; letter-spacing: .04em;
+}
+.ag-emoji-genre { background: rgba(255, 107, 157, .15); border: 1px solid rgba(255, 107, 157, .4); color: #ffd6e8; }
+.ag-emoji-year { background: rgba(120, 170, 255, .15); border: 1px solid rgba(120, 170, 255, .4); color: #cfe4ff; }

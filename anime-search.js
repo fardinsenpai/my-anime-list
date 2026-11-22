@@ -73,9 +73,10 @@
     return 99;
   }
 
-  function matches(q) {
+  function matches(q, exclude) {
     var list = buildIndex().map(function (it) { return { it: it, s: score(it, q) }; })
       .filter(function (x) { return x.s < 99; })
+      .filter(function (x) { return !exclude || x.it.title.toLowerCase() !== String(exclude).toLowerCase(); })
       .sort(function (a, b) { return a.s - b.s || a.it.title.length - b.it.title.length; })
       .slice(0, 8).map(function (x) { return x.it; });
     return list;
@@ -92,6 +93,13 @@
     owner = input;
     var box = document.createElement('div');
     box.className = 'as-box';
+    var closeBtn = document.createElement('button');
+    closeBtn.type = 'button';
+    closeBtn.className = 'as-close';
+    closeBtn.setAttribute('aria-label', 'Close suggestions');
+    closeBtn.textContent = '×';
+    closeBtn.onclick = function () { close(); };
+    box.appendChild(closeBtn);
     list.forEach(function (it) {
       var row = document.createElement('button');
       row.type = 'button';
@@ -160,18 +168,19 @@
       if (suppress) return;
       var q = String(input.value || '').trim().toLowerCase();
       if (q.length < 1) { close(); return; }
-      draw(input, matches(q));
+      var ex = (input.__searchOpts && input.__searchOpts.exclude) ? input.__searchOpts.exclude : null;
+      draw(input, matches(q, ex));
     }
     input.addEventListener('input', refresh);
     input.addEventListener('focus', refresh);
-    input.addEventListener('blur', function () { setTimeout(close, 180); });
+    input.addEventListener('blur', function () { if (!('ontouchstart' in window)) setTimeout(close, 180); });
     input.addEventListener('keydown', function (e) {
       if (e.key === 'Escape') { close(); input.blur(); }
     });
   }
 
   document.addEventListener('click', function (e) {
-    if (openBox && !openBox.contains(e.target) && e.target !== owner) close();
+    if (!('ontouchstart' in window) && openBox && !openBox.contains(e.target) && e.target !== owner) close();
   });
 
   window.addEventListener('scroll', function () { close(); }, true);
