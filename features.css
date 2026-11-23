@@ -517,3 +517,146 @@
   .tl-tag, .tl-tier-input { animation: none !important; }
 }
 
+/* === stickmen sidebar controls (cool restyle) === */
+.sm-ctrl {
+  position: relative;
+  margin: 10px 8px;
+  padding: 12px 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  border-radius: 14px;
+  background:
+    linear-gradient(160deg, rgba(255, 77, 125, .10), rgba(122, 140, 255, .08) 60%, rgba(77, 212, 172, .06)),
+    rgba(14, 6, 22, .72);
+  border: 1px solid rgba(255, 107, 157, .35);
+  box-shadow:
+    0 8px 24px rgba(0, 0, 0, .45),
+    0 0 0 1px rgba(255, 255, 255, .04) inset,
+    0 0 22px rgba(255, 77, 125, .12);
+  backdrop-filter: blur(10px);
+  overflow: hidden;
+}
+.sm-ctrl::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 20% 0%, rgba(255, 77, 125, .18), transparent 55%);
+  pointer-events: none;
+}
+.sm-ctrl-title {
+  position: relative;
+  font-family: 'Orbitron', sans-serif;
+  font-size: .72rem;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  background: linear-gradient(90deg, #ff4d7d, #ffd93d, #4dd4ac);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-shadow: 0 0 12px rgba(255, 77, 125, .35);
+  padding-bottom: 4px;
+  border-bottom: 1px solid rgba(255, 255, 255, .08);
+}
+.sm-ctrl-title::before { content: 'âœ¦ '; color: #ff4d7d; }
+.sm-ctrl-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: .74rem;
+  color: #f0e9f7;
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 600;
+}
+.sm-ctrl-row label {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  letter-spacing: .04em;
+}
+.sm-ctrl-row span {
+  min-width: 52px;
+  text-align: right;
+  font-family: 'Orbitron', sans-serif;
+  font-size: .68rem;
+  color: #ffd93d;
+  text-shadow: 0 0 8px rgba(255, 217, 61, .4);
+}
+.sm-ctrl-row input[type="range"] {
+  flex: 1;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  border-radius: 6px;
+  background: linear-gradient(90deg, rgba(255, 77, 125, .35), rgba(122, 140, 255, .35));
+  outline: none;
+  cursor: pointer;
+}
+.sm-ctrl-row input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, #fff, #ff4d7d);
+  border: 2px solid #fff;
+  box-shadow: 0 0 10px rgba(255, 77, 125, .7);
+  cursor: grab;
+}
+.sm-ctrl-row input[type="range"]::-moz-range-thumb {
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, #fff, #ff4d7d);
+  border: 2px solid #fff;
+  box-shadow: 0 0 10px rgba(255, 77, 125, .7);
+  cursor: grab;
+}
+.sm-ctrl-colors {
+  position: relative;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 4px 0;
+}
+.sm-color {
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, .5);
+  cursor: pointer;
+  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+  box-shadow: 0 0 8px rgba(255, 255, 255, .15), inset 0 2px 4px rgba(0,0,0,.3);
+}
+.sm-color:hover { transform: scale(1.2) translateY(-2px); border-color: #fff; box-shadow: 0 0 14px rgba(255, 255, 255, .45); }
+.sm-color--custom {
+  background: conic-gradient(#ff4d7d, #ffd93d, #4dd4ac, #7a8cff, #ff4d7d) !important;
+  color: #fff;
+  font-weight: 900;
+  font-size: 1rem;
+  line-height: 22px;
+  text-align: center;
+  text-shadow: 0 1px 2px rgba(0,0,0,.6);
+}
+.sm-toggle {
+  position: relative;
+  min-height: 36px;
+  padding: 0 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 77, 125, .5);
+  background: linear-gradient(135deg, rgba(255, 77, 125, .25), rgba(122, 140, 255, .2));
+  color: #ffe0ec;
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 700;
+  font-size: .72rem;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: transform .16s ease, box-shadow .16s ease, background .16s ease;
+  box-shadow: 0 4px 14px rgba(255, 77, 125, .25);
+}
+.sm-toggle:hover {
+  transform: translateY(-2px);
+  background: linear-gradient(135deg, rgba(255, 77, 125, .4), rgba(122, 140, 255, .3));
+  box-shadow: 0 6px 20px rgba(255, 77, 125, .45);
+}
+.sm-toggle:active { transform: translateY(0); }
