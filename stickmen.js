@@ -3,7 +3,7 @@
    ---------------------------------------------------------------------
    Lightweight Canvas 2D stickmen with:
      - 5s startup delay, 2 stickmen by default
-     - 11 random entry animations
+     - 11 random entry animations (full stickman + props)
      - idle/social behaviors (sit, sleep, look up/down, spar)
      - exit animations with goodbye messages
      - sidebar: Count, Size (4 levels), Custom color, Hide/Show
@@ -62,7 +62,7 @@
   function makeStickman(i, entryType) {
     var col = cfg.colors[i % cfg.colors.length];
     return {
-      x: 60 + i * 40,
+      x: 80 + i * 60,
       y: -60,
       vx: (Math.random() - 0.5) * 2,
       vy: 0,
@@ -80,7 +80,7 @@
       legPhase: Math.random() * Math.PI * 2,
       armPhase: Math.random() * Math.PI * 2,
       scale: 0.9 + Math.random() * 0.2,
-      homeX: 60 + i * 40,
+      homeX: 80 + i * 60,
       entry: { type: entryType || ENTRY_TYPES[Math.floor(Math.random() * ENTRY_TYPES.length)], t: 0, done: false },
       exiting: false,
       exitT: 0,
@@ -131,6 +131,369 @@
     return best;
   }
 
+  /* ---------- entry animation drawing ---------- */
+  /* Draws a full stickman body at origin with given pose. Props drawn by caller. */
+  function drawBody(col, pose, sizeScale, phase) {
+    phase = phase || 0;
+    ctx.save();
+    ctx.scale(sizeScale, sizeScale);
+    /* head */
+    ctx.fillStyle = col;
+    ctx.beginPath(); ctx.arc(0, -38, 9, 0, Math.PI * 2); ctx.fill();
+    /* eyes */
+    if (pose === 'sleep') {
+      ctx.strokeStyle = '#000'; ctx.lineWidth = 1.3; ctx.lineCap = 'round';
+      ctx.beginPath(); ctx.moveTo(-5, -40); ctx.lineTo(-1, -40); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(1, -40); ctx.lineTo(5, -40); ctx.stroke();
+    } else if (pose === 'shocked' || pose === 'peek') {
+      ctx.fillStyle = '#fff';
+      ctx.beginPath(); ctx.arc(-3, -40, 2.6, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(3, -40, 2.6, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#000';
+      ctx.beginPath(); ctx.arc(-3, -40, 1.3, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(3, -40, 1.3, 0, Math.PI * 2); ctx.fill();
+    } else if (pose === 'dead') {
+      ctx.strokeStyle = '#000'; ctx.lineWidth = 1.4; ctx.lineCap = 'round';
+      ctx.beginPath(); ctx.moveTo(-5, -42); ctx.lineTo(-1, -38); ctx.moveTo(-1, -42); ctx.lineTo(-5, -38); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(1, -42); ctx.lineTo(5, -38); ctx.moveTo(5, -42); ctx.lineTo(1, -38); ctx.stroke();
+    } else {
+      ctx.fillStyle = '#fff';
+      ctx.beginPath(); ctx.arc(-3, -40, 2.2, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(3, -40, 2.2, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#000';
+      ctx.beginPath(); ctx.arc(-3, -40, 1.1, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(3, -40, 1.1, 0, Math.PI * 2); ctx.fill();
+    }
+    /* mouth */
+    ctx.strokeStyle = '#000'; ctx.lineWidth = 1.3; ctx.lineCap = 'round';
+    ctx.beginPath();
+    if (pose === 'happy' || pose === 'laugh') { ctx.arc(0, -35, 4, 0.2, Math.PI - 0.2); }
+    else if (pose === 'sad' || pose === 'dead') { ctx.arc(0, -30, 4, Math.PI + 0.2, Math.PI * 2 - 0.2); }
+    else if (pose === 'angry') { ctx.moveTo(-4, -33); ctx.lineTo(4, -33); }
+    else if (pose === 'sleep') { ctx.arc(0, -33, 1.6, 0, Math.PI * 2); }
+    else if (pose === 'shocked') { ctx.arc(0, -32, 3, 0, Math.PI * 2); }
+    else if (pose === 'cough') { ctx.moveTo(-3, -33); ctx.lineTo(3, -31); }
+    else { ctx.moveTo(-3, -33); ctx.lineTo(3, -33); }
+    ctx.stroke();
+
+    /* body */
+    ctx.strokeStyle = col; ctx.lineWidth = 2.6;
+    if (pose === 'fall' || pose === 'tumble') {
+      ctx.beginPath(); ctx.moveTo(-12, -29); ctx.lineTo(12, -8); ctx.stroke();
+    } else if (pose === 'sit') {
+      ctx.beginPath(); ctx.moveTo(0, -29); ctx.lineTo(0, -12); ctx.stroke();
+    } else {
+      ctx.beginPath(); ctx.moveTo(0, -29); ctx.lineTo(0, -8); ctx.stroke();
+    }
+
+    /* arms */
+    if (pose === 'climb') {
+      ctx.beginPath(); ctx.moveTo(0, -24); ctx.lineTo(-14, -34); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(0, -24); ctx.lineTo(14, -34); ctx.stroke();
+    } else if (pose === 'sit') {
+      ctx.beginPath(); ctx.moveTo(0, -22); ctx.lineTo(-11, -6); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(0, -22); ctx.lineTo(11, -6); ctx.stroke();
+    } else if (pose === 'rubhead') {
+      ctx.beginPath(); ctx.moveTo(0, -24); ctx.lineTo(-6, -36); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(0, -24); ctx.lineTo(12, -18); ctx.stroke();
+    } else if (pose === 'scratchhead') {
+      var sw = Math.sin(phase * 12) * 2;
+      ctx.beginPath(); ctx.moveTo(0, -24); ctx.lineTo(-4 + sw, -38); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(0, -24); ctx.lineTo(12, -18); ctx.stroke();
+    } else if (pose === 'shocked' || pose === 'peek') {
+      ctx.beginPath(); ctx.moveTo(0, -24); ctx.lineTo(-14, -20); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(0, -24); ctx.lineTo(14, -20); ctx.stroke();
+    } else if (pose === 'fall' || pose === 'tumble') {
+      ctx.beginPath(); ctx.moveTo(-12, -22); ctx.lineTo(-20, -30); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(-12, -22); ctx.lineTo(-4, -12); ctx.stroke();
+    } else if (pose === 'cough') {
+      ctx.beginPath(); ctx.moveTo(0, -22); ctx.lineTo(-8, -14); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(0, -22); ctx.lineTo(8, -14); ctx.stroke();
+    } else {
+      var as = Math.sin(phase * 4) * 0.6;
+      ctx.beginPath(); ctx.moveTo(0, -22); ctx.lineTo(-12, -16 + as * 8); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(0, -22); ctx.lineTo(12, -16 - as * 8); ctx.stroke();
+    }
+
+    /* legs */
+    if (pose === 'sit') {
+      ctx.beginPath(); ctx.moveTo(0, -8); ctx.lineTo(-11, -2); ctx.lineTo(-11, 12); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(0, -8); ctx.lineTo(11, -2); ctx.lineTo(11, 12); ctx.stroke();
+    } else if (pose === 'fall' || pose === 'tumble') {
+      ctx.beginPath(); ctx.moveTo(-12, -8); ctx.lineTo(-22, 0); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(-12, -8); ctx.lineTo(-4, 4); ctx.stroke();
+    } else if (pose === 'climb') {
+      ctx.beginPath(); ctx.moveTo(0, -8); ctx.lineTo(-10, 4); ctx.lineTo(-6, 14); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(0, -8); ctx.lineTo(10, 4); ctx.lineTo(6, 14); ctx.stroke();
+    } else {
+      var ls = Math.sin(phase * 4) * 0.8;
+      ctx.beginPath(); ctx.moveTo(0, -8); ctx.lineTo(-8 + ls * 6, 12); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(0, -8); ctx.lineTo(8 - ls * 6, 12); ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  function drawEntry(s, sizeScale) {
+    var e = s.entry;
+    if (!e) return false;
+    var t = e.t;
+    var col = s.color;
+    var groundY = window.innerHeight - 40;
+    var topY = -50;
+    var sy = groundY; /* stickman y (canvas px) */
+    ctx.save();
+
+    /* helper: draw props at pixel scale (unscaled) */
+    function prop(fn) { ctx.save(); var inv = 1 / (s.scale * sizeScale); ctx.scale(inv, inv); fn(); ctx.restore(); }
+
+    if (e.type === 'rope') {
+      /* rope drops, stickman climbs, signals, rope retracts */
+      var ropeTop = -120;
+      var ropeBot;
+      if (t < 0.25) {
+        ropeBot = topY + (groundY - topY) * (t / 0.25) * 0.3;
+      } else if (t < 0.7) {
+        ropeBot = groundY;
+      } else {
+        ropeBot = groundY - (groundY - topY) * ((t - 0.7) / 0.3);
+      }
+      sy = (t < 0.25) ? (topY + (groundY - topY) * (t / 0.25) * 0.3) : (t < 0.7 ? groundY : groundY);
+      /* stickman climbs: y descends 0.25-0.7 */
+      if (t >= 0.25 && t < 0.7) {
+        var pt = (t - 0.25) / 0.45;
+        sy = topY + (groundY - topY) * pt;
+      }
+      prop(function () {
+        ctx.strokeStyle = '#8b5a2b'; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(s.x, ropeTop); ctx.lineTo(s.x, Math.max(ropeTop, ropeBot)); ctx.stroke();
+      });
+      ctx.translate(s.x, sy);
+      var pose = (t >= 0.7 && t < 0.85) ? 'shocked' : 'climb';
+      drawBody(col, pose, s.scale * sizeScale, t);
+      if (t >= 0.7 && t < 0.85) {
+        /* signal up: arm wave already in shocked; bubble */
+        if (s.bubbleTimer <= 0) { s.bubble = 'up!'; s.bubbleTimer = 40; }
+      }
+    } else if (e.type === 'ladder') {
+      var ladderX = s.x;
+      /* ladder drops 0-0.2, climb 0.2-0.6, nod 0.6-0.75, climb up 0.75-1 */
+      var ly;
+      if (t < 0.2) { ly = topY; }
+      else if (t < 0.6) { var pt = (t - 0.2) / 0.4; ly = topY + (groundY - topY) * pt; }
+      else if (t < 0.75) { ly = groundY; }
+      else { var pt2 = (t - 0.75) / 0.25; ly = groundY - (groundY - topY) * pt2; }
+      sy = ly;
+      prop(function () {
+        ctx.strokeStyle = '#8b5a2b'; ctx.lineWidth = 2;
+        var lx = s.x;
+        var top = topY, bot = groundY;
+        ctx.beginPath(); ctx.moveTo(lx - 8, top); ctx.lineTo(lx - 8, bot); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(lx + 8, top); ctx.lineTo(lx + 8, bot); ctx.stroke();
+        for (var i = 0; i < 7; i++) {
+          var ry = top + (bot - top) * (i / 6);
+          ctx.beginPath(); ctx.moveTo(lx - 8, ry); ctx.lineTo(lx + 8, ry); ctx.stroke();
+        }
+      });
+      ctx.translate(s.x, sy);
+      var lpose = (t >= 0.6 && t < 0.75) ? 'happy' : 'climb';
+      drawBody(col, lpose, s.scale * sizeScale, t);
+    } else if (e.type === 'heli') {
+      /* helicopter lowers 0-0.7, lands, flies off right 0.7-1 */
+      var hy;
+      if (t < 0.7) { hy = topY + (groundY - topY) * (t / 0.7); }
+      else { hy = groundY; }
+      sy = hy;
+      var hx = (t >= 0.7) ? s.x + (t - 0.7) / 0.3 * 200 : s.x;
+      var heliY = hy - 22;
+      var heliX = (t >= 0.7) ? hx : s.x;
+      prop(function () {
+        ctx.fillStyle = '#888'; ctx.beginPath(); ctx.arc(heliX, heliY, 6, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = '#666'; ctx.lineWidth = 1;
+        var spin = t * 20;
+        ctx.save(); ctx.translate(heliX, heliY); ctx.rotate(spin);
+        ctx.beginPath(); ctx.moveTo(-14, 0); ctx.lineTo(14, 0); ctx.stroke();
+        ctx.restore();
+        /* string */
+        ctx.strokeStyle = '#999'; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(heliX, heliY + 6); ctx.lineTo(hx, hy - 10); ctx.stroke();
+      });
+      ctx.translate(hx, sy);
+      drawBody(col, (t >= 0.7) ? 'shocked' : 'stand', s.scale * sizeScale, t);
+      if (t >= 0.85) { ctx.globalAlpha = 1 - (t - 0.85) * 6.67; }
+    } else if (e.type === 'swing') {
+      /* swing drops 0-0.25, lowers 0.25-0.7, disembark 0.7-0.85, swing retracts 0.85-1 */
+      var swingY;
+      if (t < 0.25) { swingY = topY; }
+      else if (t < 0.7) { var pt = (t - 0.25) / 0.45; swingY = topY + (groundY - topY) * pt; }
+      else { swingY = groundY; }
+      sy = (t < 0.7) ? swingY : groundY;
+      var seatY = swingY + 4;
+      prop(function () {
+        ctx.strokeStyle = '#8b5a2b'; ctx.lineWidth = 2;
+        var top = topY;
+        ctx.beginPath(); ctx.moveTo(s.x - 10, top); ctx.lineTo(s.x - 10, seatY); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(s.x + 10, top); ctx.lineTo(s.x + 10, seatY); ctx.stroke();
+        ctx.fillStyle = '#8b5a2b'; ctx.fillRect(s.x - 12, seatY - 3, 24, 6);
+      });
+      ctx.translate(s.x, sy);
+      var spose = (t < 0.7) ? 'sit' : 'stand';
+      drawBody(col, spose, s.scale * sizeScale, t);
+    } else if (e.type === 'failrope') {
+      /* rope 0-0.3 climb, snap 0.3-0.45 fall, rub 0.45-0.7, fix 0.7-1 */
+      var fy;
+      if (t < 0.3) { fy = topY + (groundY - topY) * (t / 0.3); }
+      else if (t < 0.45) { fy = groundY; }
+      else { fy = groundY; }
+      sy = fy;
+      if (t < 0.3) {
+        prop(function () {
+          ctx.strokeStyle = '#8b5a2b'; ctx.lineWidth = 2;
+          ctx.beginPath(); ctx.moveTo(s.x, topY); ctx.lineTo(s.x, fy); ctx.stroke();
+        });
+      } else if (t < 0.45) {
+        /* snapped rope dangling */
+        prop(function () {
+          ctx.strokeStyle = '#8b5a2b'; ctx.lineWidth = 2;
+          ctx.beginPath(); ctx.moveTo(s.x, topY); ctx.lineTo(s.x, topY + 40); ctx.stroke();
+        });
+      }
+      ctx.translate(s.x, sy);
+      var fpose = (t < 0.3) ? 'climb' : (t < 0.45) ? 'fall' : (t < 0.7) ? 'rubhead' : 'stand';
+      drawBody(col, fpose, s.scale * sizeScale, t);
+      if (t >= 0.45 && t < 0.7 && s.bubbleTimer <= 0) { s.bubble = 'ouch!'; s.bubbleTimer = 40; }
+    } else if (e.type === 'parachute') {
+      /* descend 0-0.7, snag 0.7-0.8, thud 0.8-0.9, scratch 0.9-1 */
+      var py;
+      if (t < 0.7) { py = topY + (groundY - topY) * (t / 0.7); }
+      else { py = groundY; }
+      sy = py;
+      var snag = (t >= 0.7 && t < 0.8);
+      var chuteY = py - 30 - (snag ? 10 : 0);
+      prop(function () {
+        ctx.fillStyle = snag ? 'rgba(255,255,255,.5)' : 'rgba(255,255,255,.85)';
+        ctx.beginPath(); ctx.arc(s.x, chuteY, 22, Math.PI, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = '#ccc'; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(s.x - 22, chuteY); ctx.lineTo(s.x, py - 10); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(s.x + 22, chuteY); ctx.lineTo(s.x, py - 10); ctx.stroke();
+      });
+      ctx.translate(s.x, sy);
+      var ppose = (t < 0.7) ? 'stand' : (t < 0.8) ? 'shocked' : (t < 0.9) ? 'fall' : 'scratchhead';
+      drawBody(col, ppose, s.scale * sizeScale, t);
+      if (t >= 0.8 && t < 0.9 && s.bubbleTimer <= 0) { s.bubble = 'thud!'; s.bubbleTimer = 30; }
+    } else if (e.type === 'bungee') {
+      /* bungee: drop with bounce, 2-3 bounces */
+      var by2 = topY + (groundY - topY) * Math.min(1, t * 1.4);
+      var bounce = Math.sin(t * Math.PI * 5) * 40 * (1 - t);
+      by2 = Math.min(groundY, by2 + bounce * (t > 0.3 ? 0.5 : 1));
+      if (t > 0.85) by2 = groundY;
+      sy = by2;
+      prop(function () {
+        ctx.strokeStyle = '#ff4d7d'; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(s.x, topY); ctx.lineTo(s.x, by2); ctx.stroke();
+      });
+      ctx.translate(s.x, sy);
+      drawBody(col, (Math.abs(bounce) > 5) ? 'shocked' : 'stand', s.scale * sizeScale, t);
+    } else if (e.type === 'slipslide') {
+      /* ramp 0-1, slide then slip midway, tumble */
+      var rampTop = topY, rampBot = groundY;
+      prop(function () {
+        ctx.fillStyle = '#8b5a2b';
+        ctx.beginPath();
+        ctx.moveTo(s.x - 80, rampTop + 20);
+        ctx.lineTo(s.x + 80, rampBot);
+        ctx.lineTo(s.x + 80, rampBot + 8);
+        ctx.lineTo(s.x - 80, rampTop + 28);
+        ctx.closePath();
+        ctx.fill();
+      });
+      var sx;
+      if (t < 0.4) {
+        sx = s.x - 60 + 120 * (t / 0.4);
+        sy = rampTop + 20 + (rampBot - rampTop - 20) * (t / 0.4);
+      } else if (t < 0.6) {
+        sx = s.x + (t - 0.4) / 0.2 * 20;
+        sy = rampTop + 20 + (rampBot - rampTop - 20) * (0.4 + (t - 0.4) / 0.2 * 0.3);
+      } else {
+        var pt = (t - 0.6) / 0.4;
+        sx = s.x + 20 + 40 * pt;
+        sy = rampTop + 20 + (rampBot - rampTop - 20) * (0.7 + pt * 0.3);
+      }
+      ctx.translate(sx, sy);
+      var sslpose = (t < 0.4) ? 'stand' : (t < 0.6) ? 'fall' : 'tumble';
+      drawBody(col, sslpose, s.scale * sizeScale, t);
+      if (t >= 0.4 && t < 0.6 && s.bubbleTimer <= 0) { s.bubble = 'whoa!'; s.bubbleTimer = 30; }
+    } else if (e.type === 'smoke') {
+      /* smoke puff 0-0.3, emerge 0.3-1 coughing */
+      sy = groundY;
+      prop(function () {
+        var alpha = (t < 0.3) ? 0.7 : Math.max(0, 0.7 - (t - 0.3) * 1.0);
+        ctx.fillStyle = 'rgba(200,200,200,' + alpha + ')';
+        ctx.beginPath(); ctx.arc(s.x, groundY - 20, 28, 0, Math.PI * 2); ctx.fill();
+        if (t < 0.3) {
+          ctx.fillStyle = 'rgba(255,255,255,.5)';
+          ctx.beginPath(); ctx.arc(s.x - 8, groundY - 30, 12, 0, Math.PI * 2); ctx.fill();
+          ctx.beginPath(); ctx.arc(s.x + 10, groundY - 25, 10, 0, Math.PI * 2); ctx.fill();
+        }
+      });
+      if (t >= 0.3) {
+        ctx.translate(s.x, groundY);
+        drawBody(col, (t < 0.5) ? 'cough' : 'shocked', s.scale * sizeScale, t);
+      }
+    } else if (e.type === 'jetpack') {
+      /* rockets down 0-0.7, lands off-balance 0.7-0.85, soot 0.85-1 */
+      var jy;
+      if (t < 0.7) { jy = topY + (groundY - topY) * (t / 0.7); }
+      else { jy = groundY; }
+      sy = jy;
+      prop(function () {
+        ctx.fillStyle = '#ff6b35';
+        ctx.beginPath(); ctx.arc(s.x, jy + 14, 5, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = 'rgba(255,100,0,.6)';
+        ctx.beginPath(); ctx.arc(s.x, jy + 20, 8, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = 'rgba(120,120,120,.5)';
+        ctx.beginPath(); ctx.arc(s.x - 6, jy + 26, 4, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(s.x + 5, jy + 28, 3, 0, Math.PI * 2); ctx.fill();
+      });
+      ctx.translate(s.x, sy);
+      var jpose = (t < 0.7) ? 'shocked' : (t < 0.85) ? 'fall' : 'rubhead';
+      drawBody(col, jpose, s.scale * sizeScale, t);
+      if (t >= 0.85 && s.bubbleTimer <= 0) { s.bubble = 'soot!'; s.bubbleTimer = 40; }
+    } else if (e.type === 'peekpop') {
+      /* peek 0-0.4, check 0.4-0.6, hop in 0.6-1 */
+      sy = groundY;
+      var peekX = s.x - 60;
+      prop(function () {
+        /* edge/card */
+        ctx.fillStyle = '#7a8cff';
+        ctx.fillRect(peekX - 6, groundY - 60, 12, 60);
+      });
+      if (t < 0.4) {
+        ctx.translate(peekX, groundY);
+        /* only head peeking */
+        ctx.save(); ctx.scale(s.scale * sizeScale, s.scale * sizeScale);
+        ctx.fillStyle = col; ctx.beginPath(); ctx.arc(0, -38, 9, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(-3, -40, 2.2, 0, Math.PI * 2); ctx.fill(); ctx.beginPath(); ctx.arc(3, -40, 2.2, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#000'; ctx.beginPath(); ctx.arc(-3, -40, 1.1, 0, Math.PI * 2); ctx.fill(); ctx.beginPath(); ctx.arc(3, -40, 1.1, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
+      } else if (t < 0.6) {
+        ctx.translate(peekX, groundY);
+        drawBody(col, 'shocked', s.scale * sizeScale, t);
+        if (s.bubbleTimer <= 0) { s.bubble = 'clear?'; s.bubbleTimer = 40; }
+      } else {
+        var hop = 1 - (t - 0.6) / 0.4;
+        var hx2 = peekX + (s.x - peekX) * ((t - 0.6) / 0.4);
+        var hy2 = groundY - Math.sin((t - 0.6) / 0.4 * Math.PI) * 40;
+        sy = hy2;
+        ctx.translate(hx2, hy2);
+        drawBody(col, 'happy', s.scale * sizeScale, t);
+      }
+    }
+
+    s.y = sy;
+    ctx.restore();
+    return true;
+  }
+
   function step() {
     var targets = cardTargets();
     var topBarH = 60;
@@ -168,7 +531,7 @@
       /* entry animation */
       if (s.entry && !s.entry.done) {
         s.entry.t += 0.015;
-        if (s.entry.t >= 1) { s.entry.done = true; s.entry = null; s.onGround = true; s.y = groundY; }
+        if (s.entry.t >= 1) { s.entry.done = true; s.entry = null; s.onGround = true; s.y = groundY; s.state = 'happy'; s.stateTimer = 60; }
         if (s.bubbleTimer > 0) s.bubbleTimer--;
         return;
       }
@@ -251,101 +614,17 @@
     ctx.beginPath(); ctx.arc(3, -40, 1.1, 0, Math.PI * 2); ctx.fill();
   }
 
-  function drawEntry(s) {
-    var e = s.entry;
-    if (!e) return false;
-    var t = e.t;
-    var col = s.color;
-    ctx.save();
-    ctx.translate(s.x, 0);
-    var groundY = window.innerHeight - 40;
-    var y = groundY * (1 - t) * 0.3 - 60 + groundY * t * 0.8;
-    s.y = groundY;
-    ctx.translate(0, y);
-
-    if (e.type === 'rope') {
-      ctx.strokeStyle = '#8b5a2b'; ctx.lineWidth = 2;
-      ctx.beginPath(); ctx.moveTo(0, -200); ctx.lineTo(0, 0); ctx.stroke();
-      ctx.fillStyle = col; ctx.beginPath(); ctx.arc(0, -38, 9, 0, Math.PI * 2); ctx.fill();
-      if (t > 0.8) { ctx.strokeStyle = col; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(0, -22); ctx.lineTo(-12, -30); ctx.stroke(); }
-    } else if (e.type === 'ladder') {
-      ctx.strokeStyle = '#8b5a2b'; ctx.lineWidth = 2;
-      for (var i = 0; i < 5; i++) { ctx.beginPath(); ctx.moveTo(-8, -180 + i * 40); ctx.lineTo(8, -180 + i * 40); ctx.stroke(); }
-      ctx.beginPath(); ctx.moveTo(-8, -200); ctx.lineTo(-8, 0); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(8, -200); ctx.lineTo(8, 0); ctx.stroke();
-      ctx.fillStyle = col; ctx.beginPath(); ctx.arc(0, -38, 9, 0, Math.PI * 2); ctx.fill();
-    } else if (e.type === 'heli') {
-      ctx.fillStyle = '#888'; ctx.beginPath(); ctx.arc(0, -55, 6, 0, Math.PI * 2); ctx.fill();
-      ctx.strokeStyle = '#666'; ctx.lineWidth = 1;
-      ctx.beginPath(); ctx.moveTo(-12, -55); ctx.lineTo(12, -55); ctx.stroke();
-      ctx.fillStyle = col; ctx.beginPath(); ctx.arc(0, -38, 9, 0, Math.PI * 2); ctx.fill();
-      if (t > 0.9) { ctx.globalAlpha = 1 - (t - 0.9) * 10; }
-    } else if (e.type === 'swing') {
-      ctx.strokeStyle = '#8b5a2b'; ctx.lineWidth = 2;
-      ctx.beginPath(); ctx.moveTo(-10, -200); ctx.lineTo(-10, 0); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(10, -200); ctx.lineTo(10, 0); ctx.stroke();
-      ctx.fillStyle = '#8b5a2b'; ctx.fillRect(-12, -4, 24, 6);
-      ctx.fillStyle = col; ctx.beginPath(); ctx.arc(0, -38, 9, 0, Math.PI * 2); ctx.fill();
-    } else if (e.type === 'failrope') {
-      if (t < 0.4) {
-        ctx.strokeStyle = '#8b5a2b'; ctx.lineWidth = 2;
-        ctx.beginPath(); ctx.moveTo(0, -200); ctx.lineTo(0, 0); ctx.stroke();
-        ctx.fillStyle = col; ctx.beginPath(); ctx.arc(0, -38, 9, 0, Math.PI * 2); ctx.fill();
-      } else {
-        ctx.fillStyle = col; ctx.beginPath(); ctx.arc(0, -38, 9, 0, Math.PI * 2); ctx.fill();
-        if (t < 0.7) { ctx.strokeStyle = '#000'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(0, -20, 12, 0, Math.PI); ctx.stroke(); }
-      }
-    } else if (e.type === 'parachute') {
-      ctx.fillStyle = 'rgba(255,255,255,.8)'; ctx.beginPath(); ctx.arc(0, -60, 20, Math.PI, Math.PI * 2); ctx.fill();
-      ctx.strokeStyle = '#ccc'; ctx.lineWidth = 1;
-      ctx.beginPath(); ctx.moveTo(-20, -60); ctx.lineTo(0, -38); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(20, -60); ctx.lineTo(0, -38); ctx.stroke();
-      ctx.fillStyle = col; ctx.beginPath(); ctx.arc(0, -38, 9, 0, Math.PI * 2); ctx.fill();
-      if (t > 0.85) { ctx.globalAlpha = 0.7; }
-    } else if (e.type === 'bungee') {
-      var bounce = Math.sin(t * Math.PI * 4) * 30 * (1 - t);
-      ctx.strokeStyle = '#ff4d7d'; ctx.lineWidth = 2;
-      ctx.beginPath(); ctx.moveTo(0, -200); ctx.lineTo(0, bounce - 40); ctx.stroke();
-      ctx.fillStyle = col; ctx.beginPath(); ctx.arc(0, bounce - 58, 9, 0, Math.PI * 2); ctx.fill();
-    } else if (e.type === 'slipslide') {
-      ctx.fillStyle = '#8b5a2b'; ctx.fillRect(-60, 0, 120, 8);
-      ctx.fillStyle = col; ctx.beginPath(); ctx.arc(t * 80 - 40, -38, 9, 0, Math.PI * 2); ctx.fill();
-    } else if (e.type === 'smoke') {
-      if (t < 0.3) {
-        ctx.fillStyle = 'rgba(200,200,200,.6)'; ctx.beginPath(); ctx.arc(0, -30, 25, 0, Math.PI * 2); ctx.fill();
-      } else {
-        ctx.fillStyle = col; ctx.beginPath(); ctx.arc(0, -38, 9, 0, Math.PI * 2); ctx.fill();
-        if (t < 0.5) { ctx.fillStyle = 'rgba(200,200,200,.4)'; ctx.beginPath(); ctx.arc(0, -30, 15, 0, Math.PI * 2); ctx.fill(); }
-      }
-    } else if (e.type === 'jetpack') {
-      ctx.fillStyle = col; ctx.beginPath(); ctx.arc(0, -38, 9, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = '#ff6b35'; ctx.beginPath(); ctx.arc(0, -25, 4, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = 'rgba(255,100,0,.6)'; ctx.beginPath(); ctx.arc(0, -20, 6, 0, Math.PI * 2); ctx.fill();
-    } else if (e.type === 'peekpop') {
-      if (t < 0.5) {
-        ctx.fillStyle = col; ctx.beginPath(); ctx.arc(-20, -38, 9, 0, Math.PI * 2); ctx.fill();
-        ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(-23, -40, 2.2, 0, Math.PI * 2); ctx.fill();
-        ctx.beginPath(); ctx.arc(-17, -40, 2.2, 0, Math.PI * 2); ctx.fill();
-      } else {
-        ctx.fillStyle = col; ctx.beginPath(); ctx.arc(0, -38, 9, 0, Math.PI * 2); ctx.fill();
-      }
-    }
-
-    ctx.restore();
-    return true;
-  }
-
   function drawStickman(s) {
     var sizeScale = SIZE_SCALE[cfg.size] || 1.0;
+    if (s.entry && !s.entry.done) {
+      drawEntry(s, sizeScale);
+      return;
+    }
     ctx.save();
     ctx.translate(s.x, s.y);
     if (s.dead) { ctx.rotate(Math.PI / 2); }
     ctx.scale(s.scale * sizeScale, s.scale * sizeScale);
     var col = s.color;
-
-    if (s.entry && !s.entry.done) {
-      if (drawEntry(s)) { ctx.restore(); return; }
-    }
 
     if (s.exiting) {
       var et = s.exitT;
@@ -373,17 +652,11 @@
     /* mouth by state */
     ctx.strokeStyle = '#000'; ctx.lineWidth = 1.3; ctx.lineCap = 'round';
     ctx.beginPath();
-    if (s.state === 'happy' || s.state === 'laugh') {
-      ctx.arc(0, -35, 4, 0.2, Math.PI - 0.2);
-    } else if (s.state === 'sad' || s.dead) {
-      ctx.arc(0, -30, 4, Math.PI + 0.2, Math.PI * 2 - 0.2);
-    } else if (s.state === 'angry') {
-      ctx.moveTo(-4, -33); ctx.lineTo(4, -33);
-    } else if (s.state === 'sleep') {
-      ctx.arc(0, -33, 1.6, 0, Math.PI * 2);
-    } else {
-      ctx.moveTo(-3, -33); ctx.lineTo(3, -33);
-    }
+    if (s.state === 'happy' || s.state === 'laugh') { ctx.arc(0, -35, 4, 0.2, Math.PI - 0.2); }
+    else if (s.state === 'sad' || s.dead) { ctx.arc(0, -30, 4, Math.PI + 0.2, Math.PI * 2 - 0.2); }
+    else if (s.state === 'angry') { ctx.moveTo(-4, -33); ctx.lineTo(4, -33); }
+    else if (s.state === 'sleep') { ctx.arc(0, -33, 1.6, 0, Math.PI * 2); }
+    else { ctx.moveTo(-3, -33); ctx.lineTo(3, -33); }
     ctx.stroke();
 
     /* body */
@@ -428,6 +701,17 @@
       }
     }
 
+    /* spar swords */
+    if (s.state === 'spar' && !s.dead) {
+      var mateS = nearestOther(s);
+      if (mateS && Math.abs(mateS.x - s.x) < 70) {
+        ctx.save();
+        ctx.strokeStyle = '#c0c0c0'; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(s.x, s.y - 24); ctx.lineTo((s.x + mateS.x) / 2, (s.y + mateS.y) / 2 - 30); ctx.stroke();
+        ctx.restore();
+      }
+    }
+
     /* bubble */
     if (s.bubble && s.bubbleTimer > 0) {
       ctx.save();
@@ -448,26 +732,6 @@
       ctx.fillStyle = col;
       ctx.textAlign = 'center';
       ctx.fillText(txt, s.x, by + 15);
-      ctx.restore();
-    }
-
-    /* goodbye message */
-    if (s.exiting && s.exitMsg === 'bye' && s.bubble) {
-      ctx.save();
-      ctx.font = 'bold 13px "Rajdhani", sans-serif';
-      var gtxt = s.bubble;
-      var gbw = ctx.measureText(gtxt).width + 14;
-      var gbx = s.x - gbw / 2, gby = s.y - 60;
-      ctx.fillStyle = 'rgba(255,255,255,.92)';
-      ctx.strokeStyle = col;
-      ctx.lineWidth = 1.5;
-      ctx.beginPath();
-      if (ctx.roundRect) { ctx.roundRect(gbx, gby, gbw, 22, 8); }
-      else { ctx.rect(gbx, gby, gbw, 22); }
-      ctx.fill(); ctx.stroke();
-      ctx.fillStyle = col;
-      ctx.textAlign = 'center';
-      ctx.fillText(gtxt, s.x, gby + 15);
       ctx.restore();
     }
   }
@@ -649,7 +913,6 @@
       if (visible) {
         if (!suppressed) { mountCanvas(); initStickmen(); }
         toggle.textContent = 'Hide Stickmen';
-        /* close sidebar immediately */
         var sidebar = document.querySelector('.side-nav, nav.side-nav');
         if (sidebar && sidebar.classList.contains('open')) sidebar.classList.remove('open');
       } else {
@@ -658,12 +921,10 @@
         stickmen.forEach(function (s) {
           s.exiting = true;
           s.exitT = 0;
-          s.exitMsg = GOODBYE[Math.floor(Math.random() * GOODBYE.length)];
           var r = Math.random();
-          if (r < 0.33) s.exitMsg = 'bye';
-          else if (r < 0.66) s.exitMsg = 'heli';
-          else s.exitMsg = 'swing';
-          s.bubble = GOODBYE[Math.floor(Math.random() * GOODBYE.length)];
+          if (r < 0.34) { s.exitMsg = 'bye'; s.bubble = 'Bye!'; }
+          else if (r < 0.67) { s.exitMsg = 'heli'; s.bubble = 'Flying off!'; }
+          else { s.exitMsg = 'swing'; s.bubble = 'Wheee!'; }
           s.bubbleTimer = 120;
         });
         toggle.textContent = 'Show Stickmen';
@@ -671,7 +932,6 @@
           unmount();
           exiting = false;
         }, 1500);
-        /* close sidebar immediately */
         var sidebar2 = document.querySelector('.side-nav, nav.side-nav');
         if (sidebar2 && sidebar2.classList.contains('open')) sidebar2.classList.remove('open');
       }
