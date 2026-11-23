@@ -1486,7 +1486,17 @@
   text-transform: uppercase;
   color: rgba(255, 255, 255, .45);
 }
-.ag-hud-cell--score { flex: 1.4 1 0; justify-content: flex-end; gap: 7px; }
+.ag-hud-cell--score { flex: 1.4 1 0; justify-content: flex-end; gap: 7px; position: relative; }
+.ag-hud-cell--score::after {
+  content: '';
+  position: absolute;
+  right: -4px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 24px;
+  height: 1px;
+  background: rgba(255,255,255,.35);
+}
 .ag-hud-v { color: #fff; font-size: 15px; letter-spacing: .4px; }
 .ag-hud-time {
   color: #2fe08a;
@@ -1503,8 +1513,27 @@
   bottom: calc(100% - 7px);
   line-height: 0;
   pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
 }
 .ag-stick--sit { width: 76px; height: 80px; }
+
+/* digital speed bubble above the green stickman's head */
+.ag-hud-speed {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .8px;
+  color: #2fe08a;
+  background: rgba(6, 12, 20, .9);
+  border: 1px solid rgba(47, 224, 138, .45);
+  border-radius: 6px;
+  padding: 2px 6px;
+  box-shadow: 0 0 10px rgba(47, 224, 138, .35), inset 0 0 6px rgba(47, 224, 138, .15);
+  text-shadow: 0 0 8px rgba(47, 224, 138, .7);
+}
 
 /* ── question type: violet pill, cool blue type ── */
 .ag-qtype {
@@ -1554,22 +1583,38 @@
 }
 .ag-qbox:has(+ .ag-inrow:not(:empty)) { border-radius: 16px 16px 0 0; border-bottom: 0; }
 
-/* SUBMIT gets the mockup's notch + cyan glow; other buttons keep their look */
+/* SUBMIT: compact cyber-glowing pill with notch, intense pulse */
 .ag-inrow .ag-btn--go {
-  border: 1.5px solid transparent;
+  padding: 10px 22px;
+  border: 1px solid transparent;
   background:
-    linear-gradient(180deg, #0b1d2b, #06121c) padding-box,
-    linear-gradient(160deg, #22d3ee, #38bdf8) border-box;
-  color: #eafcff;
-  clip-path: polygon(11px 0, 100% 0, 100% calc(100% - 11px), calc(100% - 11px) 100%, 0 100%, 0 11px);
-  box-shadow: 0 0 22px -7px rgba(34, 211, 238, .85);
+    linear-gradient(180deg, #0a1824, #061018) padding-box,
+    linear-gradient(135deg, #00f2fe, #4f8cff, #00f2fe) border-box;
+  background-size: 100%, 200%;
+  color: #e8fcff;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 2.2px;
+  clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
+  box-shadow:
+    0 0 18px -4px rgba(0, 242, 254, .9),
+    0 0 36px -10px rgba(79, 140, 255, .6),
+    inset 0 1px 0 rgba(255,255,255,.3);
+  animation: agSubmitPulse 2.5s ease-in-out infinite;
+}
+@keyframes agSubmitPulse {
+  0%, 100% { box-shadow:
+    0 0 18px -4px rgba(0, 242, 254, .9),
+    0 0 36px -10px rgba(79, 140, 255, .6),
+    inset 0 1px 0 rgba(255,255,255,.3); }
+  50% { box-shadow:
+    0 0 28px -2px rgba(0, 242, 254, 1),
+    0 0 50px -6px rgba(79, 140, 255, .9),
+    inset 0 1px 0 rgba(255,255,255,.45); }
 }
 .ag-inrow .ag-btn--go:hover {
-  background:
-    linear-gradient(180deg, #123448, #081826) padding-box,
-    linear-gradient(160deg, #67e8f9, #38bdf8) border-box;
+  background-position: 0%, 50%;
   color: #fff;
-  box-shadow: 0 0 30px -6px rgba(34, 211, 238, 1);
 }
 
 /* ── the skip strip: a red plate, stickman at the left, text and
@@ -1583,10 +1628,21 @@
   background: linear-gradient(180deg, rgba(74, 13, 30, .6), rgba(46, 8, 19, .72));
   border: 1px solid rgba(255, 77, 109, .45);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, .05), 0 18px 38px -32px rgba(255, 60, 90, .8);
+  position: relative;
   cursor: pointer;
   user-select: none;
   -webkit-tap-highlight-color: transparent;
   transition: background .18s, border-color .18s, transform .12s, box-shadow .18s;
+}
+.ag-skip::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  height: 1px;
+  background: rgba(255, 77, 109, .5);
+  pointer-events: none;
 }
 .ag-skip:hover, .ag-skip:focus-visible {
   background: linear-gradient(180deg, rgba(104, 18, 40, .68), rgba(62, 10, 24, .8));
@@ -1630,17 +1686,34 @@
   50% { transform: translateY(-1.5px); }
 }
 
-/* the red one nods and tips toward the skip text */
-.ag-stick--skip .ag-stick-g {
-  transform-box: fill-box;
-  transform-origin: center bottom;
-  animation: agNod 1.7s ease-in-out infinite;
+/* the red one now stands still on its ground line - no head-scratching */
+.ag-stick--skip .ag-stick-g { transform: none; }
+.ag-stick--skip .ag-stick { overflow: visible; }
+.ag-ground { transform-box: fill-box; transform-origin: bottom center; }
+
+/* ── persistent NEXT button at bottom-right ── */
+.ag-next-row {
+  display: flex;
+  justify-content: flex-end;
+  padding: 0 4px;
 }
-@keyframes agNod {
-  0%, 100% { transform: rotate(0deg) translateY(0); }
-  22% { transform: rotate(-8deg) translateY(0); }
-  46% { transform: rotate(0deg) translateY(2px); }
-  70% { transform: rotate(6deg) translateY(0); }
+.ag-next-row[hidden] { display: none !important; }
+.ag-next-row .ag-next-btn {
+  min-width: 96px;
+  padding: 8px 22px;
+  font-size: 12px;
+  letter-spacing: 1.8px;
+  text-transform: uppercase;
+  box-shadow:
+    0 0 18px -4px rgba(0, 242, 254, .8),
+    0 0 32px -8px rgba(79, 140, 255, .5),
+    inset 0 1px 0 rgba(255,255,255,.3);
+}
+.ag-next-row .ag-next-btn:hover {
+  box-shadow:
+    0 0 26px -2px rgba(0, 242, 254, 1),
+    0 0 40px -6px rgba(79, 140, 255, .8),
+    inset 0 1px 0 rgba(255,255,255,.45);
 }
 
 /* ── "LOL It's <Answer> Next (3s)" ── */
@@ -1716,7 +1789,7 @@
   .ag-hud-time { font-size: 11.5px; }
   .ag-hud-perch { right: 8px; bottom: calc(100% - 6px); }
   .ag-stick--sit { width: 60px; height: 64px; }
-  .ag-stick--skip { width: 36px; height: 70px; }
+  .ag-stick--skip { width: 42px; height: 82px; }
   .ag-stick--big { width: 78px; height: 78px; }
   .ag-qtype { font-size: 10px; letter-spacing: 1.6px; padding: 6px 10px; }
   .ag-qbox { padding: 14px 11px 16px; border-radius: 14px; }

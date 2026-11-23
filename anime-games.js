@@ -896,19 +896,34 @@
     var vb = head ? '-15 -52 30 30' : sit ? '-46 -54 74 78' : '-20 -56 40 78';
     var body = '', ledge = '';
     if (sit) {
-      /* side view, feet on the shelf drawn below */
+      /* natural, cozy leaning: torso tipped back & right, arms relaxed,
+         one resting on thigh, both legs bent gently */
       body =
-        '<path class="ag-stick-torso" d="M0 -29 L0 -13" stroke="' + col + '" stroke-width="2.6" fill="none" stroke-linecap="round"/>' +
-        '<path class="ag-stick-arms" d="M0 -25 L11 -18" stroke="' + col + '" stroke-width="2.4" fill="none" stroke-linecap="round"/>' +
-        '<path class="ag-stick-legs" d="M0 -13 L12 -11 M12 -11 L12 5" stroke="' + col + '" stroke-width="2.4" fill="none" stroke-linecap="round" opacity=".55"/>' +
-        '<path class="ag-stick-legs" d="M0 -13 L15 -13 M15 -13 L15 4 L21 4" stroke="' + col + '" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>';
+        '<path class="ag-stick-torso" d="M0 -29 L8 -13" stroke="' + col + '" stroke-width="2.6" fill="none" stroke-linecap="round"/>' +
+        '<path class="ag-stick-eyes" d="M-3 -40 A 3 3 0 0 1 -3 -40" fill="#fff"/><circle cx="3" cy="-40" r="2.3" fill="#fff"/><circle cx="-3" cy="-40" r="2.3" fill="#fff"/>' +
+        '<path class="ag-stick-mouth" d="M0 -24 L0 -22 A 4 4 0 0 0 4 -22" fill="none" stroke="#111" stroke-width="1.3" stroke-linecap="round"/>' +
+        '<path class="ag-stick-arm-right" d="M0 -24 L10 -16" stroke="' + col + '" stroke-width="2.4" fill="none" stroke-linecap="round"/>' +
+        '<path class="ag-stick-arm-left" d="M0 -24 L-10 -17" stroke="' + col + '" stroke-width="2.4" fill="none" stroke-linecap="round"/>' +
+        '<path class="ag-stick-leg-front" d="M0 -13 L15 -12 M15 -12 L15 4 L21 4" stroke="' + col + '" stroke-width="2.4" fill="none" stroke-linecap="round"/>' +
+        '<path class="ag-stick-leg-back" d="M0 -13 L13 -10 M13 -10 L13 5" stroke="' + col + '" stroke-width="2.4" fill="none" stroke-linecap="round"/>';
       /* kept outside the animated group so the shelf never moves */
       ledge = '<path class="ag-perch-led" d="M-41 21 L-26 9 L25 9" fill="none" stroke="' + col + '" stroke-width="1.6" stroke-opacity=".85" stroke-linecap="round" stroke-linejoin="round"/>';
+      // solid ground base under the red standing stickman (skip mode)
+      if (mode === 'skip') {
+        ledge += '<path class="ag-ground" d="M-24 14 L24 14" fill="none" stroke="' + col + '" stroke-width="2" stroke-opacity=".9" stroke-linecap="round"/>' +
+                  '<path class="ag-ground-ticks" d="M-24 14 L-24 18 M-12 14 L-12 18 M0 14 L0 18 M12 14 L12 18 M24 14 L24 18" fill="none" stroke="' + col + '" stroke-width="1" stroke-opacity=".5" stroke-linecap="round"/>';
+      }
     } else if (!head) {
       body =
         '<path class="ag-stick-torso" d="M0 -29 L0 -8" stroke="' + col + '" stroke-width="2.6" fill="none" stroke-linecap="round"/>' +
         '<path class="ag-stick-arms" d="M0 -22 L-12 -16 M0 -22 L12 -16" stroke="' + col + '" stroke-width="2.4" fill="none" stroke-linecap="round"/>' +
         '<path class="ag-stick-legs" d="M0 -8 L-8 12 M0 -8 L8 12" stroke="' + col + '" stroke-width="2.4" fill="none" stroke-linecap="round"/>';
+      /* a solid digital ground line so the standing stickman doesn't float */
+      if (mode === 'skip') {
+        ledge =
+          '<path class="ag-ground" d="M-24 14 L24 14" fill="none" stroke="' + col + '" stroke-width="2" stroke-opacity=".9" stroke-linecap="round"/>' +
+          '<path class="ag-ground-ticks" d="M-24 14 L-24 18 M-12 14 L-12 18 M0 14 L0 18 M12 14 L12 18 M24 14 L24 18" fill="none" stroke="' + col + '" stroke-width="1" stroke-opacity=".5" stroke-linecap="round"/>';
+      }
     }
     return '<svg class="ag-stick ' + (extraCls || '') + '" viewBox="' + vb + '" role="img" aria-hidden="true" focusable="false">' +
       '<g class="ag-stick-g">' +
@@ -944,7 +959,10 @@
       '<div class="ag-play" id="agPlay">' +
         '<div class="ag-hud" id="agHud" hidden>' +
           /* the green one perches on the top edge of the score bar */
-          '<span class="ag-hud-perch">' + stickSvg('green', 'ag-stick--sit', 'sit') + '</span>' +
+          '<span class="ag-hud-perch">' +
+            '<span class="ag-hud-speed" id="agHudSpeed">1.0</span>' +
+            stickSvg('green', 'ag-stick--sit', 'sit') +
+          '</span>' +
           '<div class="ag-hud-row">' +
             '<div class="ag-hud-cell"><span class="ag-hud-k">Round:</span>' +
               '<b class="ag-hud-v" id="agHudRound">0 / 5</b></div>' +
@@ -958,8 +976,11 @@
         '<div class="ag-stage ag-qbox" id="agStage"></div>' +
         '<div class="ag-inrow" id="agInRow" hidden></div>' +
         '<div class="ag-skip" id="agSkipRow" role="button" tabindex="0" hidden>' +
-          '<span class="ag-skip-stick">' + stickSvg('red', 'ag-stick--skip') + '</span>' +
+          '<span class="ag-skip-stick">' + stickSvg('red', 'ag-stick--skip', 'skip') + '</span>' +
           '<span class="ag-skip-txt">Don\'t Know? <b>Skip here…</b></span>' +
+        '</div>' +
+        '<div class="ag-next-row" id="agNextRow" hidden>' +
+          '<button type="button" class="ag-btn ag-btn--go ag-next-btn" id="agNextRound">NEXT ▸</button>' +
         '</div>' +
       '</div>' +
       '<section class="ag-overall ag-overall--game">' +
@@ -1063,10 +1084,18 @@
       if (done) return;
       done = true;
       clearInterval(tick);
+      api._nextClicked = true;
       if (typeof nextFn === 'function') nextFn(api);
       else if (typeof api._onNext === 'function') api._onNext(api);
     }
     if (btn) btn.onclick = go;
+    /* show the persistent NEXT button at bottom-right too */
+    var nextRow = document.querySelector('#agNextRow');
+    if (nextRow) {
+      nextRow.hidden = false;
+      var persistentBtn = nextRow.querySelector('#agNextRound');
+      if (persistentBtn) persistentBtn.onclick = go;
+    }
   }
 
 
@@ -1081,6 +1110,10 @@
     api._skipLock = false;
     api._onSkip = null;
     if (api.answer) api._answerText = api.answer;
+    /* hide the persistent NEXT button when a new round begins */
+    var nextRow = document.querySelector('#agNextRow');
+    if (nextRow) nextRow.hidden = true;
+    api._nextClicked = false;
     var play = api.wrap && api.wrap.querySelector('#agPlay');
     if (play) {
       var r = play.querySelector('#agHudRound');
@@ -1184,7 +1217,25 @@
     }
     api.stage.insertAdjacentHTML('beforeend',
       '<div class="ag-verdict no">Nope - it was <b>' + esc(right) + '</b></div>');
-    setTimeout(function () { nextFn(api); }, HOLD_WRONG);
+    /* show the persistent NEXT button so the player can advance manually */
+    var nextRow = document.querySelector('#agNextRow');
+    api._nextClicked = false;
+    if (nextRow) {
+      nextRow.hidden = false;
+      var persistentBtn = nextRow.querySelector('#agNextRound');
+      if (persistentBtn) {
+        persistentBtn.onclick = function () {
+          if (api._nextClicked) return;
+          api._nextClicked = true;
+          nextFn(api);
+        };
+      }
+    }
+    setTimeout(function () {
+      if (api._nextClicked) return;
+      /* auto-advance if player hasn't clicked NEXT */
+      nextFn(api);
+    }, HOLD_WRONG);
   }
   function optionsHtml(items, correct, onPick, cssClass) {
     var box = el('div', 'ag-options');
@@ -1481,7 +1532,24 @@
       api.stage.insertAdjacentHTML('beforeend',
         '<div class="ag-verdict ' + (ok ? 'ok' : 'no') + '">' +
           (ok ? 'Correct!' : 'False - it ' + (api.truth ? 'is' : 'is not') + ' true.') + '</div>');
-      setTimeout(function () { nextTfRound(api); }, ok ? HOLD_RIGHT : HOLD_WRONG);
+      if (!ok) {
+        var nextRow = document.querySelector('#agNextRow');
+        if (nextRow) {
+          nextRow.hidden = false;
+          var persistentBtn = nextRow.querySelector('#agNextRound');
+          if (persistentBtn) {
+            persistentBtn.onclick = function () {
+              if (api._nextClicked) return;
+              api._nextClicked = true;
+              nextTfRound(api);
+            };
+          }
+        }
+      }
+      setTimeout(function () {
+        if (api._nextClicked) return;
+        nextTfRound(api);
+      }, ok ? HOLD_RIGHT : HOLD_WRONG);
     }
     api.stage.querySelector('#agTfTrue').onclick = function () { answered(true); };
     api.stage.querySelector('#agTfFalse').onclick = function () { answered(false); };
