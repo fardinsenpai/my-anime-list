@@ -11,7 +11,8 @@
 (function () {
   'use strict';
 
-  var COLORS = ['#ff4d4d', '#3ddc84', '#ff9f43', '#4da6ff', '#ffd93d'];
+  var DEFAULT_COLORS = ['#ff4d4d', '#3ddc84', '#ff9f43', '#4da6ff', '#ffd93d'];
+  var COLORS = DEFAULT_COLORS.slice();
   var ENTRY_TYPES = ['rope','ladder','heli','swing','failrope','parachute','bungee','slipslide','smoke','jetpack','peekpop'];
   var IDLE_STATES = ['happy','run','jump','laugh','angry','sad','sleep','sit','cooperate','lookup','lookdown','spar'];
   var BUBBLES = {
@@ -36,7 +37,7 @@
   var canvas = null, ctx = null;
   var stickmen = [];
   var raf = null;
-  var cfg = { count: 5, colors: COLORS.slice(0, 5), size: 2 };
+  var cfg = { count: 5, colors: DEFAULT_COLORS.slice(), size: 2 };
   var drag = null;
   var mouse = { x: -1000, y: -1000 };
   var suppressed = false;
@@ -54,6 +55,9 @@
         if (typeof c.size === 'number') cfg.size = c.size;
       }
     } catch (e) {}
+    /* ensure the 5 default colors always have a permanent place */
+    var customs = cfg.colors.filter(function (col) { return DEFAULT_COLORS.indexOf(col) === -1; });
+    cfg.colors = DEFAULT_COLORS.slice().concat(customs).slice(0, 12);
   }
   function saveCfg() {
     try { localStorage.setItem(LS_KEY, JSON.stringify(cfg)); } catch (e) {}
@@ -843,7 +847,10 @@
           '<span id="smSizeVal">Level ' + cfg.size + '</span>' +
         '</div>' +
         '<div class="sm-ctrl-row sm-ctrl-colors">' +
-          cfg.colors.map(function (c, i) { return '<button class="sm-color" data-i="' + i + '" style="background:' + c + '"></button>'; }).join('') +
+          cfg.colors.map(function (c, i) {
+            var isDef = i < DEFAULT_COLORS.length;
+            return '<button class="sm-color' + (isDef ? ' sm-color--default' : '') + '" data-i="' + i + '" data-default="' + (isDef ? '1' : '0') + '" title="' + (isDef ? 'Permanent color' : 'Custom color (click to change)') + '" style="background:' + c + '"></button>';
+          }).join('') +
           '<button class="sm-color sm-color--custom" id="smCustomColor" title="Custom color">+</button>' +
         '</div>' +
         '<div class="sm-palette" id="smPalette" style="display:none">' +
@@ -875,13 +882,18 @@
 
     li.querySelectorAll('.sm-color').forEach(function (btn) {
       if (btn.id === 'smCustomColor') return;
+      var isDefault = btn.getAttribute('data-default') === '1';
+      if (isDefault) { btn.style.cursor = 'default'; return; } /* permanent defaults: no change */
       btn.addEventListener('click', function () {
         var i = parseInt(btn.getAttribute('data-i'), 10);
         var idx = COLORS.indexOf(cfg.colors[i]) + 1;
-        cfg.colors[i] = COLORS[idx % COLORS.length];
-        btn.style.background = cfg.colors[i];
-        saveCfg();
-        stickmen.forEach(function (s, k) { if (k % cfg.colors.length === i) s.color = cfg.colors[i]; });
+        /* cycle through palette; never overwrite a default slot */
+        if (i >= DEFAULT_COLORS.length) {
+          cfg.colors[i] = COLORS[idx % COLORS.length];
+          btn.style.background = cfg.colors[i];
+          saveCfg();
+          stickmen.forEach(function (s, k) { if (k % cfg.colors.length === i) s.color = cfg.colors[i]; });
+        }
       });
     });
 
@@ -895,24 +907,45 @@
     if (doneBtn && colorPicker) {
       doneBtn.addEventListener('click', function () {
         var newColor = colorPicker.value;
-        cfg.colors.push(newColor);
-        if (cfg.colors.length > 10) cfg.colors.shift();
+        /* add as custom (after permanent defaults), avoid duplicates, cap customs */
+        if (DEFAULT_COLORS.indexOf(newColor) === -1 && cfg.colors.indexOf(newColor) === -1) {
+          var customs = cfg.colors.slice(DEFAULT_COLORS.length);
+          customs.push(newColor);
+          if (customs.length > 7) customs.shift();
+          cfg.colors = DEFAULT_COLORS.slice().concat(customs);
+        }
         saveCfg();
-        /* add a new color swatch */
-        var swatch = document.createElement('button');
-        swatch.className = 'sm-color';
-        swatch.style.background = newColor;
-        swatch.addEventListener('click', function () {
-          var i = cfg.colors.indexOf(newColor);
-          if (i >= 0) {
-            var idx = COLORS.indexOf(cfg.colors[i]) + 1;
-            cfg.colors[i] = COLORS[idx % COLORS.length] || newColor;
-            swatch.style.background = cfg.colors[i];
-            saveCfg();
-            stickmen.forEach(function (s, k) { if (k % cfg.colors.length === i) s.color = cfg.colors[i]; });
+        /* rebuild swatch row from cfg.colors (keeps defaults permanent, syncs DOM) */
+        var colorsRow = li.querySelector('.sm-ctrl-colors');
+        if (colorsRow) {
+          colorsRow.innerHTML = cfg.colors.map(function (c, k) {
+            var isDef = k < DEFAULT_COLORS.length;
+            return '<button class="sm-color' + (isDef ? ' sm-color--default' : '') + '" data-i="' + k + '" data-default="' + (isDef ? '1' : '0') + '" title="' + (isDef ? 'Permanent color' : 'Custom color (click to change)') + '" style="background:' + c + '"></button>';
+          }).join('') + '<button class="sm-color sm-color--custom" id="smCustomColor" title="Custom color">+</button>';
+          /* rebind custom button toggle */
+          var newCustomBtn = document.getElementById('smCustomColor');
+          if (newCustomBtn) {
+            newCustomBtn.addEventListener('click', function () {
+              var pal2 = document.getElementById('smPalette');
+              if (pal2) pal2.style.display = (pal2.style.display === 'none' ? 'flex' : 'none');
+            });
           }
-        });
-        li.querySelector('.sm-ctrl-colors').insertBefore(swatch, customBtn);
+          /* rebind swatch clicks (defaults stay permanent) */
+          colorsRow.querySelectorAll('.sm-color').forEach(function (b) {
+            if (b.id === 'smCustomColor') return;
+            if (b.getAttribute('data-default') === '1') { b.style.cursor = 'default'; return; }
+            b.addEventListener('click', function () {
+              var i = parseInt(b.getAttribute('data-i'), 10);
+              if (i >= DEFAULT_COLORS.length && i < cfg.colors.length) {
+                var idx = COLORS.indexOf(cfg.colors[i]) + 1;
+                cfg.colors[i] = COLORS[idx % COLORS.length];
+                b.style.background = cfg.colors[i];
+                saveCfg();
+                stickmen.forEach(function (s, k) { if (k % cfg.colors.length === i) s.color = cfg.colors[i]; });
+              }
+            });
+          });
+        }
         stickmen.forEach(function (s) { if (Math.random() < 0.4) s.color = newColor; });
         if (palette) palette.style.display = 'none';
       });
