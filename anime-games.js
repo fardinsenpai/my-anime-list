@@ -884,14 +884,33 @@
 
   /* A permanent stickman drawn as SVG so it can sit inside the layout at any
      size - same proportions as the canvas crowd (head r9 at y-38, torso to
-     y-8, limbs to y12) so the two styles read as the same character. Pass
-     headOnly for the big talking head on the result screen. */
-  function stickSvg(tone, extraCls, headOnly) {
+     y-8, limbs to y12) so the two styles read as the same character.
+       mode 'sit'  -> the green one perched on a ledge above the score
+       mode 'head' -> just the head, for the verdict on the result screen */
+  function stickSvg(tone, extraCls, mode) {
     var col = tone === 'red' ? '#ff4757' : tone === 'green' ? '#2fe08a' : '#4dd4ac';
     var mouth = tone === 'red'
       ? 'M -4 -33 A 4 4 0 0 0 4 -33'      /* red one grins wide - it wants you to skip */
       : 'M -4 -34 A 4 4 0 0 0 4 -34';
-    return '<svg class="ag-stick ' + (extraCls || '') + '" viewBox="' + (headOnly ? '-15 -52 30 30' : '-20 -56 40 78') + '" role="img" aria-hidden="true" focusable="false">' +
+    var sit = mode === 'sit', head = mode === 'head';
+    var vb = head ? '-15 -52 30 30' : sit ? '-46 -54 74 78' : '-20 -56 40 78';
+    var body = '', ledge = '';
+    if (sit) {
+      /* side view, feet on the shelf drawn below */
+      body =
+        '<path class="ag-stick-torso" d="M0 -29 L0 -13" stroke="' + col + '" stroke-width="2.6" fill="none" stroke-linecap="round"/>' +
+        '<path class="ag-stick-arms" d="M0 -25 L11 -18" stroke="' + col + '" stroke-width="2.4" fill="none" stroke-linecap="round"/>' +
+        '<path class="ag-stick-legs" d="M0 -13 L12 -11 M12 -11 L12 5" stroke="' + col + '" stroke-width="2.4" fill="none" stroke-linecap="round" opacity=".55"/>' +
+        '<path class="ag-stick-legs" d="M0 -13 L15 -13 M15 -13 L15 4 L21 4" stroke="' + col + '" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>';
+      /* kept outside the animated group so the shelf never moves */
+      ledge = '<path class="ag-perch-led" d="M-41 21 L-26 9 L25 9" fill="none" stroke="' + col + '" stroke-width="1.6" stroke-opacity=".85" stroke-linecap="round" stroke-linejoin="round"/>';
+    } else if (!head) {
+      body =
+        '<path class="ag-stick-torso" d="M0 -29 L0 -8" stroke="' + col + '" stroke-width="2.6" fill="none" stroke-linecap="round"/>' +
+        '<path class="ag-stick-arms" d="M0 -22 L-12 -16 M0 -22 L12 -16" stroke="' + col + '" stroke-width="2.4" fill="none" stroke-linecap="round"/>' +
+        '<path class="ag-stick-legs" d="M0 -8 L-8 12 M0 -8 L8 12" stroke="' + col + '" stroke-width="2.4" fill="none" stroke-linecap="round"/>';
+    }
+    return '<svg class="ag-stick ' + (extraCls || '') + '" viewBox="' + vb + '" role="img" aria-hidden="true" focusable="false">' +
       '<g class="ag-stick-g">' +
         '<circle class="ag-stick-head" cx="0" cy="-38" r="9" fill="' + col + '"/>' +
         '<g class="ag-stick-eyes">' +
@@ -899,11 +918,8 @@
           '<circle cx="-3.2" cy="-40" r="1.15" fill="#111"/><circle cx="3.2" cy="-40" r="1.15" fill="#111"/>' +
         '</g>' +
         '<path class="ag-stick-mouth" d="' + mouth + '" fill="none" stroke="#111" stroke-width="1.3" stroke-linecap="round"/>' +
-        (headOnly ? '' :
-          '<path class="ag-stick-torso" d="M0 -29 L0 -8" stroke="' + col + '" stroke-width="2.6" fill="none" stroke-linecap="round"/>' +
-          '<path class="ag-stick-arms" d="M0 -22 L-12 -16 M0 -22 L12 -16" stroke="' + col + '" stroke-width="2.4" fill="none" stroke-linecap="round"/>' +
-          '<path class="ag-stick-legs" d="M0 -8 L-8 12 M0 -8 L8 12" stroke="' + col + '" stroke-width="2.4" fill="none" stroke-linecap="round"/>') +
-      '</g></svg>';
+        body +
+      '</g>' + ledge + '</svg>';
   }
 
   function openGameScreen(key) {
@@ -920,32 +936,37 @@
     host.innerHTML = '';
     var wrap = el('div', 'ag-wrap ag-wrap--game');
     wrap.innerHTML =
+      '<div class="ag-shell"><div class="ag-shell-in">' +
       '<header class="ag-head ag-head--game">' +
         '<div class="ag-head-title">' + (GAME_ICONS[g.key] || g.icon) + ' <span>' + esc(g.title) + '</span></div>' +
         '<button class="ag-close" id="agGameClose" aria-label="Back">✕</button>' +
       '</header>' +
       '<div class="ag-play" id="agPlay">' +
         '<div class="ag-hud" id="agHud" hidden>' +
-          '<div class="ag-hud-cell"><span class="ag-hud-k">Round:</span>' +
-            '<b class="ag-hud-v" id="agHudRound">0 / 5</b></div>' +
-          '<div class="ag-hud-cell ag-hud-cell--score">' +
-            '<span class="ag-hud-stick" id="agHudStick">' + stickSvg('green', 'ag-stick--timer') + '</span>' +
-            '<span class="ag-hud-k">Score:</span><b class="ag-hud-v" id="agHudScore">0</b>' +
-            '<b class="ag-hud-time" id="agHudTime">0:00</b>' +
+          /* the green one perches on the top edge of the score bar */
+          '<span class="ag-hud-perch">' + stickSvg('green', 'ag-stick--sit', 'sit') + '</span>' +
+          '<div class="ag-hud-row">' +
+            '<div class="ag-hud-cell"><span class="ag-hud-k">Round:</span>' +
+              '<b class="ag-hud-v" id="agHudRound">0 / 5</b></div>' +
+            '<div class="ag-hud-cell ag-hud-cell--score">' +
+              '<span class="ag-hud-k">Score:</span><b class="ag-hud-v" id="agHudScore">0</b>' +
+              '<b class="ag-hud-time" id="agHudTime">0:00</b>' +
+            '</div>' +
           '</div>' +
         '</div>' +
         '<div class="ag-qtype" id="agQType" hidden></div>' +
         '<div class="ag-stage ag-qbox" id="agStage"></div>' +
         '<div class="ag-inrow" id="agInRow" hidden></div>' +
         '<div class="ag-skip" id="agSkipRow" role="button" tabindex="0" hidden>' +
-          '<span class="ag-hud-stick ag-hud-stick--skip">' + stickSvg('red', 'ag-stick--skip') + '</span>' +
+          '<span class="ag-skip-stick">' + stickSvg('red', 'ag-stick--skip') + '</span>' +
           '<span class="ag-skip-txt">Don\'t Know? <b>Skip here…</b></span>' +
         '</div>' +
       '</div>' +
       '<section class="ag-overall ag-overall--game">' +
         '<div class="ag-section-title">TOP THREE <span>' + esc(g.title) + '</span></div>' +
         '<div class="ag-board" id="agGameBoard"><div class="ag-board-empty">Loading…</div></div>' +
-      '</section>';
+      '</section>' +
+      '</div></div>';
     host.appendChild(wrap);
     wrap.querySelector('#agGameClose').onclick = function () { stopTimer(); renderHub(); };
     var stage = wrap.querySelector('#agStage');
@@ -1937,7 +1958,7 @@
     wrap.querySelector('#agStage').innerHTML =
       '<div class="ag-result">' +
         '<div class="ag-result-head">' +
-          '<span class="ag-result-stick">' + stickSvg(score / max >= 0.5 ? 'green' : 'red', 'ag-stick--big', true) + '</span>' +
+          '<span class="ag-result-stick">' + stickSvg(score / max >= 0.5 ? 'green' : 'red', 'ag-stick--big', 'head') + '</span>' +
           '<div class="ag-result-bubble">' + esc(verdict) + '</div>' +
         '</div>' +
         '<div class="ag-result-icon">' + (GAME_ICONS[g.key] || g.icon) + '</div>' +
