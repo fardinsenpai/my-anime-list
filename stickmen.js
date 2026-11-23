@@ -11,7 +11,7 @@
 (function () {
   'use strict';
 
-  var COLORS = ['#ff4d7d', '#4dd4ac', '#7a8cff', '#ffd93d', '#ff9f43', '#b388ff'];
+  var COLORS = ['#ff4d7d', '#4dd4ac', '#7a8cff', '#ffd93d', '#ff9f43'];
   var ENTRY_TYPES = ['rope','ladder','heli','swing','failrope','parachute','bungee','slipslide','smoke','jetpack','peekpop'];
   var IDLE_STATES = ['happy','run','jump','laugh','angry','sad','sleep','sit','cooperate','lookup','lookdown','spar'];
   var BUBBLES = {
