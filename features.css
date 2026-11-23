@@ -660,3 +660,43 @@
   box-shadow: 0 6px 20px rgba(255, 77, 125, .45);
 }
 .sm-toggle:active { transform: translateY(0); }
+/* === stickmen custom color palette === */
+.sm-palette {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  border-radius: 10px;
+  background: rgba(14, 6, 22, .6);
+  border: 1px solid rgba(255, 255, 255, .12);
+}
+.sm-palette input[type="color"] {
+  width: 40px; height: 32px;
+  border: 1px solid rgba(255, 255, 255, .3);
+  border-radius: 8px;
+  background: transparent;
+  cursor: pointer;
+  padding: 2px;
+}
+.sm-done {
+  flex: 1;
+  min-height: 32px;
+  padding: 0 14px;
+  border-radius: 8px;
+  border: 1px solid rgba(77, 212, 172, .5);
+  background: linear-gradient(135deg, rgba(77, 212, 172, .25), rgba(122, 140, 255, .2));
+  color: #d6ffe8;
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 700;
+  font-size: .7rem;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: transform .16s ease, box-shadow .16s ease, background .16s ease;
+  box-shadow: 0 4px 12px rgba(77, 212, 172, .25);
+}
+.sm-done:hover {
+  transform: translateY(-2px);
+  background: linear-gradient(135deg, rgba(77, 212, 172, .4), rgba(122, 140, 255, .3));
+  box-shadow: 0 6px 18px rgba(77, 212, 172, .45);
+}

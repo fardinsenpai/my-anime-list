@@ -846,7 +846,10 @@
           cfg.colors.map(function (c, i) { return '<button class="sm-color" data-i="' + i + '" style="background:' + c + '"></button>'; }).join('') +
           '<button class="sm-color sm-color--custom" id="smCustomColor" title="Custom color">+</button>' +
         '</div>' +
-        '<input type="color" id="smColorPicker" style="display:none">' +
+        '<div class="sm-palette" id="smPalette" style="display:none">' +
+          '<input type="color" id="smColorPicker" value="' + (cfg.colors[0] || '#ff4d4d') + '">' +
+          '<button type="button" class="sm-done" id="smColorDone">Done</button>' +
+        '</div>' +
         '<button type="button" class="sm-toggle" id="smToggle">Hide Stickmen</button>' +
       '</div>';
     sideNav.appendChild(li);
@@ -882,12 +885,18 @@
       });
     });
 
-    if (customBtn && colorPicker) {
-      customBtn.addEventListener('click', function () { colorPicker.click(); });
-      colorPicker.addEventListener('input', function () {
+    var palette = document.getElementById('smPalette');
+    var doneBtn = document.getElementById('smColorDone');
+    if (customBtn && palette) {
+      customBtn.addEventListener('click', function () {
+        palette.style.display = (palette.style.display === 'none' ? 'flex' : 'none');
+      });
+    }
+    if (doneBtn && colorPicker) {
+      doneBtn.addEventListener('click', function () {
         var newColor = colorPicker.value;
         cfg.colors.push(newColor);
-        if (cfg.colors.length > 8) cfg.colors.shift();
+        if (cfg.colors.length > 10) cfg.colors.shift();
         saveCfg();
         /* add a new color swatch */
         var swatch = document.createElement('button');
@@ -900,10 +909,12 @@
             cfg.colors[i] = COLORS[idx % COLORS.length] || newColor;
             swatch.style.background = cfg.colors[i];
             saveCfg();
+            stickmen.forEach(function (s, k) { if (k % cfg.colors.length === i) s.color = cfg.colors[i]; });
           }
         });
         li.querySelector('.sm-ctrl-colors').insertBefore(swatch, customBtn);
-        stickmen.forEach(function (s) { if (Math.random() < 0.3) s.color = newColor; });
+        stickmen.forEach(function (s) { if (Math.random() < 0.4) s.color = newColor; });
+        if (palette) palette.style.display = 'none';
       });
     }
 
