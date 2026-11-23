@@ -913,8 +913,10 @@
       if (visible) {
         if (!suppressed) { mountCanvas(); initStickmen(); }
         toggle.textContent = 'Hide Stickmen';
-        var sidebar = document.querySelector('.side-nav, nav.side-nav');
+        var sidebar = document.getElementById('sideMenu') || document.querySelector('.sidemenu, .side-nav, nav.side-nav');
         if (sidebar && sidebar.classList.contains('open')) sidebar.classList.remove('open');
+        var overlay = document.getElementById('menuOverlay');
+        if (overlay && overlay.classList.contains('open')) overlay.classList.remove('open');
       } else {
         /* exit animations */
         exiting = true;
@@ -932,8 +934,10 @@
           unmount();
           exiting = false;
         }, 1500);
-        var sidebar2 = document.querySelector('.side-nav, nav.side-nav');
+        var sidebar2 = document.getElementById('sideMenu') || document.querySelector('.sidemenu, .side-nav, nav.side-nav');
         if (sidebar2 && sidebar2.classList.contains('open')) sidebar2.classList.remove('open');
+        var overlay2 = document.getElementById('menuOverlay');
+        if (overlay2 && overlay2.classList.contains('open')) overlay2.classList.remove('open');
       }
     });
   }
