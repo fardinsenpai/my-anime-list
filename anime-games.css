@@ -1338,3 +1338,337 @@
 }
 .ag-emoji-genre { background: rgba(255, 107, 157, .15); border: 1px solid rgba(255, 107, 157, .4); color: #ffd6e8; }
 .ag-emoji-year { background: rgba(120, 170, 255, .15); border: 1px solid rgba(120, 170, 255, .4); color: #cfe4ff; }
+# Gaming hub CSS rework - appended overrides
+
+/* --- (i) Title: move "Anime Games to Play:" to top-left under main title --- */
+.body-games .ag-head {
+  text-align: left;
+  padding: 10px 120px 16px 0;
+  border-bottom: none;
+  position: relative;
+}
+.body-games .ag-head::after { display: none; }
+.body-games .ag-head-title {
+  font-size: clamp(1.1rem, 2.6vw, 1.5rem);
+  letter-spacing: 2px;
+  text-align: left;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  position: relative;
+  padding-bottom: 6px;
+  margin-top: 2px;
+  cursor: pointer;
+  background: linear-gradient(135deg, #00f2fe 0%, #4facfe 50%, #f093fb 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 0 18px rgba(0, 242, 254, .35));
+  animation: none;
+}
+.body-games .ag-head-title::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 80px;
+  height: 3px;
+  background: linear-gradient(90deg, #00f2fe, #ff2d78, transparent);
+  border-radius: 2px;
+}
+.body-games .ag-head-sub {
+  display: block;
+  margin-top: 10px;
+  text-align: left;
+  font-size: 12.5px;
+}
+
+/* --- (ii) How-to-play button (top-right, logo cyan) + hidden block --- */
+.ag-howto-btn {
+  position: absolute;
+  right: 58px;
+  top: 12px;
+  min-height: 34px;
+  padding: 0 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(0, 242, 254, .45);
+  background: rgba(0, 242, 254, .12);
+  color: #00f2fe;
+  font-family: 'Rajdhani', 'Exo 2', sans-serif;
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: .6px;
+  cursor: pointer;
+  transition: background .2s, box-shadow .2s, transform .2s;
+  z-index: 3;
+}
+.ag-howto-btn:hover {
+  background: rgba(0, 242, 254, .24);
+  box-shadow: 0 0 18px rgba(0, 242, 254, .45);
+  transform: translateY(-1px);
+}
+.ag-howto-btn.active {
+  background: rgba(0, 242, 254, .28);
+  box-shadow: 0 0 22px rgba(0, 242, 254, .55);
+}
+.ag-howto--hub[hidden] { display: none !important; }
+
+/* keep game-screen header title centered (only hub is re-laid-out) */
+.ag-wrap--game .ag-head { text-align: center; padding: 22px 60px 20px; }
+.ag-wrap--game .ag-head-title { text-align: center; }
+.ag-wrap--game .ag-head-title::after { display: none; }
+
+/* mobile: howto button sits under the sub text */
+@media (max-width: 640px) {
+  .body-games .ag-head { padding: 10px 52px 16px 0; }
+  .ag-howto-btn { right: 50px; top: 8px; padding: 0 10px; font-size: 11px; }
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   THE GAME SCREEN CHROME
+   header (title / round / score + the green timer stickman) → question
+   type → the centre box → the "My Guess" input row → the red skip strip.
+   The start screen lives in the same centre box, so the four slots below
+   it stay hidden until the first round opens them.
+   ══════════════════════════════════════════════════════════════════════ */
+.ag-play { display: flex; flex-direction: column; gap: 10px; }
+.ag-play [hidden] { display: none !important; }
+
+/* ── top section: round + score, with the green timer stickman on top ── */
+.ag-hud {
+  display: flex;
+  gap: 8px;
+  padding: 9px 10px;
+  border-radius: 16px;
+  background: linear-gradient(180deg, rgba(10, 18, 28, .92), rgba(5, 10, 17, .92));
+  border: 1px solid rgba(255, 255, 255, .1);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .06), 0 18px 40px -34px #000;
+}
+.ag-hud-cell {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 1.6px;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, .5);
+}
+.ag-hud-cell--score {
+  flex: 1.5 1 0;
+  display: grid;
+  grid-template-columns: auto auto auto;
+  grid-template-areas: 'stick stick stick' 'k v t';
+  align-content: center;
+  justify-content: center;
+  align-items: center;
+  gap: 1px 7px;
+}
+.ag-hud-cell--score .ag-hud-stick { grid-area: stick; justify-self: center; line-height: 0; }
+.ag-hud-cell--score .ag-hud-k { grid-area: k; }
+.ag-hud-cell--score .ag-hud-v { grid-area: v; }
+.ag-hud-time { grid-area: t; }
+.ag-hud-v { color: #fff; font-size: 15px; letter-spacing: .4px; }
+.ag-hud-time {
+  color: #2fe08a;
+  font-size: 12.5px;
+  font-weight: 800;
+  letter-spacing: .8px;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 0 14px rgba(47, 224, 138, .55);
+}
+
+/* ── question type ── */
+.ag-qtype {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 4px 10px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(0, 242, 254, .13), rgba(138, 92, 255, .13), rgba(255, 45, 120, .11));
+  border: 1px solid rgba(255, 255, 255, .11);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 2.2px;
+  text-transform: uppercase;
+  color: #7df9ff;
+  text-align: center;
+  text-shadow: 0 0 16px rgba(0, 242, 254, .35);
+}
+.ag-qtype-pts { color: #ffd700; font-size: 10px; letter-spacing: 1.4px; text-shadow: 0 0 12px rgba(255, 215, 0, .45); }
+.ag-qtype-pts b { font-size: 12px; }
+
+/* ── the centre box: every round's content lands here ── */
+.ag-qbox {
+  padding: 16px 14px 18px;
+  border-radius: 18px;
+  background: rgba(6, 12, 20, .74);
+  border: 1px solid rgba(255, 255, 255, .1);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .06), 0 26px 50px -40px #000;
+}
+
+/* ── the input row ── */
+.ag-inrow { display: block; }
+.ag-inrow .ag-answer-row { margin-bottom: 0; }
+
+/* ── the skip strip: text and red stickman are one button ── */
+.ag-skip {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 7px 16px;
+  border-radius: 18px;
+  background: rgba(255, 71, 87, .08);
+  border: 1px dashed rgba(255, 71, 87, .5);
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: background .18s, border-color .18s, transform .12s, box-shadow .18s;
+}
+.ag-skip:hover, .ag-skip:focus-visible {
+  background: rgba(255, 71, 87, .16);
+  border-color: rgba(255, 71, 87, .85);
+  box-shadow: 0 0 22px -6px rgba(255, 71, 87, .7);
+  outline: none;
+}
+.ag-skip:active { transform: translateY(1px); }
+.ag-skip-txt {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 1.1px;
+  color: rgba(255, 255, 255, .68);
+}
+.ag-skip-txt b {
+  color: #ff6b7a;
+  font-weight: 800;
+  letter-spacing: 1.6px;
+  animation: agSkipPulse 1.6s ease-in-out infinite;
+}
+@keyframes agSkipPulse {
+  0%, 100% { opacity: .62; text-shadow: 0 0 0 rgba(255, 107, 122, 0); }
+  50% { opacity: 1; text-shadow: 0 0 16px rgba(255, 107, 122, .75); }
+}
+
+/* ── the three permanent stickmen ── */
+.ag-stick { display: block; overflow: visible; }
+.ag-stick--timer { width: 34px; height: 66px; }
+.ag-stick--skip { width: 40px; height: 78px; }
+.ag-stick--big { width: 96px; height: 96px; }
+.ag-hud-stick--skip { line-height: 0; flex: 0 0 auto; }
+
+/* the green one keeps time with a small bob */
+.ag-stick--timer .ag-stick-g {
+  transform-box: fill-box;
+  transform-origin: center bottom;
+  animation: agBob 2.4s ease-in-out infinite;
+}
+@keyframes agBob {
+  0%, 100% { transform: translateY(0) scaleY(1); }
+  50% { transform: translateY(-3px) scaleY(1.03); }
+}
+
+/* the red one nods and tips toward the skip text */
+.ag-stick--skip .ag-stick-g {
+  transform-box: fill-box;
+  transform-origin: center bottom;
+  animation: agNod 1.7s ease-in-out infinite;
+}
+@keyframes agNod {
+  0%, 100% { transform: rotate(0deg) translateY(0); }
+  22% { transform: rotate(-8deg) translateY(0); }
+  46% { transform: rotate(0deg) translateY(2px); }
+  70% { transform: rotate(6deg) translateY(0); }
+}
+
+/* ── "LOL It's <Answer> Next (3s)" ── */
+.ag-verdict--skip { flex-wrap: wrap; row-gap: 8px; }
+.ag-verdict--skip::before { content: '?'; }
+.ag-next-btn {
+  flex: 0 0 auto;
+  animation: agNextPop .3s cubic-bezier(.2, 1.5, .4, 1) both;
+}
+@keyframes agNextPop {
+  from { opacity: 0; transform: scale(.86); }
+  to { opacity: 1; transform: none; }
+}
+.ag-next-cd { opacity: .82; font-size: .86em; font-variant-numeric: tabular-nums; }
+
+/* ── the result screen: time, and the verdict out of a big stickman head ── */
+.ag-result-head {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  margin-bottom: 4px;
+}
+.ag-result-stick { flex: 0 0 auto; line-height: 0; }
+.ag-result-bubble {
+  position: relative;
+  max-width: 64%;
+  padding: 12px 16px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, .07);
+  border: 1px solid rgba(255, 255, 255, .17);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.35;
+  text-align: left;
+}
+.ag-result-bubble::before {
+  content: '';
+  position: absolute;
+  left: -7px;
+  top: 50%;
+  width: 13px;
+  height: 13px;
+  transform: translateY(-50%) rotate(45deg);
+  background: rgba(255, 255, 255, .07);
+  border-left: 1px solid rgba(255, 255, 255, .17);
+  border-bottom: 1px solid rgba(255, 255, 255, .17);
+}
+.ag-result-time {
+  margin-top: 10px;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 2.4px;
+  color: rgba(255, 255, 255, .5);
+}
+.ag-result-time b {
+  margin-left: 7px;
+  font-size: 16px;
+  letter-spacing: .6px;
+  color: #2fe08a;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 0 16px rgba(47, 224, 138, .55);
+}
+
+/* ── narrow screens ── */
+@media (max-width: 420px) {
+  .ag-hud { padding: 8px; gap: 6px; }
+  .ag-hud-cell { font-size: 9.5px; letter-spacing: 1.1px; gap: 4px; }
+  .ag-hud-v { font-size: 14px; }
+  .ag-hud-time { font-size: 11.5px; }
+  .ag-stick--timer { width: 30px; height: 58px; }
+  .ag-stick--skip { width: 36px; height: 70px; }
+  .ag-stick--big { width: 78px; height: 78px; }
+  .ag-qtype { font-size: 10px; letter-spacing: 1.6px; padding: 6px 10px; }
+  .ag-qbox { padding: 14px 11px 16px; border-radius: 16px; }
+  .ag-skip { padding: 6px 12px; gap: 9px; }
+  .ag-skip-txt { font-size: 12px; letter-spacing: .7px; }
+  .ag-result-head { gap: 10px; }
+  .ag-result-bubble { max-width: 60%; padding: 10px 13px; font-size: 13px; }
+}
+
+/* ── reduce motion: the two permanent stickmen hold still ── */
+@media (prefers-reduced-motion: reduce) {
+  .ag-stick--timer .ag-stick-g,
+  .ag-stick--skip .ag-stick-g,
+  .ag-skip-txt b { animation: none !important; }
+}
+

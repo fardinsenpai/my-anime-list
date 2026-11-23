@@ -36,12 +36,8 @@ function initCounterBoxes() {
   const duration = 4000; // 4 seconds for the counters to count up
   const boxes = document.querySelectorAll(".counter-box");
 
-  // Fade + Slide animation trigger
-  boxes.forEach((box, index) => {
-    setTimeout(() => {
-      box.classList.add("show");
-    }, index * 200); // staggered entry (optional)
-  });
+  /* counters are always visible - no hide/entry animation */
+  boxes.forEach((box) => { box.classList.add("show"); });
 
   /* The counting must start when the boxes are actually on screen - before
      that the numbers would race behind the reveal. */
@@ -602,6 +598,16 @@ window.addEventListener('popstate', function () {
   var ov = document.getElementById('waifuOverlay');
   if (ov && ov.style.display === 'block' && !location.pathname.endsWith('/waifus')) {
     closeWaifus(); return;
+  }
+  /* tier list overlay follows the URL - it appears only on /tier-list.
+     Both directions: leaving the route closes it, returning to the route
+     reopens it (otherwise back/forward could show the URL without the panel). */
+  if (window.TierList && typeof window.TierList.open === 'function' && typeof window.TierList.close === 'function') {
+    var tlOv = document.querySelector('.tl-overlay');
+    var tlWantOpen = location.pathname.endsWith('/tier-list');
+    var tlIsOpen = !!(tlOv && !tlOv.hidden);
+    if (tlWantOpen && !tlIsOpen) window.TierList.open();
+    else if (!tlWantOpen && tlIsOpen) window.TierList.close();
   }
   if (location.pathname.endsWith('/home')) {
     goHome(); return;
@@ -8536,8 +8542,13 @@ document.addEventListener('click', function(e) {
     document.addEventListener('DOMContentLoaded', initEnhancements);
   }
 
-  // Consume SPA redirect from 404.html (mobile-friendly)
-  (function() {
+  /* Consume SPA redirect from 404.html (mobile-friendly).
+     IMPORTANT: this must run AFTER every <script> has been parsed. Rewriting
+     the URL earlier changes the document base, so the relative script tags
+     below (tierlist.js, seasonal.js, stickmen.js) resolve against the deep
+     path and 404 - e.g. /games/emoji -> /games/tierlist.js. Deferring it into
+     routeOnPath() keeps the original base while those tags are loading. */
+  function consumeSpaRedirect() {
     var redirect = sessionStorage.getItem('spaRedirect');
     if (redirect) {
       sessionStorage.removeItem('spaRedirect');
@@ -8547,10 +8558,11 @@ document.addEventListener('click', function(e) {
         history.replaceState(null, '', base + path);
       }
     }
-  })();
+  }
 
   // GitHub Pages SPA routing — auto-open feature based on URL path
   function routeOnPath() {
+    consumeSpaRedirect();
     var p = window.location.pathname;
     if (p.endsWith('/home') || p === '/my-anime-list/' || p.endsWith('/my-anime-list') || p === '/' || p === '') {
       if (typeof goHome === 'function') goHome();
@@ -8569,6 +8581,8 @@ document.addEventListener('click', function(e) {
     } else if (p.endsWith('/hot-takes')) {
       var btn = document.getElementById('hotTakesBtn');
       if (btn) btn.click();
+    } else if (p.endsWith('/tier-list')) {
+      if (window.TierList && typeof window.TierList.open === 'function') window.TierList.open();
     } else if (p.endsWith('/analysis')) {
       var btn = document.getElementById('analysisSideBtn');
       if (btn) btn.click();

@@ -10,6 +10,16 @@
 (function () {
   'use strict';
 
+  /* Where this file itself was served from. Captured while the tag is still
+     being parsed, because after that document.currentScript is gone - it is
+     what keeps relative data fetches working when a deep link has already
+     pushed the path to /games/<name>. */
+  var SITE_BASE = (function () {
+    var s = document.currentScript;
+    if (s && s.src) return s.src.replace(/[^/]*$/, '');
+    return './';
+  })();
+
   var SUPABASE_URL = 'https://ldzlefdklcgvqcbqibtt.supabase.co';
   var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxkemxlZmRrbGNndnFjYnFpYnR0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwMzk1OTAsImV4cCI6MjA5NjYxNTU5MH0.X3TGuLIpjrnPXMgCv4ZKIIjB6pItPgkdebf4JPdhuYs';
   var SCORES = 'game_scores';
@@ -754,8 +764,6 @@
     if (siteTitle) siteTitle.style.display = 'none';
     var page = document.getElementById('gamesHubContainer');
     if (page) page.style.display = 'block';
-    var page = document.getElementById('gamesHubContainer');
-    if (page) page.style.display = 'block';
     try { history.pushState(null, '', 'anime-games'); } catch (e) {}
     renderHub();
     try { window.scrollTo({ top: 0, behavior: 'auto' }); } catch (e) {}
@@ -763,6 +771,7 @@
 
   function closeGames() {
     agGameKey = '';
+    try { if (window.Stickmen && window.Stickmen.resume) window.Stickmen.resume(); } catch (e) {}
     /* opening the games hides the home content (the grid, the search, the
        counters). closing them has to put all of that back - goHome does
        exactly that, and it is the same road the sidebar's Home takes. */
@@ -774,18 +783,27 @@
     try { history.pushState(null, '', 'home'); } catch (e) {}
   }
   function renderHub() {
+    var page = document.getElementById('gamesHubContainer');
+    /* goHome() parks this container with an inline display:none - make sure
+       coming back to the list can never land on a blank screen */
+    if (page) page.style.display = 'block';
     var host = gamesHost();
     if (!host) return;
+    /* back on the game list the wandering crowd comes back - only the game
+       screen itself parks them, because that is where the two live ones are */
+    try { if (window.Stickmen && window.Stickmen.resume) window.Stickmen.resume(); } catch (e) {}
+    stopTimer();
     host.innerHTML = '';
     var wrap = el('div', 'ag-wrap');
     wrap.innerHTML =
       '<header class="ag-head">' +
-        '<div class="ag-head-title">ANIME WEB GAMES</div>' +
+        '<div class="ag-head-title" id="agMainTitle">Anime Games to Play:</div>' +
         (agAdmin ? '<div class="ag-admin-badge" id="agAdminBadge">BOARD KEEPER ON - TAP TO LOCK</div>' : '') +
         '<div class="ag-head-sub">' + GAMES.length + ' games built from Fardin\'s own list - play, score, climb the board.</div>' +
+        '<button class="ag-howto-btn" id="agHowtoBtn" title="How to Play">❓ How to Play</button>' +
         '<button class="ag-close" id="agHubClose" aria-label="Close">✕</button>' +
       '</header>' +
-      '<div class="ag-howto ag-howto--hub">' +
+      '<div class="ag-howto ag-howto--hub" id="agHowtoBlock" hidden>' +
         '<div class="ag-howto-title">HOW TO PLAY</div>' +
         '<ol class="ag-howto-list">' +
           '<li>Sign in and confirm your player name once.</li>' +
@@ -820,7 +838,23 @@
     });
     wrap.querySelector('#agHubClose').onclick = closeGames;
     /* three taps on the heading open the board keeper */
-    wireAgAdminUnlock(wrap.querySelector('.ag-head-title'));
+    wireAgAdminUnlock(wrap.querySelector('#agMainTitle'));
+    /* how-to-play toggle button */
+    var howtoBtn = wrap.querySelector('#agHowtoBtn');
+    var howtoBlock = wrap.querySelector('#agHowtoBlock');
+    if (howtoBtn && howtoBlock) {
+      howtoBtn.onclick = function() {
+        howtoBlock.hidden = !howtoBlock.hidden;
+        howtoBtn.classList.toggle('active', !howtoBlock.hidden);
+      };
+    }
+    /* main title click reloads */
+    var mainTitle = wrap.querySelector('#agMainTitle');
+    if (mainTitle) {
+      mainTitle.style.cursor = 'pointer';
+      mainTitle.title = 'Click to reload';
+      mainTitle.addEventListener('click', function() { location.reload(); });
+    }
     var badge = wrap.querySelector('#agAdminBadge');
     if (badge) badge.onclick = function () { setAgAdmin(false); };
     if (agAdmin) renderAdminList();
@@ -848,12 +882,41 @@
     });
   }
 
+  /* A permanent stickman drawn as SVG so it can sit inside the layout at any
+     size - same proportions as the canvas crowd (head r9 at y-38, torso to
+     y-8, limbs to y12) so the two styles read as the same character. Pass
+     headOnly for the big talking head on the result screen. */
+  function stickSvg(tone, extraCls, headOnly) {
+    var col = tone === 'red' ? '#ff4757' : tone === 'green' ? '#2fe08a' : '#4dd4ac';
+    var mouth = tone === 'red'
+      ? 'M -4 -33 A 4 4 0 0 0 4 -33'      /* red one grins wide - it wants you to skip */
+      : 'M -4 -34 A 4 4 0 0 0 4 -34';
+    return '<svg class="ag-stick ' + (extraCls || '') + '" viewBox="' + (headOnly ? '-15 -52 30 30' : '-20 -56 40 78') + '" role="img" aria-hidden="true" focusable="false">' +
+      '<g class="ag-stick-g">' +
+        '<circle class="ag-stick-head" cx="0" cy="-38" r="9" fill="' + col + '"/>' +
+        '<g class="ag-stick-eyes">' +
+          '<circle cx="-3.2" cy="-40" r="2.3" fill="#fff"/><circle cx="3.2" cy="-40" r="2.3" fill="#fff"/>' +
+          '<circle cx="-3.2" cy="-40" r="1.15" fill="#111"/><circle cx="3.2" cy="-40" r="1.15" fill="#111"/>' +
+        '</g>' +
+        '<path class="ag-stick-mouth" d="' + mouth + '" fill="none" stroke="#111" stroke-width="1.3" stroke-linecap="round"/>' +
+        (headOnly ? '' :
+          '<path class="ag-stick-torso" d="M0 -29 L0 -8" stroke="' + col + '" stroke-width="2.6" fill="none" stroke-linecap="round"/>' +
+          '<path class="ag-stick-arms" d="M0 -22 L-12 -16 M0 -22 L12 -16" stroke="' + col + '" stroke-width="2.4" fill="none" stroke-linecap="round"/>' +
+          '<path class="ag-stick-legs" d="M0 -8 L-8 12 M0 -8 L8 12" stroke="' + col + '" stroke-width="2.4" fill="none" stroke-linecap="round"/>') +
+      '</g></svg>';
+  }
+
   function openGameScreen(key) {
     var g = GAME_BY_KEY[key];
     var host = gamesHost();
     if (!host) return;
     agGameKey = key;
     try { history.pushState({game:key}, '', '/my-anime-list/games/' + encodeURIComponent(key)); } catch (e) {}
+    /* scroll to top so game starts at the top */
+    try { window.scrollTo({ top: 0, behavior: 'auto' }); } catch (e) { window.scrollTo(0, 0); }
+    /* the two permanent stickmen below replace the wandering crowd here */
+    try { if (window.Stickmen && window.Stickmen.suppress) window.Stickmen.suppress(); } catch (e) {}
+    stopTimer();
     host.innerHTML = '';
     var wrap = el('div', 'ag-wrap ag-wrap--game');
     wrap.innerHTML =
@@ -861,19 +924,45 @@
         '<div class="ag-head-title">' + (GAME_ICONS[g.key] || g.icon) + ' <span>' + esc(g.title) + '</span></div>' +
         '<button class="ag-close" id="agGameClose" aria-label="Back">✕</button>' +
       '</header>' +
-      '<div class="ag-stage" id="agStage"></div>' +
+      '<div class="ag-play" id="agPlay">' +
+        '<div class="ag-hud" id="agHud" hidden>' +
+          '<div class="ag-hud-cell"><span class="ag-hud-k">Round:</span>' +
+            '<b class="ag-hud-v" id="agHudRound">0 / 5</b></div>' +
+          '<div class="ag-hud-cell ag-hud-cell--score">' +
+            '<span class="ag-hud-stick" id="agHudStick">' + stickSvg('green', 'ag-stick--timer') + '</span>' +
+            '<span class="ag-hud-k">Score:</span><b class="ag-hud-v" id="agHudScore">0</b>' +
+            '<b class="ag-hud-time" id="agHudTime">0:00</b>' +
+          '</div>' +
+        '</div>' +
+        '<div class="ag-qtype" id="agQType" hidden></div>' +
+        '<div class="ag-stage ag-qbox" id="agStage"></div>' +
+        '<div class="ag-inrow" id="agInRow" hidden></div>' +
+        '<div class="ag-skip" id="agSkipRow" role="button" tabindex="0" hidden>' +
+          '<span class="ag-hud-stick ag-hud-stick--skip">' + stickSvg('red', 'ag-stick--skip') + '</span>' +
+          '<span class="ag-skip-txt">Don\'t Know? <b>Skip here…</b></span>' +
+        '</div>' +
+      '</div>' +
       '<section class="ag-overall ag-overall--game">' +
         '<div class="ag-section-title">TOP THREE <span>' + esc(g.title) + '</span></div>' +
         '<div class="ag-board" id="agGameBoard"><div class="ag-board-empty">Loading…</div></div>' +
       '</section>';
     host.appendChild(wrap);
-    wrap.querySelector('#agGameClose').onclick = function () { renderHub(); };
+    wrap.querySelector('#agGameClose').onclick = function () { stopTimer(); renderHub(); };
     var stage = wrap.querySelector('#agStage');
 
     var api = {
       stage: stage, wrap: wrap, key: key, score: 0, round: 0, rounds: 5,
       finish: function (score, max) { finishGame(key, score, wrap, max); }
     };
+
+    /* the skip strip: the text and the red stickman are the same button */
+    var skipRow = wrap.querySelector('#agSkipRow');
+    if (skipRow) {
+      skipRow.onclick = function () { doSkip(api); };
+      skipRow.onkeydown = function (e) {
+        if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') { e.preventDefault(); doSkip(api); }
+      };
+    }
 
     topScores(key, 3).then(function (rows) {
       var host = wrap.querySelector('#agGameBoard');
@@ -884,12 +973,107 @@
     if (builder) builder(api);
   }
 
+  /* ─────────────────────── the permanent play chrome (header / timer / skip) */
+  var _timerId = null, _timerFrom = 0;
+  function stopTimer() {
+    if (_timerId) { clearInterval(_timerId); _timerId = null; }
+  }
+  function fmtTime(ms) {
+    var s = Math.max(0, Math.floor(ms / 1000));
+    var m = Math.floor(s / 60);
+    return m + ':' + String(s % 60).padStart(2, '0');
+  }
+  function startTimer() {
+    stopTimer();
+    _timerFrom = Date.now();
+    var out = document.getElementById('agHudTime');
+    if (out) out.textContent = '0:00';
+    _timerId = setInterval(function () {
+      var t = document.getElementById('agHudTime');
+      if (t) t.textContent = fmtTime(Date.now() - _timerFrom);
+      else stopTimer();
+    }, 1000);
+  }
+  function elapsedMs() { return _timerFrom ? Date.now() - _timerFrom : 0; }
+
+  /* The first round of a game flips the start screen into the real layout:
+     the HUD, question type, input row and skip strip appear, and the timer
+     begins. Called from roundHead(), which every builder already runs first. */
+  function ensurePlayChrome(api) {
+    if (api._chrome) return;
+    api._chrome = true;
+    var play = api.wrap && api.wrap.querySelector('#agPlay');
+    if (!play) return;
+    ['agHud', 'agQType', 'agInRow', 'agSkipRow'].forEach(function (id) {
+      var n = play.querySelector('#' + id);
+      if (n) n.hidden = false;
+    });
+    play.classList.add('ag-play--live');
+    startTimer();
+  }
+
+  /* Skip: the red strip (text or stickman) gives up the round. Input games
+     hand it to their own submit path so the answer still comes back through
+     wrongAnswer(); the rest register api._onSkip themselves. */
+  function doSkip(api) {
+    if (api._skipLock) return;
+    api._skipLock = true;
+    if (typeof api._onSkip === 'function') { api._onSkip(); return; }
+    skipVerdict(api, api._answerText || 'a tricky one', null);
+  }
+
+  /* "LOL It's <Answer> Next (3s)" - Next advances at once, the (3s) counts
+     down and fires it if the player does not press it. */
+  function skipVerdict(api, answerText, nextFn) {
+    var box = api.stage;
+    box.insertAdjacentHTML('beforeend',
+      '<div class="ag-verdict ag-verdict--skip no">LOL It\'s <b>' + esc(answerText) + '</b> ' +
+        '<button type="button" class="ag-btn ag-btn--go ag-next-btn" id="agNextRound">Next ' +
+        '<span class="ag-next-cd" id="agNextCd">(3s)</span></button></div>');
+    var btn = box.querySelector('#agNextRound');
+    var cd = box.querySelector('#agNextCd');
+    var left = 3, done = false;
+    var tick = setInterval(function () {
+      left--;
+      if (left <= 0) { clearInterval(tick); if (!done) { done = true; go(); } }
+      else if (cd) cd.textContent = '(' + left + 's)';
+    }, 1000);
+    function go() {
+      if (done) return;
+      done = true;
+      clearInterval(tick);
+      if (typeof nextFn === 'function') nextFn(api);
+      else if (typeof api._onNext === 'function') api._onNext(api);
+    }
+    if (btn) btn.onclick = go;
+  }
+
+
   /* ─────────────────────────────────────────── shared bits */
+  /* The round bar moved into the permanent header, so this no longer returns
+     markup - it drives the HUD and the question-type strip instead and lets
+     the builder's own content fill the centre box on its own. Every builder
+     already opens a round with this call, which makes it the right place to
+     flip the start screen into the play layout. */
   function roundHead(api, label, extra) {
-    return '<div class="ag-round"><span class="ag-round-no">ROUND ' + api.round + ' / ' + api.rounds + '</span>' +
-      '<span class="ag-round-score">SCORE <b>' + api.score + '</b></span>' +
-      (extra ? '<span class="ag-round-score">POINTS <b>' + extra + '</b></span>' : '') +
-      '<span class="ag-round-label">' + esc(label || '') + '</span></div>';
+    ensurePlayChrome(api);
+    api._skipLock = false;
+    api._onSkip = null;
+    if (api.answer) api._answerText = api.answer;
+    var play = api.wrap && api.wrap.querySelector('#agPlay');
+    if (play) {
+      var r = play.querySelector('#agHudRound');
+      if (r) r.textContent = api.round + ' / ' + api.rounds;
+      var s = play.querySelector('#agHudScore');
+      if (s) s.textContent = api.score;
+      var q = play.querySelector('#agQType');
+      if (q) {
+        q.innerHTML = esc(label || '') +
+          (extra ? '<span class="ag-qtype-pts">POINTS <b>' + extra + '</b></span>' : '');
+        q.hidden = false;
+      }
+    }
+    return '';
   }
   function howToBlock(key) {
     var steps = HOWTO[key] || [];
@@ -910,26 +1094,31 @@
     var b = api.stage.querySelector('#' + btnId);
     if (b) b.onclick = onStart;
   }
-  /* the answer box: no auto focus, tap or click to open the keyboard,
-     empty submits are ignored, and there is an optional skip button.
-     opts.search === false keeps the anime suggestion list away (Guess the
-     Character asks for a person's name, not an anime title). */
+  /* the answer box: no auto focus, tap or click to open the keyboard, empty
+     submits are ignored. It now lives in the permanent input row under the
+     centre box with the placeholder the brief asks for, and the search
+     suggestion list stays attached exactly as before (Guess the Character
+     turns it off with opts.search === false because it wants a person's
+     name, not an anime title). The old inline skip button is gone - the red
+     strip at the bottom is the skip now. */
   function answerRow(api, id, placeholder, onSubmit, withSkip, opts) {
     opts = opts || {};
-    api.stage.insertAdjacentHTML('beforeend',
+    var host = (api.wrap && api.wrap.querySelector('#agInRow')) || api.stage;
+    host.innerHTML =
       '<div class="ag-answer-row">' +
-        '<input class="ag-answer-input" id="' + id + '" type="text" placeholder="' + esc(placeholder) + '" autocomplete="off" spellcheck="false" enterkeyhint="go">' +
+        '<input class="ag-answer-input" id="' + id + '" type="text" placeholder="My Guess" autocomplete="off" spellcheck="false" enterkeyhint="go" aria-label="My Guess">' +
         '<button class="ag-btn ag-btn--go" id="' + id + 'Go">SUBMIT</button>' +
-        (withSkip ? '<button class="ag-btn ag-btn--ghost" id="' + id + 'Skip">I DON\'T KNOW</button>' : '') +
-      '</div>');
-    var input = api.stage.querySelector('#' + id);
-    var go = api.stage.querySelector('#' + id + 'Go');
-    var skip = withSkip ? api.stage.querySelector('#' + id + 'Skip') : null;
-    if (skip) { skip.style.display = 'none'; setTimeout(function () { if (skip) skip.style.display = ''; }, 3500); }
+      '</div>';
+    var input = host.querySelector('#' + id);
+    var go = host.querySelector('#' + id + 'Go');
     /* the anime search suggests the titles of the list. A pick fills the box
-       and the player presses SUBMIT (it must never empty the box behind them). */
+       and the player presses SUBMIT (it must never empty the box behind them).
+       The opts object travels along: it carries exclude, which keeps the
+       answer itself out of the suggestion list, and search:false, which
+       Guess the Character uses because it wants a person's name, not an
+       anime title. */
     if (window.AnimeSearch && input && opts.search !== false) {
-      window.AnimeSearch.attach(input, {});
+      window.AnimeSearch.attach(input, opts);
     }
     ['pointerdown', 'touchstart', 'click'].forEach(function (ev) {
       input.addEventListener(ev, function () {
@@ -945,16 +1134,18 @@
       }
       go.disabled = true;
       input.disabled = true;
-      if (skip) skip.disabled = true;
       onSubmit(v);
     }
     go.onclick = submit;
     input.onkeydown = function (e) { if (e.key === 'Enter') { e.preventDefault(); submit(); } };
-    if (skip) skip.onclick = function () {
-      api._skipped = true;
-      go.disabled = true; input.disabled = true; skip.disabled = true;
-      onSubmit(null);
-    };
+    if (withSkip) {
+      api._onSkip = function () {
+        api._skipped = true;
+        go.disabled = true;
+        input.disabled = true;
+        onSubmit(null);
+      };
+    }
     return input;
   }
   /* how long a verdict stays on screen before the next round:
@@ -962,17 +1153,16 @@
   var HOLD_RIGHT = 1900;
   var HOLD_WRONG = 3800;
 
-  /* a wrong answer shows the right one and moves on */
+  /* a wrong answer shows the right one and moves on; a skip shows it through
+     the "LOL It's <Answer> Next (3s)" strip, where Next is a real button. */
   function wrongAnswer(api, right, nextFn) {
-    var msg;
     if (api._skipped) {
-      msg = 'Yeah! I got you, this is <b>' + esc(right) + '</b>. Next is coming in ' + Math.ceil(HOLD_WRONG / 1000) + 's.';
       api._skipped = false;
-    } else {
-      msg = 'Nope - it was <b>' + esc(right) + '</b>';
+      skipVerdict(api, right, nextFn);
+      return;
     }
     api.stage.insertAdjacentHTML('beforeend',
-      '<div class="ag-verdict no">' + msg + '</div>');
+      '<div class="ag-verdict no">Nope - it was <b>' + esc(right) + '</b></div>');
     setTimeout(function () { nextFn(api); }, HOLD_WRONG);
   }
   function optionsHtml(items, correct, onPick, cssClass) {
@@ -1202,9 +1392,15 @@
       }
     });
     if (cardNum && window.ANIME_GENRES) {
+      /* ANIME_GENRES[...].nums is a Set of numbers while the card number we
+         just scraped is a string, so match through has()/indexOf() either way */
+      var cn = parseInt(cardNum, 10);
       Object.keys(window.ANIME_GENRES).forEach(function (k) {
-        if (k === 'All' || !window.ANIME_GENRES[k] || !window.ANIME_GENRES[k].nums) return;
-        if ((window.ANIME_GENRES[k].nums || []).indexOf(cardNum) > -1 && !genre) genre = k;
+        var nums = window.ANIME_GENRES[k] && window.ANIME_GENRES[k].nums;
+        if (k === 'All' || !nums) return;
+        var hit = typeof nums.has === 'function' ? nums.has(cn)
+          : (typeof nums.indexOf === 'function' ? nums.indexOf(cn) > -1 : false);
+        if (hit && !genre) genre = k;
       });
     }
     var r = (window.RATING_DATA && cardNum) ? window.RATING_DATA[cardNum] : null;
@@ -1255,6 +1451,9 @@
         '<button class="ag-btn ag-btn--tf" id="agTfTrue">TRUE</button>' +
         '<button class="ag-btn ag-btn--tf" id="agTfFalse">FALSE</button>' +
       '</div>';
+    /* the red strip skips: it gives the call away through the LOL line */
+    api._answerText = api.truth ? 'TRUE' : 'FALSE';
+    api._onSkip = function () { skipVerdict(api, api._answerText, nextTfRound); };
     function answered(said) {
       var ok = (said === api.truth);
       if (ok) api.score++;
@@ -1446,6 +1645,14 @@
           '<span class="ag-mem-face ag-mem-back">?</span>' +
         '</button>';
       }).join('') + '</div>';
+    /* the red strip skips: it names the pairs still hidden and ends the run */
+    var open = api.cards.filter(function (x) { return !x.done; }).map(function (x) { return x.pair; });
+    var uniq = open.filter(function (v, i) { return open.indexOf(v) === i; });
+    api._answerText = uniq.length ? uniq.join(', ') : 'all six pairs';
+    api._onSkip = function () {
+      api.cards.forEach(function (c) { c.done = true; });
+      skipVerdict(api, api._answerText, function (a) { a.finish(Math.max(1, 13 - a.moves), 12); });
+    };
     api.stage.querySelectorAll('.ag-mem').forEach(function (b) {
       b.onclick = function () {
         var i = parseInt(b.getAttribute('data-i'), 10);
@@ -1505,8 +1712,10 @@
     api.stage.innerHTML = roundHead(api, 'Oldest to newest') +
       '<div class="ag-tl-hint">Move the anime with the arrows, oldest first - then lock the order.</div>' +
       '<div class="ag-timeline" id="agTimeline"></div>' +
-      '<button class="ag-btn ag-btn--go ag-btn--big" id="agTimelineGo">LOCK THE ORDER</button>' +
-      '<button class="ag-btn ag-btn--ghost ag-btn--skip" id="agTimelineSkip">I DON\'T KNOW</button>';
+      '<button class="ag-btn ag-btn--go ag-btn--big" id="agTimelineGo">LOCK THE ORDER</button>';
+    /* the red strip skips: it hands over the right order through the LOL line */
+    api._answerText = api.five.map(function (a) { return a.title + ' (' + a.year + ')'; }).join(' → ');
+    api._onSkip = function () { skipVerdict(api, api._answerText, nextTimelineRound); };
     drawTimeline(api);
     api.stage.querySelector('#agTimelineGo').onclick = function () {
       var years = api.order.map(function (a) { return a.year; });
@@ -1521,12 +1730,6 @@
         if (tag) tag.textContent = y;
       });
       setTimeout(function () { nextTimelineRound(api); }, HOLD_RIGHT);
-    };
-    api.stage.querySelector('#agTimelineSkip').onclick = function () {
-      api.stage.insertAdjacentHTML('beforeend',
-        '<div class="ag-verdict no">The order was: ' +
-          esc(api.five ? api.five.map(function (a) { return a.title + ' (' + a.year + ')'; }).join(' → ') : '') + '</div>');
-      setTimeout(function () { nextTimelineRound(api); }, HOLD_WRONG);
     };
   }
 
@@ -1603,7 +1806,13 @@
       if (good) api.score++;
       api.stage.insertAdjacentHTML('beforeend',
         '<div class="ag-verdict ' + (good ? 'ok' : 'no') + '">' + (good ? 'PERFECT HIT!' : 'Missed the window…') + '</div>');
-      setTimeout(function () { nextFightRound(api); }, good ? HOLD_RIGHT : HOLD_WRONG);
+      setTimeout(function () { nextFightRound(api); }, good ? HOLD_WRONG : HOLD_WRONG);
+    };
+    /* the red strip skips: the answer is landing inside the green window */
+    api._answerText = 'a hit between 68% and 92% power';
+    api._onSkip = function () {
+      clearInterval(timer);
+      skipVerdict(api, api._answerText, nextFightRound);
     };
   }
 
@@ -1649,8 +1858,10 @@
         '<div class="ag-vs-mid">VS</div>' +
         '<button class="ag-vs-card" id="agVsB"><img src="' + esc(pair[1].a.poster) + '" alt=""><span>' + esc(pair[1].a.title) + '</span>' +
           '<small>' + esc((pair[1].a.genres && pair[1].a.genres[0]) || 'Anime') + '</small></button>' +
-      '</div>' +
-      '<button class="ag-btn ag-btn--ghost ag-btn--skip" id="agPowerSkip">I DON\'T KNOW</button>';
+      '</div>';
+    /* the red strip skips and names the stronger one */
+    api._answerText = strong.a.title;
+    api._onSkip = function () { skipVerdict(api, api._answerText, nextPowerRound); };
     function answer(chosen) {
       var ok = chosen === strong;
       if (ok) api.score++;
@@ -1661,11 +1872,6 @@
     }
     api.stage.querySelector('#agVsA').onclick = function () { answer(pair[0]); };
     api.stage.querySelector('#agVsB').onclick = function () { answer(pair[1]); };
-    api.stage.querySelector('#agPowerSkip').onclick = function () {
-      api.stage.insertAdjacentHTML('beforeend',
-        '<div class="ag-verdict no">It was <b>' + esc(strong.a.title) + '</b></div>');
-      setTimeout(function () { nextPowerRound(api); }, HOLD_WRONG);
-    };
   }
 
 
@@ -1697,6 +1903,9 @@
       setTimeout(function () { nextGenreRound(api); }, ok ? HOLD_RIGHT : HOLD_WRONG);
     });
     api.stage.appendChild(box);
+    /* the red strip skips and names the genre */
+    api._answerText = right;
+    api._onSkip = function () { skipVerdict(api, right, nextGenreRound); };
   }
 
   /* ─────────────────────────────────────────── the end of a game */
@@ -1720,11 +1929,20 @@
       }
       best = raw.score;
     } catch (e) {}
+    /* the run clock stops here; the time is shown to the player only and is
+       never part of what saveScore() sends up, so the board stays a score board */
+    stopTimer();
+    var total = fmtTime(elapsedMs());
+    var verdict = rankOf(score, max);
     wrap.querySelector('#agStage').innerHTML =
       '<div class="ag-result">' +
+        '<div class="ag-result-head">' +
+          '<span class="ag-result-stick">' + stickSvg(score / max >= 0.5 ? 'green' : 'red', 'ag-stick--big', true) + '</span>' +
+          '<div class="ag-result-bubble">' + esc(verdict) + '</div>' +
+        '</div>' +
         '<div class="ag-result-icon">' + (GAME_ICONS[g.key] || g.icon) + '</div>' +
         '<div class="ag-result-score">' + score + ' / ' + max + '</div>' +
-        '<div class="ag-result-rank">' + rankOf(score, max) + '</div>' +
+        '<div class="ag-result-time">TOTAL TIME <b>' + total + '</b></div>' +
         '<div class="ag-result-best">Your best here: ' + best + '</div>' +
         '<div class="ag-saved-note" id="agSavedNote">Checking the board…</div>' +
         '<div class="ag-result-actions">' +
@@ -1775,7 +1993,7 @@
   /* the itch.io arcade - the games are fetched into itch-games.json */
   function buildArcadeGame(api) {
     api.stage.innerHTML = '<div class="ag-start"><div class="ag-start-title">Loading the arcade...</div></div>';
-    fetch('itch-games.json?v=20261112a', { cache: 'no-cache' })
+    fetch(SITE_BASE + 'itch-games.json?v=20261112a', { cache: 'no-cache' })
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (j) {
         var list = (j && j.games) || [];
@@ -1796,6 +2014,8 @@
 
   function drawArcade(api) {
     var g = api.games[api.pick % api.games.length];
+    api.round = api.pick + 1;
+    api.rounds = api.games.length;
     api.stage.innerHTML = roundHead(api, 'Game ' + (api.pick + 1) + ' of ' + api.games.length) +
       '<div class="ag-arcade">' +
         '<div class="ag-arcade-head">' +
@@ -1812,6 +2032,12 @@
     api.stage.querySelector('#agArcadeNext').onclick = function () {
       api.pick++;
       drawArcade(api);
+    };
+    /* the red strip skips this cabinet and moves to the next one */
+    api._answerText = g.title;
+    api._onSkip = function () {
+      api.pick++;
+      skipVerdict(api, api._answerText, drawArcade);
     };
   }
 

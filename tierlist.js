@@ -321,28 +321,32 @@
   }
 
   /* ---- export ---- */
-  function loadImage(src) {
+  /* CORS proxy: kitsu CDN sends no Access-Control-Allow-Origin, so a direct
+     crossOrigin load fails and the poster never reaches the canvas. wsrv.nl
+     re-serves the image WITH CORS, so the banner always draws. */
+  function proxied(src) {
+    if (!src) return src;
+    if (/media-amazon\.com|anilist\.co|myanimelist\.net/.test(src)) return src;
+    return 'https://wsrv.nl/?url=' + encodeURIComponent(src);
+  }
+  function tryLoad(src, ms) {
     return new Promise(function (resolve) {
       if (!src) return resolve(null);
       var img = new Image();
       img.crossOrigin = 'anonymous';
       var done = false;
-      var t = setTimeout(function () { if (!done) { done = true; resolve(null); } }, 4000);
+      var t = setTimeout(function () { if (!done) { done = true; resolve(null); } }, ms || 5000);
       img.onload = function () { if (done) return; done = true; clearTimeout(t); resolve(img); };
       img.onerror = function () { if (done) return; done = true; clearTimeout(t); resolve(null); };
       img.src = src;
     });
   }
   function loadImage(src) {
-    return new Promise(function (resolve) {
-      if (!src) return resolve(null);
-      var img = new Image();
-      img.crossOrigin = 'anonymous';
-      var done = false;
-      var t = setTimeout(function () { if (!done) { done = true; resolve(null); } }, 5000);
-      img.onload = function () { if (done) return; done = true; clearTimeout(t); resolve(img); };
-      img.onerror = function () { if (done) return; done = true; clearTimeout(t); resolve(null); };
-      img.src = src;
+    if (!src) return Promise.resolve(null);
+    /* try direct first, fall back to the CORS proxy */
+    return tryLoad(src, 4000).then(function (img) {
+      if (img) return img;
+      return tryLoad(proxied(src), 6000);
     });
   }
   async function exportPng() {
@@ -631,6 +635,10 @@
     overlay.hidden = true;
     document.body.classList.remove('aw-lock');
     document.documentElement.classList.remove('aw-lock');
+    /* leave /tier-list route when closing */
+    try {
+      if (location.pathname.indexOf('/tier-list') > -1) history.pushState(null, '', '/my-anime-list/home');
+    } catch (e) {}
   }
 
   /* ---- entry ---- */
@@ -642,13 +650,20 @@
       e.preventDefault();
       if (typeof closeMenu === 'function') closeMenu();
       if (typeof closeFloatingOverlays === 'function') { try { closeFloatingOverlays(); } catch (err) {} }
+      try { history.pushState({ tier: 1 }, '', '/my-anime-list/tier-list'); } catch (err) {}
       open();
     });
   }
   function boot() {
     mountNav();
-    window.TierList = { open: open, close: close, state: function () { return state; } };
   }
+  /* Expose the API synchronously, not inside boot(): index.html loads script.js
+     (line 1871) BEFORE tierlist.js (line 2244), so script.js registers its
+     routeOnPath() DOMContentLoaded handler first and therefore runs first. If
+     window.TierList were only assigned in boot(), routeOnPath() would see it as
+     undefined and the /tier-list deep link would silently never open. mountNav()
+     still waits for the DOM. */
+  window.TierList = { open: open, close: close, state: function () { return state; } };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
   else boot();
 })()

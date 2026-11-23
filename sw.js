@@ -5,12 +5,13 @@
    the first time they are seen. API calls (the AI chat, Supabase, AniList)
    always go to the network - when there is none, the site still runs.
    ══════════════════════════════════════════════════════════════════════ */
-var VERSION = 'fardin-hub-v18';
+var VERSION = 'fardin-hub-v22';
 var IMG_VERSION = 'fardin-img-v1';
 var CORE = [
   './',
   './index.html',
   './style.css',
+  './features.css',
   './chat-styles.css',
   './duel-system.css',
   './tournament.css',
@@ -18,6 +19,11 @@ var CORE = [
   './login-otp.css',
   './search-suggest.css',
   './script.js',
+  './tierlist.js',
+  './seasonal.js',
+  './stickmen.js',
+  './shortcuts.js',
+  './perf-guard.js',
   './duel-system.js',
   './tournament.js',
   './game-data.js',

@@ -1846,14 +1846,14 @@ body.hub-hidden .card.card-live { animation-play-state: paused !important; }
   }
 }
 .counter-box {
-  opacity: 0;
-  transform: translateY(40px);
-  transition: all 1s ease-out;
+  opacity: 1;
+  transform: none;
+  transition: none;
 }
 
 .counter-box.show {
   opacity: 1;
-  transform: translateY(0);
+  transform: none;
 }
 
 .counter {
