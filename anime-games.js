@@ -952,8 +952,8 @@
     var wrap = el('div', 'ag-wrap ag-wrap--game');
     wrap.innerHTML =
       '<div class="ag-shell"><div class="ag-shell-in">' +
-      '<header class="ag-head ag-head--game">' +
-        '<span class="ag-head-badge" id="agHeadBadge">AP</span>' +
+      '<header class="ag-head ag-head--game' + (g.key === 'initials' ? '' : ' ag-head--no-ap') + '">' +
+        (g.key === 'initials' ? '<span class="ag-head-badge" id="agHeadBadge">AP</span>' : '') +
         '<div class="ag-head-title">' + (GAME_ICONS[g.key] || g.icon) + ' <span>' + esc(g.title) + '</span></div>' +
         '<button class="ag-close" id="agGameClose" aria-label="Back">✕</button>' +
       '</header>' +

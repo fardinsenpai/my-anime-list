@@ -2139,3 +2139,7 @@
     font-size: 14px;
   }
 }
+
+/* no AP badge on non-initials games */
+.ag-wrap--game .ag-head--game.ag-head--no-ap { padding-left: 20px; }
+
