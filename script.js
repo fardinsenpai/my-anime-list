@@ -431,7 +431,7 @@ function hideAllSections() {
     var el = document.getElementById(id);
     if (el) el.style.display = 'none';
   });
-  var selectors = ['.counter-container', '.search-wrap', '.filter-section', '.anime-footer', '.mood-picker'];
+  var selectors = ['.counter-container', '.search-wrap', '.filter-section', '.anime-footer', '.mood-picker', '.quote-wrap'];
   selectors.forEach(function(sel) {
     var el = document.querySelector(sel);
     if (el) el.style.display = 'none';
@@ -561,7 +561,7 @@ function goHome() {
     });
   }
 
-  var showEls = ['.counter-container', '.search-wrap', '.filter-section', '.anime-footer', '.mood-picker'];
+  var showEls = ['.counter-container', '.search-wrap', '.filter-section', '.anime-footer', '.mood-picker', '.quote-wrap'];
   showEls.forEach(function(sel) {
     var el = document.querySelector(sel);
     if (el) el.style.display = '';
