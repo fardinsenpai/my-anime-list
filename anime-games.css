@@ -1949,8 +1949,8 @@
 /* live timer inside a neon-green thought bubble */
 .ag-thought {
   position: absolute;
-  right: 108px;
-  bottom: calc(100% + 44px);
+  right: 118px;
+  bottom: calc(100% + 52px);
   display: flex;
   align-items: flex-end;
   gap: 5px;
@@ -1958,22 +1958,31 @@
   z-index: 2;
 }
 .ag-thought-bubble {
-  display: inline-block;
-  padding: 6px 12px 5px;
-  border-radius: 14px;
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  min-width: 86px;
+  padding: 16px 18px 18px;
+  border: 0;
   font-family: 'Orbitron', sans-serif;
-  font-size: 15px;
+  font-size: 17px;
   font-weight: 800;
   letter-spacing: 1px;
   font-variant-numeric: tabular-nums;
   color: #22ff88;
-  background: #0b2922;
-  border: 2px solid #22ff88;
-  box-shadow:
-    0 0 18px rgba(34, 255, 136, .55),
-    0 0 40px rgba(34, 255, 136, .20),
-    inset 0 0 12px rgba(34, 255, 136, .18);
-  text-shadow: 0 0 10px rgba(34, 255, 136, .85);
+  background: transparent;
+  box-shadow: none;
+  text-shadow: 0 0 10px rgba(34, 255, 136, .85), 0 0 22px rgba(34, 255, 136, .55);
+  isolation: isolate;
+}
+/* cloud outline with the dark emerald fill */
+.ag-thought-bubble::before {
+  content: '';
+  position: absolute;
+  inset: -4px -8px -8px -8px;
+  z-index: -1;
+  background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 74'><path d='M28,62 C12,62 6,48 19,41 C13,25 36,14 47,28 C57,10 85,12 89,30 C105,25 116,43 103,53 C113,62 101,73 86,73 L28,73 Z' fill='%230b2922' stroke='%2322ff88' stroke-width='3' stroke-linejoin='round'/></svg>") center / 100% 100% no-repeat;
+  filter: drop-shadow(0 0 10px rgba(34, 255, 136, .7)) drop-shadow(0 0 24px rgba(34, 255, 136, .3));
 }
 .ag-thought-dots {
   display: flex;
@@ -2107,8 +2116,8 @@
   .ag-hud-v { font-size: 14px; }
   .ag-hud-perch { right: 10px; }
   .ag-stick--sit { width: 66px; height: 70px; }
-  .ag-thought { right: 66px; bottom: calc(100% + 34px); }
-  .ag-thought-bubble { font-size: 13px; padding: 5px 10px 4px; }
+  .ag-thought { right: 78px; bottom: calc(100% + 42px); }
+  .ag-thought-bubble { font-size: 14px; min-width: 72px; padding: 13px 14px 15px; }
   .ag-initials { font-size: clamp(1.3rem, 7vw, 2rem); letter-spacing: 10px; padding-left: 10px; }
   .ag-genre-year { font-size: 12px; }
   .ag-prompt { font-size: 13px; margin-bottom: 12px; }
