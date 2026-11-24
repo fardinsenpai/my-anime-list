@@ -2071,7 +2071,6 @@
     wrap.querySelector('#agStage').innerHTML =
       '<div class="ag-result">' +
         '<div class="ag-result-head">' +
-          '<span class="ag-result-stick">' + stickSvg(score / max >= 0.5 ? 'green' : 'red', 'ag-stick--big', 'head') + '</span>' +
           '<div class="ag-result-bubble">' + esc(verdict) + '</div>' +
         '</div>' +
         '<div class="ag-result-icon">' + (GAME_ICONS[g.key] || g.icon) + '</div>' +
