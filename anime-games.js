@@ -800,7 +800,7 @@
         '<div class="ag-head-title" id="agMainTitle">Anime Games to Play:</div>' +
         (agAdmin ? '<div class="ag-admin-badge" id="agAdminBadge">BOARD KEEPER ON - TAP TO LOCK</div>' : '') +
         '<div class="ag-head-sub">' + GAMES.length + ' games built from Fardin\'s own list - play, score, climb the board.</div>' +
-        '<button class="ag-howto-btn" id="agHowtoBtn" title="How to Play">❓ How to Play</button>' +
+        '<button class="ag-howto-btn" id="agHowtoBtn" title="How to Play" aria-label="How to Play">(?)</button>' +
         '<button class="ag-close" id="agHubClose" aria-label="Close">✕</button>' +
       '</header>' +
       '<div class="ag-howto ag-howto--hub" id="agHowtoBlock" hidden>' +
@@ -888,7 +888,7 @@
        mode 'sit'  -> the green one perched on a ledge above the score
        mode 'head' -> just the head, for the verdict on the result screen */
   function stickSvg(tone, extraCls, mode) {
-    var col = tone === 'red' ? '#ff4757' : tone === 'green' ? '#2fe08a' : '#4dd4ac';
+    var col = tone === 'red' ? '#ef4444' : tone === 'green' ? '#22ff88' : '#4dd4ac';
     var mouth = tone === 'red'
       ? 'M -4 -33 A 4 4 0 0 0 4 -33'      /* red one grins wide - it wants you to skip */
       : 'M -4 -34 A 4 4 0 0 0 4 -34';
@@ -953,22 +953,25 @@
     wrap.innerHTML =
       '<div class="ag-shell"><div class="ag-shell-in">' +
       '<header class="ag-head ag-head--game">' +
+        '<span class="ag-head-badge" id="agHeadBadge">AP</span>' +
         '<div class="ag-head-title">' + (GAME_ICONS[g.key] || g.icon) + ' <span>' + esc(g.title) + '</span></div>' +
         '<button class="ag-close" id="agGameClose" aria-label="Back">✕</button>' +
       '</header>' +
       '<div class="ag-play" id="agPlay">' +
         '<div class="ag-hud" id="agHud" hidden>' +
-          /* the green one perches on the top edge of the score bar */
-          '<span class="ag-hud-perch">' +
-            '<span class="ag-hud-speed" id="agHudSpeed">1.0</span>' +
-            stickSvg('green', 'ag-stick--sit', 'sit') +
+          /* the green one perches on the top edge of the score side */
+          '<span class="ag-hud-perch">' + stickSvg('green', 'ag-stick--sit', 'sit') + '</span>' +
+          /* the live timer lives in a neon thought bubble beside its head */
+          '<span class="ag-thought" aria-live="off">' +
+            '<span class="ag-thought-bubble" id="agHudTime">0:00</span>' +
+            '<span class="ag-thought-dots" aria-hidden="true"><i></i><i></i><i></i></span>' +
           '</span>' +
           '<div class="ag-hud-row">' +
-            '<div class="ag-hud-cell"><span class="ag-hud-k">Round:</span>' +
-              '<b class="ag-hud-v" id="agHudRound">0 / 5</b></div>' +
+            '<div class="ag-hud-cell"><span class="ag-hud-k">ROUND:</span>' +
+              '<b class="ag-hud-v" id="agHudRound">02 / 05</b></div>' +
             '<div class="ag-hud-cell ag-hud-cell--score">' +
-              '<span class="ag-hud-k">Score:</span><b class="ag-hud-v" id="agHudScore">0</b>' +
-              '<b class="ag-hud-time" id="agHudTime">0:00</b>' +
+              '<span class="ag-hud-k">SCORE:</span>' +
+              '<b class="ag-hud-v ag-hud-v--score" id="agHudScore">0</b>' +
             '</div>' +
           '</div>' +
         '</div>' +
@@ -1051,6 +1054,10 @@
       if (n) n.hidden = false;
     });
     play.classList.add('ag-play--live');
+    /* the leaderboard only belongs on the hub and result screen - hide it
+       while a round is live so the play area fits without scrolling */
+    var overall = api.wrap && api.wrap.querySelector('.ag-overall--game');
+    if (overall) overall.hidden = true;
     startTimer();
   }
 
@@ -1072,6 +1079,7 @@
       '<div class="ag-verdict ag-verdict--skip no">LOL It\'s <b>' + esc(answerText) + '</b> ' +
         '<button type="button" class="ag-btn ag-btn--go ag-next-btn" id="agNextRound">Next ' +
         '<span class="ag-next-cd" id="agNextCd">(3s)</span></button></div>');
+    revealFeedback(api);
     var btn = box.querySelector('#agNextRound');
     var cd = box.querySelector('#agNextCd');
     var left = 3, done = false;
@@ -1117,14 +1125,20 @@
     var play = api.wrap && api.wrap.querySelector('#agPlay');
     if (play) {
       var r = play.querySelector('#agHudRound');
-      if (r) r.textContent = api.round + ' / ' + api.rounds;
+      if (r) r.textContent = String(api.round).padStart(2, '0') + ' / ' + String(api.rounds).padStart(2, '0');
       var s = play.querySelector('#agHudScore');
       if (s) s.textContent = api.score;
       var q = play.querySelector('#agQType');
       if (q) {
-        q.innerHTML = esc(label || '') +
-          (extra ? '<span class="ag-qtype-pts">POINTS <b>' + extra + '</b></span>' : '');
-        q.hidden = false;
+        if (!label) {
+          /* the initials game puts its prompt inside the puzzle box instead */
+          q.innerHTML = '';
+          q.hidden = true;
+        } else {
+          q.innerHTML = esc(label) +
+            (extra ? '<span class="ag-qtype-pts">POINTS <b>' + extra + '</b></span>' : '');
+          q.hidden = false;
+        }
       }
     }
     return '';
@@ -1207,6 +1221,21 @@
   var HOLD_RIGHT = 1900;
   var HOLD_WRONG = 3800;
 
+  /* On phones the keyboard can shrink the viewport and hide a verdict that
+     sits at the bottom of the centre box. Pull the latest feedback into view
+     so it always shows above the input field / keyboard. */
+  function revealFeedback(api) {
+    var wrap = api && api.wrap;
+    if (!wrap) return;
+    setTimeout(function () {
+      var verdicts = wrap.querySelectorAll('.ag-stage .ag-verdict');
+      var v = verdicts.length ? verdicts[verdicts.length - 1] : null;
+      if (!v) return;
+      try { v.scrollIntoView({ block: 'center', behavior: 'smooth' }); }
+      catch (e) { try { v.scrollIntoView(); } catch (e2) {} }
+    }, 60);
+  }
+
   /* a wrong answer shows the right one and moves on; a skip shows it through
      the "LOL It's <Answer> Next (3s)" strip, where Next is a real button. */
   function wrongAnswer(api, right, nextFn) {
@@ -1217,6 +1246,7 @@
     }
     api.stage.insertAdjacentHTML('beforeend',
       '<div class="ag-verdict no">Nope - it was <b>' + esc(right) + '</b></div>');
+    revealFeedback(api);
     /* show the persistent NEXT button so the player can advance manually */
     var nextRow = document.querySelector('#agNextRow');
     api._nextClicked = false;
@@ -1685,10 +1715,12 @@
     api.answer = a.title;
     api.alt = [];
     var initials = a.title.split(/\s+/).map(function (w) { return w.charAt(0); }).join(' ').toUpperCase();
-    var hint = (a.genres && a.genres.length ? a.genres[0] : 'Anime') + (a.year ? ' · ' + a.year : '');
-    api.stage.innerHTML = roundHead(api, 'Name the anime') +
-      '<div class="ag-initials">' + esc(initials) + '</div>' +
-      '<div class="ag-hint">' + esc(hint) + '</div>';
+    var initialsDisplay = initials.split(' ').join(' _ ') + ' _';
+    var hint = (a.genres && a.genres.length ? a.genres[0] : 'Anime') + (a.year ? ' • ' + a.year : '');
+    api.stage.innerHTML = roundHead(api, '') +
+      '<div class="ag-initials">' + esc(initialsDisplay) + '</div>' +
+      '<div class="ag-genre-year">' + esc(hint) + '</div>' +
+      '<div class="ag-prompt">What is the Anime name?</div>';
     answerRow(api, 'agInitialsInput', 'Type the anime title…', function (v) {
       var ok = answerMatches(v, api.answer, api.alt);
       if (ok) {
@@ -2021,6 +2053,9 @@
     /* the run clock stops here; the time is shown to the player only and is
        never part of what saveScore() sends up, so the board stays a score board */
     stopTimer();
+    /* the run is over - the board is allowed back on the result screen */
+    var overall = wrap.querySelector('.ag-overall--game');
+    if (overall) overall.hidden = false;
     var total = fmtTime(elapsedMs());
     var verdict = rankOf(score, max);
     wrap.querySelector('#agStage').innerHTML =
