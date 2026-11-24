@@ -8548,14 +8548,26 @@ document.addEventListener('click', function(e) {
      below (tierlist.js, seasonal.js, stickmen.js) resolve against the deep
      path and 404 - e.g. /games/emoji -> /games/tierlist.js. Deferring it into
      routeOnPath() keeps the original base while those tags are loading. */
+  function isKnownRoute(path) {
+    if (!path || path === '/') return false;
+    if (path === '/home' || path === '/my-anime-list') return true;
+    if (path.indexOf('/games/') === 0) return true;
+    var known = ['/analysis', '/top-5', '/top-secrets', '/hot-takes', '/tier-list', '/aoy', '/waifus', '/tournament', '/anime-duel'];
+    for (var i = 0; i < known.length; i++) {
+      if (path === known[i] || path.indexOf(known[i] + '/') === 0) return true;
+    }
+    return false;
+  }
   function consumeSpaRedirect() {
-    var redirect = sessionStorage.getItem('spaRedirect');
+    var redirect = null;
+    try { redirect = sessionStorage.getItem('spaRedirect'); } catch (e) { redirect = null; }
     if (redirect) {
-      sessionStorage.removeItem('spaRedirect');
+      try { sessionStorage.removeItem('spaRedirect'); } catch (e) {}
       var base = location.origin + '/my-anime-list';
       var path = redirect.replace(base, '').split('?')[0];
-      if (path && path !== '/') {
-        history.replaceState(null, '', base + path);
+      /* only restore real routes - unknown paths stay on Home with a clean URL */
+      if (isKnownRoute(path)) {
+        try { history.replaceState(null, '', base + path); } catch (e) {}
       }
     }
   }

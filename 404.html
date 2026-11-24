@@ -17,7 +17,7 @@
         location.replace('./index.html');
         return;
       }
-      sessionStorage.setItem('spaRedirect', location.href);
+      try { sessionStorage.setItem('spaRedirect', location.href); } catch (e) {}
       location.replace('/my-anime-list/');
     })();
   </script>
