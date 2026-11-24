@@ -890,22 +890,21 @@
   function stickSvg(tone, extraCls, mode) {
     var col = tone === 'red' ? '#ef4444' : tone === 'green' ? '#22ff88' : '#4dd4ac';
     var mouth = tone === 'red'
-      ? 'M -4 -33 A 4 4 0 0 0 4 -33'      /* red one grins wide - it wants you to skip */
-      : 'M -4 -34 A 4 4 0 0 0 4 -34';
+      ? 'M -4 -33 Q 0 -27 4 -33'      /* red one grins wide - it wants you to skip */
+      : 'M -4 -35 Q 0 -29 4 -35';
     var sit = mode === 'sit', head = mode === 'head';
     var vb = head ? '-15 -52 30 30' : sit ? '-46 -54 74 78' : '-20 -56 40 78';
     var body = '', ledge = '';
     if (sit) {
-      /* natural, cozy leaning: torso tipped back & right, arms relaxed,
-         one resting on thigh, both legs bent gently */
+      /* seated on the score bar: torso leaning back, one hand propped on
+         the bar behind, the other resting on the knee, both shins dangling
+         over the bar's top edge */
       body =
-        '<path class="ag-stick-torso" d="M0 -29 L8 -13" stroke="' + col + '" stroke-width="2.6" fill="none" stroke-linecap="round"/>' +
-        '<path class="ag-stick-eyes" d="M-3 -40 A 3 3 0 0 1 -3 -40" fill="#fff"/><circle cx="3" cy="-40" r="2.3" fill="#fff"/><circle cx="-3" cy="-40" r="2.3" fill="#fff"/>' +
-        '<path class="ag-stick-mouth" d="M0 -24 L0 -22 A 4 4 0 0 0 4 -22" fill="none" stroke="#111" stroke-width="1.3" stroke-linecap="round"/>' +
-        '<path class="ag-stick-arm-right" d="M0 -24 L10 -16" stroke="' + col + '" stroke-width="2.4" fill="none" stroke-linecap="round"/>' +
-        '<path class="ag-stick-arm-left" d="M0 -24 L-10 -17" stroke="' + col + '" stroke-width="2.4" fill="none" stroke-linecap="round"/>' +
-        '<path class="ag-stick-leg-front" d="M0 -13 L15 -12 M15 -12 L15 4 L21 4" stroke="' + col + '" stroke-width="2.4" fill="none" stroke-linecap="round"/>' +
-        '<path class="ag-stick-leg-back" d="M0 -13 L13 -10 M13 -10 L13 5" stroke="' + col + '" stroke-width="2.4" fill="none" stroke-linecap="round"/>';
+        '<path class="ag-stick-torso" d="M0 -29 L-9 -13" stroke="' + col + '" stroke-width="2.6" fill="none" stroke-linecap="round"/>' +
+        '<path class="ag-stick-arm-left" d="M-2 -25 L-18 -13" stroke="' + col + '" stroke-width="2.4" fill="none" stroke-linecap="round"/>' +
+        '<path class="ag-stick-arm-right" d="M-3 -25 L7 -19" stroke="' + col + '" stroke-width="2.4" fill="none" stroke-linecap="round"/>' +
+        '<path class="ag-stick-leg-front" d="M-9 -13 L-24 -11 M-24 -11 L-24 7 M-24 7 L-29 7" stroke="' + col + '" stroke-width="2.4" fill="none" stroke-linecap="round"/>' +
+        '<path class="ag-stick-leg-back" d="M-9 -13 L-17 -9 M-17 -9 L-17 9 M-17 9 L-12 9" stroke="' + col + '" stroke-width="2.4" fill="none" stroke-linecap="round"/>';
       /* no drawn shelf - the stickman sits on the score bar itself, legs
          hanging over its top edge */
       // solid ground base under the red standing stickman (skip mode)
