@@ -1961,8 +1961,8 @@
   position: relative;
   display: inline-grid;
   place-items: center;
-  min-width: 62px;
-  padding: 11px 12px 13px;
+  min-width: 66px;
+  padding: 18px 14px 11px;
   border: 0;
   white-space: nowrap;
   font-family: 'Orbitron', sans-serif;
@@ -1980,7 +1980,7 @@
 .ag-thought-bubble::before {
   content: '';
   position: absolute;
-  inset: -1px -5px -5px -5px;
+  inset: -8px -6px -4px -6px;
   z-index: -1;
   background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 80'><path d='M24,64 C10,64 5,50 14,42 C9,28 27,18 37,28 C45,12 67,11 74,27 C90,18 106,31 101,45 C114,51 109,66 96,66 C90,74 32,74 24,64 Z' fill='%230b2922' stroke='%2322ff88' stroke-width='2' stroke-linejoin='round'/></svg>") center / 100% 100% no-repeat;
   filter: drop-shadow(0 0 10px rgba(34, 255, 136, .7)) drop-shadow(0 0 24px rgba(34, 255, 136, .3));
