@@ -5,7 +5,7 @@
    the first time they are seen. API calls (the AI chat, Supabase, AniList)
    always go to the network - when there is none, the site still runs.
    ══════════════════════════════════════════════════════════════════════ */
-var VERSION = 'fardin-hub-v44';
+var VERSION = 'fardin-hub-v45';
 var IMG_VERSION = 'fardin-img-v1';
 var CORE = [
   './',

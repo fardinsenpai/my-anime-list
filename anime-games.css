@@ -1941,10 +1941,10 @@
 
 /* green one perched on the score half, legs dangling over the edge */
 .ag-hud-perch {
-  right: 20px;
-  bottom: calc(100% - 4px);
+  right: 24px;
+  bottom: calc(100% - 24px);
 }
-.ag-stick--sit { width: 82px; height: 86px; }
+.ag-stick--sit { width: 88px; height: 92px; }
 
 /* live timer inside a neon-green thought bubble */
 .ag-thought {
@@ -1961,11 +1961,12 @@
   position: relative;
   display: inline-grid;
   place-items: center;
-  min-width: 86px;
-  padding: 16px 18px 18px;
+  min-width: 96px;
+  padding: 20px 20px 22px;
   border: 0;
+  white-space: nowrap;
   font-family: 'Orbitron', sans-serif;
-  font-size: 17px;
+  font-size: 19px;
   font-weight: 800;
   letter-spacing: 1px;
   font-variant-numeric: tabular-nums;
@@ -1979,9 +1980,9 @@
 .ag-thought-bubble::before {
   content: '';
   position: absolute;
-  inset: -4px -8px -8px -8px;
+  inset: -2px -10px -10px -10px;
   z-index: -1;
-  background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 74'><path d='M28,62 C12,62 6,48 19,41 C13,25 36,14 47,28 C57,10 85,12 89,30 C105,25 116,43 103,53 C113,62 101,73 86,73 L28,73 Z' fill='%230b2922' stroke='%2322ff88' stroke-width='3' stroke-linejoin='round'/></svg>") center / 100% 100% no-repeat;
+  background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 80'><path d='M24,64 C10,64 5,50 14,42 C9,28 27,18 37,28 C45,12 67,11 74,27 C90,18 106,31 101,45 C114,51 109,66 96,66 C90,74 32,74 24,64 Z' fill='%230b2922' stroke='%2322ff88' stroke-width='3' stroke-linejoin='round'/></svg>") center / 100% 100% no-repeat;
   filter: drop-shadow(0 0 10px rgba(34, 255, 136, .7)) drop-shadow(0 0 24px rgba(34, 255, 136, .3));
 }
 .ag-thought-dots {
@@ -2114,8 +2115,8 @@
   .ag-hud { margin-top: 64px; }
   .ag-hud-cell { padding: 9px 10px; font-size: 10px; letter-spacing: 1.3px; }
   .ag-hud-v { font-size: 14px; }
-  .ag-hud-perch { right: 10px; }
-  .ag-stick--sit { width: 66px; height: 70px; }
+  .ag-hud-perch { right: 12px; bottom: calc(100% - 18px); }
+  .ag-stick--sit { width: 70px; height: 74px; }
   .ag-thought { right: 78px; bottom: calc(100% + 42px); }
   .ag-thought-bubble { font-size: 14px; min-width: 72px; padding: 13px 14px 15px; }
   .ag-initials { font-size: clamp(1.3rem, 7vw, 2rem); letter-spacing: 10px; padding-left: 10px; }

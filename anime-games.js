@@ -906,8 +906,8 @@
         '<path class="ag-stick-arm-left" d="M0 -24 L-10 -17" stroke="' + col + '" stroke-width="2.4" fill="none" stroke-linecap="round"/>' +
         '<path class="ag-stick-leg-front" d="M0 -13 L15 -12 M15 -12 L15 4 L21 4" stroke="' + col + '" stroke-width="2.4" fill="none" stroke-linecap="round"/>' +
         '<path class="ag-stick-leg-back" d="M0 -13 L13 -10 M13 -10 L13 5" stroke="' + col + '" stroke-width="2.4" fill="none" stroke-linecap="round"/>';
-      /* kept outside the animated group so the shelf never moves */
-      ledge = '<path class="ag-perch-led" d="M-41 21 L-26 9 L25 9" fill="none" stroke="' + col + '" stroke-width="1.6" stroke-opacity=".85" stroke-linecap="round" stroke-linejoin="round"/>';
+      /* no drawn shelf - the stickman sits on the score bar itself, legs
+         hanging over its top edge */
       // solid ground base under the red standing stickman (skip mode)
       if (mode === 'skip') {
         ledge += '<path class="ag-ground" d="M-24 14 L24 14" fill="none" stroke="' + col + '" stroke-width="2" stroke-opacity=".9" stroke-linecap="round"/>' +
