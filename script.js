@@ -8551,7 +8551,15 @@ document.addEventListener('click', function(e) {
   function isKnownRoute(path) {
     if (!path || path === '/') return false;
     if (path === '/home' || path === '/my-anime-list') return true;
-    if (path.indexOf('/games/') === 0) return true;
+    if (path.indexOf('/games/') === 0) {
+      var gname = path.slice('/games/'.length).replace(/\/+$/, '');
+      if (window.AnimeGames && Array.isArray(window.AnimeGames.games)) {
+        for (var gi = 0; gi < window.AnimeGames.games.length; gi++) {
+          if (window.AnimeGames.games[gi].key === gname) return true;
+        }
+      }
+      return false;
+    }
     var known = ['/analysis', '/top-5', '/top-secrets', '/hot-takes', '/tier-list', '/aoy', '/waifus', '/tournament', '/anime-duel'];
     for (var i = 0; i < known.length; i++) {
       if (path === known[i] || path.indexOf(known[i] + '/') === 0) return true;
@@ -8588,8 +8596,20 @@ document.addEventListener('click', function(e) {
       openWaifus();
     } else if (p.indexOf('/games/') > -1) {
       var gname = decodeURIComponent(p.split('/games/')[1] || '').replace(/\/+$/, '');
-      if (typeof openGamesHub === 'function') openGamesHub();
-      if (gname && window.AnimeGames && typeof window.AnimeGames._openGameScreen === 'function') { setTimeout(function () { try { window.AnimeGames._openGameScreen(gname); } catch (e) {} }, 120); }
+      /* top-5 / analysis / etc. are sections, not games - a stale /games/top-5
+         (or any unknown game key) must not try to open a non-existent game */
+      var isRealGame = false;
+      if (gname && window.AnimeGames && Array.isArray(window.AnimeGames.games)) {
+        for (var gi = 0; gi < window.AnimeGames.games.length; gi++) {
+          if (window.AnimeGames.games[gi].key === gname) { isRealGame = true; break; }
+        }
+      }
+      if (!isRealGame) {
+        if (typeof goHome === 'function') goHome();
+      } else {
+        if (typeof openGamesHub === 'function') openGamesHub();
+        if (window.AnimeGames && typeof window.AnimeGames._openGameScreen === 'function') { setTimeout(function () { try { window.AnimeGames._openGameScreen(gname); } catch (e) {} }, 120); }
+      }
     } else if (p.endsWith('/hot-takes')) {
       var btn = document.getElementById('hotTakesBtn');
       if (btn) btn.click();
