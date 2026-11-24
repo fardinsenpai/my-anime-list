@@ -8558,6 +8558,8 @@ document.addEventListener('click', function(e) {
           if (window.AnimeGames.games[gi].key === gname) return true;
         }
       }
+      /* section aliases that were historically mistyped under /games/ */
+      if (gname === 'top-5' || gname === 'top5' || gname === 'analysis' || gname === 'hot-takes' || gname === 'top-secrets') return true;
       return false;
     }
     var known = ['/analysis', '/top-5', '/top-secrets', '/hot-takes', '/tier-list', '/aoy', '/waifus', '/tournament', '/anime-duel'];
@@ -8605,7 +8607,15 @@ document.addEventListener('click', function(e) {
         }
       }
       if (!isRealGame) {
-        if (typeof goHome === 'function') goHome();
+        /* a non-game path under /games/ (e.g. /games/top-5) is a section,
+           not a broken game - route it to its real section instead of /home */
+        var _btn = null;
+        if (gname === 'top-5' || gname === 'top5') _btn = document.getElementById('topFiveSideBtn');
+        else if (gname === 'analysis') _btn = document.getElementById('analysisSideBtn');
+        else if (gname === 'hot-takes') _btn = document.getElementById('hotTakesBtn');
+        else if (gname === 'top-secrets') _btn = document.getElementById('topSecretsBtn');
+        if (_btn) { _btn.click(); }
+        else if (typeof goHome === 'function') goHome();
       } else {
         if (typeof openGamesHub === 'function') openGamesHub();
         if (window.AnimeGames && typeof window.AnimeGames._openGameScreen === 'function') { setTimeout(function () { try { window.AnimeGames._openGameScreen(gname); } catch (e) {} }, 120); }
