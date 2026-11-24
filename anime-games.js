@@ -1106,13 +1106,10 @@
       }
     }, 1000);
     if (btn) btn.onclick = go;
-    /* show the persistent NEXT button at bottom-right too */
+    /* only the single inline Next button in the verdict - the extra
+       persistent bottom-right NEXT button stays hidden */
     var nextRow = document.querySelector('#agNextRow');
-    if (nextRow) {
-      nextRow.hidden = false;
-      var persistentBtn = nextRow.querySelector('#agNextRound');
-      if (persistentBtn) persistentBtn.onclick = go;
-    }
+    if (nextRow) nextRow.hidden = true;
   }
 
 
