@@ -1731,7 +1731,10 @@
       var ok = answerMatches(v, api.answer, api.alt);
       if (ok) {
         api.score++;
+        var sc = api.wrap && api.wrap.querySelector('#agHudScore');
+        if (sc) sc.textContent = api.score;
         api.stage.insertAdjacentHTML('beforeend', '<div class="ag-verdict ok">Correct! <b>' + esc(api.answer) + '</b></div>');
+        revealFeedback(api);
         setTimeout(function () { nextInitialsRound(api); }, HOLD_RIGHT);
       } else {
         wrongAnswer(api, api.answer, nextInitialsRound);
