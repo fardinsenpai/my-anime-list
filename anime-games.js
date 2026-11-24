@@ -1083,19 +1083,29 @@
     var btn = box.querySelector('#agNextRound');
     var cd = box.querySelector('#agNextCd');
     var left = 3, done = false;
-    var tick = setInterval(function () {
-      left--;
-      if (left <= 0) { clearInterval(tick); if (!done) { done = true; go(); } }
-      else if (cd) cd.textContent = '(' + left + 's)';
-    }, 1000);
-    function go() {
-      if (done) return;
-      done = true;
+    /* advance() performs the actual round transition; go() is the guarded
+       user entry point. The auto-tick calls advance() directly because
+       go() bails when `done` is already true - calling go() from the tick
+       (which sets done=true first) would never advance and stall on 1s. */
+    function advance() {
       clearInterval(tick);
       api._nextClicked = true;
       if (typeof nextFn === 'function') nextFn(api);
       else if (typeof api._onNext === 'function') api._onNext(api);
     }
+    function go() {
+      if (done) return;
+      done = true;
+      advance();
+    }
+    var tick = setInterval(function () {
+      left--;
+      if (left <= 0) {
+        if (!done) { done = true; advance(); }
+      } else if (cd) {
+        cd.textContent = '(' + left + 's)';
+      }
+    }, 1000);
     if (btn) btn.onclick = go;
     /* show the persistent NEXT button at bottom-right too */
     var nextRow = document.querySelector('#agNextRow');
