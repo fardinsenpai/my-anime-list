@@ -426,7 +426,7 @@ function showToast(title, msg, type) {
 }
 
 function hideAllSections() {
-  var ids = ['scrollProgress', 'topFiveDropdown', 'analysisContainer', 'topSecretsContainer', 'hotTakesContainer', 'chatBubble', 'grid', 'animeQuestContainer', 'nowStrip'];
+  var ids = ['scrollProgress', 'topFiveDropdown', 'analysisContainer', 'topSecretsContainer', 'hotTakesContainer', 'chatBubble', 'grid', 'animeQuestContainer', 'nowStrip', 'gamesHubContainer'];
   ids.forEach(function(id) {
     var el = document.getElementById(id);
     if (el) el.style.display = 'none';
