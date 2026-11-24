@@ -32,12 +32,12 @@
   var CLICK1 = ['hey!', "what's up?", 'yo!', 'sup?', 'hola!'];
   var CLICK2 = ['stop poking!', 'again?!', 'ouch!', 'hey!', 'not again!'];
   var GOODBYE = ['Bye!', 'See ya!', 'Later!', 'Ciao!', 'Adios!'];
-  var LS_KEY = 'stickmen_cfg_v4';
+  var LS_KEY = 'stickmen_cfg_v5';
 
   var canvas = null, ctx = null;
   var stickmen = [];
   var raf = null;
-  var cfg = { count: 5, colors: DEFAULT_COLORS.slice(), size: 2 };
+  var cfg = { count: 2, colors: DEFAULT_COLORS.slice(), size: 2 };
   var drag = null;
   var mouse = { x: -1000, y: -1000 };
   var suppressed = false;
