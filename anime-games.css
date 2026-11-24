@@ -1942,7 +1942,7 @@
 /* green one perched on the score half, legs dangling over the edge */
 .ag-hud-perch {
   right: 22px;
-  bottom: calc(100% - 20px);
+  bottom: calc(100% - 34px);
 }
 .ag-stick--sit { width: 68px; height: 72px; }
 
@@ -1950,7 +1950,7 @@
 .ag-thought {
   position: absolute;
   right: 104px;
-  bottom: calc(100% + 40px);
+  bottom: calc(100% + 30px);
   display: flex;
   align-items: flex-end;
   gap: 5px;
@@ -2115,9 +2115,9 @@
   .ag-hud { margin-top: 64px; }
   .ag-hud-cell { padding: 9px 10px; font-size: 10px; letter-spacing: 1.3px; }
   .ag-hud-v { font-size: 14px; }
-  .ag-hud-perch { right: 12px; bottom: calc(100% - 16px); }
+  .ag-hud-perch { right: 12px; bottom: calc(100% - 26px); }
   .ag-stick--sit { width: 58px; height: 62px; }
-  .ag-thought { right: 72px; bottom: calc(100% + 34px); }
+  .ag-thought { right: 72px; bottom: calc(100% + 26px); }
   .ag-thought-bubble { font-size: 14px; min-width: 72px; padding: 13px 14px 15px; }
   .ag-initials { font-size: clamp(1.3rem, 7vw, 2rem); letter-spacing: 10px; padding-left: 10px; }
   .ag-genre-year { font-size: 12px; }
