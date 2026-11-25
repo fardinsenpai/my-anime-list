@@ -2272,3 +2272,7 @@
   display: inline-flex;
   margin: 0;
 }
+
+/* keep the perched stickman above the bar so its dangling legs are never cut */
+.ag-wrap--game .ag-hud-perch { z-index: 5; }
+.ag-wrap--game .ag-hud-row { z-index: 1; }
