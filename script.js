@@ -2141,6 +2141,24 @@ searchBox.addEventListener('input', function () {
   if (!html) return;
   strip.innerHTML = html;
   strip.style.display = '';
+  /* a Watching / Reading ticket takes you straight to its card */
+  strip.onclick = function (e) {
+    var ticket = e.target && e.target.closest ? e.target.closest('.now-card') : null;
+    if (!ticket) return;
+    var titleEl = ticket.querySelector('.now-title');
+    if (!titleEl) return;
+    var wanted = titleEl.textContent.trim().toLowerCase();
+    var all = document.querySelectorAll('#grid .card');
+    for (var i = 0; i < all.length; i++) {
+      var t = all[i].querySelector('.title');
+      if (t && t.textContent.trim().toLowerCase() === wanted) {
+        all[i].scrollIntoView({ behavior: prefersReducedMotion() ? 'auto' : 'smooth', block: 'center' });
+        all[i].classList.add('card-jump-flash');
+        setTimeout(function (card) { return function () { card.classList.remove('card-jump-flash'); }; }(all[i]), 2200);
+        return;
+      }
+    }
+  };
 })();
 
 function searchAnime() {

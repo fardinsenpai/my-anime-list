@@ -622,3 +622,11 @@
     width: 3px !important;
   }
 }
+
+/* clicking a Currently Watching / Reading ticket jumps to its card */
+.now-card { cursor: pointer; }
+.card-jump-flash .card-inner {
+  outline: 2px solid #00f0ff;
+  outline-offset: 3px;
+  box-shadow: 0 0 34px rgba(0, 240, 255, .7) !important;
+}
