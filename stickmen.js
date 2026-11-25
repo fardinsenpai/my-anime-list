@@ -16,14 +16,14 @@
   var ENTRY_TYPES = ['rope','ladder','heli','swing','failrope','parachute','bungee','slipslide','smoke','jetpack','peekpop'];
   var IDLE_STATES = ['happy','run','jump','laugh','angry','sad','sleep','sit','cooperate','lookup','lookdown','spar'];
   var BUBBLES = {
-    happy: ['hi!', 'yay!', ':D', 'nice!'],
-    laugh: ['haha!', 'lol', 'XD', 'hehe'],
-    jump: ['boing!', 'up!', 'wheee'],
-    run: ['zoom!', 'fast!', 'go go'],
-    angry: ['grr!', 'hmph!', 'ugh'],
-    sad: ['...', 'oh', ':(', 'meh'],
-    sleep: ['Zzz', 'zZz', 'zzZ'],
-    sit: ['*sit*', 'phew', 'resting'],
+    happy: ['hi!', 'yay!', ':D', 'nice!', 'hello there!', 'howdy!', 'awesome!', 'yippie!'],
+    laugh: ['haha!', 'lol', 'XD', 'hehe', 'lmao', 'too funny!', 'hehehe'],
+    jump: ['boing!', 'up!', 'wheee', 'whoosh!', 'wahoo!', 'yeehaw!'],
+    run: ['zoom!', 'fast!', 'go go', 'gotta go!', 'vroom!', 'later!'],
+    angry: ['grr!', 'hmph!', 'ugh', 'not again!', 'bah!', 'hate this!'],
+    sad: ['...', 'oh', ':(', 'meh', 'sigh...', 'why?', 'boo'],
+    sleep: ['Zzz', 'zZz', 'zzZ', 'ZZzz...', 'snore...', 'zzz'],
+    sit: ['*sit*', 'phew', 'resting', 'chill time', 'taking five', 'ah...'],
     cooperate: ['team!', 'together!', 'high five!'],
     lookup: ['up there!', 'oh?'],
     lookdown: ['down here', 'hmm'],
@@ -116,7 +116,8 @@
 
   function setState(s, state) {
     s.state = state;
-    s.stateTimer = 60 + Math.random() * 120;
+    /* a nap on the floor lasts at least ten seconds (600+ frames) */
+    s.stateTimer = state === 'sleep' ? 620 + Math.floor(Math.random() * 260) : 60 + Math.random() * 120;
     if (Math.random() < 0.6) {
       var opts = BUBBLES[state] || ['...'];
       s.bubble = opts[Math.floor(Math.random() * opts.length)];
@@ -245,9 +246,10 @@
     }
 
     /* legs */
-    if (pose === 'sit') {
-      ctx.beginPath(); ctx.moveTo(0, -8); ctx.lineTo(-11, -2); ctx.lineTo(-11, 12); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(0, -8); ctx.lineTo(11, -2); ctx.lineTo(11, 12); ctx.stroke();
+    if (pose === 'sit' || pose === 'sleep') {
+      /* sitting on the floor: legs stretched forward along the ground */
+      ctx.beginPath(); ctx.moveTo(0, -8); ctx.lineTo(-13, 6); ctx.lineTo(-21, 8); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(0, -8); ctx.lineTo(13, 6); ctx.lineTo(21, 8); ctx.stroke();
     } else if (pose === 'fall' || pose === 'tumble') {
       ctx.beginPath(); ctx.moveTo(-12, -8); ctx.lineTo(-22, 0); ctx.stroke();
       ctx.beginPath(); ctx.moveTo(-12, -8); ctx.lineTo(-4, 4); ctx.stroke();
@@ -685,6 +687,7 @@
     ctx.save();
     ctx.translate(s.x, s.y);
     if (s.dead) { ctx.rotate(Math.PI / 2); }
+    else if (s.state === 'sleep') { ctx.translate(0, 12); ctx.rotate(-Math.PI / 2); }
     ctx.scale(s.scale * sizeScale, s.scale * sizeScale);
     var col = s.color;
 
@@ -743,8 +746,8 @@
     /* legs */
     var legSwing = Math.sin(s.legPhase) * 0.8;
     if (s.state === 'sit' || s.state === 'sleep') {
-      ctx.beginPath(); ctx.moveTo(0, -8); ctx.lineTo(-11, -2); ctx.lineTo(-11, 12); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(0, -8); ctx.lineTo(11, -2); ctx.lineTo(11, 12); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(0, -8); ctx.lineTo(-13, 6); ctx.lineTo(-21, 8); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(0, -8); ctx.lineTo(13, 6); ctx.lineTo(21, 8); ctx.stroke();
     } else {
       ctx.beginPath(); ctx.moveTo(0, -8); ctx.lineTo(-8 + legSwing * 6, 12); ctx.stroke();
       ctx.beginPath(); ctx.moveTo(0, -8); ctx.lineTo(8 - legSwing * 6, 12); ctx.stroke();
@@ -1019,6 +1022,7 @@
       visible = !visible;
       if (visible) {
         if (!suppressed) { mountCanvas(); initStickmen(); }
+        topSwingExit(false);
         toggle.textContent = 'Hide Stickmen';
         var sidebar = document.getElementById('sideMenu') || document.querySelector('.sidemenu, .side-nav, nav.side-nav');
         if (sidebar && sidebar.classList.contains('open')) sidebar.classList.remove('open');
@@ -1026,6 +1030,7 @@
         if (overlay && overlay.classList.contains('open')) overlay.classList.remove('open');
       } else {
         /* exit animations */
+        topSwingExit(true);
         exiting = true;
         stickmen.forEach(function (s, i) {
           s.exiting = true;
@@ -1051,8 +1056,61 @@
     });
   }
 
+  /* ── the little swing hanging just under the top bar ──────────────── */
+  var SWING_LINES = ['down here', 'hi there!', 'wheee!', 'look!', 'come join!', 'hey you!', 'wahoo!', 'up here!', 'yoo-hoo!'];
+  var swingTimer = null, swingMsgTimer = null, swingEl = null;
+
+  function mountTopSwing() {
+    if (document.getElementById('topSwing')) return;
+    var el = document.createElement('div');
+    el.id = 'topSwing';
+    el.className = 'top-swing ts-enter';
+    el.setAttribute('aria-hidden', 'true');
+    el.innerHTML =
+      '<div class="ts-rig">' +
+        '<svg class="ts-svg" viewBox="-40 -160 80 210" xmlns="http://www.w3.org/2000/svg">' +
+          '<line x1="-15" y1="-158" x2="-15" y2="-4" stroke="#9fe8ff" stroke-width="1.6" stroke-dasharray="4 4" opacity=".8"/>' +
+          '<line x1="15" y1="-158" x2="15" y2="-4" stroke="#9fe8ff" stroke-width="1.6" stroke-dasharray="4 4" opacity=".8"/>' +
+          '<rect x="-21" y="-8" width="42" height="7" rx="3" fill="#8b5a2b" stroke="#c98f52" stroke-width="1"/>' +
+          '<g class="ts-body">' +
+            '<circle cx="0" cy="-44" r="9" fill="#22ff88"/>' +
+            '<circle cx="-3.2" cy="-46" r="2.1" fill="#fff"/><circle cx="3.2" cy="-46" r="2.1" fill="#fff"/>' +
+            '<circle cx="-3.2" cy="-46" r="1" fill="#111"/><circle cx="3.2" cy="-46" r="1" fill="#111"/>' +
+            '<path d="M-4 -41 Q0 -35 4 -41" fill="none" stroke="#111" stroke-width="1.3" stroke-linecap="round"/>' +
+            '<path d="M0 -35 L0 -14" stroke="#22ff88" stroke-width="2.6" stroke-linecap="round"/>' +
+            '<path d="M0 -28 L-11 -20 M0 -28 L11 -20" stroke="#22ff88" stroke-width="2.2" stroke-linecap="round" class="ts-arm"/>' +
+            '<path d="M0 -14 L-11 -2 L-15 8 M0 -14 L11 -2 L15 8" stroke="#22ff88" stroke-width="2.2" stroke-linecap="round" class="ts-leg"/>' +
+          '</g>' +
+        '</svg>' +
+        '<div class="ts-bubble">down here</div>' +
+      '</div>';
+    document.body.appendChild(el);
+    swingEl = el;
+    setTimeout(function () { el.classList.remove('ts-enter'); }, 2600);
+    swingMsgTimer = setInterval(function () {
+      var b = el.querySelector('.ts-bubble');
+      if (!b) return;
+      b.textContent = SWING_LINES[Math.floor(Math.random() * SWING_LINES.length)];
+      b.classList.remove('ts-pop');
+      void b.offsetWidth;
+      b.classList.add('ts-pop');
+    }, 4200);
+    /* every so often the swing is hauled up and drops back down */
+    swingTimer = setInterval(function () {
+      if (document.hidden || el.classList.contains('ts-exit')) return;
+      el.classList.add('ts-retract');
+      setTimeout(function () { el.classList.remove('ts-retract'); }, 2400);
+    }, 26000);
+  }
+
+  function topSwingExit(on) {
+    if (!swingEl) return;
+    swingEl.classList.toggle('ts-exit', !!on);
+  }
+
   function boot() {
     loadCfg();
+    mountTopSwing();
     if (cfg.count > 0) {
       setTimeout(function () {
         if (!suppressed) { mountCanvas(); initStickmen(); }

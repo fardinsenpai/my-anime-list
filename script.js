@@ -2559,7 +2559,8 @@ function scrollToEnd() {
     // way to jump between top and bottom now
     /* the dock stays available the whole time on the main page - never hide it
        because of scroll position or a short list */
-    var show = isScrollButtonSection();
+    /* appears only after the visitor has scrolled down a little */
+    var show = isScrollButtonSection() && y > 180;
     /* keep it fully visible while scrolling - no ghosting away */
     dock.style.opacity = show ? '1' : '0';
     dock.style.transform = show ? 'translateY(0) scale(1)' : 'translateY(18px) scale(.92)';
