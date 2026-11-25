@@ -6,11 +6,6 @@
         guide: 'Momo Ayase',
         popover: { title: '🅢 Tier List Maker', description: 'Rank every anime into S/A/B/C/D tiers. Drag titles, rename tiers, auto-rank by rating, and export a shareable PNG.', side: 'right' }
       },
-      {
-        element: '.sn-section',
-        guide: 'Momo Ayase',
-        popover: { title: 'Airing Now', description: 'See what is airing next with local-time countdowns. Click the brain icon to ask the AI about any show.', side: 'bottom' }
-      },
       Skipped on data-saver and slow lines. ─────────────────────────────── */
 (function preloadGuideModel() {
   try {
@@ -2416,9 +2411,22 @@ function scrollToTop() {
 function scrollToEnd() {
   // A genre filter is active — the list is short, so the END jump is disabled.
   if (window.__genreFilterActive) return;
-  var doc = document.documentElement;
-  var body = document.body;
-  var max = Math.max(doc ? doc.scrollHeight : 0, body ? body.scrollHeight : 0) - window.innerHeight;
+  var cards = document.querySelectorAll('#grid .card');
+  var last = null;
+  for (var i = cards.length - 1; i >= 0; i--) {
+    if (cards[i].style.display !== 'none' && !cards[i].classList.contains('hidden')) { last = cards[i]; break; }
+  }
+  var target;
+  if (last) {
+    var box = last.getBoundingClientRect();
+    target = Math.max(0, box.top + window.pageYOffset - window.innerHeight + box.height + 28);
+  } else {
+    var doc = document.documentElement;
+    var body = document.body;
+    target = Math.max(Math.max(doc ? doc.scrollHeight : 0, body ? body.scrollHeight : 0) - window.innerHeight, 0);
+  }
+  window.scrollTo({ top: target, behavior: prefersReducedMotion() ? 'auto' : 'smooth' });
+  return;
   // always animate — a long smooth ride is what the END button should feel like
   window.scrollTo({ top: max > 0 ? max : 0, behavior: prefersReducedMotion() ? 'auto' : 'smooth' });
 }
@@ -2531,10 +2539,12 @@ function scrollToEnd() {
     var shortList = visible > 0 && visible < 20;
     // keep the dock on screen for nearly the whole page — it's the main
     // way to jump between top and bottom now
-    var show = isScrollButtonSection() && p > 0.04 && p < 0.995 && !shortList;
-    var ghost = show && scrolling && !dockHover;
-    dock.style.opacity = show ? (ghost ? '0.22' : '1') : '0';
-    dock.style.transform = (show ? 'translateY(0) scale(1)' : 'translateY(18px) scale(.92)') + (ghost ? ' scale(.8)' : '');
+    /* the dock stays available the whole time on the main page - never hide it
+       because of scroll position or a short list */
+    var show = isScrollButtonSection();
+    /* keep it fully visible while scrolling - no ghosting away */
+    dock.style.opacity = show ? '1' : '0';
+    dock.style.transform = show ? 'translateY(0) scale(1)' : 'translateY(18px) scale(.92)';
     dock.style.pointerEvents = show ? 'auto' : 'none';
     topBtn.style.opacity = y > 40 ? '1' : '.42';
     // END is meaningless (and blocked) while a genre filter narrows the list
@@ -6253,19 +6263,9 @@ document.addEventListener('click', function(e) {
         popover: { title: '🅢 Tier List Maker', description: 'Rank every anime into S/A/B/C/D tiers. Drag titles, rename tiers, auto-rank by rating, and export a shareable PNG.', side: 'right' }
       },
       {
-        element: '.sn-section',
-        guide: 'Momo Ayase',
-        popover: { title: 'Airing Now', description: 'See what is airing next with local-time countdowns. Click the brain icon to ask the AI about any show.', side: 'bottom' }
-      },
-      {
         element: '#tierNavBtn',
         guide: 'Momo Ayase',
         popover: { title: '🅢 Tier List Maker', description: 'Rank every anime into S/A/B/C/D tiers. Drag titles, rename tiers, auto-rank by rating, and export a shareable PNG.', side: 'right' }
-      },
-      {
-        element: '.sn-section',
-        guide: 'Momo Ayase',
-        popover: { title: '📡 Airing Now', description: 'See what is airing next with local-time countdowns. Click the brain icon to ask the AI about any show.', side: 'bottom' }
       },
       {
         element: '#wishlistBtn',

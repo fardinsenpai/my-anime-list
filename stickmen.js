@@ -562,16 +562,29 @@
         return;
       }
 
-      /* exiting animation */
+      /* exiting animation - the stickman physically walks / swings / flies
+         off past the screen edge and only disappears once fully outside */
       if (s.exiting) {
-        s.exitT += 0.02;
-        if (s.exitT >= 1) {
+        s.exitT = Math.min(1, s.exitT + 0.012);
+        var dir = s.exitDir || 1;
+        if (s.exitMsg === 'heli') {
+          s.y -= 3.2;                      /* lifted away by the helicopter */
+          s.x += dir * 3;
+        } else if (s.exitMsg === 'swing') {
+          /* a couple of swings, then let go and fly off to the side */
+          s.x += dir * (s.exitT < 0.45 ? 2 : 7);
+          s.y -= s.exitT < 0.45 ? 0 : 1.2;
+        } else {
+          s.x += dir * 5.5;                /* casual walk off screen */
+        }
+        s.armPhase += 0.22;
+        s.legPhase += 0.24;
+        var outside = s.x < -70 || s.x > window.innerWidth + 70 || s.y < -120;
+        if (outside) {
           s.dead = true;
           s.state = 'dead';
           s.vy = 0;
           s.vx = 0;
-          if (s.bubbleTimer > 0) s.bubbleTimer--;
-          return;
         }
         if (s.bubbleTimer > 0) s.bubbleTimer--;
         return;
@@ -579,7 +592,7 @@
 
       /* entry animation */
       if (s.entry && !s.entry.done) {
-        s.entry.t += 0.015;
+        s.entry.t += 0.010;   /* slower, more readable descents */
         if (s.entry.t >= 1) { s.entry.done = true; s.entry = null; s.onGround = true; s.y = groundY; s.state = 'happy'; s.stateTimer = 60; }
         if (s.bubbleTimer > 0) s.bubbleTimer--;
         return;
@@ -677,19 +690,24 @@
 
     if (s.exiting) {
       var et = s.exitT;
-      ctx.globalAlpha = 1 - et;
+      /* no fade - they only vanish once they are really off the screen */
       if (s.exitMsg === 'heli') {
-        ctx.fillStyle = '#888'; ctx.beginPath(); ctx.arc(0, -55 - et * 80, 6, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#888'; ctx.beginPath(); ctx.arc(0, -58, 6, 0, Math.PI * 2); ctx.fill();
         ctx.strokeStyle = '#666'; ctx.lineWidth = 1;
-        ctx.beginPath(); ctx.moveTo(-12, -55 - et * 80); ctx.lineTo(12, -55 - et * 80); ctx.stroke();
-      }
-      if (s.exitMsg === 'swing') {
+        ctx.save(); ctx.translate(0, -58); ctx.rotate(s.exitT * 26);
+        ctx.beginPath(); ctx.moveTo(-13, 0); ctx.lineTo(13, 0); ctx.stroke();
+        ctx.restore();
+        ctx.strokeStyle = '#999'; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(0, -52); ctx.lineTo(0, -12); ctx.stroke();
+      } else if (s.exitMsg === 'swing') {
+        /* ropes from above, body swaying before it lets go and flies off */
+        ctx.rotate(Math.sin(et * 12) * 0.3);
         ctx.strokeStyle = '#8b5a2b'; ctx.lineWidth = 2;
-        ctx.beginPath(); ctx.moveTo(-10, -200 + et * 200); ctx.lineTo(-10, -et * 200); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(10, -200 + et * 200); ctx.lineTo(10, -et * 200); ctx.stroke();
-      }
-      if (s.exitMsg === 'bye') {
-        ctx.translate(et * 100, 0);
+        ctx.beginPath(); ctx.moveTo(-11, -220); ctx.lineTo(-11, -30); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(11, -220); ctx.lineTo(11, -30); ctx.stroke();
+      } else {
+        /* 'bye' - a cheerful little hop as it walks off */
+        ctx.translate(0, -Math.abs(Math.sin(et * 16)) * 5);
       }
     }
 
@@ -1009,9 +1027,10 @@
       } else {
         /* exit animations */
         exiting = true;
-        stickmen.forEach(function (s) {
+        stickmen.forEach(function (s, i) {
           s.exiting = true;
           s.exitT = 0;
+          s.exitDir = (i % 2 === 0) ? 1 : -1;
           var r = Math.random();
           if (r < 0.34) { s.exitMsg = 'bye'; s.bubble = 'Bye!'; }
           else if (r < 0.67) { s.exitMsg = 'heli'; s.bubble = 'Flying off!'; }
@@ -1019,10 +1038,11 @@
           s.bubbleTimer = 120;
         });
         toggle.textContent = 'Show Stickmen';
+        /* give them enough time to actually leave the screen */
         setTimeout(function () {
           unmount();
           exiting = false;
-        }, 1500);
+        }, 3200);
         var sidebar2 = document.getElementById('sideMenu') || document.querySelector('.sidemenu, .side-nav, nav.side-nav');
         if (sidebar2 && sidebar2.classList.contains('open')) sidebar2.classList.remove('open');
         var overlay2 = document.getElementById('menuOverlay');

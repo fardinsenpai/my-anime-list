@@ -25,7 +25,6 @@
           '<div class="fp-item"><b>⚔️ Duel / Tournament</b><span>Compare anime head-to-head or run a bracket.</span></div>' +
           '<div class="fp-item"><b>🧭 Quest</b><span>Trivia runs with saved titles.</span></div>' +
           '<div class="fp-item"><b>🅢 Tier List</b><span>Rank anime S→D, rename tiers, auto-rank, export PNG, share.</span></div>' +
-          '<div class="fp-item"><b>📡 Airing Now</b><span>Next episodes with local-time countdowns.</span></div>' +
           '<div class="fp-item"><b>⚖️ Taste Match</b><span>Compare your wish list with Fardin.</span></div>' +
           '<div class="fp-item"><b>🎯 Tour (Ctrl+T)</b><span>Guided walkthrough of every feature.</span></div>' +
           '<div class="fp-item"><b>⌨️ Shortcuts</b><span>Ctrl+F search · Ctrl+K this popup · Ctrl+T tour · Esc close.</span></div>' +

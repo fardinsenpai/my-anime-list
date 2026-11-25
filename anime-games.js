@@ -1075,11 +1075,11 @@
   function skipVerdict(api, answerText, nextFn) {
     var box = api.stage;
     box.insertAdjacentHTML('beforeend',
-      '<div class="ag-verdict ag-verdict--skip no">LOL It\'s <b>' + esc(answerText) + '</b> ' +
-        '<button type="button" class="ag-btn ag-btn--go ag-next-btn" id="agNextRound">Next ' +
+      '<div class="ag-verdict ag-verdict--skip">LOL It\'s <b>' + esc(answerText) + '</b> ' +
+        '<button type="button" class="ag-btn ag-btn--go ag-next-btn" id="agSkipNext">Next ' +
         '<span class="ag-next-cd" id="agNextCd">(3s)</span></button></div>');
     revealFeedback(api);
-    var btn = box.querySelector('#agNextRound');
+    var btn = box.querySelector('#agSkipNext');
     var cd = box.querySelector('#agNextCd');
     var left = 3, done = false;
     /* advance() performs the actual round transition; go() is the guarded
@@ -1192,6 +1192,7 @@
        Guess the Character uses because it wants a person's name, not an
        anime title. */
     if (window.AnimeSearch && input && opts.search !== false) {
+      opts.game = true;   /* masked hints only - no answer-leaking autocomplete */
       window.AnimeSearch.attach(input, opts);
     }
     ['pointerdown', 'touchstart', 'click'].forEach(function (ev) {
@@ -1521,6 +1522,7 @@
       if (ok) {
         api.score++;
         api.stage.insertAdjacentHTML('beforeend', '<div class="ag-verdict ok">Correct! <b>' + esc(api.answer) + '</b></div>');
+        revealFeedback(api);
         setTimeout(function () { nextEmojiRound(api); }, HOLD_RIGHT);
       } else {
         wrongAnswer(api, api.answer, nextEmojiRound);
@@ -1650,15 +1652,35 @@
       var win = g === api.word;
       api.stage.insertAdjacentHTML('beforeend',
         '<div class="ag-verdict ' + (win ? 'ok' : 'no') + '">' +
-          (win ? 'Solved in ' + api.guesses.length + '!' :
-            (api.guesses.length >= 6 ? 'Out of guesses - it was ' + esc(api.answer) : 'Keep going...')) +
+          (win ? 'Solved in ' + api.guesses.length + '! It was <b>' + esc(api.answer) + '</b>' :
+            (api.guesses.length >= 6 ? 'Out of guesses - it was <b>' + esc(api.answer) + '</b>' : 'Keep going...')) +
         '</div>');
+      revealFeedback(api);
       if (win || api.guesses.length >= 6) {
         setTimeout(function () { api.finish(win ? 1 : 0, 1); }, HOLD_WRONG);
       } else {
-        setTimeout(function () { drawWordle(api); }, 900);
+        setTimeout(function () { drawWordle(api); }, 1400);
       }
+    }, true, { exclude: api.answer, search: false });
+    /* skip reveals the answer and moves to a fresh title instead of sticking
+       on a fake result card */
+    api._onSkip = function () {
+      skipVerdict(api, api.answer, function (a) { nextWordleRound(a); });
+    };
+  }
+
+  function nextWordleRound(api) {
+    var pool = famousPool().filter(function (a) {
+      var t = a.title.toLowerCase().replace(/[^a-z0-9 ]/g, '').replace(/\s+/g, ' ').trim();
+      return t.length >= 4 && t.length <= 16 && a.title.indexOf('(') === -1 && a.title.indexOf(':') === -1;
     });
+    if (pool.length < 10) pool = famousPool();
+    var picked = pick(pool);
+    api.answer = picked.title;
+    api.word = picked.title.toLowerCase().replace(/[^a-z0-9 ]/g, ' ').replace(/\s+/g, ' ').trim();
+    api.guesses = [];
+    api.round = 1;
+    drawWordle(api);
   }
 
 
@@ -1693,6 +1715,7 @@
       if (ok) {
         api.score++;
         api.stage.insertAdjacentHTML('beforeend', '<div class="ag-verdict ok">Correct! <b>' + esc(api.answer) + '</b></div>');
+        revealFeedback(api);
         setTimeout(function () { nextScrambleRound(api); }, HOLD_RIGHT);
       } else {
         wrongAnswer(api, api.answer, nextScrambleRound);
@@ -2062,7 +2085,13 @@
     /* the run clock stops here; the time is shown to the player only and is
        never part of what saveScore() sends up, so the board stays a score board */
     stopTimer();
-    /* the run is over - the board is allowed back on the result screen */
+    /* the run is over: put the play chrome away so nothing from a live round
+       (or a skip verdict) can linger on the result screen */
+    ['agHud', 'agQType', 'agInRow', 'agSkipRow', 'agNextRow'].forEach(function (id) {
+      var c = wrap.querySelector('#' + id);
+      if (c) c.hidden = true;
+    });
+    /* the board is allowed back on the result screen */
     var overall = wrap.querySelector('.ag-overall--game');
     if (overall) overall.hidden = false;
     var total = fmtTime(elapsedMs());
