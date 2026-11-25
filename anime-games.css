@@ -2276,3 +2276,79 @@
 /* keep the perched stickman above the bar so its dangling legs are never cut */
 .ag-wrap--game .ag-hud-perch { z-index: 5; }
 .ag-wrap--game .ag-hud-row { z-index: 1; }
+
+/* ── cooler skip verdict card ── */
+.ag-wrap--game .ag-verdict--skip {
+  position: relative;
+  flex-wrap: wrap;
+  row-gap: 12px;
+  padding: 18px 20px;
+  border-radius: 16px;
+  font-weight: 700;
+  letter-spacing: .4px;
+  background:
+    linear-gradient(135deg, rgba(255, 45, 120, .18) 0%, rgba(22, 14, 34, .96) 48%, rgba(9, 13, 30, .96) 100%);
+  border: 1px solid rgba(255, 77, 125, .55);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .07),
+    0 0 34px -12px rgba(255, 45, 120, .6),
+    0 18px 44px -30px #000;
+  backdrop-filter: blur(10px);
+  overflow: hidden;
+}
+.ag-verdict--skip::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(110deg, transparent 30%, rgba(255,255,255,.09) 50%, transparent 70%);
+  transform: translateX(-120%);
+  animation: agSkipShine 5.5s ease-in-out infinite;
+}
+@keyframes agSkipShine { 0%, 62% { transform: translateX(-120%); } 100% { transform: translateX(120%); } }
+.ag-verdict--skip::before {
+  content: '\2715';
+  width: 34px; height: 34px;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 900;
+  color: #fff;
+  background: linear-gradient(135deg, #ff4d7d, #ff2d78);
+  box-shadow: 0 0 18px rgba(255, 45, 120, .7), inset 0 1px 0 rgba(255,255,255,.4);
+}
+.ag-verdict--skip b {
+  font-family: 'Orbitron', sans-serif;
+  font-size: clamp(15px, 3vw, 20px);
+  letter-spacing: .6px;
+  color: #ffd700;
+  text-shadow: 0 0 16px rgba(255, 215, 0, .65), 0 0 34px rgba(255, 215, 0, .25);
+}
+.ag-wrap--game .ag-next-btn {
+  margin-left: auto;
+  padding: 11px 20px;
+  border: 0;
+  border-radius: 12px;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 1.4px;
+  color: #fff;
+  background: linear-gradient(135deg, #00c6ff 0%, #0072ff 55%, #6366f1 100%);
+  box-shadow: 0 0 22px rgba(0, 198, 255, .6), 0 10px 24px -10px rgba(0, 114, 255, .9), inset 0 2px 0 rgba(255,255,255,.45);
+}
+.ag-wrap--game .ag-next-btn:hover {
+  background: linear-gradient(135deg, #22d3ff 0%, #1a86ff 55%, #7c7dff 100%);
+  box-shadow: 0 0 30px rgba(0, 198, 255, .85), 0 12px 28px -8px rgba(0, 114, 255, .95), inset 0 2px 0 rgba(255,255,255,.6);
+}
+.ag-next-cd {
+  opacity: 1;
+  padding: 2px 7px;
+  margin-left: 6px;
+  border-radius: 999px;
+  font-size: .78em;
+  background: rgba(0, 0, 0, .25);
+  box-shadow: inset 0 1px 3px rgba(0,0,0,.35);
+}
