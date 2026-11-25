@@ -1950,7 +1950,7 @@
 .ag-thought {
   position: absolute;
   right: 104px;
-  bottom: calc(100% + 30px);
+  bottom: calc(100% + 14px);
   display: flex;
   align-items: flex-end;
   gap: 5px;
@@ -2119,7 +2119,7 @@
   .ag-hud-v { font-size: 14px; }
   .ag-hud-perch { right: 12px; bottom: calc(100% - 26px); }
   .ag-stick--sit { width: 58px; height: 62px; }
-  .ag-thought { right: 72px; bottom: calc(100% + 26px); }
+  .ag-thought { right: 72px; bottom: calc(100% + 8px); }
   .ag-thought-bubble { font-size: 14px; min-width: 72px; padding: 13px 14px 15px; }
   .ag-initials { font-size: clamp(1.3rem, 7vw, 2rem); letter-spacing: 10px; padding-left: 10px; }
   .ag-genre-year { font-size: 12px; }
