@@ -2377,3 +2377,10 @@
 /* local-data option chips under the initials clue */
 
 .ag-clue-meta { font-size: 12px; letter-spacing: .6px; color: #94a3b8; margin-bottom: 6px; }
+
+/* result screen must remain scrollable with touch */
+.body-games, .ag-wrap--game .ag-stage, .ag-wrap--game .ag-result {
+  touch-action: pan-y;
+  -webkit-overflow-scrolling: touch;
+}
+.ag-wrap--game .ag-result { position: relative; z-index: 2; }

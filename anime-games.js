@@ -746,7 +746,26 @@
     return document.getElementById('gamesHubBody');
   }
 
+  /* A full-screen panel opened elsewhere (waifus, chat, name gate) can leave
+     the body scroll-locked or an overlay covering the page. Clear all of that
+     whenever we enter the games page or a game so the result can scroll. */
+  function clearPageLocks() {
+    try { document.body.style.overflow = ''; } catch (e) {}
+    try { if (typeof closeWaifus === 'function') closeWaifus(); } catch (e) {}
+    try { if (typeof setChatOpen === 'function') setChatOpen(false); } catch (e) {}
+    try { if (typeof closeMenu === 'function') closeMenu(); } catch (e) {}
+    ['menuOverlay', 'chatBackdrop'].forEach(function (id) {
+      var n = document.getElementById(id);
+      if (n) n.classList.remove('open');
+    });
+    var sidebar = document.querySelector('.chat-sidebar');
+    if (sidebar) sidebar.classList.remove('open');
+    var gate = document.querySelector('.ag-gate');
+    if (gate && gate.parentNode) gate.parentNode.removeChild(gate);
+  }
+
   function openGamesHub() {
+    clearPageLocks();
     if (typeof closeMenu === 'function') closeMenu();
     if (typeof closeFloatingOverlays === 'function') { try { closeFloatingOverlays(); } catch (e) {} }
     var ids = ['analysisContainer', 'topSecretsContainer', 'hotTakesContainer', 'topFiveDropdown', 'animeQuestContainer'];
@@ -937,6 +956,7 @@
   }
 
   function openGameScreen(key) {
+    clearPageLocks();
     var g = GAME_BY_KEY[key];
     var host = gamesHost();
     if (!host) return;
@@ -2077,6 +2097,7 @@
 
   /* ─────────────────────────────────────────── the end of a game */
   function finishGame(key, score, wrap, max) {
+    clearPageLocks();
     var g = GAME_BY_KEY[key];
     max = max || 5;
     var saved = false;

@@ -3140,7 +3140,10 @@ function setChatOpen(open) {
   // hide the floating bubble while the chat is open (it would overlap the input)
   chatBubble.style.display = open ? 'none' : 'flex';
   var isMobile = window.matchMedia('(max-width: 768px)').matches;
-  if (isMobile) document.body.style.overflow = open ? 'hidden' : '';
+  if (isMobile && open) document.body.style.overflow = 'hidden';
+  /* always release the scroll lock on close - the viewport may have been
+     resized or rotated since the chat was opened */
+  if (!open) document.body.style.overflow = '';
   if (open) {
     /* read the site's files in the background so the first answer is instant */
     try { ensureKnowledge(); } catch (e) {}
