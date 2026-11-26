@@ -1197,6 +1197,9 @@
        Guess the Character uses because it wants a person's name, not an
        anime title. */
     if (window.AnimeSearch && input && opts.search !== false) {
+      /* show every matching title, including the real answer, so typing the
+         full name always brings it up and a click can autofill it */
+      delete opts.exclude;
       window.AnimeSearch.attach(input, opts);
     }
     ['pointerdown', 'touchstart', 'click'].forEach(function (ev) {
