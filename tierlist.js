@@ -246,7 +246,7 @@
   /* ---------- PNG export ---------- */
   function proxied(src) {
     if (!src) return src;
-    if (/^data:/.test(src) || /anilist\.co|media-amazon\.com|myanimelist\.net/.test(src)) return src;
+    if (/^data:/.test(src) || src.indexOf(location.origin) === 0) return src;
     return 'https://wsrv.nl/?url=' + encodeURIComponent(src);
   }
   function tryLoad(src, ms) {
@@ -349,6 +349,16 @@
       ctx.textAlign = 'left';
     }
 
+    /* preload every poster through the CORS proxy so the canvas stays clean */
+    var posterIds = [];
+    state.order.forEach(function (t) {
+      (state.tiers[t] || []).slice(0, 6).forEach(function (id) { posterIds.push(id); });
+    });
+    var posterMap = {};
+    await Promise.all(posterIds.map(function (id) {
+      return loadImage((cards[id] || {}).poster).then(function (img) { posterMap[id] = img; });
+    }));
+
     state.order.forEach(function (t, i) {
       var y = headH + i * rowH;
       var col = colorFor(t, i);
@@ -371,13 +381,28 @@
       var items = (state.tiers[t] || []).slice(0, 6);
       items.forEach(function (id, k) {
         var cx = 208 + (k % 2) * 470;
-        var cy = y + 18 + Math.floor(k / 2) * 54;
+        var cy = y + 18 + Math.floor(k / 2) * 80;
         var c = cards[id] || { title: '#' + id };
+        var img = posterMap[id];
+        if (img) {
+          ctx.save();
+          ctx.beginPath();
+          ctx.rect(cx, cy, 46, 62);
+          ctx.clip();
+          ctx.drawImage(img, cx, cy, 46, 62);
+          ctx.restore();
+          ctx.strokeStyle = 'rgba(255,255,255,.35)';
+          ctx.lineWidth = 1;
+          ctx.strokeRect(cx, cy, 46, 62);
+        } else {
+          ctx.fillStyle = 'rgba(255,255,255,.09)';
+          ctx.fillRect(cx, cy, 46, 62);
+        }
         ctx.fillStyle = 'rgba(255,255,255,.92)';
-        ctx.font = '600 24px "Rajdhani", "Segoe UI", sans-serif';
+        ctx.font = '600 22px "Rajdhani", "Segoe UI", sans-serif';
         var txt = String(c.title || '');
-        if (txt.length > 30) txt = txt.slice(0, 29) + '…';
-        ctx.fillText(txt, cx, cy + 26);
+        if (txt.length > 26) txt = txt.slice(0, 25) + '…';
+        ctx.fillText(txt, cx + 56, cy + 28);
       });
       if (!items.length) {
         ctx.fillStyle = 'rgba(255,255,255,.22)';

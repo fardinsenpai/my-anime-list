@@ -91,10 +91,6 @@
   function draw(input, list) {
     close();
     owner = input;
-    /* game answer inputs only get a masked hint - never a full title that
-       could be picked and submitted as the answer */
-    var game = !!(input.__searchOpts && input.__searchOpts.game);
-    var qraw = String(input.value || '').trim();
     var box = document.createElement('div');
     box.className = 'as-box';
     var closeBtn = document.createElement('button');

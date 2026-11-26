@@ -1746,18 +1746,6 @@
         nextInitialsRound(api);
       });
   }
-  /* options come from this site's own DB: three random titles plus the rest
-     from the top popular list, so every choice is recognisable */
-  function initialsOptions(answer) {
-    var all = buildDb().filter(function (a) { return a.title && a.title !== answer; });
-    var three = shuffle(all).slice(0, 3).map(function (a) { return a.title; });
-    var top = famousPool().filter(function (a) {
-      return a.title !== answer && three.indexOf(a.title) === -1 && all.indexOf(a) > -1;
-    });
-    var rest = shuffle(top).slice(0, 3).map(function (a) { return a.title; });
-    return shuffle([answer].concat(three, rest));
-  }
-
   function nextInitialsRound(api) {
     if (api.round >= api.rounds) return api.finish(api.score, api.rounds);
     api.round++;
@@ -1770,12 +1758,7 @@
     api.stage.innerHTML = roundHead(api, '') +
       '<div class="ag-initials">' + esc(initialsDisplay) + '</div>' +
       '<div class="ag-genre-year">' + esc(hint) + '</div>' +
-      '<div class="ag-prompt">What is the Anime name?</div>' +
-      '<div class="ag-init-options">' +
-        shuffle(initialsOptions(api.answer)).map(function (t) {
-          return '<button type="button" class="ag-init-option" data-title="' + esc(t) + '">' + esc(t) + '</button>';
-        }).join('') +
-      '</div>';
+      '<div class="ag-prompt">What is the Anime name?</div>';
     answerRow(api, 'agInitialsInput', 'Type the anime title…', function (v) {
       var ok = answerMatches(v, api.answer, api.alt);
       if (ok) {
@@ -1789,15 +1772,9 @@
         wrongAnswer(api, api.answer, nextInitialsRound);
       }
     }, true, { exclude: api.answer });
-    /* local-data option chips: pick one instead of typing */
-    Array.prototype.forEach.call(api.stage.querySelectorAll('.ag-init-option'), function (b) {
-      b.onclick = function () {
-        var inp = document.getElementById('agInitialsInput');
-        var go = document.getElementById('agInitialsInputGo');
-        if (inp && go) { inp.value = b.getAttribute('data-title'); go.click(); }
-      };
-    });
   }
+
+
 
   /* ══════════════════════════════════════════════════════════════════════
      8. ANIME MEMORY
