@@ -274,6 +274,7 @@
     cv.width = W * S; cv.height = H * S;
     var ctx = cv.getContext('2d');
     ctx.scale(S, S);
+    var logoImg = await loadImage(SITE_BASE + 'logo-2.png');
 
     var bg = ctx.createLinearGradient(0, 0, W, H);
     bg.addColorStop(0, '#1a0a24');
@@ -326,23 +327,27 @@
     ctx.font = '600 24px "Rajdhani", "Segoe UI", sans-serif';
     ctx.fillText("Fardin's Anime Hub", 50, 122);
 
-    /* circular star badge on the right of the banner */
-    ctx.save();
-    ctx.translate(W - 96, 80);
-    ctx.strokeStyle = '#ffd700';
-    ctx.lineWidth = 3;
-    ctx.shadowColor = 'rgba(255,215,0,.6)';
-    ctx.shadowBlur = 14;
-    ctx.beginPath();
-    ctx.arc(0, 0, 42, 0, Math.PI * 2);
-    ctx.stroke();
-    ctx.shadowBlur = 0;
-    ctx.fillStyle = '#ffd700';
-    ctx.font = '900 44px "Orbitron", sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText('✦', 0, 15);
-    ctx.restore();
-    ctx.textAlign = 'left';
+    /* the site logo in the top-right corner, like the quest certificate */
+    if (logoImg) {
+      var maxW = 130, maxH = 110;
+      var scale = Math.min(maxW / logoImg.width, maxH / logoImg.height);
+      var dw = logoImg.width * scale, dh = logoImg.height * scale;
+      ctx.drawImage(logoImg, W - 40 - dw, 22, dw, dh);
+    } else {
+      ctx.save();
+      ctx.translate(W - 96, 80);
+      ctx.strokeStyle = '#ffd700';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.arc(0, 0, 42, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.fillStyle = '#ffd700';
+      ctx.font = '900 44px "Orbitron", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('✦', 0, 15);
+      ctx.restore();
+      ctx.textAlign = 'left';
+    }
 
     state.order.forEach(function (t, i) {
       var y = headH + i * rowH;
