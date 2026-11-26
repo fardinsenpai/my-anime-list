@@ -301,20 +301,18 @@
       ctx.restore();
     });
 
-    /* the banner: a dark inset band with a sky-blue bottom edge */
-    var band = ctx.createLinearGradient(0, 14, W, headH - 12);
-    band.addColorStop(0, 'rgba(8,10,28,.72)');
-    band.addColorStop(1, 'rgba(28,14,52,.72)');
+    /* the banner: a solid, clearly visible violet-to-indigo band */
+    var band = ctx.createLinearGradient(0, 0, W, headH);
+    band.addColorStop(0, '#241056');
+    band.addColorStop(0.5, '#1b144a');
+    band.addColorStop(1, '#0f0a2e');
     ctx.fillStyle = band;
-    ctx.beginPath();
-    if (ctx.roundRect) ctx.roundRect(22, 14, W - 44, headH - 28, 18);
-    else ctx.rect(22, 14, W - 44, headH - 28);
-    ctx.fill();
-    ctx.strokeStyle = 'rgba(135,206,235,.55)';
-    ctx.lineWidth = 2;
-    ctx.stroke();
-    ctx.fillStyle = 'rgba(135,206,235,.75)';
-    ctx.fillRect(40, headH - 20, W - 80, 3);
+    ctx.fillRect(16, 10, W - 32, headH - 14);
+    ctx.strokeStyle = '#4fc3f7';
+    ctx.lineWidth = 4;
+    ctx.strokeRect(16, 10, W - 32, headH - 14);
+    ctx.fillStyle = '#4fc3f7';
+    ctx.fillRect(16, headH - 10, W - 32, 5);
 
     /* sky-blue glowing title */
     ctx.fillStyle = '#87ceeb';
