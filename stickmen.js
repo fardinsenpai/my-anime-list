@@ -14,7 +14,8 @@
   var DEFAULT_COLORS = ['#ff4d4d', '#3ddc84', '#ff9f43', '#4da6ff', '#ffd93d'];
   var COLORS = DEFAULT_COLORS.slice();
   var ENTRY_TYPES = ['rope','ladder','heli','swing','failrope','parachute','bungee','slipslide','smoke','jetpack','peekpop'];
-  var IDLE_STATES = ['happy','run','jump','laugh','angry','sad','sleep','sit','cooperate','lookup','lookdown','spar'];
+  var IDLE_STATES = ['happy','run','jump','laugh','angry','sad','sleep','sit','cooperate','lookup','lookdown','spar','rps','pushups','shock','runoff','chase'];
+  var RPS_MOVES = ['✊', '✋', '✌️'];
   var BUBBLES = {
     happy: ['hi!', 'yay!', ':D', 'nice!', 'hello there!', 'howdy!', 'awesome!', 'yippie!'],
     laugh: ['haha!', 'lol', 'XD', 'hehe', 'lmao', 'too funny!', 'hehehe'],
@@ -27,7 +28,12 @@
     cooperate: ['team!', 'together!', 'high five!'],
     lookup: ['up there!', 'oh?'],
     lookdown: ['down here', 'hmm'],
-    spar: ['hiya!', 'en garde!', 'clash!']
+    spar: ['hiya!', 'en garde!', 'clash!'],
+    rps: ['rock...', 'paper...', 'scissors...', 'go!'],
+    pushups: ['one!', 'two!', 'exercise!', 'pump it!'],
+    shock: ['whoa!', 'o_o', 'no way!', 'yikes!'],
+    runoff: ['later!', 'can\'t deal!', 'I\'m out!', 'bye!'],
+    chase: ['catch me!', 'got you!', 'run!', 'wheee!']
   };
   var CLICK1 = ['hey!', "what's up?", 'yo!', 'sup?', 'hola!'];
   var CLICK2 = ['stop poking!', 'again?!', 'ouch!', 'hey!', 'not again!'];
@@ -37,7 +43,8 @@
   var canvas = null, ctx = null;
   var stickmen = [];
   var raf = null;
-  var cfg = { count: 2, colors: DEFAULT_COLORS.slice(), size: 2 };
+  var tickCount = 0;
+  var cfg = { count: 2, colors: DEFAULT_COLORS.slice(), size: 2, swingHidden: false };
   var drag = null;
   var mouse = { x: -1000, y: -1000 };
   var suppressed = false;
@@ -53,6 +60,7 @@
         if (typeof c.count === 'number') cfg.count = c.count;
         if (Array.isArray(c.colors) && c.colors.length) cfg.colors = c.colors;
         if (typeof c.size === 'number') cfg.size = c.size;
+        if (typeof c.swingHidden === 'boolean') cfg.swingHidden = c.swingHidden;
       }
     } catch (e) {}
     /* ensure the 5 default colors always have a permanent place */
@@ -89,7 +97,10 @@
       exiting: false,
       exitT: 0,
       exitMsg: null,
-      prop: null
+      prop: null,
+      partner: null,
+      rpsMove: null,
+      rpsUntil: 0
     };
   }
 
@@ -150,7 +161,7 @@
       ctx.strokeStyle = '#000'; ctx.lineWidth = 1.3; ctx.lineCap = 'round';
       ctx.beginPath(); ctx.moveTo(-5, -40); ctx.lineTo(-1, -40); ctx.stroke();
       ctx.beginPath(); ctx.moveTo(1, -40); ctx.lineTo(5, -40); ctx.stroke();
-    } else if (pose === 'shocked' || pose === 'peek') {
+    } else if (pose === 'shocked' || pose === 'shock' || pose === 'peek') {
       ctx.fillStyle = '#fff';
       ctx.beginPath(); ctx.arc(-3, -40, 2.6, 0, Math.PI * 2); ctx.fill();
       ctx.beginPath(); ctx.arc(3, -40, 2.6, 0, Math.PI * 2); ctx.fill();
@@ -188,14 +199,16 @@
     else if (pose === 'panic') { ctx.arc(0, -31, 2.4, 0, Math.PI * 2); }
     else if (pose === 'angry') { ctx.moveTo(-4, -33); ctx.lineTo(4, -33); }
     else if (pose === 'sleep') { ctx.arc(0, -33, 1.6, 0, Math.PI * 2); }
-    else if (pose === 'shocked') { ctx.arc(0, -32, 3, 0, Math.PI * 2); }
+    else if (pose === 'shocked' || pose === 'shock') { ctx.arc(0, -32, 3, 0, Math.PI * 2); }
     else if (pose === 'cough') { ctx.moveTo(-3, -33); ctx.lineTo(3, -31); }
     else { ctx.moveTo(-3, -33); ctx.lineTo(3, -33); }
     ctx.stroke();
 
     /* body */
     ctx.strokeStyle = col; ctx.lineWidth = 2.6;
-    if (pose === 'fall' || pose === 'tumble') {
+    if (pose === 'pushups') {
+      ctx.beginPath(); ctx.moveTo(-14, -18); ctx.lineTo(14, -14); ctx.stroke();
+    } else if (pose === 'fall' || pose === 'tumble') {
       ctx.beginPath(); ctx.moveTo(-12, -29); ctx.lineTo(12, -8); ctx.stroke();
     } else if (pose === 'sit') {
       ctx.beginPath(); ctx.moveTo(0, -29); ctx.lineTo(0, -12); ctx.stroke();
@@ -204,7 +217,14 @@
     }
 
     /* arms */
-    if (pose === 'climb') {
+    if (pose === 'pushups') {
+      var pu = Math.sin(phase * 9) * 3;
+      ctx.beginPath(); ctx.moveTo(-10, -17); ctx.lineTo(-10, 8 + pu); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(10, -15); ctx.lineTo(10, 8 - pu); ctx.stroke();
+    } else if (pose === 'chase') {
+      ctx.beginPath(); ctx.moveTo(0, -24); ctx.lineTo(-15, -19); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(0, -24); ctx.lineTo(15, -19); ctx.stroke();
+    } else if (pose === 'climb') {
       /* alternating reach makes the climb read as actual movement */
       var cs = Math.sin(phase * 14);
       ctx.beginPath(); ctx.moveTo(0, -24); ctx.lineTo(-14, -34 + cs * 5); ctx.stroke();
@@ -230,7 +250,7 @@
       var sw = Math.sin(phase * 12) * 2;
       ctx.beginPath(); ctx.moveTo(0, -24); ctx.lineTo(-4 + sw, -38); ctx.stroke();
       ctx.beginPath(); ctx.moveTo(0, -24); ctx.lineTo(12, -18); ctx.stroke();
-    } else if (pose === 'shocked' || pose === 'peek') {
+    } else if (pose === 'shocked' || pose === 'shock' || pose === 'peek') {
       ctx.beginPath(); ctx.moveTo(0, -24); ctx.lineTo(-14, -20); ctx.stroke();
       ctx.beginPath(); ctx.moveTo(0, -24); ctx.lineTo(14, -20); ctx.stroke();
     } else if (pose === 'fall' || pose === 'tumble') {
@@ -246,7 +266,14 @@
     }
 
     /* legs */
-    if (pose === 'sit' || pose === 'sleep') {
+    if (pose === 'pushups') {
+      ctx.beginPath(); ctx.moveTo(14, -14); ctx.lineTo(24, 8); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(14, -14); ctx.lineTo(22, 10); ctx.stroke();
+    } else if (pose === 'chase') {
+      var chp = Math.sin(phase * 14) * 8;
+      ctx.beginPath(); ctx.moveTo(0, -8); ctx.lineTo(-12 + chp, 12); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(0, -8); ctx.lineTo(12 - chp, 12); ctx.stroke();
+    } else if (pose === 'sit' || pose === 'sleep') {
       /* sitting on the floor: legs stretched forward along the ground */
       ctx.beginPath(); ctx.moveTo(0, -8); ctx.lineTo(-13, 6); ctx.lineTo(-21, 8); ctx.stroke();
       ctx.beginPath(); ctx.moveTo(0, -8); ctx.lineTo(13, 6); ctx.lineTo(21, 8); ctx.stroke();
@@ -549,6 +576,37 @@
     var targets = cardTargets();
     var topBarH = 60;
     var groundY = window.innerHeight - 40;
+    tickCount++;
+
+    /* playful encounters: a light spar, mock sword fight, chase or a quick
+       game of rock-paper-scissors whenever two of them pass each other */
+    for (var ai = 0; ai < stickmen.length; ai++) {
+      for (var bi = ai + 1; bi < stickmen.length; bi++) {
+        var a = stickmen[ai], b = stickmen[bi];
+        if (a.dead || b.dead || a.exiting || b.exiting || a.dragging || b.dragging) continue;
+        if (a.entry || b.entry) continue;
+        if (Math.abs(a.x - b.x) > 42) continue;
+        if (a.state === 'rps' || b.state === 'rps' || a.state === 'spar' || b.state === 'spar') continue;
+        if (Math.random() > 0.006) continue;
+        var roll = Math.random();
+        if (roll < 0.34) {
+          setState(a, 'spar'); setState(b, 'spar');
+          a.partner = b; b.partner = a;
+        } else if (roll < 0.62) {
+          setState(a, 'chase'); setState(b, 'chase');
+          a.partner = b; b.partner = a;
+        } else {
+          a.state = b.state = 'rps';
+          a.rpsMove = RPS_MOVES[Math.floor(Math.random() * 3)];
+          b.rpsMove = RPS_MOVES[Math.floor(Math.random() * 3)];
+          a.bubble = a.rpsMove; b.bubble = b.rpsMove;
+          a.bubbleTimer = b.bubbleTimer = 150;
+          a.rpsUntil = b.rpsUntil = tickCount + 105;
+          a.partner = b; b.partner = a;
+        }
+      }
+    }
+
     stickmen.forEach(function (s) {
       if (s.dragging) {
         s.x = mouse.x; s.y = mouse.y;
@@ -607,8 +665,42 @@
       }
       if (s.bubbleTimer > 0) s.bubbleTimer--;
 
+      /* rock-paper-scissors settles after a beat */
+      if (s.state === 'rps' && tickCount >= s.rpsUntil) {
+        var other = s.partner;
+        if (other && other.state === 'rps') {
+          var beats = { '✊': '✌️', '✋': '✊', '✌️': '✋' };
+          var iWin = beats[s.rpsMove] === other.rpsMove;
+          setState(s, iWin ? 'happy' : 'sad');
+          setState(other, iWin ? 'sad' : 'happy');
+          s.bubble = iWin ? 'won! 🎉' : 'lost...'; other.bubble = iWin ? 'lost...' : 'won! 🎉';
+          s.bubbleTimer = other.bubbleTimer = 110;
+          if (iWin) { s.vy = -9; s.onGround = false; }
+        } else {
+          setState(s, 'happy');
+        }
+        s.partner = null;
+      }
+
+      /* chase the partner across the base */
+      if (s.state === 'chase' && s.partner) {
+        s.vx = (s.partner.x > s.x ? 1 : -1) * 3.2;
+        s.armPhase += 0.2;
+      }
+      /* frustrated run-off: leave the screen and pop back in elsewhere */
+      if (s.state === 'runoff') {
+        if (s.x < -60 || s.x > window.innerWidth + 60) {
+          s.x = 60 + Math.random() * Math.max(100, window.innerWidth - 120);
+          setState(s, 'happy');
+          s.onGround = true; s.y = groundY;
+        } else {
+          s.vx = (s.vx || 2) * (s.vx >= 0 ? 1 : -1);
+        }
+      }
+
       var sp = 1.0;
       if (s.state === 'run') { s.vx = (Math.random() > 0.5 ? 1 : -1) * (1.5 + Math.random()) * sp; }
+      else if (s.state === 'runoff') { s.vx = s.vx * 1.02; }
       else if (s.state === 'happy') { s.vx *= 0.9; s.vy = -3 * Math.sin(s.legPhase); }
       else if (s.state === 'jump') { if (s.onGround) { s.vy = -8 * sp; s.onGround = false; } s.vx *= 0.95; }
       else if (s.state === 'laugh') { s.vx *= 0.8; }
@@ -726,16 +818,28 @@
     else if (s.state === 'sad' || s.dead) { ctx.arc(0, -30, 4, Math.PI + 0.2, Math.PI * 2 - 0.2); }
     else if (s.state === 'angry') { ctx.moveTo(-4, -33); ctx.lineTo(4, -33); }
     else if (s.state === 'sleep') { ctx.arc(0, -33, 1.6, 0, Math.PI * 2); }
+    else if (s.state === 'shock') { ctx.arc(0, -32, 3, 0, Math.PI * 2); }
     else { ctx.moveTo(-3, -33); ctx.lineTo(3, -33); }
     ctx.stroke();
 
     /* body */
     ctx.strokeStyle = col; ctx.lineWidth = 2.6;
-    ctx.beginPath(); ctx.moveTo(0, -29); ctx.lineTo(0, -8); ctx.stroke();
+    if (s.state === 'pushups') {
+      ctx.beginPath(); ctx.moveTo(-14, -18); ctx.lineTo(14, -14); ctx.stroke();
+    } else {
+      ctx.beginPath(); ctx.moveTo(0, -29); ctx.lineTo(0, -8); ctx.stroke();
+    }
 
     /* arms */
     var armSwing = Math.sin(s.armPhase) * 0.6;
-    if (s.state === 'sit' || s.state === 'sleep') {
+    if (s.state === 'pushups') {
+      var pu = Math.sin(s.armPhase * 2) * 3;
+      ctx.beginPath(); ctx.moveTo(-10, -17); ctx.lineTo(-10, 8 + pu); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(10, -15); ctx.lineTo(10, 8 - pu); ctx.stroke();
+    } else if (s.state === 'chase') {
+      ctx.beginPath(); ctx.moveTo(0, -22); ctx.lineTo(-15, -18); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(0, -22); ctx.lineTo(15, -18); ctx.stroke();
+    } else if (s.state === 'sit' || s.state === 'sleep') {
       ctx.beginPath(); ctx.moveTo(0, -22); ctx.lineTo(-11, -6); ctx.stroke();
       ctx.beginPath(); ctx.moveTo(0, -22); ctx.lineTo(11, -6); ctx.stroke();
     } else {
@@ -745,7 +849,13 @@
 
     /* legs */
     var legSwing = Math.sin(s.legPhase) * 0.8;
-    if (s.state === 'sit' || s.state === 'sleep') {
+    if (s.state === 'pushups') {
+      ctx.beginPath(); ctx.moveTo(14, -14); ctx.lineTo(24, 8); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(14, -14); ctx.lineTo(22, 10); ctx.stroke();
+    } else if (s.state === 'chase' || s.state === 'runoff') {
+      ctx.beginPath(); ctx.moveTo(0, -8); ctx.lineTo(-8 + legSwing * 9, 12); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(0, -8); ctx.lineTo(8 - legSwing * 9, 12); ctx.stroke();
+    } else if (s.state === 'sit' || s.state === 'sleep') {
       ctx.beginPath(); ctx.moveTo(0, -8); ctx.lineTo(-13, 6); ctx.lineTo(-21, 8); ctx.stroke();
       ctx.beginPath(); ctx.moveTo(0, -8); ctx.lineTo(13, 6); ctx.lineTo(21, 8); ctx.stroke();
     } else {
@@ -924,6 +1034,7 @@
           '<button type="button" class="sm-done" id="smColorDone">Done</button>' +
         '</div>' +
         '<button type="button" class="sm-toggle" id="smToggle">Hide Stickmen</button>' +
+        '<button type="button" class="sm-toggle sm-toggle--swing" id="smSwingToggle">' + (cfg.swingHidden ? 'Show Swing' : 'Hide Swing') + '</button>' +
       '</div>';
     sideNav.appendChild(li);
 
@@ -1017,6 +1128,17 @@
       });
     }
 
+    var swingBtn = document.getElementById('smSwingToggle');
+    if (swingBtn) {
+      swingBtn.addEventListener('click', function () {
+        cfg.swingHidden = !cfg.swingHidden;
+        saveCfg();
+        topSwingExit(cfg.swingHidden);
+        swingBtn.textContent = cfg.swingHidden ? 'Show Swing' : 'Hide Swing';
+      });
+    }
+    if (cfg.swingHidden) topSwingExit(true);
+
     var visible = true;
     toggle.addEventListener('click', function () {
       visible = !visible;
@@ -1060,43 +1182,81 @@
   var SWING_LINES = ['down here', 'hi there!', 'wheee!', 'look!', 'come join!', 'hey you!', 'wahoo!', 'up here!', 'yoo-hoo!'];
   var swingTimer = null, swingMsgTimer = null, swingEl = null;
 
+  var SWING_COLORS = ['#ef4444', '#22ff88', '#ffd700', '#3b82f6', '#ff9f43'];
+  var SWING_ACTIONS = ['ts-wild', 'ts-look', 'ts-slip', 'ts-dizzy', 'ts-wave', 'ts-sparkle'];
+  var SWING_REACTIONS = ['hey!', 'ouch!', 'hi!', 'lol', 'boing!', 'stop it!', 'wheee!'];
+
   function mountTopSwing() {
     if (document.getElementById('topSwing')) return;
     var el = document.createElement('div');
     el.id = 'topSwing';
     el.className = 'top-swing ts-enter';
-    el.setAttribute('aria-hidden', 'true');
+    var col = SWING_COLORS[Math.floor(Math.random() * SWING_COLORS.length)];
+    el.style.setProperty('--ts-color', col);
+    /* random horizontal landing spot and rope drop */
+    el.style.left = (34 + Math.random() * 32).toFixed(1) + '%';
+    el.style.setProperty('--ts-drop-x', ((Math.random() * 70) - 35).toFixed(0) + 'px');
     el.innerHTML =
+      '<div class="ts-mask"></div>' +
       '<div class="ts-rig">' +
-        '<svg class="ts-svg" viewBox="-40 -160 80 210" xmlns="http://www.w3.org/2000/svg">' +
-          '<line x1="-15" y1="-158" x2="-15" y2="-4" stroke="#9fe8ff" stroke-width="1.6" stroke-dasharray="4 4" opacity=".8"/>' +
-          '<line x1="15" y1="-158" x2="15" y2="-4" stroke="#9fe8ff" stroke-width="1.6" stroke-dasharray="4 4" opacity=".8"/>' +
-          '<rect x="-21" y="-8" width="42" height="7" rx="3" fill="#8b5a2b" stroke="#c98f52" stroke-width="1"/>' +
+        '<svg class="ts-svg" viewBox="-40 -180 80 240" xmlns="http://www.w3.org/2000/svg">' +
+          '<line x1="-15" y1="-170" x2="-15" y2="-6" stroke="#9fe8ff" stroke-width="1.6" stroke-dasharray="4 4" opacity=".8"/>' +
+          '<line x1="15" y1="-170" x2="15" y2="-6" stroke="#9fe8ff" stroke-width="1.6" stroke-dasharray="4 4" opacity=".8"/>' +
+          '<circle cx="-15" cy="-170" r="3" fill="#9fe8ff"/><circle cx="15" cy="-170" r="3" fill="#9fe8ff"/>' +
+          '<rect x="-21" y="-10" width="42" height="7" rx="3" fill="#8b5a2b" stroke="#c98f52" stroke-width="1"/>' +
           '<g class="ts-body">' +
-            '<circle cx="0" cy="-44" r="9" fill="#22ff88"/>' +
-            '<circle cx="-3.2" cy="-46" r="2.1" fill="#fff"/><circle cx="3.2" cy="-46" r="2.1" fill="#fff"/>' +
-            '<circle cx="-3.2" cy="-46" r="1" fill="#111"/><circle cx="3.2" cy="-46" r="1" fill="#111"/>' +
-            '<path d="M-4 -41 Q0 -35 4 -41" fill="none" stroke="#111" stroke-width="1.3" stroke-linecap="round"/>' +
-            '<path d="M0 -35 L0 -14" stroke="#22ff88" stroke-width="2.6" stroke-linecap="round"/>' +
-            '<path d="M0 -28 L-11 -20 M0 -28 L11 -20" stroke="#22ff88" stroke-width="2.2" stroke-linecap="round" class="ts-arm"/>' +
-            '<path d="M0 -14 L-11 -2 L-15 8 M0 -14 L11 -2 L15 8" stroke="#22ff88" stroke-width="2.2" stroke-linecap="round" class="ts-leg"/>' +
+            '<circle cx="0" cy="-46" r="9" fill="var(--ts-color)"/>' +
+            '<circle cx="-3.2" cy="-48" r="2.1" fill="#fff"/><circle cx="3.2" cy="-48" r="2.1" fill="#fff"/>' +
+            '<circle cx="-3.2" cy="-48" r="1" fill="#111"/><circle cx="3.2" cy="-48" r="1" fill="#111"/>' +
+            '<path d="M-4 -43 Q0 -37 4 -43" fill="none" stroke="#111" stroke-width="1.3" stroke-linecap="round"/>' +
+            '<path d="M0 -37 L0 -16" stroke="var(--ts-color)" stroke-width="2.6" stroke-linecap="round"/>' +
+            '<path d="M0 -30 L-11 -22 M0 -30 L11 -22" stroke="var(--ts-color)" stroke-width="2.2" stroke-linecap="round" class="ts-arm"/>' +
+            '<path d="M0 -16 L-11 -4 L-15 6 M0 -16 L11 -4 L15 6" stroke="var(--ts-color)" stroke-width="2.2" stroke-linecap="round" class="ts-leg"/>' +
+          '</g>' +
+          '<g class="ts-sparkles" fill="var(--ts-color)">' +
+            '<circle cx="-26" cy="-58" r="2"/><circle cx="26" cy="-54" r="1.6"/><circle cx="-20" cy="-78" r="1.4"/>' +
           '</g>' +
         '</svg>' +
         '<div class="ts-bubble">down here</div>' +
       '</div>';
     document.body.appendChild(el);
     swingEl = el;
-    setTimeout(function () { el.classList.remove('ts-enter'); }, 2600);
-    swingMsgTimer = setInterval(function () {
+    setTimeout(function () { el.classList.remove('ts-enter'); }, 2800);
+
+    /* messages at natural intervals, not a steady spam */
+    function say() {
       var b = el.querySelector('.ts-bubble');
-      if (!b) return;
+      if (!b || document.hidden || el.classList.contains('ts-exit')) return;
       b.textContent = SWING_LINES[Math.floor(Math.random() * SWING_LINES.length)];
-      b.classList.remove('ts-pop');
-      void b.offsetWidth;
-      b.classList.add('ts-pop');
-    }, 4200);
+      b.classList.remove('ts-pop'); void b.offsetWidth; b.classList.add('ts-pop');
+      swingMsgTimer = setTimeout(say, 7000 + Math.random() * 7000);
+    }
+    swingMsgTimer = setTimeout(say, 5000 + Math.random() * 4000);
+
+    /* playful random actions */
+    function act() {
+      if (!document.hidden && !el.classList.contains('ts-exit')) {
+        var a = SWING_ACTIONS[Math.floor(Math.random() * SWING_ACTIONS.length)];
+        el.classList.add(a);
+        setTimeout(function () { el.classList.remove(a); }, 1000 + Math.random() * 900);
+      }
+      swingTimer = setTimeout(act, 3200 + Math.random() * 4200);
+    }
+    swingTimer = setTimeout(act, 2600);
+
+    /* a click gets a reaction, just like the other stickmen */
+    el.setAttribute('aria-hidden', 'false');
+    el.style.pointerEvents = 'auto';
+    el.title = 'Tap the swinging stickman';
+    el.addEventListener('click', function () {
+      var b = el.querySelector('.ts-bubble');
+      if (b) { b.textContent = SWING_REACTIONS[Math.floor(Math.random() * SWING_REACTIONS.length)]; b.classList.remove('ts-pop'); void b.offsetWidth; b.classList.add('ts-pop'); }
+      el.classList.add('ts-react');
+      setTimeout(function () { el.classList.remove('ts-react'); }, 700);
+    });
+
     /* every so often the swing is hauled up and drops back down */
-    swingTimer = setInterval(function () {
+    setInterval(function () {
       if (document.hidden || el.classList.contains('ts-exit')) return;
       el.classList.add('ts-retract');
       setTimeout(function () { el.classList.remove('ts-retract'); }, 2400);

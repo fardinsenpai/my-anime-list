@@ -1052,6 +1052,11 @@
       var n = play.querySelector('#' + id);
       if (n) n.hidden = false;
     });
+    /* games that have no designed skip path get no skip strip at all */
+    if (api.key === 'memory' || api.key === 'arcade') {
+      var skip = play.querySelector('#agSkipRow');
+      if (skip) skip.hidden = true;
+    }
     play.classList.add('ag-play--live');
     /* the leaderboard only belongs on the hub and result screen - hide it
        while a round is live so the play area fits without scrolling */
@@ -1192,7 +1197,6 @@
        Guess the Character uses because it wants a person's name, not an
        anime title. */
     if (window.AnimeSearch && input && opts.search !== false) {
-      opts.game = true;   /* masked hints only - no answer-leaking autocomplete */
       window.AnimeSearch.attach(input, opts);
     }
     ['pointerdown', 'touchstart', 'click'].forEach(function (ev) {
@@ -1749,7 +1753,15 @@
     api.stage.innerHTML = roundHead(api, '') +
       '<div class="ag-initials">' + esc(initialsDisplay) + '</div>' +
       '<div class="ag-genre-year">' + esc(hint) + '</div>' +
-      '<div class="ag-prompt">What is the Anime name?</div>';
+      '<div class="ag-prompt">What is the Anime name?</div>' +
+      '<div class="ag-init-options">' +
+        shuffle([api.answer].concat(
+          shuffle(famousPool().filter(function (x) { return x.title !== api.answer; })).slice(0, 3)
+            .map(function (x) { return x.title; })
+        )).map(function (t) {
+          return '<button type="button" class="ag-init-option" data-title="' + esc(t) + '">' + esc(t) + '</button>';
+        }).join('') +
+      '</div>';
     answerRow(api, 'agInitialsInput', 'Type the anime title…', function (v) {
       var ok = answerMatches(v, api.answer, api.alt);
       if (ok) {
@@ -1763,6 +1775,14 @@
         wrongAnswer(api, api.answer, nextInitialsRound);
       }
     }, true, { exclude: api.answer });
+    /* local-data option chips: pick one instead of typing */
+    Array.prototype.forEach.call(api.stage.querySelectorAll('.ag-init-option'), function (b) {
+      b.onclick = function () {
+        var inp = document.getElementById('agInitialsInput');
+        var go = document.getElementById('agInitialsInputGo');
+        if (inp && go) { inp.value = b.getAttribute('data-title'); go.click(); }
+      };
+    });
   }
 
   /* ══════════════════════════════════════════════════════════════════════

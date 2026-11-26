@@ -598,9 +598,9 @@ window.addEventListener('popstate', function () {
      Both directions: leaving the route closes it, returning to the route
      reopens it (otherwise back/forward could show the URL without the panel). */
   if (window.TierList && typeof window.TierList.open === 'function' && typeof window.TierList.close === 'function') {
-    var tlOv = document.querySelector('.tl-overlay');
+    var tlOv = document.querySelector('.tl2-overlay, .tl-overlay');
     var tlWantOpen = location.pathname.endsWith('/tier-list');
-    var tlIsOpen = !!(tlOv && !tlOv.hidden);
+    var tlIsOpen = !!(tlOv && tlOv.classList && tlOv.classList.contains('show'));
     if (tlWantOpen && !tlIsOpen) window.TierList.open();
     else if (!tlWantOpen && tlIsOpen) window.TierList.close();
   }
@@ -11766,4 +11766,17 @@ var TITLE_THEME = {
   st.id = 'titleThemeStyle';
   st.textContent = css;
   (document.head || document.documentElement).appendChild(st);
+})();
+
+/* tier list nav item: close the mobile drawer, then open the maker */
+(function () {
+  var btn = document.getElementById('tierNavBtn');
+  if (!btn) return;
+  btn.addEventListener('click', function (e) {
+    e.preventDefault();
+    if (typeof closeMenu === 'function') closeMenu();
+    if (typeof closeFloatingOverlays === 'function') closeFloatingOverlays();
+    try { history.pushState(null, '', 'tier-list'); } catch (err) {}
+    if (window.TierList && typeof window.TierList.open === 'function') window.TierList.open();
+  });
 })();

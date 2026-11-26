@@ -108,18 +108,6 @@
       var row = document.createElement('button');
       row.type = 'button';
       row.className = 'as-item';
-      if (game) {
-        /* e.g. typing R for ReLIFE only shows "R-" - no titles, no posters,
-           no ids, and nothing is ever written into the answer box */
-        row.innerHTML = '<span class="as-poster as-poster--none">?</span>' +
-          '<span class="as-title">' + esc(qraw.charAt(0).toUpperCase() + '-') + '</span>';
-        row.onclick = function () {
-          close();
-          try { input.focus({ preventScroll: true }); } catch (e) {}
-        };
-        box.appendChild(row);
-        return;
-      }
       row.innerHTML =
         (it.poster ? '<img class="as-poster" src="' + esc(it.poster) + '" alt="">' : '<span class="as-poster as-poster--none">🎴</span>') +
         '<span class="as-title">' + esc(it.title) + '</span>' +

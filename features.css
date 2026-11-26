@@ -1016,3 +1016,48 @@
 @media (prefers-reduced-motion: reduce) {
   .tl2-overlay, .tl2-toast { transition: none !important; }
 }
+
+/* swing anchored inside the top bar: the bar edge masks the chain anchor */
+.top-swing { top: 0; height: 240px; z-index: 55; }
+.top-swing .ts-mask {
+  position: absolute;
+  top: 0; left: -24px; right: -24px;
+  height: 66px;
+  z-index: 4;
+  background: linear-gradient(180deg, #1f194c 0%, #171239 100%);
+  border-bottom: 1px solid rgba(0, 240, 255, .22);
+  box-shadow: 0 3px 12px rgba(0,0,0,.35);
+}
+.top-swing .ts-bubble { top: 92px; }
+.top-swing.ts-enter .ts-rig { animation: tsDrop 2.6s cubic-bezier(.2,.9,.3,1) both; }
+@keyframes tsDrop {
+  0% { transform: translate(var(--ts-drop-x, 0), -260px) rotate(0deg); opacity: 0; }
+  60% { opacity: 1; }
+  100% { transform: translate(0, 0) rotate(-7deg); opacity: 1; }
+}
+/* random playful actions */
+@keyframes tsWild { 0% { transform: rotate(-18deg); } 100% { transform: rotate(18deg); } }
+@keyframes tsLook { 0%,100% { transform: rotate(-10deg); } 50% { transform: rotate(10deg); } }
+@keyframes tsSlip { 0% { transform: translateY(0) rotate(-7deg); } 45% { transform: translateY(26px) rotate(28deg); } 100% { transform: translateY(0) rotate(-7deg); } }
+@keyframes tsDizzy { 0% { transform: rotate(0deg); } 50% { transform: rotate(22deg) scaleY(.9); } 100% { transform: rotate(0deg); } }
+@keyframes tsBigWave { 0%,100% { transform: rotate(0deg); } 50% { transform: rotate(-70deg); } }
+@keyframes tsTwinkle { 0%,100% { opacity: .15; } 50% { opacity: 1; } }
+@keyframes tsJump { 0%,100% { transform: translateY(0) rotate(-7deg); } 50% { transform: translateY(-16px) rotate(8deg); } }
+.top-swing.ts-wild .ts-rig { animation: tsWild .42s ease-in-out infinite alternate; }
+.top-swing.ts-look .ts-body { animation: tsLook 1s ease-in-out infinite; transform-origin: 50% 30%; }
+.top-swing.ts-slip .ts-rig { animation: tsSlip 1.1s ease-in-out both; }
+.top-swing.ts-dizzy .ts-body { animation: tsDizzy .7s ease-in-out infinite; transform-origin: 50% 40%; }
+.top-swing.ts-wave .ts-arm { animation: tsBigWave .55s ease-in-out infinite; }
+.top-swing.ts-sparkle .ts-sparkles { animation: tsTwinkle .4s ease-in-out infinite; }
+.top-swing .ts-sparkles { opacity: .15; }
+.top-swing.ts-react .ts-rig { animation: tsJump .7s ease-in-out both; }
+@media (max-width: 640px) {
+  .top-swing { height: 200px; width: 96px; }
+  .top-swing .ts-mask { height: 54px; }
+  .top-swing .ts-bubble { top: 74px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .top-swing.ts-wild .ts-rig, .top-swing.ts-look .ts-body, .top-swing.ts-slip .ts-rig,
+  .top-swing.ts-dizzy .ts-body, .top-swing.ts-wave .ts-arm, .top-swing.ts-sparkle .ts-sparkles,
+  .top-swing.ts-react .ts-rig { animation: none !important; }
+}

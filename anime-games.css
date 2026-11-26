@@ -2369,3 +2369,27 @@
 @media (prefers-reduced-motion: reduce) {
   .ag-stick--skip .ag-stick-g { animation: none !important; }
 }
+
+/* the perched green stickman belongs to a live round only, never to results */
+.ag-wrap--game .ag-hud[hidden] .ag-hud-perch,
+.ag-wrap--game .ag-hud[hidden] .ag-thought { display: none !important; }
+
+/* local-data option chips under the initials clue */
+.ag-init-options { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin: 4px 0 6px; }
+.ag-init-option {
+  max-width: 200px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,215,0,.35);
+  background: rgba(255,215,0,.07);
+  color: #ffe9a8;
+  font-family: 'Exo 2', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: .18s;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ag-init-option:hover { border-color: #ffd700; color: #fff; background: rgba(255,215,0,.18); transform: translateY(-2px); }
