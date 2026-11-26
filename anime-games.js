@@ -1343,9 +1343,14 @@
 
   function drawClue(api) {
     var nextCost = api.clueIndex < api.clues.length - 1 ? CLUE_COST[api.clueIndex] : 0;
+    /* genre + year come from this site's own card data, never an outside API */
+    var local = buildDb().filter(function (a) { return a.title === api.answer; })[0] || {};
+    var meta = (local.genres && local.genres.length ? local.genres.slice(0, 2).join(' • ') : '') +
+      (local.year ? (local.genres && local.genres.length ? ' • ' : '') + local.year : '');
     api.stage.innerHTML = roundHead(api, 'Clue ' + (api.clueIndex + 1) + ' of ' + api.clues.length, api.points) +
       '<div class="ag-clue-box">' +
         '<div class="ag-clue-no">CLUE ' + (api.clueIndex + 1) + '</div>' +
+        (meta ? '<div class="ag-clue-meta">' + esc(meta) + '</div>' : '') +
         '<div class="ag-clue-text">' + esc(api.clues[api.clueIndex]) + '</div>' +
       '</div>';
     answerRow(api, 'agCardInput', 'Type the anime title…', function (v) {
@@ -1741,6 +1746,18 @@
         nextInitialsRound(api);
       });
   }
+  /* options come from this site's own DB: three random titles plus the rest
+     from the top popular list, so every choice is recognisable */
+  function initialsOptions(answer) {
+    var all = buildDb().filter(function (a) { return a.title && a.title !== answer; });
+    var three = shuffle(all).slice(0, 3).map(function (a) { return a.title; });
+    var top = famousPool().filter(function (a) {
+      return a.title !== answer && three.indexOf(a.title) === -1 && all.indexOf(a) > -1;
+    });
+    var rest = shuffle(top).slice(0, 3).map(function (a) { return a.title; });
+    return shuffle([answer].concat(three, rest));
+  }
+
   function nextInitialsRound(api) {
     if (api.round >= api.rounds) return api.finish(api.score, api.rounds);
     api.round++;
@@ -1755,10 +1772,7 @@
       '<div class="ag-genre-year">' + esc(hint) + '</div>' +
       '<div class="ag-prompt">What is the Anime name?</div>' +
       '<div class="ag-init-options">' +
-        shuffle([api.answer].concat(
-          shuffle(famousPool().filter(function (x) { return x.title !== api.answer; })).slice(0, 3)
-            .map(function (x) { return x.title; })
-        )).map(function (t) {
+        shuffle(initialsOptions(api.answer)).map(function (t) {
           return '<button type="button" class="ag-init-option" data-title="' + esc(t) + '">' + esc(t) + '</button>';
         }).join('') +
       '</div>';
