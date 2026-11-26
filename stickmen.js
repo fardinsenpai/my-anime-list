@@ -1197,7 +1197,6 @@
     el.style.left = (34 + Math.random() * 32).toFixed(1) + '%';
     el.style.setProperty('--ts-drop-x', ((Math.random() * 70) - 35).toFixed(0) + 'px');
     el.innerHTML =
-      '<div class="ts-mask"></div>' +
       '<div class="ts-rig">' +
         '<svg class="ts-svg" viewBox="-40 -180 80 240" xmlns="http://www.w3.org/2000/svg">' +
           '<line x1="-15" y1="-170" x2="-15" y2="-6" stroke="#9fe8ff" stroke-width="1.6" stroke-dasharray="4 4" opacity=".8"/>' +
@@ -1221,6 +1220,16 @@
       '</div>';
     document.body.appendChild(el);
     swingEl = el;
+    /* the swing belongs to the main page only - the top bar itself masks its
+       anchor, no extra panel is drawn over the content */
+    function syncPlace() {
+      var p = location.pathname.replace(/\/+$/, '');
+      var main = p === '' || p === '/' || /\/my-anime-list$|home$|index\.html$/.test(p);
+      el.style.display = main ? '' : 'none';
+    }
+    syncPlace();
+    window.addEventListener('popstate', syncPlace);
+    setInterval(syncPlace, 2000);
     setTimeout(function () { el.classList.remove('ts-enter'); }, 2800);
 
     /* messages at natural intervals, not a steady spam */

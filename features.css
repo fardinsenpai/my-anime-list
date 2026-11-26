@@ -737,7 +737,7 @@
   100% { transform: translateY(-260px) translateX(180px) rotate(40deg); opacity: 0; }
 }
 @media (max-width: 640px) {
-  .top-swing { top: 58px; width: 92px; height: 150px; }
+  .top-swing { top: 0; width: 92px; height: 200px; }
   .top-swing .ts-bubble { top: 42px; font-size: 9px; padding: 3px 8px; }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -1018,16 +1018,7 @@
 }
 
 /* swing anchored inside the top bar: the bar edge masks the chain anchor */
-.top-swing { top: 0; height: 240px; z-index: 55; }
-.top-swing .ts-mask {
-  position: absolute;
-  top: 0; left: -24px; right: -24px;
-  height: 66px;
-  z-index: 4;
-  background: linear-gradient(180deg, #1f194c 0%, #171239 100%);
-  border-bottom: 1px solid rgba(0, 240, 255, .22);
-  box-shadow: 0 3px 12px rgba(0,0,0,.35);
-}
+.top-swing { top: 0; height: 240px; z-index: 9999; }
 .top-swing .ts-bubble { top: 92px; }
 .top-swing.ts-enter .ts-rig { animation: tsDrop 2.6s cubic-bezier(.2,.9,.3,1) both; }
 @keyframes tsDrop {
@@ -1053,7 +1044,6 @@
 .top-swing.ts-react .ts-rig { animation: tsJump .7s ease-in-out both; }
 @media (max-width: 640px) {
   .top-swing { height: 200px; width: 96px; }
-  .top-swing .ts-mask { height: 54px; }
   .top-swing .ts-bubble { top: 74px; }
 }
 @media (prefers-reduced-motion: reduce) {
