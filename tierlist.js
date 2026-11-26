@@ -301,17 +301,50 @@
       ctx.restore();
     });
 
-    /* classic white title, like the original export */
-    ctx.fillStyle = '#ffffff';
+    /* the banner: a dark inset band with a sky-blue bottom edge */
+    var band = ctx.createLinearGradient(0, 14, W, headH - 12);
+    band.addColorStop(0, 'rgba(8,10,28,.72)');
+    band.addColorStop(1, 'rgba(28,14,52,.72)');
+    ctx.fillStyle = band;
+    ctx.beginPath();
+    if (ctx.roundRect) ctx.roundRect(22, 14, W - 44, headH - 28, 18);
+    else ctx.rect(22, 14, W - 44, headH - 28);
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(135,206,235,.55)';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    ctx.fillStyle = 'rgba(135,206,235,.75)';
+    ctx.fillRect(40, headH - 20, W - 80, 3);
+
+    /* sky-blue glowing title */
+    ctx.fillStyle = '#87ceeb';
     ctx.font = '900 54px "Orbitron", "Segoe UI", sans-serif';
     ctx.textAlign = 'left';
-    ctx.shadowColor = 'rgba(255,255,255,.35)';
-    ctx.shadowBlur = 14;
+    ctx.shadowColor = 'rgba(135,206,235,.75)';
+    ctx.shadowBlur = 20;
     ctx.fillText('MY ANIME TIER LIST', 48, 86);
     ctx.shadowBlur = 0;
     ctx.fillStyle = 'rgba(207, 228, 255, .8)';
     ctx.font = '600 24px "Rajdhani", "Segoe UI", sans-serif';
     ctx.fillText("Fardin's Anime Hub", 50, 122);
+
+    /* circular star badge on the right of the banner */
+    ctx.save();
+    ctx.translate(W - 96, 80);
+    ctx.strokeStyle = '#ffd700';
+    ctx.lineWidth = 3;
+    ctx.shadowColor = 'rgba(255,215,0,.6)';
+    ctx.shadowBlur = 14;
+    ctx.beginPath();
+    ctx.arc(0, 0, 42, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = '#ffd700';
+    ctx.font = '900 44px "Orbitron", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('✦', 0, 15);
+    ctx.restore();
+    ctx.textAlign = 'left';
 
     state.order.forEach(function (t, i) {
       var y = headH + i * rowH;
