@@ -2645,7 +2645,7 @@ const GEMINI_API_KEY = 'GEMINI_KEY_1';
 let GEMINI_API_KEYS = ['GEMINI_KEY_1', 'GEMINI_KEY_2'].filter(function (k) { return k && !/^GEMINI_KEY_/.test(k); });
 let geminiKeyIndex = 0;
 let AI_PROVIDER = 'gemini';                 /* 'groq' | 'gemini' */
-let GEMINI_MODELS = ['gemini-3.8-flash'];
+let GEMINI_MODELS = ['gemini-3.6-flash', 'gemini-3-flash-preview', 'gemini-3.5-flash', 'gemini-3.8-flash'];
 
 function geminiReady() {
   return AI_PROVIDER === 'gemini' && (GEMINI_API_KEYS.length > 0 ||
@@ -2665,7 +2665,7 @@ async function geminiRequest(body) {
     contents.push({ role: m.role === 'assistant' ? 'model' : 'user', parts: [{ text: text }] });
   });
   if (!contents.length) throw new Error('Gemini: no user message');
-  var models = (GEMINI_MODELS && GEMINI_MODELS.length) ? GEMINI_MODELS : ['gemini-3-flash-preview'];
+  var models = (GEMINI_MODELS && GEMINI_MODELS.length) ? GEMINI_MODELS : ['gemini-3.6-flash', 'gemini-3-flash-preview', 'gemini-3.5-flash', 'gemini-3.8-flash'];
   var keys = GEMINI_API_KEYS.length ? GEMINI_API_KEYS :
     (GEMINI_API_KEY && !/^GEMINI_KEY_/.test(GEMINI_API_KEY) ? [GEMINI_API_KEY] : []);
   var payload = {

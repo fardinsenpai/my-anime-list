@@ -44,7 +44,7 @@ var SPECIAL_CARD_NAMES = {
 var AWARD_WINNERS = {};
 var GROQ_MODELS = [];
 var AI_PROVIDER = 'groq';
-var GEMINI_MODELS = ['gemini-3-flash-preview'];
+var GEMINI_MODELS = ['gemini-3.6-flash', 'gemini-3-flash-preview', 'gemini-3.5-flash', 'gemini-3.8-flash'];
 var GEMINI_API_KEY = '';
 var GEMINI_API_KEYS = [];
 var GROQ_API_KEYS = [];
@@ -412,7 +412,7 @@ async function loadAdminData() {
     GROQ_MODELS = grabLiteral(jsText, 'GROQ_MODELS') || [];
     GROQ_API_KEYS = grabLiteral(jsText, 'GROQ_API_KEYS') || [];
     AI_PROVIDER = grabLiteral(jsText, 'AI_PROVIDER') || 'groq';
-    GEMINI_MODELS = grabLiteral(jsText, 'GEMINI_MODELS') || ['gemini-3-flash-preview'];
+    GEMINI_MODELS = grabLiteral(jsText, 'GEMINI_MODELS') || ['gemini-3.6-flash', 'gemini-3-flash-preview', 'gemini-3.5-flash', 'gemini-3.8-flash'];
     GEMINI_API_KEY = grabLiteral(jsText, 'GEMINI_API_KEY') || '';
     GEMINI_API_KEYS = grabLiteral(jsText, 'GEMINI_API_KEYS') || [];
     var avatars = grabLiteral(jsText, 'CHAT_AVATARS');
