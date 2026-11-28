@@ -2644,8 +2644,8 @@ let currentModelIndex = 0;
 const GEMINI_API_KEY = 'GEMINI_KEY_1';
 let GEMINI_API_KEYS = ['GEMINI_KEY_1', 'GEMINI_KEY_2'].filter(function (k) { return k && !/^GEMINI_KEY_/.test(k); });
 let geminiKeyIndex = 0;
-let AI_PROVIDER = 'groq';                 /* 'groq' | 'gemini' */
-let GEMINI_MODELS = ['gemini-2.5-flash', 'gemini-2.0-flash'];
+let AI_PROVIDER = 'gemini';                 /* 'groq' | 'gemini' */
+let GEMINI_MODELS = ['gemini-2.5-flash'];
 
 function geminiReady() {
   return AI_PROVIDER === 'gemini' && (GEMINI_API_KEYS.length > 0 ||
