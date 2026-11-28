@@ -44,7 +44,7 @@ var SPECIAL_CARD_NAMES = {
 var AWARD_WINNERS = {};
 var GROQ_MODELS = [];
 var AI_PROVIDER = 'groq';
-var GEMINI_MODELS = ['gemini-2.5-flash'];
+var GEMINI_MODELS = ['gemini-3-flash-preview'];
 var GEMINI_API_KEY = '';
 var GEMINI_API_KEYS = [];
 var GROQ_API_KEYS = [];
@@ -420,7 +420,7 @@ async function loadAdminData() {
     GROQ_MODELS = grabLiteral(jsText, 'GROQ_MODELS') || [];
     GROQ_API_KEYS = grabLiteral(jsText, 'GROQ_API_KEYS') || [];
     AI_PROVIDER = grabLiteral(jsText, 'AI_PROVIDER') || 'groq';
-    GEMINI_MODELS = grabLiteral(jsText, 'GEMINI_MODELS') || ['gemini-2.5-flash'];
+    GEMINI_MODELS = grabLiteral(jsText, 'GEMINI_MODELS') || ['gemini-3-flash-preview'];
     GEMINI_API_KEY = grabLiteral(jsText, 'GEMINI_API_KEY') || '';
     GEMINI_API_KEYS = grabLiteral(jsText, 'GEMINI_API_KEYS') || [];
     var avatars = grabLiteral(jsText, 'CHAT_AVATARS');
@@ -1364,7 +1364,7 @@ async function saveAiProvider() {
   var st = document.getElementById('aiProviderStatus');
   if (!sel) return;
   var provider = sel.value === 'gemini' ? 'gemini' : 'groq';
-  var model = gm ? gm.value : 'gemini-2.5-flash';
+  var model = gm ? gm.value : 'gemini-3-flash-preview';
   try {
     var res = await githubFetch('script.js');
     var text = res && res.content ? decodeURIComponent(escape(atob(res.content.replace(/\s/g, '')))) : null;

@@ -2645,7 +2645,7 @@ const GEMINI_API_KEY = 'GEMINI_KEY_1';
 let GEMINI_API_KEYS = ['GEMINI_KEY_1', 'GEMINI_KEY_2'].filter(function (k) { return k && !/^GEMINI_KEY_/.test(k); });
 let geminiKeyIndex = 0;
 let AI_PROVIDER = 'gemini';                 /* 'groq' | 'gemini' */
-let GEMINI_MODELS = ['gemini-2.5-flash'];
+let GEMINI_MODELS = ['gemini-3-flash-preview'];
 
 function geminiReady() {
   return AI_PROVIDER === 'gemini' && (GEMINI_API_KEYS.length > 0 ||
@@ -2665,7 +2665,7 @@ async function geminiRequest(body) {
     contents.push({ role: m.role === 'assistant' ? 'model' : 'user', parts: [{ text: text }] });
   });
   if (!contents.length) throw new Error('Gemini: no user message');
-  var model = GEMINI_MODELS[0] || 'gemini-2.5-flash';
+  var models = (GEMINI_MODELS && GEMINI_MODELS.length) ? GEMINI_MODELS : ['gemini-3-flash-preview'];
   var keys = GEMINI_API_KEYS.length ? GEMINI_API_KEYS :
     (GEMINI_API_KEY && !/^GEMINI_KEY_/.test(GEMINI_API_KEY) ? [GEMINI_API_KEY] : []);
   var payload = {
@@ -2677,21 +2677,29 @@ async function geminiRequest(body) {
   };
   if (system) payload.systemInstruction = { parts: [{ text: system }] };
   var lastErr = null, data = null;
-  for (var gi = 0; gi < keys.length; gi++) {
-    var key = keys[(geminiKeyIndex + gi) % keys.length];
-    var url = 'https://generativelanguage.googleapis.com/v1beta/models/' + encodeURIComponent(model) +
-      ':generateContent?key=' + encodeURIComponent(key);
-    var res = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
-    data = await res.json().catch(function () { return null; });
-    if (res.ok && data) { geminiKeyIndex = (geminiKeyIndex + gi) % keys.length; break; }
-    lastErr = new Error('Gemini request failed (' + res.status + ')');
-    lastErr.status = res.status;
-    if (res.status === 401 || res.status === 403 || res.status === 429) continue;
-    throw lastErr;
+  /* try every model in the chain with every key: Google retires models and
+     individual models can be overloaded (404/503), so the next one takes over */
+  for (var mi = 0; mi < models.length && !data; mi++) {
+    var model = models[mi];
+    for (var gi = 0; gi < keys.length; gi++) {
+      var key = keys[(geminiKeyIndex + gi) % keys.length];
+      var url = 'https://generativelanguage.googleapis.com/v1beta/models/' + encodeURIComponent(model) +
+        ':generateContent?key=' + encodeURIComponent(key);
+      try {
+        var res = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        data = await res.json().catch(function () { return null; });
+        if (res.ok && data) { geminiKeyIndex = (geminiKeyIndex + gi) % keys.length; break; }
+        lastErr = new Error('Gemini ' + model + ' failed (' + res.status + ')');
+        lastErr.status = res.status;
+      } catch (e) {
+        lastErr = e;
+      }
+      data = null;
+    }
   }
   if (!data) throw lastErr || new Error('Gemini unavailable');
   var cand = data.candidates && data.candidates[0];
@@ -9057,7 +9065,7 @@ async function saveAiProvider() {
   var st = document.getElementById('aiProviderStatus');
   if (!sel) return;
   var provider = sel.value === 'gemini' ? 'gemini' : 'groq';
-  var model = gm ? gm.value : 'gemini-2.5-flash';
+  var model = gm ? gm.value : 'gemini-3-flash-preview';
   try {
     var res = await githubFetch('script.js');
     var text = typeof res === 'string' ? res : (res && res.content ? decodeURIComponent(escape(atob(res.content.replace(/\s/g, '')))) : null);
