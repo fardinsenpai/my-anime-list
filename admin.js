@@ -132,16 +132,8 @@ function paintPatStatus() {
   if (!el) return;
   var saved = '';
   try { saved = localStorage.getItem('gh_pat') || ''; } catch (e) {}
-  if (saved) {
-    el.textContent = '// PAT: ' + saved.slice(0, 7) + '…' + saved.slice(-4) + ' (saved)';
-    el.className = 'ad-pat-status ok';
-  } else if (getPat()) {
-    el.textContent = '// PAT: not saved - paste yours';
-    el.className = 'ad-pat-status';
-  } else {
-    el.textContent = '// PAT: NOT SET';
-    el.className = 'ad-pat-status';
-  }
+  el.textContent = '';
+  el.className = 'ad-pat-status';
 }
 
 /* Pull `const NAME = {...};` / `let NAME = [...];` / `window.NAME = {...};`
@@ -966,7 +958,7 @@ function openAdmin() {
     // the PAT the owner saved in this browser (masked) - never in the code
     var p = '';
     try { p = localStorage.getItem('gh_pat') || ''; } catch (e) {}
-    el.textContent = p ? '// PAT: ' + p.slice(0, 7) + '…' + p.slice(-4) : '// PAT: NOT SET';
+    el.textContent = '';
   })();
 }
 

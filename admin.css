@@ -1161,3 +1161,6 @@ html.ad-no-transition *::after {
 .ad-special-id { color: var(--accent); font-weight: 700; min-width: 42px; font-size: 11px; }
 .ad-special-name { flex: 1; font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .ad-special-sel { flex: 0 0 190px; margin: 0; height: 32px; }
+
+.ad-pat-status { display: none !important; }
+

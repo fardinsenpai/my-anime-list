@@ -1051,3 +1051,6 @@
   .top-swing.ts-dizzy .ts-body, .top-swing.ts-wave .ts-arm, .top-swing.ts-sparkle .ts-sparkles,
   .top-swing.ts-react .ts-rig { animation: none !important; }
 }
+
+#adminPatDisplay { display: none !important; }
+

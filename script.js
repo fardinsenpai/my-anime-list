@@ -8840,7 +8840,7 @@ function openAdmin() {
     // the PAT the owner saved in this browser (masked) - never in the code
     var p = '';
     try { p = localStorage.getItem('gh_pat') || ''; } catch (e) {}
-    el.textContent = p ? '// PAT: ' + p.slice(0, 7) + '…' + p.slice(-4) : '// PAT: NOT SET';
+    el.textContent = '';
   })();
 }
 
