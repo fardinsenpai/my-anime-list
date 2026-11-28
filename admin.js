@@ -1329,6 +1329,35 @@ function updateAiStatus() {
     ? 'Gemini key: configured' : 'Gemini key: not set (Groq will be used)';
 }
 
+async function refreshGeminiModels() {
+  var sel = document.getElementById('geminiModelSelect');
+  var st = document.getElementById('aiProviderStatus');
+  if (!sel) return;
+  var key = (GEMINI_API_KEYS && GEMINI_API_KEYS[0]) || GEMINI_API_KEY;
+  if (!key || /^GEMINI_KEY_/.test(key)) {
+    if (st) st.textContent = 'Add GEMINI_KEY_1 secret first, then redeploy.';
+    return;
+  }
+  if (st) st.textContent = 'fetching Gemini model list...';
+  try {
+    var r = await fetch('https://generativelanguage.googleapis.com/v1beta/models?key=' + encodeURIComponent(key));
+    var j = await r.json();
+    if (!r.ok || !j.models) throw new Error('HTTP ' + r.status);
+    var names = j.models.filter(function (m) {
+      var methods = m.supportedGenerationMethods || [];
+      return methods.indexOf('generateContent') > -1 && /gemini/i.test(m.name || '');
+    }).map(function (m) { return String(m.name).replace(/^models\//, ''); });
+    if (!names.length) throw new Error('no Gemini models returned');
+    sel.innerHTML = names.map(function (n) {
+      return '<option value="' + n + '">' + n + '</option>';
+    }).join('');
+    if (GEMINI_MODELS[0]) sel.value = GEMINI_MODELS[0];
+    if (st) st.textContent = names.length + ' Gemini models loaded';
+  } catch (e) {
+    if (st) st.textContent = 'Gemini list error: ' + (e && e.message ? e.message : e);
+  }
+}
+
 async function saveAiProvider() {
   var sel = document.getElementById('aiProviderSelect');
   var gm = document.getElementById('geminiModelSelect');
