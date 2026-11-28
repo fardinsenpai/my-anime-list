@@ -50,7 +50,7 @@ jobs:
             echo "::error::No GROQ_KEY_1..5 secret is set. Add at least one in Settings -> Secrets and variables -> Actions."
             exit 1
           fi
-          if grep -qE 'GROQ_KEY_|GEMINI_KEY_' script.js; then
+          if grep -qE 'GROQ_KEY_[0-9]|GEMINI_KEY_[0-9]' script.js; then
             echo "::error::Key injection left a placeholder in script.js. The deploy was stopped before publishing a broken AI."
             exit 1
           fi
