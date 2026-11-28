@@ -2672,7 +2672,8 @@ async function geminiRequest(body) {
     contents: contents,
     generationConfig: {
       temperature: typeof body.temperature === 'number' ? body.temperature : 0.8,
-      maxOutputTokens: body.max_tokens || 1600
+      maxOutputTokens: body.max_tokens || 1200,
+      thinkingConfig: { thinkingBudget: 0 }
     }
   };
   if (system) payload.systemInstruction = { parts: [{ text: system }] };
@@ -2685,11 +2686,14 @@ async function geminiRequest(body) {
       var key = keys[(geminiKeyIndex + gi) % keys.length];
       var url = 'https://generativelanguage.googleapis.com/v1beta/models/' + encodeURIComponent(model) +
         ':generateContent?key=' + encodeURIComponent(key);
+      var controller = (typeof AbortController === 'function') ? new AbortController() : null;
+      var timer = controller ? setTimeout(function () { controller.abort(); }, 9000) : null;
       try {
         var res = await fetch(url, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
+          body: JSON.stringify(payload),
+          signal: controller ? controller.signal : undefined
         });
         data = await res.json().catch(function () { return null; });
         if (res.ok && data) { geminiKeyIndex = (geminiKeyIndex + gi) % keys.length; break; }
@@ -2697,6 +2701,8 @@ async function geminiRequest(body) {
         lastErr.status = res.status;
       } catch (e) {
         lastErr = e;
+      } finally {
+        if (timer) clearTimeout(timer);
       }
       data = null;
     }
