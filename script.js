@@ -2633,6 +2633,63 @@ const GROQ_DEAD_KEYS = new Set();
 let GROQ_MODELS = ['openai/gpt-oss-120b', 'qwen/qwen3.8-27b', 'openai/gpt-oss-20b'];
 let currentModelIndex = 0;
 
+/* Optional Gemini provider beside Groq. Groq stays the default and is used
+   automatically whenever Gemini is not configured or fails. */
+const GEMINI_API_KEY = 'GEMINI_KEY_1';
+let AI_PROVIDER = 'groq';                 /* 'groq' | 'gemini' */
+let GEMINI_MODELS = ['gemini-2.5-flash', 'gemini-2.0-flash'];
+
+function geminiReady() {
+  return AI_PROVIDER === 'gemini' && GEMINI_API_KEY && !/^GEMINI_KEY_/.test(GEMINI_API_KEY);
+}
+
+/* Translate the OpenAI-shaped request into Gemini's format, then wrap the
+   answer back into the choices[] shape the rest of the chat already reads. */
+async function geminiRequest(body) {
+  var msgs = Array.isArray(body.messages) ? body.messages : [];
+  var system = '';
+  var contents = [];
+  msgs.forEach(function (m) {
+    var text = String((m && m.content) || '');
+    if (m.role === 'system') { system = text; return; }
+    if (!text) return;
+    contents.push({ role: m.role === 'assistant' ? 'model' : 'user', parts: [{ text: text }] });
+  });
+  if (!contents.length) throw new Error('Gemini: no user message');
+  var model = GEMINI_MODELS[0] || 'gemini-2.5-flash';
+  var url = 'https://generativelanguage.googleapis.com/v1beta/models/' + encodeURIComponent(model) +
+    ':generateContent?key=' + encodeURIComponent(GEMINI_API_KEY);
+  var payload = {
+    contents: contents,
+    generationConfig: {
+      temperature: typeof body.temperature === 'number' ? body.temperature : 0.8,
+      maxOutputTokens: body.max_tokens || 1600
+    }
+  };
+  if (system) payload.systemInstruction = { parts: [{ text: system }] };
+  var res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  });
+  var data = await res.json().catch(function () { return null; });
+  if (!res.ok || !data) {
+    var err = new Error('Gemini request failed (' + res.status + ')');
+    err.status = res.status;
+    throw err;
+  }
+  var cand = data.candidates && data.candidates[0];
+  var textOut = cand && cand.content && Array.isArray(cand.content.parts)
+    ? cand.content.parts.map(function (p) { return p.text || ''; }).join('')
+    : '';
+  if (!String(textOut).trim()) throw new Error('Gemini returned an empty answer');
+  return {
+    ok: true,
+    status: 200,
+    json: function () { return Promise.resolve({ choices: [{ message: { content: textOut } }] }); }
+  };
+}
+
 // Only the gpt-oss family takes reasoning_effort — sending it to a fallback model
 // (qwen, etc.) would be a 400, so the flag is applied per model.
 function isGptOssModel(m) {
@@ -2645,6 +2702,12 @@ function getNextKeyIndex() {
 }
 
 async function fetchWithFallback(body) {
+  /* Gemini first when the admin selected it; any failure falls through to
+     the existing Groq key/model rotation, so the chat never goes down. */
+  if (geminiReady()) {
+    try { return await geminiRequest(body); }
+    catch (e) { console.warn('Gemini unavailable, using Groq:', e && e.message); }
+  }
   let lastError = null;
   let attempts = 0;
   let rateLimitHits = 0;
@@ -8927,7 +8990,40 @@ var GROQ_MODELS_DEFAULT = ['openai/gpt-oss-120b', 'qwen/qwen3.8-27b', 'openai/gp
 
 function updateAiStatus() {
   var el = document.getElementById('aiModelStatus');
-  if (el) el.textContent = 'current in script.js: ' + GROQ_MODELS[0] + '  (+ ' + (GROQ_MODELS.length - 1) + ' fallbacks)';
+  if (el) el.textContent = 'provider: ' + AI_PROVIDER + '  |  Groq: ' + GROQ_MODELS[0] + '  (+ ' + (GROQ_MODELS.length - 1) + ' fallbacks)';
+  var ps = document.getElementById('aiProviderSelect');
+  if (ps) ps.value = AI_PROVIDER;
+  var gm = document.getElementById('geminiModelSelect');
+  if (gm && GEMINI_MODELS && GEMINI_MODELS[0]) gm.value = GEMINI_MODELS[0];
+  var st = document.getElementById('aiProviderStatus');
+  if (st) st.textContent = GEMINI_API_KEY && !/^GEMINI_KEY_/.test(GEMINI_API_KEY)
+    ? 'Gemini key: configured' : 'Gemini key: not set (Groq will be used)';
+}
+
+async function saveAiProvider() {
+  var sel = document.getElementById('aiProviderSelect');
+  var gm = document.getElementById('geminiModelSelect');
+  var st = document.getElementById('aiProviderStatus');
+  if (!sel) return;
+  var provider = sel.value === 'gemini' ? 'gemini' : 'groq';
+  var model = gm ? gm.value : 'gemini-2.5-flash';
+  try {
+    var res = await githubFetch('script.js');
+    var text = typeof res === 'string' ? res : (res && res.content ? decodeURIComponent(escape(atob(res.content.replace(/\s/g, '')))) : null);
+    if (!text) throw new Error('could not read script.js');
+    if (!/(?:const|let|var) AI_PROVIDER = '[^']*';/.test(text)) throw new Error('AI_PROVIDER line not found');
+    if (!/(?:const|let|var) GEMINI_MODELS = \[[^\]]*\];/.test(text)) throw new Error('GEMINI_MODELS line not found');
+    text = text.replace(/(?:const|let|var) AI_PROVIDER = '[^']*';/, "let AI_PROVIDER = '" + provider + "';");
+    text = text.replace(/(?:const|let|var) GEMINI_MODELS = \[[^\]]*\];/, "let GEMINI_MODELS = ['" + model + "'];");
+    var ok = await githubCommit('script.js', text, 'admin: AI provider ' + provider + ' / ' + model);
+    if (!ok) throw new Error('GitHub commit failed');
+    AI_PROVIDER = provider;
+    GEMINI_MODELS = [model];
+    if (st) st.textContent = 'Saved. Live after the Pages deploy.';
+    updateAiStatus();
+  } catch (e) {
+    if (st) st.textContent = 'Error: ' + (e && e.message ? e.message : e);
+  }
 }
 
 async function refreshAiModels() {

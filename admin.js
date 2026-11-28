@@ -43,6 +43,9 @@ var SPECIAL_CARD_NAMES = {
 };
 var AWARD_WINNERS = {};
 var GROQ_MODELS = [];
+var AI_PROVIDER = 'groq';
+var GEMINI_MODELS = ['gemini-2.5-flash'];
+var GEMINI_API_KEY = '';
 var GROQ_API_KEYS = [];
 var GENRE_BY_ID = {};          // anime id → ['Action', …] straight out of script.js
 var ADMIN_DATA_READY = false;
@@ -415,6 +418,9 @@ async function loadAdminData() {
     AWARD_WINNERS = grabLiteral(jsText, 'AWARD_WINNERS') || {};
     GROQ_MODELS = grabLiteral(jsText, 'GROQ_MODELS') || [];
     GROQ_API_KEYS = grabLiteral(jsText, 'GROQ_API_KEYS') || [];
+    AI_PROVIDER = grabLiteral(jsText, 'AI_PROVIDER') || 'groq';
+    GEMINI_MODELS = grabLiteral(jsText, 'GEMINI_MODELS') || ['gemini-2.5-flash'];
+    GEMINI_API_KEY = grabLiteral(jsText, 'GEMINI_API_KEY') || '';
     var avatars = grabLiteral(jsText, 'CHAT_AVATARS');
     if (avatars && typeof avatars === 'object') CHAT_AVATARS = avatars;
     GENRE_BY_ID = grabGenres(jsText);
@@ -1311,7 +1317,40 @@ var GROQ_MODELS_DEFAULT = ['openai/gpt-oss-120b', 'qwen/qwen3.8-27b', 'openai/gp
 
 function updateAiStatus() {
   var el = document.getElementById('aiModelStatus');
-  if (el) el.textContent = 'current in script.js: ' + GROQ_MODELS[0] + '  (+ ' + (GROQ_MODELS.length - 1) + ' fallbacks)';
+  if (el) el.textContent = 'provider: ' + AI_PROVIDER + '  |  Groq: ' + GROQ_MODELS[0] + '  (+ ' + (GROQ_MODELS.length - 1) + ' fallbacks)';
+  var ps = document.getElementById('aiProviderSelect');
+  if (ps) ps.value = AI_PROVIDER;
+  var gm = document.getElementById('geminiModelSelect');
+  if (gm && GEMINI_MODELS[0]) gm.value = GEMINI_MODELS[0];
+  var st = document.getElementById('aiProviderStatus');
+  if (st) st.textContent = GEMINI_API_KEY && !/^GEMINI_KEY_/.test(GEMINI_API_KEY)
+    ? 'Gemini key: configured' : 'Gemini key: not set (Groq will be used)';
+}
+
+async function saveAiProvider() {
+  var sel = document.getElementById('aiProviderSelect');
+  var gm = document.getElementById('geminiModelSelect');
+  var st = document.getElementById('aiProviderStatus');
+  if (!sel) return;
+  var provider = sel.value === 'gemini' ? 'gemini' : 'groq';
+  var model = gm ? gm.value : 'gemini-2.5-flash';
+  try {
+    var res = await githubFetch('script.js');
+    var text = res && res.content ? decodeURIComponent(escape(atob(res.content.replace(/\s/g, '')))) : null;
+    if (!text) throw new Error('could not read script.js');
+    if (!/(?:const|let|var) AI_PROVIDER = '[^']*';/.test(text)) throw new Error('AI_PROVIDER line not found');
+    if (!/(?:const|let|var) GEMINI_MODELS = \[[^\]]*\];/.test(text)) throw new Error('GEMINI_MODELS line not found');
+    text = text.replace(/(?:const|let|var) AI_PROVIDER = '[^']*';/, "let AI_PROVIDER = '" + provider + "';");
+    text = text.replace(/(?:const|let|var) GEMINI_MODELS = \[[^\]]*\];/, "let GEMINI_MODELS = ['" + model + "'];");
+    var ok = await githubCommit('script.js', text, 'admin: AI provider ' + provider + ' / ' + model);
+    if (!ok) throw new Error('GitHub commit failed');
+    AI_PROVIDER = provider;
+    GEMINI_MODELS = [model];
+    if (st) st.textContent = 'Saved. Live after the Pages deploy.';
+    updateAiStatus();
+  } catch (e) {
+    if (st) st.textContent = 'Error: ' + (e && e.message ? e.message : e);
+  }
 }
 
 /* The live script.js holds all three Groq keys. Try them in order so one

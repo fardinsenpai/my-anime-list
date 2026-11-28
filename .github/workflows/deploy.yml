@@ -23,6 +23,7 @@ jobs:
           KEY1: ${{ secrets.GROQ_KEY_1 }}
           KEY2: ${{ secrets.GROQ_KEY_2 }}
           KEY3: ${{ secrets.GROQ_KEY_3 }}
+          KEY4: ${{ secrets.GEMINI_KEY_1 }}
         run: |
           if [ -z "$KEY1" ] || [ -z "$KEY2" ] || [ -z "$KEY3" ]; then
             echo "::error::One or more GROQ_KEY_1/2/3 secrets are empty. Add all three in Settings -> Secrets and variables -> Actions."
@@ -31,6 +32,12 @@ jobs:
           sed -i "s/GROQ_KEY_1/${KEY1}/g" script.js
           sed -i "s/GROQ_KEY_2/${KEY2}/g" script.js
           sed -i "s/GROQ_KEY_3/${KEY3}/g" script.js
+          # Gemini is optional - leave an empty key when the secret is not set
+          if [ -n "$KEY4" ]; then
+            sed -i "s/GEMINI_KEY_1/${KEY4}/g" script.js
+          else
+            sed -i "s/GEMINI_KEY_1//g" script.js
+          fi
           if grep -q 'GROQ_KEY_' script.js; then
             echo "::error::Key injection left a placeholder in script.js. The deploy was stopped before publishing a broken AI."
             exit 1
