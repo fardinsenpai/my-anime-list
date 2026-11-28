@@ -23,13 +23,11 @@ jobs:
           G1: ${{ secrets.GROQ_KEY_1 }}
           G2: ${{ secrets.GROQ_KEY_2 }}
           G3: ${{ secrets.GROQ_KEY_3 }}
-          G4: ${{ secrets.GROQ_KEY_4 }}
-          G5: ${{ secrets.GROQ_KEY_5 }}
           M1: ${{ secrets.GEMINI_KEY_1 }}
           M2: ${{ secrets.GEMINI_KEY_2 }}
         run: |
           have=0
-          for i in 1 2 3 4 5; do
+          for i in 1 2 3; do
             eval val=\$G$i
             if [ -n "$val" ]; then
               have=1
@@ -47,7 +45,7 @@ jobs:
             fi
           done
           if [ "$have" -eq 0 ]; then
-            echo "::error::No GROQ_KEY_1..5 secret is set. Add at least one in Settings -> Secrets and variables -> Actions."
+            echo "::error::No GROQ_KEY_1..3 secret is set. Add at least one in Settings -> Secrets and variables -> Actions."
             exit 1
           fi
           if grep -qE 'GROQ_KEY_[0-9]|GEMINI_KEY_[0-9]' script.js; then

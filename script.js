@@ -2620,9 +2620,7 @@ const apiUrl = 'https://api.groq.com/openai/v1/chat/completions';
 let GROQ_API_KEYS = [
   'GROQ_KEY_1',
   'GROQ_KEY_2',
-  'GROQ_KEY_3',
-  'GROQ_KEY_4',
-  'GROQ_KEY_5'
+  'GROQ_KEY_3'
 ];
 /* secrets that were not configured are injected as empty strings - drop them
    so rotation only ever uses real keys */
