@@ -2620,7 +2620,9 @@ const apiUrl = 'https://api.groq.com/openai/v1/chat/completions';
 let GROQ_API_KEYS = [
   'GROQ_KEY_1',
   'GROQ_KEY_2',
-  'GROQ_KEY_3'
+  'GROQ_KEY_3',
+  'GROQ_KEY_4',
+  'GROQ_KEY_5'
 ];
 /* secrets that were not configured are injected as empty strings - drop them
    so rotation only ever uses real keys */
@@ -2688,7 +2690,7 @@ async function geminiRequest(body) {
     if (res.ok && data) { geminiKeyIndex = (geminiKeyIndex + gi) % keys.length; break; }
     lastErr = new Error('Gemini request failed (' + res.status + ')');
     lastErr.status = res.status;
-    if (res.status === 401 || res.status === 403) continue;
+    if (res.status === 401 || res.status === 403 || res.status === 429) continue;
     throw lastErr;
   }
   if (!data) throw lastErr || new Error('Gemini unavailable');
@@ -2764,10 +2766,11 @@ async function fetchWithFallback(body) {
       }
       if (res.status === 429 || res.status === 401 || res.status === 403 || res.status >= 500) {
         lastError = new Error('Groq API error: ' + res.status);
-        if (res.status === 401 || res.status === 403) {
-          // invalid/revoked key: stop retrying it until the page reloads
+        if (res.status === 401 || res.status === 403 || res.status === 429) {
+          // invalid OR exhausted key: skip it for the rest of this page load
+          // so the chain always moves straight to the next available key
           GROQ_DEAD_KEYS.add(keyIndex);
-          try { console.warn('Groq key ' + (keyIndex + 1) + ' was rejected; switching to key ' + ((keyIndex + 1) % GROQ_API_KEYS.length + 1) + '.'); } catch (e) {}
+          try { console.warn('Groq key ' + (keyIndex + 1) + ' unavailable (' + res.status + '); switching to the next key.'); } catch (e) {}
         }
         // Rate limited: keys share a free-tier quota, so hammering the next key
         // instantly just burns it too. Wait a moment before the next attempt.
