@@ -2644,7 +2644,7 @@ let currentModelIndex = 0;
 const GEMINI_API_KEY = 'GEMINI_KEY_1';
 let GEMINI_API_KEYS = ['GEMINI_KEY_1', 'GEMINI_KEY_2'].filter(function (k) { return k && !/^GEMINI_KEY_/.test(k); });
 let geminiKeyIndex = 0;
-let AI_PROVIDER = 'gemini';                 /* 'groq' | 'gemini' */
+let AI_PROVIDER = 'groq';                 /* 'groq' | 'gemini' */
 let GEMINI_MODELS = ['gemini-3-flash-preview'];
 
 function geminiReady() {
