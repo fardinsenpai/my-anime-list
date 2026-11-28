@@ -2617,11 +2617,17 @@ function scrollToEnd() {
 
 const apiUrl = 'https://api.groq.com/openai/v1/chat/completions';
 
-const GROQ_API_KEYS = [
+let GROQ_API_KEYS = [
   'GROQ_KEY_1',
   'GROQ_KEY_2',
-  'GROQ_KEY_3'
+  'GROQ_KEY_3',
+  'GROQ_KEY_4',
+  'GROQ_KEY_5'
 ];
+/* secrets that were not configured are injected as empty strings - drop them
+   so rotation only ever uses real keys */
+GROQ_API_KEYS = GROQ_API_KEYS.filter(function (k) { return k && !/^GROQ_KEY_/.test(k); });
+if (!GROQ_API_KEYS.length) GROQ_API_KEYS = [''];
 let currentKeyIndex = 0;
 
 /* A key that answered 401/403 is not coming back during this page load.
@@ -2636,11 +2642,14 @@ let currentModelIndex = 0;
 /* Optional Gemini provider beside Groq. Groq stays the default and is used
    automatically whenever Gemini is not configured or fails. */
 const GEMINI_API_KEY = 'GEMINI_KEY_1';
+let GEMINI_API_KEYS = ['GEMINI_KEY_1', 'GEMINI_KEY_2'].filter(function (k) { return k && !/^GEMINI_KEY_/.test(k); });
+let geminiKeyIndex = 0;
 let AI_PROVIDER = 'groq';                 /* 'groq' | 'gemini' */
 let GEMINI_MODELS = ['gemini-2.5-flash', 'gemini-2.0-flash'];
 
 function geminiReady() {
-  return AI_PROVIDER === 'gemini' && GEMINI_API_KEY && !/^GEMINI_KEY_/.test(GEMINI_API_KEY);
+  return AI_PROVIDER === 'gemini' && (GEMINI_API_KEYS.length > 0 ||
+    (GEMINI_API_KEY && !/^GEMINI_KEY_/.test(GEMINI_API_KEY)));
 }
 
 /* Translate the OpenAI-shaped request into Gemini's format, then wrap the
@@ -2657,8 +2666,8 @@ async function geminiRequest(body) {
   });
   if (!contents.length) throw new Error('Gemini: no user message');
   var model = GEMINI_MODELS[0] || 'gemini-2.5-flash';
-  var url = 'https://generativelanguage.googleapis.com/v1beta/models/' + encodeURIComponent(model) +
-    ':generateContent?key=' + encodeURIComponent(GEMINI_API_KEY);
+  var keys = GEMINI_API_KEYS.length ? GEMINI_API_KEYS :
+    (GEMINI_API_KEY && !/^GEMINI_KEY_/.test(GEMINI_API_KEY) ? [GEMINI_API_KEY] : []);
   var payload = {
     contents: contents,
     generationConfig: {
@@ -2667,17 +2676,24 @@ async function geminiRequest(body) {
     }
   };
   if (system) payload.systemInstruction = { parts: [{ text: system }] };
-  var res = await fetch(url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload)
-  });
-  var data = await res.json().catch(function () { return null; });
-  if (!res.ok || !data) {
-    var err = new Error('Gemini request failed (' + res.status + ')');
-    err.status = res.status;
-    throw err;
+  var lastErr = null, data = null;
+  for (var gi = 0; gi < keys.length; gi++) {
+    var key = keys[(geminiKeyIndex + gi) % keys.length];
+    var url = 'https://generativelanguage.googleapis.com/v1beta/models/' + encodeURIComponent(model) +
+      ':generateContent?key=' + encodeURIComponent(key);
+    var res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    data = await res.json().catch(function () { return null; });
+    if (res.ok && data) { geminiKeyIndex = (geminiKeyIndex + gi) % keys.length; break; }
+    lastErr = new Error('Gemini request failed (' + res.status + ')');
+    lastErr.status = res.status;
+    if (res.status === 401 || res.status === 403) continue;
+    throw lastErr;
   }
+  if (!data) throw lastErr || new Error('Gemini unavailable');
   var cand = data.candidates && data.candidates[0];
   var textOut = cand && cand.content && Array.isArray(cand.content.parts)
     ? cand.content.parts.map(function (p) { return p.text || ''; }).join('')
@@ -8996,7 +9012,7 @@ function updateAiStatus() {
   var gm = document.getElementById('geminiModelSelect');
   if (gm && GEMINI_MODELS && GEMINI_MODELS[0]) gm.value = GEMINI_MODELS[0];
   var st = document.getElementById('aiProviderStatus');
-  if (st) st.textContent = GEMINI_API_KEY && !/^GEMINI_KEY_/.test(GEMINI_API_KEY)
+  if (st) st.textContent = (GEMINI_API_KEYS.length || (GEMINI_API_KEY && !/^GEMINI_KEY_/.test(GEMINI_API_KEY)))
     ? 'Gemini key: configured' : 'Gemini key: not set (Groq will be used)';
 }
 

@@ -46,6 +46,7 @@ var GROQ_MODELS = [];
 var AI_PROVIDER = 'groq';
 var GEMINI_MODELS = ['gemini-2.5-flash'];
 var GEMINI_API_KEY = '';
+var GEMINI_API_KEYS = [];
 var GROQ_API_KEYS = [];
 var GENRE_BY_ID = {};          // anime id → ['Action', …] straight out of script.js
 var ADMIN_DATA_READY = false;
@@ -421,6 +422,7 @@ async function loadAdminData() {
     AI_PROVIDER = grabLiteral(jsText, 'AI_PROVIDER') || 'groq';
     GEMINI_MODELS = grabLiteral(jsText, 'GEMINI_MODELS') || ['gemini-2.5-flash'];
     GEMINI_API_KEY = grabLiteral(jsText, 'GEMINI_API_KEY') || '';
+    GEMINI_API_KEYS = grabLiteral(jsText, 'GEMINI_API_KEYS') || [];
     var avatars = grabLiteral(jsText, 'CHAT_AVATARS');
     if (avatars && typeof avatars === 'object') CHAT_AVATARS = avatars;
     GENRE_BY_ID = grabGenres(jsText);
@@ -1323,7 +1325,7 @@ function updateAiStatus() {
   var gm = document.getElementById('geminiModelSelect');
   if (gm && GEMINI_MODELS[0]) gm.value = GEMINI_MODELS[0];
   var st = document.getElementById('aiProviderStatus');
-  if (st) st.textContent = GEMINI_API_KEY && !/^GEMINI_KEY_/.test(GEMINI_API_KEY)
+  if (st) st.textContent = (GEMINI_API_KEYS && GEMINI_API_KEYS.length) || (GEMINI_API_KEY && !/^GEMINI_KEY_/.test(GEMINI_API_KEY))
     ? 'Gemini key: configured' : 'Gemini key: not set (Groq will be used)';
 }
 
